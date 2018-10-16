@@ -1,0 +1,7 @@
+(library
+  (name clangml)
+  (public_name clangml)
+  (wrapped false)
+  (c_names clang_stubs)
+  (c_flags (:include "../config/cflags.sexp"))
+  (c_library_flags (:include "../config/ldflags.sexp")))
