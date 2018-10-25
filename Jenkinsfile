@@ -6,6 +6,8 @@ pipeline {
         stage('Prepare') {
             steps {
                 sh 'tar -xf ~/bootstrap.tar.xz'
+                sh 'automake --add-missing'
+                sh 'autoreconf'
             }
         }
         stage('Configure') {
