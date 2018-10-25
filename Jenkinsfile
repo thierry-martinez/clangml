@@ -24,7 +24,7 @@ pipeline {
         }
         stage('Generate stubs') {
             steps {
-                sh 'mkdir -p bootstrap/6.0.1/ && _build/default/stubgen/stubgen.exe --cc -I,/media/llvms/6.0.1/lib/clang/6.0.1/include /media/llvms/6.0.1/bin/llvm-config bootstrap/6.0.1/'
+                sh 'mkdir -p bootstrap/6.0.1/ && _build/default/stubgen/stubgen.exe --cc=-I,/media/llvms/6.0.1/lib/clang/6.0.1/include /media/llvms/6.0.1/bin/llvm-config bootstrap/6.0.1/'
             }
         }
     }
