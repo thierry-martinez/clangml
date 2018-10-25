@@ -2,7 +2,6 @@
 /autom4te.cache/
 /bootstrap/
 *~
-/dune-project
 .merlin
 /config.log
 /config.status
