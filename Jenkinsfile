@@ -13,7 +13,7 @@ pipeline {
         }
         stage('Configure') {
             steps {
-                sh './configure --with-llvm-config=/media/llvms/6.0.1/bin/llvm-config'
+                sh 'eval $(opam env) && ./configure --with-llvm-config=/media/llvms/6.0.1/bin/llvm-config'
             }
         }
         stage('Build') {
