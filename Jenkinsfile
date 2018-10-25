@@ -38,7 +38,7 @@ pipeline {
                         def llvm_version = i
                         branches[llvm_version] = {
                             node {
-                                sh "cd $pwd && mkdir -p build/bootstrap/$llvm_version/ && build/_build/default/stubgen/stubgen.exe --cc=-I,/media/llvms/$llvm_version/lib/clang/$llvm_version/include /media/llvms/$llvm_version/bin/llvm-config build/bootstrap/$llvm_version/"
+                                sh "cd $pwd && mkdir -p build/bootstrap/$llvm_version/ && build/_build/default/stubgen/stubgen.exe --cc=-I,build,-I,/media/llvms/$llvm_version/lib/clang/$llvm_version/include /media/llvms/$llvm_version/bin/llvm-config build/bootstrap/$llvm_version/"
                                 sh "cd $pwd && mkdir $llvm_version/ && cd $llvm_version/ && ../src/configure --with-llvm-config=/media/llvms/$llvm_version/bin/llvm-config && make clangml stubgen"
                             }
                         }
