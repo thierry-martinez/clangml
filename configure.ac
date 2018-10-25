@@ -96,6 +96,24 @@ AC_MSG_NOTICE(updating clangml/ sym-links)
 AS_IF([rm clangml/clang__bindings.ml],
   [true])
 
+AS_IF([test -d bootstrap],
+  [true],
+  [AS_IF([$LN_S $srcdir/bootstrap bootstrap],
+    [true],
+    [AC_MSG_ERROR([[cannot create symbolic link]])])])
+
+AS_IF([test -d stubgen],
+  [true],
+  [AS_IF([$LN_S $srcdir/stubgen stubgen],
+    [true],
+    [AC_MSG_ERROR([[cannot create symbolic link]])])])
+
+AS_IF([test -d clangml],
+  [true],
+  [AS_IF([mkdir clangml],
+    [true],
+    [AC_MSG_ERROR([[cannot create directory]])])])
+
 AS_IF(
   [$LN_S ../bootstrap/$LLVM_VERSION/clang__bindings.ml clangml/clang__bindings.ml],
   [true],
@@ -115,6 +133,7 @@ AS_IF([rm clangml/clang_stubs.c],
 AS_IF([$LN_S ../bootstrap/$LLVM_VERSION/clang_stubs.c clangml/clang_stubs.c],
   [true],
   [AC_MSG_ERROR([[cannot create symbolic link]])])
+
 
 AC_SUBST([LLVM_CFLAGS], [[`$LLVM_CONFIG --cflags `]])
 
