@@ -93,46 +93,55 @@ AS_IF([test "x$LLVM_VERSION" = "x"],
 AC_MSG_RESULT([[$LLVM_VERSION]])
 
 AC_MSG_NOTICE(updating clangml/ sym-links)
-AS_IF([rm clangml/clang__bindings.ml],
-  [true])
+
+AC_DEFUN([AC_LN_S],
+  [AS_IF([$LN_S $1 $2],
+    [true],
+    [AC_MSG_ERROR([[cannot create symbolic link]])])])
+
+AC_DEFUN([AC_CP],
+  [AS_IF([cp $1 $2],
+    [true],
+    [AC_MSG_ERROR([[cannot copy file]])])])
 
 AS_IF([test -d bootstrap],
   [true],
-  [AS_IF([$LN_S $srcdir/bootstrap bootstrap],
-    [true],
-    [AC_MSG_ERROR([[cannot create symbolic link]])])])
+  [AC_LN_S([$srcdir/bootstrap], [bootstrap])])
 
 AS_IF([test -d stubgen],
   [true],
-  [AS_IF([$LN_S $srcdir/stubgen stubgen],
-    [true],
-    [AC_MSG_ERROR([[cannot create symbolic link]])])])
+  [AC_LN_S([$srcdir/stubgen], [stubgen])])
 
 AS_IF([test -d clangml],
   [true],
   [AS_IF([mkdir clangml],
-    [true],
+    [AC_CP([$srcdir/clangml/clang.ml], [clangml/])
+     AC_CP([$srcdir/clangml/clang.mli], [clangml/])
+     AC_CP([$srcdir/clangml/clang__ast.ml], [clangml/])
+     AC_CP([$srcdir/clangml/clang__ast.mli], [clangml/])
+     AC_CP([$srcdir/clangml/dune], [clangml/])
+     AC_CP([$srcdir/clangml/stubgen.h], [clangml/])
+     AC_CP([$srcdir/clangml/libclang_extensions.cpp], [clangml/])
+     AC_CP([$srcdir/clangml/libclang_extensions.h], [clangml/])],
     [AC_MSG_ERROR([[cannot create directory]])])])
 
-AS_IF(
-  [$LN_S ../bootstrap/$LLVM_VERSION/clang__bindings.ml clangml/clang__bindings.ml],
-  [true],
-  [AC_MSG_ERROR([[cannot create symbolic link]])])
+AC_CP([$srcdir/dune-project], [.])
+AC_CP([$srcdir/clangml.opam], [.])
+
+AS_IF([rm clangml/clang__bindings.ml],
+  [true])
+
+AC_LN_S([../bootstrap/$LLVM_VERSION/clang__bindings.ml], [clangml/clang__bindings.ml])
 
 AS_IF([rm clangml/clang__bindings.mli],
   [true])
 
-AS_IF(
-  [$LN_S ../bootstrap/$LLVM_VERSION/clang__bindings.mli clangml/clang__bindings.mli],
-  [true],
-  [AC_MSG_ERROR([[cannot create symbolic link]])])
+AC_LN_S([../bootstrap/$LLVM_VERSION/clang__bindings.mli], [clangml/clang__bindings.mli])
 
 AS_IF([rm clangml/clang_stubs.c],
   [true])
 
-AS_IF([$LN_S ../bootstrap/$LLVM_VERSION/clang_stubs.c clangml/clang_stubs.c],
-  [true],
-  [AC_MSG_ERROR([[cannot create symbolic link]])])
+AC_LN_S([../bootstrap/$LLVM_VERSION/clang_stubs.c], [clangml/clang_stubs.c])
 
 
 AC_SUBST([LLVM_CFLAGS], [[`$LLVM_CONFIG --cflags `]])
