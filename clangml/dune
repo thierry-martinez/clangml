@@ -5,6 +5,6 @@
   (c_names clang_stubs)
   (c_flags (:include "../config/cflags.sexp"))
   (cxx_flags --std=c++11 (:include "../config/cflags.sexp"))
-  (c_library_flags (:include "../config/ldflags.sexp") -lclang -lclangBasic -lclangAST -lclangLex -lLLVMCore -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle -lcurses -lstdc++)
+  (c_library_flags (:include "../config/ldflags.sexp") (:include "../config/libs.sexp"))
   (cxx_names libclang_extensions)
   (library_flags -linkall))
