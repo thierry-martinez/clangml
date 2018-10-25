@@ -124,6 +124,11 @@ AC_SUBST([LLVM_LIBS], [[`$LLVM_CONFIG --libs`]])
 
 AC_SUBST([LLVM_LIBDIR], [[`$LLVM_CONFIG --libdir`]])
 
+AC_SUBST([CFLAGS], [["$LLVM_CFLAGS"]])
+
+AC_SUBST([LDFLAGS], [["$LLVM_LDFLAGS -Wl,-rpath,$LLVM_LIBDIR"]])
+
+AC_SUBST([LIBS], [["-lclang -lclangBasic $LLVM_LIBS -lpthread"]])
 
 AC_CONFIG_FILES([
   Makefile

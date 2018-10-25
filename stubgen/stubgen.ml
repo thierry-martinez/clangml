@@ -1129,15 +1129,10 @@ let run_llvm_config llvm_config arguments =
     failwith (Printf.sprintf "%s: execution failed" command);
   result
 
-let main () =
-  let llvm_config, prefix =
-    match Sys.argv with
-    | [| _; llvm_config; prefix |] -> llvm_config, prefix
-    | _ ->
-        Printf.eprintf "Usage: %s <llvm-config> <prefix>\n" Sys.argv.(0);
-        exit 1 in
-  let cflags = run_llvm_config llvm_config ["--cflags"] in
-  let clang_options = String.split_on_char ' ' cflags in
+let main cflags llvm_config prefix =
+  let llvm_cflags = run_llvm_config llvm_config ["--cflags"] in
+  let cflags = cflags |> List.map @@ String.split_on_char ',' |> List.flatten in
+  let clang_options = cflags @ String.split_on_char ' ' llvm_cflags in
   let module_interface =
     empty_module_interface |>
     add_function (Pcre.regexp "^(?!clang_)|clang_getCString|clang_disposeString|clang_disposeStringSet|clang_VirtualFileOverlay_writeToBuffer|clang_free|constructUSR|clang_executeOnThread") hidden_function_interface |>
@@ -1241,4 +1236,30 @@ let main () =
       Format.fprintf (Format.formatter_of_out_channel chan_intf)
         "%a@." Pprintast.signature (List.rev context.items_accu)))
 
-let () = main ()
+let option_cflags =
+  let doc = "Pass option to the C compiler" in
+  Cmdliner.Arg.(
+    value & opt_all string [] & info ["cc"] ~docv:"FLAGS" ~doc)
+
+let option_llvm_config =
+  let doc = "Path to llvm-config" in
+  Cmdliner.Arg.(
+    required & pos 0 (some non_dir_file) None & info [] ~docv:"LLVM_CONFIG" ~doc)
+
+let option_prefix =
+  let doc = "Prefix path for output files" in
+  Cmdliner.Arg.(
+    required & pos 1 (some string) None & info [] ~docv:"LLVM_CONFIG" ~doc)
+
+let options = Cmdliner.Term.(
+    const main $ option_cflags $ option_llvm_config $ option_prefix)
+
+let info =
+  let doc = "generate stubs for ClangML" in
+  let man = [
+      `S Cmdliner.Manpage.s_bugs;
+      `P "Email bug reports to <thierry.martinez@inria.fr>.";
+    ] in
+  Cmdliner.Term.info "stubgen" ~doc ~exits:Cmdliner.Term.default_exits ~man
+
+let () = Cmdliner.Term.exit (Cmdliner.Term.eval (options, info))

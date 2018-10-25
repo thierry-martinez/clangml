@@ -32,7 +32,10 @@ static CXString cxstring_createRef(const char *String) {
 // Copied from clang source tree: tools/libclang/CXString.cpp
 CXString cxstring_createDup(llvm::StringRef String) {
   CXString Result;
-  char *Spelling = static_cast<char *>(llvm::safe_malloc(String.size() + 1));
+  char *Spelling = static_cast<char *>(malloc(String.size() + 1));
+  if (Spelling == NULL) {
+    return cxstring_createRef("");
+  }
   memmove(Spelling, String.data(), String.size());
   Spelling[String.size()] = 0;
   Result.data = Spelling;
