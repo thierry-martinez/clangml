@@ -24,7 +24,23 @@ pipeline {
         }
         stage('Generate stubs') {
             steps {
-                sh 'mkdir -p bootstrap/6.0.1/ && _build/default/stubgen/stubgen.exe --cc=-I,/media/llvms/6.0.1/lib/clang/6.0.1/include /media/llvms/6.0.1/bin/llvm-config bootstrap/6.0.1/'
+                script {
+                    def llvm_versions = sh (
+                        script: 'ls -1 /media/llvms',
+                        returnStdout: true
+                    ).split('\n').retainAll { it =~ /[0-9][.][0-9][.][0-9]/ }
+                    def branches = [:]
+                    for (i in llvm_versions) {
+                        def llvm_version = i
+                        branches[llvm_version] = {
+                            node {
+                                sh "mkdir -p bootstrap/$llvm_version/ && _build/default/stubgen/stubgen.exe --cc=-I,/media/llvms/$llvm_version/lib/clang/$llvm_version/include /media/llvms/$llvm_version/bin/llvm-config bootstrap/$llvm_version/"
+                            }
+                        }
+                    }
+                }
+                sh 'tar -cf bootstrap.tar.xz bootstrap/'
+                archiveArtifacts artifacts: 'bootstrap.tar.xz', fingerprint: true
             }
         }
     }
