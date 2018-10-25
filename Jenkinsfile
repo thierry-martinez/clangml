@@ -38,6 +38,7 @@ pipeline {
                             }
                         }
                     }
+                    parallel branches
                 }
                 sh 'tar -cf bootstrap.tar.xz bootstrap/'
                 archiveArtifacts artifacts: 'bootstrap.tar.xz', fingerprint: true
