@@ -28,7 +28,7 @@ pipeline {
                     def llvm_versions = sh (
                         script: 'ls -1 /media/llvms',
                         returnStdout: true
-                    ).split('\n').retainAll { it =~ /[0-9][.][0-9][.][0-9]/ }
+                    ).split('\n').toList().retainAll { it =~ /[0-9][.][0-9][.][0-9]/ }
                     def branches = [:]
                     for (i in llvm_versions) {
                         def llvm_version = i
