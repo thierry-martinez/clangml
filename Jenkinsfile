@@ -18,7 +18,13 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'make'
+                sh 'make clangml'
+                sh 'make stubgen'
+            }
+        }
+        stage('Generate stubs') {
+            steps {
+                sh 'mkdir -p bootstrap/6.0.1/ && _build/default/stubgen/stubgen.exe /media/llvms/6.0.1/bin/llvm-config bootstrap/6.0.1/'
             }
         }
     }
