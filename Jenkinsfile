@@ -25,6 +25,10 @@ pipeline {
         stage('Generate stubs') {
             steps {
                 script {
+                    def pwd = sh (
+                        script: 'echo $PWD',
+                        returnStdout: true
+                    ).trim()
                     def llvm_versions = sh (
                         script: 'ls -1 /media/llvms',
                         returnStdout: true
@@ -35,7 +39,7 @@ pipeline {
                         def llvm_version = i
                         branches[llvm_version] = {
                             node {
-                                sh "mkdir -p bootstrap/$llvm_version/ && _build/default/stubgen/stubgen.exe --cc=-I,/media/llvms/$llvm_version/lib/clang/$llvm_version/include /media/llvms/$llvm_version/bin/llvm-config bootstrap/$llvm_version/"
+                                sh "cd $pwd && mkdir -p bootstrap/$llvm_version/ && _build/default/stubgen/stubgen.exe --cc=-I,/media/llvms/$llvm_version/lib/clang/$llvm_version/include /media/llvms/$llvm_version/bin/llvm-config bootstrap/$llvm_version/"
                             }
                         }
                     }
