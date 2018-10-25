@@ -1,1 +1,1 @@
-"@LLVM_CFLAGS@"
+(@LLVM_CFLAGS@)

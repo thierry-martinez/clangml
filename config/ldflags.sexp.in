@@ -1,1 +1,1 @@
-"@LLVM_LDFLAGS@ -lclang -Wl,-rpath,@LLVM_LIBDIR@"
+(@LLVM_LDFLAGS@ -Wl,-rpath,@LLVM_LIBDIR@)

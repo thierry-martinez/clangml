@@ -18,3 +18,4 @@
 /clangml/clang__bindings.mli
 /config/cflags.sexp
 /config/ldflags.sexp
+/config/*.sexp

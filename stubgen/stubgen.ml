@@ -80,15 +80,31 @@ type argument_interface =
       data_callee : argument;
     }
 
+type type_interface = {
+    integer_boolean : bool;
+  }
+
+let empty_type_interface =
+  { integer_boolean = false }
+
+let integer_boolean =
+  { integer_boolean = true }
+
+let union_type_interface a b =
+  { integer_boolean = a.integer_boolean || b.integer_boolean }
 
 type function_interface = {
     hidden : bool;
+    result : type_interface;
     rename : string -> string;
     arguments : argument_interface list;
   }
 
 let empty_function_interface =
-  { hidden = false; rename = (fun x -> x); arguments = [] }
+  { hidden = false;
+    result = empty_type_interface;
+    rename = (fun x -> x);
+    arguments = [] }
 
 let hidden_function_interface = { empty_function_interface with hidden = true }
 
@@ -97,12 +113,17 @@ let rename_function rename =
 
 let union_function_interfaces a b =
   { hidden = a.hidden || b.hidden;
+    result = union_type_interface a.result b.result;
     rename = (fun name -> a.rename (b.rename name));
     arguments = List.rev_append a.arguments b.arguments }
 
 let add_argument argument function_interface =
   { function_interface with
     arguments = argument :: function_interface.arguments }
+
+let add_result type_interface function_interface =
+  { function_interface with
+    result = union_type_interface function_interface.result type_interface }
 
 type constant_interface = {
     success : bool;
@@ -293,7 +314,12 @@ let get_elaborated_type type_spelling =
       | Some type_name -> Some (Struct type_name)
       | None -> None
 
-let find_type_info ?(declare_abstract = true) context ty =
+let bool_info =
+  { ocamltype = ptyp_constr (loc (Longident.Lident "bool"));
+    c_of_ocaml = Some "Bool_val";
+    ocaml_of_c = Some "Val_bool"; }
+
+let find_type_info ?(declare_abstract = true) context type_interface ty =
   match Clang.get_type_kind ty with
   | Void ->
       { ocamltype = ptyp_constr (loc (Longident.Lident "unit"));
@@ -303,9 +329,14 @@ let find_type_info ?(declare_abstract = true) context ty =
   | Int
   | Long
   | LongLong ->
-      { ocamltype = ptyp_constr (loc (Longident.Lident "int"));
-        c_of_ocaml = Some "Int_val";
-        ocaml_of_c = Some "Val_int"; }, Regular ()
+      if type_interface.integer_boolean then
+        bool_info, Regular ()
+      else
+        { ocamltype = ptyp_constr (loc (Longident.Lident "int"));
+          c_of_ocaml = Some "Int_val";
+          ocaml_of_c = Some "Val_int"; }, Regular ()
+  | Bool ->
+      bool_info, Regular ()
   | Double ->
       { ocamltype = ptyp_constr (loc (Longident.Lident "float"));
         c_of_ocaml = Some "Double_val";
@@ -382,9 +413,9 @@ let translate_type_info ?(outputs = []) context (common_info, type_info) =
   | Struct struct_info ->
       common_info.ocamltype
 
-let translate_type ?outputs ?declare_abstract context ty =
+let translate_type ?outputs ?declare_abstract context type_interface ty =
   translate_type_info ?outputs context
-    (find_type_info ?declare_abstract context ty)
+    (find_type_info ?declare_abstract context type_interface ty)
 
 type field_type =
   | Unknown of string * Clang.cxtype
@@ -424,7 +455,7 @@ let print_ocaml_primitive channel name args print_body =
     name print_list args print_body
 
 let print_return_ocaml_of_c context used_arg_names print_expression
-    result_type outputs =
+    result_type_interface result_type outputs =
   if Clang.get_type_kind result_type = Void then
     begin
       Printf.fprintf context.chan_stubs "\n  %t;" print_expression;
@@ -435,21 +466,24 @@ let print_return_ocaml_of_c context used_arg_names print_expression
       let result = make_name_unique used_arg_names "result" in
       Printf.fprintf context.chan_stubs "\n  %s %s = %t;"
         (Clang.get_type_spelling result_type) result print_expression;
-      let common_info, type_info = find_type_info context result_type in
+      let common_info, type_info =
+        find_type_info context result_type_interface result_type in
       match type_info with
       | Enum { result = Some success } ->
           let make_data channel =
             match outputs with
             | [] -> Printf.fprintf channel "data = Val_unit;"
             | [single, ty] ->
-                 let common_info, type_info = find_type_info context ty in
+                 let common_info, type_info =
+                   find_type_info context empty_type_interface ty in
                  Printf.fprintf channel "data = %s(%s);"
                    (Option.get common_info.ocaml_of_c) single
             | list ->
                  Printf.fprintf channel "data = caml_alloc_tuple(%d);\n"
                    (List.length list);
                  list |> List.iteri @@ fun i (s, ty) ->
-                   let common_info, type_info = find_type_info context ty in
+                   let common_info, type_info =
+                     find_type_info context empty_type_interface ty in
                    Printf.fprintf channel "  Store_field(data, %d, %s(%s));\n"
                      i (Option.get common_info.ocaml_of_c) s in
           Printf.fprintf context.chan_stubs "
@@ -473,7 +507,7 @@ let print_return_ocaml_of_c context used_arg_names print_expression
     end
 
 let print_return_c_of_ocaml context used_arg_names print_expression
-    result_type =
+    result_type_interface result_type =
   if Clang.get_type_kind result_type = Void then
     begin
       Printf.fprintf context.chan_stubs "  %t;" print_expression;
@@ -482,7 +516,8 @@ let print_return_c_of_ocaml context used_arg_names print_expression
     begin
       let result = "result" in
       Printf.fprintf context.chan_stubs "  %s = %t;\n" result print_expression;
-      let common_info, type_info = find_type_info context result_type in
+      let common_info, type_info =
+        find_type_info context result_type_interface result_type in
       let c_of_ocaml = Option.get common_info.c_of_ocaml in
       Printf.fprintf context.chan_stubs "  CAMLreturnT(%s, %s(%s));\n"
         (Clang.get_type_spelling result_type) c_of_ocaml
@@ -525,7 +560,9 @@ let translate_struct_decl' context cur typedef name =
     let recognize_type field_type =
       match field_type with
       | Unknown (name, ty) ->
-          Translated (name, find_type_info ~declare_abstract:false context ty)
+          Translated (
+            name,
+          find_type_info ~declare_abstract:false context empty_type_interface ty)
       | ty -> ty in
     let record_fields =
       try Some (List.map recognize_type ocaml_fields)
@@ -628,12 +665,13 @@ static %s
             field_name in
          let print_result channel =
            print_return_ocaml_of_c context used_arg_names print_expression
-             field_type [] in
+             empty_type_interface field_type [] in
          Printf.fprintf channel "
   CAMLparam1(arg);
   %t" print_result);
     let pval_prim = [stub_name] in
-    let field_type_info, _ = find_type_info context field_type in
+    let field_type_info, _ =
+      find_type_info context empty_type_interface field_type in
     let pval_type = ptyp_arrow common_info.ocamltype
       field_type_info.ocamltype in
     let item =
@@ -823,22 +861,23 @@ let find_argument argument index_args =
       with Not_found ->
         failwith ("HERE: " ^ name)
 
-let rec translate_argument_type context ty =
+let translate_argument_type context ty =
   match ty with
   | Removed | Output _ -> assert false
-  | CXType ty -> translate_type context ty
+  | CXType ty -> translate_type context empty_type_interface ty
   | Array (_, _, ty) ->
-      ptyp_constr (loc (Longident.Lident "array"))
-        ~args:[translate_type context (Clang.get_pointee_type ty)]
+      let args = [
+        translate_type context empty_type_interface (Clang.get_pointee_type ty)] in
+      ptyp_constr (loc (Longident.Lident "array")) ~args
   | Closure { closure_args; closure_result; data_callee } ->
       let rec build_closure_type (_, arg_type) (i, accu) =
         let j = pred i in
         if j = data_callee then
           j, accu
         else
-          j, ptyp_arrow (translate_type context arg_type) accu in
+          j, ptyp_arrow (translate_type context empty_type_interface arg_type) accu in
       snd (Array.fold_right build_closure_type closure_args
-        (Array.length closure_args, translate_type context closure_result))
+        (Array.length closure_args, translate_type context empty_type_interface closure_result))
 
 let index_args args =
   let index = String_hashtbl.create 17 in
@@ -877,7 +916,7 @@ let translate_function_decl context cur =
           match args.(output) with
           | CXType ty ->
               let ty = Clang.get_pointee_type ty in
-              outputs := (output, translate_type context ty) :: !outputs;
+              outputs := (output, translate_type context empty_type_interface ty) :: !outputs;
               args.(output) <- Output ty
           | _ -> failwith "Argument expected"
         end
@@ -908,7 +947,7 @@ let translate_function_decl context cur =
   let result_type = Clang.get_result_type ty in
   let pval_type =
     if num_args = 0 then
-      let result_ty = translate_type context result_type in
+      let result_ty = translate_type context function_interface.result result_type in
       ptyp_arrow (ptyp_constr (loc (Longident.Lident "unit"))) result_ty
     else
       let add_arg arg pval_type =
@@ -917,7 +956,7 @@ let translate_function_decl context cur =
         | _ ->
             ptyp_arrow (translate_argument_type context arg) pval_type in
       let result_ty = translate_type ~outputs:(List.map snd outputs) context
-          (Clang.get_result_type ty) in
+          function_interface.result (Clang.get_result_type ty) in
       Array.fold_right add_arg args result_ty in
   let wrapper_name = name ^ "_wrapper" in
   let used_arg_names = String_hashtbl.create 17 in
@@ -954,7 +993,7 @@ let translate_function_decl context cur =
           let local = "result" :: "f" :: ocaml_args in
           let init_args chan =
             args |> Array.iter @@ Option.iter @@ fun (name, ty, name_ocaml) ->
-              let arg_info, _ = find_type_info context ty in
+              let arg_info, _ = find_type_info context empty_type_interface ty in
               flush chan;
               Printf.fprintf chan "  %s = %s(%s);\n"
                  name_ocaml (Option.get arg_info.ocaml_of_c) name in
@@ -964,7 +1003,7 @@ let translate_function_decl context cur =
               print_list ("f" :: ocaml_args) in
           let print_call_and_return channel =
             print_return_c_of_ocaml context used_arg_names print_expression
-              result_type in
+              empty_type_interface result_type in
           Printf.fprintf context.chan_stubs "\
 %s
 %s(%a)
@@ -1011,7 +1050,7 @@ let translate_function_decl context cur =
           Printf.fprintf context.chan_stubs "\n  %s %s;"
             (Clang.get_type_spelling ty) wrapper_arg_names.(i)
       | CXType ty ->
-          let common_info, type_info = find_type_info context ty in
+          let common_info, type_info = find_type_info context empty_type_interface ty in
           let c_of_ocaml = Option.get common_info.c_of_ocaml in
           Printf.fprintf context.chan_stubs "\n  %s %s = %s(%s_ocaml);"
             (Clang.get_type_spelling ty) wrapper_arg_names.(i) c_of_ocaml
@@ -1026,7 +1065,7 @@ let translate_function_decl context cur =
             wrapper_arg_names.(j)
             (Clang.get_type_spelling cell_type);
           let index = Lazy.force index in
-          let common_info, type_info = find_type_info context cell_type in
+          let common_info, type_info = find_type_info context empty_type_interface cell_type in
           let c_of_ocaml = Option.get common_info.c_of_ocaml in
           Printf.fprintf context.chan_stubs "\n  for (%s = 0; %s < %s; %s++) {\n    %s[%s] = %s(Field(%s_ocaml, %s));\n  }"
             index index wrapper_arg_names.(j) index wrapper_arg_names.(i) index c_of_ocaml wrapper_arg_names.(i) index
@@ -1039,7 +1078,7 @@ let translate_function_decl context cur =
       Printf.fprintf channel "%s(%a)" name print_list
         (Array.to_list wrapper_args) in
     print_return_ocaml_of_c context used_arg_names print_expression
-      result_type
+      empty_type_interface result_type
       (outputs |> List.map @@ fun (i, _) -> wrapper_arg_names.(i), match args.(i) with Output ty -> ty | _ -> assert false) in
   let ocaml_args_decl =
     ocaml_args |> List.map (fun s -> Printf.sprintf "value %s" s) in
@@ -1073,6 +1112,9 @@ let rename_clang name =
             Buffer.add_char result '_'
           end;
         Buffer.add_char result (Char.lowercase_ascii c)
+    | '_' ->
+        previous_lowercase := false;
+        Buffer.add_char result '_'
     | _ ->
         previous_lowercase := true;
         Buffer.add_char result c in
@@ -1122,12 +1164,14 @@ let main () =
         add_argument (Output_on_success (Name "out_TU"))) |>
     add_function (Pcre.regexp "^clang_visitChildren$")
       (empty_function_interface |>
+        add_result integer_boolean |>
         add_argument (Closure {
           pointer = Name "visitor";
           data_caller = Name "client_data";
           data_callee = Index 2 })) |>
     add_function (Pcre.regexp "^clang_getInclusions$")
       (empty_function_interface |>
+        add_result integer_boolean |>
         add_argument (Closure {
           pointer = Name "visitor";
           data_caller = Name "client_data";
@@ -1138,6 +1182,8 @@ let main () =
           pointer = Name "visitor";
           data_caller = Name "client_data";
           data_callee = Index 1 })) |>
+    add_function (Pcre.regexp "^clang*_(is|equal)[A-Z]")
+      (empty_function_interface |> add_result integer_boolean) |>
     add_enum (Pcre.regexp "^CXErrorCode$")
       (empty_enum_interface |>
         add_constant (Pcre.regexp "^CXError_Success$") { success = true }) |>
@@ -1153,16 +1199,19 @@ let main () =
       Clang.parse_translation_unit2 idx
         "source.c"
         (Array.of_list clang_options)
-        [| { filename = "source.c"; contents = "#include <clang-c/Index.h>" } |]
+        [| { filename = "source.c"; contents = "\
+#include <clang-c/Index.h>
+#include \"clangml/libclang_extensions.h\"" } |]
         0 with
     | Error _ -> failwith "Error!"
     | Ok tu -> tu in
   let cur = Clang.get_translation_unit_cursor tu in
-  let chan_stubs = open_out (prefix ^ "_stubs.c") in
+  let chan_stubs = open_out (prefix ^ "clang_stubs.c") in
   protect ~finally:(fun () -> close_out chan_stubs) (fun () ->
     output_string chan_stubs "\
 #include \"stubgen.h\"
 #include <clang-c/Index.h>
+#include \"libclang_extensions.h\"
 #include <stdio.h>
 ";
     let context =
@@ -1183,11 +1232,11 @@ let main () =
         | _ -> ()
       end;
       Continue));
-    let chan_intf = open_out (prefix ^ ".mli") in
+    let chan_intf = open_out (prefix ^ "clang__bindings.mli") in
     protect ~finally:(fun () -> close_out chan_intf) (fun () ->
       Format.fprintf (Format.formatter_of_out_channel chan_intf)
         "%a@." Pprintast.signature (List.rev context.items_accu));
-    let chan_intf = open_out (prefix ^ ".ml") in
+    let chan_intf = open_out (prefix ^ "clang__bindings.ml") in
     protect ~finally:(fun () -> close_out chan_intf) (fun () ->
       Format.fprintf (Format.formatter_of_out_channel chan_intf)
         "%a@." Pprintast.signature (List.rev context.items_accu)))

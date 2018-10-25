@@ -116,9 +116,11 @@ AS_IF([$LN_S ../bootstrap/$LLVM_VERSION/clang_stubs.c clangml/clang_stubs.c],
   [true],
   [AC_MSG_ERROR([[cannot create symbolic link]])])
 
-AC_SUBST([LLVM_CFLAGS], [[`$LLVM_CONFIG --cflags`]])
+AC_SUBST([LLVM_CFLAGS], [[`$LLVM_CONFIG --cflags `]])
 
 AC_SUBST([LLVM_LDFLAGS], [[`$LLVM_CONFIG --ldflags`]])
+
+AC_SUBST([LLVM_LIBS], [[`$LLVM_CONFIG --libs`]])
 
 AC_SUBST([LLVM_LIBDIR], [[`$LLVM_CONFIG --libdir`]])
 
@@ -127,6 +129,9 @@ AC_CONFIG_FILES([
   Makefile
   config/cflags.sexp
   config/ldflags.sexp
+  config/ldflags_quoted.sexp
+  config/libs.sexp
+  config/libs_quoted.sexp
 ])
 
 AC_OUTPUT

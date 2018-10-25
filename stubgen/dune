@@ -1,4 +1,5 @@
 (executable
   (name stubgen)
   (flags -open Stdcompat)
+  (link_flags -cclib (:include "../config/ldflags_quoted.sexp"))
   (libraries unix stdcompat compiler-libs.common pcre clangml))
