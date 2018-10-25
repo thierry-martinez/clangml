@@ -5,21 +5,20 @@ pipeline {
     stages {
         stage('Prepare') {
             steps {
-                sh 'tar -xf ~/bootstrap.tar.xz'
-                sh 'aclocal'
-                sh 'automake --add-missing'
-                sh 'autoreconf'
+                sh 'mkdir src'
+                sh 'mv * src/ || true'
+                sh 'cd src && tar -xf ~/bootstrap.tar.xz && aclocal && automake --add-missing && autoreconf'
             }
         }
         stage('Configure') {
             steps {
-                sh 'eval $(opam env) && ./configure --with-llvm-config=/media/llvms/6.0.1/bin/llvm-config'
+                sh 'eval $(opam env) && mkdir build && cd build && ../src/configure --with-llvm-config=/media/llvms/6.0.1/bin/llvm-config'
             }
         }
         stage('Build') {
             steps {
-                sh 'make clangml'
-                sh 'make stubgen'
+                sh 'make -C build clangml'
+                sh 'make -C build stubgen'
             }
         }
         stage('Generate stubs') {
@@ -39,14 +38,15 @@ pipeline {
                         def llvm_version = i
                         branches[llvm_version] = {
                             node {
-                                sh "cd $pwd && mkdir -p bootstrap/$llvm_version/ && _build/default/stubgen/stubgen.exe --cc=-I,/media/llvms/$llvm_version/lib/clang/$llvm_version/include /media/llvms/$llvm_version/bin/llvm-config bootstrap/$llvm_version/"
+                                sh "cd $pwd && mkdir -p build/bootstrap/$llvm_version/ && build/_build/default/stubgen/stubgen.exe --cc=-I,/media/llvms/$llvm_version/lib/clang/$llvm_version/include /media/llvms/$llvm_version/bin/llvm-config build/bootstrap/$llvm_version/"
+                                sh "cd $pwd && mkdir $llvm_version/ && cd $llvm_version/ && ../src/configure --with-llvm-config=/media/llvms/$llvm_version/bin/llvm-config && make clangml stubgen"
                             }
                         }
                     }
                     parallel branches
                 }
-                sh 'tar -cf bootstrap.tar.xz bootstrap/'
-                archiveArtifacts artifacts: 'bootstrap.tar.xz', fingerprint: true
+                sh 'cd build && tar -cf bootstrap.tar.xz bootstrap/'
+                archiveArtifacts artifacts: 'build/bootstrap.tar.xz', fingerprint: true
             }
         }
     }
