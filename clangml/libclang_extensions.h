@@ -24,14 +24,35 @@ enum clang_ext_BinaryOperatorKind clang_ext_BinaryOperator_getOpcode(
 CXString clang_ext_BinaryOperator_getOpcodeSpelling(
   enum clang_ext_BinaryOperatorKind Kind);
 
-enum clang_ext_ForStmtArguments {
+enum clang_ext_ForStmtChild {
   CLANG_EXT_FOR_STMT_INIT = 1,
   CLANG_EXT_FOR_STMT_CONDITION_VARIABLE = 2,
   CLANG_EXT_FOR_STMT_COND = 4,
   CLANG_EXT_FOR_STMT_INC = 8
 };
 
-unsigned clang_ext_ForStmt_getArguments(CXCursor c);
+unsigned clang_ext_ForStmt_getChildrenSet(CXCursor c);
+
+enum clang_ext_IfStmtChild {
+  CLANG_EXT_IF_STMT_INIT = 1,
+  CLANG_EXT_IF_STMT_CONDITION_VARIABLE = 2,
+  CLANG_EXT_IF_STMT_ELSE = 4
+};
+
+unsigned clang_ext_IfStmt_getChildrenSet(CXCursor c);
+
+enum clang_ext_SwitchStmtChild {
+  CLANG_EXT_SWITCH_STMT_INIT = 1,
+  CLANG_EXT_SWITCH_STMT_CONDITION_VARIABLE = 2
+};
+
+unsigned clang_ext_SwitchStmt_getChildrenSet(CXCursor c);
+
+enum clang_ext_WhileStmtChild {
+  CLANG_EXT_WHILE_STMT_CONDITION_VARIABLE = 1
+};
+
+unsigned clang_ext_WhileStmt_getChildrenSet(CXCursor c);
 
 /* From clang/AST/Type.h */
 enum clang_ext_ElaboratedTypeKeyword {

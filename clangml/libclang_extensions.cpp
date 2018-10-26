@@ -129,7 +129,7 @@ extern "C" {
     //llvm_unreachable("Unsupported BinaryOperatorKind");
   }
 
-  unsigned clang_ext_ForStmt_getArguments(CXCursor c) {
+  unsigned clang_ext_ForStmt_getChildrenSet(CXCursor c) {
     const clang::ForStmt *e =
       llvm::dyn_cast_or_null<clang::ForStmt>(getCursorStmt(c));
     if (e == NULL) {
@@ -147,6 +147,54 @@ extern "C" {
     }
     if (e->getInc()) {
       Result |= CLANG_EXT_FOR_STMT_INC;
+    }
+    return Result;
+  }
+
+  unsigned clang_ext_IfStmt_getChildrenSet(CXCursor c) {
+    const clang::IfStmt *e =
+      llvm::dyn_cast_or_null<clang::IfStmt>(getCursorStmt(c));
+    if (e == NULL) {
+      return 0;
+    }
+    unsigned Result = 0;
+    if (e->getInit()) {
+      Result |= CLANG_EXT_IF_STMT_INIT;
+    }
+    if (e->getConditionVariable()) {
+      Result |= CLANG_EXT_IF_STMT_CONDITION_VARIABLE;
+    }
+    if (e->getElse()) {
+      Result |= CLANG_EXT_IF_STMT_ELSE;
+    }
+    return Result;
+  }
+
+  unsigned clang_ext_SwitchStmt_getChildrenSet(CXCursor c) {
+    const clang::SwitchStmt *e =
+      llvm::dyn_cast_or_null<clang::SwitchStmt>(getCursorStmt(c));
+    if (e == NULL) {
+      return 0;
+    }
+    unsigned Result = 0;
+    if (e->getInit()) {
+      Result |= CLANG_EXT_SWITCH_STMT_INIT;
+    }
+    if (e->getConditionVariable()) {
+      Result |= CLANG_EXT_SWITCH_STMT_CONDITION_VARIABLE;
+    }
+    return Result;
+  }
+
+  unsigned clang_ext_WhileStmt_getChildrenSet(CXCursor c) {
+    const clang::WhileStmt *e =
+      llvm::dyn_cast_or_null<clang::SwitchStmt>(getCursorStmt(c));
+    if (e == NULL) {
+      return 0;
+    }
+    unsigned Result = 0;
+    if (e->getConditionVariable()) {
+      Result |= CLANG_EXT_WHILE_STMT_CONDITION_VARIABLE;
     }
     return Result;
   }

@@ -1,3 +1,5 @@
+[@@@ocaml.warning "-30"]
+
 open Clang__bindings
 
 type qual_type = {
@@ -30,96 +32,143 @@ and type_desc =
       kind : cxtypekind;
     }
 
-type stmt =
+type 'a node = {
+    cxcursor : cxcursor;
+    desc : 'a;
+  }
+
+type stmt = stmt_desc node
+and stmt_desc =
   | Null
   | Compound of {
-      cxcursor : cxcursor;
       items : stmt list;
     }
   | For of {
-      cxcursor : cxcursor;
       init : stmt option;
-      condition_variable : decl_stmt option;
+      condition_variable : var_decl option;
       cond : stmt option;
       inc : stmt option;
       body : stmt;
     }
-  | Decl of decl_stmt
+  | If of {
+      init : stmt option;
+      condition_variable : var_decl option;
+      cond : expr;
+      then_branch : stmt;
+      else_branch : stmt option;
+    }
+  | Switch of {
+      init : stmt option;
+      condition_variable : var_decl option;
+      cond : expr;
+      body : stmt;
+    }
+  | Case of {
+      lhs : expr;
+      rhs : expr option;
+      body : stmt;
+    }
+  | Default of {
+      body : stmt;
+    }
+  | Label of {
+      label : string;
+      body : stmt;
+    }
+  | While of {
+      condition_variable : var_decl option;
+      cond : expr;
+      body : stmt;
+    }
+  | Do of {
+      body : stmt;
+      cond : expr;
+    }
+  | Goto of {
+      label : string;
+    }
+  | IndirectGoto of {
+      target : stmt;
+    }
+  | Continue
+  | Break
+  | Asm
+  | Decl of decl_stmt_desc
   | Return of {
-      cxcursor : cxcursor;
       value : expr
     }
-  | Expr of expr
+  | Expr of expr_desc
 
-and expr =
+and expr = expr_desc node
+
+and expr_desc =
   | IntegerLiteral of {
-      cxcursor : cxcursor;
       s : string;
     }
   | UnaryOperator of {
-      cxcursor : cxcursor;
       kind : clang_ext_unaryoperatorkind;
       operand : expr;
     }
+
   | BinaryOperator of {
-      cxcursor : cxcursor;
       lhs : expr;
       kind : clang_ext_binaryoperatorkind;
       rhs : expr;
     }
   | DeclRef of {
-      cxcursor : cxcursor;
       s : string;
     }
   | Call of {
-      cxcursor : cxcursor;
       f : expr;
       args : expr list;
     }
   | UnexposedExpr of {
-      cxcursor : cxcursor;
       s : string;
     }
-  | OtherExpr of cxcursor
+  | OtherExpr
 
-and decl_stmt =
+and decl_stmt = decl_stmt_desc node
+
+and decl_stmt_desc =
   | Function of {
-      cxcursor : cxcursor;
       result : qual_type;
       name : string;
       args : (string * qual_type) list;
       stmt : stmt;
     }
-  | Var of {
-      cxcursor : cxcursor;
-      name : string;
-      qual_type : qual_type;
-      init : expr option
-    }
+  | Var of var_decl_desc
   | Enum of {
-      cxcursor : cxcursor;
       name : string;
       constants : enum_constant list;
     }
   | Struct of {
-      cxcursor : cxcursor;
       name : string;
       fields : (string * qual_type) list;
     }
   | Typedef of {
-      cxcursor : cxcursor;
       name : string;
       underlying_type : qual_type;
     }
-  | OtherDecl of cxcursor
+  | OtherDecl
 
-and enum_constant = {
-    cxcursor : cxcursor;
+and enum_constant = enum_constant_desc node
+
+and enum_constant_desc = {
     name : string;
     init : expr option;
     value : int;
   }
 
-type translation_unit = {
-    cxcursor : cxcursor; filename : string; items : decl_stmt list
+and var_decl = var_decl_desc node
+
+and var_decl_desc = {
+    name : string;
+    qual_type : qual_type;
+    init : expr option
   }
+
+type translation_unit_desc = {
+    filename : string; items : decl_stmt list
+  }
+
+type translation_unit = translation_unit_desc node
