@@ -81,11 +81,11 @@ and stmt_desc =
       cond : expr;
     }
   | Label of {
-      label : string;
+      label : label_ref;
       body : stmt;
     }
   | Goto of {
-      label : string;
+      label : label_ref;
     }
   | IndirectGoto of {
       target : stmt;
@@ -150,6 +150,12 @@ and decl_stmt_desc =
       underlying_type : qual_type;
     }
   | OtherDecl
+
+and label_ref = label_ref_desc node
+
+and label_ref_desc = {
+    name : string;
+  }
 
 and enum_constant = enum_constant_desc node
 
