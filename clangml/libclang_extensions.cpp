@@ -188,7 +188,7 @@ extern "C" {
 
   unsigned clang_ext_WhileStmt_getChildrenSet(CXCursor c) {
     const clang::WhileStmt *e =
-      llvm::dyn_cast_or_null<clang::SwitchStmt>(getCursorStmt(c));
+      llvm::dyn_cast_or_null<clang::WhileStmt>(getCursorStmt(c));
     if (e == NULL) {
       return 0;
     }
