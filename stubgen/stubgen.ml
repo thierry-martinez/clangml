@@ -767,7 +767,9 @@ let translate_enum_decl context cur =
       Printf.fprintf context.chan_stubs
         "  case %i: return %s;\n" i constructor);
     Printf.fprintf context.chan_stubs
-      "  default: failwith_fmt(\"invalid value for %s: %%d\", Int_val(ocaml));\n  }\n}\n\n"
+      "  }
+  failwith_fmt(\"invalid value for %s: %%d\", Int_val(ocaml));
+}\n\n"
       common_info.c_of_ocaml;
     Printf.fprintf context.chan_stubs
       "value\n%s(%s v)\n{\n  switch (v) {\n"
@@ -776,7 +778,9 @@ let translate_enum_decl context cur =
       Printf.fprintf context.chan_stubs
         "  case %s: return Val_int(%i);\n" constructor i);
     Printf.fprintf context.chan_stubs
-      "  default: failwith_fmt(\"invalid value for %s: %%d\", v);\n  }\n}\n\n"
+      "  }
+  failwith_fmt(\"invalid value for %s: %%d\", v);
+}\n\n"
       common_info.ocaml_of_c;
     let type_decl =
       type_declaration ~ptype_kind:(Ptype_variant ocaml_constructors)
