@@ -100,8 +100,7 @@ module Ast = struct
               | [init] -> Some (expr_of_cursor init)
               | [] -> None
               | _ -> failwith "enum_decl_of_cursor (init)" in
-            let value = get_enum_constant_decl_value cxcursor in
-            { cxcursor; desc = { name; init; value } }
+            { cxcursor; desc = { name; init } }
         | _ -> failwith "enum_decl_of_cursor" in
     Enum { name; constants }
 

@@ -71,10 +71,6 @@ and stmt_desc =
   | Default of {
       body : stmt;
     }
-  | Label of {
-      label : string;
-      body : stmt;
-    }
   | While of {
       condition_variable : var_decl option;
       cond : expr;
@@ -83,6 +79,10 @@ and stmt_desc =
   | Do of {
       body : stmt;
       cond : expr;
+    }
+  | Label of {
+      label : string;
+      body : stmt;
     }
   | Goto of {
       label : string;
@@ -156,7 +156,6 @@ and enum_constant = enum_constant_desc node
 and enum_constant_desc = {
     name : string;
     init : expr option;
-    value : int;
   }
 
 and var_decl = var_decl_desc node
