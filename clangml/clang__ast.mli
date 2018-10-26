@@ -88,7 +88,7 @@ and stmt_desc =
       label : label_ref;
     }
   | IndirectGoto of {
-      target : stmt;
+      target : expr;
     }
   | Continue
   | Break

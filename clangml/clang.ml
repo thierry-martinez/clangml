@@ -233,27 +233,27 @@ module Ast = struct
       | DoStmt ->
           let body, cond =
             match list_of_children cxcursor with
-            | [body; cond] ->
-                stmt_of_cursor body, expr_of_cursor cond
-            | _ ->
-                failwith "stmt_of_cursor (DoStmt)" in
+            | [body; cond] -> stmt_of_cursor body, expr_of_cursor cond
+            | _ -> failwith "stmt_of_cursor (DoStmt)" in
           Do { body; cond }
       | LabelStmt ->
           let label, body =
             match list_of_children cxcursor with
-            | [label; body] ->
-                label_ref_of_cursor label, stmt_of_cursor body
-            | _ ->
-                failwith "stmt_of_cursor (LabelStmt)" in
+            | [label; body] -> label_ref_of_cursor label, stmt_of_cursor body
+            | _ -> failwith "stmt_of_cursor (LabelStmt)" in
           Label { label; body }
       | GotoStmt ->
           let label =
             match list_of_children cxcursor with
-            | [label] ->
-                label_ref_of_cursor label
-            | _ ->
-                failwith "stmt_of_cursor (GotoStmt)" in
+            | [label] -> label_ref_of_cursor label
+            | _ -> failwith "stmt_of_cursor (GotoStmt)" in
           Goto { label }
+      | IndirectGotoStmt ->
+          let target =
+            match list_of_children cxcursor with
+            | [target] -> expr_of_cursor target
+            | _ -> failwith "stmt_of_cursor (IndirectGotoStmt)" in
+          IndirectGoto { target }
       | ContinueStmt ->
           Continue
       | BreakStmt ->
