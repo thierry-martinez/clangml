@@ -72,3 +72,6 @@ failwith_fmt(const char* format, ...)
     CAMLreturnT(C_TYPE, *((C_TYPE *) Data_custom_val(ocaml)));          \
   }
 
+#define Not_bool_val(X) (!Bool_val(X))
+
+#define Val_not_bool(X) (Val_bool(!(X)))

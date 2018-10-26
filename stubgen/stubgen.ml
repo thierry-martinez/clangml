@@ -81,17 +81,28 @@ type argument_interface =
     }
 
 type type_interface = {
-    integer_boolean : bool;
+    integer_enum : string option;
   }
 
 let empty_type_interface =
-  { integer_boolean = false }
+  { integer_enum = None }
 
-let integer_boolean =
-  { integer_boolean = true }
+let integer_enum enum =
+  { integer_enum = Some enum }
+
+let integer_boolean = integer_enum "bool"
+
+let integer_zero_is_true = integer_enum "not bool"
 
 let union_type_interface a b =
-  { integer_boolean = a.integer_boolean || b.integer_boolean }
+  { integer_enum =
+      match a.integer_enum, b.integer_enum with
+      | None, None -> None
+      | None, Some enum
+      | Some enum, None -> Some enum
+      | Some enum, Some enum' ->
+          assert (enum = enum');
+          Some enum }
 
 type function_interface = {
     hidden : bool;
@@ -242,10 +253,11 @@ type enum_info = {
 
 type struct_info = unit
 
-type regular_info = unit
-
 type type_info =
-  | Regular of regular_info
+  | Void
+  | Regular
+  | Bool
+  | Not_bool
   | Enum of enum_info
   | Struct of struct_info
 
@@ -314,50 +326,65 @@ let get_elaborated_type type_spelling =
       | Some type_name -> Some (Struct type_name)
       | None -> None
 
+let ocaml_bool = ptyp_constr (loc (Longident.Lident "bool"))
+
 let bool_info =
-  { ocamltype = ptyp_constr (loc (Longident.Lident "bool"));
+  { ocamltype = ocaml_bool;
     c_of_ocaml = Some "Bool_val";
     ocaml_of_c = Some "Val_bool"; }
 
+let not_bool_info =
+  { ocamltype = ocaml_bool;
+    c_of_ocaml = Some "Not_bool_val";
+    ocaml_of_c = Some "Val_not_bool"; }
+
 let find_type_info ?(declare_abstract = true) context type_interface ty =
+  let find_enum_info type_name =
+    let enum_info =
+      try
+        String_hashtbl.find context.enum_table type_name
+      with Not_found ->
+        failwith ("Unknown enum " ^ type_name) in
+    let common_info, enum_info = Lazy.force enum_info in
+    common_info, (Enum enum_info : type_info) in
   match Clang.get_type_kind ty with
   | Void ->
       { ocamltype = ptyp_constr (loc (Longident.Lident "unit"));
         c_of_ocaml = None;
-        ocaml_of_c = None; }, Regular ()
+        ocaml_of_c = None; }, Void
   | UInt
   | Int
   | Long
   | LongLong ->
-      if type_interface.integer_boolean then
-        bool_info, Regular ()
-      else
-        { ocamltype = ptyp_constr (loc (Longident.Lident "int"));
-          c_of_ocaml = Some "Int_val";
-          ocaml_of_c = Some "Val_int"; }, Regular ()
+      begin
+        match type_interface.integer_enum with
+        | Some "bool" ->
+            bool_info, Bool
+        | Some "not bool" ->
+            not_bool_info, Not_bool
+        | Some enum ->
+            find_enum_info enum
+        | None ->
+            { ocamltype = ptyp_constr (loc (Longident.Lident "int"));
+              c_of_ocaml = Some "Int_val";
+              ocaml_of_c = Some "Val_int"; }, Regular
+      end
   | Bool ->
-      bool_info, Regular ()
+      bool_info, Bool
   | Double ->
       { ocamltype = ptyp_constr (loc (Longident.Lident "float"));
         c_of_ocaml = Some "Double_val";
-        ocaml_of_c = Some "caml_copy_double"; }, Regular ()
+        ocaml_of_c = Some "caml_copy_double"; }, Regular
   | Pointer when Clang.get_type_kind (Clang.get_pointee_type ty) = Char_S ->
       { ocamltype = ocaml_string;
         c_of_ocaml = Some "String_val";
-        ocaml_of_c = Some "caml_copy_string"; }, Regular ()
+        ocaml_of_c = Some "caml_copy_string"; }, Regular
   | Elaborated ->
       let full_type_name = Clang.get_type_spelling ty in
       begin
         match get_elaborated_type full_type_name with
         | None -> failwith full_type_name
-        | Some (Enum type_name) ->
-            let enum_info =
-              try
-                String_hashtbl.find context.enum_table type_name
-              with Not_found ->
-                failwith ("Unknown enum " ^ type_name) in
-            let common_info, enum_info = Lazy.force enum_info in
-            common_info, Enum enum_info
+        | Some (Enum type_name) -> find_enum_info type_name
         | Some (Struct type_name) ->
             let struct_info =
               try
@@ -373,7 +400,7 @@ let find_type_info ?(declare_abstract = true) context type_interface ty =
       | "CXString" ->
           { ocamltype = ocaml_string;
             c_of_ocaml =  Some "";
-            ocaml_of_c = Some "OCAML_OF_CXSTRING"; }, Regular ()
+            ocaml_of_c = Some "OCAML_OF_CXSTRING"; }, Regular
       | _ ->
           match String_hashtbl.find_opt context.type_table type_name with
           | Some type_info -> Lazy.force type_info
@@ -387,27 +414,34 @@ let find_type_info ?(declare_abstract = true) context type_interface ty =
                 ptyp_constr (loc (Longident.Lident ocaml_type_name)) in
               let type_info =
                 { ocamltype; c_of_ocaml = Some ""; ocaml_of_c = Some "" },
-                Regular () in
+                Regular in
               String_hashtbl.add context.type_table type_name (lazy type_info);
               context.items_accu <-
                 psig_type [type_declaration (loc ocaml_type_name)]
                 :: context.items_accu;
               type_info
 
+let make_tuple list =
+  match list with
+  | [] -> ptyp_constr (loc (Longident.Lident "unit"))
+  | [ty] -> ty
+  | _ -> ptyp_tuple list
+
 let translate_type_info ?(outputs = []) context (common_info, type_info) =
   match type_info with
-  | Regular () -> common_info.ocamltype
+  | Void -> make_tuple outputs
+  | Regular -> common_info.ocamltype
+  | Bool | Not_bool ->
+      if outputs = [] then
+        ocaml_bool
+      else
+        ptyp_constr (loc (Longident.Lident "option")) ~args:[make_tuple outputs]
   | Enum enum_info ->
       let ocaml_type =
         match enum_info.result with
         | Some _ ->
-            let output_tuple =
-              match outputs with
-              | [] -> ptyp_constr (loc (Longident.Lident "unit"))
-              | [ty] -> ty
-              | list -> ptyp_tuple list in
             ptyp_constr (loc (Longident.Lident "result"))
-              ~args:[output_tuple; common_info.ocamltype]
+              ~args:[make_tuple outputs; common_info.ocamltype]
         | None -> common_info.ocamltype in
       ocaml_type
   | Struct struct_info ->
@@ -456,11 +490,39 @@ let print_ocaml_primitive channel name args print_body =
 
 let print_return_ocaml_of_c context used_arg_names print_expression
     result_type_interface result_type outputs =
+  let make_data channel =
+    match outputs with
+    | [] -> Printf.fprintf channel "data = Val_unit;"
+    | [single, ty] ->
+        let common_info, type_info =
+          find_type_info context empty_type_interface ty in
+        Printf.fprintf channel "data = %s(%s);"
+          (Option.get common_info.ocaml_of_c) single
+    | list ->
+        Printf.fprintf channel "data = caml_alloc_tuple(%d);\n"
+          (List.length list);
+        list |> List.iteri @@ fun i (s, ty) ->
+          let common_info, type_info =
+            find_type_info context empty_type_interface ty in
+          Printf.fprintf channel "  Store_field(data, %d, %s(%s));\n"
+            i (Option.get common_info.ocaml_of_c) s in
   if Clang.get_type_kind result_type = Void then
-    begin
-      Printf.fprintf context.chan_stubs "\n  %t;" print_expression;
-      Printf.fprintf context.chan_stubs "\n  CAMLreturn(Val_unit);\n"
-    end
+    if outputs = [] then
+      begin
+        Printf.fprintf context.chan_stubs "\n  %t;" print_expression;
+        Printf.fprintf context.chan_stubs "\n  CAMLreturn(Val_unit);\n"
+      end
+    else
+      begin
+        Printf.fprintf context.chan_stubs "
+  %t;
+  {
+    CAMLlocal1(data);
+    %t
+    CAMLreturn(data);
+  }
+" print_expression make_data
+      end
   else
     begin
       let result = make_name_unique used_arg_names "result" in
@@ -469,23 +531,22 @@ let print_return_ocaml_of_c context used_arg_names print_expression
       let common_info, type_info =
         find_type_info context result_type_interface result_type in
       match type_info with
+      | Bool | Not_bool ->
+          let prefix =
+            if type_info = Bool then ""
+            else "!" in
+          Printf.fprintf context.chan_stubs "
+  if (%s%s) {
+    CAMLlocal2(result, data);
+    result = caml_alloc(1, 0);
+    %t
+    Store_field(result, 0, data);
+    CAMLreturn(result);
+  }
+  else {
+    CAMLreturn(Val_int(0));
+  }" prefix result make_data
       | Enum { result = Some success } ->
-          let make_data channel =
-            match outputs with
-            | [] -> Printf.fprintf channel "data = Val_unit;"
-            | [single, ty] ->
-                 let common_info, type_info =
-                   find_type_info context empty_type_interface ty in
-                 Printf.fprintf channel "data = %s(%s);"
-                   (Option.get common_info.ocaml_of_c) single
-            | list ->
-                 Printf.fprintf channel "data = caml_alloc_tuple(%d);\n"
-                   (List.length list);
-                 list |> List.iteri @@ fun i (s, ty) ->
-                   let common_info, type_info =
-                     find_type_info context empty_type_interface ty in
-                   Printf.fprintf channel "  Store_field(data, %d, %s(%s));\n"
-                     i (Option.get common_info.ocaml_of_c) s in
           Printf.fprintf context.chan_stubs "
   if (%s == %s) {
     CAMLlocal2(result, data);
@@ -769,8 +830,9 @@ let translate_enum_decl context cur =
     Printf.fprintf context.chan_stubs
       "  }
   failwith_fmt(\"invalid value for %s: %%d\", Int_val(ocaml));
+  return %s;
 }\n\n"
-      common_info.c_of_ocaml;
+      common_info.c_of_ocaml (List.hd constructors);
     Printf.fprintf context.chan_stubs
       "value\n%s(%s v)\n{\n  switch (v) {\n"
       common_info.ocaml_of_c type_name;
@@ -780,6 +842,7 @@ let translate_enum_decl context cur =
     Printf.fprintf context.chan_stubs
       "  }
   failwith_fmt(\"invalid value for %s: %%d\", v);
+  return Val_int(0);
 }\n\n"
       common_info.ocaml_of_c;
     let type_decl =
@@ -839,7 +902,7 @@ let translate_typedef_decl context cur =
         context.items_accu <- psig_type [type_decl] :: context.items_accu in
       let some_common_info = map_common_type_info Option.some common_info in
       String_hashtbl.add context.type_table name
-        (lazy (make_decl (); some_common_info, Regular ()));
+        (lazy (make_decl (); some_common_info, Regular));
       String_hashtbl.add context.used_type_table ocaml_type_name ()
     end
 
@@ -1082,7 +1145,7 @@ let translate_function_decl context cur =
       Printf.fprintf channel "%s(%a)" name print_list
         (Array.to_list wrapper_args) in
     print_return_ocaml_of_c context used_arg_names print_expression
-      empty_type_interface result_type
+      function_interface.result result_type
       (outputs |> List.map @@ fun (i, _) -> wrapper_arg_names.(i), match args.(i) with Output ty -> ty | _ -> assert false) in
   let ocaml_args_decl =
     ocaml_args |> List.map (fun s -> Printf.sprintf "value %s" s) in
@@ -1181,17 +1244,43 @@ let main cflags llvm_config prefix =
           pointer = Name "visitor";
           data_caller = Name "client_data";
           data_callee = Index 1 })) |>
-    add_function (Pcre.regexp "^clang*_(is|equal)[A-Z]")
+    add_function (Pcre.regexp "^clang.*_(is|equal)[A-Z]")
       (empty_function_interface |> add_result integer_boolean) |>
     add_enum (Pcre.regexp "^CXErrorCode$")
       (empty_enum_interface |>
         add_constant (Pcre.regexp "^CXError_Success$") { success = true }) |>
+    add_enum (Pcre.regexp "^CXSaveError$")
+      (empty_enum_interface |>
+        add_constant (Pcre.regexp "^CXSaveError_None$") { success = true }) |>
     add_struct (Pcre.regexp "^CXUnsavedFile$")
       (empty_struct_interface |>
         add_field (SizedString {length = "Length"; contents = "Contents"})) |>
     add_struct (Pcre.regexp "^CXType$")
       (empty_struct_interface |>
-        add_accessor "kind" "get_type_kind" "clang_getTypeKind_wrapper") in
+        add_accessor "kind" "get_type_kind" "clang_getTypeKind_wrapper") |>
+    add_function (Pcre.regexp "^clang_saveTranslationUnit")
+      (empty_function_interface |>
+        add_result (integer_enum "CXSaveError")) |>
+    add_function (Pcre.regexp "^clang_reparseTranslationUnit")
+      (empty_function_interface |>
+        add_result (integer_enum "CXErrorCode")) |>
+    add_function (Pcre.regexp "^clang_getFileUniqueID")
+      (empty_function_interface |>
+        add_result integer_zero_is_true |>
+        add_argument (Output_on_success (Name "outID"))) |>
+    add_function (Pcre.regexp "^clang_indexSourceFile")
+      (empty_function_interface |>
+        add_result (integer_enum "CXErrorCode") |>
+        add_argument (Output_on_success (Name "out_TU"))) |>
+    add_function (Pcre.regexp "^clang_(indexLoc_)?getFileLocation$")
+      (empty_function_interface |>
+        add_argument (Output_on_success (Name "file")) |>
+        add_argument (Output_on_success (Name "line")) |>
+        add_argument (Output_on_success (Name "column")) |>
+        add_argument (Output_on_success (Name "offset"))) |>
+    add_function (Pcre.regexp "^clang_indexLoc_getFileLocation$")
+      (empty_function_interface |>
+        add_argument (Output_on_success (Name "indexFile"))) in
   let idx = Clang.create_index 1 1 in
   let tu =
     match
