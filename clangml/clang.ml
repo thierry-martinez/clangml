@@ -1,11 +1,14 @@
 include Clang__bindings
 
+let iter_children f c =
+  assert (not (visit_children c begin fun cur _par ->
+    f cur;
+    Continue
+  end))
+
 let list_of_children c =
   let children_ref = ref [] in
-  assert (not (visit_children c begin fun cur _par ->
-    children_ref := cur :: !children_ref;
-    Continue
-  end));
+  c |> iter_children (fun cur -> children_ref := cur :: !children_ref);
   List.rev !children_ref
 
 module Ast = struct
@@ -36,6 +39,10 @@ module Ast = struct
           Typedef { name }
       | _ -> OtherType { kind = get_type_kind cxtype } in
     { cxtype; desc; const = is_const_qualified_type cxtype }
+
+  let label_ref_of_cursor cxcursor =
+    let desc = { name = get_cursor_spelling cxcursor } in
+    { cxcursor; desc }
 
   let rec list_last l =
     match l with
@@ -122,11 +129,12 @@ module Ast = struct
       | NullStmt ->
           Null
       | CompoundStmt ->
-          Compound { items = cxcursor |> list_of_children |> List.map stmt_of_cursor }
+          let items = cxcursor |> list_of_children |> List.map stmt_of_cursor in
+          Compound { items }
       | ForStmt ->
           let children_set = ext_for_stmt_get_children_set cxcursor in
-          let queue =
-            cxcursor |> list_of_children |> List.to_seq |> Queue.of_seq in
+          let queue = Queue.create () in
+          cxcursor |> iter_children (fun cur -> Queue.add cur queue);
           let init =
             if children_set land 1 <> 0 then
               Some (stmt_of_cursor (Queue.pop queue))
@@ -152,8 +160,8 @@ module Ast = struct
           For { init; condition_variable; cond; inc; body }
       | IfStmt ->
           let children_set = ext_if_stmt_get_children_set cxcursor in
-          let queue =
-            cxcursor |> list_of_children |> List.to_seq |> Queue.of_seq in
+          let queue = Queue.create () in
+          cxcursor |> iter_children (fun cur -> Queue.add cur queue);
           let init =
             if children_set land 1 <> 0 then
               Some (stmt_of_cursor (Queue.pop queue))
@@ -175,8 +183,8 @@ module Ast = struct
           If { init; condition_variable; cond; then_branch; else_branch }
       | SwitchStmt ->
           let children_set = ext_switch_stmt_get_children_set cxcursor in
-          let queue =
-            cxcursor |> list_of_children |> List.to_seq |> Queue.of_seq in
+          let queue = Queue.create () in
+          cxcursor |> iter_children (fun cur -> Queue.add cur queue);
           let init =
             if children_set land 1 <> 0 then
               Some (stmt_of_cursor (Queue.pop queue))
@@ -211,8 +219,8 @@ module Ast = struct
           Default { body }
       | WhileStmt ->
           let children_set = ext_while_stmt_get_children_set cxcursor in
-          let queue =
-            cxcursor |> list_of_children |> List.to_seq |> Queue.of_seq in
+          let queue = Queue.create () in
+          cxcursor |> iter_children (fun cur -> Queue.add cur queue);
           let condition_variable =
             if children_set land 1 <> 0 then
               Some (var_decl_of_cursor (Queue.pop queue))
@@ -230,6 +238,22 @@ module Ast = struct
             | _ ->
                 failwith "stmt_of_cursor (DoStmt)" in
           Do { body; cond }
+      | LabelStmt ->
+          let label, body =
+            match list_of_children cxcursor with
+            | [label; body] ->
+                label_ref_of_cursor label, stmt_of_cursor body
+            | _ ->
+                failwith "stmt_of_cursor (LabelStmt)" in
+          Label { label; body }
+      | GotoStmt ->
+          let label =
+            match list_of_children cxcursor with
+            | [label] ->
+                label_ref_of_cursor label
+            | _ ->
+                failwith "stmt_of_cursor (GotoStmt)" in
+          Goto { label }
       | ContinueStmt ->
           Continue
       | BreakStmt ->

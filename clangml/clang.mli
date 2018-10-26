@@ -2,6 +2,8 @@ include module type of struct
   include Clang__bindings
 end
 
+val iter_children : (cxcursor -> unit) -> cxcursor -> unit
+
 val list_of_children : cxcursor -> cxcursor list
 
 module Ast : sig
