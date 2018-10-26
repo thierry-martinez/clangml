@@ -799,6 +799,7 @@ let translate_enum_decl context cur =
       | _ -> ()
     end;
     Continue));
+  let result = !result in
   let constructors = List.rev !constructors_ref in
   let longuest_common_prefix =
     match constructors with
@@ -816,7 +817,7 @@ let translate_enum_decl context cur =
       constructor_declaration (loc (String.capitalize_ascii name)))
       ocaml_constructor_names in
   let common_info = make_common_type_info ocaml_type_name in
-  let enum_info = { result = !result } in
+  let enum_info = { result } in
   let make_decl () =
     let type_name =
       if typedef then name
@@ -839,6 +840,14 @@ let translate_enum_decl context cur =
     constructors |> List.iteri (fun i constructor ->
       Printf.fprintf context.chan_stubs
         "  case %s: return Val_int(%i);\n" constructor i);
+    begin
+      match result with
+      | None -> ()
+      | Some result ->
+          Printf.fprintf context.chan_stubs
+            "  case %s: failwith(\"unexpected success value\");\n"
+            result
+    end;
     Printf.fprintf context.chan_stubs
       "  }
   failwith_fmt(\"invalid value for %s: %%d\", v);
