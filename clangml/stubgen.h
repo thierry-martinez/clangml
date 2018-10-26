@@ -45,7 +45,7 @@ failwith_fmt(const char* format, ...)
 
 #define DECLARE_OPAQUE(C_TYPE, OCAML_TYPE, C_OF_OCAML, OCAML_OF_C)      \
   struct custom_operations OCAML_TYPE##_ops = {                         \
-    #C_TYPE,                                                            \
+    (char *) #C_TYPE,                                                   \
     custom_finalize_default,                                            \
     custom_compare_default,                                             \
     custom_compare_ext_default,                                         \
