@@ -92,25 +92,19 @@ AS_IF([test "x$LLVM_VERSION" = "x"],
   [AC_MSG_ERROR([[unable to run $LLVM_CONFIG --version]])])
 AC_MSG_RESULT([[$LLVM_VERSION]])
 
-AC_MSG_NOTICE(updating clangml/ sym-links)
-
-AC_DEFUN([AC_LN_S],
-  [AS_IF([$LN_S $1 $2],
-    [true],
-    [AC_MSG_ERROR([[cannot create symbolic link]])])])
+AC_MSG_NOTICE(initialize build tree)
 
 AC_DEFUN([AC_CP],
   [AS_IF([cp $1 $2],
     [true],
     [AC_MSG_ERROR([[cannot copy file]])])])
 
-AS_IF([test -d bootstrap],
-  [true],
-  [AC_LN_S([$srcdir/bootstrap], [bootstrap])])
-
 AS_IF([test -d stubgen],
   [true],
-  [AC_LN_S([$srcdir/stubgen], [stubgen])])
+  [AS_IF([mkdir stubgen],
+    [AC_CP([$srcdir/stubgen/dune], [stubgen/])
+     AC_CP([$srcdir/stubgen/stubgen.ml], [stubgen/])],
+    [AC_MSG_ERROR([[cannot create directory stubgen/]])])])
 
 AS_IF([test -d clangml],
   [true],
@@ -123,25 +117,16 @@ AS_IF([test -d clangml],
      AC_CP([$srcdir/clangml/stubgen.h], [clangml/])
      AC_CP([$srcdir/clangml/libclang_extensions.cpp], [clangml/])
      AC_CP([$srcdir/clangml/libclang_extensions.h], [clangml/])],
-    [AC_MSG_ERROR([[cannot create directory]])])])
+    [AC_MSG_ERROR([[cannot create directory clangml/]])])])
 
-AC_CP([$srcdir/dune-project], [.])
-AC_CP([$srcdir/clangml.opam], [.])
+cp $srcdir/dune-project .
+cp $srcdir/clangml.opam .
 
-AS_IF([rm clangml/clang__bindings.ml],
-  [true])
+AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang__bindings.ml], [clangml/clang__bindings.ml])
 
-AC_LN_S([../bootstrap/$LLVM_VERSION/clang__bindings.ml], [clangml/clang__bindings.ml])
+AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang__bindings.mli], [clangml/clang__bindings.mli])
 
-AS_IF([rm clangml/clang__bindings.mli],
-  [true])
-
-AC_LN_S([../bootstrap/$LLVM_VERSION/clang__bindings.mli], [clangml/clang__bindings.mli])
-
-AS_IF([rm clangml/clang_stubs.c],
-  [true])
-
-AC_LN_S([../bootstrap/$LLVM_VERSION/clang_stubs.c], [clangml/clang_stubs.c])
+AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang_stubs.c], [clangml/clang_stubs.c])
 
 
 AC_SUBST([LLVM_CFLAGS], [[`$LLVM_CONFIG --cflags `]])
