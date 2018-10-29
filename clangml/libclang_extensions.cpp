@@ -106,6 +106,7 @@ extern "C" {
 #include <clang/AST/OperationKinds.def>
     }
     //llvm_unreachable("Unsupported BinaryOperatorKind");
+    return cxstring_createRef("");
   }
 
   enum clang_ext_BinaryOperatorKind clang_ext_BinaryOperator_getOpcode(
@@ -127,6 +128,7 @@ extern "C" {
 #include <clang/AST/OperationKinds.def>
     }
     //llvm_unreachable("Unsupported BinaryOperatorKind");
+    return cxstring_createRef("");
   }
 
   unsigned clang_ext_ForStmt_getChildrenSet(CXCursor c) {
