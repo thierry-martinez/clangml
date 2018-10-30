@@ -31,3 +31,9 @@ current/clang__bindings.ml : $(STUBGEN_EXE)
 current/clang__bindings.mli : current/clang__bindings.ml
 
 current/clang_stubs.c : current/clang__bindings.ml
+
+clean-local : clean-local-dune
+
+.PHONY : clean-local-dune
+clean-local-dune :
+	dune clean
