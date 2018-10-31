@@ -33,7 +33,7 @@ let iter_type_fields f ty =
       with exn ->
         exn_ref := Some exn;
         Break
-    end <> 0);
+    end);
   match !exn_ref with
   | None -> ()
   | Some exn -> raise exn

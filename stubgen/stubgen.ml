@@ -1506,6 +1506,7 @@ let main cflags llvm_config prefix =
           data_callee = Index 3 })) |>
     add_function (Pcre.regexp "^clang_Type_visitFields$")
       (empty_function_interface |>
+        add_result (empty_type_interface |> integer_boolean) |>
         add_argument (Closure {
           pointer = Name "visitor";
           data_caller = Name "client_data";
