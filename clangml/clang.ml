@@ -1,15 +1,47 @@
 include Clang__bindings
 
 let iter_children f c =
-  assert (not (visit_children c begin fun cur _par ->
-    f cur;
-    Continue
-  end))
+  let exn_ref = ref (None : exn option) in
+  if
+    visit_children c begin fun cur _par ->
+      try
+        f cur;
+        Continue
+      with exn ->
+        exn_ref := Some exn;
+        Break
+    end
+  then
+    match !exn_ref with
+    | None -> assert false
+    | Some exn -> raise exn
+  else
+    assert (!exn_ref = None)
 
 let list_of_children c =
   let children_ref = ref [] in
   c |> iter_children (fun cur -> children_ref := cur :: !children_ref);
   List.rev !children_ref
+
+let iter_type_fields f ty =
+  let exn_ref = ref (None : exn option) in
+  assert (
+    type_visit_fields ty begin fun cur ->
+      try
+        f cur;
+        Continue
+      with exn ->
+        exn_ref := Some exn;
+        Break
+    end <> 0);
+  match !exn_ref with
+  | None -> ()
+  | Some exn -> raise exn
+
+let list_of_type_fields c =
+  let fields_ref = ref [] in
+  c |> iter_type_fields (fun cur -> fields_ref := cur :: !fields_ref);
+  List.rev !fields_ref
 
 module Ast = struct
   include Clang__ast
