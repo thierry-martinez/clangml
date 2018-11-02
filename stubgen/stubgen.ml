@@ -77,6 +77,7 @@ type argument =
   | Name of string
 
 type type_spec =
+  | Int
   | Enum of string
   | Array_struct of { contents : string; length : string }
   | Sized_string of { can_be_null : bool; length : argument }
@@ -380,6 +381,14 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
     let common_info, enum_info = Lazy.force enum_info in
     common_info, (Enum enum_info : type_info) in
   let default_type type_name =
+    match type_interface.reinterpret_as with
+    | Some Int ->
+        { ocamltype = int_info.ocamltype;
+          c_of_ocaml = (fun fmt ~src _params ~tgt ->
+            Printf.fprintf fmt "%s = (time_t) Int_val(%s);" tgt src);
+          ocaml_of_c = (fun fmt ~src _params ~tgt ->
+            Printf.fprintf fmt "%s = Val_int((time_t) %s);" tgt src); }, Regular
+    | _ ->
     match String_hashtbl.find_opt context.type_table type_name with
     | Some type_info -> Lazy.force type_info
     | None ->
@@ -608,17 +617,20 @@ let print_ocaml_primitive channel name args print_body =
     name print_list args print_body
 
 type output =
+  | Info of common_type_info * type_info * string array
   | Regular of Clang.cxtype
   | Sized_string of string
   | Array of string * Clang.cxtype * Clang.cxtype
 
 let print_return_ocaml_of_c context used_arg_names print_expression
     result_type result_type_interface (common_info, type_info) params outputs =
-  let print_output channel src output tgt =
+  let print_output channel src output type_interface tgt =
     match output with
+    | Info (common_info, type_info, params) ->
+        common_info.ocaml_of_c channel ~src params ~tgt
     | Regular ty ->
         let common_info, type_info =
-          find_type_info context empty_type_interface ty in
+          find_type_info context type_interface ty in
         common_info.ocaml_of_c channel ~src [| |] ~tgt
     | Sized_string length ->
         Printf.fprintf channel "%s = caml_alloc_initialized_string(%s, %s);\n"
@@ -641,18 +653,18 @@ tgt
     begin
       match outputs with
       | [] -> Printf.fprintf channel "data = Val_unit;"
-      | [single, output, _] ->
-          print_output channel single output "data"
+      | [single, output, type_interface] ->
+          print_output channel single output type_interface "data"
       | list ->
           Printf.fprintf channel "data = caml_alloc_tuple(%d);\n"
             (List.length list);
-          list |> List.iteri @@ fun i (s, output, _) ->
+          list |> List.iteri @@ fun i (s, output, type_interface) ->
             Printf.fprintf channel "  {
     CAMLlocal1(field);
     %t
     Store_field(data, %d, field);
   }\n"
-              (fun channel -> print_output channel s output "field")
+              (fun channel -> print_output channel s output type_interface "field")
               i
     end;
     outputs |> List.iter @@ fun (s, output, type_interface) ->
@@ -726,7 +738,7 @@ tgt
     %t
     CAMLreturn(data);
   }\n"
-(make_data ((result, Regular result_type, result_type_interface) :: outputs))
+(make_data ((result, Info (common_info, type_info, params), result_type_interface) :: outputs))
     end
 
 let print_return_c_of_ocaml context used_arg_names print_expression
@@ -1468,7 +1480,7 @@ let main cflags llvm_config prefix =
   let clang_options = cflags @ String.split_on_char ' ' llvm_cflags in
   let module_interface =
     empty_module_interface |>
-    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|clang_disposeString|clang_disposeStringSet|clang_VirtualFileOverlay_writeToBuffer|clang_free|constructUSR|clang_executeOnThread|clang_getDiagnosticCategoryName|^clang_getDefinitionSpellingAndExtent$|^clang_disposeOverriddenCursors$|^clang_disposeSourceRangeList$|^clang_disposeTokens$") hidden_function_interface |>
+    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|clang_disposeString|clang_disposeStringSet|clang_VirtualFileOverlay_writeToBuffer|clang_free|constructUSR|clang_executeOnThread|clang_getDiagnosticCategoryName|^clang_getDefinitionSpellingAndExtent$|^clang_disposeOverriddenCursors$|^clang_disposeSourceRangeList$|^clang_disposeTokens$|^clang_getFileUniqueID$") hidden_function_interface |>
     add_function (Pcre.regexp "^clang_") (rename_function rename_clang) |>
     add_function (Pcre.regexp "^clang_createTranslationUnitFromSourceFile$")
       (empty_function_interface |>
@@ -1595,7 +1607,10 @@ let main cflags llvm_config prefix =
         add_argument (Output_on_success (Name "Tokens"))) |>
     add_function (Pcre.regexp "^clang_getDiagnosticFixIt$")
       (empty_function_interface |>
-        add_argument (Update (Name "ReplacementRange"))) in
+        add_argument (Update (Name "ReplacementRange"))) |>
+    add_function (Pcre.regexp "^clang_getFileTime$")
+      (empty_function_interface |>
+        add_result (empty_type_interface |> reinterpret_as Int)) in
   let idx = Clang.create_index 1 1 in
   let tu =
     match
