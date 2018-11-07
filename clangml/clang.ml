@@ -43,6 +43,28 @@ let list_of_type_fields c =
   c |> iter_type_fields (fun cur -> fields_ref := cur :: !fields_ref);
   List.rev !fields_ref
 
+let seq_of_diagnostics tu =
+  let count = get_num_diagnostics tu in
+  let rec next i () =
+    if i < count then
+      Seq.Cons (get_diagnostic tu i, next (succ i))
+    else
+      Seq.Nil in
+  next 0
+
+let is_error diagnostic_severity =
+  match diagnostic_severity with
+  | Error | Fatal -> true
+  | _ -> false
+
+let has_error tu =
+  try
+    seq_of_diagnostics tu |>
+    Seq.iter (fun d -> if is_error (get_diagnostic_severity d) then raise Exit);
+    false
+  with Exit ->
+    true
+
 module Ast = struct
   include Clang__ast
 

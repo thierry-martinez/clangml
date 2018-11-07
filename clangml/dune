@@ -7,4 +7,6 @@
   (cxx_flags --std=c++11 (:include "../config/cflags.sexp"))
   (c_library_flags (:include "../config/ldflags.sexp") (:include "../config/libs.sexp"))
   (cxx_names libclang_extensions)
-  (library_flags -linkall))
+  (library_flags -linkall)
+  (flags -open Stdcompat)
+  (libraries unix stdcompat))
