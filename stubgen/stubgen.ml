@@ -1656,7 +1656,20 @@ let main cflags llvm_config prefix =
     add_function (Pcre.regexp "^clang_loadDiagnostics$")
       (empty_function_interface |>
         add_argument (output (Name "error")) |>
-        add_argument (output_on_error (Name "errorString"))) in
+        add_argument (output_on_error (Name "errorString"))) |>
+    add_function (Pcre.regexp "^clang_getCursorPlatformAvailability$")
+      (empty_function_interface |>
+        add_argument (Type_interface { argument = Name "always_deprecated"; interface = empty_type_interface |> integer_boolean }) |>
+        add_argument (output (Name "always_deprecated")) |>
+        add_argument (output (Name "deprecated_message")) |>
+        add_argument (Type_interface { argument = Name "always_unavailable"; interface = empty_type_interface |> integer_boolean }) |>
+        add_argument (output (Name "always_unavailable")) |>
+        add_argument (output (Name "unavailable_message"))) |>
+    add_function (Pcre.regexp "^clang_Cursor_get(CXX|ObjC)Manglings$")
+      (empty_function_interface |>
+        add_result (empty_type_interface |>
+          reinterpret_as (Array_struct { length = "Count"; contents = "Strings" }) |>
+          make_destructor "clang_disposeStringSet")) in
   let idx = Clang.create_index 1 1 in
   let tu =
     match
