@@ -42,8 +42,6 @@ failwith_fmt(const char* format, ...)
     failwith(buffer);
 }
 
-#define OCAML_OF_CXSTRING(S) caml_copy_string(clang_getCString(S))
-
 #define DECLARE_OPAQUE(C_TYPE, OCAML_TYPE, C_OF_OCAML, OCAML_OF_C)      \
   struct custom_operations OCAML_TYPE##_ops = {                         \
     (char *) #C_TYPE,                                                   \

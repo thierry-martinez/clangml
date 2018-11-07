@@ -558,8 +558,10 @@ tgt); }, Regular
       match type_name with
       | "CXString" ->
           { ocamltype = ocaml_string;
-            c_of_ocaml =  simple_converter "";
-            ocaml_of_c = simple_converter "OCAML_OF_CXSTRING"; }, Regular
+            c_of_ocaml = (fun _ -> assert false);
+            ocaml_of_c = (fun fmt ~src _params ~tgt ->
+  Printf.fprintf fmt "%s = caml_copy_string(clang_getCString(%s));
+clang_disposeString(%s);" tgt src src) }, Regular
       | _ ->
           default_type type_name
 
