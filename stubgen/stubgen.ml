@@ -1519,7 +1519,7 @@ let main cflags llvm_config prefix =
   let clang_options = cflags @ String.split_on_char ' ' llvm_cflags @ ["-I"; List.fold_left Filename.concat llvm_prefix ["lib"; "clang"; llvm_version; "include"]] in
   let module_interface =
     empty_module_interface |>
-    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|clang_disposeString|clang_disposeStringSet|clang_VirtualFileOverlay_writeToBuffer|clang_free|constructUSR|clang_executeOnThread|clang_getDiagnosticCategoryName|^clang_getDefinitionSpellingAndExtent$|^clang_disposeOverriddenCursors$|^clang_disposeSourceRangeList$|^clang_disposeTokens$|^clang_getFileUniqueID$") hidden_function_interface |>
+    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|clang_disposeString|clang_disposeStringSet|clang_VirtualFileOverlay_writeToBuffer|clang_free|constructUSR|clang_executeOnThread|clang_getDiagnosticCategoryName|^clang_getDefinitionSpellingAndExtent$|^clang_disposeOverriddenCursors$|^clang_disposeSourceRangeList$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_disposeTokens$|^clang_getFileUniqueID$") hidden_function_interface |>
     add_function (Pcre.regexp "^clang_") (rename_function rename_clang) |>
     add_function (Pcre.regexp "^clang_createTranslationUnitFromSourceFile$")
       (empty_function_interface |>
