@@ -475,13 +475,9 @@ type cxavailabilitykind =
 external get_cursor_availability :
   cxcursor -> cxavailabilitykind = "clang_getCursorAvailability_wrapper"
 type cxplatformavailability2
-type cxstring2
-type int2
 external get_cursor_platform_availability :
   cxcursor ->
-    int2 ->
-      cxstring2 -> int2 -> cxstring2 -> cxplatformavailability2 -> int -> int
-    = "clang_getCursorPlatformAvailability_bytecode"
+    cxplatformavailability2 -> int -> (int * int * string * int * string) =
     "clang_getCursorPlatformAvailability_wrapper"
 external dispose_cxplatform_availability :
   cxplatformavailability2 -> unit =
@@ -764,9 +760,8 @@ external cursor_get_brief_comment_text :
   cxcursor -> string = "clang_Cursor_getBriefCommentText_wrapper"
 external cursor_get_mangling :
   cxcursor -> string = "clang_Cursor_getMangling_wrapper"
-type cxstringset2
 external cursor_get_cxxmanglings :
-  cxcursor -> cxstringset2 = "clang_Cursor_getCXXManglings_wrapper"
+  cxcursor -> string array = "clang_Cursor_getCXXManglings_wrapper"
 type cxmodule
 external cursor_get_module :
   cxcursor -> cxmodule = "clang_Cursor_getModule_wrapper"
@@ -815,25 +810,6 @@ external get_specialized_cursor_template :
 external get_cursor_reference_name_range :
   cxcursor -> int -> int -> cxsourcerange =
     "clang_getCursorReferenceNameRange_wrapper"
-type cxtokenkind =
-  | Punctuation 
-  | Keyword 
-  | Identifier 
-  | Literal 
-  | Comment 
-type cxtoken
-external get_token_kind :
-  cxtoken -> cxtokenkind = "clang_getTokenKind_wrapper"
-external get_token_spelling :
-  cxtranslationunit -> cxtoken -> string = "clang_getTokenSpelling_wrapper"
-external get_token_location :
-  cxtranslationunit -> cxtoken -> cxsourcelocation =
-    "clang_getTokenLocation_wrapper"
-external get_token_extent :
-  cxtranslationunit -> cxtoken -> cxsourcerange =
-    "clang_getTokenExtent_wrapper"
-external tokenize :
-  cxtranslationunit -> cxsourcerange -> string = "clang_tokenize_wrapper"
 type cxcursor2
 type cxtoken2
 external annotate_tokens :
@@ -960,6 +936,7 @@ external get_remappings_from_file_list :
   string array -> cxremapping = "clang_getRemappingsFromFileList_wrapper"
 external remap_get_num_files :
   cxremapping -> int = "clang_remap_getNumFiles_wrapper"
+type cxstring2
 external remap_get_filenames :
   cxremapping -> int -> cxstring2 -> cxstring2 -> unit =
     "clang_remap_getFilenames_wrapper"
