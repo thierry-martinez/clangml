@@ -49,5 +49,19 @@ pipeline {
                 archiveArtifacts artifacts: 'src/bootstrap.tar.xz', fingerprint: true
             }
         }
+        stage('Commit to bootstrap branch') {
+            steps {
+                script {
+                    def commit = sh (
+                        script: 'git rev-parse HEAD',
+                        returnStdout: true
+                    ).trim()
+                    sh 'git checkout origin/bootstrap'
+                    sh 'tar -xf src/bootstrap.tar.xz'
+                    sh "git commit -a -m 'generated files for commit $commit'"
+                    sh 'git push'
+                }
+            }
+        }
     }
 }
