@@ -511,14 +511,6 @@ type cxavailabilitykind =
   | NotAccessible 
 external get_cursor_availability :
   cxcursor -> cxavailabilitykind = "clang_getCursorAvailability_wrapper"
-type cxplatformavailability2
-external get_cursor_platform_availability :
-  cxcursor ->
-    cxplatformavailability2 -> int -> (int * int * string * int * string) =
-    "clang_getCursorPlatformAvailability_wrapper"
-external dispose_cxplatform_availability :
-  cxplatformavailability2 -> unit =
-    "clang_disposeCXPlatformAvailability_wrapper"
 type cxlanguagekind =
   | Invalid 
   | C 
@@ -961,11 +953,6 @@ external get_specialized_cursor_template :
 external get_cursor_reference_name_range :
   cxcursor -> int -> int -> cxsourcerange =
     "clang_getCursorReferenceNameRange_wrapper"
-type cxcursor2
-type cxtoken2
-external annotate_tokens :
-  cxtranslationunit -> cxtoken2 -> int -> cxcursor2 -> unit =
-    "clang_annotateTokens_wrapper"
 external get_cursor_kind_spelling :
   cxcursorkind -> string = "clang_getCursorKindSpelling_wrapper"
 external enable_stack_traces :
@@ -1030,42 +1017,9 @@ external get_completion_fix_it :
     "clang_getCompletionFixIt_wrapper"
 external default_code_complete_options :
   unit -> int = "clang_defaultCodeCompleteOptions_wrapper"
-external code_complete_at :
-  cxtranslationunit ->
-    string ->
-      int -> int -> cxunsavedfile array -> int -> cxcodecompleteresults2 =
-    "clang_codeCompleteAt_bytecode" "clang_codeCompleteAt_wrapper"
-type cxcompletionresult2
-external sort_code_completion_results :
-  cxcompletionresult2 -> int -> unit =
-    "clang_sortCodeCompletionResults_wrapper"
-external dispose_code_complete_results :
-  cxcodecompleteresults2 -> unit = "clang_disposeCodeCompleteResults_wrapper"
-external code_complete_get_num_diagnostics :
-  cxcodecompleteresults2 -> int =
-    "clang_codeCompleteGetNumDiagnostics_wrapper"
-external code_complete_get_diagnostic :
-  cxcodecompleteresults2 -> int -> cxdiagnostic =
-    "clang_codeCompleteGetDiagnostic_wrapper"
-external code_complete_get_contexts :
-  cxcodecompleteresults2 -> int = "clang_codeCompleteGetContexts_wrapper"
-type unsignedint
-external code_complete_get_container_kind :
-  cxcodecompleteresults2 -> unsignedint -> cxcursorkind =
-    "clang_codeCompleteGetContainerKind_wrapper"
-external code_complete_get_container_usr :
-  cxcodecompleteresults2 -> string =
-    "clang_codeCompleteGetContainerUSR_wrapper"
-external code_complete_get_obj_cselector :
-  cxcodecompleteresults2 -> string =
-    "clang_codeCompleteGetObjCSelector_wrapper"
 external get_clang_version : unit -> string = "clang_getClangVersion_wrapper"
 external toggle_crash_recovery :
   int -> unit = "clang_toggleCrashRecovery_wrapper"
-type cxsourcelocation2
-external get_inclusions :
-  cxtranslationunit -> (cxfile -> cxsourcelocation2 -> int -> unit) -> unit =
-    "clang_getInclusions_wrapper"
 type cxevalresult
 external cursor_evaluate :
   cxcursor -> cxevalresult = "clang_Cursor_Evaluate_wrapper"
@@ -1100,141 +1054,12 @@ external get_remappings_from_file_list :
   string array -> cxremapping = "clang_getRemappingsFromFileList_wrapper"
 external remap_get_num_files :
   cxremapping -> int = "clang_remap_getNumFiles_wrapper"
-type cxstring2
-external remap_get_filenames :
-  cxremapping -> int -> cxstring2 -> cxstring2 -> unit =
-    "clang_remap_getFilenames_wrapper"
 external remap_dispose : cxremapping -> unit = "clang_remap_dispose_wrapper"
-type cxresult =
-  | Success 
-  | Invalid 
-  | VisitBreak 
-type cxcursorandrangevisitor
-external find_references_in_file :
-  cxcursor -> cxfile -> cxcursorandrangevisitor -> cxresult =
-    "clang_findReferencesInFile_wrapper"
-external find_includes_in_file :
-  cxtranslationunit -> cxfile -> cxcursorandrangevisitor -> cxresult =
-    "clang_findIncludesInFile_wrapper"
-type cxidxentitykind =
-  | Unexposed 
-  | Typedef 
-  | Function 
-  | Variable 
-  | Field 
-  | EnumConstant 
-  | ObjCClass 
-  | ObjCProtocol 
-  | ObjCCategory 
-  | ObjCInstanceMethod 
-  | ObjCClassMethod 
-  | ObjCProperty 
-  | ObjCIvar 
-  | Enum 
-  | Struct 
-  | Union 
-  | CXXClass 
-  | CXXNamespace 
-  | CXXNamespaceAlias 
-  | CXXStaticVariable 
-  | CXXStaticMethod 
-  | CXXInstanceMethod 
-  | CXXConstructor 
-  | CXXDestructor 
-  | CXXConversionFunction 
-  | CXXTypeAlias 
-  | CXXInterface 
-external index_is_entity_obj_ccontainer_kind :
-  cxidxentitykind -> bool = "clang_index_isEntityObjCContainerKind_wrapper"
-type constcxidxobjccontainerdeclinfo
-type constcxidxdeclinfo
-external index_get_obj_ccontainer_decl_info :
-  constcxidxdeclinfo -> constcxidxobjccontainerdeclinfo =
-    "clang_index_getObjCContainerDeclInfo_wrapper"
-type constcxidxobjcinterfacedeclinfo
-external index_get_obj_cinterface_decl_info :
-  constcxidxdeclinfo -> constcxidxobjcinterfacedeclinfo =
-    "clang_index_getObjCInterfaceDeclInfo_wrapper"
-type constcxidxobjccategorydeclinfo
-external index_get_obj_ccategory_decl_info :
-  constcxidxdeclinfo -> constcxidxobjccategorydeclinfo =
-    "clang_index_getObjCCategoryDeclInfo_wrapper"
-type constcxidxobjcprotocolreflistinfo
-external index_get_obj_cprotocol_ref_list_info :
-  constcxidxdeclinfo -> constcxidxobjcprotocolreflistinfo =
-    "clang_index_getObjCProtocolRefListInfo_wrapper"
-type constcxidxobjcpropertydeclinfo
-external index_get_obj_cproperty_decl_info :
-  constcxidxdeclinfo -> constcxidxobjcpropertydeclinfo =
-    "clang_index_getObjCPropertyDeclInfo_wrapper"
-type constcxidxiboutletcollectionattrinfo
-type constcxidxattrinfo
-external index_get_iboutlet_collection_attr_info :
-  constcxidxattrinfo -> constcxidxiboutletcollectionattrinfo =
-    "clang_index_getIBOutletCollectionAttrInfo_wrapper"
-type constcxidxcxxclassdeclinfo
-external index_get_cxxclass_decl_info :
-  constcxidxdeclinfo -> constcxidxcxxclassdeclinfo =
-    "clang_index_getCXXClassDeclInfo_wrapper"
-type cxidxclientcontainer
-type constcxidxcontainerinfo
-external index_get_client_container :
-  constcxidxcontainerinfo -> cxidxclientcontainer =
-    "clang_index_getClientContainer_wrapper"
-external index_set_client_container :
-  constcxidxcontainerinfo -> cxidxclientcontainer -> unit =
-    "clang_index_setClientContainer_wrapper"
-type cxidxcliententity
-type constcxidxentityinfo
-external index_get_client_entity :
-  constcxidxentityinfo -> cxidxcliententity =
-    "clang_index_getClientEntity_wrapper"
-external index_set_client_entity :
-  constcxidxentityinfo -> cxidxcliententity -> unit =
-    "clang_index_setClientEntity_wrapper"
 type cxindexaction
 external index_action_create :
   cxindex -> cxindexaction = "clang_IndexAction_create_wrapper"
 external index_action_dispose :
   cxindexaction -> unit = "clang_IndexAction_dispose_wrapper"
-type indexercallbacks2
-type cxclientdata
-external index_source_file :
-  cxindexaction ->
-    cxclientdata ->
-      indexercallbacks2 ->
-        int ->
-          int ->
-            string ->
-              string array ->
-                cxunsavedfile array ->
-                  int -> (cxtranslationunit, cxerrorcode) result =
-    "clang_indexSourceFile_bytecode" "clang_indexSourceFile_wrapper"
-external index_source_file_full_argv :
-  cxindexaction ->
-    cxclientdata ->
-      indexercallbacks2 ->
-        int ->
-          int ->
-            string ->
-              string array ->
-                cxunsavedfile array ->
-                  int -> (cxtranslationunit, cxerrorcode) result =
-    "clang_indexSourceFileFullArgv_bytecode"
-    "clang_indexSourceFileFullArgv_wrapper"
-external index_translation_unit :
-  cxindexaction ->
-    cxclientdata ->
-      indexercallbacks2 -> int -> int -> cxtranslationunit -> int =
-    "clang_indexTranslationUnit_bytecode"
-    "clang_indexTranslationUnit_wrapper"
-type cxidxclientfile
-type cxidxloc
-external index_loc_get_file_location :
-  cxidxloc -> (cxfile * int * int * int * cxidxclientfile) =
-    "clang_indexLoc_getFileLocation_wrapper"
-external index_loc_get_cxsource_location :
-  cxidxloc -> cxsourcelocation = "clang_indexLoc_getCXSourceLocation_wrapper"
 type cxvisitorresult =
   | Break 
   | Continue 
