@@ -825,23 +825,22 @@ let translate_struct_decl' context cur typedef name =
   List.iter apply_field_rule interface.fields;
   let ocaml_fields = !ocaml_fields_ref in
   let common_info = make_common_type_info ocaml_type_name in
-  let make_decl () =
-    let recognize_type field_type =
-      match field_type with
-      | Unknown (name, ty) ->
-          Translated (
-            name,
-          ty,
+  let recognize_type field_type =
+    match field_type with
+    | Unknown (name, ty) ->
+        Translated (name, ty,
           find_type_info ~declare_abstract:false context empty_type_interface ty)
       | ty -> ty in
-    let record_fields =
+  let record_fields =
+    lazy (
       try Some (List.map recognize_type ocaml_fields)
-      with Unknown_type -> None in
+      with Unknown_type -> None) in
+  let make_decl () =
     let type_name =
       if typedef then name
       else Printf.sprintf "struct %s" name in
     let ptype_kind =
-      match record_fields with
+      match Lazy.force record_fields with
       | None ->
           Printf.fprintf context.chan_stubs
             "DECLARE_OPAQUE(%s, %s, %s, %s)\n\n"
@@ -851,7 +850,7 @@ let translate_struct_decl' context cur typedef name =
       | Some fields ->
           let nb_fields = List.length fields in
           Printf.fprintf context.chan_stubs "\
-static value
+static value __attribute__ ((unused))
 %s(%s v)
 {
   CAMLparam0();
@@ -881,7 +880,7 @@ static value
   CAMLreturn(ocaml);
 }
 
-static %s
+static %s __attribute__ ((unused))
 %s(value ocaml)
 {
   CAMLparam1(ocaml);
@@ -1519,7 +1518,7 @@ let main cflags llvm_config prefix =
   let clang_options = cflags @ String.split_on_char ' ' llvm_cflags @ ["-I"; List.fold_left Filename.concat llvm_prefix ["lib"; "clang"; llvm_version; "include"]] in
   let module_interface =
     empty_module_interface |>
-    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|clang_disposeString|clang_disposeStringSet|clang_VirtualFileOverlay_writeToBuffer|clang_free|constructUSR|clang_executeOnThread|clang_getDiagnosticCategoryName|^clang_getDefinitionSpellingAndExtent$|^clang_disposeOverriddenCursors$|^clang_disposeSourceRangeList$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_disposeTokens$|^clang_getFileUniqueID$|^clang_.*WithBlock$") hidden_function_interface |>
+    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|clang_disposeString|clang_disposeStringSet|clang_VirtualFileOverlay_writeToBuffer|clang_free|constructUSR|clang_executeOnThread|clang_getDiagnosticCategoryName|^clang_getDefinitionSpellingAndExtent$|^clang_disposeOverriddenCursors$|^clang_disposeSourceRangeList$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_disposeTokens$|^clang_annotateTokens$|^clang_getFileUniqueID$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_disposeCXPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_disposeCodeCompleteResults$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$") hidden_function_interface |>
     add_function (Pcre.regexp "^clang_") (rename_function rename_clang) |>
     add_function (Pcre.regexp "^clang_createTranslationUnitFromSourceFile$")
       (empty_function_interface |>
