@@ -37,3 +37,10 @@ clean-local : clean-local-dune
 .PHONY : clean-local-dune
 clean-local-dune :
 	dune clean
+
+_build/default/clangml.install : \
+		$(CLANGML_CMXA) $(LIBCLANGML_STUBS_A) clangml.opam
+	dune build @install
+
+install : _build/default/clangml.install
+	dune install
