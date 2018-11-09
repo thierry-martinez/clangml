@@ -1007,14 +1007,6 @@ external get_completion_brief_comment :
   cxcompletionstring -> string = "clang_getCompletionBriefComment_wrapper"
 external get_cursor_completion_string :
   cxcursor -> cxcompletionstring = "clang_getCursorCompletionString_wrapper"
-type cxcodecompleteresults2
-external get_completion_num_fix_its :
-  cxcodecompleteresults2 -> int -> int =
-    "clang_getCompletionNumFixIts_wrapper"
-type cxsourcerange2
-external get_completion_fix_it :
-  cxcodecompleteresults2 -> int -> int -> cxsourcerange2 -> string =
-    "clang_getCompletionFixIt_wrapper"
 external default_code_complete_options :
   unit -> int = "clang_defaultCodeCompleteOptions_wrapper"
 external get_clang_version : unit -> string = "clang_getClangVersion_wrapper"

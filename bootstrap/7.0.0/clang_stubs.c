@@ -5488,43 +5488,6 @@ clang_getCursorCompletionString_wrapper(value cursor_ocaml)
 }
 
 CAMLprim value
-clang_getCompletionNumFixIts_wrapper(value results_ocaml, value completion_index_ocaml)
-{
-  CAMLparam2(results_ocaml, completion_index_ocaml);
-  CXCodeCompleteResults * results;
-  results = (results_ocaml);
-  unsigned int completion_index;
-  completion_index = Int_val(completion_index_ocaml);
-  unsigned int result = clang_getCompletionNumFixIts(results, completion_index);
-  {
-    CAMLlocal1(data);
-    data = Val_int(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_getCompletionFixIt_wrapper(value results_ocaml, value completion_index_ocaml, value fixit_index_ocaml, value replacement_range_ocaml)
-{
-  CAMLparam4(results_ocaml, completion_index_ocaml, fixit_index_ocaml, replacement_range_ocaml);
-  CXCodeCompleteResults * results;
-  results = (results_ocaml);
-  unsigned int completion_index;
-  completion_index = Int_val(completion_index_ocaml);
-  unsigned int fixit_index;
-  fixit_index = Int_val(fixit_index_ocaml);
-  CXSourceRange * replacement_range;
-  replacement_range = (replacement_range_ocaml);
-  CXString result = clang_getCompletionFixIt(results, completion_index, fixit_index, replacement_range);
-  {
-    CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
 clang_defaultCodeCompleteOptions_wrapper()
 {
   CAMLparam0();
