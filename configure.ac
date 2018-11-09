@@ -5,7 +5,7 @@ AM_INIT_AUTOMAKE
 AC_PROG_LN_S
 
 AC_MSG_CHECKING([for bootstrap/ sub-directory])
-AS_IF([test -d bootstrap],
+AS_IF([test -d $srcdir/bootstrap],
   [AC_MSG_RESULT([yes])],
   [AC_MSG_RESULT([no])
    AC_MSG_ERROR([bootstrap/ sub-directory not found. Please run $srcdir/bootstrap.sh first.])])
