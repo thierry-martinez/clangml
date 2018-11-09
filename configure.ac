@@ -139,7 +139,9 @@ AC_SUBST([LLVM_LIBDIR], [[`$LLVM_CONFIG --libdir`]])
 
 AC_SUBST([CFLAGS], [["$LLVM_CFLAGS"]])
 
-AC_SUBST([LDFLAGS], [["$LLVM_LDFLAGS -Wl,-rpath,$LLVM_LIBDIR"]])
+AC_SUBST([STRIPPED_LLVM_LDFLAGS], [[`echo $LLVM_LDFLAGS | sed 's/-Wl,-search_paths_first //' | sed 's/-Wl,-headerpad_max_install_names//'`]])
+
+AC_SUBST([LDFLAGS], [["$STRIPPED_LLVM_LDFLAGS -Wl,-rpath,$LLVM_LIBDIR"]])
 
 AC_SUBST([LIBS], [["-lclang -lclangAST -lclangLex -lclangBasic $LLVM_LIBS -lpthread -lcurses -lstdc++"]])
 
