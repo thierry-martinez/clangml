@@ -4,6 +4,12 @@ AM_INIT_AUTOMAKE
 
 AC_PROG_LN_S
 
+AC_MSG_CHECKING([for bootstrap/ sub-directory])
+AS_IF([test -d bootstrap],
+  [AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no])
+   AC_MSG_ERROR([bootstrap/ sub-directory not found. Please run $srcdir/bootstrap.sh first.])])
+
 AC_DEFUN([AC_OCAMLFIND_PKG],
   [AC_MSG_CHECKING([for ocamlfind package $2])
    AS_IF([$OCAMLFIND query $2 >/dev/null 2>&1],
