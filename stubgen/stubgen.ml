@@ -140,6 +140,7 @@ let output_on_error argument =
 
 type function_interface = {
     hidden : bool;
+    label_unique : bool;
     result : type_interface;
     rename : string -> string;
     arguments : argument_interface list;
@@ -147,17 +148,21 @@ type function_interface = {
 
 let empty_function_interface =
   { hidden = false;
+    label_unique = true;
     result = empty_type_interface;
     rename = (fun x -> x);
     arguments = [] }
 
 let hidden_function_interface = { empty_function_interface with hidden = true }
 
+let dont_label_unique interface = { interface with label_unique = false }
+
 let rename_function rename =
   { empty_function_interface with rename }
 
 let union_function_interfaces a b =
   { hidden = a.hidden || b.hidden;
+    label_unique = a.label_unique && b.label_unique;
     result = union_type_interface a.result b.result;
     rename = (fun name -> a.rename (b.rename name));
     arguments = List.rev_append a.arguments b.arguments }
@@ -1161,13 +1166,13 @@ let find_argument argument index_args =
       with Not_found ->
         failwith ("HERE: " ^ name)
 
-let translate_argument_type context ty =
+let translate_argument_type context type_interface ty =
   match ty with
   | Removed _ | Removed_output _ | Output _ | Fixed_value _ -> assert false
-  | CXType ty | Update ty -> translate_type context empty_type_interface ty
+  | CXType ty | Update ty -> translate_type context type_interface ty
   | Array (_, _, ty) ->
-      let contents = 
-        translate_type context empty_type_interface (Clang.get_pointee_type ty) in
+      let contents =
+        translate_type context type_interface (Clang.get_pointee_type ty) in
       ocaml_array contents
   | Sized_string _ -> ocaml_string
   | Closure { closure_args; closure_result; data_callee } ->
@@ -1191,6 +1196,27 @@ let rec get_argument_type ty =
   | Removed_output ty -> get_argument_type ty
   | CXType ty | Update ty -> ty
   | _ -> failwith "get_argument_type"
+
+let uncamelcase s =
+  let result = Buffer.create 17 in
+  let previous_lowercase = ref false in
+  let add_char c =
+    match c with
+    | 'A' .. 'Z' ->
+        if !previous_lowercase then
+          begin
+            previous_lowercase := false;
+            Buffer.add_char result '_'
+          end;
+        Buffer.add_char result (Char.lowercase_ascii c)
+    | '_' ->
+        previous_lowercase := false;
+        Buffer.add_char result '_'
+    | _ ->
+        previous_lowercase := true;
+        Buffer.add_char result c in
+  String.iter add_char s;
+  Buffer.contents result
 
 let translate_function_decl context cur =
   let name = Clang.get_cursor_spelling cur in
@@ -1318,12 +1344,34 @@ let translate_function_decl context cur =
     if num_args = 0 then
       ptyp_arrow (ptyp_constr (loc (Longident.Lident "unit"))) result_ty
     else
-      let add_arg arg pval_type =
-        match arg with
-        | Removed _ | Removed_output _ | Output _ | Fixed_value _ -> pval_type
-        | _ ->
-            ptyp_arrow (translate_argument_type context arg) pval_type in
-      Array.fold_right add_arg args result_ty in
+      let arg_types = Hashtbl.create 17 in
+      let arg_list =
+        Array.mapi (fun i arg -> (arg, arg_names.(i), arg_interfaces.(i))) args |>
+        Array.to_seq |>
+        Seq.filter_map begin fun (arg, name, interface) ->
+          match arg with
+          | Removed _ | Removed_output _ | Output _ | Fixed_value _ -> None
+          | _ ->
+              let ty = translate_argument_type context interface arg in
+              let unique =
+                match Hashtbl.find_opt arg_types ty with
+                | Some unique ->
+                    unique := false;
+                    unique
+                | None ->
+                    let unique = ref true in
+                    Hashtbl.add arg_types ty unique;
+                    unique in
+              Some (unique, name, ty)
+        end |> List.of_seq in
+      List.fold_right begin fun (unique, name, ty) pval_type ->
+        let label =
+          if not function_interface.label_unique || !unique then
+            None
+          else
+            Some (Asttypes.Labelled (uncamelcase name)) in
+        ptyp_arrow ?label ty pval_type
+      end arg_list result_ty in
   let wrapper_name = name ^ "_wrapper" in
   let ocaml_args = Array.map2 (fun arg arg_name ->
       match arg with
@@ -1414,7 +1462,7 @@ let translate_function_decl context cur =
             (Clang.get_type_spelling contents_ty) wrapper_arg_names.(i)
       | Output _ -> assert false
       | CXType ty | Update ty ->
-          let common_info, type_info = find_type_info context empty_type_interface ty in
+          let common_info, type_info = find_type_info context arg_interfaces.(i) ty in
           Printf.fprintf context.chan_stubs "
   %s %s;
   %t"
@@ -1479,25 +1527,7 @@ let translate_function_decl context cur =
   context.items_accu <- item :: context.items_accu
 
 let rename_clang name =
-  let result = Buffer.create 17 in
-  let previous_lowercase = ref false in
-  let add_char c =
-    match c with
-    | 'A' .. 'Z' ->
-        if !previous_lowercase then
-          begin
-            previous_lowercase := false;
-            Buffer.add_char result '_'
-          end;
-        Buffer.add_char result (Char.lowercase_ascii c)
-    | '_' ->
-        previous_lowercase := false;
-        Buffer.add_char result '_'
-    | _ ->
-        previous_lowercase := true;
-        Buffer.add_char result c in
-  String.iter add_char (String.sub name 6 (String.length name - 6));
-  Buffer.contents result
+  uncamelcase (String.sub name 6 (String.length name - 6))
 
 let run_llvm_config llvm_config arguments =
   let command = String.concat " " (llvm_config :: arguments) in
@@ -1563,7 +1593,8 @@ let main cflags llvm_config prefix =
           data_callee = Index 1 })) |>
     add_function (Pcre.regexp "^clang.*_(is|equal)[A-Z]")
       (empty_function_interface |>
-        add_result (empty_type_interface |> integer_boolean)) |>
+        add_result (empty_type_interface |> integer_boolean) |>
+        dont_label_unique) |>
     add_enum (Pcre.regexp "^CXErrorCode$")
       (empty_enum_interface |>
         add_constant (Pcre.regexp "^CXError_Success$") { success = true }) |>
@@ -1656,6 +1687,13 @@ let main cflags llvm_config prefix =
       (empty_function_interface |>
         add_argument (output (Name "error")) |>
         add_argument (output_on_error (Name "errorString"))) |>
+    add_function (Pcre.regexp "^clang_createIndex$")
+      (empty_function_interface |>
+        add_argument (Type_interface { argument = Name "excludeDeclarationsFromPCH"; interface = empty_type_interface |> integer_boolean }) |>
+        add_argument (Type_interface { argument = Name "displayDiagnostics"; interface = empty_type_interface |> integer_boolean })) |>
+    add_function (Pcre.regexp "^clang_getRange$")
+      (empty_function_interface |>
+        dont_label_unique) |>
     add_function (Pcre.regexp "^clang_getCursorPlatformAvailability$")
       (empty_function_interface |>
         add_argument (Type_interface { argument = Name "always_deprecated"; interface = empty_type_interface |> integer_boolean }) |>
@@ -1669,7 +1707,7 @@ let main cflags llvm_config prefix =
         add_result (empty_type_interface |>
           reinterpret_as (Array_struct { length = "Count"; contents = "Strings" }) |>
           make_destructor "clang_disposeStringSet")) in
-  let idx = Clang.create_index 1 1 in
+  let idx = Clang.create_index true true in
   let tu =
     match
       Clang.parse_translation_unit2 idx
