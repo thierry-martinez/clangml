@@ -9,4 +9,5 @@
   (cxx_names libclang_extensions)
   (library_flags -linkall)
   (flags -open Stdcompat)
-  (libraries unix stdcompat))
+  (libraries unix stdcompat)
+  (inline_tests (backend ocamlcodoc)))

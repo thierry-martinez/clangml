@@ -44,3 +44,11 @@ _build/default/clangml.install : \
 
 install : _build/default/clangml.install
 	dune install
+
+.mli.doc.ml :
+	$(OCAMLCODOC) $<
+
+.PHONY : tests
+
+tests :
+	dune runtest

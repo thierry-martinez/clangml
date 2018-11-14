@@ -79,6 +79,8 @@ AC_CHECK_TOOL([DUNE], [dune], [])
 AS_IF([test "x$DUNE" = "x"],
   [AC_MSG_ERROR([[dune not available]])])
 
+AC_CHECK_TOOL([OCAMLCODOC], [ocamlcodoc], [])
+
 AC_MSG_CHECKING([for llvm-config])
 AC_ARG_WITH([llvm-config],
   AS_HELP_STRING([--with-llvm-config[=PATH]],
