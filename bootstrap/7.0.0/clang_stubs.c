@@ -230,9 +230,9 @@ clang_createIndex_wrapper(value excludeDeclarationsFromPCH_ocaml, value displayD
 {
   CAMLparam2(excludeDeclarationsFromPCH_ocaml, displayDiagnostics_ocaml);
   int excludeDeclarationsFromPCH;
-  excludeDeclarationsFromPCH = Int_val(excludeDeclarationsFromPCH_ocaml);
+  excludeDeclarationsFromPCH = Bool_val(excludeDeclarationsFromPCH_ocaml);
   int displayDiagnostics;
-  displayDiagnostics = Int_val(displayDiagnostics_ocaml);
+  displayDiagnostics = Bool_val(displayDiagnostics_ocaml);
   CXIndex result = clang_createIndex(excludeDeclarationsFromPCH, displayDiagnostics);
   {
     CAMLlocal1(data);
@@ -4342,6 +4342,8 @@ clang_Cursor_getSpellingNameRange_wrapper(value arg_ocaml, value pieceIndex_ocam
   }
 }
 
+DECLARE_OPAQUE(CXPrintingPolicy, cxprintingpolicy, Cxprintingpolicy_val, Val_cxprintingpolicy)
+
 enum CXPrintingPolicyProperty
 Cxprintingpolicyproperty_val(value ocaml)
 {
@@ -4411,8 +4413,6 @@ Val_cxprintingpolicyproperty(enum CXPrintingPolicyProperty v)
   failwith_fmt("invalid value for Val_cxprintingpolicyproperty: %d", v);
   return Val_int(0);
 }
-
-DECLARE_OPAQUE(CXPrintingPolicy, cxprintingpolicy, Cxprintingpolicy_val, Val_cxprintingpolicy)
 
 CAMLprim value
 clang_PrintingPolicy_getProperty_wrapper(value Policy_ocaml, value Property_ocaml)

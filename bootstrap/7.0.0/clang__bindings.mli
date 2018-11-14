@@ -9,7 +9,8 @@ type cxerrorcode =
   | InvalidArguments 
   | ASTReadError 
 external virtual_file_overlay_add_file_mapping :
-  cxvirtualfileoverlay -> string -> string -> (unit, cxerrorcode) result =
+  cxvirtualfileoverlay ->
+    virtual_path:string -> real_path:string -> (unit, cxerrorcode) result =
     "clang_VirtualFileOverlay_addFileMapping_wrapper"
 external virtual_file_overlay_set_case_sensitivity :
   cxvirtualfileoverlay -> int -> (unit, cxerrorcode) result =
@@ -31,12 +32,27 @@ external module_map_descriptor_write_to_buffer :
 external module_map_descriptor_dispose :
   cxmodulemapdescriptor -> unit = "clang_ModuleMapDescriptor_dispose_wrapper"
 type cxindex
-external create_index : int -> int -> cxindex = "clang_createIndex_wrapper"
+external create_index :
+  exclude_declarations_from_pch:bool -> display_diagnostics:bool -> cxindex =
+    "clang_createIndex_wrapper"
 external dispose_index : cxindex -> unit = "clang_disposeIndex_wrapper"
+module Cxglobaloptflags :
+sig
+  type t
+  external (+) : t -> t -> t = "%orint"
+  val (-) : t -> t -> t
+  external (&) : t -> t -> t = "%andint"
+  external ( * ) : t -> t -> t = "%xorint"
+  val none : t
+  val thread_background_priority_for_indexing : t
+  val thread_background_priority_for_editing : t
+  val thread_background_priority_for_all : t
+end
 external cxindex_set_global_options :
-  cxindex -> int -> unit = "clang_CXIndex_setGlobalOptions_wrapper"
+  cxindex -> Cxglobaloptflags.t -> unit =
+    "clang_CXIndex_setGlobalOptions_wrapper"
 external cxindex_get_global_options :
-  cxindex -> int = "clang_CXIndex_getGlobalOptions_wrapper"
+  cxindex -> Cxglobaloptflags.t = "clang_CXIndex_getGlobalOptions_wrapper"
 external cxindex_set_invocation_emission_path_option :
   cxindex -> string -> unit =
     "clang_CXIndex_setInvocationEmissionPathOption_wrapper"
@@ -63,7 +79,7 @@ external equal_locations :
   cxsourcelocation -> cxsourcelocation -> bool =
     "clang_equalLocations_wrapper"
 external get_location :
-  cxtranslationunit -> cxfile -> int -> int -> cxsourcelocation =
+  cxtranslationunit -> cxfile -> line:int -> column:int -> cxsourcelocation =
     "clang_getLocation_wrapper"
 external get_location_for_offset :
   cxtranslationunit -> cxfile -> int -> cxsourcelocation =
@@ -132,10 +148,26 @@ external get_diagnostic_set_from_tu :
     "clang_getDiagnosticSetFromTU_wrapper"
 external dispose_diagnostic :
   cxdiagnostic -> unit = "clang_disposeDiagnostic_wrapper"
+module Cxdiagnosticdisplayoptions :
+sig
+  type t
+  external (+) : t -> t -> t = "%orint"
+  val (-) : t -> t -> t
+  external (&) : t -> t -> t = "%andint"
+  external ( * ) : t -> t -> t = "%xorint"
+  val display_source_location : t
+  val display_column : t
+  val display_source_ranges : t
+  val display_option : t
+  val display_category_id : t
+  val display_category_name : t
+end
 external format_diagnostic :
-  cxdiagnostic -> int -> string = "clang_formatDiagnostic_wrapper"
+  cxdiagnostic -> Cxdiagnosticdisplayoptions.t -> string =
+    "clang_formatDiagnostic_wrapper"
 external default_diagnostic_display_options :
-  unit -> int = "clang_defaultDiagnosticDisplayOptions_wrapper"
+  unit -> Cxdiagnosticdisplayoptions.t =
+    "clang_defaultDiagnosticDisplayOptions_wrapper"
 type cxdiagnosticseverity =
   | Ignored 
   | Note 
@@ -179,42 +211,90 @@ external create_translation_unit :
 external create_translation_unit2 :
   cxindex -> string -> (cxtranslationunit, cxerrorcode) result =
     "clang_createTranslationUnit2_wrapper"
+module Cxtranslationunit_flags :
+sig
+  type t
+  external (+) : t -> t -> t = "%orint"
+  val (-) : t -> t -> t
+  external (&) : t -> t -> t = "%andint"
+  external ( * ) : t -> t -> t = "%xorint"
+  val none : t
+  val detailed_preprocessing_record : t
+  val incomplete : t
+  val precompiled_preamble : t
+  val cache_completion_results : t
+  val for_serialization : t
+  val cxxchained_pch : t
+  val skip_function_bodies : t
+  val include_brief_comments_in_code_completion : t
+  val create_preamble_on_first_parse : t
+  val keep_going : t
+  val single_file_parse : t
+  val limit_skip_function_bodies_to_preamble : t
+end
 external default_editing_translation_unit_options :
-  unit -> int = "clang_defaultEditingTranslationUnitOptions_wrapper"
+  unit -> Cxtranslationunit_flags.t =
+    "clang_defaultEditingTranslationUnitOptions_wrapper"
 external parse_translation_unit :
   cxindex ->
-    string -> string array -> cxunsavedfile array -> int -> cxtranslationunit
+    string ->
+      string array ->
+        cxunsavedfile array -> Cxtranslationunit_flags.t -> cxtranslationunit
     = "clang_parseTranslationUnit_wrapper"
 external parse_translation_unit2 :
   cxindex ->
     string ->
       string array ->
-        cxunsavedfile array -> int -> (cxtranslationunit, cxerrorcode) result
-    = "clang_parseTranslationUnit2_wrapper"
+        cxunsavedfile array ->
+          Cxtranslationunit_flags.t ->
+            (cxtranslationunit, cxerrorcode) result =
+    "clang_parseTranslationUnit2_wrapper"
 external parse_translation_unit2_full_argv :
   cxindex ->
     string ->
       string array ->
-        cxunsavedfile array -> int -> (cxtranslationunit, cxerrorcode) result
-    = "clang_parseTranslationUnit2FullArgv_wrapper"
+        cxunsavedfile array ->
+          Cxtranslationunit_flags.t ->
+            (cxtranslationunit, cxerrorcode) result =
+    "clang_parseTranslationUnit2FullArgv_wrapper"
 external default_save_options :
   cxtranslationunit -> int = "clang_defaultSaveOptions_wrapper"
 type cxsaveerror =
   | Unknown 
   | TranslationErrors 
   | InvalidTU 
+module Cxsavetranslationunit_flags :
+sig
+  type t
+  external (+) : t -> t -> t = "%orint"
+  val (-) : t -> t -> t
+  external (&) : t -> t -> t = "%andint"
+  external ( * ) : t -> t -> t = "%xorint"
+  val none : t
+end
 external save_translation_unit :
-  cxtranslationunit -> string -> int -> (unit, cxsaveerror) result =
+  cxtranslationunit ->
+    string -> Cxsavetranslationunit_flags.t -> (unit, cxsaveerror) result =
     "clang_saveTranslationUnit_wrapper"
 external suspend_translation_unit :
   cxtranslationunit -> int = "clang_suspendTranslationUnit_wrapper"
 external dispose_translation_unit :
   cxtranslationunit -> unit = "clang_disposeTranslationUnit_wrapper"
+module Cxreparse_flags :
+sig
+  type t
+  external (+) : t -> t -> t = "%orint"
+  val (-) : t -> t -> t
+  external (&) : t -> t -> t = "%andint"
+  external ( * ) : t -> t -> t = "%xorint"
+  val none : t
+end
 external default_reparse_options :
-  cxtranslationunit -> int = "clang_defaultReparseOptions_wrapper"
+  cxtranslationunit -> Cxreparse_flags.t =
+    "clang_defaultReparseOptions_wrapper"
 external reparse_translation_unit :
   cxtranslationunit ->
-    cxunsavedfile array -> int -> (unit, cxerrorcode) result =
+    cxunsavedfile array -> Cxreparse_flags.t -> (unit, cxerrorcode) result =
     "clang_reparseTranslationUnit_wrapper"
 type cxturesourceusagekind =
   | AST 
@@ -819,8 +899,9 @@ external get_cursor_usr : cxcursor -> string = "clang_getCursorUSR_wrapper"
 external get_cursor_spelling :
   cxcursor -> string = "clang_getCursorSpelling_wrapper"
 external cursor_get_spelling_name_range :
-  cxcursor -> int -> int -> cxsourcerange =
+  cxcursor -> piece_index:int -> options:int -> cxsourcerange =
     "clang_Cursor_getSpellingNameRange_wrapper"
+type cxprintingpolicy
 type cxprintingpolicyproperty =
   | Indentation 
   | SuppressSpecifiers 
@@ -848,7 +929,6 @@ type cxprintingpolicyproperty =
   | ConstantsAsWritten 
   | SuppressImplicitBase 
   | FullyQualifiedName 
-type cxprintingpolicy
 external printing_policy_get_property :
   cxprintingpolicy -> cxprintingpolicyproperty -> int =
     "clang_PrintingPolicy_getProperty_wrapper"
@@ -951,7 +1031,7 @@ external get_template_cursor_kind :
 external get_specialized_cursor_template :
   cxcursor -> cxcursor = "clang_getSpecializedCursorTemplate_wrapper"
 external get_cursor_reference_name_range :
-  cxcursor -> int -> int -> cxsourcerange =
+  cxcursor -> name_flags:int -> piece_index:int -> cxsourcerange =
     "clang_getCursorReferenceNameRange_wrapper"
 external get_cursor_kind_spelling :
   cxcursorkind -> string = "clang_getCursorKindSpelling_wrapper"

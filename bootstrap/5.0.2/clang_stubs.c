@@ -230,9 +230,9 @@ clang_createIndex_wrapper(value excludeDeclarationsFromPCH_ocaml, value displayD
 {
   CAMLparam2(excludeDeclarationsFromPCH_ocaml, displayDiagnostics_ocaml);
   int excludeDeclarationsFromPCH;
-  excludeDeclarationsFromPCH = Int_val(excludeDeclarationsFromPCH_ocaml);
+  excludeDeclarationsFromPCH = Bool_val(excludeDeclarationsFromPCH_ocaml);
   int displayDiagnostics;
-  displayDiagnostics = Int_val(displayDiagnostics_ocaml);
+  displayDiagnostics = Bool_val(displayDiagnostics_ocaml);
   CXIndex result = clang_createIndex(excludeDeclarationsFromPCH, displayDiagnostics);
   {
     CAMLlocal1(data);
