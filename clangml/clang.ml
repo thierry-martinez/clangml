@@ -375,3 +375,9 @@ module Ast = struct
   let of_cxtranslationunit tu =
     translation_unit_of_cursor (get_translation_unit_cursor tu)
 end
+
+let parse_string ?(index = create_index true true) ?(filename = "<string>.c")
+    ?(command_line_args = [| |]) ?(unsaved_files = [])
+    ?(options = default_editing_translation_unit_options ()) contents =
+  parse_translation_unit2 index filename command_line_args
+    (Array.of_list ({ filename; contents } :: unsaved_files)) options

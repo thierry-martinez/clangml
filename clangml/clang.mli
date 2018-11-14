@@ -23,3 +23,9 @@ module Ast : sig
 
   val of_cxtranslationunit : cxtranslationunit -> translation_unit
 end
+
+val parse_string : ?index:cxindex -> ?filename:string ->
+  ?command_line_args:string array ->
+    ?unsaved_files:cxunsavedfile list ->
+      ?options:Cxtranslationunit_flags.t ->
+        string -> (cxtranslationunit, cxerrorcode) Stdcompat.result
