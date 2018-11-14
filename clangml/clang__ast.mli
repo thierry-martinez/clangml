@@ -9,6 +9,27 @@ type qual_type = {
   }
 
 and type_desc =
+  | ConstantArray of {
+      element : qual_type;
+      size : int;
+    }
+(** Constant-sized array.
+    {[
+open Stdcompat
+
+let example = "char s[42];"
+
+let ast = Clang.parse_string example |>
+  Result.get_ok |> Clang.Ast.of_cxtranslationunit
+
+let () =
+  match ast.desc.items with
+  | [{ desc = Var { name = "s"; qual_type = { desc = ConstantArray {
+      element = { desc = OtherType { kind = Char_S } };
+      size = 42 }}}}] -> ()
+  | _ -> assert false
+    ]}
+*)
   | IncompleteArray of {
       element : qual_type;
     }

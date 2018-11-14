@@ -71,8 +71,12 @@ module Ast = struct
   let rec qual_type_of_cxtype cxtype =
     let desc =
       match get_type_kind cxtype with
+      | ConstantArray ->
+          let element = cxtype |> get_array_element_type |> qual_type_of_cxtype in
+          let size = cxtype |> get_array_size in
+          ConstantArray { element; size }
       | IncompleteArray ->
-          let element = cxtype |> get_element_type |> qual_type_of_cxtype in
+          let element = cxtype |> get_array_element_type |> qual_type_of_cxtype in
           IncompleteArray { element }
       | Pointer ->
           let pointee = cxtype |> get_pointee_type |> qual_type_of_cxtype in
