@@ -17,18 +17,81 @@ let output_subst f channel template =
   Buffer.add_substitute buffer f template;
   Buffer.output_buffer channel buffer
 
+let pconst_integer ?suffix value =
+  Parsetree.Pconst_integer (value, suffix)
+
+let pconst_of_int i =
+  pconst_integer (string_of_int i)
+
 let psig_value value_description =
   { Parsetree.psig_desc = Psig_value value_description;
     psig_loc = value_description.pval_loc; }
+
+let pstr_value ?(rec_flag = Asttypes.Nonrecursive) ?(pstr_loc = Location.none) bindings =
+  { Parsetree.pstr_desc = Pstr_value (rec_flag, bindings);
+    pstr_loc; }
+
+let pstr_primitive value_description =
+  { Parsetree.pstr_desc = Pstr_primitive value_description;
+    pstr_loc = value_description.pval_loc; }
 
 let psig_type ?(rec_flag = Asttypes.Recursive) ?(psig_loc = Location.none)
     type_declarations =
   { Parsetree.psig_desc = Psig_type (rec_flag, type_declarations);
     psig_loc }
 
+let pstr_type ?(rec_flag = Asttypes.Recursive) ?(pstr_loc = Location.none)
+    type_declarations =
+  { Parsetree.pstr_desc = Pstr_type (rec_flag, type_declarations);
+    pstr_loc }
+
+let psig_module ?(psig_loc = Location.none) module_declaration =
+  { Parsetree.psig_desc = Psig_module module_declaration;
+    psig_loc }
+
+let pstr_module ?(pstr_loc = Location.none) module_binding =
+  { Parsetree.pstr_desc = Pstr_module module_binding;
+    pstr_loc }
+
+let pmty_signature ?(pmty_loc = Location.none) ?(pmty_attributes = []) signature =
+  { Parsetree.pmty_desc = Pmty_signature signature;
+    pmty_loc; pmty_attributes }
+
+let pmod_structure ?(pmod_loc = Location.none) ?(pmod_attributes = []) structure =
+  { Parsetree.pmod_desc = Pmod_structure structure;
+    pmod_loc; pmod_attributes }
+
+let module_declaration ?(pmd_attributes = []) ?(pmd_loc = Location.none) pmd_name pmd_type =
+  { Parsetree.pmd_name; pmd_type; pmd_attributes; pmd_loc }
+
+let module_binding ?(pmb_attributes = []) ?(pmb_loc = Location.none) pmb_name pmb_expr =
+  { Parsetree.pmb_name; pmb_expr; pmb_attributes; pmb_loc }
+
+let pexp_constant ?(pexp_loc = Location.none) ?(pexp_attributes = []) constant =
+  { Parsetree.pexp_desc = Pexp_constant constant; pexp_attributes; pexp_loc }
+
+let pexp_construct ?(pexp_loc = Location.none) ?(pexp_attributes = []) ?argument ident =
+  { Parsetree.pexp_desc = Pexp_construct (ident, argument); pexp_attributes; pexp_loc }
+
+let pexp_ident ?(pexp_loc = Location.none) ?(pexp_attributes = []) ident =
+  { Parsetree.pexp_desc = Pexp_ident ident; pexp_attributes; pexp_loc }
+
+let pexp_apply ?(pexp_loc = Location.none) ?(pexp_attributes = []) f args =
+  { Parsetree.pexp_desc = Pexp_apply (f, args); pexp_attributes; pexp_loc }
+
+let pexp_fun ?(pexp_loc = Location.none) ?(pexp_attributes = []) ?(arg_label = Asttypes.Nolabel) ?default pat body =
+  { Parsetree.pexp_desc = Pexp_fun (arg_label, default, pat, body); pexp_attributes; pexp_loc }
+
+let pexp_record ?(pexp_loc = Location.none) ?(pexp_attributes = []) ?source fields =
+  { Parsetree.pexp_desc = Pexp_record (fields, source); pexp_attributes; pexp_loc }
+
 let value_description ?(pval_attributes = []) ?(pval_loc = Location.none)
     ?(pval_prim = []) pval_name pval_type =
   { Parsetree.pval_name; pval_type; pval_prim; pval_attributes; pval_loc }
+
+let value_binding ?(pvb_attributes = []) ?(pvb_loc = Location.none)
+    pvb_pat pvb_expr =
+  { Parsetree.pvb_pat; pvb_expr; pvb_attributes; pvb_loc }
 
 let type_declaration ?(ptype_params = []) ?(ptype_cstrs = [])
     ?(ptype_kind = Parsetree.Ptype_abstract) ?(ptype_private = Asttypes.Public)
@@ -63,6 +126,12 @@ let ptyp_tuple ?(ptyp_attributes = []) ?(ptyp_loc = Location.none) list =
   { Parsetree.ptyp_desc = Ptyp_tuple list;
     ptyp_attributes; ptyp_loc }
 
+let pattern ?(ppat_attributes = []) ?(ppat_loc = Location.none) ppat_desc =
+  { Parsetree.ppat_desc; ppat_attributes; ppat_loc }
+
+let ppat_var ?(ppat_attributes = []) ?(ppat_loc = Location.none) var =
+  { Parsetree.ppat_desc = Ppat_var var; ppat_attributes; ppat_loc }
+
 let make_ocaml_type_name s =
   let buffer = Buffer.create 17 in
   String.iter (fun c ->
@@ -81,6 +150,7 @@ type type_spec =
   | Enum of string
   | Array_struct of { contents : string; length : string }
   | Sized_string of { can_be_null : bool; length : argument }
+  | Set_of of string
 
 type type_interface = {
     reinterpret_as : type_spec option;
@@ -299,6 +369,7 @@ let make_common_type_info ?converter ocaml_type_name =
 
 type enum_info = {
     result : string option;
+    constructors : (string * string * int) list;
   }
 
 type struct_info = unit
@@ -314,11 +385,12 @@ type type_info =
 type translation_context = {
     module_interface : module_interface;
     chan_stubs : out_channel;
-    type_table : (common_type_info * type_info) Lazy.t String_hashtbl.t;
-    enum_table : (common_type_info * enum_info) Lazy.t String_hashtbl.t;
-    struct_table : (common_type_info * struct_info) Lazy.t String_hashtbl.t;
+    type_table : (common_type_info Lazy.t * type_info) String_hashtbl.t;
+    enum_table : (common_type_info Lazy.t * enum_info) String_hashtbl.t;
+    struct_table : (common_type_info Lazy.t * struct_info) String_hashtbl.t;
     used_type_table : unit String_hashtbl.t;
-    mutable items_accu : Parsetree.signature_item list;
+    mutable sig_accu : Parsetree.signature_item list;
+    mutable struct_accu : Parsetree.structure_item list;
   }
 
 let create_translation_context module_interface chan_stubs =
@@ -330,7 +402,8 @@ let create_translation_context module_interface chan_stubs =
     enum_table = String_hashtbl.create 17;
     struct_table = String_hashtbl.create 17;
     used_type_table;
-    items_accu = [];
+    sig_accu = [];
+    struct_accu = [];
   }
 
 let make_name_unique used_names name =
@@ -390,6 +463,37 @@ let string_type_info =
     c_of_ocaml = simple_converter "String_val";
     ocaml_of_c = simple_converter "caml_copy_string"; }, Regular
 
+let defined_set_of = String_hashtbl.create 17
+
+let uncamelcase s =
+  let result = Buffer.create 17 in
+  let previous_lowercase = ref false in
+  let add_char c =
+    match c with
+    | 'A' .. 'Z' ->
+        if !previous_lowercase then
+          begin
+            previous_lowercase := false;
+            Buffer.add_char result '_'
+          end;
+        Buffer.add_char result (Char.lowercase_ascii c)
+    | '_' ->
+        previous_lowercase := false;
+        Buffer.add_char result '_'
+    | _ ->
+        previous_lowercase := true;
+        Buffer.add_char result c in
+  String.iter add_char s;
+  Buffer.contents result
+
+let add_type_declaration context type_declaration =
+  context.sig_accu <- psig_type type_declaration :: context.sig_accu;
+  context.struct_accu <- pstr_type type_declaration :: context.struct_accu
+
+let add_primitive context value_description =
+  context.sig_accu <- psig_value value_description :: context.sig_accu;
+  context.struct_accu <- pstr_primitive value_description :: context.struct_accu
+
 let rec find_type_info ?(declare_abstract = true) ?parameters context type_interface ty =
   let find_enum_info type_name =
     let enum_info =
@@ -397,8 +501,8 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
         String_hashtbl.find context.enum_table type_name
       with Not_found ->
         failwith ("Unknown enum " ^ type_name) in
-    let common_info, enum_info = Lazy.force enum_info in
-    common_info, (Enum enum_info : type_info) in
+    let common_info, enum_info = enum_info in
+    Lazy.force common_info, (Enum enum_info : type_info) in
   let default_type type_name =
     match type_interface.reinterpret_as with
     | Some Int ->
@@ -409,7 +513,8 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
             Printf.fprintf fmt "%s = Val_int((time_t) %s);" tgt src); }, Regular
     | _ ->
     match String_hashtbl.find_opt context.type_table type_name with
-    | Some type_info -> Lazy.force type_info
+    | Some (common_info, type_info) ->
+        Lazy.force common_info, type_info
     | None ->
         if not declare_abstract then
           raise Unknown_type;
@@ -418,15 +523,13 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
           make_name_unique context.used_type_table ocaml_type_name in
         let ocamltype =
           ptyp_constr (loc (Longident.Lident ocaml_type_name)) in
-        let type_info =
+        let common_info, type_info =
           { ocamltype; c_of_ocaml = simple_converter "";
             ocaml_of_c = simple_converter "" },
           Regular in
-        String_hashtbl.add context.type_table type_name (lazy type_info);
-        context.items_accu <-
-          psig_type [type_declaration (loc ocaml_type_name)]
-          :: context.items_accu;
-        type_info in
+        String_hashtbl.add context.type_table type_name (lazy common_info, type_info);
+        add_type_declaration context [type_declaration (loc ocaml_type_name)];
+        common_info, type_info in
   match Clang.get_type_kind ty with
   | Void ->
       { ocamltype = ptyp_constr (loc (Longident.Lident "unit"));
@@ -443,6 +546,45 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
         | Some (Enum "bool") -> bool_info, Bool
         | Some (Enum "not bool") -> not_bool_info, Not_bool
         | Some (Enum enum) -> find_enum_info enum
+        | Some (Set_of enum) ->
+            let ocaml_type_name = String.lowercase_ascii enum in
+            let mod_name = String.capitalize_ascii ocaml_type_name in
+            let type_info =  
+  { ocamltype = ptyp_constr (loc (Longident.Ldot (Longident.Lident mod_name, "t")));
+    c_of_ocaml =
+      simple_converter (name_of_c_of_ocaml "int");
+    ocaml_of_c = simple_converter (name_of_ocaml_of_c "int"); } in
+            let () =
+              if not (String_hashtbl.mem defined_set_of ocaml_type_name) then
+                begin
+                  String_hashtbl.add defined_set_of ocaml_type_name ();
+                  let _, enum_info =
+                    try String_hashtbl.find context.enum_table enum
+                    with Not_found ->
+                    try
+                      match String_hashtbl.find context.type_table enum with
+                      | x, Enum enum_info -> x, enum_info
+                      | _ -> assert false
+                    with Not_found -> failwith ("not found " ^ enum) in
+                  let t = ptyp_constr (loc (Longident.Lident "t")) in
+                  let s = psig_type [type_declaration (loc "t")] ::
+                    psig_value (value_description (loc "+") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%orint"]) ::
+                    psig_value (value_description (loc "-") (ptyp_arrow t (ptyp_arrow t t))) ::
+                    psig_value (value_description (loc "&") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%andint"]) ::
+                    psig_value (value_description (loc "*") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%xorint"]) ::
+                    (enum_info.constructors |> List.map @@ fun (_, ocaml_name, _) ->
+                      psig_value (value_description (loc (uncamelcase ocaml_name)) t)) in
+                  let m = pstr_type [type_declaration (loc "t") ~ptype_manifest:int_info.ocamltype] ::
+                    pstr_primitive (value_description (loc "+") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%orint"]) ::
+                    pstr_value [value_binding (ppat_var (loc "-")) (pexp_fun (ppat_var (loc "x")) (pexp_fun (ppat_var (loc "y")) (pexp_apply (pexp_ident (loc (Longident.Lident "land"))) [Nolabel, pexp_ident (loc (Longident.Lident "x")); Nolabel, pexp_apply (pexp_ident (loc (Longident.Lident "lnot"))) [Nolabel, pexp_ident (loc (Longident.Lident "y"))]])))] ::
+                    pstr_primitive (value_description (loc "&") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%andint"]) ::
+                    pstr_primitive (value_description (loc "*") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%xorint"]) ::
+                    (enum_info.constructors |> List.map @@ fun (_, ocaml_name, value) ->
+                      pstr_value [value_binding (ppat_var (loc (uncamelcase ocaml_name))) (pexp_constant (pconst_of_int value))]) in
+                  context.sig_accu <- psig_module (module_declaration (loc mod_name) (pmty_signature s)) :: context.sig_accu;
+                  context.struct_accu <- pstr_module (module_binding (loc mod_name) (pmod_structure m)) :: context.struct_accu
+                end in
+            type_info, Regular
         | None -> int_info, Regular
         | Some _ -> assert false
       end
@@ -555,8 +697,8 @@ tgt); }, Regular
                 String_hashtbl.find context.struct_table type_name
               with Not_found ->
                 failwith ("Unknown struct " ^ type_name) in
-            let common_info, struct_info = Lazy.force struct_info in
-            common_info, Struct struct_info
+            let common_info, struct_info = struct_info in
+            Lazy.force common_info, Struct struct_info
       end
   | _ ->
       let type_name = Clang.get_type_spelling ty in
@@ -924,7 +1066,7 @@ static %s __attribute__ ((unused))
                   (translate_type_info ty)) in
           Ptype_record fields in
     let type_decl = type_declaration (loc ocaml_type_name) ~ptype_kind in
-    context.items_accu <- psig_type [type_decl] :: context.items_accu in
+    add_type_declaration context [type_decl] in
   let decl_made = ref false in
   let make_decl () =
     if not !decl_made then
@@ -934,10 +1076,10 @@ static %s __attribute__ ((unused))
       end in
   if typedef then
     String_hashtbl.add context.type_table name
-      (lazy (make_decl (); common_info, Struct ()))
+      (lazy (make_decl (); common_info), Struct ())
   else
     String_hashtbl.add context.struct_table name
-      (lazy (make_decl (); common_info, ()));
+      (lazy (make_decl (); common_info), ());
   String_hashtbl.add context.used_type_table ocaml_type_name ();
   let used_arg_names = String_hashtbl.create 17 in
   let print_accessor { field_name; accessor_name; stub_name } =
@@ -962,9 +1104,8 @@ static %s __attribute__ ((unused))
       find_type_info context empty_type_interface field_type in
     let pval_type = ptyp_arrow common_info.ocamltype
       field_type_info.ocamltype in
-    let item =
-      psig_value (value_description (loc accessor_name) pval_type ~pval_prim) in
-    context.items_accu <- item :: context.items_accu in
+    let desc = value_description (loc accessor_name) pval_type ~pval_prim in
+    add_primitive context desc in
   List.iter print_accessor interface.accessors
 
 let translate_struct_decl context cur =
@@ -1021,7 +1162,7 @@ let translate_enum_decl context cur =
               if interface.success then
                 result := Some name
               else
-                constructors_ref := name :: !constructors_ref
+                constructors_ref := (name, value) :: !constructors_ref
             end
       | _ -> ()
     end;
@@ -1029,22 +1170,22 @@ let translate_enum_decl context cur =
   let result = !result in
   let constructors = List.rev !constructors_ref in
   let longuest_common_prefix =
-    match constructors with
+    match List.map fst constructors with
     | [] -> ""
     | hd :: tl -> List.fold_left longuest_common_prefix hd tl in
-  let ocaml_constructor_names =
+  let constructors =
     match String.rindex_opt longuest_common_prefix '_' with
-    | None -> constructors
+    | None -> List.map (fun (name, value) -> (name, name, value)) constructors
     | Some index ->
-        List.map (fun name ->
-          String.sub name (index + 1) (String.length name - index - 1))
+        List.map (fun (name, value) ->
+          name, String.sub name (index + 1) (String.length name - index - 1), value)
           constructors in
   let ocaml_constructors =
-    List.map (fun name ->
+    List.map (fun (_, name, _) ->
       constructor_declaration (loc (String.capitalize_ascii name)))
-      ocaml_constructor_names in
+      constructors in
   let common_info = make_common_type_info ocaml_type_name in
-  let enum_info = { result } in
+  let enum_info = { result; constructors } in
   let make_decl () =
     let type_name =
       if typedef then name
@@ -1052,7 +1193,7 @@ let translate_enum_decl context cur =
     Printf.fprintf context.chan_stubs
       "%s\n%s(value ocaml)\n{\n  switch (Int_val(ocaml)) {\n"
       type_name (name_of_c_of_ocaml ocaml_type_name);
-    constructors |> List.iteri (fun i constructor ->
+    constructors |> List.iteri (fun i (constructor, _, _) ->
       Printf.fprintf context.chan_stubs
         "  case %i: return %s;\n" i constructor);
     Printf.fprintf context.chan_stubs
@@ -1060,11 +1201,11 @@ let translate_enum_decl context cur =
   failwith_fmt(\"invalid value for %s: %%d\", Int_val(ocaml));
   return %s;
 }\n\n"
-      (name_of_c_of_ocaml ocaml_type_name) (List.hd constructors);
+      (name_of_c_of_ocaml ocaml_type_name) (match List.hd constructors with (name, _, _) -> name);
     Printf.fprintf context.chan_stubs
       "value\n%s(%s v)\n{\n  switch (v) {\n"
       (name_of_ocaml_of_c ocaml_type_name) type_name;
-    constructors |> List.iteri (fun i constructor ->
+    constructors |> List.iteri (fun i (constructor, _, _) ->
       Printf.fprintf context.chan_stubs
         "  case %s: return Val_int(%i);\n" constructor i);
     begin
@@ -1084,13 +1225,13 @@ let translate_enum_decl context cur =
     let type_decl =
       type_declaration ~ptype_kind:(Ptype_variant ocaml_constructors)
         (loc ocaml_type_name) in
-    context.items_accu <- psig_type [type_decl] :: context.items_accu in
+    add_type_declaration context [type_decl] in
   if typedef then
     String_hashtbl.add context.type_table name
-      (lazy (make_decl (); common_info, Enum enum_info))
+      (lazy (make_decl (); common_info), Enum enum_info)
   else
     String_hashtbl.add context.enum_table name
-      (lazy (make_decl (); common_info, enum_info));
+      (lazy (make_decl (); common_info), enum_info);
   String_hashtbl.add context.used_type_table ocaml_type_name ()
 
 let translate_typedef_decl context cur =
@@ -1105,9 +1246,9 @@ let translate_typedef_decl context cur =
           | None -> true
           | Some enum_info ->
               String_hashtbl.add context.type_table name
-                (lazy (
-                  let common_info, enum_info = Lazy.force enum_info in
-                  common_info, Enum enum_info));
+                (
+                  let common_info, enum_info = enum_info in
+                  common_info, Enum enum_info);
               false
         end
     | Elaborated, Some (Struct type_name) ->
@@ -1116,9 +1257,9 @@ let translate_typedef_decl context cur =
           | None -> true
           | Some struct_info ->
               String_hashtbl.add context.type_table name
-                (lazy (
-                  let common_info, struct_info = Lazy.force struct_info in
-                  common_info, Struct struct_info));
+                (
+                  let common_info, struct_info = struct_info in
+                  common_info, Struct struct_info);
               false
         end
     | _ ->
@@ -1134,9 +1275,9 @@ let translate_typedef_decl context cur =
           name ocaml_type_name (name_of_c_of_ocaml ocaml_type_name)
           (name_of_ocaml_of_c ocaml_type_name);
         let type_decl = type_declaration (loc ocaml_type_name) in
-        context.items_accu <- psig_type [type_decl] :: context.items_accu in
+        add_type_declaration context [type_decl] in
       String_hashtbl.add context.type_table name
-        (lazy (make_decl (); common_info, Regular));
+        (lazy (make_decl (); common_info), Regular);
       String_hashtbl.add context.used_type_table ocaml_type_name ()
     end
 
@@ -1196,27 +1337,6 @@ let rec get_argument_type ty =
   | Removed_output ty -> get_argument_type ty
   | CXType ty | Update ty -> ty
   | _ -> failwith "get_argument_type"
-
-let uncamelcase s =
-  let result = Buffer.create 17 in
-  let previous_lowercase = ref false in
-  let add_char c =
-    match c with
-    | 'A' .. 'Z' ->
-        if !previous_lowercase then
-          begin
-            previous_lowercase := false;
-            Buffer.add_char result '_'
-          end;
-        Buffer.add_char result (Char.lowercase_ascii c)
-    | '_' ->
-        previous_lowercase := false;
-        Buffer.add_char result '_'
-    | _ ->
-        previous_lowercase := true;
-        Buffer.add_char result c in
-  String.iter add_char s;
-  Buffer.contents result
 
 let translate_function_decl context cur =
   let name = Clang.get_cursor_spelling cur in
@@ -1522,9 +1642,8 @@ let translate_function_decl context cur =
             print_list (List.init nb_args
               (fun i -> Printf.sprintf "argv[%d]" i)));
       [bytecode_name; wrapper_name] in
-  let item =
-    psig_value (value_description pval_name pval_type ~pval_prim) in
-  context.items_accu <- item :: context.items_accu
+  let desc = value_description pval_name pval_type ~pval_prim in
+  add_primitive context desc
 
 let rename_clang name =
   uncamelcase (String.sub name 6 (String.length name - 6))
@@ -1560,6 +1679,33 @@ let main cflags llvm_config prefix =
         add_argument (Array {
           length = Name "num_command_line_args";
           contents = Name "command_line_args" })) |>
+    add_function (Pcre.regexp "^clang_CXIndex_setGlobalOptions$")
+      (empty_function_interface |>
+        add_argument (Type_interface {argument = Name "options"; interface = empty_type_interface |> reinterpret_as (Set_of "CXGlobalOptFlags")})) |>
+    add_function (Pcre.regexp "^clang_CXIndex_getGlobalOptions$")
+      (empty_function_interface |>
+        add_result (empty_type_interface |> reinterpret_as (Set_of "CXGlobalOptFlags"))) |>
+    add_function (Pcre.regexp "^clang_formatDiagnostic")
+      (empty_function_interface |>
+        add_argument (Type_interface {argument = Name "Options"; interface = empty_type_interface |> reinterpret_as (Set_of "CXDiagnosticDisplayOptions")})) |>
+    add_function (Pcre.regexp "^clang_defaultDiagnosticDisplayOptions$")
+      (empty_function_interface |>
+        add_result (empty_type_interface |> reinterpret_as (Set_of "CXDiagnosticDisplayOptions"))) |>
+    add_function (Pcre.regexp "^clang_defaultEditingTranslationUnitOptions$")
+      (empty_function_interface |>
+        add_result (empty_type_interface |> reinterpret_as (Set_of "CXTranslationUnit_Flags"))) |>
+    add_function (Pcre.regexp "^clang_parseTranslationUnit")
+      (empty_function_interface |>
+        add_argument (Type_interface {argument = Name "options"; interface = empty_type_interface |> reinterpret_as (Set_of "CXTranslationUnit_Flags")})) |>
+    add_function (Pcre.regexp "^clang_saveTranslationUnit$")
+      (empty_function_interface |>
+        add_argument (Type_interface {argument = Name "options"; interface = empty_type_interface |> reinterpret_as (Set_of "CXSaveTranslationUnit_Flags")})) |>
+    add_function (Pcre.regexp "^clang_reparseTranslationUnit$")
+      (empty_function_interface |>
+        add_argument (Type_interface {argument = Name "options"; interface = empty_type_interface |> reinterpret_as (Set_of "CXReparse_Flags")})) |>
+    add_function (Pcre.regexp "^clang_defaultReparseOptions$")
+      (empty_function_interface |>
+        add_result (empty_type_interface |> reinterpret_as (Set_of "CXReparse_Flags"))) |>
     add_function (Pcre.regexp "^(clang_(re)?parseTranslationUnit|\
                     clang_createTranslationUnitFromSourceFile$|\
                     clang_codeCompleteAt$|clang_indexSourceFile)")
@@ -1716,7 +1862,7 @@ let main cflags llvm_config prefix =
         [| { filename = "source.c"; contents = "\
 #include <clang-c/Index.h>
 #include \"clangml/libclang_extensions.h\"" } |]
-        0 with
+        Clang.Cxtranslationunit_flags.none with
     | Error _ -> failwith "Error!"
     | Ok tu -> tu in
   if Clang.has_error tu then
@@ -1751,11 +1897,11 @@ let main cflags llvm_config prefix =
     let chan_intf = open_out (prefix ^ "clang__bindings.mli") in
     protect ~finally:(fun () -> close_out chan_intf) (fun () ->
       Format.fprintf (Format.formatter_of_out_channel chan_intf)
-        "%a@." Pprintast.signature (List.rev context.items_accu));
+        "%a@." Pprintast.signature (List.rev context.sig_accu));
     let chan_intf = open_out (prefix ^ "clang__bindings.ml") in
     protect ~finally:(fun () -> close_out chan_intf) (fun () ->
       Format.fprintf (Format.formatter_of_out_channel chan_intf)
-        "%a@." Pprintast.signature (List.rev context.items_accu)))
+        "%a@." Pprintast.structure (List.rev context.struct_accu)))
 
 let option_cflags =
   let doc = "Pass option to the C compiler" in
