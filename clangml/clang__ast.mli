@@ -23,8 +23,8 @@ various types.
     {[
 open Stdcompat
 
-let parse_declaration_list source =
-  (Clang.parse_string source |> Result.get_ok |>
+let parse_declaration_list ?filename source =
+  (Clang.parse_string ?filename source |> Result.get_ok |>
     Clang.Ast.of_cxtranslationunit).desc.items
     ]} *)
 and type_desc =
@@ -61,13 +61,14 @@ let () =
     }
 (** Incomplete array.
     {[
-let example = "char (*s)[];"
+let example = "struct s { int i; char array[]; };"
 
 let () =
   match parse_declaration_list example with
-  | [{ desc = Var { name = "s"; qual_type = { desc = Pointer { pointee = {
-      desc = IncompleteArray {
-        element = { desc = OtherType { kind = Char_S } }}}}}}}] -> ()
+  | [{ desc = Struct { name = "s"; fields = [
+      "i", { desc = OtherType { kind = Int }};
+      "array", { desc = IncompleteArray {
+        element = { desc = OtherType { kind = Char_S }}}}] }}] -> ()
   | _ -> assert false
     ]} *)
   | VariableArray of {
@@ -165,6 +166,7 @@ let () =
     }
 (** Other type.
     {[
+(* TODO: stdbool.h not available
 let example = "#include <stdbool.h>\nbool s;"
 
 let () =
@@ -172,6 +174,7 @@ let () =
   | { desc = Var { name = "s";
       qual_type = { desc = OtherType { kind = Bool }}}} -> ()
   | _ -> assert false
+*)
     ]} *)
 
 
@@ -183,12 +186,10 @@ statement list (by putting it in the context of a function):
 this function is used in the following examples to check the AST of
 various types.
     {[
-open Stdcompat
-
-let parse_statement_list source =
+let parse_statement_list ?filename source =
   match
     Printf.sprintf "int f(void) { %s }" source |>
-    parse_declaration_list
+    parse_declaration_list ?filename
   with
   | [{ desc = Function { stmt = { desc = Compound { items }}}}] -> items
   | _ -> assert false
@@ -217,7 +218,6 @@ let () =
   match parse_statement_list example with
   | [{ desc = Compound { items = [] }}] -> ()
   | _ -> assert false
-    ]}
 
 let example = "{;;}"
 
@@ -247,9 +247,8 @@ let () =
       inc = None;
       body = { desc = Compound { items = [] }}}}] -> ()
   | _ -> assert false
-    ]}
 
-let example = "int i; for (i = 0; i < 4; i++) { i }"
+let example = "int i; for (i = 0; i < 4; i++) { i; }"
 
 let () =
   match parse_statement_list example with
@@ -260,18 +259,19 @@ let () =
         rhs = { desc = IntegerLiteral { s = "0" }}})};
       condition_variable = None;
       cond = Some { desc = Expr (BinaryOperator {
-        lhs = { desc = DeclRef { s = "i" }};
+        lhs = { desc =
+          (* DeclRef is exposed since 7.0.0 *)
+          (UnexposedExpr { s = "i" } | DeclRef { s = "i" })};
         kind = LT;
         rhs = { desc = IntegerLiteral { s = "4" }}})};
       inc = Some { desc = Expr (UnaryOperator {
         kind = PostInc;
         operand = { desc = DeclRef { s = "i" }}})};
       body = { desc = Compound { items = [{ desc =
-        Expr (UnexposedExpr { s = "i" })}]}}}}] -> ()
+        Expr (UnexposedExpr { s = "i" })}] }}}}] -> ()
   | _ -> assert false
-    ]}
 
-let example = "for (int i = 0; i < 4; i++) { i }"
+let example = "for (int i = 0; i < 4; i++) { i; }"
 
 let () =
   match parse_statement_list example with
@@ -282,17 +282,19 @@ let () =
         init = Some { desc = IntegerLiteral { s = "0" }}})};
       condition_variable = None;
       cond = Some { desc = Expr (BinaryOperator {
-        lhs = { desc = DeclRef { s = "i" }};
+        lhs = { desc =
+          (* DeclRef is exposed since 7.0.0 *)
+          (UnexposedExpr { s = "i" } | DeclRef { s = "i" })};
         kind = LT;
         rhs = { desc = IntegerLiteral { s = "4" }}})};
       inc = Some { desc = Expr (UnaryOperator {
         kind = PostInc;
         operand = { desc = DeclRef { s = "i" }}})};
       body = { desc = Compound { items = [{ desc =
-        Expr (UnexposedExpr { s = "i" })}]}}}}] -> ()
+        Expr (UnexposedExpr { s = "i" })}] }}}}] -> ()
   | _ -> assert false
 
-let example = "for (int i = 0; int j = i - 1; i--) { j }"
+let example = "for (int i = 0; int j = i - 1; i--) { j; }"
 
 let () =
   match parse_statement_list ~filename:"<string>.cpp" example with
@@ -305,16 +307,21 @@ let () =
         name = "j";
         qual_type = { desc = OtherType { kind = Int }};
         init = Some { desc = BinaryOperator {
-          lhs = { desc = DeclRef { s = "i" }};
+          lhs = { desc =
+            (* DeclRef is exposed since 7.0.0 *)
+            (UnexposedExpr { s = "i" } | DeclRef { s = "i" })};
           kind = Sub;
-          rhs = { desc = IntegerLiteral { s = "1" }}})}};
-      cond = Some { desc = Expr (UnexposedExpr { s = "j" })};
+          rhs = { desc = IntegerLiteral { s = "1" }}}}}};
+      cond = Some { desc = Expr (
+        (* DeclRef is exposed since 7.0.0 *)
+        (UnexposedExpr { s = "j" } | DeclRef { s = "j" }))};
       inc = Some { desc = Expr (UnaryOperator {
         kind = PostDec;
         operand = { desc = DeclRef { s = "i" }}})};
       body = { desc = Compound { items = [{ desc =
-        Expr (UnexposedExpr { s = "j" })}]}}}}] -> ()
+        Expr (UnexposedExpr { s = "j" } | DeclRef { s = "j" })}] }}}}] -> ()
   | _ -> assert false
+    ]}
 *)
   | If of {
       init : stmt option;
@@ -371,11 +378,39 @@ and expr_desc =
   | IntegerLiteral of {
       s : string;
     }
+(** Integer literal
+    {[
+let example = "0;"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Expr (IntegerLiteral { s = "0" })}] -> ()
+  | _ -> assert false
+    ]} *)
   | UnaryOperator of {
       kind : clang_ext_unaryoperatorkind;
       operand : expr;
     }
+(** Unary operator
+    {[
+let example = "+1;"
 
+let () =
+  match parse_statement_list example with
+  | [{ desc = Expr (UnaryOperator {
+      kind = Plus;
+      operand = { desc = IntegerLiteral { s = "1" }}})}] -> ()
+  | _ -> assert false
+
+let example = "int x; &x;"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Decl _ }; { desc = Expr (UnaryOperator {
+      kind = AddrOf;
+      operand = { desc = DeclRef { s = "x" }}})}] -> ()
+  | _ -> assert false
+    ]} *)
   | BinaryOperator of {
       lhs : expr;
       kind : clang_ext_binaryoperatorkind;
