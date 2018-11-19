@@ -68,23 +68,23 @@ let has_error tu =
 module Ast = struct
   include Clang__ast
 
-  let rec qual_type_of_cxtype cxtype =
+  let rec of_cxtype cxtype =
     let desc =
       match get_type_kind cxtype with
       | ConstantArray ->
-          let element = cxtype |> get_array_element_type |> qual_type_of_cxtype in
+          let element = cxtype |> get_array_element_type |> of_cxtype in
           let size = cxtype |> get_array_size in
           ConstantArray { element; size }
       | IncompleteArray ->
-          let element = cxtype |> get_array_element_type |> qual_type_of_cxtype in
+          let element = cxtype |> get_array_element_type |> of_cxtype in
           IncompleteArray { element }
       | Pointer ->
-          let pointee = cxtype |> get_pointee_type |> qual_type_of_cxtype in
+          let pointee = cxtype |> get_pointee_type |> of_cxtype in
           Pointer { pointee }
       | Elaborated ->
           Elaborated {
             keyword = ext_elaborated_type_get_keyword cxtype;
-            named_type = type_get_named_type cxtype |> qual_type_of_cxtype;
+            named_type = type_get_named_type cxtype |> of_cxtype;
           }
       | Enum ->
           let name = cxtype |> get_type_declaration |> get_cursor_spelling in
@@ -122,18 +122,18 @@ module Ast = struct
       | TypedefDecl ->
           let name = get_cursor_spelling cxcursor in
           let underlying_type = cxcursor |>
-          get_typedef_decl_underlying_type |> qual_type_of_cxtype in
+          get_typedef_decl_underlying_type |> of_cxtype in
           Typedef { name; underlying_type }
       | _ -> OtherDecl
 
   and function_decl_of_cursor cxcursor =
     let result = cxcursor |>
-      get_cursor_type |> get_result_type |> qual_type_of_cxtype in
+      get_cursor_type |> get_result_type |> of_cxtype in
     let name = get_cursor_spelling cxcursor in
     let _, stmt = list_last (list_of_children cxcursor) in
     let args = List.init (cursor_get_num_arguments cxcursor) @@ fun i ->
       let c = cursor_get_argument cxcursor i in
-      get_cursor_spelling c, qual_type_of_cxtype (get_cursor_type c) in
+      get_cursor_spelling c, of_cxtype (get_cursor_type c) in
     let stmt = stmt_of_cursor stmt in
     Function { result; name; args; stmt }
 
@@ -142,7 +142,7 @@ module Ast = struct
 
   and var_decl_desc_of_cursor cxcursor =
     let name = get_cursor_spelling cxcursor in
-    let qual_type = qual_type_of_cxtype (get_cursor_type cxcursor) in
+    let qual_type = of_cxtype (get_cursor_type cxcursor) in
     let init =
       if ext_var_decl_has_init cxcursor then
         begin
@@ -176,7 +176,7 @@ module Ast = struct
         match get_cursor_kind cur with
         | FieldDecl ->
             let name = get_cursor_spelling cur in
-            let qual_type = get_cursor_type cur |> qual_type_of_cxtype in
+            let qual_type = get_cursor_type cur |> of_cxtype in
             name, qual_type
         | _ -> failwith "struct_decl_of_cursor" in
     Struct { name; fields }

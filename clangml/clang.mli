@@ -21,6 +21,8 @@ module Ast : sig
     include Clang__ast
   end
 
+  val of_cxtype : cxtype -> qual_type
+
   val of_cxtranslationunit : cxtranslationunit -> translation_unit
 end
 

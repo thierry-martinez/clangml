@@ -2,68 +2,231 @@
 
 open Clang__bindings
 
+type 'a node = {
+    cxcursor : cxcursor;
+    desc : 'a;
+  }
+
 type qual_type = {
     cxtype : cxtype;
     const : bool;
     desc : type_desc;
   }
 
+(** Type description.
+
+The following example declares the function [parse_declaration_list]
+that returns the AST obtained from the parsing of [source] string as a
+declaration list:
+this function is used in the following examples to check the AST of
+various types.
+    {[
+open Stdcompat
+
+let parse_declaration_list source =
+  (Clang.parse_string source |> Result.get_ok |>
+    Clang.Ast.of_cxtranslationunit).desc.items
+    ]} *)
 and type_desc =
+  | Pointer of {
+      pointee : qual_type;
+    }
+(** Pointer.
+    {[
+let example = "char *s;"
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Var { name = "s"; qual_type = { desc = Pointer {
+      pointee = { desc = OtherType { kind = Char_S } }}}}}] -> ()
+  | _ -> assert false
+    ]} *)
   | ConstantArray of {
       element : qual_type;
       size : int;
     }
 (** Constant-sized array.
     {[
-open Stdcompat
-
 let example = "char s[42];"
 
-let ast = Clang.parse_string example |>
-  Result.get_ok |> Clang.Ast.of_cxtranslationunit
-
 let () =
-  match ast.desc.items with
+  match parse_declaration_list example with
   | [{ desc = Var { name = "s"; qual_type = { desc = ConstantArray {
       element = { desc = OtherType { kind = Char_S } };
       size = 42 }}}}] -> ()
   | _ -> assert false
-    ]}
-*)
+    ]} *)
   | IncompleteArray of {
       element : qual_type;
     }
-  | Pointer of {
-      pointee : qual_type;
+(** Incomplete array.
+    {[
+let example = "char (*s)[];"
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Var { name = "s"; qual_type = { desc = Pointer { pointee = {
+      desc = IncompleteArray {
+        element = { desc = OtherType { kind = Char_S } }}}}}}}] -> ()
+  | _ -> assert false
+    ]} *)
+  | VariableArray of {
+      element : qual_type;
+      size : expr;
     }
   | Elaborated of {
       keyword : clang_ext_elaboratedtypekeyword;
       named_type : qual_type;
     }
+(** Elaborated type.
+    {[
+let example = "enum example { A, B, C }; enum example e;"
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Enum _ };
+     { desc = Var { name = "e"; qual_type = { desc = Elaborated {
+      keyword = Enum;
+      named_type = { desc = Enum { name = "example" } }}}}}] -> ()
+  | _ -> assert false
+    ]} *)
   | Enum of {
       name : string;
     }
+(** Enum type.
+    {[
+let example = "enum { A, B, C } e;"
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Enum _ };
+     { desc = Var { name = "e"; qual_type = { desc = Elaborated {
+      keyword = Enum;
+      named_type = { cxtype; desc = Enum { name = "" } }}}}}] ->
+        let values = cxtype |> Clang.get_type_declaration |>
+          Clang.list_of_children |> List.map @@ fun cur ->
+            Clang.get_cursor_spelling cur,
+            Clang.get_enum_constant_decl_value cur in
+        assert (values = ["A", 0; "B", 1; "C", 2]);
+  | _ -> assert false
+    ]} *)
   | Struct of {
       name : string;
     }
+(** Struct type.
+    {[
+let example = "struct { int i; float f; } s;"
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Struct _ };
+     { desc = Var { name = "s"; qual_type = { desc = Elaborated {
+      keyword = Struct;
+      named_type = { cxtype; desc = Struct { name = "" } }}}}}] ->
+        let fields = cxtype |> Clang.list_of_type_fields |>
+          List.map @@ fun cur ->
+            Clang.get_cursor_spelling cur,
+            Clang.get_cursor_type cur |> Clang.Ast.of_cxtype in
+        begin
+          match fields with
+          | ["i", { desc = OtherType { kind = Int } };
+             "f", { desc = OtherType { kind = Float } }] -> ()
+          | _ -> assert false
+        end
+  | _ -> assert false
+    ]} *)
   | Typedef of {
       name : string;
     }
+(** Typedef type.
+    {[
+let example = "typedef struct { int i; float f; } struct_t; struct_t s;"
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Struct _ }; { desc = Typedef _ };
+     { desc = Var { name = "s";
+       qual_type = { cxtype; desc = Typedef { name = "struct_t" }}}}] ->
+        let fields = cxtype |> Clang.get_type_declaration |>
+          Clang.get_typedef_decl_underlying_type |> Clang.list_of_type_fields |>
+          List.map @@ fun cur ->
+            Clang.get_cursor_spelling cur,
+            Clang.get_cursor_type cur |> Clang.Ast.of_cxtype in
+        begin
+          match fields with
+          | ["i", { desc = OtherType { kind = Int } };
+             "f", { desc = OtherType { kind = Float } }] -> ()
+          | _ -> assert false
+        end
+  | _ -> assert false
+    ]} *)
   | OtherType of {
       kind : cxtypekind;
     }
+(** Other type.
+    {[
+let example = "#include <stdbool.h>\nbool s;"
 
-type 'a node = {
-    cxcursor : cxcursor;
-    desc : 'a;
-  }
+let () =
+  match parse_declaration_list example |> List.rev |> List.hd with
+  | { desc = Var { name = "s";
+      qual_type = { desc = OtherType { kind = Bool }}}} -> ()
+  | _ -> assert false
+    ]} *)
 
-type stmt = stmt_desc node
+
+(** Statement.
+
+The following example declares the function [parse_statement_list]
+that returns the AST obtained from the parsing of [source] string as a
+statement list (by putting it in the context of a function):
+this function is used in the following examples to check the AST of
+various types.
+    {[
+open Stdcompat
+
+let parse_statement_list source =
+  match
+    Printf.sprintf "int f(void) { %s }" source |>
+    parse_declaration_list
+  with
+  | [{ desc = Function { stmt = { desc = Compound { items }}}}] -> items
+  | _ -> assert false
+    ]} *)
+and stmt = stmt_desc node
 and stmt_desc =
   | Null
+(** Null statement
+    {[
+let example = ";"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Null }] -> ()
+  | _ -> assert false
+    ]}
+    *)
   | Compound of {
       items : stmt list;
     }
+(** Compound statement
+    {[
+let example = "{}"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Compound { items = [] }}] -> ()
+  | _ -> assert false
+    ]}
+
+let example = "{;;}"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Compound { items = [{ desc = Null }; { desc = Null }] }}] -> ()
+  | _ -> assert false
+    ]}
+    *)
   | For of {
       init : stmt option;
       condition_variable : var_decl option;
@@ -71,6 +234,88 @@ and stmt_desc =
       inc : stmt option;
       body : stmt;
     }
+(** For statement
+    {[
+let example = "for (;;) {}"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = For {
+      init = None;
+      condition_variable = None;
+      cond = None;
+      inc = None;
+      body = { desc = Compound { items = [] }}}}] -> ()
+  | _ -> assert false
+    ]}
+
+let example = "int i; for (i = 0; i < 4; i++) { i }"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Decl _ }; { desc = For {
+      init = Some { desc = Expr (BinaryOperator {
+        lhs = { desc = DeclRef { s = "i" }};
+        kind = Assign;
+        rhs = { desc = IntegerLiteral { s = "0" }}})};
+      condition_variable = None;
+      cond = Some { desc = Expr (BinaryOperator {
+        lhs = { desc = DeclRef { s = "i" }};
+        kind = LT;
+        rhs = { desc = IntegerLiteral { s = "4" }}})};
+      inc = Some { desc = Expr (UnaryOperator {
+        kind = PostInc;
+        operand = { desc = DeclRef { s = "i" }}})};
+      body = { desc = Compound { items = [{ desc =
+        Expr (UnexposedExpr { s = "i" })}]}}}}] -> ()
+  | _ -> assert false
+    ]}
+
+let example = "for (int i = 0; i < 4; i++) { i }"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = For {
+      init = Some { desc = Decl (Var {
+        name = "i";
+        qual_type = { desc = OtherType { kind = Int }};
+        init = Some { desc = IntegerLiteral { s = "0" }}})};
+      condition_variable = None;
+      cond = Some { desc = Expr (BinaryOperator {
+        lhs = { desc = DeclRef { s = "i" }};
+        kind = LT;
+        rhs = { desc = IntegerLiteral { s = "4" }}})};
+      inc = Some { desc = Expr (UnaryOperator {
+        kind = PostInc;
+        operand = { desc = DeclRef { s = "i" }}})};
+      body = { desc = Compound { items = [{ desc =
+        Expr (UnexposedExpr { s = "i" })}]}}}}] -> ()
+  | _ -> assert false
+
+let example = "for (int i = 0; int j = i - 1; i--) { j }"
+
+let () =
+  match parse_statement_list ~filename:"<string>.cpp" example with
+  | [{ desc = For {
+      init = Some { desc = Decl (Var {
+        name = "i";
+        qual_type = { desc = OtherType { kind = Int }};
+        init = Some { desc = IntegerLiteral { s = "0" }}})};
+      condition_variable = Some { desc = {
+        name = "j";
+        qual_type = { desc = OtherType { kind = Int }};
+        init = Some { desc = BinaryOperator {
+          lhs = { desc = DeclRef { s = "i" }};
+          kind = Sub;
+          rhs = { desc = IntegerLiteral { s = "1" }}})}};
+      cond = Some { desc = Expr (UnexposedExpr { s = "j" })};
+      inc = Some { desc = Expr (UnaryOperator {
+        kind = PostDec;
+        operand = { desc = DeclRef { s = "i" }}})};
+      body = { desc = Compound { items = [{ desc =
+        Expr (UnexposedExpr { s = "j" })}]}}}}] -> ()
+  | _ -> assert false
+*)
   | If of {
       init : stmt option;
       condition_variable : var_decl option;
