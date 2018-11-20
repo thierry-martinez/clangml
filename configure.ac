@@ -81,6 +81,8 @@ AS_IF([test "x$DUNE" = "x"],
 
 AC_CHECK_TOOL([OCAMLCODOC], [ocamlcodoc], [])
 
+AC_CHECK_TOOL([INSTALL_NAME_TOOL], [install_name_tool], [])
+
 AC_MSG_CHECKING([for llvm-config])
 AC_ARG_WITH([llvm-config],
   AS_HELP_STRING([--with-llvm-config[=PATH]],

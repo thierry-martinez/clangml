@@ -43,6 +43,7 @@ _build/default/clangml.install : \
 	dune build @install
 
 install : _build/default/clangml.install
+	- test -z $(INSTALL_NAME_TOOL) || $(INSTALL_NAME_TOOL) -add_rpath $(LLVM_LIBDIR) _build/install/default/lib/stublibs/dllclangml_stubs.so
 	dune install
 
 .mli.doc.ml :
