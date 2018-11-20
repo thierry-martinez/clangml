@@ -365,10 +365,10 @@ let example = "for (int i = 0; i < 4; i++) { i; }"
 let () =
   match parse_statement_list example with
   | [{ desc = For {
-      init = Some { desc = Decl (Var {
+      init = Some { desc = Decl [{ desc = Var {
         name = "i";
         qual_type = { desc = OtherType { kind = Int }};
-        init = Some { desc = IntegerLiteral { s = "0" }}})};
+        init = Some { desc = IntegerLiteral { s = "0" }}}}] };
       condition_variable = None;
       cond = Some { desc = Expr (BinaryOperator {
         lhs = { desc =
@@ -388,10 +388,10 @@ let example = "for (int i = 0; int j = i - 1; i--) { j; }"
 let () =
   match parse_statement_list ~filename:"<string>.cpp" example with
   | [{ desc = For {
-      init = Some { desc = Decl (Var {
+      init = Some { desc = Decl [{ desc = Var {
         name = "i";
         qual_type = { desc = OtherType { kind = Int }};
-        init = Some { desc = IntegerLiteral { s = "0" }}})};
+        init = Some { desc = IntegerLiteral { s = "0" }}}}] };
       condition_variable = Some { desc = {
         name = "j";
         qual_type = { desc = OtherType { kind = Int }};
@@ -455,7 +455,7 @@ let () =
   | Continue
   | Break
   | Asm
-  | Decl of decl_stmt_desc
+  | Decl of decl_stmt list
   | Return of {
       value : expr
     }

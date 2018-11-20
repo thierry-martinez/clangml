@@ -340,10 +340,7 @@ module Ast = struct
       | BreakStmt ->
           Break
       | DeclStmt ->
-          let decl =
-            match list_of_children cxcursor with
-            | [decl] -> decl_desc_of_cursor decl
-            | _ -> failwith "stmt_of_cursor (DeclStmt)" in
+          let decl = list_of_children cxcursor |> List.map decl_of_cursor in
           Decl decl
       | ReturnStmt ->
           let value =
@@ -354,7 +351,7 @@ module Ast = struct
       | _ ->
           match decl_desc_of_cursor cxcursor with
           | OtherDecl -> Expr (expr_desc_of_cursor cxcursor)
-          | d -> Decl d in
+          | desc -> Decl [{ cxcursor; desc }] in
     { cxcursor; desc }
 
   and expr_of_cursor cxcursor =
