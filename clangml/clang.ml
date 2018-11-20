@@ -98,7 +98,8 @@ module Ast = struct
       | _ -> OtherType { kind = get_type_kind cxtype } in
     { cxtype; desc;
       const = is_const_qualified_type cxtype;
-      volatile = is_volatile_qualified_type cxtype; }
+      volatile = is_volatile_qualified_type cxtype;
+      restrict = is_restrict_qualified_type cxtype; }
 
   let label_ref_of_cursor cxcursor =
     let desc = { name = get_cursor_spelling cxcursor } in

@@ -33,7 +33,7 @@ let () =
   match parse_declaration_list example with
   | [{ desc = Var { name = "one"; qual_type = {
       const = true;
-      desc = OtherType { kind = Int } }}}] -> ()
+      desc = OtherType { kind = Int }}}}] -> ()
   | _ -> assert false
 
 let example = "int x = 1;"
@@ -42,7 +42,7 @@ let () =
   match parse_declaration_list example with
   | [{ desc = Var { name = "one"; qual_type = {
       const = false;
-      desc = OtherType { kind = Int } }}}] -> ()
+      desc = OtherType { kind = Int }}}}] -> ()
   | _ -> assert false
 *)
     volatile : bool;
@@ -53,7 +53,7 @@ let () =
   match parse_declaration_list example with
   | [{ desc = Var { name = "x"; qual_type = {
       volatile = true;
-      desc = OtherType { kind = Int } }}}] -> ()
+      desc = OtherType { kind = Int }}}}] -> ()
   | _ -> assert false
 
 let example = "int x = 1;"
@@ -62,6 +62,26 @@ let () =
   match parse_declaration_list example with
   | [{ desc = Var { name = "x"; qual_type = {
       volatile = false;
+      desc = OtherType { kind = Int }}}}] -> ()
+  | _ -> assert false
+*)
+    restrict : bool;
+(** [true] if the type is restrict-qualified.
+let example = "int * restrict x;"
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Var { name = "x"; qual_type = {
+      restrict = true;
+      desc = Pointer { desc = OtherType { kind = Int }}}}}] -> ()
+  | _ -> assert false
+
+let example = "int * x;"
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Var { name = "x"; qual_type = {
+      restrict = false;
       desc = OtherType { kind = Int } }}}] -> ()
   | _ -> assert false
 *)
@@ -80,7 +100,7 @@ let example = "char *s;"
 let () =
   match parse_declaration_list example with
   | [{ desc = Var { name = "s"; qual_type = { desc = Pointer {
-      pointee = { desc = OtherType { kind = Char_S } }}}}}] -> ()
+      pointee = { desc = OtherType { kind = Char_S }}}}}}] -> ()
   | _ -> assert false
     ]} *)
   | ConstantArray of {
