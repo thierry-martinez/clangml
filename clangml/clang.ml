@@ -68,6 +68,18 @@ let has_error tu =
 module Ast = struct
   include Clang__ast
 
+  let label_ref_of_cursor cxcursor =
+    let desc = { name = get_cursor_spelling cxcursor } in
+    { cxcursor; desc }
+
+  let rec list_last l =
+    match l with
+    | [] -> failwith "list_last"
+    | [last] -> [], last
+    | hd :: tl ->
+        let tl, last = list_last tl in
+        hd :: tl, last
+
   let rec of_cxtype cxtype =
     let desc =
       match get_type_kind cxtype with
@@ -95,25 +107,17 @@ module Ast = struct
       | Typedef ->
           let name = cxtype |> get_type_declaration |> get_cursor_spelling in
           Typedef { name }
+      | FunctionProto
+      | FunctionNoProto ->
+          let function_type = cxtype |> function_type_of_cxtype (fun _ -> "") in
+          Function function_type
       | _ -> OtherType { kind = get_type_kind cxtype } in
     { cxtype; desc;
       const = is_const_qualified_type cxtype;
       volatile = is_volatile_qualified_type cxtype;
       restrict = is_restrict_qualified_type cxtype; }
 
-  let label_ref_of_cursor cxcursor =
-    let desc = { name = get_cursor_spelling cxcursor } in
-    { cxcursor; desc }
-
-  let rec list_last l =
-    match l with
-    | [] -> failwith "list_last"
-    | [last] -> [], last
-    | hd :: tl ->
-        let tl, last = list_last tl in
-        hd :: tl, last
-
-  let rec decl_of_cursor cxcursor =
+  and decl_of_cursor cxcursor =
     { cxcursor; desc = decl_desc_of_cursor cxcursor }
 
   and decl_desc_of_cursor cxcursor =
@@ -130,20 +134,34 @@ module Ast = struct
       | _ -> OtherDecl
 
   and function_decl_of_cursor cxcursor =
-    let result = cxcursor |>
-      get_cursor_type |> get_result_type |> of_cxtype in
+    let linkage = cxcursor |> get_cursor_linkage in
+    let function_type = cxcursor |> get_cursor_type |>
+      function_type_of_cxtype @@ fun i ->
+        cursor_get_argument cxcursor i |> get_cursor_spelling in
     let name = get_cursor_spelling cxcursor in
     let _, stmt = list_last (list_of_children cxcursor) in
-    let args = List.init (cursor_get_num_arguments cxcursor) @@ fun i ->
-      let c = cursor_get_argument cxcursor i in
-      get_cursor_spelling c, of_cxtype (get_cursor_type c) in
     let stmt = stmt_of_cursor stmt in
-    Function { result; name; args; stmt }
+    Function { linkage; function_type; name; stmt }
+
+  and function_type_of_cxtype get_argument_name cxtype =
+    let calling_conv = cxtype |> get_function_type_calling_conv in
+    let result = cxtype |> get_result_type |> of_cxtype in
+    let args =
+      if cxtype |> get_type_kind = FunctionProto then
+        let non_variadic =
+          List.init (get_num_arg_types cxtype) @@ fun i ->
+            get_argument_name i, of_cxtype (get_arg_type cxtype i) in
+        let variadic = is_function_type_variadic cxtype in
+        Some { non_variadic; variadic }
+      else
+        None in
+    { calling_conv; result; args }
 
   and var_decl_of_cursor cxcursor =
     { cxcursor; desc = var_decl_desc_of_cursor cxcursor }
 
   and var_decl_desc_of_cursor cxcursor =
+    let linkage = cxcursor |> get_cursor_linkage in
     let name = get_cursor_spelling cxcursor in
     let qual_type = of_cxtype (get_cursor_type cxcursor) in
     let init =
@@ -154,7 +172,7 @@ module Ast = struct
         end
       else
         None in
-    { name; qual_type; init }
+    { linkage; name; qual_type; init }
 
   and enum_decl_of_cursor cxcursor =
     let name = get_cursor_spelling cxcursor in

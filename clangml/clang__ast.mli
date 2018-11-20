@@ -173,6 +173,20 @@ let () =
         assert (values = ["A", 0; "B", 1; "C", 2]);
   | _ -> assert false
     ]} *)
+  | Function of function_type
+(** Function type.
+    {[
+let example = "int (*p)(void);"
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Var { name = "p"; qual_type = { desc =
+      Pointer { pointee = { desc = Function {
+        result = { desc = OtherType { kind = Int } };
+        args = Some { non_variadic = []; variadic = false};
+    }}}}}}] -> ()
+  | _ -> assert false
+    ]} *)
   | Struct of {
       name : string;
     }
@@ -239,6 +253,16 @@ let () =
 *)
     ]} *)
 
+and function_type = {
+  calling_conv : cxcallingconv;
+  result : qual_type;
+  args : args option;
+}
+
+and args = {
+  non_variadic : (string * qual_type) list;
+  variadic : bool;
+}
 
 (** Statement.
 
@@ -509,9 +533,9 @@ and decl_stmt = decl_stmt_desc node
 
 and decl_stmt_desc =
   | Function of {
-      result : qual_type;
+      linkage : cxlinkagekind;
+      function_type : function_type;
       name : string;
-      args : (string * qual_type) list;
       stmt : stmt;
     }
   | Var of var_decl_desc
@@ -545,6 +569,7 @@ and enum_constant_desc = {
 and var_decl = var_decl_desc node
 
 and var_decl_desc = {
+    linkage : cxlinkagekind;
     name : string;
     qual_type : qual_type;
     init : expr option
