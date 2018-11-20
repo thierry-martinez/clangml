@@ -331,17 +331,12 @@ clang_isFileMultipleIncludeGuarded_wrapper(value tu_ocaml, value file_ocaml)
   CXFile file;
   file = Cxfile_val(file_ocaml);
   unsigned int result = clang_isFileMultipleIncludeGuarded(tu, file);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_getFile_wrapper(value tu_ocaml, value file_name_ocaml)
@@ -393,17 +388,12 @@ clang_File_isEqual_wrapper(value file1_ocaml, value file2_ocaml)
   CXFile file2;
   file2 = Cxfile_val(file2_ocaml);
   int result = clang_File_isEqual(file1, file2);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 DECLARE_OPAQUE(CXSourceLocation, cxsourcelocation, Cxsourcelocation_val, Val_cxsourcelocation)
 
@@ -428,17 +418,12 @@ clang_equalLocations_wrapper(value loc1_ocaml, value loc2_ocaml)
   CXSourceLocation loc2;
   loc2 = Cxsourcelocation_val(loc2_ocaml);
   unsigned int result = clang_equalLocations(loc1, loc2);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_getLocation_wrapper(value tu_ocaml, value file_ocaml, value line_ocaml, value column_ocaml)
@@ -485,17 +470,12 @@ clang_Location_isInSystemHeader_wrapper(value location_ocaml)
   CXSourceLocation location;
   location = Cxsourcelocation_val(location_ocaml);
   int result = clang_Location_isInSystemHeader(location);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_Location_isFromMainFile_wrapper(value location_ocaml)
@@ -504,17 +484,12 @@ clang_Location_isFromMainFile_wrapper(value location_ocaml)
   CXSourceLocation location;
   location = Cxsourcelocation_val(location_ocaml);
   int result = clang_Location_isFromMainFile(location);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 DECLARE_OPAQUE(CXSourceRange, cxsourcerange, Cxsourcerange_val, Val_cxsourcerange)
 
@@ -555,17 +530,12 @@ clang_equalRanges_wrapper(value range1_ocaml, value range2_ocaml)
   CXSourceRange range2;
   range2 = Cxsourcerange_val(range2_ocaml);
   unsigned int result = clang_equalRanges(range1, range2);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_Range_isNull_wrapper(value range_ocaml)
@@ -574,17 +544,12 @@ clang_Range_isNull_wrapper(value range_ocaml)
   CXSourceRange range;
   range = Cxsourcerange_val(range_ocaml);
   int result = clang_Range_isNull(range);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_getExpansionLocation_wrapper(value location_ocaml)
@@ -2239,17 +2204,12 @@ clang_equalCursors_wrapper(value arg_ocaml, value arg2_ocaml)
   CXCursor arg2;
   arg2 = Cxcursor_val(arg2_ocaml);
   unsigned int result = clang_equalCursors(arg, arg2);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_Cursor_isNull_wrapper(value cursor_ocaml)
@@ -2258,17 +2218,12 @@ clang_Cursor_isNull_wrapper(value cursor_ocaml)
   CXCursor cursor;
   cursor = Cxcursor_val(cursor_ocaml);
   int result = clang_Cursor_isNull(cursor);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_hashCursor_wrapper(value arg_ocaml)
@@ -2305,17 +2260,12 @@ clang_isDeclaration_wrapper(value arg_ocaml)
   enum CXCursorKind arg;
   arg = Cxcursorkind_val(arg_ocaml);
   unsigned int result = clang_isDeclaration(arg);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_isReference_wrapper(value arg_ocaml)
@@ -2324,17 +2274,12 @@ clang_isReference_wrapper(value arg_ocaml)
   enum CXCursorKind arg;
   arg = Cxcursorkind_val(arg_ocaml);
   unsigned int result = clang_isReference(arg);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_isExpression_wrapper(value arg_ocaml)
@@ -2343,17 +2288,12 @@ clang_isExpression_wrapper(value arg_ocaml)
   enum CXCursorKind arg;
   arg = Cxcursorkind_val(arg_ocaml);
   unsigned int result = clang_isExpression(arg);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_isStatement_wrapper(value arg_ocaml)
@@ -2362,17 +2302,12 @@ clang_isStatement_wrapper(value arg_ocaml)
   enum CXCursorKind arg;
   arg = Cxcursorkind_val(arg_ocaml);
   unsigned int result = clang_isStatement(arg);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_isAttribute_wrapper(value arg_ocaml)
@@ -2381,17 +2316,12 @@ clang_isAttribute_wrapper(value arg_ocaml)
   enum CXCursorKind arg;
   arg = Cxcursorkind_val(arg_ocaml);
   unsigned int result = clang_isAttribute(arg);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_Cursor_hasAttrs_wrapper(value C_ocaml)
@@ -2414,17 +2344,12 @@ clang_isInvalid_wrapper(value arg_ocaml)
   enum CXCursorKind arg;
   arg = Cxcursorkind_val(arg_ocaml);
   unsigned int result = clang_isInvalid(arg);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_isTranslationUnit_wrapper(value arg_ocaml)
@@ -2433,17 +2358,12 @@ clang_isTranslationUnit_wrapper(value arg_ocaml)
   enum CXCursorKind arg;
   arg = Cxcursorkind_val(arg_ocaml);
   unsigned int result = clang_isTranslationUnit(arg);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_isPreprocessing_wrapper(value arg_ocaml)
@@ -2452,17 +2372,12 @@ clang_isPreprocessing_wrapper(value arg_ocaml)
   enum CXCursorKind arg;
   arg = Cxcursorkind_val(arg_ocaml);
   unsigned int result = clang_isPreprocessing(arg);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_isUnexposed_wrapper(value arg_ocaml)
@@ -2471,17 +2386,12 @@ clang_isUnexposed_wrapper(value arg_ocaml)
   enum CXCursorKind arg;
   arg = Cxcursorkind_val(arg_ocaml);
   unsigned int result = clang_isUnexposed(arg);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 enum CXLinkageKind
 Cxlinkagekind_val(value ocaml)
@@ -3336,17 +3246,12 @@ clang_equalTypes_wrapper(value A_ocaml, value B_ocaml)
   CXType B;
   B = Cxtype_val(B_ocaml);
   unsigned int result = clang_equalTypes(A, B);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_getCanonicalType_wrapper(value T_ocaml)
@@ -3369,17 +3274,12 @@ clang_isConstQualifiedType_wrapper(value T_ocaml)
   CXType T;
   T = Cxtype_val(T_ocaml);
   unsigned int result = clang_isConstQualifiedType(T);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_Cursor_isMacroFunctionLike_wrapper(value C_ocaml)
@@ -3388,17 +3288,12 @@ clang_Cursor_isMacroFunctionLike_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_Cursor_isMacroFunctionLike(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_Cursor_isMacroBuiltin_wrapper(value C_ocaml)
@@ -3407,17 +3302,12 @@ clang_Cursor_isMacroBuiltin_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_Cursor_isMacroBuiltin(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_Cursor_isFunctionInlined_wrapper(value C_ocaml)
@@ -3426,17 +3316,12 @@ clang_Cursor_isFunctionInlined_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_Cursor_isFunctionInlined(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_isVolatileQualifiedType_wrapper(value T_ocaml)
@@ -3445,17 +3330,12 @@ clang_isVolatileQualifiedType_wrapper(value T_ocaml)
   CXType T;
   T = Cxtype_val(T_ocaml);
   unsigned int result = clang_isVolatileQualifiedType(T);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_isRestrictQualifiedType_wrapper(value T_ocaml)
@@ -3464,17 +3344,12 @@ clang_isRestrictQualifiedType_wrapper(value T_ocaml)
   CXType T;
   T = Cxtype_val(T_ocaml);
   unsigned int result = clang_isRestrictQualifiedType(T);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_getAddressSpace_wrapper(value T_ocaml)
@@ -3711,17 +3586,12 @@ clang_isFunctionTypeVariadic_wrapper(value T_ocaml)
   CXType T;
   T = Cxtype_val(T_ocaml);
   unsigned int result = clang_isFunctionTypeVariadic(T);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_getCursorResultType_wrapper(value C_ocaml)
@@ -3758,17 +3628,12 @@ clang_isPODType_wrapper(value T_ocaml)
   CXType T;
   T = Cxtype_val(T_ocaml);
   unsigned int result = clang_isPODType(T);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_getElementType_wrapper(value T_ocaml)
@@ -3847,17 +3712,12 @@ clang_Type_isTransparentTagTypedef_wrapper(value T_ocaml)
   CXType T;
   T = Cxtype_val(T_ocaml);
   unsigned int result = clang_Type_isTransparentTagTypedef(T);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_Type_getAlignOf_wrapper(value T_ocaml)
@@ -3938,17 +3798,12 @@ clang_Cursor_isAnonymous_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_Cursor_isAnonymous(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_Type_getNumTemplateArguments_wrapper(value T_ocaml)
@@ -4025,17 +3880,12 @@ clang_Cursor_isBitField_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_Cursor_isBitField(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_isVirtualBase_wrapper(value arg_ocaml)
@@ -4044,17 +3894,12 @@ clang_isVirtualBase_wrapper(value arg_ocaml)
   CXCursor arg;
   arg = Cxcursor_val(arg_ocaml);
   unsigned int result = clang_isVirtualBase(arg);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 enum CX_CXXAccessSpecifier
 Cx_cxxaccessspecifier_val(value ocaml)
@@ -4234,17 +4079,12 @@ clang_visitChildren_wrapper(value parent_ocaml, value visitor_ocaml)
   CXCursor parent;
   parent = Cxcursor_val(parent_ocaml);
   unsigned int result = clang_visitChildren(parent, clang_visitChildren_visitor_callback, &visitor_ocaml);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_getCursorUSR_wrapper(value arg_ocaml)
@@ -4344,17 +4184,12 @@ clang_isCursorDefinition_wrapper(value arg_ocaml)
   CXCursor arg;
   arg = Cxcursor_val(arg_ocaml);
   unsigned int result = clang_isCursorDefinition(arg);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_getCanonicalCursor_wrapper(value arg_ocaml)
@@ -4391,17 +4226,12 @@ clang_Cursor_isDynamicCall_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   int result = clang_Cursor_isDynamicCall(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_Cursor_getReceiverType_wrapper(value C_ocaml)
@@ -4454,17 +4284,12 @@ clang_Cursor_isObjCOptional_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_Cursor_isObjCOptional(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_Cursor_isVariadic_wrapper(value C_ocaml)
@@ -4473,17 +4298,12 @@ clang_Cursor_isVariadic_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_Cursor_isVariadic(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_Cursor_isExternalSymbol_wrapper(value C_ocaml)
@@ -4725,17 +4545,12 @@ clang_Module_isSystem_wrapper(value Module_ocaml)
   CXModule Module;
   Module = Cxmodule_val(Module_ocaml);
   int result = clang_Module_isSystem(Module);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_Module_getNumTopLevelHeaders_wrapper(value arg_ocaml, value Module_ocaml)
@@ -4778,17 +4593,12 @@ clang_CXXConstructor_isConvertingConstructor_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_CXXConstructor_isConvertingConstructor(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_CXXConstructor_isCopyConstructor_wrapper(value C_ocaml)
@@ -4797,17 +4607,12 @@ clang_CXXConstructor_isCopyConstructor_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_CXXConstructor_isCopyConstructor(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_CXXConstructor_isDefaultConstructor_wrapper(value C_ocaml)
@@ -4816,17 +4621,12 @@ clang_CXXConstructor_isDefaultConstructor_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_CXXConstructor_isDefaultConstructor(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_CXXConstructor_isMoveConstructor_wrapper(value C_ocaml)
@@ -4835,17 +4635,12 @@ clang_CXXConstructor_isMoveConstructor_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_CXXConstructor_isMoveConstructor(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_CXXField_isMutable_wrapper(value C_ocaml)
@@ -4854,17 +4649,12 @@ clang_CXXField_isMutable_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_CXXField_isMutable(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_CXXMethod_isDefaulted_wrapper(value C_ocaml)
@@ -4873,17 +4663,12 @@ clang_CXXMethod_isDefaulted_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_CXXMethod_isDefaulted(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_CXXMethod_isPureVirtual_wrapper(value C_ocaml)
@@ -4892,17 +4677,12 @@ clang_CXXMethod_isPureVirtual_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_CXXMethod_isPureVirtual(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_CXXMethod_isStatic_wrapper(value C_ocaml)
@@ -4911,17 +4691,12 @@ clang_CXXMethod_isStatic_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_CXXMethod_isStatic(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_CXXMethod_isVirtual_wrapper(value C_ocaml)
@@ -4930,17 +4705,12 @@ clang_CXXMethod_isVirtual_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_CXXMethod_isVirtual(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_CXXRecord_isAbstract_wrapper(value C_ocaml)
@@ -4949,17 +4719,12 @@ clang_CXXRecord_isAbstract_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_CXXRecord_isAbstract(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_EnumDecl_isScoped_wrapper(value C_ocaml)
@@ -4968,17 +4733,12 @@ clang_EnumDecl_isScoped_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_EnumDecl_isScoped(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_CXXMethod_isConst_wrapper(value C_ocaml)
@@ -4987,17 +4747,12 @@ clang_CXXMethod_isConst_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(C_ocaml);
   unsigned int result = clang_CXXMethod_isConst(C);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_getTemplateCursorKind_wrapper(value C_ocaml)
@@ -5428,17 +5183,12 @@ clang_EvalResult_isUnsignedInt_wrapper(value E_ocaml)
   CXEvalResult E;
   E = Cxevalresult_val(E_ocaml);
   unsigned int result = clang_EvalResult_isUnsignedInt(E);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_EvalResult_getAsUnsigned_wrapper(value E_ocaml)
@@ -5619,17 +5369,12 @@ clang_Type_visitFields_wrapper(value T_ocaml, value visitor_ocaml)
   CXType T;
   T = Cxtype_val(T_ocaml);
   unsigned int result = clang_Type_visitFields(T, clang_Type_visitFields_visitor_callback, &visitor_ocaml);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
 CAMLprim value
 clang_ext_IntegerLiteral_getValueAsString_wrapper(value c_ocaml, value Radix_ocaml, value isSigned_ocaml)
@@ -5962,15 +5707,10 @@ clang_ext_VarDecl_hasInit_wrapper(value c_ocaml)
   CXCursor c;
   c = Cxcursor_val(c_ocaml);
   _Bool result = clang_ext_VarDecl_hasInit(c);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = Val_unit;
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
   }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
+}
 
