@@ -367,6 +367,13 @@ module Ast = struct
               f, args
           | _ -> failwith "expr_of_cursor (CallExpr)" in
         Call { f; args }
+    | CStyleCastExpr ->
+        let qual_type = get_cursor_type cxcursor |> of_cxtype in
+        let operand =
+          match list_of_children cxcursor with
+          | [operand] -> expr_of_cursor operand
+          | _ -> failwith "expr_of_cursor (CStyleCastExpr)" in
+        CStyleCast { qual_type; operand }
     | FirstExpr ->
         UnexposedExpr { s = get_cursor_spelling cxcursor }
     | _ -> OtherExpr

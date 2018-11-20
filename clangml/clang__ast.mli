@@ -423,6 +423,21 @@ let () =
       f : expr;
       args : expr list;
     }
+  | CStyleCast of {
+      qual_type : qual_type;
+      operand : expr;
+    }
+(** C-style cast
+    {[
+let example = {| (void * ) "Hello"; |}
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Expr (CStyleCast {
+      qual_type = { desc = Pointer _ };
+      operand = { desc = _ }})}] -> ()
+  | _ -> assert false
+    ]} *)
   | UnexposedExpr of {
       s : string;
     }
