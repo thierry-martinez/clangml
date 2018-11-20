@@ -869,7 +869,7 @@ tgt
       Printf.fprintf context.chan_stubs "\n  %s %s = %t;"
         (Clang.get_type_spelling result_type) result print_expression;
       match type_info with
-      | Bool | Not_bool ->
+      | Bool | Not_bool when outputs <> [] ->
           let prefix =
             if type_info = Bool then ""
             else "!" in

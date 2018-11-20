@@ -7,26 +7,68 @@ type 'a node = {
     desc : 'a;
   }
 
-type qual_type = {
-    cxtype : cxtype;
-    const : bool;
-    desc : type_desc;
-  }
-
-(** Type description.
-
+(**
 The following example declares the function [parse_declaration_list]
 that returns the AST obtained from the parsing of [source] string as a
 declaration list:
 this function is used in the following examples to check the AST of
-various types.
+various programs.
     {[
 open Stdcompat
 
 let parse_declaration_list ?filename source =
   (Clang.parse_string ?filename source |> Result.get_ok |>
     Clang.Ast.of_cxtranslationunit).desc.items
-    ]} *)
+    ]}
+*)
+
+(** Qualified type. *)
+type qual_type = {
+    cxtype : cxtype;
+    const : bool;
+(** [true] if the type is const-qualified.
+let example = "const int one = 1;"
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Var { name = "one"; qual_type = {
+      const = true;
+      desc = OtherType { kind = Int } }}}] -> ()
+  | _ -> assert false
+
+let example = "int x = 1;"
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Var { name = "one"; qual_type = {
+      const = false;
+      desc = OtherType { kind = Int } }}}] -> ()
+  | _ -> assert false
+*)
+    volatile : bool;
+(** [true] if the type is volatile-qualified.
+let example = "volatile int x = 1;"
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Var { name = "x"; qual_type = {
+      volatile = true;
+      desc = OtherType { kind = Int } }}}] -> ()
+  | _ -> assert false
+
+let example = "int x = 1;"
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Var { name = "x"; qual_type = {
+      volatile = false;
+      desc = OtherType { kind = Int } }}}] -> ()
+  | _ -> assert false
+*)
+    desc : type_desc;
+  }
+
+(** Type description. *)
 and type_desc =
   | Pointer of {
       pointee : qual_type;
