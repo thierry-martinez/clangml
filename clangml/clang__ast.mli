@@ -277,7 +277,7 @@ let parse_statement_list ?filename source =
     Printf.sprintf "int f(void) { %s }" source |>
     parse_declaration_list ?filename
   with
-  | [{ desc = Function { stmt = { desc = Compound { items }}}}] -> items
+  | [{ desc = Function { stmt = Some { desc = Compound { items }}}}] -> items
   | _ -> assert false
     ]} *)
 and stmt = stmt_desc node
@@ -536,8 +536,40 @@ and decl_stmt_desc =
       linkage : cxlinkagekind;
       function_type : function_type;
       name : string;
-      stmt : stmt;
+      stmt : stmt option;
     }
+(** Function definition or forward declaration.
+    {[
+let example = {| int f(void) {} |}
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Function {
+      linkage = External;
+      function_type = {
+        calling_conv = C;
+        result = { desc = OtherType { kind = Int }};
+        args = Some { non_variadic = []; variadic = false }};
+      name = "f";
+      stmt = Some { desc = Compound { items = [] }}}}] -> ()
+  | _ -> assert false
+
+let example = {| static int f(int x); |}
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Function {
+      linkage = Internal;
+      function_type = {
+        calling_conv = C;
+        result = { desc = OtherType { kind = Int }};
+        args = Some {
+          non_variadic = [("x", { desc = OtherType { kind = Int }})];
+          variadic = false }};
+      name = "f";
+      stmt = None }}] -> ()
+  | _ -> assert false
+    ]} *)
   | Var of var_decl_desc
   | Enum of {
       name : string;

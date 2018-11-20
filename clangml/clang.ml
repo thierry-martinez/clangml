@@ -139,8 +139,10 @@ module Ast = struct
       function_type_of_cxtype @@ fun i ->
         cursor_get_argument cxcursor i |> get_cursor_spelling in
     let name = get_cursor_spelling cxcursor in
-    let _, stmt = list_last (list_of_children cxcursor) in
-    let stmt = stmt_of_cursor stmt in
+    let stmt =
+      List.nth_opt (list_of_children cxcursor)
+        (cursor_get_num_arguments cxcursor) |>
+      Option.map stmt_of_cursor in
     Function { linkage; function_type; name; stmt }
 
   and function_type_of_cxtype get_argument_name cxtype =
