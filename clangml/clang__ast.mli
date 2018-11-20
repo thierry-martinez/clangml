@@ -185,6 +185,9 @@ let () =
         result = { desc = OtherType { kind = Int } };
         args = Some { non_variadic = []; variadic = false};
     }}}}}}] -> ()
+  | [{ desc = Var { name = "p"; qual_type = { desc =
+      Pointer { pointee = { desc = OtherType { kind = Unexposed }}}}}}] ->
+      prerr_endline "warning: unexposed function type (< 7.0.0?)"
   | _ -> assert false
     ]} *)
   | Struct of {
