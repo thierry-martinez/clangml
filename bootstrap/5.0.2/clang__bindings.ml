@@ -15,8 +15,6 @@ external virtual_file_overlay_add_file_mapping :
 external virtual_file_overlay_set_case_sensitivity :
   cxvirtualfileoverlay -> int -> (unit, cxerrorcode) result =
     "clang_VirtualFileOverlay_setCaseSensitivity_wrapper"
-external virtual_file_overlay_dispose :
-  cxvirtualfileoverlay -> unit = "clang_VirtualFileOverlay_dispose_wrapper"
 type cxmodulemapdescriptor
 external module_map_descriptor_create :
   int -> cxmodulemapdescriptor = "clang_ModuleMapDescriptor_create_wrapper"
@@ -29,13 +27,10 @@ external module_map_descriptor_set_umbrella_header :
 external module_map_descriptor_write_to_buffer :
   cxmodulemapdescriptor -> int -> (string, cxerrorcode) result =
     "clang_ModuleMapDescriptor_writeToBuffer_wrapper"
-external module_map_descriptor_dispose :
-  cxmodulemapdescriptor -> unit = "clang_ModuleMapDescriptor_dispose_wrapper"
 type cxindex
 external create_index :
   exclude_declarations_from_pch:bool -> display_diagnostics:bool -> cxindex =
     "clang_createIndex_wrapper"
-external dispose_index : cxindex -> unit = "clang_disposeIndex_wrapper"
 module Cxglobaloptflags =
   struct
     type t = int
@@ -127,8 +122,6 @@ type cxloaddiag_error =
 external load_diagnostics :
   string -> (cxdiagnosticset, (cxloaddiag_error * string)) result =
     "clang_loadDiagnostics_wrapper"
-external dispose_diagnostic_set :
-  cxdiagnosticset -> unit = "clang_disposeDiagnosticSet_wrapper"
 external get_child_diagnostics :
   cxdiagnostic -> cxdiagnosticset = "clang_getChildDiagnostics_wrapper"
 external get_num_diagnostics :
@@ -138,8 +131,6 @@ external get_diagnostic :
 external get_diagnostic_set_from_tu :
   cxtranslationunit -> cxdiagnosticset =
     "clang_getDiagnosticSetFromTU_wrapper"
-external dispose_diagnostic :
-  cxdiagnostic -> unit = "clang_disposeDiagnostic_wrapper"
 module Cxdiagnosticdisplayoptions =
   struct
     type t = int
@@ -269,8 +260,6 @@ external save_translation_unit :
     "clang_saveTranslationUnit_wrapper"
 external suspend_translation_unit :
   cxtranslationunit -> int = "clang_suspendTranslationUnit_wrapper"
-external dispose_translation_unit :
-  cxtranslationunit -> unit = "clang_disposeTranslationUnit_wrapper"
 module Cxreparse_flags =
   struct
     type t = int
@@ -308,14 +297,10 @@ type cxturesourceusage
 external get_cxturesource_usage :
   cxtranslationunit -> cxturesourceusage =
     "clang_getCXTUResourceUsage_wrapper"
-external dispose_cxturesource_usage :
-  cxturesourceusage -> unit = "clang_disposeCXTUResourceUsage_wrapper"
 type cxtargetinfo
 external get_translation_unit_target_info :
   cxtranslationunit -> cxtargetinfo =
     "clang_getTranslationUnitTargetInfo_wrapper"
-external target_info_dispose :
-  cxtargetinfo -> unit = "clang_TargetInfo_dispose_wrapper"
 external target_info_get_triple :
   cxtargetinfo -> string = "clang_TargetInfo_getTriple_wrapper"
 external target_info_get_pointer_width :
@@ -591,8 +576,6 @@ external cursor_get_translation_unit :
 type cxcursorset
 external create_cxcursor_set :
   unit -> cxcursorset = "clang_createCXCursorSet_wrapper"
-external dispose_cxcursor_set :
-  cxcursorset -> unit = "clang_disposeCXCursorSet_wrapper"
 external cxcursor_set_contains :
   cxcursorset -> cxcursor -> int = "clang_CXCursorSet_contains_wrapper"
 external cxcursor_set_insert :
@@ -1047,8 +1030,6 @@ external eval_result_get_as_double :
   cxevalresult -> float = "clang_EvalResult_getAsDouble_wrapper"
 external eval_result_get_as_str :
   cxevalresult -> string = "clang_EvalResult_getAsStr_wrapper"
-external eval_result_dispose :
-  cxevalresult -> unit = "clang_EvalResult_dispose_wrapper"
 type cxremapping
 external get_remappings :
   string -> cxremapping = "clang_getRemappings_wrapper"
@@ -1056,21 +1037,46 @@ external get_remappings_from_file_list :
   string array -> cxremapping = "clang_getRemappingsFromFileList_wrapper"
 external remap_get_num_files :
   cxremapping -> int = "clang_remap_getNumFiles_wrapper"
-external remap_dispose : cxremapping -> unit = "clang_remap_dispose_wrapper"
 type cxindexaction
 external index_action_create :
   cxindex -> cxindexaction = "clang_IndexAction_create_wrapper"
-external index_action_dispose :
-  cxindexaction -> unit = "clang_IndexAction_dispose_wrapper"
 type cxvisitorresult =
   | Break 
   | Continue 
 external type_visit_fields :
   cxtype -> (cxcursor -> cxvisitorresult) -> bool =
     "clang_Type_visitFields_wrapper"
-external ext_integer_literal_get_value_as_string :
-  cxcursor -> int -> bool -> string =
-    "clang_ext_IntegerLiteral_getValueAsString_wrapper"
+type cxint
+external ext_integer_literal_get_value :
+  cxcursor -> cxint = "clang_ext_IntegerLiteral_getValue_wrapper"
+external ext_int_is_valid : cxint -> bool = "clang_ext_Int_isValid_wrapper"
+external ext_int_to_string :
+  cxint -> int -> bool -> string = "clang_ext_Int_toString_wrapper"
+external ext_int_round_to_double :
+  cxint -> bool -> float = "clang_ext_Int_roundToDouble_wrapper"
+external ext_int_bits_to_float :
+  cxint -> float = "clang_ext_Int_bitsToFloat_wrapper"
+external ext_int_get_bit_width :
+  cxint -> int = "clang_ext_Int_getBitWidth_wrapper"
+external ext_int_get_active_bits :
+  cxint -> int = "clang_ext_Int_getActiveBits_wrapper"
+external ext_int_get_min_signed_bits :
+  cxint -> int = "clang_ext_Int_getMinSignedBits_wrapper"
+external ext_int_get_bool_value :
+  cxint -> bool = "clang_ext_Int_getBoolValue_wrapper"
+external ext_int_get_sext_value :
+  cxint -> Int64.t = "clang_ext_Int_getSExtValue_wrapper"
+type cxfloat
+external ext_floating_literal_get_value :
+  cxcursor -> cxfloat = "clang_ext_FloatingLiteral_getValue_wrapper"
+external ext_float_is_valid :
+  cxfloat -> bool = "clang_ext_Float_isValid_wrapper"
+external ext_float_to_string :
+  cxfloat -> string = "clang_ext_Float_toString_wrapper"
+external ext_float_convert_to_double :
+  cxfloat -> float = "clang_ext_Float_convertToDouble_wrapper"
+external ext_string_literal_get_string :
+  cxcursor -> string = "clang_ext_StringLiteral_GetString_wrapper"
 type clang_ext_unaryoperatorkind =
   | PostInc 
   | PostDec 
@@ -1163,8 +1169,7 @@ external ext_stmt_get_class_kind :
   cxcursor -> int = "clang_ext_Stmt_GetClassKind_wrapper"
 type clang_ext_cursorkind =
   | ImplicitCastExpr 
+  | BinaryConditionalOperator 
   | Unknown 
 external ext_get_cursor_kind :
   cxcursor -> clang_ext_cursorkind = "clang_ext_GetCursorKind_wrapper"
-external ext_string_literal_get_string :
-  cxcursor -> string = "clang_ext_StringLiteral_GetString_wrapper"
