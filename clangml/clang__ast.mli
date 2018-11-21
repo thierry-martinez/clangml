@@ -527,6 +527,39 @@ let () =
       operand = { desc = _ }})}] -> ()
   | _ -> assert false
     ]} *)
+  | Member of {
+      base : expr;
+      arrow : bool;
+      field : string node;
+    }
+(** Member dot or arrow
+    {[
+let example = {| struct s { int i } s; s.i = 0; |}
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Decl _ }; { desc = Expr (BinaryOperator {
+      lhs = { desc = Member {
+        base = { desc = DeclRef { s = "s" }};
+        arrow = false;
+        field = { desc = "i" }}};
+      kind = Assign;
+      rhs = { desc = IntegerLiteral { s = "0" }}})}] -> ()
+  | _ -> assert false
+
+let example = {| struct s { int i } *p; p->i = 0; |}
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Decl _ }; { desc = Expr (BinaryOperator {
+      lhs = { desc = Member {
+        base = { desc = UnexposedExpr { s = "p" }};
+        arrow = true;
+        field = { desc = "i" }}};
+      kind = Assign;
+      rhs = { desc = IntegerLiteral { s = "0" }}})}] -> ()
+  | _ -> assert false
+    ]} *)
   | UnexposedExpr of {
       s : string;
     }

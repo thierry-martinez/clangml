@@ -394,6 +394,15 @@ module Ast = struct
           | [operand] -> expr_of_cursor operand
           | _ -> failwith "expr_of_cursor (CStyleCastExpr)" in
         CStyleCast { qual_type; operand }
+    | MemberRefExpr ->
+        let base =
+          match list_of_children cxcursor with
+          | [lhs] -> expr_of_cursor lhs
+          | _ -> failwith "expr_of_cursor" in
+        let field = get_cursor_referenced cxcursor in
+        let arrow = ext_member_ref_expr_is_arrow cxcursor in
+        Member { base; arrow; field = {
+          cxcursor = field; desc = get_cursor_spelling field }};
     | FirstExpr ->
         UnexposedExpr { s = get_cursor_spelling cxcursor }
     | _ -> OtherExpr

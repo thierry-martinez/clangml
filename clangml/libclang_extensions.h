@@ -72,3 +72,5 @@ CXString clang_ext_ElaboratedType_getKeywordSpelling(
   enum clang_ext_ElaboratedTypeKeyword keyword);
 
 bool clang_ext_VarDecl_hasInit(CXCursor c);
+
+bool clang_ext_MemberRefExpr_isArrow(CXCursor c);

@@ -70,6 +70,11 @@ static const clang::Stmt *getCursorStmt(CXCursor Cursor) {
   return static_cast<const clang::Stmt *>(Cursor.data[1]);
 }
 
+// Copied from clang source tree: tools/libclang/CXCursor.cpp
+static const clang::Expr *getCursorExpr(CXCursor Cursor) {
+  return llvm::dyn_cast_or_null<clang::Expr>(getCursorStmt(Cursor));
+}
+
 // From tools/libclang/CXType.cpp
 static inline clang::QualType GetQualType(CXType CT) {
   return clang::QualType::getFromOpaquePtr(CT.data[0]);
@@ -225,5 +230,13 @@ extern "C" {
       return false;
     }
     return d->getInit() != NULL;
+  }
+
+  bool clang_ext_MemberRefExpr_isArrow(CXCursor c) {
+    const clang::Expr *e = getCursorExpr(c);
+    if (auto *m = llvm::dyn_cast_or_null<clang::MemberExpr>(e)) {
+      return m->isArrow();
+    }
+    return false;
   }
 }
