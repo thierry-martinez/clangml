@@ -5321,3 +5321,17 @@ clang_ext_VarDecl_hasInit_wrapper(value c_ocaml)
   }
 }
 
+CAMLprim value
+clang_ext_MemberRefExpr_isArrow_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(c_ocaml);
+  _Bool result = clang_ext_MemberRefExpr_isArrow(c);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+

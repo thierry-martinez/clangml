@@ -1066,3 +1066,5 @@ external ext_elaborated_type_get_keyword_spelling :
     "clang_ext_ElaboratedType_getKeywordSpelling_wrapper"
 external ext_var_decl_has_init :
   cxcursor -> bool = "clang_ext_VarDecl_hasInit_wrapper"
+external ext_member_ref_expr_is_arrow :
+  cxcursor -> bool = "clang_ext_MemberRefExpr_isArrow_wrapper"
