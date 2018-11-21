@@ -1089,3 +1089,14 @@ external ext_var_decl_has_init :
   cxcursor -> bool = "clang_ext_VarDecl_hasInit_wrapper"
 external ext_member_ref_expr_is_arrow :
   cxcursor -> bool = "clang_ext_MemberRefExpr_isArrow_wrapper"
+external ext_stmt_get_class_name :
+  cxcursor -> string = "clang_ext_Stmt_GetClassName_wrapper"
+external ext_stmt_get_class_kind :
+  cxcursor -> int = "clang_ext_Stmt_GetClassKind_wrapper"
+type clang_ext_cursorkind =
+  | ImplicitCastExpr 
+  | Unknown 
+external ext_get_cursor_kind :
+  cxcursor -> clang_ext_cursorkind = "clang_ext_GetCursorKind_wrapper"
+external ext_string_literal_get_string :
+  cxcursor -> string = "clang_ext_StringLiteral_GetString_wrapper"

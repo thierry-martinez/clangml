@@ -5335,3 +5335,83 @@ clang_ext_MemberRefExpr_isArrow_wrapper(value c_ocaml)
   }
 }
 
+CAMLprim value
+clang_ext_Stmt_GetClassName_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(c_ocaml);
+  CXString result = clang_ext_Stmt_GetClassName(c);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(clang_getCString(result));
+clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_Stmt_GetClassKind_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(c_ocaml);
+  int result = clang_ext_Stmt_GetClassKind(c);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CursorKind
+Clang_ext_cursorkind_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return ECK_ImplicitCastExpr;
+  case 1: return ECK_Unknown;
+  }
+  failwith_fmt("invalid value for Clang_ext_cursorkind_val: %d", Int_val(ocaml));
+  return ECK_ImplicitCastExpr;
+}
+
+value
+Val_clang_ext_cursorkind(enum clang_ext_CursorKind v)
+{
+  switch (v) {
+  case ECK_ImplicitCastExpr: return Val_int(0);
+  case ECK_Unknown: return Val_int(1);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cursorkind: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_GetCursorKind_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(c_ocaml);
+  enum clang_ext_CursorKind result = clang_ext_GetCursorKind(c);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cursorkind(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_StringLiteral_GetString_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(c_ocaml);
+  CXString result = clang_ext_StringLiteral_GetString(c);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(clang_getCString(result));
+clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
