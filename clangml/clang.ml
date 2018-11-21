@@ -403,6 +403,12 @@ module Ast = struct
         let arrow = ext_member_ref_expr_is_arrow cxcursor in
         Member { base; arrow; field = {
           cxcursor = field; desc = get_cursor_spelling field }};
+    | ArraySubscriptExpr ->
+        let lhs, rhs =
+          match list_of_children cxcursor with
+          | [lhs; rhs] -> expr_of_cursor lhs, expr_of_cursor rhs
+          | _ -> failwith "expr_of_cursor" in
+        ArraySubscript { lhs; rhs }
     | FirstExpr ->
         UnexposedExpr { s = get_cursor_spelling cxcursor }
     | _ -> OtherExpr

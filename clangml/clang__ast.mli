@@ -560,6 +560,24 @@ let () =
       rhs = { desc = IntegerLiteral { s = "0" }}})}] -> ()
   | _ -> assert false
     ]} *)
+  | ArraySubscript of {
+      lhs : expr;
+      rhs : expr;
+    }
+(** Array subscript
+    {[
+let example = {| int a[1]; a[0] = 1; |}
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Decl _ }; { desc = Expr (BinaryOperator {
+      lhs = { desc = ArraySubscript {
+        lhs = { desc = UnexposedExpr { s = "a" }};
+        rhs = { desc = IntegerLiteral { s = "0" }}}};
+      kind = Assign;
+      rhs = { desc = IntegerLiteral { s = "1" }}})}] -> ()
+  | _ -> assert false
+    ]} *)
   | UnexposedExpr of {
       s : string;
     }
