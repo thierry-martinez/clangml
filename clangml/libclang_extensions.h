@@ -85,6 +85,7 @@ int clang_ext_Stmt_GetClassKind(CXCursor c);
 
 enum clang_ext_CursorKind {
   ECK_ImplicitCastExpr,
+  ECK_BinaryConditionalOperator,
   ECK_Unknown
 };
 

@@ -419,8 +419,15 @@ module Ast = struct
           let lhs, rhs =
             match list_of_children cxcursor with
             | [lhs; rhs] -> expr_of_cursor lhs, expr_of_cursor rhs
-            | _ -> failwith "expr_of_cursor" in
+            | _ -> failwith "expr_of_cursor (ArraySubscriptExpr)" in
           ArraySubscript { lhs; rhs }
+      | ConditionalOperator ->
+          let cond, then_branch, else_branch =
+            match list_of_children cxcursor |> List.map expr_of_cursor with
+            | [cond; then_branch; else_branch] ->
+                cond, Some then_branch, else_branch
+            | _ -> failwith "expr_of_cursor (ConditionalOperator)" in
+          ConditionalOperator { cond; then_branch; else_branch }
       | FirstExpr (* TODO: UnexposedExpr! *) ->
           begin
             match ext_get_cursor_kind cxcursor with
@@ -434,6 +441,13 @@ module Ast = struct
                 else
                   let qual_type = get_cursor_type cxcursor |> of_cxtype in
                   Cast { kind = Implicit; qual_type; operand }
+            | BinaryConditionalOperator ->
+                let cond, else_branch =
+                  match list_of_children cxcursor |> List.map expr_of_cursor with
+                  | [_; cond; _; else_branch] ->
+                      cond, else_branch
+                  | _ -> failwith "expr_of_cursor (BinaryConditionalOperator)" in
+                ConditionalOperator { cond; then_branch = None; else_branch }
             | Unknown -> UnexposedExpr { s = get_cursor_spelling cxcursor } 
           end
       | _ -> OtherExpr

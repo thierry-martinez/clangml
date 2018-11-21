@@ -601,6 +601,34 @@ let () =
       rhs = { desc = IntegerLiteral "1"}})}] -> ()
   | _ -> assert false
     ]} *)
+  | ConditionalOperator of {
+      cond : expr;
+      then_branch : expr option;
+      else_branch : expr;
+    }
+(** Conditional operator.
+    [None] in [else_branch] captures GNU "missing middle" extension.
+    {[
+let example = {| 1 ? 2 : 3; |}
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Expr (ConditionalOperator {
+      cond = { desc = IntegerLiteral "1"};
+      then_branch = Some { desc = IntegerLiteral "2"};
+      else_branch = { desc = IntegerLiteral "3"}})}] -> ()
+  | _ -> assert false
+
+let example = {| 1 ? : 3; |}
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Expr (ConditionalOperator {
+      cond = { desc = IntegerLiteral "1"};
+      then_branch = None;
+      else_branch = { desc = IntegerLiteral "3"}})}] -> ()
+  | _ -> assert false
+    ]} *)
   | UnexposedExpr of {
       s : string;
     }
