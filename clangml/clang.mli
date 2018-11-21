@@ -21,9 +21,11 @@ module Ast : sig
     include Clang__ast
   end
 
-  val of_cxtype : cxtype -> qual_type
+  val of_cxtype : ?ignore_paren:bool -> ?ignore_implicit_cast:bool -> cxtype ->
+    qual_type
 
-  val of_cxtranslationunit : cxtranslationunit -> translation_unit
+  val of_cxtranslationunit : ?ignore_paren:bool -> ?ignore_implicit_cast:bool ->
+    cxtranslationunit -> translation_unit
 end
 
 val parse_string : ?index:cxindex -> ?filename:string ->

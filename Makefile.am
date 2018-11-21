@@ -25,7 +25,7 @@ $(LIBCLANGML_STUBS_A) : clangml/clang_stubs.c clangml/libclang_extensions.cpp cl
 $(STUBGEN_EXE) : $(CLANGML_CMXA) stubgen/stubgen.ml
 	$(DUNE) build stubgen/stubgen.exe
 
-current/clang__bindings.ml : $(STUBGEN_EXE)
+current/clang__bindings.ml : $(STUBGEN_EXE) clangml/libclang_extensions.h
 	$(STUBGEN_EXE) $(LLVM_CONFIG) current/
 
 current/clang__bindings.mli : current/clang__bindings.ml

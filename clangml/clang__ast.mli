@@ -17,10 +17,15 @@ various programs.
 open Stdcompat
 
 let parse_declaration_list ?filename source =
+   prerr_endline source;
   (Clang.parse_string ?filename source |> Result.get_ok |>
     Clang.Ast.of_cxtranslationunit).desc.items
     ]}
 *)
+
+type cast_kind =
+  | CStyle
+  | Implicit
 
 (** Qualified type. *)
 type qual_type = {
@@ -348,16 +353,14 @@ let () =
         rhs = { desc = IntegerLiteral { s = "0" }}})};
       condition_variable = None;
       cond = Some { desc = Expr (BinaryOperator {
-        lhs = { desc =
-          (* DeclRef is exposed since 7.0.0 *)
-          (UnexposedExpr { s = "i" } | DeclRef { s = "i" })};
+        lhs = { desc = DeclRef { s = "i" }};
         kind = LT;
         rhs = { desc = IntegerLiteral { s = "4" }}})};
       inc = Some { desc = Expr (UnaryOperator {
         kind = PostInc;
         operand = { desc = DeclRef { s = "i" }}})};
       body = { desc = Compound { items = [{ desc =
-        Expr (UnexposedExpr { s = "i" })}] }}}}] -> ()
+        Expr (DeclRef { s = "i" })}] }}}}] -> ()
   | _ -> assert false
 
 let example = "for (int i = 0; i < 4; i++) { i; }"
@@ -380,7 +383,7 @@ let () =
         kind = PostInc;
         operand = { desc = DeclRef { s = "i" }}})};
       body = { desc = Compound { items = [{ desc =
-        Expr (UnexposedExpr { s = "i" })}] }}}}] -> ()
+        Expr (DeclRef { s = "i" })}] }}}}] -> ()
   | _ -> assert false
 
 let example = "for (int i = 0; int j = i - 1; i--) { j; }"
@@ -476,6 +479,7 @@ let () =
   | [{ desc = Expr (IntegerLiteral { s = "0" })}] -> ()
   | _ -> assert false
     ]} *)
+  | StringLiteral of string
   | UnaryOperator of {
       kind : clang_ext_unaryoperatorkind;
       operand : expr;
@@ -512,19 +516,21 @@ let () =
       f : expr;
       args : expr list;
     }
-  | CStyleCast of {
+  | Cast of {
+      kind : cast_kind;
       qual_type : qual_type;
       operand : expr;
     }
-(** C-style cast
+(** Cast
     {[
 let example = {| (void * ) "Hello"; |}
 
 let () =
   match parse_statement_list example with
-  | [{ desc = Expr (CStyleCast {
+  | [{ desc = Expr (Cast {
+      kind = CStyle;
       qual_type = { desc = Pointer _ };
-      operand = { desc = _ }})}] -> ()
+      operand = { desc = StringLiteral "Hello" }})}] -> ()
   | _ -> assert false
     ]} *)
   | Member of {
@@ -553,7 +559,7 @@ let () =
   match parse_statement_list example with
   | [{ desc = Decl _ }; { desc = Expr (BinaryOperator {
       lhs = { desc = Member {
-        base = { desc = UnexposedExpr { s = "p" }};
+        base = { desc = DeclRef { s = "p" }};
         arrow = true;
         field = { desc = "i" }}};
       kind = Assign;
@@ -572,7 +578,7 @@ let () =
   match parse_statement_list example with
   | [{ desc = Decl _ }; { desc = Expr (BinaryOperator {
       lhs = { desc = ArraySubscript {
-        lhs = { desc = UnexposedExpr { s = "a" }};
+        lhs = { desc = DeclRef { s = "a" }};
         rhs = { desc = IntegerLiteral { s = "0" }}}};
       kind = Assign;
       rhs = { desc = IntegerLiteral { s = "1" }}})}] -> ()

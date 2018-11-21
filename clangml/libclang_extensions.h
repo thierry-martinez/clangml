@@ -65,8 +65,8 @@ enum clang_ext_ElaboratedTypeKeyword {
   ETK_None
 };
 
-enum clang_ext_ElaboratedTypeKeyword clang_ext_ElaboratedType_getKeyword(
-  CXType c);
+enum clang_ext_ElaboratedTypeKeyword
+clang_ext_ElaboratedType_getKeyword(CXType c);
 
 CXString clang_ext_ElaboratedType_getKeywordSpelling(
   enum clang_ext_ElaboratedTypeKeyword keyword);
@@ -74,3 +74,17 @@ CXString clang_ext_ElaboratedType_getKeywordSpelling(
 bool clang_ext_VarDecl_hasInit(CXCursor c);
 
 bool clang_ext_MemberRefExpr_isArrow(CXCursor c);
+
+CXString clang_ext_Stmt_GetClassName(CXCursor c);
+
+int clang_ext_Stmt_GetClassKind(CXCursor c);
+
+enum clang_ext_CursorKind {
+  ECK_ImplicitCastExpr,
+  ECK_Unknown
+};
+
+enum clang_ext_CursorKind
+clang_ext_GetCursorKind(CXCursor c);
+
+CXString clang_ext_StringLiteral_GetString(CXCursor c);

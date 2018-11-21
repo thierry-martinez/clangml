@@ -239,4 +239,33 @@ extern "C" {
     }
     return false;
   }
+
+  CXString clang_ext_Stmt_GetClassName(CXCursor c) {
+    const clang::Stmt *s = getCursorStmt(c);
+    return cxstring_createRef(s->getStmtClassName());
+  }
+
+  int clang_ext_Stmt_GetClassKind(CXCursor c) {
+    const clang::Stmt *s = getCursorStmt(c);
+    return s->getStmtClass();
+  }
+
+  enum clang_ext_CursorKind
+  clang_ext_GetCursorKind(CXCursor c) {
+    const clang::Stmt *s = getCursorStmt(c);
+    switch (s->getStmtClass()) {
+    case clang::Stmt::ImplicitCastExprClass: return ECK_ImplicitCastExpr;
+    default:
+      return ECK_Unknown;
+    }    
+  }
+
+  CXString clang_ext_StringLiteral_GetString(CXCursor c) {
+    const clang::Expr *e = getCursorExpr(c);
+    if (auto *m = llvm::dyn_cast_or_null<clang::StringLiteral>(e)) {
+      return cxstring_createDup(m->getString());
+    }
+    return cxstring_createRef("");
+  }
+
 }
