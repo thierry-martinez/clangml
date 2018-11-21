@@ -203,12 +203,19 @@ module Ast = struct
     and struct_decl_of_cursor cxcursor =
       let name = get_cursor_spelling cxcursor in
       let fields =
-        list_of_children cxcursor |> List.map @@ fun cur ->
-          match get_cursor_kind cur with
+        list_of_children cxcursor |> List.map @@ fun cxcursor ->
+          match get_cursor_kind cxcursor with
           | FieldDecl ->
-              let name = get_cursor_spelling cur in
-              let qual_type = get_cursor_type cur |> of_cxtype in
-              name, qual_type
+              let name = get_cursor_spelling cxcursor in
+              let qual_type = get_cursor_type cxcursor |> of_cxtype in
+              let bitfield =
+                if cursor_is_bit_field cxcursor then
+                  match list_of_children cxcursor with
+                  | [bitfield] -> Some (expr_of_cursor bitfield)
+                  | _ -> failwith "struct_decl_of_cursor (bitfield)"
+                else
+                  None in
+              { cxcursor; desc = { name; qual_type; bitfield }}
           | _ -> failwith "struct_decl_of_cursor" in
       Struct { name; fields }
     

@@ -133,9 +133,9 @@ let example = "struct s { int i; char array[]; };"
 let () =
   match parse_declaration_list example with
   | [{ desc = Struct { name = "s"; fields = [
-      "i", { desc = OtherType { kind = Int }};
-      "array", { desc = IncompleteArray {
-        element = { desc = OtherType { kind = Char_S }}}}] }}] -> ()
+      { desc = { name = "i"; qual_type = { desc = OtherType { kind = Int }}}};
+      { desc = { name = "array"; qual_type = { desc = IncompleteArray {
+        element = { desc = OtherType { kind = Char_S }}}}}}] }}] -> ()
   | _ -> assert false
     ]} *)
   | VariableArray of {
@@ -682,13 +682,53 @@ let () =
     }
   | Struct of {
       name : string;
-      fields : (string * qual_type) list;
+      fields : field_desc node list;
     }
+(** Structure declaration.
+    {[
+let example = {| struct s { int i; float f; }; |}
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Struct {
+      name = "s";
+      fields = [
+        { desc = { name = "i";
+          qual_type = { desc = OtherType { kind = Int }}}};
+        { desc = { name = "f";
+          qual_type = { desc = OtherType { kind = Float }}}}] }}] -> ()
+  | _ -> assert false
+
+let example = {| struct s { int a:1; int b:2; int c; }; |}
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Struct {
+      name = "s";
+      fields = [
+        { cxcursor; desc = { name = "a";
+          qual_type = { desc = OtherType { kind = Int }};
+          bitfield = Some { desc = IntegerLiteral "1" }}};
+        { desc = { name = "b";
+          qual_type = { desc = OtherType { kind = Int }};
+          bitfield = Some { desc = IntegerLiteral "2" }}};
+        { desc = { name = "c";
+          qual_type = { desc = OtherType { kind = Int }};
+          bitfield = None}}] }}] ->
+      assert (Clang.get_field_decl_bit_width cxcursor = 1)
+  | _ -> assert false
+    ]} *)
   | Typedef of {
       name : string;
       underlying_type : qual_type;
     }
   | OtherDecl
+
+and field_desc = {
+  name : string;
+  qual_type : qual_type;
+  bitfield : expr option;
+}
 
 and label_ref = label_ref_desc node
 
