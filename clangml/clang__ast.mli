@@ -16,10 +16,10 @@ various programs.
     {[
 open Stdcompat
 
-let parse_declaration_list ?filename source =
+let parse_declaration_list ?filename ?ignore_paren source =
    prerr_endline source;
   (Clang.parse_string ?filename source |> Result.get_ok |>
-    Clang.Ast.of_cxtranslationunit).desc.items
+    Clang.Ast.of_cxtranslationunit ?ignore_paren).desc.items
     ]}
 *)
 
@@ -280,12 +280,12 @@ statement list (by putting it in the context of a function):
 this function is used in the following examples to check the AST of
 various types.
     {[
-let parse_statement_list ?filename source =
+let parse_statement_list ?filename ?ignore_paren source =
   match
     Printf.sprintf "int f(void) { %s }" source |>
-    parse_declaration_list ?filename
+    parse_declaration_list ?filename ?ignore_paren
   with
-  | [{ desc = Function { stmt = Some { desc = Compound { items }}}}] -> items
+  | [{ desc = Function { stmt = Some { desc = Compound items }}}] -> items
   | _ -> assert false
     ]} *)
 and stmt = stmt_desc node
@@ -301,23 +301,21 @@ let () =
   | _ -> assert false
     ]}
     *)
-  | Compound of {
-      items : stmt list;
-    }
+  | Compound of stmt list
 (** Compound statement
     {[
 let example = "{}"
 
 let () =
   match parse_statement_list example with
-  | [{ desc = Compound { items = [] }}] -> ()
+  | [{ desc = Compound [] }] -> ()
   | _ -> assert false
 
 let example = "{;;}"
 
 let () =
   match parse_statement_list example with
-  | [{ desc = Compound { items = [{ desc = Null }; { desc = Null }] }}] -> ()
+  | [{ desc = Compound [{ desc = Null }; { desc = Null }] }] -> ()
   | _ -> assert false
     ]}
     *)
@@ -339,7 +337,7 @@ let () =
       condition_variable = None;
       cond = None;
       inc = None;
-      body = { desc = Compound { items = [] }}}}] -> ()
+      body = { desc = Compound [] }}}] -> ()
   | _ -> assert false
 
 let example = "int i; for (i = 0; i < 4; i++) { i; }"
@@ -359,8 +357,8 @@ let () =
       inc = Some { desc = Expr (UnaryOperator {
         kind = PostInc;
         operand = { desc = DeclRef { s = "i" }}})};
-      body = { desc = Compound { items = [{ desc =
-        Expr (DeclRef { s = "i" })}] }}}}] -> ()
+      body = { desc = Compound [{ desc =
+        Expr (DeclRef { s = "i" })}] }}}] -> ()
   | _ -> assert false
 
 let example = "for (int i = 0; i < 4; i++) { i; }"
@@ -374,16 +372,14 @@ let () =
         init = Some { desc = IntegerLiteral "0"}}}] };
       condition_variable = None;
       cond = Some { desc = Expr (BinaryOperator {
-        lhs = { desc =
-          (* DeclRef is exposed since 7.0.0 *)
-          (UnexposedExpr { s = "i" } | DeclRef { s = "i" })};
+        lhs = { desc = DeclRef { s = "i" }};
         kind = LT;
         rhs = { desc = IntegerLiteral "4"}})};
       inc = Some { desc = Expr (UnaryOperator {
         kind = PostInc;
         operand = { desc = DeclRef { s = "i" }}})};
-      body = { desc = Compound { items = [{ desc =
-        Expr (DeclRef { s = "i" })}] }}}}] -> ()
+      body = { desc = Compound [{ desc =
+        Expr (DeclRef { s = "i" })}] }}}] -> ()
   | _ -> assert false
 
 let example = "for (int i = 0; int j = i - 1; i--) { j; }"
@@ -399,29 +395,69 @@ let () =
         name = "j";
         qual_type = { desc = OtherType { kind = Int }};
         init = Some { desc = BinaryOperator {
-          lhs = { desc =
-            (* DeclRef is exposed since 7.0.0 *)
-            (UnexposedExpr { s = "i" } | DeclRef { s = "i" })};
+          lhs = { desc = DeclRef { s = "i" }};
           kind = Sub;
           rhs = { desc = IntegerLiteral "1"}}}}};
-      cond = Some { desc = Expr (
-        (* DeclRef is exposed since 7.0.0 *)
-        (UnexposedExpr { s = "j" } | DeclRef { s = "j" }))};
+      cond = Some { desc = Expr (DeclRef { s = "j" })};
       inc = Some { desc = Expr (UnaryOperator {
         kind = PostDec;
         operand = { desc = DeclRef { s = "i" }}})};
-      body = { desc = Compound { items = [{ desc =
-        Expr (UnexposedExpr { s = "j" } | DeclRef { s = "j" })}] }}}}] -> ()
+      body = { desc = Compound [{ desc =
+        Expr (DeclRef { s = "j" })}] }}}] -> ()
   | _ -> assert false
     ]}
 *)
   | If of {
-      init : stmt option;
+      init : stmt option; (* TODO: How ? *)
       condition_variable : var_decl option;
       cond : expr;
       then_branch : stmt;
       else_branch : stmt option;
     }
+(** If statement
+    {[
+let example = "if (1) { 2; } else { 3; }"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = If {
+       init = None;
+       condition_variable = None;
+       cond = { desc = IntegerLiteral "1" };
+       then_branch = { desc = Compound [{
+         desc = Expr (IntegerLiteral "2")}] };
+       else_branch = Some { desc = Compound [{
+         desc = Expr (IntegerLiteral "3") }] }}}] -> ()
+  | _ -> assert false
+
+let example = "if (1) { 2; }"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = If {
+       init = None;
+       condition_variable = None;
+       cond = { desc = IntegerLiteral "1" };
+       then_branch = { desc = Compound [{
+         desc = Expr (IntegerLiteral "2")}] };
+       else_branch = None }}] -> ()
+  | _ -> assert false
+
+let example = "if (int i = 1) { i; }"
+
+let () =
+  match parse_statement_list ~filename:"<string>.cpp" example with
+  | [{ desc = If {
+       init = None;
+       condition_variable = Some ({ desc = {
+         qual_type = { desc = OtherType { kind = Int }};
+         init = Some { desc = IntegerLiteral "1" }}});
+       cond = { desc = DeclRef { s = "i" }};
+       then_branch = { desc = Compound [{
+         desc = Expr (DeclRef { s = "i" })}] };
+       else_branch = None }}] -> ()
+  | _ -> assert false
+   ]} *)
   | Switch of {
       init : stmt option;
       condition_variable : var_decl option;
@@ -629,6 +665,22 @@ let () =
       else_branch = { desc = IntegerLiteral "3"}})}] -> ()
   | _ -> assert false
     ]} *)
+  | ParenExpr of expr
+(** Parenthesed expression
+    {[
+let example = {| (1); |}
+
+let () =
+  match parse_statement_list ~ignore_paren:false example with
+  | [{ desc = Expr (ParenExpr ({ desc = IntegerLiteral "1"}))}] -> ()
+  | _ -> assert false
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Expr (IntegerLiteral "1")}] -> ()
+  | _ -> assert false
+    ]} *)
+
   | UnexposedExpr of {
       s : string;
     }
@@ -656,7 +708,7 @@ let () =
         result = { desc = OtherType { kind = Int }};
         args = Some { non_variadic = []; variadic = false }};
       name = "f";
-      stmt = Some { desc = Compound { items = [] }}}}] -> ()
+      stmt = Some { desc = Compound [] }}}] -> ()
   | _ -> assert false
 
 let example = {| static int f(int x); |}

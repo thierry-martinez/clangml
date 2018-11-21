@@ -68,7 +68,7 @@ let has_error tu =
 module Ast = struct
   include Clang__ast
 
-  let label_ref_of_cursor cxcursor =
+  let label_ref_of_cxcursor cxcursor =
     let desc = { name = get_cursor_spelling cxcursor } in
     { cxcursor; desc }
 
@@ -125,15 +125,15 @@ module Ast = struct
         volatile = is_volatile_qualified_type cxtype;
         restrict = is_restrict_qualified_type cxtype; }
     
-    and decl_of_cursor cxcursor =
-      { cxcursor; desc = decl_desc_of_cursor cxcursor }
+    and decl_of_cxcursor cxcursor =
+      { cxcursor; desc = decl_desc_of_cxcursor cxcursor }
     
-    and decl_desc_of_cursor cxcursor =
+    and decl_desc_of_cxcursor cxcursor =
         match get_cursor_kind cxcursor with
-        | FunctionDecl -> function_decl_of_cursor cxcursor
-        | VarDecl -> Var (var_decl_desc_of_cursor cxcursor)
-        | StructDecl -> struct_decl_of_cursor cxcursor
-        | EnumDecl -> enum_decl_of_cursor cxcursor
+        | FunctionDecl -> function_decl_of_cxcursor cxcursor
+        | VarDecl -> Var (var_decl_desc_of_cxcursor cxcursor)
+        | StructDecl -> struct_decl_of_cxcursor cxcursor
+        | EnumDecl -> enum_decl_of_cxcursor cxcursor
         | TypedefDecl ->
             let name = get_cursor_spelling cxcursor in
             let underlying_type = cxcursor |>
@@ -141,7 +141,7 @@ module Ast = struct
             Typedef { name; underlying_type }
         | _ -> OtherDecl
     
-    and function_decl_of_cursor cxcursor =
+    and function_decl_of_cxcursor cxcursor =
       let linkage = cxcursor |> get_cursor_linkage in
       let function_type = cxcursor |> get_cursor_type |>
         function_type_of_cxtype @@ fun i ->
@@ -150,7 +150,7 @@ module Ast = struct
       let stmt =
         List.nth_opt (list_of_children cxcursor)
           (cursor_get_num_arguments cxcursor) |>
-        Option.map stmt_of_cursor in
+        Option.map stmt_of_cxcursor in
       Function { linkage; function_type; name; stmt }
     
     and function_type_of_cxtype get_argument_name cxtype =
@@ -167,10 +167,10 @@ module Ast = struct
           None in
       { calling_conv; result; args }
     
-    and var_decl_of_cursor cxcursor =
-      { cxcursor; desc = var_decl_desc_of_cursor cxcursor }
+    and var_decl_of_cxcursor cxcursor =
+      { cxcursor; desc = var_decl_desc_of_cxcursor cxcursor }
     
-    and var_decl_desc_of_cursor cxcursor =
+    and var_decl_desc_of_cxcursor cxcursor =
       let linkage = cxcursor |> get_cursor_linkage in
       let name = get_cursor_spelling cxcursor in
       let qual_type = of_cxtype (get_cursor_type cxcursor) in
@@ -178,13 +178,13 @@ module Ast = struct
         if ext_var_decl_has_init cxcursor then
           begin
             let _, init_value = list_last (list_of_children cxcursor) in
-            Some (expr_of_cursor init_value)
+            Some (expr_of_cxcursor init_value)
           end
         else
           None in
       { linkage; name; qual_type; init }
     
-    and enum_decl_of_cursor cxcursor =
+    and enum_decl_of_cxcursor cxcursor =
       let name = get_cursor_spelling cxcursor in
       let constants =
         list_of_children cxcursor |> List.map @@ fun cxcursor ->
@@ -193,14 +193,14 @@ module Ast = struct
               let name = get_cursor_spelling cxcursor in
               let init =
                 match list_of_children cxcursor with
-                | [init] -> Some (expr_of_cursor init)
+                | [init] -> Some (expr_of_cxcursor init)
                 | [] -> None
-                | _ -> failwith "enum_decl_of_cursor (init)" in
+                | _ -> failwith "enum_decl_of_cxcursor (init)" in
               { cxcursor; desc = { name; init } }
-          | _ -> failwith "enum_decl_of_cursor" in
+          | _ -> failwith "enum_decl_of_cxcursor" in
       Enum { name; constants }
     
-    and struct_decl_of_cursor cxcursor =
+    and struct_decl_of_cxcursor cxcursor =
       let name = get_cursor_spelling cxcursor in
       let fields =
         list_of_children cxcursor |> List.map @@ fun cxcursor ->
@@ -211,47 +211,47 @@ module Ast = struct
               let bitfield =
                 if cursor_is_bit_field cxcursor then
                   match list_of_children cxcursor with
-                  | [bitfield] -> Some (expr_of_cursor bitfield)
-                  | _ -> failwith "struct_decl_of_cursor (bitfield)"
+                  | [bitfield] -> Some (expr_of_cxcursor bitfield)
+                  | _ -> failwith "struct_decl_of_cxcursor (bitfield)"
                 else
                   None in
               { cxcursor; desc = { name; qual_type; bitfield }}
-          | _ -> failwith "struct_decl_of_cursor" in
+          | _ -> failwith "struct_decl_of_cxcursor" in
       Struct { name; fields }
     
-    and stmt_of_cursor cxcursor =
+    and stmt_of_cxcursor cxcursor =
       let desc =
         match get_cursor_kind cxcursor with
         | NullStmt ->
             Null
         | CompoundStmt ->
-            let items = cxcursor |> list_of_children |> List.map stmt_of_cursor in
-            Compound { items }
+            let items = cxcursor |> list_of_children |> List.map stmt_of_cxcursor in
+            Compound items
         | ForStmt ->
             let children_set = ext_for_stmt_get_children_set cxcursor in
             let queue = Queue.create () in
             cxcursor |> iter_children (fun cur -> Queue.add cur queue);
             let init =
               if children_set land 1 <> 0 then
-                Some (stmt_of_cursor (Queue.pop queue))
+                Some (stmt_of_cxcursor (Queue.pop queue))
               else
                 None in
             let condition_variable =
               if children_set land 2 <> 0 then
-                Some (var_decl_of_cursor (Queue.pop queue))
+                Some (var_decl_of_cxcursor (Queue.pop queue))
               else
                 None in
             let cond =
               if children_set land 4 <> 0 then
-                Some (stmt_of_cursor (Queue.pop queue))
+                Some (stmt_of_cxcursor (Queue.pop queue))
               else
                 None in
             let inc =
               if children_set land 8 <> 0 then
-                Some (stmt_of_cursor (Queue.pop queue))
+                Some (stmt_of_cxcursor (Queue.pop queue))
               else
                 None in
-            let body = stmt_of_cursor (Queue.pop queue) in
+            let body = stmt_of_cxcursor (Queue.pop queue) in
             assert (Queue.is_empty queue);
             For { init; condition_variable; cond; inc; body }
         | IfStmt ->
@@ -260,19 +260,19 @@ module Ast = struct
             cxcursor |> iter_children (fun cur -> Queue.add cur queue);
             let init =
               if children_set land 1 <> 0 then
-                Some (stmt_of_cursor (Queue.pop queue))
+                Some (stmt_of_cxcursor (Queue.pop queue))
               else
                 None in
             let condition_variable =
               if children_set land 2 <> 0 then
-                Some (var_decl_of_cursor (Queue.pop queue))
+                Some (var_decl_of_cxcursor (Queue.pop queue))
               else
                 None in
-            let cond = expr_of_cursor (Queue.pop queue) in
-            let then_branch = stmt_of_cursor (Queue.pop queue) in
+            let cond = expr_of_cxcursor (Queue.pop queue) in
+            let then_branch = stmt_of_cxcursor (Queue.pop queue) in
             let else_branch =
               if children_set land 4 <> 0 then
-                Some (stmt_of_cursor (Queue.pop queue))
+                Some (stmt_of_cxcursor (Queue.pop queue))
               else
                 None in
             assert (Queue.is_empty queue);
@@ -283,35 +283,35 @@ module Ast = struct
             cxcursor |> iter_children (fun cur -> Queue.add cur queue);
             let init =
               if children_set land 1 <> 0 then
-                Some (stmt_of_cursor (Queue.pop queue))
+                Some (stmt_of_cxcursor (Queue.pop queue))
               else
                 None in
             let condition_variable =
               if children_set land 2 <> 0 then
-                Some (var_decl_of_cursor (Queue.pop queue))
+                Some (var_decl_of_cxcursor (Queue.pop queue))
               else
                 None in
-            let cond = expr_of_cursor (Queue.pop queue) in
-            let body = stmt_of_cursor (Queue.pop queue) in
+            let cond = expr_of_cxcursor (Queue.pop queue) in
+            let body = stmt_of_cxcursor (Queue.pop queue) in
             assert (Queue.is_empty queue);
             Switch { init; condition_variable; cond; body }
         | CaseStmt ->
             let lhs, rhs, body =
               match list_of_children cxcursor with
               | [lhs; rhs; body] ->
-                  lhs, Some (expr_of_cursor rhs), body
+                  lhs, Some (expr_of_cxcursor rhs), body
               | [lhs; body] ->
                   lhs, None, body
               | _ ->
-                  failwith "stmt_of_cursor (CaseStmt)" in
-            let lhs = expr_of_cursor lhs in
-            let body = stmt_of_cursor body in
+                  failwith "stmt_of_cxcursor (CaseStmt)" in
+            let lhs = expr_of_cxcursor lhs in
+            let body = stmt_of_cxcursor body in
             Case { lhs; rhs; body }
         | DefaultStmt ->
             let body =
               match list_of_children cxcursor with
-              | [body] -> stmt_of_cursor body
-              | _ -> failwith "stmt_of_cursor (DefaultStmt)" in
+              | [body] -> stmt_of_cxcursor body
+              | _ -> failwith "stmt_of_cxcursor (DefaultStmt)" in
             Default { body }
         | WhileStmt ->
             let children_set = ext_while_stmt_get_children_set cxcursor in
@@ -319,60 +319,60 @@ module Ast = struct
             cxcursor |> iter_children (fun cur -> Queue.add cur queue);
             let condition_variable =
               if children_set land 1 <> 0 then
-                Some (var_decl_of_cursor (Queue.pop queue))
+                Some (var_decl_of_cxcursor (Queue.pop queue))
               else
                 None in
-            let cond = expr_of_cursor (Queue.pop queue) in
-            let body = stmt_of_cursor (Queue.pop queue) in
+            let cond = expr_of_cxcursor (Queue.pop queue) in
+            let body = stmt_of_cxcursor (Queue.pop queue) in
             assert (Queue.is_empty queue);
             While { condition_variable; cond; body }
         | DoStmt ->
             let body, cond =
               match list_of_children cxcursor with
-              | [body; cond] -> stmt_of_cursor body, expr_of_cursor cond
-              | _ -> failwith "stmt_of_cursor (DoStmt)" in
+              | [body; cond] -> stmt_of_cxcursor body, expr_of_cxcursor cond
+              | _ -> failwith "stmt_of_cxcursor (DoStmt)" in
             Do { body; cond }
         | LabelStmt ->
             let label, body =
               match list_of_children cxcursor with
-              | [label; body] -> label_ref_of_cursor label, stmt_of_cursor body
-              | _ -> failwith "stmt_of_cursor (LabelStmt)" in
+              | [label; body] -> label_ref_of_cxcursor label, stmt_of_cxcursor body
+              | _ -> failwith "stmt_of_cxcursor (LabelStmt)" in
             Label { label; body }
         | GotoStmt ->
             let label =
               match list_of_children cxcursor with
-              | [label] -> label_ref_of_cursor label
-              | _ -> failwith "stmt_of_cursor (GotoStmt)" in
+              | [label] -> label_ref_of_cxcursor label
+              | _ -> failwith "stmt_of_cxcursor (GotoStmt)" in
             Goto { label }
         | IndirectGotoStmt ->
             let target =
               match list_of_children cxcursor with
-              | [target] -> expr_of_cursor target
-              | _ -> failwith "stmt_of_cursor (IndirectGotoStmt)" in
+              | [target] -> expr_of_cxcursor target
+              | _ -> failwith "stmt_of_cxcursor (IndirectGotoStmt)" in
             IndirectGoto { target }
         | ContinueStmt ->
             Continue
         | BreakStmt ->
             Break
         | DeclStmt ->
-            let decl = list_of_children cxcursor |> List.map decl_of_cursor in
+            let decl = list_of_children cxcursor |> List.map decl_of_cxcursor in
             Decl decl
         | ReturnStmt ->
             let value =
               match list_of_children cxcursor with
-              | [value] -> expr_of_cursor value
-              | _ -> failwith "stmt_of_cursor (ReturnStmt)" in
+              | [value] -> expr_of_cxcursor value
+              | _ -> failwith "stmt_of_cxcursor (ReturnStmt)" in
             Return { value }
         | _ ->
-            match decl_desc_of_cursor cxcursor with
-            | OtherDecl -> Expr (expr_desc_of_cursor cxcursor)
+            match decl_desc_of_cxcursor cxcursor with
+            | OtherDecl -> Expr (expr_desc_of_cxcursor cxcursor)
             | desc -> Decl [{ cxcursor; desc }] in
       { cxcursor; desc }
     
-    and expr_of_cursor cxcursor =
-      { cxcursor; desc = expr_desc_of_cursor cxcursor }
+    and expr_of_cxcursor cxcursor =
+      { cxcursor; desc = expr_desc_of_cxcursor cxcursor }
     
-    and expr_desc_of_cursor cxcursor =
+    and expr_desc_of_cxcursor cxcursor =
       match get_cursor_kind cxcursor with
       | IntegerLiteral ->
           let i = ext_integer_literal_get_value_as_string cxcursor 10 true in
@@ -385,15 +385,15 @@ module Ast = struct
       | UnaryOperator ->
           let operand =
             match list_of_children cxcursor with
-            | [operand] -> expr_of_cursor operand
-            | _ -> failwith "expr_of_cursor (UnaryOperator)" in
+            | [operand] -> expr_of_cxcursor operand
+            | _ -> failwith "expr_of_cxcursor (UnaryOperator)" in
           let kind = ext_unary_operator_get_opcode cxcursor in
           UnaryOperator { kind; operand }
       | BinaryOperator ->
           let lhs, rhs =
             match list_of_children cxcursor with
-            | [lhs; rhs] -> expr_of_cursor lhs, expr_of_cursor rhs
-            | _ -> failwith "expr_of_cursor (BinaryOperator)" in
+            | [lhs; rhs] -> expr_of_cxcursor lhs, expr_of_cxcursor rhs
+            | _ -> failwith "expr_of_cxcursor (BinaryOperator)" in
           let kind = ext_binary_operator_get_opcode cxcursor in
           BinaryOperator { lhs; kind; rhs }
       | DeclRefExpr -> DeclRef { s = get_cursor_spelling cxcursor }
@@ -401,23 +401,23 @@ module Ast = struct
           let f, args =
             match list_of_children cxcursor with
             | f :: args ->
-                let f = f |> expr_of_cursor in
-                let args = args |> List.map expr_of_cursor in
+                let f = f |> expr_of_cxcursor in
+                let args = args |> List.map expr_of_cxcursor in
                 f, args
-            | _ -> failwith "expr_of_cursor (CallExpr)" in
+            | _ -> failwith "expr_of_cxcursor (CallExpr)" in
           Call { f; args }
       | CStyleCastExpr ->
           let qual_type = get_cursor_type cxcursor |> of_cxtype in
           let operand =
             match list_of_children cxcursor with
-            | [operand] -> expr_of_cursor operand
-            | _ -> failwith "expr_of_cursor (CStyleCastExpr)" in
+            | [operand] -> expr_of_cxcursor operand
+            | _ -> failwith "expr_of_cxcursor (CStyleCastExpr)" in
           Cast { kind = CStyle; qual_type; operand }
       | MemberRefExpr ->
           let base =
             match list_of_children cxcursor with
-            | [lhs] -> expr_of_cursor lhs
-            | _ -> failwith "expr_of_cursor" in
+            | [lhs] -> expr_of_cxcursor lhs
+            | _ -> failwith "expr_of_cxcursor" in
           let field = get_cursor_referenced cxcursor in
           let arrow = ext_member_ref_expr_is_arrow cxcursor in
           Member { base; arrow; field = {
@@ -425,24 +425,33 @@ module Ast = struct
       | ArraySubscriptExpr ->
           let lhs, rhs =
             match list_of_children cxcursor with
-            | [lhs; rhs] -> expr_of_cursor lhs, expr_of_cursor rhs
-            | _ -> failwith "expr_of_cursor (ArraySubscriptExpr)" in
+            | [lhs; rhs] -> expr_of_cxcursor lhs, expr_of_cxcursor rhs
+            | _ -> failwith "expr_of_cxcursor (ArraySubscriptExpr)" in
           ArraySubscript { lhs; rhs }
       | ConditionalOperator ->
           let cond, then_branch, else_branch =
-            match list_of_children cxcursor |> List.map expr_of_cursor with
+            match list_of_children cxcursor |> List.map expr_of_cxcursor with
             | [cond; then_branch; else_branch] ->
                 cond, Some then_branch, else_branch
-            | _ -> failwith "expr_of_cursor (ConditionalOperator)" in
+            | _ -> failwith "expr_of_cxcursor (ConditionalOperator)" in
           ConditionalOperator { cond; then_branch; else_branch }
+      | ParenExpr ->
+          let subexpr =
+            match list_of_children cxcursor with
+            | [subexpr] -> expr_of_cxcursor subexpr
+            | _ -> failwith "expr_of_cxcursor (ParenExpr)" in
+          if Options.ignore_paren then
+            subexpr.desc
+          else
+            ParenExpr subexpr
       | FirstExpr (* TODO: UnexposedExpr! *) ->
           begin
             match ext_get_cursor_kind cxcursor with
             | ImplicitCastExpr ->
                 let operand =
                   match list_of_children cxcursor with
-                  | [operand] -> expr_of_cursor operand
-                  | _ -> failwith "expr_of_cursor (ImplicitCastExpr)" in
+                  | [operand] -> expr_of_cxcursor operand
+                  | _ -> failwith "expr_of_cxcursor (ImplicitCastExpr)" in
                 if Options.ignore_implicit_cast then
                   operand.desc
                 else
@@ -450,22 +459,22 @@ module Ast = struct
                   Cast { kind = Implicit; qual_type; operand }
             | BinaryConditionalOperator ->
                 let cond, else_branch =
-                  match list_of_children cxcursor |> List.map expr_of_cursor with
+                  match list_of_children cxcursor |> List.map expr_of_cxcursor with
                   | [_; cond; _; else_branch] ->
                       cond, else_branch
-                  | _ -> failwith "expr_of_cursor (BinaryConditionalOperator)" in
+                  | _ -> failwith "expr_of_cxcursor (BinaryConditionalOperator)" in
                 ConditionalOperator { cond; then_branch = None; else_branch }
             | Unknown -> UnexposedExpr { s = get_cursor_spelling cxcursor } 
           end
       | _ -> OtherExpr
     
-    let translation_unit_of_cursor cxcursor =
+    let translation_unit_of_cxcursor cxcursor =
       let filename = get_cursor_spelling cxcursor in
-      let items = list_of_children cxcursor |> List.map decl_of_cursor in
+      let items = list_of_children cxcursor |> List.map decl_of_cxcursor in
       { cxcursor; desc = { filename; items } }
     
     let of_cxtranslationunit tu =
-      translation_unit_of_cursor (get_translation_unit_cursor tu)
+      translation_unit_of_cxcursor (get_translation_unit_cursor tu)
   end
 
   let of_cxtype ?(ignore_paren = true) ?(ignore_implicit_cast = true) tu =
@@ -474,6 +483,20 @@ module Ast = struct
       let ignore_implicit_cast = ignore_implicit_cast
      end) in
     Convert.of_cxtype tu
+
+  let expr_of_cxcursor ?(ignore_paren = true) ?(ignore_implicit_cast = true) cur =
+    let module Convert = Converter (struct
+      let ignore_paren = ignore_paren
+      let ignore_implicit_cast = ignore_implicit_cast
+    end) in
+    Convert.expr_of_cxcursor cur
+
+  let stmt_of_cxcursor ?(ignore_paren = true) ?(ignore_implicit_cast = true) cur =
+    let module Convert = Converter (struct
+      let ignore_paren = ignore_paren
+      let ignore_implicit_cast = ignore_implicit_cast
+    end) in
+    Convert.stmt_of_cxcursor cur
 
   let of_cxtranslationunit ?(ignore_paren = true) ?(ignore_implicit_cast = true) tu =
     let module Convert = Converter (struct

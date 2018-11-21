@@ -24,6 +24,12 @@ module Ast : sig
   val of_cxtype : ?ignore_paren:bool -> ?ignore_implicit_cast:bool -> cxtype ->
     qual_type
 
+  val expr_of_cxcursor : ?ignore_paren:bool -> ?ignore_implicit_cast:bool ->
+    cxcursor -> expr
+
+  val stmt_of_cxcursor : ?ignore_paren:bool -> ?ignore_implicit_cast:bool ->
+    cxcursor -> stmt
+
   val of_cxtranslationunit : ?ignore_paren:bool -> ?ignore_implicit_cast:bool ->
     cxtranslationunit -> translation_unit
 end
