@@ -16,6 +16,14 @@ val is_error : cxdiagnosticseverity -> bool
 
 val has_error : cxtranslationunit -> bool
 
+val int64_of_cxint_opt : cxint -> Int64.t option
+
+val int64_of_cxint : cxint -> Int64.t
+
+val int_of_cxint_opt : cxint -> int option
+
+val int_of_cxint : cxint -> int
+
 module Ast : sig
   include module type of struct
     include Clang__ast

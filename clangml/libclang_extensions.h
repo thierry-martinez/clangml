@@ -1,9 +1,61 @@
 #include <stdbool.h>
+#include <stdint.h>
 
-CXString clang_ext_IntegerLiteral_getValueAsString(
-  CXCursor c, unsigned Radix, bool isSigned);
+typedef struct {
+  void *data;
+} CXInt;
 
-CXString clang_ext_FloatingLiteral_getValueAsString(CXCursor c);
+CXInt
+clang_ext_IntegerLiteral_getValue(CXCursor c);
+
+void
+clang_ext_Int_dispose(CXInt c);
+
+bool
+clang_ext_Int_isValid(CXInt c);
+
+CXString
+clang_ext_Int_toString(CXInt c, unsigned Radix, bool isSigned);
+
+double
+clang_ext_Int_roundToDouble(CXInt c, bool isSigned);
+
+float
+clang_ext_Int_bitsToFloat(CXInt c);
+
+unsigned
+clang_ext_Int_getBitWidth(CXInt c);
+
+unsigned
+clang_ext_Int_getActiveBits(CXInt c);
+
+unsigned
+clang_ext_Int_getMinSignedBits(CXInt c);
+
+bool
+clang_ext_Int_getBoolValue(CXInt c);
+
+int64_t
+clang_ext_Int_getSExtValue(CXInt c);
+
+typedef struct {
+  void *data;
+} CXFloat;
+
+CXFloat
+clang_ext_FloatingLiteral_getValue(CXCursor c);
+
+void
+clang_ext_Float_dispose(CXFloat c);
+
+bool
+clang_ext_Float_isValid(CXFloat f);
+
+CXString
+clang_ext_Float_toString(CXFloat f);
+
+double
+clang_ext_Float_convertToDouble(CXFloat f);
 
 CXString clang_ext_StringLiteral_GetString(CXCursor c);
 

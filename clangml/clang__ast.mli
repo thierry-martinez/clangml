@@ -348,17 +348,19 @@ let () =
       init = Some { desc = Expr (BinaryOperator {
         lhs = { desc = DeclRef { s = "i" }};
         kind = Assign;
-        rhs = { desc = IntegerLiteral "0"}})};
+        rhs = { desc = IntegerLiteral zero}})};
       condition_variable = None;
       cond = Some { desc = Expr (BinaryOperator {
         lhs = { desc = DeclRef { s = "i" }};
         kind = LT;
-        rhs = { desc = IntegerLiteral "4"}})};
+        rhs = { desc = IntegerLiteral four}})};
       inc = Some { desc = Expr (UnaryOperator {
         kind = PostInc;
         operand = { desc = DeclRef { s = "i" }}})};
       body = { desc = Compound [{ desc =
-        Expr (DeclRef { s = "i" })}] }}}] -> ()
+        Expr (DeclRef { s = "i" })}] }}}] ->
+      assert (Clang.int_of_cxint zero = 0);
+      assert (Clang.int_of_cxint four = 4)
   | _ -> assert false
 
 let example = "for (int i = 0; i < 4; i++) { i; }"
@@ -369,17 +371,19 @@ let () =
       init = Some { desc = Decl [{ desc = Var {
         name = "i";
         qual_type = { desc = OtherType { kind = Int }};
-        init = Some { desc = IntegerLiteral "0"}}}] };
+        init = Some { desc = IntegerLiteral zero}}}] };
       condition_variable = None;
       cond = Some { desc = Expr (BinaryOperator {
         lhs = { desc = DeclRef { s = "i" }};
         kind = LT;
-        rhs = { desc = IntegerLiteral "4"}})};
+        rhs = { desc = IntegerLiteral four}})};
       inc = Some { desc = Expr (UnaryOperator {
         kind = PostInc;
         operand = { desc = DeclRef { s = "i" }}})};
       body = { desc = Compound [{ desc =
-        Expr (DeclRef { s = "i" })}] }}}] -> ()
+        Expr (DeclRef { s = "i" })}] }}}] ->
+      assert (Clang.int_of_cxint zero = 0);
+      assert (Clang.int_of_cxint four = 4)
   | _ -> assert false
 
 let example = "for (int i = 0; int j = i - 1; i--) { j; }"
@@ -390,20 +394,22 @@ let () =
       init = Some { desc = Decl [{ desc = Var {
         name = "i";
         qual_type = { desc = OtherType { kind = Int }};
-        init = Some { desc = IntegerLiteral "0"}}}] };
+        init = Some { desc = IntegerLiteral zero}}}] };
       condition_variable = Some { desc = {
         name = "j";
         qual_type = { desc = OtherType { kind = Int }};
         init = Some { desc = BinaryOperator {
           lhs = { desc = DeclRef { s = "i" }};
           kind = Sub;
-          rhs = { desc = IntegerLiteral "1"}}}}};
+          rhs = { desc = IntegerLiteral one}}}}};
       cond = Some { desc = Expr (DeclRef { s = "j" })};
       inc = Some { desc = Expr (UnaryOperator {
         kind = PostDec;
         operand = { desc = DeclRef { s = "i" }}})};
       body = { desc = Compound [{ desc =
-        Expr (DeclRef { s = "j" })}] }}}] -> ()
+        Expr (DeclRef { s = "j" })}] }}}] ->
+      assert (Clang.int_of_cxint zero = 0);
+      assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
     ]}
 *)
@@ -423,11 +429,14 @@ let () =
   | [{ desc = If {
        init = None;
        condition_variable = None;
-       cond = { desc = IntegerLiteral "1" };
+       cond = { desc = IntegerLiteral one };
        then_branch = { desc = Compound [{
-         desc = Expr (IntegerLiteral "2")}] };
+         desc = Expr (IntegerLiteral two)}] };
        else_branch = Some { desc = Compound [{
-         desc = Expr (IntegerLiteral "3") }] }}}] -> ()
+         desc = Expr (IntegerLiteral three) }] }}}] ->
+      assert (Clang.int_of_cxint one = 1);
+      assert (Clang.int_of_cxint two = 2);
+      assert (Clang.int_of_cxint three = 3)
   | _ -> assert false
 
 let example = "if (1) { 2; }"
@@ -437,10 +446,12 @@ let () =
   | [{ desc = If {
        init = None;
        condition_variable = None;
-       cond = { desc = IntegerLiteral "1" };
+       cond = { desc = IntegerLiteral one };
        then_branch = { desc = Compound [{
-         desc = Expr (IntegerLiteral "2")}] };
-       else_branch = None }}] -> ()
+         desc = Expr (IntegerLiteral two)}] };
+       else_branch = None }}] ->
+      assert (Clang.int_of_cxint one = 1);
+      assert (Clang.int_of_cxint two = 2)
   | _ -> assert false
 
 let example = "if (int i = 1) { i; }"
@@ -451,11 +462,12 @@ let () =
        init = None;
        condition_variable = Some ({ desc = {
          qual_type = { desc = OtherType { kind = Int }};
-         init = Some { desc = IntegerLiteral "1" }}});
+         init = Some { desc = IntegerLiteral one }}});
        cond = { desc = DeclRef { s = "i" }};
        then_branch = { desc = Compound [{
          desc = Expr (DeclRef { s = "i" })}] };
-       else_branch = None }}] -> ()
+       else_branch = None }}] ->
+      assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
    ]} *)
   | Switch of {
@@ -503,24 +515,26 @@ let () =
 and expr = expr_desc node
 
 and expr_desc =
-  | IntegerLiteral of string
+  | IntegerLiteral of cxint
 (** Integer literal
     {[
 let example = "0;"
 
 let () =
   match parse_statement_list example with
-  | [{ desc = Expr (IntegerLiteral "0")}] -> ()
+  | [{ desc = Expr (IntegerLiteral zero)}] ->
+      assert (Clang.int_of_cxint zero = 0)
   | _ -> assert false
     ]} *)
-  | FloatingLiteral of string
+  | FloatingLiteral of cxfloat
 (** Floating literal
     {[
 let example = "0.5;"
 
 let () =
   match parse_statement_list example with
-  | [{ desc = Expr (FloatingLiteral "0.5")}] -> ()
+  | [{ desc = Expr (FloatingLiteral f)}] ->
+    assert (Clang.ext_float_convert_to_double f = 0.5)
   | _ -> assert false
     ]} *)
   | StringLiteral of string
@@ -545,7 +559,8 @@ let () =
   match parse_statement_list example with
   | [{ desc = Expr (UnaryOperator {
       kind = Plus;
-      operand = { desc = IntegerLiteral "1"}})}] -> ()
+      operand = { desc = IntegerLiteral one}})}] ->
+      assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
 
 let example = "int x; &x;"
@@ -603,7 +618,8 @@ let () =
         arrow = false;
         field = { desc = "i" }}};
       kind = Assign;
-      rhs = { desc = IntegerLiteral "0"}})}] -> ()
+      rhs = { desc = IntegerLiteral zero}})}] ->
+      assert (Clang.int_of_cxint zero = 0)
   | _ -> assert false
 
 let example = {| struct s { int i } *p; p->i = 0; |}
@@ -616,7 +632,8 @@ let () =
         arrow = true;
         field = { desc = "i" }}};
       kind = Assign;
-      rhs = { desc = IntegerLiteral "0"}})}] -> ()
+      rhs = { desc = IntegerLiteral zero}})}] ->
+      assert (Clang.int_of_cxint zero = 0)
   | _ -> assert false
     ]} *)
   | ArraySubscript of {
@@ -632,9 +649,11 @@ let () =
   | [{ desc = Decl _ }; { desc = Expr (BinaryOperator {
       lhs = { desc = ArraySubscript {
         lhs = { desc = DeclRef { s = "a" }};
-        rhs = { desc = IntegerLiteral "0"}}};
+        rhs = { desc = IntegerLiteral zero}}};
       kind = Assign;
-      rhs = { desc = IntegerLiteral "1"}})}] -> ()
+      rhs = { desc = IntegerLiteral one}})}] ->
+      assert (Clang.int_of_cxint zero = 0);
+      assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
     ]} *)
   | ConditionalOperator of {
@@ -650,9 +669,12 @@ let example = {| 1 ? 2 : 3; |}
 let () =
   match parse_statement_list example with
   | [{ desc = Expr (ConditionalOperator {
-      cond = { desc = IntegerLiteral "1"};
-      then_branch = Some { desc = IntegerLiteral "2"};
-      else_branch = { desc = IntegerLiteral "3"}})}] -> ()
+      cond = { desc = IntegerLiteral one };
+      then_branch = Some { desc = IntegerLiteral two };
+      else_branch = { desc = IntegerLiteral three }})}] ->
+      assert (Clang.int_of_cxint one = 1);
+      assert (Clang.int_of_cxint two = 2);
+      assert (Clang.int_of_cxint three = 3)
   | _ -> assert false
 
 let example = {| 1 ? : 3; |}
@@ -660,9 +682,11 @@ let example = {| 1 ? : 3; |}
 let () =
   match parse_statement_list example with
   | [{ desc = Expr (ConditionalOperator {
-      cond = { desc = IntegerLiteral "1"};
+      cond = { desc = IntegerLiteral one };
       then_branch = None;
-      else_branch = { desc = IntegerLiteral "3"}})}] -> ()
+      else_branch = { desc = IntegerLiteral three }})}] ->
+      assert (Clang.int_of_cxint one = 1);
+      assert (Clang.int_of_cxint three = 3)
   | _ -> assert false
     ]} *)
   | ParenExpr of expr
@@ -672,12 +696,14 @@ let example = {| (1); |}
 
 let () =
   match parse_statement_list ~ignore_paren:false example with
-  | [{ desc = Expr (ParenExpr ({ desc = IntegerLiteral "1"}))}] -> ()
+  | [{ desc = Expr (ParenExpr ({ desc = IntegerLiteral one}))}] ->
+      assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
 
 let () =
   match parse_statement_list example with
-  | [{ desc = Expr (IntegerLiteral "1")}] -> ()
+  | [{ desc = Expr (IntegerLiteral one)}] ->
+      assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
     ]} *)
 
@@ -760,13 +786,15 @@ let () =
       fields = [
         { cxcursor; desc = { name = "a";
           qual_type = { desc = OtherType { kind = Int }};
-          bitfield = Some { desc = IntegerLiteral "1" }}};
+          bitfield = Some { desc = IntegerLiteral one }}};
         { desc = { name = "b";
           qual_type = { desc = OtherType { kind = Int }};
-          bitfield = Some { desc = IntegerLiteral "2" }}};
+          bitfield = Some { desc = IntegerLiteral two }}};
         { desc = { name = "c";
           qual_type = { desc = OtherType { kind = Int }};
           bitfield = None}}] }}] ->
+      assert (Clang.int_of_cxint one = 1);
+      assert (Clang.int_of_cxint two = 2);
       assert (Clang.get_field_decl_bit_width cxcursor = 1)
   | _ -> assert false
     ]} *)

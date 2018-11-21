@@ -463,6 +463,11 @@ let string_type_info =
     c_of_ocaml = simple_converter "String_val";
     ocaml_of_c = simple_converter "caml_copy_string"; }, Regular
 
+let int64_type_info =
+  { ocamltype = ptyp_constr (loc (Longident.Ldot (Longident.Lident "Int64", "t")));
+    c_of_ocaml = simple_converter "Int64_val";
+    ocaml_of_c = simple_converter "copy_int64"; }, Regular
+
 let defined_set_of = String_hashtbl.create 17
 
 let uncamelcase s =
@@ -590,7 +595,7 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
       end
   | Bool ->
       bool_info, Bool
-  | Double ->
+  | Float | Double ->
       { ocamltype = ptyp_constr (loc (Longident.Lident "float"));
         c_of_ocaml = simple_converter "Double_val";
         ocaml_of_c = simple_converter "caml_copy_double"; }, Regular
@@ -709,6 +714,8 @@ tgt); }, Regular
             ocaml_of_c = (fun fmt ~src _params ~tgt ->
   Printf.fprintf fmt "%s = caml_copy_string(clang_getCString(%s));
 clang_disposeString(%s);" tgt src src) }, Regular
+      | "uint64_t" | "int64_t" ->
+          int64_type_info
       | _ ->
           default_type type_name
 

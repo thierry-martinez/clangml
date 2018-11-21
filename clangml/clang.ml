@@ -65,6 +65,24 @@ let has_error tu =
   with Exit ->
     true
 
+let int64_of_cxint_opt cxint =
+  if ext_int_get_min_signed_bits cxint <= 64 then
+    Some (ext_int_get_sext_value cxint)
+  else
+    None
+
+let int64_of_cxint cxint =
+  if ext_int_get_min_signed_bits cxint <= 64 then
+    ext_int_get_sext_value cxint
+  else
+    failwith "int64_of_cxint"
+
+let int_of_cxint_opt cxint =
+  int64_of_cxint_opt cxint |> Option.map Int64.to_int
+
+let int_of_cxint cxint =
+  int64_of_cxint cxint |> Int64.to_int
+
 module Ast = struct
   include Clang__ast
 
@@ -375,10 +393,10 @@ module Ast = struct
     and expr_desc_of_cxcursor cxcursor =
       match get_cursor_kind cxcursor with
       | IntegerLiteral ->
-          let i = ext_integer_literal_get_value_as_string cxcursor 10 true in
+          let i = ext_integer_literal_get_value cxcursor in
           IntegerLiteral i
       | FloatingLiteral ->
-          let f = ext_floating_literal_get_value_as_string cxcursor in
+          let f = ext_floating_literal_get_value cxcursor in
           FloatingLiteral f
       | StringLiteral ->
           StringLiteral (ext_string_literal_get_string cxcursor)

@@ -80,25 +80,164 @@ static inline clang::QualType GetQualType(CXType CT) {
   return clang::QualType::getFromOpaquePtr(CT.data[0]);
 }
 
+CXInt Invalid_CXInt = { NULL };
+
+static inline CXInt
+MakeCXInt(const llvm::APInt &value)
+{
+  CXInt result;
+  result.data = new llvm::APInt(value);
+  return result;
+}
+
+CXFloat Invalid_CXFloat = { NULL };
+
+static inline CXFloat
+MakeCXFloat(const llvm::APFloat &value)
+{
+  CXFloat result;
+  result.data = new llvm::APFloat(value);
+  return result;
+}
+
 extern "C" {
-  CXString clang_ext_IntegerLiteral_getValueAsString(
-      CXCursor c, unsigned Radix, bool isSigned) {
+  CXInt
+  clang_ext_IntegerLiteral_getValue(CXCursor c)
+  {
     if (auto e =
       llvm::dyn_cast_or_null<clang::IntegerLiteral>(getCursorStmt(c))) {
-      std::string s = e->getValue().toString(Radix, isSigned);
+      return MakeCXInt(e->getValue());
+    }
+    return Invalid_CXInt;
+  }
+
+  void
+  clang_ext_Int_dispose(CXInt c)
+  {
+    delete(static_cast<llvm::APInt *>(c.data));
+    c.data = NULL;
+  }
+
+  bool
+  clang_ext_Int_isValid(CXInt c)
+  {
+    return c.data != NULL;
+  }
+
+  CXString
+  clang_ext_Int_toString(CXInt c, unsigned Radix, bool isSigned)
+  {
+    if (auto i = static_cast<llvm::APInt *>(c.data)) {
+      std::string s = i->toString(Radix, isSigned);
       return cxstring_createDup(s);
     }
     return cxstring_createRef("");
   }
 
-  CXString clang_ext_FloatingLiteral_getValueAsString(CXCursor c) {
+  double
+  clang_ext_Int_roundToDouble(CXInt c, bool isSigned)
+  {
+    if (auto i = static_cast<llvm::APInt *>(c.data)) {
+      return i->roundToDouble(isSigned);
+    }
+    return 0.;
+  }
+
+  float
+  clang_ext_Int_bitsToFloat(CXInt c)
+  {
+    if (auto i = static_cast<llvm::APInt *>(c.data)) {
+      return i->bitsToFloat();
+    }
+    return 0.f;
+  }
+
+  unsigned
+  clang_ext_Int_getBitWidth(CXInt c)
+  {
+    if (auto i = static_cast<llvm::APInt *>(c.data)) {
+      return i->getBitWidth();
+    }
+    return 0;
+  }
+
+  unsigned
+  clang_ext_Int_getActiveBits(CXInt c)
+  {
+    if (auto i = static_cast<llvm::APInt *>(c.data)) {
+      return i->getActiveBits();
+    }
+    return 0;
+  }
+
+  unsigned
+  clang_ext_Int_getMinSignedBits(CXInt c)
+  {
+    if (auto i = static_cast<llvm::APInt *>(c.data)) {
+      return i->getMinSignedBits();
+    }
+    return 0;
+  }
+
+  bool
+  clang_ext_Int_getBoolValue(CXInt c)
+  {
+    if (auto i = static_cast<llvm::APInt *>(c.data)) {
+      return i->getBoolValue();
+    }
+    return false;
+  }
+
+  int64_t
+  clang_ext_Int_getSExtValue(CXInt c)
+  {
+    if (auto i = static_cast<llvm::APInt *>(c.data)) {
+      return i->getSExtValue();
+    }
+    return 0;
+  }
+
+  CXFloat
+  clang_ext_FloatingLiteral_getValue(CXCursor c)
+  {
     if (auto e =
       llvm::dyn_cast_or_null<clang::FloatingLiteral>(getCursorStmt(c))) {
+      return MakeCXFloat(e->getValue());
+    }
+    return Invalid_CXFloat;
+  }
+
+  void
+  clang_ext_Float_dispose(CXFloat c)
+  {
+    delete(static_cast<llvm::APFloat *>(c.data));
+    c.data = NULL;
+  }
+
+  bool
+  clang_ext_Float_isValid(CXFloat c)
+  {
+    return c.data != NULL;
+  }
+
+  CXString
+  clang_ext_Float_toString(CXFloat c)
+  {
+    if (auto f = static_cast<llvm::APFloat *>(c.data)) {
       llvm::SmallString<40> S;
-      e->getValue().toString(S);
+      f->toString(S);
       return cxstring_createDup(S.str());
     }
     return cxstring_createRef("");
+  }
+
+  double
+  clang_ext_Float_convertToDouble(CXFloat c)
+  {
+    if (auto f = static_cast<llvm::APFloat *>(c.data)) {
+      return f->convertToDouble();
+    }
+    return 0.;
   }
 
   CXString clang_ext_StringLiteral_GetString(CXCursor c) {
