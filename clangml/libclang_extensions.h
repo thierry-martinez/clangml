@@ -3,6 +3,10 @@
 CXString clang_ext_IntegerLiteral_getValueAsString(
   CXCursor c, unsigned Radix, bool isSigned);
 
+CXString clang_ext_FloatingLiteral_getValueAsString(CXCursor c);
+
+CXString clang_ext_StringLiteral_GetString(CXCursor c);
+
 enum clang_ext_UnaryOperatorKind {
 #define UNARY_OPERATION(Name, Spelling) CLANG_EXT_UNARY_OPERATOR_##Name,
 #include <clang/AST/OperationKinds.def>
@@ -86,5 +90,3 @@ enum clang_ext_CursorKind {
 
 enum clang_ext_CursorKind
 clang_ext_GetCursorKind(CXCursor c);
-
-CXString clang_ext_StringLiteral_GetString(CXCursor c);

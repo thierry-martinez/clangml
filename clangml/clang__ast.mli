@@ -350,12 +350,12 @@ let () =
       init = Some { desc = Expr (BinaryOperator {
         lhs = { desc = DeclRef { s = "i" }};
         kind = Assign;
-        rhs = { desc = IntegerLiteral { s = "0" }}})};
+        rhs = { desc = IntegerLiteral "0"}})};
       condition_variable = None;
       cond = Some { desc = Expr (BinaryOperator {
         lhs = { desc = DeclRef { s = "i" }};
         kind = LT;
-        rhs = { desc = IntegerLiteral { s = "4" }}})};
+        rhs = { desc = IntegerLiteral "4"}})};
       inc = Some { desc = Expr (UnaryOperator {
         kind = PostInc;
         operand = { desc = DeclRef { s = "i" }}})};
@@ -371,14 +371,14 @@ let () =
       init = Some { desc = Decl [{ desc = Var {
         name = "i";
         qual_type = { desc = OtherType { kind = Int }};
-        init = Some { desc = IntegerLiteral { s = "0" }}}}] };
+        init = Some { desc = IntegerLiteral "0"}}}] };
       condition_variable = None;
       cond = Some { desc = Expr (BinaryOperator {
         lhs = { desc =
           (* DeclRef is exposed since 7.0.0 *)
           (UnexposedExpr { s = "i" } | DeclRef { s = "i" })};
         kind = LT;
-        rhs = { desc = IntegerLiteral { s = "4" }}})};
+        rhs = { desc = IntegerLiteral "4"}})};
       inc = Some { desc = Expr (UnaryOperator {
         kind = PostInc;
         operand = { desc = DeclRef { s = "i" }}})};
@@ -394,7 +394,7 @@ let () =
       init = Some { desc = Decl [{ desc = Var {
         name = "i";
         qual_type = { desc = OtherType { kind = Int }};
-        init = Some { desc = IntegerLiteral { s = "0" }}}}] };
+        init = Some { desc = IntegerLiteral "0"}}}] };
       condition_variable = Some { desc = {
         name = "j";
         qual_type = { desc = OtherType { kind = Int }};
@@ -403,7 +403,7 @@ let () =
             (* DeclRef is exposed since 7.0.0 *)
             (UnexposedExpr { s = "i" } | DeclRef { s = "i" })};
           kind = Sub;
-          rhs = { desc = IntegerLiteral { s = "1" }}}}}};
+          rhs = { desc = IntegerLiteral "1"}}}}};
       cond = Some { desc = Expr (
         (* DeclRef is exposed since 7.0.0 *)
         (UnexposedExpr { s = "j" } | DeclRef { s = "j" }))};
@@ -467,19 +467,36 @@ let () =
 and expr = expr_desc node
 
 and expr_desc =
-  | IntegerLiteral of {
-      s : string;
-    }
+  | IntegerLiteral of string
 (** Integer literal
     {[
 let example = "0;"
 
 let () =
   match parse_statement_list example with
-  | [{ desc = Expr (IntegerLiteral { s = "0" })}] -> ()
+  | [{ desc = Expr (IntegerLiteral "0")}] -> ()
+  | _ -> assert false
+    ]} *)
+  | FloatingLiteral of string
+(** Floating literal
+    {[
+let example = "0.5;"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Expr (FloatingLiteral "0.5")}] -> ()
   | _ -> assert false
     ]} *)
   | StringLiteral of string
+(** String literal
+    {[
+let example = "\"Hello!\";"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Expr (StringLiteral "Hello!")}] -> ()
+  | _ -> assert false
+    ]} *)
   | UnaryOperator of {
       kind : clang_ext_unaryoperatorkind;
       operand : expr;
@@ -492,7 +509,7 @@ let () =
   match parse_statement_list example with
   | [{ desc = Expr (UnaryOperator {
       kind = Plus;
-      operand = { desc = IntegerLiteral { s = "1" }}})}] -> ()
+      operand = { desc = IntegerLiteral "1"}})}] -> ()
   | _ -> assert false
 
 let example = "int x; &x;"
@@ -550,7 +567,7 @@ let () =
         arrow = false;
         field = { desc = "i" }}};
       kind = Assign;
-      rhs = { desc = IntegerLiteral { s = "0" }}})}] -> ()
+      rhs = { desc = IntegerLiteral "0"}})}] -> ()
   | _ -> assert false
 
 let example = {| struct s { int i } *p; p->i = 0; |}
@@ -563,7 +580,7 @@ let () =
         arrow = true;
         field = { desc = "i" }}};
       kind = Assign;
-      rhs = { desc = IntegerLiteral { s = "0" }}})}] -> ()
+      rhs = { desc = IntegerLiteral "0"}})}] -> ()
   | _ -> assert false
     ]} *)
   | ArraySubscript of {
@@ -579,9 +596,9 @@ let () =
   | [{ desc = Decl _ }; { desc = Expr (BinaryOperator {
       lhs = { desc = ArraySubscript {
         lhs = { desc = DeclRef { s = "a" }};
-        rhs = { desc = IntegerLiteral { s = "0" }}}};
+        rhs = { desc = IntegerLiteral "0"}}};
       kind = Assign;
-      rhs = { desc = IntegerLiteral { s = "1" }}})}] -> ()
+      rhs = { desc = IntegerLiteral "1"}})}] -> ()
   | _ -> assert false
     ]} *)
   | UnexposedExpr of {

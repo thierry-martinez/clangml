@@ -83,13 +83,30 @@ static inline clang::QualType GetQualType(CXType CT) {
 extern "C" {
   CXString clang_ext_IntegerLiteral_getValueAsString(
       CXCursor c, unsigned Radix, bool isSigned) {
-    const clang::IntegerLiteral *e =
-      llvm::dyn_cast_or_null<clang::IntegerLiteral>(getCursorStmt(c));
-    if (e == NULL) {
-      return cxstring_createRef("");
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::IntegerLiteral>(getCursorStmt(c))) {
+      std::string s = e->getValue().toString(Radix, isSigned);
+      return cxstring_createDup(s);
     }
-    std::string s = e->getValue().toString(Radix, isSigned);
-    return cxstring_createDup(s);
+    return cxstring_createRef("");
+  }
+
+  CXString clang_ext_FloatingLiteral_getValueAsString(CXCursor c) {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::FloatingLiteral>(getCursorStmt(c))) {
+      llvm::SmallString<40> S;
+      e->getValue().toString(S);
+      return cxstring_createDup(S.str());
+    }
+    return cxstring_createRef("");
+  }
+
+  CXString clang_ext_StringLiteral_GetString(CXCursor c) {
+    const clang::Expr *e = getCursorExpr(c);
+    if (auto *m = llvm::dyn_cast_or_null<clang::StringLiteral>(e)) {
+      return cxstring_createDup(m->getString());
+    }
+    return cxstring_createRef("");
   }
 
   enum clang_ext_UnaryOperatorKind clang_ext_UnaryOperator_getOpcode(
@@ -259,13 +276,4 @@ extern "C" {
       return ECK_Unknown;
     }    
   }
-
-  CXString clang_ext_StringLiteral_GetString(CXCursor c) {
-    const clang::Expr *e = getCursorExpr(c);
-    if (auto *m = llvm::dyn_cast_or_null<clang::StringLiteral>(e)) {
-      return cxstring_createDup(m->getString());
-    }
-    return cxstring_createRef("");
-  }
-
 }

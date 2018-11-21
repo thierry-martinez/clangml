@@ -368,9 +368,11 @@ module Ast = struct
     and expr_desc_of_cursor cxcursor =
       match get_cursor_kind cxcursor with
       | IntegerLiteral ->
-          IntegerLiteral {
-            s = ext_integer_literal_get_value_as_string cxcursor 10 true;
-          }
+          let i = ext_integer_literal_get_value_as_string cxcursor 10 true in
+          IntegerLiteral i
+      | FloatingLiteral ->
+          let f = ext_floating_literal_get_value_as_string cxcursor in
+          FloatingLiteral f
       | StringLiteral ->
           StringLiteral (ext_string_literal_get_string cxcursor)
       | UnaryOperator ->
