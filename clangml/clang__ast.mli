@@ -32,53 +32,66 @@ type qual_type = {
     cxtype : cxtype;
     const : bool;
 (** [true] if the type is const-qualified.
+      {[
 let example = "const int one = 1;"
 
 let () =
   match parse_declaration_list example with
-  | [{ desc = Var { name = "one"; qual_type = {
-      const = true;
-      desc = OtherType { kind = Int }}}}] -> ()
+  | [{ desc = Var { name = "one";
+      qual_type = {
+        const = true;
+        desc = OtherType { kind = Int }};
+      init = Some { desc = IntegerLiteral one }}}] ->
+      assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
 
-let example = "int x = 1;"
+let example = "int x;"
 
 let () =
   match parse_declaration_list example with
-  | [{ desc = Var { name = "one"; qual_type = {
-      const = false;
-      desc = OtherType { kind = Int }}}}] -> ()
+  | [{ desc = Var { name = "x";
+      qual_type = {
+        const = false;
+        desc = OtherType { kind = Int }};
+      init = None }}] -> ()
   | _ -> assert false
+     ]}
 *)
     volatile : bool;
 (** [true] if the type is volatile-qualified.
-let example = "volatile int x = 1;"
+    {[
+let example = "volatile int x;"
 
 let () =
   match parse_declaration_list example with
-  | [{ desc = Var { name = "x"; qual_type = {
-      volatile = true;
-      desc = OtherType { kind = Int }}}}] -> ()
+  | [{ desc = Var { name = "x";
+      qual_type = {
+        volatile = true;
+        desc = OtherType { kind = Int }}}}] -> ()
   | _ -> assert false
 
-let example = "int x = 1;"
+let example = "int x;"
 
 let () =
   match parse_declaration_list example with
-  | [{ desc = Var { name = "x"; qual_type = {
-      volatile = false;
-      desc = OtherType { kind = Int }}}}] -> ()
+  | [{ desc = Var { name = "x";
+      qual_type = {
+        volatile = false;
+        desc = OtherType { kind = Int }}}}] -> ()
   | _ -> assert false
+    ]}
 *)
     restrict : bool;
 (** [true] if the type is restrict-qualified.
+    {[
 let example = "int * restrict x;"
 
 let () =
   match parse_declaration_list example with
   | [{ desc = Var { name = "x"; qual_type = {
       restrict = true;
-      desc = Pointer { desc = OtherType { kind = Int }}}}}] -> ()
+      desc = Pointer { pointee = {
+        desc = OtherType { kind = Int }}}}}}] -> ()
   | _ -> assert false
 
 let example = "int * x;"
@@ -87,8 +100,10 @@ let () =
   match parse_declaration_list example with
   | [{ desc = Var { name = "x"; qual_type = {
       restrict = false;
-      desc = OtherType { kind = Int } }}}] -> ()
+      desc = Pointer { pointee = {
+        desc = OtherType { kind = Int }}}}}}] -> ()
   | _ -> assert false
+    ]}
 *)
     desc : type_desc;
   }

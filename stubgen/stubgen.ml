@@ -168,6 +168,10 @@ let union_option a b =
       assert (a = b);
       Some a
 
+let union_type_interfaces a b =
+  { reinterpret_as = union_option a.reinterpret_as b.reinterpret_as;
+    destructor = union_option a.destructor b.destructor }
+
 let reinterpret_as type_spec type_interface =
   { type_interface with reinterpret_as = union_option type_interface.reinterpret_as (Some type_spec) }
 
@@ -296,12 +300,13 @@ let add_accessor field_name accessor_name stub_name struct_interface =
       struct_interface.accessors }
 
 type module_interface = {
+    types : (Pcre.regexp * type_interface) list;
     functions : (Pcre.regexp * function_interface) list;
     enums : (Pcre.regexp * enum_interface) list;
     structs : (Pcre.regexp * struct_interface) list;
   }
 
-let empty_module_interface = { functions = []; enums = []; structs = [] }
+let empty_module_interface = { types = []; functions = []; enums = []; structs = [] }
 
 let get_interface empty union list name =
   let add_rule accu (rex, interface) =
@@ -310,6 +315,10 @@ let get_interface empty union list name =
     else
       accu in
   List.fold_left add_rule empty list
+
+let get_type type_name module_interface =
+  get_interface empty_type_interface union_type_interfaces
+    module_interface.types type_name
 
 let get_function function_name module_interface =
   get_interface empty_function_interface union_function_interfaces
@@ -326,6 +335,10 @@ let get_constant constant_name enum_interface =
 let get_struct struct_name module_interface =
   get_interface empty_struct_interface union_struct_interfaces
     module_interface.structs struct_name
+
+let add_type type_name type_interface module_interface =
+  { module_interface with types =
+    (type_name, type_interface) :: module_interface.types }
 
 let add_function function_name function_interface module_interface =
   { module_interface with functions =
@@ -947,8 +960,21 @@ let print_return_c_of_ocaml context used_arg_names print_expression
         (Clang.get_type_spelling result_type)
     end
 
+let make_destructor context type_name ocaml_name type_interface =
+  match type_interface.destructor with
+  | None -> "custom_finalize_default"
+  | Some destructor ->
+      let finalizer = "finalize_" ^ ocaml_name in
+      Printf.fprintf context.chan_stubs "\
+static void %s(value v) {
+  %s;
+}
+" finalizer (destructor (Printf.sprintf "*((%s *) Data_custom_val(v))" type_name));
+      finalizer
+
 let translate_struct_decl' context cur typedef name =
   let interface = get_struct name context.module_interface in
+  let type_interface = get_type name context.module_interface in
   let ocaml_type_name = make_ocaml_type_name name in
   let fields_ref = ref [] in
   ignore (Clang.visit_children cur (fun cur par ->
@@ -996,15 +1022,17 @@ let translate_struct_decl' context cur typedef name =
     let ptype_kind =
       match Lazy.force record_fields with
       | None ->
+          let destructor = make_destructor context type_name ocaml_type_name type_interface in
           Printf.fprintf context.chan_stubs
-            "DECLARE_OPAQUE(%s, %s, %s, %s)\n\n"
+            "DECLARE_OPAQUE(%s, %s, %s, %s, %s)\n\n"
             type_name ocaml_type_name (name_of_c_of_ocaml ocaml_type_name)
-            (name_of_ocaml_of_c ocaml_type_name);
+            (name_of_ocaml_of_c ocaml_type_name)
+            destructor;
           Parsetree.Ptype_abstract
       | Some fields ->
           let nb_fields = List.length fields in
           Printf.fprintf context.chan_stubs "\
-static value __attribute__ ((unused))
+static value __attribute__((unused))
 %s(%s v)
 {
   CAMLparam0();
@@ -1034,7 +1062,7 @@ static value __attribute__ ((unused))
   CAMLreturn(ocaml);
 }
 
-static %s __attribute__ ((unused))
+static %s __attribute__((unused))
 %s(value ocaml)
 {
   CAMLparam1(ocaml);
@@ -1274,13 +1302,17 @@ let translate_typedef_decl context cur =
   then
     if not (String_hashtbl.mem context.type_table name) then
     begin
+      let type_interface = get_type name context.module_interface in
+
       let ocaml_type_name = make_ocaml_type_name name in
       let common_info = make_common_type_info ocaml_type_name in
       let make_decl () =
+        let destructor = make_destructor context name ocaml_type_name type_interface in
         Printf.fprintf context.chan_stubs
-          "DECLARE_OPAQUE(%s, %s, %s, %s)\n\n"
+          "DECLARE_OPAQUE(%s, %s, %s, %s, %s)\n\n"
           name ocaml_type_name (name_of_c_of_ocaml ocaml_type_name)
-          (name_of_ocaml_of_c ocaml_type_name);
+          (name_of_ocaml_of_c ocaml_type_name)
+          destructor;
         let type_decl = type_declaration (loc ocaml_type_name) in
         add_type_declaration context [type_decl] in
       String_hashtbl.add context.type_table name
@@ -1674,7 +1706,13 @@ let main cflags llvm_config prefix =
   let clang_options = cflags @ String.split_on_char ' ' llvm_cflags @ ["-I"; List.fold_left Filename.concat llvm_prefix ["lib"; "clang"; llvm_version; "include"]] in
   let module_interface =
     empty_module_interface |>
-    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|clang_disposeString|clang_disposeStringSet|clang_VirtualFileOverlay_writeToBuffer|clang_free|constructUSR|clang_executeOnThread|clang_getDiagnosticCategoryName|^clang_getDefinitionSpellingAndExtent$|^clang_disposeOverriddenCursors$|^clang_disposeSourceRangeList$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_disposeTokens$|^clang_annotateTokens$|^clang_getFileUniqueID$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_disposeCXPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_disposeCodeCompleteResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$") hidden_function_interface |>
+    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|clang_VirtualFileOverlay_writeToBuffer|clang_free|constructUSR|clang_executeOnThread|clang_getDiagnosticCategoryName|^clang_getDefinitionSpellingAndExtent$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_annotateTokens$|^clang_getFileUniqueID$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$") hidden_function_interface |>
+    add_type (Pcre.regexp "^CXInt$")
+      (empty_type_interface |>
+       make_destructor "clang_ext_Int_dispose") |>
+    add_type (Pcre.regexp "^CXFloat$")
+      (empty_type_interface |>
+       make_destructor "clang_ext_Float_dispose") |>
     add_function (Pcre.regexp "^clang_") (rename_function rename_clang) |>
     add_function (Pcre.regexp "^clang_createTranslationUnitFromSourceFile$")
       (empty_function_interface |>

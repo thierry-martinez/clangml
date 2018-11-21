@@ -42,10 +42,10 @@ failwith_fmt(const char* format, ...)
     failwith(buffer);
 }
 
-#define DECLARE_OPAQUE(C_TYPE, OCAML_TYPE, C_OF_OCAML, OCAML_OF_C)      \
+#define DECLARE_OPAQUE(C_TYPE, OCAML_TYPE, C_OF_OCAML, OCAML_OF_C, DESTRUCTOR) \
   struct custom_operations OCAML_TYPE##_ops = {                         \
     (char *) #C_TYPE,                                                   \
-    custom_finalize_default,                                            \
+    DESTRUCTOR,                                                         \
     custom_compare_default,                                             \
     custom_compare_ext_default,                                         \
     custom_hash_default,                                                \
@@ -53,7 +53,7 @@ failwith_fmt(const char* format, ...)
     custom_deserialize_default                                          \
   };                                                                    \
                                                                         \
-  static value                                                          \
+  static value __attribute__((unused))                                  \
   OCAML_OF_C(C_TYPE v)                                                  \
   {                                                                     \
     CAMLparam0();                                                       \
@@ -64,7 +64,7 @@ failwith_fmt(const char* format, ...)
     CAMLreturn(ocaml);                                                  \
   }                                                                     \
                                                                         \
-  static C_TYPE                                                         \
+  static C_TYPE __attribute__((unused))                                 \
   C_OF_OCAML(value ocaml)                                               \
   {                                                                     \
     CAMLparam1(ocaml);                                                  \
