@@ -29,17 +29,21 @@ module Ast : sig
     include Clang__ast
   end
 
-  val of_cxtype : ?ignore_paren:bool -> ?ignore_implicit_cast:bool -> cxtype ->
-    qual_type
+  val of_cxtype :
+      ?ignore_implicit_cast:bool -> ?ignore_paren:bool -> ?ignore_paren_in_types:bool ->
+        cxtype -> qual_type
 
-  val expr_of_cxcursor : ?ignore_paren:bool -> ?ignore_implicit_cast:bool ->
-    cxcursor -> expr
+  val expr_of_cxcursor :
+      ?ignore_implicit_cast:bool -> ?ignore_paren:bool -> ?ignore_paren_in_types:bool ->
+        cxcursor -> expr
 
-  val stmt_of_cxcursor : ?ignore_paren:bool -> ?ignore_implicit_cast:bool ->
-    cxcursor -> stmt
+  val stmt_of_cxcursor :
+      ?ignore_implicit_cast:bool -> ?ignore_paren:bool -> ?ignore_paren_in_types:bool ->
+        cxcursor -> stmt
 
-  val of_cxtranslationunit : ?ignore_paren:bool -> ?ignore_implicit_cast:bool ->
-    cxtranslationunit -> translation_unit
+  val of_cxtranslationunit :
+      ?ignore_implicit_cast:bool -> ?ignore_paren:bool -> ?ignore_paren_in_types:bool ->
+        cxtranslationunit -> translation_unit
 end
 
 val parse_string : ?index:cxindex -> ?filename:string ->

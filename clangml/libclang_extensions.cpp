@@ -80,6 +80,11 @@ static inline clang::QualType GetQualType(CXType CT) {
   return clang::QualType::getFromOpaquePtr(CT.data[0]);
 }
 
+// Copied from tools/libclang/CXType.cpp
+static inline CXTranslationUnit GetTU(CXType CT) {
+  return static_cast<CXTranslationUnit>(CT.data[1]);
+}
+
 CXInt Invalid_CXInt = { NULL };
 
 static inline CXInt
@@ -407,14 +412,51 @@ extern "C" {
   }
 
   enum clang_ext_CursorKind
-  clang_ext_GetCursorKind(CXCursor c) {
+  clang_ext_GetCursorKind(CXCursor c)
+  {
     const clang::Stmt *s = getCursorStmt(c);
-    #define CASE(X) case clang::Stmt::X##Class: return ECK_##X;
+    #define CASE(X) case clang::Stmt::X##Class: return ECK_##X
     switch (s->getStmtClass()) {
-    CASE(ImplicitCastExpr)
-    CASE(BinaryConditionalOperator)
+    CASE(ImplicitCastExpr);
+    CASE(BinaryConditionalOperator);
     default:
       return ECK_Unknown;
-    }    
+    }
+    #undef CASE
   }
+
+  enum clang_ext_TypeKind
+  clang_ext_GetTypeKind(CXType c)
+  {
+    clang::QualType T = GetQualType(c);
+    if (auto TP = T.getTypePtrOrNull()) {
+      #define CASE(X) case clang::Type::X: return ETK_##X
+      switch (TP->getTypeClass()) {
+      CASE(Paren);
+      default:
+        return ETK_Unknown;
+      }
+      #undef CASE
+    }
+    return ETK_Invalid;
+  }
+}
+
+static CXType
+MakeCXType(clang::QualType T, CXTranslationUnit TU)
+{
+  clang::OpaqueValueExpr e(
+    clang::SourceLocation::getFromRawEncoding(0), T, clang::VK_RValue);
+  CXCursor C = { CXCursor_FirstExpr, 0, { NULL, &e, TU } };
+  return clang_getCursorType(C);
+}
+
+CXType
+clang_ext_GetInnerType(CXType c)
+{
+  clang::QualType T = GetQualType(c);
+  if (auto *PTT = T->getAs<clang::ParenType>()) {
+    return MakeCXType(PTT->getInnerType(), GetTU(c));
+  }
+  return c;
 }

@@ -143,3 +143,15 @@ enum clang_ext_CursorKind {
 
 enum clang_ext_CursorKind
 clang_ext_GetCursorKind(CXCursor c);
+
+enum clang_ext_TypeKind {
+  ETK_Invalid,
+  ETK_Paren,
+  ETK_Unknown
+};
+
+enum clang_ext_TypeKind
+clang_ext_GetTypeKind(CXType c);
+
+CXType
+clang_ext_GetInnerType(CXType c);
