@@ -5502,3 +5502,55 @@ clang_ext_GetCursorKind_wrapper(value c_ocaml)
   }
 }
 
+enum clang_ext_TypeKind
+Clang_ext_typekind_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return ETK_Invalid;
+  case 1: return ETK_Paren;
+  case 2: return ETK_Unknown;
+  }
+  failwith_fmt("invalid value for Clang_ext_typekind_val: %d", Int_val(ocaml));
+  return ETK_Invalid;
+}
+
+value
+Val_clang_ext_typekind(enum clang_ext_TypeKind v)
+{
+  switch (v) {
+  case ETK_Invalid: return Val_int(0);
+  case ETK_Paren: return Val_int(1);
+  case ETK_Unknown: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_typekind: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_GetTypeKind_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXType c;
+  c = Cxtype_val(c_ocaml);
+  enum clang_ext_TypeKind result = clang_ext_GetTypeKind(c);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_typekind(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_GetInnerType_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXType c;
+  c = Cxtype_val(c_ocaml);
+  CXType result = clang_ext_GetInnerType(c);
+  {
+    CAMLlocal1(data);
+    data = Val_cxtype(result);
+    CAMLreturn(data);
+  }
+}
+

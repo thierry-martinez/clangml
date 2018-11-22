@@ -1191,3 +1191,11 @@ type clang_ext_cursorkind =
   | Unknown 
 external ext_get_cursor_kind :
   cxcursor -> clang_ext_cursorkind = "clang_ext_GetCursorKind_wrapper"
+type clang_ext_typekind =
+  | Invalid 
+  | Paren 
+  | Unknown 
+external ext_get_type_kind :
+  cxtype -> clang_ext_typekind = "clang_ext_GetTypeKind_wrapper"
+external ext_get_inner_type :
+  cxtype -> cxtype = "clang_ext_GetInnerType_wrapper"
