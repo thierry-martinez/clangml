@@ -59,7 +59,8 @@ pipeline {
                     ).trim()
                     sh 'git checkout origin/bootstrap'
                     sh 'tar -xf src/bootstrap.tar.xz'
-                    sh "git commit -a -m 'generated files for commit $commit' || true"
+                    sh 'git add bootstrap'
+                    sh "git commit -m 'generated files for commit $commit' || true"
                     sh 'git push origin HEAD:bootstrap'
                 }
             }
