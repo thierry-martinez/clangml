@@ -57,16 +57,19 @@ clang_ext_Float_toString(CXFloat f);
 double
 clang_ext_Float_convertToDouble(CXFloat f);
 
-CXString clang_ext_StringLiteral_GetString(CXCursor c);
+CXString
+clang_ext_StringLiteral_GetString(CXCursor c);
 
 enum clang_ext_UnaryOperatorKind {
 #define UNARY_OPERATION(Name, Spelling) CLANG_EXT_UNARY_OPERATOR_##Name,
 #include <clang/AST/OperationKinds.def>
 };
 
-enum clang_ext_UnaryOperatorKind clang_ext_UnaryOperator_getOpcode(CXCursor c);
+enum clang_ext_UnaryOperatorKind
+clang_ext_UnaryOperator_getOpcode(CXCursor c);
 
-CXString clang_ext_UnaryOperator_getOpcodeSpelling(
+CXString
+clang_ext_UnaryOperator_getOpcodeSpelling(
   enum clang_ext_UnaryOperatorKind Kind);
 
 enum clang_ext_BinaryOperatorKind {
@@ -74,10 +77,12 @@ enum clang_ext_BinaryOperatorKind {
 #include <clang/AST/OperationKinds.def>
 };
 
-enum clang_ext_BinaryOperatorKind clang_ext_BinaryOperator_getOpcode(
+enum clang_ext_BinaryOperatorKind
+clang_ext_BinaryOperator_getOpcode(
   CXCursor c);
 
-CXString clang_ext_BinaryOperator_getOpcodeSpelling(
+CXString
+clang_ext_BinaryOperator_getOpcodeSpelling(
   enum clang_ext_BinaryOperatorKind Kind);
 
 enum clang_ext_ForStmtChild {
@@ -87,7 +92,8 @@ enum clang_ext_ForStmtChild {
   CLANG_EXT_FOR_STMT_INC = 8
 };
 
-unsigned clang_ext_ForStmt_getChildrenSet(CXCursor c);
+unsigned
+clang_ext_ForStmt_getChildrenSet(CXCursor c);
 
 enum clang_ext_IfStmtChild {
   CLANG_EXT_IF_STMT_INIT = 1,
@@ -95,20 +101,29 @@ enum clang_ext_IfStmtChild {
   CLANG_EXT_IF_STMT_ELSE = 4
 };
 
-unsigned clang_ext_IfStmt_getChildrenSet(CXCursor c);
+unsigned
+clang_ext_IfStmt_getChildrenSet(CXCursor c);
+
+CXCursor
+clang_ext_IfStmt_getInit(CXCursor c);
 
 enum clang_ext_SwitchStmtChild {
   CLANG_EXT_SWITCH_STMT_INIT = 1,
   CLANG_EXT_SWITCH_STMT_CONDITION_VARIABLE = 2
 };
 
-unsigned clang_ext_SwitchStmt_getChildrenSet(CXCursor c);
+unsigned
+clang_ext_SwitchStmt_getChildrenSet(CXCursor c);
+
+CXCursor
+clang_ext_SwitchStmt_getInit(CXCursor c);
 
 enum clang_ext_WhileStmtChild {
   CLANG_EXT_WHILE_STMT_CONDITION_VARIABLE = 1
 };
 
-unsigned clang_ext_WhileStmt_getChildrenSet(CXCursor c);
+unsigned
+clang_ext_WhileStmt_getChildrenSet(CXCursor c);
 
 /* From clang/AST/Type.h */
 enum clang_ext_ElaboratedTypeKeyword {
@@ -124,16 +139,21 @@ enum clang_ext_ElaboratedTypeKeyword {
 enum clang_ext_ElaboratedTypeKeyword
 clang_ext_ElaboratedType_getKeyword(CXType c);
 
-CXString clang_ext_ElaboratedType_getKeywordSpelling(
+CXString
+clang_ext_ElaboratedType_getKeywordSpelling(
   enum clang_ext_ElaboratedTypeKeyword keyword);
 
-bool clang_ext_VarDecl_hasInit(CXCursor c);
+bool
+clang_ext_VarDecl_hasInit(CXCursor c);
 
-bool clang_ext_MemberRefExpr_isArrow(CXCursor c);
+bool
+clang_ext_MemberRefExpr_isArrow(CXCursor c);
 
-CXString clang_ext_Stmt_GetClassName(CXCursor c);
+CXString
+clang_ext_Stmt_GetClassName(CXCursor c);
 
-int clang_ext_Stmt_GetClassKind(CXCursor c);
+int
+clang_ext_Stmt_GetClassKind(CXCursor c);
 
 enum clang_ext_CursorKind {
   ECK_ImplicitCastExpr,

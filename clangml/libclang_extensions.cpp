@@ -2,6 +2,8 @@
 #include <clang/AST/Stmt.h>
 #include <clang/AST/Expr.h>
 #include <clang/AST/Type.h>
+#include "clang/Frontend/ASTUnit.h"
+#include "clang/Basic/SourceLocation.h"
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/ErrorHandling.h>
 
@@ -23,7 +25,9 @@ enum CXStringFlag {
 };
 
 // Copied from clang source tree: tools/libclang/CXString.cpp
-static CXString cxstring_createRef(const char *String) {
+static CXString
+cxstring_createRef(const char *String)
+{
   CXString Str;
   Str.data = String;
   Str.private_flags = CXS_Unmanaged;
@@ -31,7 +35,9 @@ static CXString cxstring_createRef(const char *String) {
 }
 
 // Copied from clang source tree: tools/libclang/CXString.cpp
-CXString cxstring_createDup(llvm::StringRef String) {
+CXString
+cxstring_createDup(llvm::StringRef String)
+{
   CXString Result;
   char *Spelling = static_cast<char *>(malloc(String.size() + 1));
   if (Spelling == NULL) {
@@ -57,12 +63,16 @@ static CXString cxstring_createDupFromString(std::string &s) {
 */
 
 // Copied from clang source tree: tools/libclang/CXCursor.cpp
-static const clang::Decl *getCursorDecl(CXCursor Cursor) {
+static const clang::Decl *
+getCursorDecl(CXCursor Cursor)
+{
   return static_cast<const clang::Decl *>(Cursor.data[0]);
 }
 
 // Copied from clang source tree: tools/libclang/CXCursor.cpp
-static const clang::Stmt *getCursorStmt(CXCursor Cursor) {
+static const clang::Stmt *
+getCursorStmt(CXCursor Cursor)
+{
   if (Cursor.kind == CXCursor_ObjCSuperClassRef ||
       Cursor.kind == CXCursor_ObjCProtocolRef ||
       Cursor.kind == CXCursor_ObjCClassRef)
@@ -72,18 +82,52 @@ static const clang::Stmt *getCursorStmt(CXCursor Cursor) {
 }
 
 // Copied from clang source tree: tools/libclang/CXCursor.cpp
-static const clang::Expr *getCursorExpr(CXCursor Cursor) {
+static const clang::Expr *
+getCursorExpr(CXCursor Cursor)
+{
   return llvm::dyn_cast_or_null<clang::Expr>(getCursorStmt(Cursor));
 }
 
-// From tools/libclang/CXType.cpp
-static inline clang::QualType GetQualType(CXType CT) {
+// From clang source tree: tools/libclang/CXType.cpp
+static inline clang::QualType
+GetQualType(CXType CT)
+{
   return clang::QualType::getFromOpaquePtr(CT.data[0]);
 }
 
-// Copied from tools/libclang/CXType.cpp
-static inline CXTranslationUnit GetTU(CXType CT) {
+// Copied from clang source tree: tools/libclang/CXType.cpp
+static inline CXTranslationUnit
+GetTU(CXType CT)
+{
   return static_cast<CXTranslationUnit>(CT.data[1]);
+}
+
+// Copied from clang source tree: tools/libclang/CXCursor.cpp
+static CXTranslationUnit
+getCursorTU(CXCursor Cursor)
+{
+  return static_cast<CXTranslationUnit>(const_cast<void*>(Cursor.data[2]));
+}
+
+// From clang source tree: tools/libclang/CXTranslationUnit.h
+struct CXTranslationUnitImpl {
+  void *CIdx;
+  clang::ASTUnit *TheASTUnit;
+  void *StringPool;
+  void *Diagnostics;
+  void *OverridenCursorsPool;
+  void *CommentToXML;
+  unsigned ParsingOptions;
+  std::vector<std::string> Arguments;
+};
+
+// From clang source tree: tools/libclang/CXTranslationUnit.h
+static inline clang::ASTUnit *
+getASTUnit(CXTranslationUnit TU)
+{
+  if (!TU)
+    return nullptr;
+  return TU->TheASTUnit;
 }
 
 CXInt Invalid_CXInt = { NULL };
@@ -104,6 +148,71 @@ MakeCXFloat(const llvm::APFloat &value)
   CXFloat result;
   result.data = new llvm::APFloat(value);
   return result;
+}
+
+/* Copied from clang source tree: tools/libclang/CXCursor.cpp */
+static CXCursor
+MakeCXCursorInvalid(CXCursorKind K, CXTranslationUnit TU)
+{
+  assert(K >= CXCursor_FirstInvalid && K <= CXCursor_LastInvalid);
+  CXCursor C = { K, 0, { nullptr, nullptr, TU } };
+  return C;
+}
+
+/* MakeCXCursor is not exported in libclang.
+   The following implementation makes a (not well-formed) cursor on an
+   OpaqueValueExpr with E as source expression. Visiting the (single) child of
+   this cursor calls libclang's MakeCXCursor on E.
+*/
+enum CXChildVisitResult
+MakeCXCursor_visitor(CXCursor cursor, CXCursor parent, CXClientData client_data)
+{
+  *((CXCursor *) client_data) = cursor;
+  return CXChildVisit_Break;
+}
+
+static CXCursor
+MakeCXCursor(clang::Expr *E, CXTranslationUnit TU)
+{
+  clang::OpaqueValueExpr OV(
+    clang::SourceLocation::getFromRawEncoding(0), E->getType(),
+    clang::VK_RValue, clang::OK_Ordinary, E);
+  CXCursor C = { CXCursor_FirstExpr, 0, { NULL, &OV, TU }};
+  CXCursor Result;
+  clang_visitChildren(C, MakeCXCursor_visitor, &Result);
+  return Result;
+}
+
+/* The following implementation makes a (not well-formed) cursor on a
+   compound statement with S as substatement. Visiting the (single) child of
+   this cursor calls libclang's MakeCXCursor on S.
+*/
+static CXCursor
+MakeCXCursor(const clang::Stmt *S, CXTranslationUnit TU)
+{
+  clang::CompoundStmt *CS = clang::CompoundStmt::Create(
+    getASTUnit(TU)->getASTContext(), (clang::Stmt *) S,
+    clang::SourceLocation::getFromRawEncoding(0),
+    clang::SourceLocation::getFromRawEncoding(0));
+  CXCursor C = { CXCursor_CompoundStmt, 0, { NULL, CS, TU }};
+  CXCursor Result;
+  clang_visitChildren(C, MakeCXCursor_visitor, &Result);
+  /* TODO: How to free CS? */
+  return Result;
+}
+
+/* MakeCXType is not exported in libclang.
+   The following implementation makes a (not well-formed) cursor on an
+   OpaqueValueExpr of type T. Querying the type of this cursor calls
+   libclang's MakeCXType on T.
+*/
+static CXType
+MakeCXType(clang::QualType T, CXTranslationUnit TU)
+{
+  clang::OpaqueValueExpr OV(
+    clang::SourceLocation::getFromRawEncoding(0), T, clang::VK_RValue);
+  CXCursor C = { CXCursor_FirstExpr, 0, { NULL, &OV, TU }};
+  return clang_getCursorType(C);
 }
 
 extern "C" {
@@ -246,26 +355,30 @@ extern "C" {
     return 0.;
   }
 
-  CXString clang_ext_StringLiteral_GetString(CXCursor c) {
+  CXString
+  clang_ext_StringLiteral_GetString(CXCursor c)
+  {
     const clang::Expr *e = getCursorExpr(c);
-    if (auto *m = llvm::dyn_cast_or_null<clang::StringLiteral>(e)) {
+    if (auto m = llvm::dyn_cast_or_null<clang::StringLiteral>(e)) {
       return cxstring_createDup(m->getString());
     }
     return cxstring_createRef("");
   }
 
-  enum clang_ext_UnaryOperatorKind clang_ext_UnaryOperator_getOpcode(
-      CXCursor c) {
-    const clang::UnaryOperator *e =
-      llvm::dyn_cast_or_null<clang::UnaryOperator>(getCursorStmt(c));
-    if (e == NULL) {
-      return static_cast<clang_ext_UnaryOperatorKind>(0);
+  enum clang_ext_UnaryOperatorKind
+  clang_ext_UnaryOperator_getOpcode(CXCursor c)
+  {
+    if (auto Op =
+        llvm::dyn_cast_or_null<clang::UnaryOperator>(getCursorStmt(c))) {
+      return static_cast<clang_ext_UnaryOperatorKind>(Op->getOpcode());
     }
-    return static_cast<clang_ext_UnaryOperatorKind>(e->getOpcode());
+    return static_cast<clang_ext_UnaryOperatorKind>(0);
   }
 
-  CXString clang_ext_UnaryOperator_getOpcodeSpelling(
-      enum clang_ext_UnaryOperatorKind Kind) {
+  CXString
+  clang_ext_UnaryOperator_getOpcodeSpelling(
+      enum clang_ext_UnaryOperatorKind Kind)
+  {
     switch (Kind) {
 #define UNARY_OPERATION(Name, Spelling)        \
       case CLANG_EXT_UNARY_OPERATOR_##Name:     \
@@ -276,18 +389,20 @@ extern "C" {
     return cxstring_createRef("");
   }
 
-  enum clang_ext_BinaryOperatorKind clang_ext_BinaryOperator_getOpcode(
-      CXCursor c) {
-    const clang::BinaryOperator *e =
-      llvm::dyn_cast_or_null<clang::BinaryOperator>(getCursorStmt(c));
-    if (e == NULL) {
-      return static_cast<clang_ext_BinaryOperatorKind>(0);
+  enum clang_ext_BinaryOperatorKind
+  clang_ext_BinaryOperator_getOpcode(CXCursor c)
+  {
+    if (auto Op =
+        llvm::dyn_cast_or_null<clang::BinaryOperator>(getCursorStmt(c))) {
+      return static_cast<clang_ext_BinaryOperatorKind>(Op->getOpcode());
     }
-    return static_cast<clang_ext_BinaryOperatorKind>(e->getOpcode());
+    return static_cast<clang_ext_BinaryOperatorKind>(0);
   }
 
-  CXString clang_ext_BinaryOperator_getOpcodeSpelling(
-      enum clang_ext_BinaryOperatorKind Kind) {
+  CXString
+  clang_ext_BinaryOperator_getOpcodeSpelling(
+      enum clang_ext_BinaryOperatorKind Kind)
+  {
     switch (Kind) {
 #define BINARY_OPERATION(Name, Spelling)        \
       case CLANG_EXT_BINARY_OPERATOR_##Name:     \
@@ -298,78 +413,98 @@ extern "C" {
     return cxstring_createRef("");
   }
 
-  unsigned clang_ext_ForStmt_getChildrenSet(CXCursor c) {
-    const clang::ForStmt *e =
-      llvm::dyn_cast_or_null<clang::ForStmt>(getCursorStmt(c));
-    if (e == NULL) {
-      return 0;
+  unsigned
+  clang_ext_ForStmt_getChildrenSet(CXCursor c)
+  {
+    if (auto S = llvm::dyn_cast_or_null<clang::ForStmt>(getCursorStmt(c))) {
+      unsigned Result = 0;
+      if (S->getInit()) {
+        Result |= CLANG_EXT_FOR_STMT_INIT;
+      }
+      if (S->getConditionVariable()) {
+        Result |= CLANG_EXT_FOR_STMT_CONDITION_VARIABLE;
+      }
+      if (S->getCond()) {
+        Result |= CLANG_EXT_FOR_STMT_COND;
+      }
+      if (S->getInc()) {
+        Result |= CLANG_EXT_FOR_STMT_INC;
+      }
+      return Result;
     }
-    unsigned Result = 0;
-    if (e->getInit()) {
-      Result |= CLANG_EXT_FOR_STMT_INIT;
-    }
-    if (e->getConditionVariable()) {
-      Result |= CLANG_EXT_FOR_STMT_CONDITION_VARIABLE;
-    }
-    if (e->getCond()) {
-      Result |= CLANG_EXT_FOR_STMT_COND;
-    }
-    if (e->getInc()) {
-      Result |= CLANG_EXT_FOR_STMT_INC;
-    }
-    return Result;
+    return 0;
   }
 
-  unsigned clang_ext_IfStmt_getChildrenSet(CXCursor c) {
-    const clang::IfStmt *e =
-      llvm::dyn_cast_or_null<clang::IfStmt>(getCursorStmt(c));
-    if (e == NULL) {
-      return 0;
+  unsigned
+  clang_ext_IfStmt_getChildrenSet(CXCursor c)
+  {
+    if (auto S = llvm::dyn_cast_or_null<clang::IfStmt>(getCursorStmt(c))) {
+      unsigned Result = 0;
+      if (S->getInit()) {
+        Result |= CLANG_EXT_IF_STMT_INIT;
+      }
+      if (S->getConditionVariable()) {
+        Result |= CLANG_EXT_IF_STMT_CONDITION_VARIABLE;
+      }
+      if (S->getElse()) {
+        Result |= CLANG_EXT_IF_STMT_ELSE;
+      }
+      return Result;
     }
-    unsigned Result = 0;
-    if (e->getInit()) {
-      Result |= CLANG_EXT_IF_STMT_INIT;
-    }
-    if (e->getConditionVariable()) {
-      Result |= CLANG_EXT_IF_STMT_CONDITION_VARIABLE;
-    }
-    if (e->getElse()) {
-      Result |= CLANG_EXT_IF_STMT_ELSE;
-    }
-    return Result;
+    return 0;
   }
 
-  unsigned clang_ext_SwitchStmt_getChildrenSet(CXCursor c) {
-    const clang::SwitchStmt *e =
-      llvm::dyn_cast_or_null<clang::SwitchStmt>(getCursorStmt(c));
-    if (e == NULL) {
-      return 0;
+  CXCursor
+  clang_ext_IfStmt_getInit(CXCursor c)
+  {
+    if (auto S = llvm::dyn_cast_or_null<clang::IfStmt>(getCursorStmt(c))) {
+      return MakeCXCursor(S->getInit(), getCursorTU(c));
     }
-    unsigned Result = 0;
-    if (e->getInit()) {
-      Result |= CLANG_EXT_SWITCH_STMT_INIT;
-    }
-    if (e->getConditionVariable()) {
-      Result |= CLANG_EXT_SWITCH_STMT_CONDITION_VARIABLE;
-    }
-    return Result;
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
   }
 
-  unsigned clang_ext_WhileStmt_getChildrenSet(CXCursor c) {
-    const clang::WhileStmt *e =
-      llvm::dyn_cast_or_null<clang::WhileStmt>(getCursorStmt(c));
-    if (e == NULL) {
-      return 0;
+  unsigned
+  clang_ext_SwitchStmt_getChildrenSet(CXCursor c)
+  {
+    if (auto S = llvm::dyn_cast_or_null<clang::SwitchStmt>(getCursorStmt(c))) {
+      unsigned Result = 0;
+      if (S->getInit()) {
+        Result |= CLANG_EXT_SWITCH_STMT_INIT;
+      }
+      if (S->getConditionVariable()) {
+        Result |= CLANG_EXT_SWITCH_STMT_CONDITION_VARIABLE;
+      }
+      return Result;
     }
-    unsigned Result = 0;
-    if (e->getConditionVariable()) {
-      Result |= CLANG_EXT_WHILE_STMT_CONDITION_VARIABLE;
-    }
-    return Result;
+    return 0;
   }
 
-  enum clang_ext_ElaboratedTypeKeyword clang_ext_ElaboratedType_getKeyword(
-      CXType CT) {
+  CXCursor
+  clang_ext_SwitchStmt_getInit(CXCursor c)
+  {
+    if (auto S = llvm::dyn_cast_or_null<clang::SwitchStmt>(getCursorStmt(c))) {
+      return MakeCXCursor(S->getInit(), getCursorTU(c));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  unsigned
+  clang_ext_WhileStmt_getChildrenSet(CXCursor c)
+  {
+    if (auto S = llvm::dyn_cast_or_null<clang::WhileStmt>(getCursorStmt(c))) {
+      unsigned Result = 0;
+      if (S->getConditionVariable()) {
+        Result |= CLANG_EXT_WHILE_STMT_CONDITION_VARIABLE;
+      }
+      return Result;
+    }
+    return 0;
+  }
+
+  enum clang_ext_ElaboratedTypeKeyword
+  clang_ext_ElaboratedType_getKeyword(
+      CXType CT)
+  {
     clang::QualType T = GetQualType(CT);
     const clang::Type *TP = T.getTypePtrOrNull();
     if (TP && TP->getTypeClass() == clang::Type::Elaborated) {
@@ -379,35 +514,43 @@ extern "C" {
     return static_cast<enum clang_ext_ElaboratedTypeKeyword>(0);
   }
 
-  CXString clang_ext_ElaboratedType_getKeywordSpelling(
-      enum clang_ext_ElaboratedTypeKeyword keyword) {
+  CXString
+  clang_ext_ElaboratedType_getKeywordSpelling(
+      enum clang_ext_ElaboratedTypeKeyword keyword)
+  {
     return cxstring_createDup(clang::TypeWithKeyword::getKeywordName(
       static_cast<clang::ElaboratedTypeKeyword>(keyword)));
   }
 
-  bool clang_ext_VarDecl_hasInit(CXCursor c) {
-    const clang::VarDecl *d =
-      llvm::dyn_cast_or_null<clang::VarDecl>(getCursorDecl(c));
-    if (d == NULL) {
-      return false;
+  bool
+  clang_ext_VarDecl_hasInit(CXCursor c)
+  {
+    if (auto D = llvm::dyn_cast_or_null<clang::VarDecl>(getCursorDecl(c))) {
+      return D->getInit() != NULL;
     }
-    return d->getInit() != NULL;
+    return false;
   }
 
-  bool clang_ext_MemberRefExpr_isArrow(CXCursor c) {
+  bool
+  clang_ext_MemberRefExpr_isArrow(CXCursor c)
+  {
     const clang::Expr *e = getCursorExpr(c);
-    if (auto *m = llvm::dyn_cast_or_null<clang::MemberExpr>(e)) {
+    if (auto m = llvm::dyn_cast_or_null<clang::MemberExpr>(e)) {
       return m->isArrow();
     }
     return false;
   }
 
-  CXString clang_ext_Stmt_GetClassName(CXCursor c) {
+  CXString
+  clang_ext_Stmt_GetClassName(CXCursor c)
+  {
     const clang::Stmt *s = getCursorStmt(c);
     return cxstring_createRef(s->getStmtClassName());
   }
 
-  int clang_ext_Stmt_GetClassKind(CXCursor c) {
+  int
+  clang_ext_Stmt_GetClassKind(CXCursor c)
+  {
     const clang::Stmt *s = getCursorStmt(c);
     return s->getStmtClass();
   }
@@ -441,75 +584,29 @@ extern "C" {
     }
     return ETK_Invalid;
   }
-}
 
-/* Copied from clang source tree: tools/libclang/CXCursor.cpp */
-static CXCursor
-MakeCXCursorInvalid(CXCursorKind K, CXTranslationUnit TU) {
-  assert(K >= CXCursor_FirstInvalid && K <= CXCursor_LastInvalid);
-  CXCursor C = { K, 0, { nullptr, nullptr, TU } };
-  return C;
-}
-
-/* MakeCXCursor is not exported in libclang.
-   The following implementation makes a (not well-formed) cursor on an
-   OpaqueValueExpr with E as source expression. Visiting the (single) child of
-   this cursor calls libclang's MakeCXCursor on E.
- */
-enum CXChildVisitResult
-MakeCXCursor_visitor(CXCursor cursor, CXCursor parent, CXClientData client_data) {
-  *((CXCursor *) client_data) = cursor;
-  return CXChildVisit_Break;
-}
-
-static CXCursor
-MakeCXCursor(clang::Expr *E, CXTranslationUnit TU)
-{
-  clang::OpaqueValueExpr OV(
-    clang::SourceLocation::getFromRawEncoding(0), E->getType(),
-    clang::VK_RValue, clang::OK_Ordinary, E);
-  CXCursor C = { CXCursor_FirstExpr, 0, { NULL, &OV, TU }};
-  CXCursor Result;
-  clang_visitChildren(C, MakeCXCursor_visitor, &Result);
-  return Result;
-}
-
-/* MakeCXType is not exported in libclang.
-   The following implementation makes a (not well-formed) cursor on an
-   OpaqueValueExpr of type T. Querying the type of this cursor calls
-   libclang's MakeCXType on T.
- */
-static CXType
-MakeCXType(clang::QualType T, CXTranslationUnit TU)
-{
-  clang::OpaqueValueExpr OV(
-    clang::SourceLocation::getFromRawEncoding(0), T, clang::VK_RValue);
-  CXCursor C = { CXCursor_FirstExpr, 0, { NULL, &OV, TU }};
-  return clang_getCursorType(C);
-}
-
-CXType
-clang_ext_GetInnerType(CXType c)
-{
-  clang::QualType T = GetQualType(c);
-  if (auto *PTT = T->getAs<clang::ParenType>()) {
-    return MakeCXType(PTT->getInnerType(), GetTU(c));
-  }
-  return c;
-}
-
-CXCursor
-clang_ext_VariableArrayType_GetSizeExpr(CXType c)
-{
-  clang::QualType T = GetQualType(c);
-  const clang::Type *TP = T.getTypePtrOrNull();
-  if (TP) {
-    switch (TP->getTypeClass()) {
-    case clang::Type::VariableArray:
-      return MakeCXCursor(clang::cast<clang::VariableArrayType>(TP)->getSizeExpr(), GetTU(c));
-    default:
-      break;
+  CXType
+  clang_ext_GetInnerType(CXType c)
+  {
+    clang::QualType T = GetQualType(c);
+    if (auto PTT = T->getAs<clang::ParenType>()) {
+      return MakeCXType(PTT->getInnerType(), GetTU(c));
     }
+    return c;
   }
-  return MakeCXCursorInvalid(CXCursor_InvalidCode, GetTU(c));
+
+  CXCursor
+  clang_ext_VariableArrayType_GetSizeExpr(CXType c)
+  {
+    clang::QualType T = GetQualType(c);
+    if (auto TP = T.getTypePtrOrNull()) {
+      switch (TP->getTypeClass()) {
+      case clang::Type::VariableArray:
+        return MakeCXCursor(clang::cast<clang::VariableArrayType>(TP)->getSizeExpr(), GetTU(c));
+      default:
+        break;
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, GetTU(c));
+  }
 }

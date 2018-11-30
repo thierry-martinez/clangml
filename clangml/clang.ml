@@ -134,13 +134,13 @@ module Ast = struct
             }
         | Enum ->
             let name = cxtype |> get_type_declaration |> get_cursor_spelling in
-            Enum { name }
+            Enum name
         | Record ->
             let name = cxtype |> get_type_declaration |> get_cursor_spelling in
-            Record { name }
+            Record name
         | Typedef ->
             let name = cxtype |> get_type_declaration |> get_cursor_spelling in
-            Typedef { name }
+            Typedef name
         | FunctionProto
         | FunctionNoProto ->
             let function_type =
@@ -305,7 +305,7 @@ module Ast = struct
             cxcursor |> iter_children (fun cur -> Queue.add cur queue);
             let init =
               if children_set land 1 <> 0 then
-                Some (stmt_of_cxcursor (Queue.pop queue))
+                Some (ext_if_stmt_get_init cxcursor |> stmt_of_cxcursor)
               else
                 None in
             let condition_variable =
@@ -328,7 +328,7 @@ module Ast = struct
             cxcursor |> iter_children (fun cur -> Queue.add cur queue);
             let init =
               if children_set land 1 <> 0 then
-                Some (stmt_of_cxcursor (Queue.pop queue))
+                Some (ext_switch_stmt_get_init cxcursor |> stmt_of_cxcursor)
               else
                 None in
             let condition_variable =
@@ -357,7 +357,7 @@ module Ast = struct
               match list_of_children cxcursor with
               | [body] -> stmt_of_cxcursor body
               | _ -> failwith "stmt_of_cxcursor (DefaultStmt)" in
-            Default { body }
+            Default body
         | WhileStmt ->
             let children_set = ext_while_stmt_get_children_set cxcursor in
             let queue = Queue.create () in

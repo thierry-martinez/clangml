@@ -2,19 +2,21 @@
 
 open Clang__bindings
 
+(** Most of the AST nodes carry the [cxcursor] from where they come from
+    in the Clang translation unit. *)
 type 'a node = {
     cxcursor : cxcursor;
     desc : 'a;
   }
 
-(**
-   {[
+(*{[
 open Stdcompat
 
 let () =
   prerr_endline (Clang.get_clang_version ())
-   ]}
+]}*)
 
+(**
 The following example declares the function [parse_declaration_list]
 that returns the AST obtained from the parsing of [source] string as a
 declaration list:
@@ -27,8 +29,7 @@ let parse_declaration_list ?filename ?ignore_paren ?ignore_paren_in_types
   (Clang.parse_string ?filename source |> Result.get_ok |>
       Clang.Ast.of_cxtranslationunit ?ignore_paren ?ignore_paren_in_types)
     .desc.items
-   ]}
-*)
+   ]}*)
 
 type cast_kind =
   | CStyle
@@ -62,8 +63,7 @@ let () =
         desc = OtherType Int};
       init = None }}] -> ()
   | _ -> assert false
-     ]}
-*)
+     ]}*)
     volatile : bool;
 (** [true] if the type is volatile-qualified.
     {[
@@ -86,8 +86,7 @@ let () =
         volatile = false;
         desc = OtherType Int}}}] -> ()
   | _ -> assert false
-    ]}
-*)
+    ]}*)
     restrict : bool;
 (** [true] if the type is restrict-qualified.
     {[
@@ -110,8 +109,7 @@ let () =
       desc = Pointer { pointee = {
         desc = OtherType Int}}}}}] -> ()
   | _ -> assert false
-    ]}
-*)
+    ]}*)
     desc : type_desc;
   }
 
@@ -129,7 +127,7 @@ let () =
   | [{ desc = Var { name = "s"; qual_type = { desc = Pointer {
       pointee = { desc = OtherType Char_S }}}}}] -> ()
   | _ -> assert false
-    ]} *)
+    ]}*)
   | ConstantArray of {
       element : qual_type;
       size : int;
@@ -144,7 +142,7 @@ let () =
       element = { desc = OtherType Char_S };
       size = 42 }}}}] -> ()
   | _ -> assert false
-    ]} *)
+    ]}*)
   | IncompleteArray of {
       element : qual_type;
     }
@@ -159,7 +157,7 @@ let () =
       { desc = { name = "array"; qual_type = { desc = IncompleteArray {
         element = { desc = OtherType Char_S }}}}}] }}] -> ()
   | _ -> assert false
-    ]} *)
+    ]}*)
   | VariableArray of {
       element : qual_type;
       size : expr;
@@ -180,7 +178,7 @@ let () =
                size = { desc = DeclRef "i" }}})];
           variadic = false }}}}] -> ()
   | _ -> assert false
-    ]} *)
+    ]}*)
   | Elaborated of {
       keyword : clang_ext_elaboratedtypekeyword;
       named_type : qual_type;
@@ -194,12 +192,10 @@ let () =
   | [{ desc = Enum _ };
      { desc = Var { name = "e"; qual_type = { desc = Elaborated {
       keyword = Enum;
-      named_type = { desc = Enum { name = "example" } }}}}}] -> ()
+      named_type = { desc = Enum "example" }}}}}] -> ()
   | _ -> assert false
-    ]} *)
-  | Enum of {
-      name : string;
-    }
+    ]}*)
+  | Enum of string
 (** Enum type.
     {[
 let example = "enum { A, B, C } e;"
@@ -209,14 +205,14 @@ let () =
   | [{ desc = Enum _ };
      { desc = Var { name = "e"; qual_type = { desc = Elaborated {
       keyword = Enum;
-      named_type = { cxtype; desc = Enum { name = "" } }}}}}] ->
+      named_type = { cxtype; desc = Enum "" }}}}}] ->
         let values = cxtype |> Clang.get_type_declaration |>
           Clang.list_of_children |> List.map @@ fun cur ->
             Clang.get_cursor_spelling cur,
             Clang.get_enum_constant_decl_value cur in
         assert (values = ["A", 0; "B", 1; "C", 2]);
   | _ -> assert false
-    ]} *)
+    ]}*)
   | Function of function_type
 (** Function type.
     {[
@@ -230,11 +226,12 @@ let () =
         args = Some { non_variadic = []; variadic = false};
     }}}}}}] -> ()
   | _ -> assert false
-    ]} *)
-  | Record of {
-      name : string;
-    }
+    ]}*)
+  | Record of string
 (** Record type (either struct or union).
+
+    The argument is the name and is the empty string for anonymous struct or
+    union.
     {[
 let example = "struct { int i; float f; } s;"
 
@@ -243,7 +240,7 @@ let () =
   | [{ desc = Struct _ };
      { desc = Var { name = "s"; qual_type = { desc = Elaborated {
       keyword = Struct;
-      named_type = { cxtype; desc = Record { name = "" } }}}}}] ->
+      named_type = { cxtype; desc = Record "" }}}}}] ->
         let fields = cxtype |> Clang.list_of_type_fields |>
           List.map @@ fun cur ->
             Clang.get_cursor_spelling cur,
@@ -263,7 +260,7 @@ let () =
   | [{ desc = Union _ };
      { desc = Var { name = "u"; qual_type = { desc = Elaborated {
       keyword = Union;
-      named_type = { cxtype; desc = Record { name = "" } }}}}}] ->
+      named_type = { cxtype; desc = Record "" }}}}}] ->
         let fields = cxtype |> Clang.list_of_type_fields |>
           List.map @@ fun cur ->
             Clang.get_cursor_spelling cur,
@@ -275,10 +272,8 @@ let () =
           | _ -> assert false
         end
   | _ -> assert false
-    ]} *)
-  | Typedef of {
-      name : string;
-    }
+    ]}*)
+  | Typedef of string
 (** Typedef type.
     {[
 let example = "typedef struct { int i; float f; } struct_t; struct_t s;"
@@ -287,7 +282,7 @@ let () =
   match parse_declaration_list example with
   | [{ desc = Struct _ }; { desc = Typedef _ };
      { desc = Var { name = "s";
-       qual_type = { cxtype; desc = Typedef { name = "struct_t" }}}}] ->
+       qual_type = { cxtype; desc = Typedef "struct_t" }}}] ->
         let fields = cxtype |> Clang.get_type_declaration |>
           Clang.get_typedef_decl_underlying_type |> Clang.list_of_type_fields |>
           List.map @@ fun cur ->
@@ -300,7 +295,7 @@ let () =
           | _ -> assert false
         end
   | _ -> assert false
-    ]} *)
+    ]}*)
   | Paren of qual_type
 (** Parenthesized type.
 
@@ -341,7 +336,7 @@ let () =
       qual_type = { desc = OtherType Bool}}} -> ()
   | _ -> assert false
 *)
-    ]} *)
+    ]}*)
 
 (** Function type. *)
 and function_type = {
@@ -387,8 +382,7 @@ let () =
         name = "f"; 
         function_type = { result = { desc = OtherType Int }}}}] -> ()
     | _ -> assert false
-    ]}
-*)
+    ]}*)
 
   args : args option;
 (** Argument types. [None] for K&R-style 'int foo()' function.
@@ -491,11 +485,11 @@ let parse_statement_list ?filename ?ignore_paren source =
   with
   | [{ desc = Function { stmt = Some { desc = Compound items }}}] -> items
   | _ -> assert false
-    ]} *)
+    ]}*)
 and stmt = stmt_desc node
 and stmt_desc =
   | Null
-(** Null statement
+(** Null statement.
     {[
 let example = ";"
 
@@ -506,7 +500,7 @@ let () =
     ]}
     *)
   | Compound of stmt list
-(** Compound statement
+(** Compound statement.
     {[
 let example = "{}"
 
@@ -524,13 +518,13 @@ let () =
     ]}
     *)
   | For of {
-      init : stmt option;
-      condition_variable : var_decl option;
+      init : stmt option; (** C++ *)
+      condition_variable : var_decl option; (** C++ *)
       cond : stmt option;
       inc : stmt option;
       body : stmt;
     }
-(** For statement
+(** For statement.
     {[
 let example = "for (;;) {}"
 
@@ -615,16 +609,15 @@ let () =
       assert (Clang.int_of_cxint zero = 0);
       assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
-    ]}
-*)
+    ]}*)
   | If of {
-      init : stmt option; (* TODO: How ? *)
-      condition_variable : var_decl option;
+      init : stmt option; (** C++17 *)
+      condition_variable : var_decl option; (** C++ *)
       cond : expr;
       then_branch : stmt;
       else_branch : stmt option;
     }
-(** If statement
+(** If statement.
     {[
 let example = "if (1) { 2; } else { 3; }"
 
@@ -666,6 +659,7 @@ let () =
        init = None;
        condition_variable = Some ({ desc = {
          qual_type = { desc = OtherType Int};
+         name = "i";
          init = Some { desc = IntegerLiteral one }}});
        cond = { desc = DeclRef "i"};
        then_branch = { desc = Compound [{
@@ -673,21 +667,113 @@ let () =
        else_branch = None }}] ->
       assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
-   ]} *)
+
+let example = "if (int i = 1; i) { i; }"
+
+let () =
+  match parse_statement_list ~filename:"<string>.cpp" example with
+  | [{ desc = If {
+       init = Some { desc = Decl [{ desc = Var {
+         name = "i";
+         qual_type = { desc = OtherType Int };
+         init = Some { desc = IntegerLiteral one }}}] };
+       condition_variable = None;
+       then_branch = { desc = Compound [{
+         desc = Expr (DeclRef "i")}] };
+       else_branch = None }}] ->
+      assert (Clang.int_of_cxint one = 1)
+  | _ -> assert false
+   ]}*)
   | Switch of {
-      init : stmt option;
-      condition_variable : var_decl option;
+      init : stmt option; (** C++17 *)
+      condition_variable : var_decl option; (** C++ *)
       cond : expr;
       body : stmt;
     }
+(** Switch statement.
+    {[
+let example = "switch (1) { case 1: f(); break; case 2: break; default:;}"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Switch {
+      init = None;
+      condition_variable = None;
+      cond = { desc = IntegerLiteral one };
+      body = { desc = Compound [
+        { desc = Case {
+          lhs = { desc = IntegerLiteral one' };
+          body = { desc =
+            Expr (Call { f = { desc = DeclRef "f" }; args = [] })}}};
+        { desc = Break };
+        { desc = Case {
+          lhs = { desc = IntegerLiteral two };
+          body = { desc = Break }}};
+        { desc = Default { desc = Null }}] }}}] ->
+      assert (Clang.int_of_cxint one = 1);
+      assert (Clang.int_of_cxint one' = 1);
+      assert (Clang.int_of_cxint two = 2)
+  | _ -> assert false
+
+let example = "switch (int i = 1) { case 1: f(); break; case 2: break; default:;}"
+
+let () =
+  match parse_statement_list ~filename:"<string>.cpp" example with
+  | [{ desc = Switch {
+      init = None;
+      condition_variable = Some ({ desc = {
+         qual_type = { desc = OtherType Int};
+         name = "i";
+         init = Some { desc = IntegerLiteral one }}});
+      cond = { desc = DeclRef "i" };
+      body = { desc = Compound [
+        { desc = Case {
+          lhs = { desc = IntegerLiteral one' };
+          body = { desc =
+            Expr (Call { f = { desc = DeclRef "f" }; args = [] })}}};
+        { desc = Break };
+        { desc = Case {
+          lhs = { desc = IntegerLiteral two };
+          body = { desc = Break }}};
+        { desc = Default { desc = Null }}] }}}] ->
+      assert (Clang.int_of_cxint one = 1);
+      assert (Clang.int_of_cxint one' = 1);
+      assert (Clang.int_of_cxint two = 2)
+  | _ -> assert false
+
+let example = "switch (int i = 1; i) { case 1: f(); break; case 2: break; default:;}"
+
+let () =
+  match parse_statement_list ~filename:"<string>.cpp" example with
+  | [{ desc = Switch {
+      init = Some { desc = Decl [{ desc = Var {
+         name = "i";
+         qual_type = { desc = OtherType Int };
+         init = Some { desc = IntegerLiteral one }}}] };
+      condition_variable = None;
+      cond = { desc = DeclRef "i" };
+      body = { desc = Compound [
+        { desc = Case {
+          lhs = { desc = IntegerLiteral one' };
+          body = { desc =
+            Expr (Call { f = { desc = DeclRef "f" }; args = [] })}}};
+        { desc = Break };
+        { desc = Case {
+          lhs = { desc = IntegerLiteral two };
+          body = { desc = Break }}};
+        { desc = Default { desc = Null }}] }}}] ->
+      assert (Clang.int_of_cxint one = 1);
+      assert (Clang.int_of_cxint one' = 1);
+      assert (Clang.int_of_cxint two = 2)
+  | _ -> assert false
+    ]}
+ *)
   | Case of {
       lhs : expr;
       rhs : expr option;
       body : stmt;
     }
-  | Default of {
-      body : stmt;
-    }
+  | Default of stmt
   | While of {
       condition_variable : var_decl option;
       cond : expr;
@@ -720,7 +806,7 @@ and expr = expr_desc node
 
 and expr_desc =
   | IntegerLiteral of cxint
-(** Integer literal
+(** Integer literal.
     {[
 let example = "0;"
 
@@ -729,9 +815,9 @@ let () =
   | [{ desc = Expr (IntegerLiteral zero)}] ->
       assert (Clang.int_of_cxint zero = 0)
   | _ -> assert false
-    ]} *)
+    ]}*)
   | FloatingLiteral of cxfloat
-(** Floating literal
+(** Floating literal.
     {[
 let example = "0.5;"
 
@@ -740,9 +826,9 @@ let () =
   | [{ desc = Expr (FloatingLiteral f)}] ->
     assert (Clang.ext_float_convert_to_double f = 0.5)
   | _ -> assert false
-    ]} *)
+    ]}*)
   | StringLiteral of string
-(** String literal
+(** String literal.
     {[
 let example = "\"Hello!\";"
 
@@ -750,12 +836,12 @@ let () =
   match parse_statement_list example with
   | [{ desc = Expr (StringLiteral "Hello!")}] -> ()
   | _ -> assert false
-    ]} *)
+    ]}*)
   | UnaryOperator of {
       kind : clang_ext_unaryoperatorkind;
       operand : expr;
     }
-(** Unary operator
+(** Unary operator.
     {[
 let example = "+1;"
 
@@ -775,23 +861,61 @@ let () =
       kind = AddrOf;
       operand = { desc = DeclRef "x" }})}] -> ()
   | _ -> assert false
-    ]} *)
+    ]}*)
   | BinaryOperator of {
       lhs : expr;
       kind : clang_ext_binaryoperatorkind;
       rhs : expr;
     }
+(** Binary operator.
+    {[
+let example = "1 + 2;"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Expr (BinaryOperator {
+      lhs = { desc = IntegerLiteral one};
+      kind = Add;
+      rhs = { desc = IntegerLiteral two}})}] ->
+      assert (Clang.int_of_cxint one = 1);
+      assert (Clang.int_of_cxint two = 2)
+  | _ -> assert false
+    ]} *)
   | DeclRef of string
+(** Declaration reference.
+    {[
+let example = "int i; i;"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Decl _ }; { desc = Expr (DeclRef "i")}] -> ()
+  | _ -> assert false
+    ]} *)
   | Call of {
       f : expr;
       args : expr list;
     }
+(** Function call.
+    {[
+let example = "void g(int); g(1);"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Decl _ }; { desc = Expr (Call {
+      f = { desc = DeclRef "g" };
+      args = [{ desc = IntegerLiteral one }] })}] ->
+      assert (Clang.int_of_cxint one = 1)
+  | _ -> assert false
+    ]} *)
   | Cast of {
       kind : cast_kind;
       qual_type : qual_type;
       operand : expr;
     }
-(** Cast
+(** Cast.
+
+    Implicit casts are removed in the AST unless ~ignore_implicit_cast:false is
+    passed to the converting function.
     {[
 let example = {| (void * ) "Hello"; |}
 
@@ -802,7 +926,7 @@ let () =
       qual_type = { desc = Pointer _ };
       operand = { desc = StringLiteral "Hello" }})}] -> ()
   | _ -> assert false
-    ]} *)
+    ]}*)
   | Member of {
       base : expr;
       arrow : bool;
@@ -837,7 +961,7 @@ let () =
       rhs = { desc = IntegerLiteral zero}})}] ->
       assert (Clang.int_of_cxint zero = 0)
   | _ -> assert false
-    ]} *)
+    ]}*)
   | ArraySubscript of {
       lhs : expr;
       rhs : expr;
@@ -857,7 +981,7 @@ let () =
       assert (Clang.int_of_cxint zero = 0);
       assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
-    ]} *)
+    ]}*)
   | ConditionalOperator of {
       cond : expr;
       then_branch : expr option;
@@ -890,9 +1014,12 @@ let () =
       assert (Clang.int_of_cxint one = 1);
       assert (Clang.int_of_cxint three = 3)
   | _ -> assert false
-    ]} *)
+    ]}*)
   | ParenExpr of expr
-(** Parenthesed expression
+(** Parenthesed expression.
+
+    Parenthesed expression are removed in the AST unless ~ignore_paren:false
+    is passed to the converting function.
     {[
 let example = {| (1); |}
 
@@ -907,7 +1034,7 @@ let () =
   | [{ desc = Expr (IntegerLiteral one)}] ->
       assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
-    ]} *)
+    ]}*)
 
   | UnexposedExpr of {
       s : string;
@@ -954,12 +1081,70 @@ let () =
       name = "f";
       stmt = None }}] -> ()
   | _ -> assert false
-    ]} *)
+    ]}*)
   | Var of var_decl_desc
+(** Variable declaration.
+    {[
+let example = {| int x = 1; |}
+
+let () =
+    match parse_declaration_list example with
+  | [{ desc = Var {
+      linkage = External;
+      qual_type = { const = false; desc = OtherType Int };
+      name = "x";
+      init = Some ({ desc = IntegerLiteral one })}}] ->
+      assert (Clang.int_of_cxint one = 1)
+  | _ -> assert false
+
+let example = {| const int x = 1; |}
+
+let () =
+    match parse_declaration_list example with
+  | [{ desc = Var {
+      linkage = External;
+      qual_type = { const = true; desc = OtherType Int };
+      name = "x";
+      init = Some ({ desc = IntegerLiteral one })}}] ->
+      assert (Clang.int_of_cxint one = 1)
+  | _ -> assert false
+
+let example = {| static int x = 1; |}
+
+let () =
+    match parse_declaration_list example with
+  | [{ desc = Var {
+      linkage = Internal;
+      qual_type = { const = false; desc = OtherType Int };
+      name = "x";
+      init = Some ({ desc = IntegerLiteral one })}}] ->
+      assert (Clang.int_of_cxint one = 1)
+  | _ -> assert false
+    ]}*)
   | Enum of {
       name : string;
       constants : enum_constant list;
     }
+(** Enum declaration.
+    {[
+let example = {| enum e { A, B = 2, C }; |}
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Enum {
+      name = "e";
+      constants = [
+        { cxcursor = a; desc = { name = "A"; init = None }};
+        { cxcursor = b; desc = {
+          name = "B";
+          init = Some { desc = IntegerLiteral two }}};
+        { cxcursor = c; desc = { name = "C"; init = None }}] }}] ->
+        assert (Clang.int_of_cxint two = 2);
+        assert (Clang.get_enum_constant_decl_value a = 0);
+        assert (Clang.get_enum_constant_decl_value b = 2);
+        assert (Clang.get_enum_constant_decl_value c = 3)
+  | _ -> assert false
+    ]}*)
   | Struct of {
       name : string;
       fields : field_desc node list;
@@ -999,7 +1184,7 @@ let () =
       assert (Clang.int_of_cxint two = 2);
       assert (Clang.get_field_decl_bit_width cxcursor = 1)
   | _ -> assert false
-    ]} *)
+    ]}*)
   | Union of {
       name : string;
       fields : field_desc node list;
@@ -1007,6 +1192,7 @@ let () =
 (** Union declaration.
     {[
 let example = {| union u { int i; float f; }; |}
+
 let () =
   match parse_declaration_list example with
   | [{ desc = Union {
@@ -1038,12 +1224,73 @@ let () =
       assert (Clang.int_of_cxint two = 2);
       assert (Clang.get_field_decl_bit_width cxcursor = 1)
   | _ -> assert false
-    ]} *)
-
+    ]}*)
   | Typedef of {
       name : string;
       underlying_type : qual_type;
     }
+(** Typedef declaration.
+
+    Note that if the typedef declares a new underlying type,
+    the declaration of the underlying type precedes the typedef
+    declaration in the AST.
+    {[
+let example = {| typedef int int_t; |}
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Typedef {
+      name = "int_t";
+      underlying_type = { desc = OtherType Int }}}] -> ()
+  | _ -> assert false
+
+let example = {| typedef union u { int i; float f } u_t; |}
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Union {
+        name = "u";
+        fields = [
+          { desc = { name = "i";
+            qual_type = { desc = OtherType Int}}};
+          { desc = { name = "f";
+            qual_type = { desc = OtherType Float}}}] }};
+      { desc = Typedef {
+        name = "u_t";
+        underlying_type = { desc = Elaborated {
+          keyword = Union;
+          named_type = { desc = Record "u" }}}}}] -> ()
+  | _ -> assert false
+
+let example = {| typedef union { int i; float f } u_t; |}
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Union {
+        name = "";
+        fields = [
+          { desc = { name = "i";
+            qual_type = { desc = OtherType Int}}};
+          { desc = { name = "f";
+            qual_type = { desc = OtherType Float}}}] }};
+      { cxcursor; desc = Typedef {
+        name = "u_t";
+        underlying_type = { desc = Elaborated {
+          keyword = Union;
+          named_type = { desc = Record "" }}}}}] ->
+        let fields = cxcursor |>
+          Clang.get_typedef_decl_underlying_type |> Clang.list_of_type_fields |>
+          List.map @@ fun cur ->
+            Clang.get_cursor_spelling cur,
+            Clang.get_cursor_type cur |> Clang.Ast.of_cxtype in
+        begin
+          match fields with
+          | ["i", { desc = OtherType Int };
+             "f", { desc = OtherType Float }] -> ()
+          | _ -> assert false
+        end
+  | _ -> assert false
+    ]}*)
   | OtherDecl
 
 and field_desc = {
