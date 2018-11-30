@@ -40,7 +40,7 @@ let () =
   | [{ desc = Var { name = "one";
       qual_type = {
         const = true;
-        desc = OtherType { kind = Int }};
+        desc = OtherType Int};
       init = Some { desc = IntegerLiteral one }}}] ->
       assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
@@ -52,7 +52,7 @@ let () =
   | [{ desc = Var { name = "x";
       qual_type = {
         const = false;
-        desc = OtherType { kind = Int }};
+        desc = OtherType Int};
       init = None }}] -> ()
   | _ -> assert false
      ]}
@@ -67,7 +67,7 @@ let () =
   | [{ desc = Var { name = "x";
       qual_type = {
         volatile = true;
-        desc = OtherType { kind = Int }}}}] -> ()
+        desc = OtherType Int}}}] -> ()
   | _ -> assert false
 
 let example = "int x;"
@@ -77,7 +77,7 @@ let () =
   | [{ desc = Var { name = "x";
       qual_type = {
         volatile = false;
-        desc = OtherType { kind = Int }}}}] -> ()
+        desc = OtherType Int}}}] -> ()
   | _ -> assert false
     ]}
 *)
@@ -91,7 +91,7 @@ let () =
   | [{ desc = Var { name = "x"; qual_type = {
       restrict = true;
       desc = Pointer { pointee = {
-        desc = OtherType { kind = Int }}}}}}] -> ()
+        desc = OtherType Int}}}}}] -> ()
   | _ -> assert false
 
 let example = "int * x;"
@@ -101,7 +101,7 @@ let () =
   | [{ desc = Var { name = "x"; qual_type = {
       restrict = false;
       desc = Pointer { pointee = {
-        desc = OtherType { kind = Int }}}}}}] -> ()
+        desc = OtherType Int}}}}}] -> ()
   | _ -> assert false
     ]}
 *)
@@ -120,7 +120,7 @@ let example = "char *s;"
 let () =
   match parse_declaration_list example with
   | [{ desc = Var { name = "s"; qual_type = { desc = Pointer {
-      pointee = { desc = OtherType { kind = Char_S }}}}}}] -> ()
+      pointee = { desc = OtherType Char_S }}}}}] -> ()
   | _ -> assert false
     ]} *)
   | ConstantArray of {
@@ -134,7 +134,7 @@ let example = "char s[42];"
 let () =
   match parse_declaration_list example with
   | [{ desc = Var { name = "s"; qual_type = { desc = ConstantArray {
-      element = { desc = OtherType { kind = Char_S } };
+      element = { desc = OtherType Char_S };
       size = 42 }}}}] -> ()
   | _ -> assert false
     ]} *)
@@ -148,15 +148,32 @@ let example = "struct s { int i; char array[]; };"
 let () =
   match parse_declaration_list example with
   | [{ desc = Struct { name = "s"; fields = [
-      { desc = { name = "i"; qual_type = { desc = OtherType { kind = Int }}}};
+      { desc = { name = "i"; qual_type = { desc = OtherType Int}}};
       { desc = { name = "array"; qual_type = { desc = IncompleteArray {
-        element = { desc = OtherType { kind = Char_S }}}}}}] }}] -> ()
+        element = { desc = OtherType Char_S }}}}}] }}] -> ()
   | _ -> assert false
     ]} *)
   | VariableArray of {
       element : qual_type;
       size : expr;
     }
+  (** Variable array.
+    {[
+let example = "void f(int i, char array[i]);"
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Function { name = "f"; function_type =
+      { result = { desc = OtherType Void };
+        args = Some {
+          non_variadic = [
+            ("i", { desc = OtherType Int });
+            ("array", { desc = VariableArray {
+               element = { desc = OtherType Char_S };
+               size = { desc = DeclRef "i" }}})];
+          variadic = false }}}}] -> ()
+  | _ -> assert false
+    ]} *)
   | Elaborated of {
       keyword : clang_ext_elaboratedtypekeyword;
       named_type : qual_type;
@@ -202,7 +219,7 @@ let () =
   match parse_declaration_list example with
   | [{ desc = Var { name = "p"; qual_type = { desc =
       Pointer { pointee = { desc = Function {
-        result = { desc = OtherType { kind = Int } };
+        result = { desc = OtherType Int };
         args = Some { non_variadic = []; variadic = false};
     }}}}}}] -> ()
   | _ -> assert false
@@ -226,8 +243,8 @@ let () =
             Clang.get_cursor_type cur |> Clang.Ast.of_cxtype in
         begin
           match fields with
-          | ["i", { desc = OtherType { kind = Int } };
-             "f", { desc = OtherType { kind = Float } }] -> ()
+          | ["i", { desc = OtherType Int };
+             "f", { desc = OtherType Float }] -> ()
           | _ -> assert false
         end
   | _ -> assert false
@@ -251,16 +268,14 @@ let () =
             Clang.get_cursor_type cur |> Clang.Ast.of_cxtype in
         begin
           match fields with
-          | ["i", { desc = OtherType { kind = Int } };
-             "f", { desc = OtherType { kind = Float } }] -> ()
+          | ["i", { desc = OtherType Int };
+             "f", { desc = OtherType Float }] -> ()
           | _ -> assert false
         end
   | _ -> assert false
     ]} *)
   | Paren of qual_type
-  | OtherType of {
-      kind : cxtypekind;
-    }
+  | OtherType of cxtypekind
 (** Other type.
     {[
 (* TODO: stdbool.h not available
@@ -269,7 +284,7 @@ let example = "#include <stdbool.h>\nbool s;"
 let () =
   match parse_declaration_list example |> List.rev |> List.hd with
   | { desc = Var { name = "s";
-      qual_type = { desc = OtherType { kind = Bool }}}} -> ()
+      qual_type = { desc = OtherType Bool}}} -> ()
   | _ -> assert false
 *)
     ]} *)
@@ -359,19 +374,19 @@ let () =
   match parse_statement_list example with
   | [{ desc = Decl _ }; { desc = For {
       init = Some { desc = Expr (BinaryOperator {
-        lhs = { desc = DeclRef { s = "i" }};
+        lhs = { desc = DeclRef "i"};
         kind = Assign;
         rhs = { desc = IntegerLiteral zero}})};
       condition_variable = None;
       cond = Some { desc = Expr (BinaryOperator {
-        lhs = { desc = DeclRef { s = "i" }};
+        lhs = { desc = DeclRef "i"};
         kind = LT;
         rhs = { desc = IntegerLiteral four}})};
       inc = Some { desc = Expr (UnaryOperator {
         kind = PostInc;
-        operand = { desc = DeclRef { s = "i" }}})};
+        operand = { desc = DeclRef "i"}})};
       body = { desc = Compound [{ desc =
-        Expr (DeclRef { s = "i" })}] }}}] ->
+        Expr (DeclRef "i")}] }}}] ->
       assert (Clang.int_of_cxint zero = 0);
       assert (Clang.int_of_cxint four = 4)
   | _ -> assert false
@@ -383,18 +398,18 @@ let () =
   | [{ desc = For {
       init = Some { desc = Decl [{ desc = Var {
         name = "i";
-        qual_type = { desc = OtherType { kind = Int }};
+        qual_type = { desc = OtherType Int};
         init = Some { desc = IntegerLiteral zero}}}] };
       condition_variable = None;
       cond = Some { desc = Expr (BinaryOperator {
-        lhs = { desc = DeclRef { s = "i" }};
+        lhs = { desc = DeclRef "i"};
         kind = LT;
         rhs = { desc = IntegerLiteral four}})};
       inc = Some { desc = Expr (UnaryOperator {
         kind = PostInc;
-        operand = { desc = DeclRef { s = "i" }}})};
+        operand = { desc = DeclRef "i"}})};
       body = { desc = Compound [{ desc =
-        Expr (DeclRef { s = "i" })}] }}}] ->
+        Expr (DeclRef "i")}] }}}] ->
       assert (Clang.int_of_cxint zero = 0);
       assert (Clang.int_of_cxint four = 4)
   | _ -> assert false
@@ -406,21 +421,21 @@ let () =
   | [{ desc = For {
       init = Some { desc = Decl [{ desc = Var {
         name = "i";
-        qual_type = { desc = OtherType { kind = Int }};
+        qual_type = { desc = OtherType Int};
         init = Some { desc = IntegerLiteral zero}}}] };
       condition_variable = Some { desc = {
         name = "j";
-        qual_type = { desc = OtherType { kind = Int }};
+        qual_type = { desc = OtherType Int};
         init = Some { desc = BinaryOperator {
-          lhs = { desc = DeclRef { s = "i" }};
+          lhs = { desc = DeclRef "i"};
           kind = Sub;
           rhs = { desc = IntegerLiteral one}}}}};
-      cond = Some { desc = Expr (DeclRef { s = "j" })};
+      cond = Some { desc = Expr (DeclRef "j")};
       inc = Some { desc = Expr (UnaryOperator {
         kind = PostDec;
-        operand = { desc = DeclRef { s = "i" }}})};
+        operand = { desc = DeclRef "i"}})};
       body = { desc = Compound [{ desc =
-        Expr (DeclRef { s = "j" })}] }}}] ->
+        Expr (DeclRef "j")}] }}}] ->
       assert (Clang.int_of_cxint zero = 0);
       assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
@@ -474,11 +489,11 @@ let () =
   | [{ desc = If {
        init = None;
        condition_variable = Some ({ desc = {
-         qual_type = { desc = OtherType { kind = Int }};
+         qual_type = { desc = OtherType Int};
          init = Some { desc = IntegerLiteral one }}});
-       cond = { desc = DeclRef { s = "i" }};
+       cond = { desc = DeclRef "i"};
        then_branch = { desc = Compound [{
-         desc = Expr (DeclRef { s = "i" })}] };
+         desc = Expr (DeclRef "i")}] };
        else_branch = None }}] ->
       assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
@@ -582,7 +597,7 @@ let () =
   match parse_statement_list example with
   | [{ desc = Decl _ }; { desc = Expr (UnaryOperator {
       kind = AddrOf;
-      operand = { desc = DeclRef { s = "x" }}})}] -> ()
+      operand = { desc = DeclRef "x" }})}] -> ()
   | _ -> assert false
     ]} *)
   | BinaryOperator of {
@@ -590,9 +605,7 @@ let () =
       kind : clang_ext_binaryoperatorkind;
       rhs : expr;
     }
-  | DeclRef of {
-      s : string;
-    }
+  | DeclRef of string
   | Call of {
       f : expr;
       args : expr list;
@@ -627,7 +640,7 @@ let () =
   match parse_statement_list example with
   | [{ desc = Decl _ }; { desc = Expr (BinaryOperator {
       lhs = { desc = Member {
-        base = { desc = DeclRef { s = "s" }};
+        base = { desc = DeclRef "s" };
         arrow = false;
         field = { desc = "i" }}};
       kind = Assign;
@@ -641,7 +654,7 @@ let () =
   match parse_statement_list example with
   | [{ desc = Decl _ }; { desc = Expr (BinaryOperator {
       lhs = { desc = Member {
-        base = { desc = DeclRef { s = "p" }};
+        base = { desc = DeclRef "p" };
         arrow = true;
         field = { desc = "i" }}};
       kind = Assign;
@@ -661,7 +674,7 @@ let () =
   match parse_statement_list example with
   | [{ desc = Decl _ }; { desc = Expr (BinaryOperator {
       lhs = { desc = ArraySubscript {
-        lhs = { desc = DeclRef { s = "a" }};
+        lhs = { desc = DeclRef "a" };
         rhs = { desc = IntegerLiteral zero}}};
       kind = Assign;
       rhs = { desc = IntegerLiteral one}})}] ->
@@ -744,7 +757,7 @@ let () =
       linkage = External;
       function_type = {
         calling_conv = C;
-        result = { desc = OtherType { kind = Int }};
+        result = { desc = OtherType Int};
         args = Some { non_variadic = []; variadic = false }};
       name = "f";
       stmt = Some { desc = Compound [] }}}] -> ()
@@ -758,9 +771,9 @@ let () =
       linkage = Internal;
       function_type = {
         calling_conv = C;
-        result = { desc = OtherType { kind = Int }};
+        result = { desc = OtherType Int};
         args = Some {
-          non_variadic = [("x", { desc = OtherType { kind = Int }})];
+          non_variadic = [("x", { desc = OtherType Int})];
           variadic = false }};
       name = "f";
       stmt = None }}] -> ()
@@ -785,9 +798,9 @@ let () =
       name = "s";
       fields = [
         { desc = { name = "i";
-          qual_type = { desc = OtherType { kind = Int }}}};
+          qual_type = { desc = OtherType Int}}};
         { desc = { name = "f";
-          qual_type = { desc = OtherType { kind = Float }}}}] }}] -> ()
+          qual_type = { desc = OtherType Float}}}] }}] -> ()
   | _ -> assert false
 
 let example = {| struct s { int a:1; int b:2; int c; }; |}
@@ -798,13 +811,13 @@ let () =
       name = "s";
       fields = [
         { cxcursor; desc = { name = "a";
-          qual_type = { desc = OtherType { kind = Int }};
+          qual_type = { desc = OtherType Int};
           bitfield = Some { desc = IntegerLiteral one }}};
         { desc = { name = "b";
-          qual_type = { desc = OtherType { kind = Int }};
+          qual_type = { desc = OtherType Int};
           bitfield = Some { desc = IntegerLiteral two }}};
         { desc = { name = "c";
-          qual_type = { desc = OtherType { kind = Int }};
+          qual_type = { desc = OtherType Int};
           bitfield = None}}] }}] ->
       assert (Clang.int_of_cxint one = 1);
       assert (Clang.int_of_cxint two = 2);

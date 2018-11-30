@@ -1,6 +1,7 @@
 #include <clang-c/Index.h>
 #include <clang/AST/Stmt.h>
 #include <clang/AST/Expr.h>
+#include <clang/AST/Type.h>
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/ErrorHandling.h>
 
@@ -442,12 +443,48 @@ extern "C" {
   }
 }
 
+/* Copied from clang source tree: tools/libclang/CXCursor.cpp */
+static CXCursor
+MakeCXCursorInvalid(CXCursorKind K, CXTranslationUnit TU) {
+  assert(K >= CXCursor_FirstInvalid && K <= CXCursor_LastInvalid);
+  CXCursor C = { K, 0, { nullptr, nullptr, TU } };
+  return C;
+}
+
+/* MakeCXCursor is not exported in libclang.
+   The following implementation makes a (not well-formed) cursor on an
+   OpaqueValueExpr with E as source expression. Visiting the (single) child of
+   this cursor calls libclang's MakeCXCursor on E.
+ */
+enum CXChildVisitResult
+MakeCXCursor_visitor(CXCursor cursor, CXCursor parent, CXClientData client_data) {
+  *((CXCursor *) client_data) = cursor;
+  return CXChildVisit_Break;
+}
+
+static CXCursor
+MakeCXCursor(clang::Expr *E, CXTranslationUnit TU)
+{
+  clang::OpaqueValueExpr OV(
+    clang::SourceLocation::getFromRawEncoding(0), E->getType(),
+    clang::VK_RValue, clang::OK_Ordinary, E);
+  CXCursor C = { CXCursor_FirstExpr, 0, { NULL, &OV, TU }};
+  CXCursor Result;
+  clang_visitChildren(C, MakeCXCursor_visitor, &Result);
+  return Result;
+}
+
+/* MakeCXType is not exported in libclang.
+   The following implementation makes a (not well-formed) cursor on an
+   OpaqueValueExpr of type T. Querying the type of this cursor calls
+   libclang's MakeCXType on T.
+ */
 static CXType
 MakeCXType(clang::QualType T, CXTranslationUnit TU)
 {
-  clang::OpaqueValueExpr e(
+  clang::OpaqueValueExpr OV(
     clang::SourceLocation::getFromRawEncoding(0), T, clang::VK_RValue);
-  CXCursor C = { CXCursor_FirstExpr, 0, { NULL, &e, TU } };
+  CXCursor C = { CXCursor_FirstExpr, 0, { NULL, &OV, TU }};
   return clang_getCursorType(C);
 }
 
@@ -459,4 +496,20 @@ clang_ext_GetInnerType(CXType c)
     return MakeCXType(PTT->getInnerType(), GetTU(c));
   }
   return c;
+}
+
+CXCursor
+clang_ext_VariableArrayType_GetSizeExpr(CXType c)
+{
+  clang::QualType T = GetQualType(c);
+  const clang::Type *TP = T.getTypePtrOrNull();
+  if (TP) {
+    switch (TP->getTypeClass()) {
+    case clang::Type::VariableArray:
+      return MakeCXCursor(clang::cast<clang::VariableArrayType>(TP)->getSizeExpr(), GetTU(c));
+    default:
+      break;
+    }
+  }
+  return MakeCXCursorInvalid(CXCursor_InvalidCode, GetTU(c));
 }

@@ -118,6 +118,12 @@ module Ast = struct
         | IncompleteArray ->
             let element = cxtype |> get_array_element_type |> of_cxtype in
             IncompleteArray { element }
+        | VariableArray ->
+            let element = cxtype |> get_array_element_type |> of_cxtype in
+            let size =
+              cxtype |> ext_variable_array_type_get_size_expr |>
+              expr_of_cxcursor in
+            VariableArray { element; size }
         | Pointer ->
             let pointee = cxtype |> get_pointee_type |> of_cxtype in
             Pointer { pointee }
@@ -143,9 +149,9 @@ module Ast = struct
             begin
               match ext_get_type_kind cxtype with
               | Paren -> Paren (cxtype |> ext_get_inner_type |> of_cxtype)
-              | _ -> OtherType { kind = get_type_kind cxtype }
+              | _ -> OtherType (get_type_kind cxtype)
             end
-        | _ -> OtherType { kind = get_type_kind cxtype } in
+        | _ -> OtherType (get_type_kind cxtype) in
       match desc with
       | Paren inner when Options.ignore_paren_in_types -> inner
       | _ ->
@@ -429,7 +435,7 @@ module Ast = struct
             | _ -> failwith "expr_of_cxcursor (BinaryOperator)" in
           let kind = ext_binary_operator_get_opcode cxcursor in
           BinaryOperator { lhs; kind; rhs }
-      | DeclRefExpr -> DeclRef { s = get_cursor_spelling cxcursor }
+      | DeclRefExpr -> DeclRef (get_cursor_spelling cxcursor)
       | CallExpr ->
           let f, args =
             match list_of_children cxcursor with

@@ -155,3 +155,6 @@ clang_ext_GetTypeKind(CXType c);
 
 CXType
 clang_ext_GetInnerType(CXType c);
+
+CXCursor
+clang_ext_VariableArrayType_GetSizeExpr(CXType c);
