@@ -231,10 +231,10 @@ let () =
     }}}}}}] -> ()
   | _ -> assert false
     ]} *)
-  | Struct of {
+  | Record of {
       name : string;
     }
-(** Struct type.
+(** Record type (either struct or union).
     {[
 let example = "struct { int i; float f; } s;"
 
@@ -243,7 +243,27 @@ let () =
   | [{ desc = Struct _ };
      { desc = Var { name = "s"; qual_type = { desc = Elaborated {
       keyword = Struct;
-      named_type = { cxtype; desc = Struct { name = "" } }}}}}] ->
+      named_type = { cxtype; desc = Record { name = "" } }}}}}] ->
+        let fields = cxtype |> Clang.list_of_type_fields |>
+          List.map @@ fun cur ->
+            Clang.get_cursor_spelling cur,
+            Clang.get_cursor_type cur |> Clang.Ast.of_cxtype in
+        begin
+          match fields with
+          | ["i", { desc = OtherType Int };
+             "f", { desc = OtherType Float }] -> ()
+          | _ -> assert false
+        end
+  | _ -> assert false
+
+let example = "union { int i; float f; } u;"
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Union _ };
+     { desc = Var { name = "u"; qual_type = { desc = Elaborated {
+      keyword = Union;
+      named_type = { cxtype; desc = Record { name = "" } }}}}}] ->
         let fields = cxtype |> Clang.list_of_type_fields |>
           List.map @@ fun cur ->
             Clang.get_cursor_spelling cur,

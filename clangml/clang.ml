@@ -137,7 +137,7 @@ module Ast = struct
             Enum { name }
         | Record ->
             let name = cxtype |> get_type_declaration |> get_cursor_spelling in
-            Struct { name }
+            Record { name }
         | Typedef ->
             let name = cxtype |> get_type_declaration |> get_cursor_spelling in
             Typedef { name }
