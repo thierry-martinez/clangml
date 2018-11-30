@@ -8,19 +8,26 @@ type 'a node = {
   }
 
 (**
+   {[
+open Stdcompat
+
+let () =
+  prerr_endline (Clang.get_clang_version ())
+   ]}
+
 The following example declares the function [parse_declaration_list]
 that returns the AST obtained from the parsing of [source] string as a
 declaration list:
 this function is used in the following examples to check the AST of
 various programs.
     {[
-open Stdcompat
-
-let parse_declaration_list ?filename ?ignore_paren source =
-   prerr_endline source;
+let parse_declaration_list ?filename ?ignore_paren ?ignore_paren_in_types
+    source =
+  prerr_endline source;
   (Clang.parse_string ?filename source |> Result.get_ok |>
-    Clang.Ast.of_cxtranslationunit ?ignore_paren).desc.items
-    ]}
+      Clang.Ast.of_cxtranslationunit ?ignore_paren ?ignore_paren_in_types)
+    .desc.items
+   ]}
 *)
 
 type cast_kind =
@@ -275,6 +282,34 @@ let () =
   | _ -> assert false
     ]} *)
   | Paren of qual_type
+(** Parenthesized type.
+
+    Warning: parenthesized type only occurs with Clang <7.0.0 and when
+    ~ignore_paren_in_types:false argument is passed to the AST converting
+    function. From 7.0.0, Clang automatically ignores parenthesized
+    type.
+
+    {[
+let example = "int (*p)(void);"
+
+let () =
+  match parse_declaration_list ~ignore_paren_in_types:false example with
+  | [{ desc = Var { name = "p"; qual_type = { desc =
+      Pointer { pointee = { desc = Function {
+        result = { desc = OtherType Int };
+        args = Some { non_variadic = []; variadic = false};
+    }}}}}}] ->
+      assert (Clang.get_clang_version () >= "clang version 7.0.0")
+  | [{ desc = Var { name = "p"; qual_type = { desc =
+      Pointer { pointee = { desc = Paren { desc = Function {
+        result = { desc = OtherType Int };
+        args = Some { non_variadic = []; variadic = false};
+    }}}}}}}] ->
+      assert (Clang.get_clang_version () < "clang version 7.0.0")
+  | _ -> assert false
+    ]}
+
+*)
   | OtherType of cxtypekind
 (** Other type.
     {[
