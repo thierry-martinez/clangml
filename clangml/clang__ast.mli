@@ -286,8 +286,7 @@ let () =
 
     Warning: parenthesized type only occurs with Clang <7.0.0 and when
     ~ignore_paren_in_types:false argument is passed to the AST converting
-    function. From 7.0.0, Clang automatically ignores parenthesized
-    type.
+    function. From 7.0.0, Clang automatically passes through type.
 
     {[
 let example = "int (*p)(void);"
@@ -324,15 +323,137 @@ let () =
 *)
     ]} *)
 
+(** Function type. *)
 and function_type = {
   calling_conv : cxcallingconv;
+(** Calling convention.
+    {[
+let example = "void f(void);"
+
+let () =
+    match parse_declaration_list example with
+    | [{ desc = Function {
+        name = "f"; 
+        function_type = { calling_conv = C }}}] -> ()
+    | _ -> assert false
+
+let example = "__regcall void f(void);"
+
+let () =
+    match parse_declaration_list example with
+    | [{ desc = Function {
+        name = "f"; 
+        function_type = { calling_conv = X86RegCall }}}] -> ()
+    | _ -> assert false
+    ]}
+ *)
   result : qual_type;
+(** Result type.
+    {[
+let example = "void f(void);"
+
+let () =
+    match parse_declaration_list example with
+    | [{ desc = Function {
+        name = "f"; 
+        function_type = { result = { desc = OtherType Void }}}}] -> ()
+    | _ -> assert false
+
+let example = "f(void);"
+
+let () =
+    match parse_declaration_list example with
+    | [{ desc = Function {
+        name = "f"; 
+        function_type = { result = { desc = OtherType Int }}}}] -> ()
+    | _ -> assert false
+    ]}
+*)
+
   args : args option;
+(** Argument types. [None] for K&R-style 'int foo()' function.
+    {[
+let example = "void f(void);"
+
+let () =
+    match parse_declaration_list example with
+    | [{ desc = Function {
+        name = "f"; 
+        function_type = { args = Some { non_variadic = []; variadic = false }}}}] -> ()
+    | _ -> assert false
+
+let example = "void f();"
+
+let () =
+    match parse_declaration_list example with
+    | [{ desc = Function {
+        name = "f"; 
+        function_type = { args = None }}}] -> ()
+    | _ -> assert false
+
+    ]}
+ *)
 }
 
+
+(** Function arguments. *)
 and args = {
   non_variadic : (string * qual_type) list;
+(** Non-variadic arguments: the list gives for each argument its name and its type.
+    For a function type which is not attached to an actual function declaration, all
+    arguments have the empty name [""], since Clang does not keep argument names in
+    function types.
+    {[
+let example = "void f(int i);"
+
+let () =
+    match parse_declaration_list example with
+    | [{ desc = Function {
+        name = "f"; 
+        function_type = { args = Some {
+          non_variadic = ["i", { desc = OtherType Int }];
+          variadic = false }}}}] -> ()
+    | _ -> assert false
+
+let example = "void f(int);"
+
+let () =
+    match parse_declaration_list example with
+    | [{ desc = Function {
+        name = "f"; 
+        function_type = { args = Some {
+          non_variadic = ["", { desc = OtherType Int }];
+          variadic = false }}}}] -> ()
+    | _ -> assert false
+
+let example = "typedef void (*f)(int x);"
+
+let () =
+    match parse_declaration_list example with
+    | [{ desc = Typedef {
+        name = "f"; 
+        underlying_type = { desc =
+          Pointer { pointee = { desc = Function { args = Some {
+            non_variadic = ["", { desc = OtherType Int }];
+            variadic = false }}}}}}}] -> ()
+    | _ -> assert false
+    ]}
+ *)
   variadic : bool;
+(** True if the function type is variadic.
+    {[
+let example = "void f(int i, ...);"
+
+let () =
+    match parse_declaration_list example with
+    | [{ desc = Function {
+        name = "f"; 
+        function_type = { args = Some {
+          non_variadic = ["i", { desc = OtherType Int }];
+          variadic = true }}}}] -> ()
+    | _ -> assert false
+    ]}
+ *)
 }
 
 (** Statement.
@@ -841,7 +962,7 @@ let () =
 let example = {| struct s { int a:1; int b:2; int c; }; |}
 
 let () =
-  match parse_declaration_list example with
+    match parse_declaration_list example with
   | [{ desc = Struct {
       name = "s";
       fields = [
@@ -859,6 +980,46 @@ let () =
       assert (Clang.get_field_decl_bit_width cxcursor = 1)
   | _ -> assert false
     ]} *)
+  | Union of {
+      name : string;
+      fields : field_desc node list;
+    }
+(** Union declaration.
+    {[
+let example = {| union u { int i; float f; }; |}
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Union {
+      name = "u";
+      fields = [
+        { desc = { name = "i";
+          qual_type = { desc = OtherType Int}}};
+        { desc = { name = "f";
+          qual_type = { desc = OtherType Float}}}] }}] -> ()
+  | _ -> assert false
+
+let example = {| union u { int a:1; int b:2; int c; }; |}
+
+let () =
+    match parse_declaration_list example with
+  | [{ desc = Union {
+      name = "u";
+      fields = [
+        { cxcursor; desc = { name = "a";
+          qual_type = { desc = OtherType Int};
+          bitfield = Some { desc = IntegerLiteral one }}};
+        { desc = { name = "b";
+          qual_type = { desc = OtherType Int};
+          bitfield = Some { desc = IntegerLiteral two }}};
+        { desc = { name = "c";
+          qual_type = { desc = OtherType Int};
+          bitfield = None}}] }}] ->
+      assert (Clang.int_of_cxint one = 1);
+      assert (Clang.int_of_cxint two = 2);
+      assert (Clang.get_field_decl_bit_width cxcursor = 1)
+  | _ -> assert false
+    ]} *)
+
   | Typedef of {
       name : string;
       underlying_type : qual_type;
