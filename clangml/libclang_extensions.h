@@ -178,3 +178,6 @@ clang_ext_GetInnerType(CXType c);
 
 CXCursor
 clang_ext_VariableArrayType_GetSizeExpr(CXType c);
+
+CXString
+clang_ext_AsmStmt_GetAsmString(CXCursor c);

@@ -86,10 +86,6 @@ let int_of_cxint cxint =
 module Ast = struct
   include Clang__ast
 
-  let label_ref_of_cxcursor cxcursor =
-    let desc = { name = get_cursor_spelling cxcursor } in
-    { cxcursor; desc }
-
   let rec list_last l =
     match l with
     | [] -> failwith "list_last"
@@ -126,7 +122,7 @@ module Ast = struct
             VariableArray { element; size }
         | Pointer ->
             let pointee = cxtype |> get_pointee_type |> of_cxtype in
-            Pointer { pointee }
+            Pointer pointee
         | Elaborated ->
             Elaborated {
               keyword = ext_elaborated_type_get_keyword cxtype;
@@ -378,24 +374,24 @@ module Ast = struct
               | _ -> failwith "stmt_of_cxcursor (DoStmt)" in
             Do { body; cond }
         | LabelStmt ->
-            let label, body =
+            let label = cxcursor |> get_cursor_spelling in
+            let body =
               match list_of_children cxcursor with
-              | [label; body] ->
-                  label_ref_of_cxcursor label, stmt_of_cxcursor body
+              | [body] -> stmt_of_cxcursor body
               | _ -> failwith "stmt_of_cxcursor (LabelStmt)" in
             Label { label; body }
         | GotoStmt ->
             let label =
               match list_of_children cxcursor with
-              | [label] -> label_ref_of_cxcursor label
+              | [label] -> label |> get_cursor_spelling
               | _ -> failwith "stmt_of_cxcursor (GotoStmt)" in
-            Goto { label }
+            Goto label
         | IndirectGotoStmt ->
             let target =
               match list_of_children cxcursor with
               | [target] -> expr_of_cxcursor target
               | _ -> failwith "stmt_of_cxcursor (IndirectGotoStmt)" in
-            IndirectGoto { target }
+            IndirectGoto target
         | ContinueStmt ->
             Continue
         | BreakStmt ->
@@ -408,7 +404,15 @@ module Ast = struct
               match list_of_children cxcursor with
               | [value] -> expr_of_cxcursor value
               | _ -> failwith "stmt_of_cxcursor (ReturnStmt)" in
-            Return { value }
+            Return value
+        | GCCAsmStmt ->
+            let code = ext_asm_stmt_get_asm_string cxcursor in
+            let parameters =
+              list_of_children cxcursor |> List.map @@ fun cxcursor ->
+                { cxcursor; desc = get_cursor_spelling cxcursor } in
+            GCCAsm (code, parameters)
+        | MSAsmStmt ->
+            MSAsm (ext_asm_stmt_get_asm_string cxcursor)
         | _ -> Decl [{ cxcursor; desc = decl_desc_of_cxcursor cxcursor }] in
       match desc with
       | Decl [{ desc = OtherDecl }] ->
@@ -492,6 +496,12 @@ module Ast = struct
             | [subexpr] -> expr_of_cxcursor subexpr
             | _ -> failwith "expr_of_cxcursor (ParenExpr)" in
           ParenExpr subexpr
+      | AddrLabelExpr ->
+          let label =
+            match list_of_children cxcursor with
+            | [label] -> get_cursor_spelling label
+            | _ -> failwith "expr_of_cxcursor (AddrLabelExpr)" in
+          AddrLabel label
       | FirstExpr (* TODO: UnexposedExpr! *) ->
           begin
             match ext_get_cursor_kind cxcursor with

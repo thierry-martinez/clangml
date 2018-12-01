@@ -96,8 +96,7 @@ let () =
   match parse_declaration_list example with
   | [{ desc = Var { name = "x"; qual_type = {
       restrict = true;
-      desc = Pointer { pointee = {
-        desc = OtherType Int}}}}}] -> ()
+      desc = Pointer { desc = OtherType Int }}}}] -> ()
   | _ -> assert false
 
 let example = "int * x;"
@@ -106,8 +105,7 @@ let () =
   match parse_declaration_list example with
   | [{ desc = Var { name = "x"; qual_type = {
       restrict = false;
-      desc = Pointer { pointee = {
-        desc = OtherType Int}}}}}] -> ()
+      desc = Pointer { desc = OtherType Int }}}}] -> ()
   | _ -> assert false
     ]}*)
     desc : type_desc;
@@ -115,17 +113,15 @@ let () =
 
 (** Type description. *)
 and type_desc =
-  | Pointer of {
-      pointee : qual_type;
-    }
+  | Pointer of qual_type
 (** Pointer.
     {[
 let example = "char *s;"
 
 let () =
   match parse_declaration_list example with
-  | [{ desc = Var { name = "s"; qual_type = { desc = Pointer {
-      pointee = { desc = OtherType Char_S }}}}}] -> ()
+  | [{ desc = Var { name = "s"; qual_type = { desc =
+      Pointer { desc = OtherType Char_S }}}}] -> ()
   | _ -> assert false
     ]}*)
   | ConstantArray of {
@@ -221,10 +217,9 @@ let example = "int (*p)(void);"
 let () =
   match parse_declaration_list example with
   | [{ desc = Var { name = "p"; qual_type = { desc =
-      Pointer { pointee = { desc = Function {
+      Pointer { desc = Function {
         result = { desc = OtherType Int };
-        args = Some { non_variadic = []; variadic = false};
-    }}}}}}] -> ()
+        args = Some { non_variadic = []; variadic = false}}}}}}] -> ()
   | _ -> assert false
     ]}*)
   | Record of string
@@ -301,7 +296,8 @@ let () =
 
     Warning: parenthesized type only occurs with Clang <7.0.0 and when
     ~ignore_paren_in_types:false argument is passed to the AST converting
-    function. From 7.0.0, Clang automatically passes through type.
+    function. From 7.0.0, Clang automatically passes through parentheses in
+    types.
 
     {[
 let example = "int (*p)(void);"
@@ -309,16 +305,14 @@ let example = "int (*p)(void);"
 let () =
   match parse_declaration_list ~ignore_paren_in_types:false example with
   | [{ desc = Var { name = "p"; qual_type = { desc =
-      Pointer { pointee = { desc = Function {
+      Pointer { desc = Function {
         result = { desc = OtherType Int };
-        args = Some { non_variadic = []; variadic = false};
-    }}}}}}] ->
+        args = Some { non_variadic = []; variadic = false}}}}}}] ->
       assert (Clang.get_clang_version () >= "clang version 7.0.0")
   | [{ desc = Var { name = "p"; qual_type = { desc =
-      Pointer { pointee = { desc = Paren { desc = Function {
+      Pointer { desc = Paren { desc = Function {
         result = { desc = OtherType Int };
-        args = Some { non_variadic = []; variadic = false};
-    }}}}}}}] ->
+        args = Some { non_variadic = []; variadic = false}}}}}}}] ->
       assert (Clang.get_clang_version () < "clang version 7.0.0")
   | _ -> assert false
     ]}
@@ -393,7 +387,9 @@ let () =
     match parse_declaration_list example with
     | [{ desc = Function {
         name = "f"; 
-        function_type = { args = Some { non_variadic = []; variadic = false }}}}] -> ()
+        function_type = { args = Some {
+          non_variadic = [];
+          variadic = false }}}}] -> ()
     | _ -> assert false
 
 let example = "void f();"
@@ -413,10 +409,12 @@ let () =
 (** Function arguments. *)
 and args = {
   non_variadic : (string * qual_type) list;
-(** Non-variadic arguments: the list gives for each argument its name and its type.
-    For a function type which is not attached to an actual function declaration, all
-    arguments have the empty name [""], since Clang does not keep argument names in
-    function types.
+(** Non-variadic arguments: the list gives for each argument its name and its
+    type.
+
+    For a function type which is not attached to an actual function declaration,
+    all arguments have the empty name [""], since Clang does not keep argument
+    names in function types.
     {[
 let example = "void f(int i);"
 
@@ -447,9 +445,9 @@ let () =
     | [{ desc = Typedef {
         name = "f"; 
         underlying_type = { desc =
-          Pointer { pointee = { desc = Function { args = Some {
+          Pointer { desc = Function { args = Some {
             non_variadic = ["", { desc = OtherType Int }];
-            variadic = false }}}}}}}] -> ()
+            variadic = false }}}}}}] -> ()
     | _ -> assert false
     ]}
  *)
@@ -715,7 +713,8 @@ let () =
       assert (Clang.int_of_cxint two = 2)
   | _ -> assert false
 
-let example = "switch (int i = 1) { case 1: f(); break; case 2: break; default:;}"
+let example =
+  "switch (int i = 1) { case 1: f(); break; case 2: break; default:;}"
 
 let () =
   match parse_statement_list ~filename:"<string>.cpp" example with
@@ -741,7 +740,8 @@ let () =
       assert (Clang.int_of_cxint two = 2)
   | _ -> assert false
 
-let example = "switch (int i = 1; i) { case 1: f(); break; case 2: break; default:;}"
+let example =
+  "switch (int i = 1; i) { case 1: f(); break; case 2: break; default:;}"
 
 let () =
   match parse_statement_list ~filename:"<string>.cpp" example with
@@ -766,40 +766,213 @@ let () =
       assert (Clang.int_of_cxint one' = 1);
       assert (Clang.int_of_cxint two = 2)
   | _ -> assert false
-    ]}
- *)
+    ]}*)
   | Case of {
       lhs : expr;
-      rhs : expr option;
+      rhs : expr option; (** GNU extension: case ranges "case low ... high:" *)
       body : stmt;
     }
+(** Case statement.
+
+    Note that [body] only covers the first statement that follows. Other
+    statements are attached to the parent.
+    {[
+let example = "switch (1) { case 1: f(); break; case 2 ... 3: break; default:;}"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Switch {
+      init = None;
+      condition_variable = None;
+      cond = { desc = IntegerLiteral one };
+      body = { desc = Compound [
+        { desc = Case {
+          lhs = { desc = IntegerLiteral one' };
+          rhs = None;
+          body = { desc =
+            Expr (Call { f = { desc = DeclRef "f" }; args = [] })}}};
+        { desc = Break };
+        { desc = Case {
+          lhs = { desc = IntegerLiteral two };
+          rhs = Some { desc = IntegerLiteral three };
+          body = { desc = Break }}};
+        { desc = Default { desc = Null }}] }}}] ->
+      assert (Clang.int_of_cxint one = 1);
+      assert (Clang.int_of_cxint one' = 1);
+      assert (Clang.int_of_cxint two = 2);
+      assert (Clang.int_of_cxint three = 3)
+  | _ -> assert false
+    ]}*)
   | Default of stmt
+(** Default statement.
+
+    Note that the parameter only covers the first statement that follows. Other
+    statements are attached to the parent.
+ *)
   | While of {
-      condition_variable : var_decl option;
+      condition_variable : var_decl option; (** C++ *)
       cond : expr;
       body : stmt;
     }
+(** While statement.
+    {[
+let example = "while (1);"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = While {
+      condition_variable = None;
+      cond = { desc = IntegerLiteral one };
+      body = { desc = Null }}}] ->
+      assert (Clang.int_of_cxint one = 1);
+  | _ -> assert false
+
+let example = "while (int i = 1) { i; }"
+
+let () =
+  match parse_statement_list ~filename:"<string>.cpp" example with
+  | [{ desc = While {
+      condition_variable = Some ({ desc = {
+         qual_type = { desc = OtherType Int};
+         name = "i";
+         init = Some { desc = IntegerLiteral one }}});
+      cond = { desc = DeclRef "i" };
+      body = { desc = Compound [{ desc = Expr (DeclRef "i")}] }}}] ->
+      assert (Clang.int_of_cxint one = 1);
+  | _ -> assert false
+    ]}*)
   | Do of {
       body : stmt;
       cond : expr;
     }
+(** Do statement.
+    {[
+let example = "do; while (1);"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Do {
+      body = { desc = Null };
+      cond = { desc = IntegerLiteral one }}}] ->
+      assert (Clang.int_of_cxint one = 1);
+  | _ -> assert false
+
+let example = "do { f(); } while (1);"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Do {
+      body = { desc = Compound [{ desc =
+        Expr (Call { f = { desc = DeclRef "f" }; args = [] })}] };
+      cond = { desc = IntegerLiteral one }}}] ->
+      assert (Clang.int_of_cxint one = 1)
+  | _ -> assert false
+    ]}*)
   | Label of {
       label : label_ref;
       body : stmt;
     }
-  | Goto of {
-      label : label_ref;
-    }
-  | IndirectGoto of {
-      target : expr;
-    }
+(** Label statement.
+    {[
+let example = "label: 1; 2;"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Label {
+        label = "label";
+        body = { desc = Expr (IntegerLiteral one)}}};
+      { desc = Expr (IntegerLiteral two)}] ->
+      assert (Clang.int_of_cxint one = 1);
+      assert (Clang.int_of_cxint two = 2)
+  | _ -> assert false
+    ]}*)
+  | Goto of label_ref
+(** Goto statement.
+    {[
+let example = "label: 1; goto label;"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Label {
+        label = "label";
+        body = { desc = Expr (IntegerLiteral one)}}};
+      { desc = Goto "label" }] ->
+      assert (Clang.int_of_cxint one = 1)
+  | _ -> assert false
+    ]}*)
+  | IndirectGoto of expr
+(** Indirect goto statement (Labels as Values GNU extension).
+    {[
+let example = "label: 1; void *ptr = &&label; goto *ptr;"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Label {
+        label = "label";
+        body = { desc = Expr (IntegerLiteral one)}}};
+      { desc = Decl [{ desc = Var {
+        name = "ptr";
+        qual_type = { desc = Pointer { desc = OtherType Void }};
+        init = Some { desc = AddrLabel "label" }}}] };
+      { desc = IndirectGoto { desc = DeclRef "ptr"}}] ->
+      assert (Clang.int_of_cxint one = 1)
+  | _ -> assert false
+    ]}*)
   | Continue
+(** Continue statement.
+    {[
+let example = "for (;;) continue;"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = For { body = { desc = Continue } }}] -> ()
+  | _ -> assert false
+   ]}*)
   | Break
-  | Asm
+(** Break statement.
+    {[
+let example = "for (;;) break;"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = For { body = { desc = Break } }}] -> ()
+  | _ -> assert false
+   ]}*)
+  | GCCAsm of string * string node list
+(** GCC assembler statement.
+    {[
+let example = {|
+  int src = 1;
+  int dst;   
+
+  asm ("mov %1, %0\n\t"
+    "add $1, %0"
+    : "=r" (dst) 
+    : "r" (src));
+|}
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Decl _ }; { desc = Decl _ };
+     { desc = GCCAsm (
+       "mov %1, %0\n\tadd $1, %0",
+       [{ desc = "dst" }; { desc = "src" }])}] -> ()
+  | _ -> assert false
+   ]}*)
+  | MSAsm of string
+(** MS assembler statement. *)
+  | Return of expr
+(** Return statement.
+    {[
+let example = "return 1;"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Return { desc = IntegerLiteral one }}] ->
+      assert (Clang.int_of_cxint one = 1)
+  | _ -> assert false
+   ]}*)
   | Decl of decl_stmt list
-  | Return of {
-      value : expr
-    }
   | Expr of expr_desc
 
 and expr = expr_desc node
@@ -1035,7 +1208,19 @@ let () =
       assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
     ]}*)
+  | AddrLabel of string
+(** Label address (Labels as Values GNU extension)
+    {[
+let example = {| label: &&label; |}
 
+let () =
+  match parse_statement_list example with
+  | [{ desc = Label {
+        label = "label";
+        body = { desc = Expr (AddrLabel "label")}}}] ->
+      ()
+  | _ -> assert false
+    ]}*)
   | UnexposedExpr of {
       s : string;
     }
@@ -1299,11 +1484,7 @@ and field_desc = {
   bitfield : expr option;
 }
 
-and label_ref = label_ref_desc node
-
-and label_ref_desc = {
-    name : string;
-  }
+and label_ref = string
 
 and enum_constant = enum_constant_desc node
 

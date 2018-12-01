@@ -602,11 +602,27 @@ extern "C" {
     if (auto TP = T.getTypePtrOrNull()) {
       switch (TP->getTypeClass()) {
       case clang::Type::VariableArray:
-        return MakeCXCursor(clang::cast<clang::VariableArrayType>(TP)->getSizeExpr(), GetTU(c));
+        return MakeCXCursor(
+          clang::cast<clang::VariableArrayType>(TP)->getSizeExpr(), GetTU(c));
       default:
         break;
       }
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, GetTU(c));
+  }
+
+  CXString
+  clang_ext_AsmStmt_GetAsmString(CXCursor c) {
+    const clang::Stmt *s = getCursorStmt(c);
+    switch (s->getStmtClass()) {
+    case clang::Stmt::GCCAsmStmtClass:;
+      return cxstring_createDup(
+        clang::cast<clang::GCCAsmStmt>(s)->getAsmString()->getString());
+    case clang::Stmt::MSAsmStmtClass:
+      return cxstring_createDup(
+        clang::cast<clang::MSAsmStmt>(s)->getAsmString());
+    default:
+      return cxstring_createRef("");
+    }
   }
 }
