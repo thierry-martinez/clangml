@@ -155,10 +155,11 @@ type type_spec =
 type type_interface = {
     reinterpret_as : type_spec option;
     destructor : (string -> string) option;
+    carry_reference : bool;
   }
 
 let empty_type_interface =
-  { reinterpret_as = None; destructor = None }
+  { reinterpret_as = None; destructor = None; carry_reference = false }
 
 let union_option a b =
   match a, b with
@@ -170,7 +171,8 @@ let union_option a b =
 
 let union_type_interfaces a b =
   { reinterpret_as = union_option a.reinterpret_as b.reinterpret_as;
-    destructor = union_option a.destructor b.destructor }
+    destructor = union_option a.destructor b.destructor;
+    carry_reference = a.carry_reference || b.carry_reference}
 
 let reinterpret_as type_spec type_interface =
   { type_interface with reinterpret_as = union_option type_interface.reinterpret_as (Some type_spec) }
@@ -178,17 +180,14 @@ let reinterpret_as type_spec type_interface =
 let destructor destructor type_interface =
   { type_interface with destructor = union_option type_interface.destructor (Some destructor) }
 
+let carry_reference type_interface =
+  { type_interface with carry_reference = true }
+
 let integer_enum enum = reinterpret_as (Enum enum)
 
 let integer_boolean = integer_enum "bool"
 
 let integer_zero_is_true = integer_enum "not bool"
-
-let union_type_interface a b =
-  { reinterpret_as =
-      union_option a.reinterpret_as b.reinterpret_as;
-    destructor =
-      union_option a.destructor b.destructor }
 
 type argument_interface =
   | Array of { length : argument; contents : argument }
@@ -197,10 +196,12 @@ type argument_interface =
   | Update of argument
   | Fixed_value of { argument : argument; value : string }
   | Type_interface of { argument : argument; interface : type_interface }
+  | Reference of argument * (string -> string)
   | Closure of {
       pointer : argument;
       data_caller : argument;
       data_callee : argument;
+      references : argument list;
     }
 
 let output argument =
@@ -237,7 +238,7 @@ let rename_function rename =
 let union_function_interfaces a b =
   { hidden = a.hidden || b.hidden;
     label_unique = a.label_unique && b.label_unique;
-    result = union_type_interface a.result b.result;
+    result = union_type_interfaces a.result b.result;
     rename = (fun name -> a.rename (b.rename name));
     arguments = List.rev_append a.arguments b.arguments }
 
@@ -247,7 +248,7 @@ let add_argument argument function_interface =
 
 let add_result type_interface function_interface =
   { function_interface with
-    result = union_type_interface function_interface.result type_interface }
+    result = union_type_interfaces function_interface.result type_interface }
 
 type constant_interface = {
     success : bool;
@@ -353,7 +354,7 @@ let add_struct struct_name struct_interface module_interface =
     (struct_name, struct_interface) :: module_interface.structs }
 
 type converter =
-    out_channel -> src:string -> string array -> tgt:string -> unit
+    out_channel -> src:string -> params:string array -> references:string array -> tgt:string -> unit
 
 type common_type_info = {
     ocamltype : Parsetree.core_type;
@@ -361,7 +362,7 @@ type common_type_info = {
     ocaml_of_c : converter;
   }
 
-let simple_converter name fmt ~src _params ~tgt =
+let simple_converter name fmt ~src ~params ~references ~tgt =
   Printf.fprintf fmt "%s = %s(%s);" tgt name src
 
 let name_of_c_of_ocaml converter =
@@ -370,15 +371,29 @@ let name_of_c_of_ocaml converter =
 let name_of_ocaml_of_c converter =
   Printf.sprintf "Val_%s" converter
 
-let make_common_type_info ?converter ocaml_type_name =
+let make_common_type_info ?type_interface ?converter ocaml_type_name =
   let converter =
     match converter with
     | None -> ocaml_type_name
     | Some converter -> converter in
+  let c_of_ocaml = name_of_c_of_ocaml converter in
+  let ocaml_of_c = name_of_ocaml_of_c converter in
+  let c_of_ocaml, ocaml_of_c =
+    match type_interface with
+    | Some { carry_reference = true } ->
+        let c_of_ocaml fmt ~src ~params ~references ~tgt =
+          Printf.fprintf fmt "%s = %s(Field(%s, 0));" tgt c_of_ocaml src in
+        let ocaml_of_c fmt ~src ~params ~references ~tgt =
+          Printf.fprintf fmt "\
+  %s = caml_alloc_tuple(%d);
+  Store_field(%s, 0, %s(%s));" tgt (1 + Array.length references) tgt ocaml_of_c src;
+          references |> Array.iteri @@ fun i reference ->
+     Printf.fprintf fmt "\n  Store_field(%s, %d, %s);" tgt (i + 1) reference in
+        c_of_ocaml, ocaml_of_c
+    | _ ->
+        simple_converter c_of_ocaml, simple_converter ocaml_of_c in
   { ocamltype = ptyp_constr (loc (Longident.Lident ocaml_type_name));
-    c_of_ocaml =
-      simple_converter (name_of_c_of_ocaml converter);
-    ocaml_of_c = simple_converter (name_of_ocaml_of_c converter); }
+    c_of_ocaml; ocaml_of_c; }
 
 type enum_info = {
     result : string option;
@@ -522,13 +537,15 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
     let common_info, enum_info = enum_info in
     Lazy.force common_info, (Enum enum_info : type_info) in
   let default_type type_name =
+    let type_interface = union_type_interfaces
+      type_interface (get_type type_name context.module_interface) in
     match type_interface.reinterpret_as with
     | Some Int ->
         { ocamltype = int_info.ocamltype;
-          c_of_ocaml = (fun fmt ~src _params ~tgt ->
-            Printf.fprintf fmt "%s = (time_t) Int_val(%s);" tgt src);
-          ocaml_of_c = (fun fmt ~src _params ~tgt ->
-            Printf.fprintf fmt "%s = Val_int((time_t) %s);" tgt src); }, Regular
+          c_of_ocaml = (fun fmt ~src ~params ~references ~tgt ->
+            Printf.fprintf fmt "%s = (%s) Int_val(%s);" tgt type_name src);
+          ocaml_of_c = (fun fmt ~src ~params ~references ~tgt ->
+            Printf.fprintf fmt "%s = Val_int((int) %s);" tgt src); }, Regular
     | _ ->
     match String_hashtbl.find_opt context.type_table type_name with
     | Some (common_info, type_info) ->
@@ -664,7 +681,7 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
                   | Some destructor -> destructor src
                 end
             | _ -> assert false in
-          let converter template channel ~src params ~tgt =
+          let converter template channel ~src ~params ~references ~tgt =
             let length = params.(0) in
             output_subst (subst ~src ~tgt ~length) channel template in
           { ocamltype;
@@ -689,7 +706,7 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
             let contents_type_info, _ = find_type_info ~declare_abstract context empty_type_interface (Clang.get_pointee_type contents_ty) in
             { ocamltype = ocaml_array contents_type_info.ocamltype;
               c_of_ocaml = simple_converter "";
-              ocaml_of_c = (fun channel ~src params ~tgt ->
+              ocaml_of_c = (fun channel ~src ~params ~references ~tgt ->
                 Printf.fprintf channel "
 %s = caml_alloc(%s->%s, 0);
 for (%s i = 0; i < %s->%s; i++) {
@@ -698,7 +715,7 @@ for (%s i = 0; i < %s->%s; i++) {
   Store_field(%s, i, field);
 }
 " tgt src length (Clang.get_type_spelling length_ty) src length
-(fun channel -> contents_type_info.ocaml_of_c channel ~src:(Printf.sprintf "%s->%s[i]" src contents) [| |] ~tgt:"field")
+(fun channel -> contents_type_info.ocaml_of_c channel ~src:(Printf.sprintf "%s->%s[i]" src contents) ~params:[| |] ~references ~tgt:"field")
 tgt); }, Regular
         | None -> default_type (Clang.get_type_spelling ty)
         | _ -> assert false
@@ -724,7 +741,7 @@ tgt); }, Regular
       | "CXString" ->
           { ocamltype = ocaml_string;
             c_of_ocaml = (fun _ -> assert false);
-            ocaml_of_c = (fun fmt ~src _params ~tgt ->
+            ocaml_of_c = (fun fmt ~src ~params ~references ~tgt ->
   Printf.fprintf fmt "%s = caml_copy_string(clang_getCString(%s));
 clang_disposeString(%s);" tgt src src) }, Regular
       | "uint64_t" | "int64_t" ->
@@ -818,15 +835,15 @@ type output_desc =
   | Array of string * Clang.cxtype * Clang.cxtype
 
 let print_return_ocaml_of_c context used_arg_names print_expression
-    result_type result_type_interface ?result_name (common_info, type_info) params outputs =
+    result_type result_type_interface ?result_name (common_info, type_info) ~params ~references outputs =
   let print_output channel src output type_interface tgt =
     match output with
     | Info (common_info, type_info, params) ->
-        common_info.ocaml_of_c channel ~src params ~tgt
+        common_info.ocaml_of_c channel ~src ~params ~references ~tgt
     | Regular ty ->
         let common_info, type_info =
           find_type_info context type_interface ty in
-        common_info.ocaml_of_c channel ~src [| |] ~tgt
+        common_info.ocaml_of_c channel ~src ~params:[| |] ~references ~tgt
     | Sized_string length ->
         Printf.fprintf channel "%s = caml_alloc_initialized_string(%s, %s);\n"
           tgt length src
@@ -841,7 +858,7 @@ for (%s i = 0; i < %s; i++) {
   Store_field(%s, i, cell);
 }
 " tgt length (Clang.get_type_spelling length_ty) length
-(fun channel -> common_info.ocaml_of_c channel ~src:(Printf.sprintf "%s[i]" src) [| |] ~tgt:"cell")
+(fun channel -> common_info.ocaml_of_c channel ~src:(Printf.sprintf "%s[i]" src) ~params:[| |] ~references ~tgt:"cell")
 tgt
  in
   let make_data outputs channel =
@@ -956,7 +973,7 @@ let print_return_c_of_ocaml context used_arg_names print_expression
     CAMLreturnT(%s, data);
   }
 "
-        (fun channel -> common_info.c_of_ocaml channel result [| |] "data")
+        (fun channel -> common_info.c_of_ocaml channel ~src:result ~params:[| |] ~references:[| |] ~tgt:"data")
         (Clang.get_type_spelling result_type)
     end
 
@@ -1004,7 +1021,7 @@ let translate_struct_decl' context cur typedef name =
           | _ -> None) in
   List.iter apply_field_rule interface.fields;
   let ocaml_fields = !ocaml_fields_ref in
-  let common_info = make_common_type_info ocaml_type_name in
+  let common_info = make_common_type_info ~type_interface ocaml_type_name in
   let recognize_type field_type =
     match field_type with
     | Unknown (name, ty) ->
@@ -1057,7 +1074,7 @@ static value __attribute__((unused))
      Store_field(ocaml, %d, data);
   }
 "
-                  (fun channel -> common_type_info.ocaml_of_c channel (Printf.sprintf "v.%s" name) [| |] "data") i);
+                  (fun channel -> common_type_info.ocaml_of_c channel ~src:(Printf.sprintf "v.%s" name) ~params:[| |] ~references:[| |] ~tgt:"data") i);
           Printf.fprintf context.chan_stubs "\
   CAMLreturn(ocaml);
 }
@@ -1085,7 +1102,7 @@ static %s __attribute__((unused))
                               }
 "
                   (Clang.get_type_spelling ty)
-                  (fun channel -> common_type_info.c_of_ocaml channel (Printf.sprintf "Field(ocaml, %d)" i) [| |] "data") name);
+                  (fun channel -> common_type_info.c_of_ocaml channel ~src:(Printf.sprintf "Field(ocaml, %d)" i) ~params:[| |] ~references:[| |] ~tgt:"data") name);
           Printf.fprintf context.chan_stubs "\
   CAMLreturnT(%s, v);
 }
@@ -1120,19 +1137,24 @@ static %s __attribute__((unused))
   let print_accessor { field_name; accessor_name; stub_name } =
     make_decl ();
     let field_type = List.assoc field_name fields in
-    print_ocaml_primitive context.chan_stubs stub_name ["value arg"]
+    print_ocaml_primitive context.chan_stubs stub_name ["value arg_ocaml"]
       (fun channel ->
+         Printf.fprintf channel "
+CAMLparam1(arg_ocaml);
+%s arg;\n" name;
+         common_info.c_of_ocaml channel
+                ~src:"arg_ocaml"
+                ~params:[| |] ~references:[| |]
+                ~tgt:"arg";
          let print_expression channel =
-           Printf.fprintf channel "%s(arg).%s"
-             (name_of_c_of_ocaml ocaml_type_name)
+           Printf.fprintf channel "arg.%s"
              field_name in
          let field_type_info =
            find_type_info context empty_type_interface field_type in
          let print_result channel =
            print_return_ocaml_of_c context used_arg_names print_expression
-             field_type empty_type_interface field_type_info [| |] [] in
+             field_type empty_type_interface field_type_info ~params:[| |] ~references:[| |] [] in
          Printf.fprintf channel "
-  CAMLparam1(arg);
   %t" print_result);
     let pval_prim = [stub_name] in
     let field_type_info, _ =
@@ -1176,6 +1198,7 @@ end)
 let translate_enum_decl context cur =
   let name = Clang.get_cursor_spelling cur in
   let interface = get_enum name context.module_interface in
+  let type_interface = get_type name context.module_interface in
   let typedef, name =
     if name = "" then
       true, Clang.get_type_spelling (Clang.get_cursor_type cur)
@@ -1219,7 +1242,7 @@ let translate_enum_decl context cur =
     List.map (fun (_, name, _) ->
       constructor_declaration (loc (String.capitalize_ascii name)))
       constructors in
-  let common_info = make_common_type_info ocaml_type_name in
+  let common_info = make_common_type_info ~type_interface ocaml_type_name in
   let enum_info = { result; constructors } in
   let make_decl () =
     let type_name =
@@ -1305,7 +1328,7 @@ let translate_typedef_decl context cur =
       let type_interface = get_type name context.module_interface in
 
       let ocaml_type_name = make_ocaml_type_name name in
-      let common_info = make_common_type_info ocaml_type_name in
+      let common_info = make_common_type_info ~type_interface ocaml_type_name in
       let make_decl () =
         let destructor = make_destructor context name ocaml_type_name type_interface in
         Printf.fprintf context.chan_stubs
@@ -1335,6 +1358,7 @@ type argument_type =
       closure_args : (string * Clang.cxtype) array;
       closure_result : Clang.cxtype;
       data_callee : int;
+      references : int list;
     }
 
 let find_argument argument index_args =
@@ -1391,6 +1415,7 @@ let translate_function_decl context cur =
     CXType (Clang.get_arg_type ty i)) in
   let outputs = ref [] in
   let arg_interfaces = Array.make num_args empty_type_interface in
+  let references = ref [] in
   let apply_argument_rule (rule : argument_interface) =
     match rule with
     | Array { length; contents } ->
@@ -1442,7 +1467,7 @@ let translate_function_decl context cur =
     | Fixed_value { argument; value } ->
         let argument = find_argument argument index in
         args.(argument) <- Fixed_value value
-    | Closure { pointer; data_caller; data_callee } ->
+    | Closure { pointer; data_caller; data_callee; references } ->
         let pointer = find_argument pointer index in
         let data_caller = find_argument data_caller index in
         begin
@@ -1455,19 +1480,23 @@ let translate_function_decl context cur =
                 let arg_ty = Clang.get_arg_type pointee_ty i in
                 (Printf.sprintf "arg%d" i, arg_ty)) in
               let closure_result = Clang.get_result_type pointee_ty in
-              let index = index_args (Array.map fst closure_args) in
-              let data_callee = find_argument data_callee index in
+              let index' = index_args (Array.map fst closure_args) in
+              let data_callee = find_argument data_callee index' in
+              let references = references |> List.map @@ fun arg ->
+                find_argument arg index in
               args.(pointer) <-
                 Closure {
                   data_caller; data_caller_type; closure_args; closure_result;
-                data_callee }
+                data_callee; references }
           | _ -> failwith "Argument expected"
         end;
         args.(data_caller) <- Removed args.(data_caller)
     | Type_interface { argument; interface } ->
         let argument = find_argument argument index in
-        arg_interfaces.(argument) <- union_type_interface arg_interfaces.(argument)
-          interface in
+        arg_interfaces.(argument) <- union_type_interfaces arg_interfaces.(argument)
+          interface
+    | Reference (argument, accessor) ->
+        references := (find_argument argument index, accessor) :: !references in
   List.iter apply_argument_rule function_interface.arguments;
   let outputs = List.rev !outputs in
   let result_type = Clang.get_result_type ty in
@@ -1498,6 +1527,8 @@ let translate_function_decl context cur =
         | _ -> failwith "Argument expected" in
       args.(param) <- Output { output_type = CXType ty; on_success = true; on_error = false };
       param in
+  let references =
+    !references |> Array.of_list in
   let result_ty = translate_type_info ~outputs:(List.map (fun o -> { o with desc = translate_type_info (snd o.desc) }) real_outputs) result_type_info in
   let pval_type =
     if num_args = 0 then
@@ -1532,11 +1563,12 @@ let translate_function_decl context cur =
         ptyp_arrow ?label ty pval_type
       end arg_list result_ty in
   let wrapper_name = name ^ "_wrapper" in
-  let ocaml_args = Array.map2 (fun arg arg_name ->
+  let ocaml_arg_names = Array.map2 (fun arg arg_name ->
       match arg with
       | Removed _ | Removed_output _ | Output _ | Fixed_value _ -> None
       | _ -> Some (Printf.sprintf "%s_ocaml" arg_name))
-      args wrapper_arg_names |>
+      args wrapper_arg_names in
+  let ocaml_args = ocaml_arg_names |>
     Array.to_seq |> Seq.filter_map (fun x -> x) |> List.of_seq in
   let nb_args = List.length ocaml_args in
   let rec make_buckets args =
@@ -1549,7 +1581,7 @@ let translate_function_decl context cur =
     match arg with
     | Closure {
         data_caller; data_caller_type; closure_args; closure_result;
-        data_callee } ->
+        data_callee; references } ->
           let callback_name =
             Printf.sprintf "%s_%s_callback" name wrapper_arg_names.(i) in
           let closure_result_string = Clang.get_type_spelling closure_result in
@@ -1558,11 +1590,12 @@ let translate_function_decl context cur =
           let ocaml_args = args
            |> Array.to_seq |> Seq.filter_map (Option.map (fun (_, _, name) -> name)) |> List.of_seq in
           let local = "result" :: "f" :: ocaml_args in
+          let references' = List.mapi (fun i _ -> Printf.sprintf "*((value **)%s)[%d]" (fst closure_args.(data_callee)) (i + 1)) references  |> Array.of_list in
           let init_args chan =
             args |> Array.iter @@ Option.iter @@ fun (name, ty, name_ocaml) ->
               let arg_info, _ = find_type_info context empty_type_interface ty in
               flush chan;
-              arg_info.ocaml_of_c chan name [| |] name_ocaml in
+              arg_info.ocaml_of_c chan ~src:name ~params:[| |] ~references:references' ~tgt:name_ocaml in
           let print_expression channel =
             Printf.fprintf channel "caml_callback%s(%a)"
               (match List.length ocaml_args with 1 -> "" | n -> string_of_int n)
@@ -1584,10 +1617,15 @@ let translate_function_decl context cur =
             (closure_args |> Array.to_list |> List.map (fun (name, ty) ->
               Printf.sprintf "%s %s" (Clang.get_type_spelling ty) name))
             (List.length local) print_list local
-            (fst closure_args.(data_callee))
+            (if references = [] then fst closure_args.(data_callee)
+             else Printf.sprintf "((value **)%s)[0]" (fst closure_args.(data_callee)))
             init_args print_call_and_return;
-          wrapper_arg_names.(data_caller) <-
-            Printf.sprintf "&%s_ocaml" wrapper_arg_names.(i);
+          let data_caller_name = Printf.sprintf "&%s_ocaml" wrapper_arg_names.(i) in
+          if references = [] then
+            wrapper_arg_names.(data_caller) <- data_caller_name
+          else
+            wrapper_arg_names.(data_caller) <-
+              Printf.sprintf "(value *[]){%s,%s}" data_caller_name (String.concat "," (List.map (fun i -> "&" ^ wrapper_arg_names.(i) ^ "_ocaml") references));
           wrapper_arg_names.(i) <- callback_name
     | _ -> ()
   );
@@ -1627,9 +1665,9 @@ let translate_function_decl context cur =
   %t"
             (Clang.get_type_spelling ty) wrapper_arg_names.(i)
             (fun channel -> common_info.c_of_ocaml channel
-                (Printf.sprintf "%s_ocaml" wrapper_arg_names.(i))
-                [| |]
-                wrapper_arg_names.(i))
+                ~src:(Printf.sprintf "%s_ocaml" wrapper_arg_names.(i))
+                ~params:[| |] ~references:[| |]
+                ~tgt:wrapper_arg_names.(i))
       | Sized_string (j, length_ty, contents_ty) ->
           Printf.fprintf context.chan_stubs "\n  %s %s = caml_string_length(%s_ocaml);"
             (Clang.get_type_spelling length_ty) wrapper_arg_names.(j)
@@ -1649,7 +1687,7 @@ let translate_function_decl context cur =
           let common_info, type_info = find_type_info context empty_type_interface cell_type in
           let index = make_name_unique used_arg_names "i" in
           Printf.fprintf context.chan_stubs "\n  %s %s; for (%s = 0; %s < %s; %s++) {\n    %t\n  }"
-            c_length_ty index index index wrapper_arg_names.(j) index (fun channel -> common_info.c_of_ocaml channel (Printf.sprintf "Field(%s_ocaml, %s)" wrapper_arg_names.(i) index) [| |] (Printf.sprintf "%s[%s]" wrapper_arg_names.(i) index))
+            c_length_ty index index index wrapper_arg_names.(j) index (fun channel -> common_info.c_of_ocaml channel ~src:(Printf.sprintf "Field(%s_ocaml, %s)" wrapper_arg_names.(i) index) ~params:[| |] ~references:[| |] ~tgt:(Printf.sprintf "%s[%s]" wrapper_arg_names.(i) index))
       | Closure _ -> ());
     let wrapper_args = Array.map2 (fun arg arg_name ->
       match arg with
@@ -1663,7 +1701,8 @@ let translate_function_decl context cur =
         (Array.to_list wrapper_args) in
     print_return_ocaml_of_c context used_arg_names print_expression
       result_type function_interface.result result_type_info ?result_name
-      (params |> Array.map @@ fun i -> wrapper_arg_names.(i))
+      ~params:(params |> Array.map @@ fun i -> wrapper_arg_names.(i))
+      ~references:(references |> Array.map @@ fun (i, accessor) -> accessor (Option.get ocaml_arg_names.(i)))
       (real_outputs |> List.map @@ fun { desc = (i, _) } -> match i with None -> "result", { desc = Regular result_type; on_success = true; on_error = false }, empty_type_interface | Some i -> wrapper_arg_names.(i), (match args.(i) with Output { output_type = CXType ty; on_success; on_error } -> { desc = Regular ty; on_success; on_error } | Update ty ->  { desc = Regular ty; on_success = true; on_error = false } | Output { output_type = Sized_string (length, _, _); on_success; on_error } -> { desc = Sized_string wrapper_arg_names.(length); on_success; on_error } | Output { output_type = Array (length, length_ty, contents_ty); on_success; on_error } -> { desc = Array (wrapper_arg_names.(length), length_ty, Clang.get_pointee_type contents_ty); on_success; on_error } | _ -> assert false), arg_interfaces.(i)) in
   let ocaml_args_decl =
     ocaml_args |> List.map (fun s -> Printf.sprintf "value %s" s) in
@@ -1713,12 +1752,32 @@ let main cflags llvm_config prefix =
     add_type (Pcre.regexp "^CXFloat$")
       (empty_type_interface |>
        make_destructor "clang_ext_Float_dispose") |>
+    add_type (Pcre.regexp "^CXIndex$")
+      (empty_type_interface |>
+       make_destructor "clang_disposeIndex") |>
+    add_type (Pcre.regexp "^CXTranslationUnit$")
+      (empty_type_interface |>
+       make_destructor "clang_disposeTranslationUnit") |>
+    add_type (Pcre.regexp "^CXTranslationUnit$|^CXCursor$|^CXType$")
+      (empty_type_interface |> carry_reference) |>
     add_function (Pcre.regexp "^clang_") (rename_function rename_clang) |>
     add_function (Pcre.regexp "^clang_createTranslationUnitFromSourceFile$")
       (empty_function_interface |>
         add_argument (Array {
           length = Name "num_clang_command_line_args";
           contents = Name "clang_command_line_args" })) |>
+    add_function (Pcre.regexp "^clang_createTranslationUnit(FromSourceFile|2)?$|^clang_parseTranslationUnit(2(FullArgv)?)?")
+      (empty_function_interface |>
+        add_argument (Reference (Name "CIdx", (fun x -> x)))) |>
+    add_function (Pcre.regexp "^clang_get(TranslationUnit)?Cursor$")
+      (empty_function_interface |>
+        add_argument (Reference (Index 0, (fun x -> x)))) |>
+    add_function (Pcre.regexp "^clang_Cursor_getTranslationUnit$")
+      (empty_function_interface |>
+        add_argument (Reference (Index 0, (fun x -> Printf.sprintf "Field(Field(%s, 1), 1)" x)))) |>
+    add_function (Pcre.regexp "^clang_getCursor(Semantic|Lexical)Parent$|^clang_getOverriddenCursors$|^clang_Cursor_getArgument$|^clang_getTypeDeclaration$|^clang_getOverloadedDecl$|^clang_getCursorReferenced$|^clang_getCursorDefinition$|^clang_getCanonicalCursor$|^clang_getSpecializedCursorTemplate$|^clang_ext_IfStmt_getInit$|^clang_ext_SwitchStmt_getInit$|^clang_ext_VariableArrayType_GetSizeExpr$|^clang_getCursorType$|^clang_getTypedefDeclUnderlyingType$|^clang_getEnumDeclIntegerType$|^clang_Cursor_getTemplateArgumentType$|^clang_getCanonicalType$|^clang_getPointeeType$|^clang_getResultType$|^clang_getArgType$|^clang_getCursorResultType$|^clang_getElementType$|^clang_getArrayElementType$|^clang_Type_getNamedType$|^clang_Type_getClassType$|^clang_Type_getTemplateArgumentAsType$|^clang_getIBOutletCollectionType$|^clang_Cursor_getReceiverType$|^clang_ext_GetInnerType$")
+      (empty_function_interface |>
+        add_argument (Reference (Index 0, (fun x -> Printf.sprintf "Field(%s, 1)" x)))) |>
     add_function (Pcre.regexp "^clang_parseTranslationUnit|^clang_indexSourceFile")
       (empty_function_interface |>
         add_argument (Array {
@@ -1767,21 +1826,24 @@ let main cflags llvm_config prefix =
         add_argument (Closure {
           pointer = Name "visitor";
           data_caller = Name "client_data";
-          data_callee = Index 2 })) |>
+          data_callee = Index 2;
+          references = [Name "parent"] })) |>
     add_function (Pcre.regexp "^clang_getInclusions$")
       (empty_function_interface |>
         add_result (empty_type_interface |> integer_boolean) |>
         add_argument (Closure {
           pointer = Name "visitor";
           data_caller = Name "client_data";
-          data_callee = Index 3 })) |>
+          data_callee = Index 3;
+          references = [Name "parent"] })) |>
     add_function (Pcre.regexp "^clang_Type_visitFields$")
       (empty_function_interface |>
         add_result (empty_type_interface |> integer_boolean) |>
         add_argument (Closure {
           pointer = Name "visitor";
           data_caller = Name "client_data";
-          data_callee = Index 1 })) |>
+          data_callee = Index 1;
+          references = [Name "T"]})) |>
     add_function (Pcre.regexp "^clang.*_(is|equal)[A-Z]")
       (empty_function_interface |>
         add_result (empty_type_interface |> integer_boolean) |>
