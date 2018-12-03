@@ -149,8 +149,8 @@ let example = "struct s { int i; char array[]; };"
 let () =
   match parse_declaration_list example with
   | [{ desc = Struct { name = "s"; fields = [
-      { desc = { name = "i"; qual_type = { desc = OtherType Int}}};
-      { desc = { name = "array"; qual_type = { desc = IncompleteArray {
+      { desc = Named { name = "i"; qual_type = { desc = OtherType Int}}};
+      { desc = Named { name = "array"; qual_type = { desc = IncompleteArray {
         element = { desc = OtherType Char_S }}}}}] }}] -> ()
   | _ -> assert false
     ]}*)
@@ -1371,7 +1371,7 @@ let () =
     ]}*)
   | Struct of {
       name : string;
-      fields : field_desc node list;
+      fields : field list;
     }
 (** Structure declaration.
     {[
@@ -1382,9 +1382,9 @@ let () =
   | [{ desc = Struct {
       name = "s";
       fields = [
-        { desc = { name = "i";
+        { desc = Named { name = "i";
           qual_type = { desc = OtherType Int}}};
-        { desc = { name = "f";
+        { desc = Named { name = "f";
           qual_type = { desc = OtherType Float}}}] }}] -> ()
   | _ -> assert false
 
@@ -1395,13 +1395,13 @@ let () =
   | [{ desc = Struct {
       name = "s";
       fields = [
-        { cxcursor; desc = { name = "a";
+        { cxcursor; desc = Named { name = "a";
           qual_type = { desc = OtherType Int};
           bitfield = Some { desc = IntegerLiteral one }}};
-        { desc = { name = "b";
+        { desc = Named { name = "b";
           qual_type = { desc = OtherType Int};
           bitfield = Some { desc = IntegerLiteral two }}};
-        { desc = { name = "c";
+        { desc = Named { name = "c";
           qual_type = { desc = OtherType Int};
           bitfield = None}}] }}] ->
       assert (Clang.int_of_cxint one = 1);
@@ -1411,7 +1411,7 @@ let () =
     ]}*)
   | Union of {
       name : string;
-      fields : field_desc node list;
+      fields : field list;
     }
 (** Union declaration.
     {[
@@ -1422,9 +1422,9 @@ let () =
   | [{ desc = Union {
       name = "u";
       fields = [
-        { desc = { name = "i";
+        { desc = Named { name = "i";
           qual_type = { desc = OtherType Int}}};
-        { desc = { name = "f";
+        { desc = Named { name = "f";
           qual_type = { desc = OtherType Float}}}] }}] -> ()
   | _ -> assert false
 
@@ -1435,13 +1435,13 @@ let () =
   | [{ desc = Union {
       name = "u";
       fields = [
-        { cxcursor; desc = { name = "a";
+        { cxcursor; desc = Named { name = "a";
           qual_type = { desc = OtherType Int};
           bitfield = Some { desc = IntegerLiteral one }}};
-        { desc = { name = "b";
+        { desc = Named { name = "b";
           qual_type = { desc = OtherType Int};
           bitfield = Some { desc = IntegerLiteral two }}};
-        { desc = { name = "c";
+        { desc = Named { name = "c";
           qual_type = { desc = OtherType Int};
           bitfield = None}}] }}] ->
       assert (Clang.int_of_cxint one = 1);
@@ -1475,9 +1475,9 @@ let () =
   | [{ desc = Union {
         name = "u";
         fields = [
-          { desc = { name = "i";
+          { desc = Named { name = "i";
             qual_type = { desc = OtherType Int}}};
-          { desc = { name = "f";
+          { desc = Named { name = "f";
             qual_type = { desc = OtherType Float}}}] }};
       { desc = Typedef {
         name = "u_t";
@@ -1493,9 +1493,9 @@ let () =
   | [{ desc = Union {
         name = "";
         fields = [
-          { desc = { name = "i";
+          { desc = Named { name = "i";
             qual_type = { desc = OtherType Int}}};
-          { desc = { name = "f";
+          { desc = Named { name = "f";
             qual_type = { desc = OtherType Float}}}] }};
       { cxcursor; desc = Typedef {
         name = "u_t";
@@ -1517,11 +1517,52 @@ let () =
     ]}*)
   | OtherDecl
 
-and field_desc = {
-  name : string;
-  qual_type : qual_type;
-  bitfield : expr option;
-}
+and field = field_desc node
+
+and field_desc =
+  | Named of  {
+      name : string;
+      qual_type : qual_type;
+      bitfield : expr option;
+    }
+  | AnonymousUnion of field list
+(** Anonymous union
+    {[
+let example = {| struct s { int label; union { int i; float f; };}; |}
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Struct {
+      name = "s";
+      fields = [
+        { desc = Named { name = "label";
+          qual_type = { desc = OtherType Int}}};
+        { desc = AnonymousUnion [
+          { desc = Named { name = "i";
+            qual_type = { desc = OtherType Int}}};
+          { desc = Named { name = "f";
+            qual_type = { desc = OtherType Float}}}] }] }}] -> ()
+  | _ -> assert false
+    ]}*)
+  | AnonymousStruct of field list
+(** Anonymous struct
+    {[
+let example = {| union s { int single; struct { int i; float f; };}; |}
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Union {
+      name = "s";
+      fields = [
+        { desc = Named { name = "single";
+          qual_type = { desc = OtherType Int}}};
+        { desc = AnonymousStruct [
+          { desc = Named { name = "i";
+            qual_type = { desc = OtherType Int}}};
+          { desc = Named { name = "f";
+            qual_type = { desc = OtherType Float}}}] }] }}] -> ()
+  | _ -> assert false
+    ]}*)
 
 and label_ref = string
 

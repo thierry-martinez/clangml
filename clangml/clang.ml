@@ -256,7 +256,11 @@ module Ast = struct
                 | _ -> failwith "fields_of_cxcursor (bitfield)"
               else
                 None in
-            { cxcursor; desc = { name; qual_type; bitfield }}
+            { cxcursor; desc = Named { name; qual_type; bitfield }}
+        | UnionDecl ->
+            { cxcursor; desc = AnonymousUnion (fields_of_cxcursor cxcursor)}
+        | StructDecl ->
+            { cxcursor; desc = AnonymousStruct (fields_of_cxcursor cxcursor)}
         | _ -> failwith "fields_of_cxcursor"
 
     and stmt_of_cxcursor cxcursor =
