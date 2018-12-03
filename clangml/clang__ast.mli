@@ -1188,7 +1188,7 @@ let () =
       assert (Clang.int_of_cxint three = 3)
   | _ -> assert false
     ]}*)
-  | ParenExpr of expr
+  | Paren of expr
 (** Parenthesed expression.
 
     Parenthesed expression are removed in the AST unless ~ignore_paren:false
@@ -1198,7 +1198,7 @@ let example = {| (1); |}
 
 let () =
   match parse_statement_list ~ignore_paren:false example with
-  | [{ desc = Expr (ParenExpr ({ desc = IntegerLiteral one}))}] ->
+  | [{ desc = Expr (Paren ({ desc = IntegerLiteral one}))}] ->
       assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
 

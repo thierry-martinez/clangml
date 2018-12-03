@@ -422,7 +422,7 @@ module Ast = struct
 
     and expr_of_cxcursor cxcursor =
       match expr_desc_of_cxcursor cxcursor with
-      | ParenExpr subexpr when Options.ignore_paren -> subexpr
+      | Paren subexpr when Options.ignore_paren -> subexpr
       | Cast { kind = Implicit; operand } when Options.ignore_implicit_cast ->
           operand
       | desc -> { cxcursor; desc }
@@ -495,7 +495,7 @@ module Ast = struct
             match list_of_children cxcursor with
             | [subexpr] -> expr_of_cxcursor subexpr
             | _ -> failwith "expr_of_cxcursor (ParenExpr)" in
-          ParenExpr subexpr
+          Paren subexpr
       | AddrLabelExpr ->
           let label =
             match list_of_children cxcursor with
