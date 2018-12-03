@@ -121,15 +121,6 @@ struct CXTranslationUnitImpl {
   std::vector<std::string> Arguments;
 };
 
-// From clang source tree: tools/libclang/CXTranslationUnit.h
-static inline clang::ASTUnit *
-getASTUnit(CXTranslationUnit TU)
-{
-  if (!TU)
-    return nullptr;
-  return TU->TheASTUnit;
-}
-
 CXInt Invalid_CXInt = { NULL };
 
 static inline CXInt
@@ -184,20 +175,18 @@ MakeCXCursor(clang::Expr *E, CXTranslationUnit TU)
 }
 
 /* The following implementation makes a (not well-formed) cursor on a
-   compound statement with S as substatement. Visiting the (single) child of
+   default statement with S as substatement. Visiting the (single) child of
    this cursor calls libclang's MakeCXCursor on S.
 */
 static CXCursor
 MakeCXCursor(const clang::Stmt *S, CXTranslationUnit TU)
 {
-  clang::CompoundStmt *CS = clang::CompoundStmt::Create(
-    getASTUnit(TU)->getASTContext(), (clang::Stmt *) S,
+  clang::DefaultStmt CS(
     clang::SourceLocation::getFromRawEncoding(0),
-    clang::SourceLocation::getFromRawEncoding(0));
-  CXCursor C = { CXCursor_CompoundStmt, 0, { NULL, CS, TU }};
+    clang::SourceLocation::getFromRawEncoding(0), (clang::Stmt *) S);
+  CXCursor C = { CXCursor_CompoundStmt, 0, { NULL, &CS, TU }};
   CXCursor Result;
   clang_visitChildren(C, MakeCXCursor_visitor, &Result);
-  /* TODO: How to free CS? */
   return Result;
 }
 
