@@ -1075,8 +1075,12 @@ external ext_for_stmt_get_children_set :
   cxcursor -> int = "clang_ext_ForStmt_getChildrenSet_wrapper"
 external ext_if_stmt_get_children_set :
   cxcursor -> int = "clang_ext_IfStmt_getChildrenSet_wrapper"
+external ext_if_stmt_get_init :
+  cxcursor -> cxcursor = "clang_ext_IfStmt_getInit_wrapper"
 external ext_switch_stmt_get_children_set :
   cxcursor -> int = "clang_ext_SwitchStmt_getChildrenSet_wrapper"
+external ext_switch_stmt_get_init :
+  cxcursor -> cxcursor = "clang_ext_SwitchStmt_getInit_wrapper"
 external ext_while_stmt_get_children_set :
   cxcursor -> int = "clang_ext_WhileStmt_getChildrenSet_wrapper"
 type clang_ext_elaboratedtypekeyword =
@@ -1117,3 +1121,5 @@ external ext_get_inner_type :
   cxtype -> cxtype = "clang_ext_GetInnerType_wrapper"
 external ext_variable_array_type_get_size_expr :
   cxtype -> cxcursor = "clang_ext_VariableArrayType_GetSizeExpr_wrapper"
+external ext_asm_stmt_get_asm_string :
+  cxcursor -> string = "clang_ext_AsmStmt_GetAsmString_wrapper"
