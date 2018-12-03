@@ -346,13 +346,13 @@ let () =
         function_type = { calling_conv = C }}}] -> ()
     | _ -> assert false
 
-let example = "__regcall void f(void);"
+let example = "__vectorcall void f(void);"
 
 let () =
     match parse_declaration_list example with
     | [{ desc = Function {
         name = "f"; 
-        function_type = { calling_conv = X86RegCall }}}] -> ()
+        function_type = { calling_conv = X86VectorCall }}}] -> ()
     | _ -> assert false
     ]}
  *)
