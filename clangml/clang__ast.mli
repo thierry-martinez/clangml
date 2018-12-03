@@ -1221,6 +1221,24 @@ let () =
       ()
   | _ -> assert false
     ]}*)
+  | InitList of expr list
+(** Initialization list
+    {[
+let example = {| int a[2] = { 1, 2 }; |}
+
+let () =
+  match parse_declaration_list example with
+  | [{ desc = Var { name = "a"; qual_type = {
+      desc = ConstantArray {
+        element = { desc = OtherType Int };
+        size = 2 }};
+      init = Some { desc = InitList [
+        { desc = IntegerLiteral one };
+        { desc = IntegerLiteral two }] }}}] ->
+      assert (Clang.int_of_cxint one = 1);
+      assert (Clang.int_of_cxint two = 2)
+  | _ -> assert false
+    ]}*)
   | UnexposedExpr of {
       s : string;
     }

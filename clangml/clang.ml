@@ -502,6 +502,8 @@ module Ast = struct
             | [label] -> get_cursor_spelling label
             | _ -> failwith "expr_of_cxcursor (AddrLabelExpr)" in
           AddrLabel label
+      | InitListExpr ->
+          InitList (list_of_children cxcursor |> List.map expr_of_cxcursor)
       | FirstExpr (* TODO: UnexposedExpr! *) ->
           begin
             match ext_get_cursor_kind cxcursor with
