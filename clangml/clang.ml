@@ -504,6 +504,13 @@ module Ast = struct
           AddrLabel label
       | InitListExpr ->
           InitList (list_of_children cxcursor |> List.map expr_of_cxcursor)
+      | CompoundLiteralExpr ->
+          let qual_type = cxcursor |> get_cursor_type |> of_cxtype in
+          let init =
+            match list_of_children cxcursor with
+            | [init] -> init |> expr_of_cxcursor
+            | _ -> failwith "expr_of_cxcursor (CompoundLiteralExpr)" in
+          CompoundLiteral { qual_type; init }
       | FirstExpr (* TODO: UnexposedExpr! *) ->
           begin
             match ext_get_cursor_kind cxcursor with

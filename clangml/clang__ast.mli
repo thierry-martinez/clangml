@@ -1209,7 +1209,7 @@ let () =
   | _ -> assert false
     ]}*)
   | AddrLabel of string
-(** Label address (Labels as Values GNU extension)
+(** Label address (Labels as Values GNU extension).
     {[
 let example = {| label: &&label; |}
 
@@ -1222,7 +1222,7 @@ let () =
   | _ -> assert false
     ]}*)
   | InitList of expr list
-(** Initialization list
+(** Initialization list.
     {[
 let example = {| int a[2] = { 1, 2 }; |}
 
@@ -1235,6 +1235,27 @@ let () =
       init = Some { desc = InitList [
         { desc = IntegerLiteral one };
         { desc = IntegerLiteral two }] }}}] ->
+      assert (Clang.int_of_cxint one = 1);
+      assert (Clang.int_of_cxint two = 2)
+  | _ -> assert false
+    ]}*)
+  | CompoundLiteral of {
+      qual_type : qual_type;
+      init : expr
+    }
+(** Compound literal [C99 6.5.2.5].
+    {[
+let example = {| (int []) { 1, 2 }; |}
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Expr (CompoundLiteral {
+      qual_type = { desc = ConstantArray {
+        element = { desc = OtherType Int };
+        size = 2 }};
+      init = { desc = InitList [
+        { desc = IntegerLiteral one };
+        { desc = IntegerLiteral two }] }})}] ->
       assert (Clang.int_of_cxint one = 1);
       assert (Clang.int_of_cxint two = 2)
   | _ -> assert false
