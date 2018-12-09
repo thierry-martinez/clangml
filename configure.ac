@@ -112,6 +112,27 @@ AS_IF([test "x$LLVM_VERSION" = "x"],
   [AC_MSG_ERROR([[unable to run $LLVM_CONFIG --version]])])
 AC_MSG_RESULT([[$LLVM_VERSION]])
 
+AC_SUBST([LLVM_CFLAGS], [[`$LLVM_CONFIG --cflags `]])
+
+AC_SUBST([LLVM_LDFLAGS], [[`$LLVM_CONFIG --ldflags`]])
+
+AC_SUBST([LLVM_LIBS], [[`$LLVM_CONFIG --libs`]])
+
+AC_SUBST([LLVM_LIBDIR], [[`$LLVM_CONFIG --libdir`]])
+
+AC_SUBST([CFLAGS], [["$LLVM_CFLAGS"]])
+
+AC_SUBST([CPPFLAGS], [["$LLVM_CFLAGS"]])
+
+AC_SUBST([STRIPPED_LLVM_LDFLAGS], [[`echo $LLVM_LDFLAGS | sed 's/-Wl,-search_paths_first //' | sed 's/-Wl,-headerpad_max_install_names//'`]])
+
+AC_SUBST([LDFLAGS], [["$STRIPPED_LLVM_LDFLAGS -Wl,-rpath,$LLVM_LIBDIR"]])
+
+AC_SUBST([LIBS], [["-lclang -lclangAST -lclangLex -lclangBasic $LLVM_LIBS -lpthread -lcurses -lstdc++"]])
+
+AC_CHECK_HEADERS([clang-c/Index.h], [],
+  [AC_MSG_ERROR([[Header clang-c/Index.h not found]])])
+
 AC_MSG_NOTICE(initialize build tree)
 
 AC_DEFUN([AC_CP],
@@ -147,22 +168,6 @@ AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang__bindings.ml], [clangml/clang__bind
 AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang__bindings.mli], [clangml/clang__bindings.mli])
 
 AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang_stubs.c], [clangml/clang_stubs.c])
-
-AC_SUBST([LLVM_CFLAGS], [[`$LLVM_CONFIG --cflags `]])
-
-AC_SUBST([LLVM_LDFLAGS], [[`$LLVM_CONFIG --ldflags`]])
-
-AC_SUBST([LLVM_LIBS], [[`$LLVM_CONFIG --libs`]])
-
-AC_SUBST([LLVM_LIBDIR], [[`$LLVM_CONFIG --libdir`]])
-
-AC_SUBST([CFLAGS], [["$LLVM_CFLAGS"]])
-
-AC_SUBST([STRIPPED_LLVM_LDFLAGS], [[`echo $LLVM_LDFLAGS | sed 's/-Wl,-search_paths_first //' | sed 's/-Wl,-headerpad_max_install_names//'`]])
-
-AC_SUBST([LDFLAGS], [["$STRIPPED_LLVM_LDFLAGS -Wl,-rpath,$LLVM_LIBDIR"]])
-
-AC_SUBST([LIBS], [["-lclang -lclangAST -lclangLex -lclangBasic $LLVM_LIBS -lpthread -lcurses -lstdc++"]])
 
 AC_CONFIG_FILES([
   Makefile
