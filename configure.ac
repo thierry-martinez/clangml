@@ -91,6 +91,16 @@ AC_ARG_WITH([llvm-config],
    AC_MSG_RESULT([[$LLVM_CONFIG (--with-llvm-config=)]])],
   [AC_SUBST([LLVM_CONFIG], [[`which llvm-config`]])
    AS_IF([test "x$LLVM_CONFIG" = "x"],
+     [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-7`]])
+      AS_IF([test "x$LLVM_CONFIG" = "x"],
+        [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-6`]])
+         AS_IF([test "x$LLVM_CONFIG" = "x"],
+           [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-5`]])
+            AS_IF([test "x$LLVM_CONFIG" = "x"],
+              [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-4`]])
+               AS_IF([test "x$LLVM_CONFIG" = "x"],
+                 [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-3`]])])])])])])
+   AS_IF([test "x$LLVM_CONFIG" = "x"],
      [AC_MSG_RESULT([[not found in PATH]])
       AC_MSG_ERROR(
         [[llvm-config not available (you may use --with-llvm-config=)]])])
@@ -137,7 +147,6 @@ AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang__bindings.ml], [clangml/clang__bind
 AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang__bindings.mli], [clangml/clang__bindings.mli])
 
 AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang_stubs.c], [clangml/clang_stubs.c])
-
 
 AC_SUBST([LLVM_CFLAGS], [[`$LLVM_CONFIG --cflags `]])
 
