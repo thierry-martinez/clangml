@@ -46,14 +46,16 @@ module Ast : sig
         cxtranslationunit -> translation_unit
 end
 
+val string_of_cxerrorcode : cxerrorcode -> string
+
 val parse_file : ?index:cxindex ->
   ?command_line_args:string list ->
     ?unsaved_files:cxunsavedfile list ->
       ?options:Cxtranslationunit_flags.t ->
-        string -> (cxtranslationunit, cxerrorcode) Stdcompat.result
+        string -> cxtranslationunit
 
 val parse_string : ?index:cxindex -> ?filename:string ->
   ?command_line_args:string list ->
     ?unsaved_files:cxunsavedfile list ->
       ?options:Cxtranslationunit_flags.t ->
-        string -> (cxtranslationunit, cxerrorcode) Stdcompat.result
+        string -> cxtranslationunit

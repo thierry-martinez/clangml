@@ -26,7 +26,7 @@ various programs.
 let parse_declaration_list ?filename ?ignore_paren ?ignore_paren_in_types
     source =
   prerr_endline source;
-  (Clang.parse_string ?filename source |> Result.get_ok |>
+  (Clang.parse_string ?filename source |>
       Clang.Ast.of_cxtranslationunit ?ignore_paren ?ignore_paren_in_types)
     .desc.items
    ]}*)

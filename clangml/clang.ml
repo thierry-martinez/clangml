@@ -592,11 +592,22 @@ module Ast = struct
     Convert.of_cxtranslationunit tu
 end
 
+let string_of_cxerrorcode cxerrorcode =
+  match cxerrorcode with
+  | Failure -> "generic error code, no further details are available"
+  | Crashed -> "libclang crashed while performing the requested operation"
+  | InvalidArguments -> "the arguments violate the function contract"
+  | ASTReadError -> "an AST deserialization error has occurred"
+
 let parse_file ?(index = create_index true true)
     ?(command_line_args = []) ?(unsaved_files = [])
     ?(options = default_editing_translation_unit_options ()) filename =
-  parse_translation_unit2 index filename (Array.of_list command_line_args)
-    (Array.of_list unsaved_files) options
+  match
+    parse_translation_unit2 index filename (Array.of_list command_line_args)
+      (Array.of_list unsaved_files) options
+  with
+  | Ok cxtranslationunit -> cxtranslationunit
+  | Error cxerrorcode -> failwith (string_of_cxerrorcode cxerrorcode)
 
 let parse_string ?index ?(filename = "<string>.c")
     ?command_line_args ?(unsaved_files = [])
