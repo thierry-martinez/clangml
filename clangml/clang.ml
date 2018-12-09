@@ -592,8 +592,15 @@ module Ast = struct
     Convert.of_cxtranslationunit tu
 end
 
-let parse_string ?(index = create_index true true) ?(filename = "<string>.c")
-    ?(command_line_args = [| |]) ?(unsaved_files = [])
-    ?(options = default_editing_translation_unit_options ()) contents =
-  parse_translation_unit2 index filename command_line_args
-    (Array.of_list ({ filename; contents } :: unsaved_files)) options
+let parse_file ?(index = create_index true true)
+    ?(command_line_args = []) ?(unsaved_files = [])
+    ?(options = default_editing_translation_unit_options ()) filename =
+  parse_translation_unit2 index filename (Array.of_list command_line_args)
+    (Array.of_list unsaved_files) options
+
+let parse_string ?index ?(filename = "<string>.c")
+    ?command_line_args ?(unsaved_files = [])
+    ?options contents =
+  parse_file ?index ?command_line_args
+    ~unsaved_files:({ filename; contents } :: unsaved_files)
+    ?options filename
