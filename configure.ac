@@ -124,14 +124,23 @@ AC_SUBST([CFLAGS], [["$LLVM_CFLAGS"]])
 
 AC_SUBST([CPPFLAGS], [["$LLVM_CFLAGS"]])
 
-AC_SUBST([STRIPPED_LLVM_LDFLAGS], [[`echo $LLVM_LDFLAGS | sed 's/-Wl,-search_paths_first //' | sed 's/-Wl,-headerpad_max_install_names//'`]])
-
-AC_SUBST([LDFLAGS], [["$STRIPPED_LLVM_LDFLAGS -Wl,-rpath,$LLVM_LIBDIR"]])
-
-AC_SUBST([LIBS], [["-lclang -lclangAST -lclangLex -lclangBasic $LLVM_LIBS -lpthread -lcurses -lstdc++"]])
-
 AC_CHECK_HEADERS([clang-c/Index.h], [],
   [AC_MSG_ERROR([[Header clang-c/Index.h not found]])])
+
+# LIBS and LDFLAGS should be changed after AC_CHECK_HEADERS
+# or else configure will fail to use the C compiler even for the simplest
+# tests when libclang is not available.
+AC_SUBST([STRIPPED_LLVM_LDFLAGS],
+  [[`echo $LLVM_LDFLAGS | sed 's/-Wl,-search_paths_first //' | sed 's/-Wl,-headerpad_max_install_names//'`]])
+
+AC_SUBST([LDFLAGS],
+  [["$STRIPPED_LLVM_LDFLAGS -Wl,-rpath,$LLVM_LIBDIR"]])
+
+AC_SUBST([LIBS],
+  [["-lclang -lclangAST -lclangLex -lclangBasic $LLVM_LIBS -lpthread -lcurses -lstdc++"]])
+
+AC_CHECK_LIB([clang], [clang_createIndex], [],
+  [AC_MSG_ERROR([[libclang not found]])])
 
 AC_MSG_NOTICE(initialize build tree)
 
