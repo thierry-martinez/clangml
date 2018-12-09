@@ -972,7 +972,7 @@ let () =
       assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
    ]}*)
-  | Decl of decl_stmt list
+  | Decl of decl list
   | Expr of expr_desc
 
 and expr = expr_desc node
@@ -1265,9 +1265,9 @@ let () =
     }
   | OtherExpr
 
-and decl_stmt = decl_stmt_desc node
+and decl = decl_desc node
 
-and decl_stmt_desc =
+and decl_desc =
   | Function of {
       linkage : cxlinkagekind;
       function_type : function_type;
@@ -1583,7 +1583,7 @@ and var_decl_desc = {
   }
 
 type translation_unit_desc = {
-    filename : string; items : decl_stmt list
+    filename : string; items : decl list
   }
 
 type translation_unit = translation_unit_desc node
