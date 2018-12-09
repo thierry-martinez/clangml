@@ -10,9 +10,6 @@
 /Makefile
 /aclocal.m4
 /configure
-/INSTALL
-/missing
-/install-sh
 /clangml/clang__bindings.ml
 /clangml/clang__bindings.mli
 /config/cflags.sexp
