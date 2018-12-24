@@ -29,21 +29,40 @@ module Ast : sig
     include Clang__ast
   end
 
+  module Options : sig
+    type t = {
+        ignore_implicit_cast : bool [@default true];
+        ignore_paren : bool [@default true];
+        ignore_paren_in_types : bool [@default true];
+      }
+          [@@deriving make]
+  end
+
   val of_cxtype :
-      ?ignore_implicit_cast:bool -> ?ignore_paren:bool -> ?ignore_paren_in_types:bool ->
+      ?options:Options.t ->
         cxtype -> qual_type
 
   val expr_of_cxcursor :
-      ?ignore_implicit_cast:bool -> ?ignore_paren:bool -> ?ignore_paren_in_types:bool ->
+      ?options:Options.t ->
         cxcursor -> expr
 
   val stmt_of_cxcursor :
-      ?ignore_implicit_cast:bool -> ?ignore_paren:bool -> ?ignore_paren_in_types:bool ->
+      ?options:Options.t ->
         cxcursor -> stmt
 
   val of_cxtranslationunit :
-      ?ignore_implicit_cast:bool -> ?ignore_paren:bool -> ?ignore_paren_in_types:bool ->
+      ?options:Options.t ->
         cxtranslationunit -> translation_unit
+end
+
+module Type : sig
+  type t = Ast.qual_type
+
+  val equal : t -> t -> bool
+
+  val compare : t -> t -> int
+
+  module Map : Map.S with type key = t
 end
 
 val string_of_cxerrorcode : cxerrorcode -> string

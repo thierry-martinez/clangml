@@ -27,6 +27,10 @@ let psig_value value_description =
   { Parsetree.psig_desc = Psig_value value_description;
     psig_loc = value_description.pval_loc; }
 
+let pstr_eval ?(pstr_loc = Location.none) ?(attributes = []) expression =
+  { Parsetree.pstr_desc = Pstr_eval (expression, attributes);
+    pstr_loc; }
+
 let pstr_value ?(rec_flag = Asttypes.Nonrecursive) ?(pstr_loc = Location.none) bindings =
   { Parsetree.pstr_desc = Pstr_value (rec_flag, bindings);
     pstr_loc; }
@@ -78,6 +82,9 @@ let pexp_ident ?(pexp_loc = Location.none) ?(pexp_attributes = []) ident =
 
 let pexp_apply ?(pexp_loc = Location.none) ?(pexp_attributes = []) f args =
   { Parsetree.pexp_desc = Pexp_apply (f, args); pexp_attributes; pexp_loc }
+
+let pexp_tuple ?(pexp_loc = Location.none) ?(pexp_attributes = []) items =
+  { Parsetree.pexp_desc = Pexp_tuple items; pexp_attributes; pexp_loc }
 
 let pexp_fun ?(pexp_loc = Location.none) ?(pexp_attributes = []) ?(arg_label = Asttypes.Nolabel) ?default pat body =
   { Parsetree.pexp_desc = Pexp_fun (arg_label, default, pat, body); pexp_attributes; pexp_loc }
@@ -260,16 +267,21 @@ let union_constant_interfaces a b = { success = a.success || b.success }
 
 type enum_interface = {
     constants : (Pcre.regexp * constant_interface) list;
+    attributes : Parsetree.attributes;
   }
 
-let empty_enum_interface = { constants = [] }
+let empty_enum_interface = { constants = []; attributes = []; }
 
 let union_enum_interfaces a b =
-  { constants = List.rev_append a.constants b.constants }
+  { constants = List.rev_append a.constants b.constants;
+    attributes = a.attributes @ b.attributes; }
 
 let add_constant constant_name constant_interface enum_interface =
-  { constants =
+  { enum_interface with constants =
     (constant_name, constant_interface) :: enum_interface.constants }
+
+let add_attributes attributes enum_interface =
+  { enum_interface with attributes = enum_interface.attributes @ attributes }
 
 type field_interface =
   | Sized_string of { length : string; contents : string }
@@ -1282,6 +1294,7 @@ let translate_enum_decl context cur =
       (name_of_ocaml_of_c ocaml_type_name);
     let type_decl =
       type_declaration ~ptype_kind:(Ptype_variant ocaml_constructors)
+        ~ptype_attributes:interface.attributes
         (loc ocaml_type_name) in
     add_type_declaration context [type_decl] in
   if typedef then
@@ -1742,7 +1755,7 @@ let main cflags llvm_config prefix =
   let llvm_prefix = run_llvm_config llvm_config ["--prefix"] in
   let llvm_cflags = run_llvm_config llvm_config ["--cflags"] in
   let cflags = cflags |> List.map @@ String.split_on_char ',' |> List.flatten in
-  let clang_options = cflags @ String.split_on_char ' ' llvm_cflags @ ["-I"; List.fold_left Filename.concat llvm_prefix ["lib"; "clang"; llvm_version; "include"]] in
+  let clang_options = cflags @ String.split_on_char ' ' llvm_cflags @ ["-I"; List.fold_left Filename.concat llvm_prefix ["lib"; "clang"; llvm_version; "include"]; "-I"; "/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include/"] in
   let module_interface =
     empty_module_interface |>
     add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|clang_VirtualFileOverlay_writeToBuffer|clang_free|constructUSR|clang_executeOnThread|clang_getDiagnosticCategoryName|^clang_getDefinitionSpellingAndExtent$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_annotateTokens$|^clang_getFileUniqueID$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$") hidden_function_interface |>
@@ -1844,10 +1857,16 @@ let main cflags llvm_config prefix =
           data_caller = Name "client_data";
           data_callee = Index 1;
           references = [Name "T"]})) |>
-    add_function (Pcre.regexp "^clang.*_(is|equal)[A-Z]")
+    add_function (Pcre.regexp "^clang.*_(is|equal)[A-Z_]")
       (empty_function_interface |>
         add_result (empty_type_interface |> integer_boolean) |>
         dont_label_unique) |>
+    add_function (Pcre.regexp "^clang_compare_")
+      (empty_function_interface |>
+        dont_label_unique) |>
+    add_enum (Pcre.regexp "^CXLinkageKind$|^CXTypeKind$|^CXCallingConv$|^clang_ext_UnaryOperatorKind$|^clang_ext_BinaryOperatorKind$|^clang_ext_ElaboratedTypeKeyword$")
+      (empty_enum_interface |>
+        add_attributes [(loc "deriving", PStr [pstr_eval (pexp_tuple [pexp_ident (loc (Longident.Lident "eq")); pexp_ident (loc (Longident.Lident "ord"))])])]) |>
     add_enum (Pcre.regexp "^CXErrorCode$")
       (empty_enum_interface |>
         add_constant (Pcre.regexp "^CXError_Success$") { success = true }) |>

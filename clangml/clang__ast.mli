@@ -5,9 +5,12 @@ open Clang__bindings
 (** Most of the AST nodes carry the [cxcursor] from where they come from
     in the Clang translation unit. *)
 type 'a node = {
-    cxcursor : cxcursor;
+    cxcursor : cxcursor
+      [@equal fun _ _ -> true]
+      [@compare fun _ _ -> 0];
     desc : 'a;
   }
+  [@@deriving eq, ord]
 
 (*{[
 open Stdcompat
@@ -23,21 +26,22 @@ declaration list:
 this function is used in the following examples to check the AST of
 various programs.
     {[
-let parse_declaration_list ?filename ?ignore_paren ?ignore_paren_in_types
-    source =
+let parse_declaration_list ?filename ?options source =
   prerr_endline source;
   (Clang.parse_string ?filename source |>
-      Clang.Ast.of_cxtranslationunit ?ignore_paren ?ignore_paren_in_types)
+      Clang.Ast.of_cxtranslationunit ?options)
     .desc.items
    ]}*)
 
 type cast_kind =
   | CStyle
-  | Implicit
+  | Implicit [@@deriving eq, ord]
 
 (** Qualified type. *)
 type qual_type = {
-    cxtype : cxtype;
+    cxtype : cxtype
+      [@equal fun _ _ -> true]
+      [@compare fun _ _ -> 0];
     const : bool;
 (** [true] if the type is const-qualified.
       {[
@@ -110,6 +114,7 @@ let () =
     ]}*)
     desc : type_desc;
   }
+  [@@deriving eq, ord]
 
 (** Type description. *)
 and type_desc =
@@ -209,7 +214,7 @@ let () =
         assert (values = ["A", 0; "B", 1; "C", 2]);
   | _ -> assert false
     ]}*)
-  | Function of function_type
+  | FunctionType of function_type
 (** Function type.
     {[
 let example = "int (*p)(void);"
@@ -217,7 +222,7 @@ let example = "int (*p)(void);"
 let () =
   match parse_declaration_list example with
   | [{ desc = Var { name = "p"; qual_type = { desc =
-      Pointer { desc = Function {
+      Pointer { desc = FunctionType {
         result = { desc = OtherType Int };
         args = Some { non_variadic = []; variadic = false}}}}}}] -> ()
   | _ -> assert false
@@ -323,14 +328,15 @@ let () =
 let example = "int (*p)(void);"
 
 let () =
-  match parse_declaration_list ~ignore_paren_in_types:false example with
+  match parse_declaration_list example
+    ~options:(Clang.Ast.Options.make ~ignore_paren_in_types:false ()) with
   | [{ desc = Var { name = "p"; qual_type = { desc =
-      Pointer { desc = Function {
+      Pointer { desc = FunctionType {
         result = { desc = OtherType Int };
         args = Some { non_variadic = []; variadic = false}}}}}}] ->
       assert (Clang.get_clang_version () >= "clang version 7.0.0")
   | [{ desc = Var { name = "p"; qual_type = { desc =
-      Pointer { desc = Paren { desc = Function {
+      Pointer { desc = Paren { desc = FunctionType {
         result = { desc = OtherType Int };
         args = Some { non_variadic = []; variadic = false}}}}}}}] ->
       assert (Clang.get_clang_version () < "clang version 7.0.0")
@@ -349,7 +355,7 @@ let () =
       qual_type = { desc = OtherType Bool}}} -> ()
   | _ -> assert false
     ]}*)
-
+  [@@deriving eq, ord]
 (** Function type. *)
 and function_type = {
   calling_conv : cxcallingconv;
@@ -422,6 +428,7 @@ let () =
     ]}
  *)
 }
+  [@@deriving eq, ord]
 
 
 (** Function arguments. *)
@@ -463,7 +470,7 @@ let () =
     | [{ desc = Typedef {
         name = "f"; 
         underlying_type = { desc =
-          Pointer { desc = Function { args = Some {
+          Pointer { desc = FunctionType { args = Some {
             non_variadic = ["", { desc = OtherType Int }];
             variadic = false }}}}}}] -> ()
     | _ -> assert false
@@ -494,10 +501,10 @@ statement list (by putting it in the context of a function):
 this function is used in the following examples to check the AST of
 various types.
     {[
-let parse_statement_list ?filename ?ignore_paren source =
+let parse_statement_list ?filename ?options source =
   match
     Printf.sprintf "int f(void) { %s }" source |>
-    parse_declaration_list ?filename ?ignore_paren
+    parse_declaration_list ?filename ?options
   with
   | [{ desc = Function { stmt = Some { desc = Compound items }}}] -> items
   | _ -> assert false
@@ -992,8 +999,10 @@ let () =
    ]}*)
   | Decl of decl list
   | Expr of expr_desc
+  [@@deriving eq, ord]
 
 and expr = expr_desc node
+  [@@deriving eq, ord]
 
 and expr_desc =
   | IntegerLiteral of cxint
@@ -1215,7 +1224,8 @@ let () =
 let example = {| (1); |}
 
 let () =
-  match parse_statement_list ~ignore_paren:false example with
+  match parse_statement_list example
+    ~options:(Clang.Ast.Options.make ~ignore_paren:false ()) with
   | [{ desc = Expr (Paren ({ desc = IntegerLiteral one}))}] ->
       assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
@@ -1282,8 +1292,10 @@ let () =
       s : string;
     }
   | OtherExpr
+  [@@deriving eq, ord]
 
 and decl = decl_desc node
+  [@@deriving eq, ord]
 
 and decl_desc =
   | Function of {
@@ -1534,8 +1546,10 @@ let () =
   | _ -> assert false
     ]}*)
   | OtherDecl
+  [@@deriving eq, ord]
 
 and field = field_desc node
+  [@@deriving eq, ord]
 
 and field_desc =
   | Named of  {
@@ -1581,17 +1595,21 @@ let () =
             qual_type = { desc = OtherType Float}}}] }] }}] -> ()
   | _ -> assert false
     ]}*)
+  [@@deriving eq, ord]
 
 and label_ref = string
 
 and enum_constant = enum_constant_desc node
+  [@@deriving eq, ord]
 
 and enum_constant_desc = {
     name : string;
     init : expr option;
   }
+  [@@deriving eq, ord]
 
 and var_decl = var_decl_desc node
+  [@@deriving eq, ord]
 
 and var_decl_desc = {
     linkage : cxlinkagekind;
@@ -1599,6 +1617,7 @@ and var_decl_desc = {
     qual_type : qual_type;
     init : expr option
   }
+  [@@deriving eq, ord]
 
 type translation_unit_desc = {
     filename : string; items : decl list

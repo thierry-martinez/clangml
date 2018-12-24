@@ -94,12 +94,17 @@ module Ast = struct
         let tl, last = list_last tl in
         hd :: tl, last
 
+  module Options = struct
+    type t = {
+        ignore_implicit_cast : bool [@default true];
+        ignore_paren : bool [@default true];
+        ignore_paren_in_types : bool [@default true];
+      }
+          [@@deriving make]
+  end
+
   module type OptionsS = sig
-    val ignore_implicit_cast : bool
-
-    val ignore_paren : bool
-
-    val ignore_paren_in_types : bool
+    val options : Options.t
   end
 
 
@@ -141,7 +146,7 @@ module Ast = struct
         | FunctionNoProto ->
             let function_type =
               cxtype |> function_type_of_cxtype (fun _ -> "") in
-            Function function_type
+            FunctionType function_type
         | Complex ->
             let element_type = cxtype |> get_element_type |> of_cxtype in 
             Complex element_type
@@ -153,7 +158,7 @@ module Ast = struct
             end
         | _ -> OtherType (get_type_kind cxtype) in
       match desc with
-      | Paren inner when Options.ignore_paren_in_types -> inner
+      | Paren inner when Options.options.ignore_paren_in_types -> inner
       | _ ->
           { cxtype; desc;
             const = is_const_qualified_type cxtype;
@@ -429,8 +434,8 @@ module Ast = struct
 
     and expr_of_cxcursor cxcursor =
       match expr_desc_of_cxcursor cxcursor with
-      | Paren subexpr when Options.ignore_paren -> subexpr
-      | Cast { kind = Implicit; operand } when Options.ignore_implicit_cast ->
+      | Paren subexpr when Options.options.ignore_paren -> subexpr
+      | Cast { kind = Implicit; operand } when Options.options.ignore_implicit_cast ->
           operand
       | desc -> { cxcursor; desc }
 
@@ -551,48 +556,42 @@ module Ast = struct
   end
 
   let of_cxtype
-      ?(ignore_implicit_cast = true) ?(ignore_paren = true)
-      ?(ignore_paren_in_types = true)
+      ?(options = Options.make ())
       tu =
-    let module Convert = Converter (struct
-      let ignore_implicit_cast = ignore_implicit_cast
-      let ignore_paren = ignore_paren
-      let ignore_paren_in_types = ignore_paren_in_types
-     end) in
+    let module Convert = Converter (struct let options = options end) in
     Convert.of_cxtype tu
 
   let expr_of_cxcursor
-      ?(ignore_implicit_cast = true) ?(ignore_paren = true)
-      ?(ignore_paren_in_types = true)
+      ?(options = Options.make ())
       cur =
-    let module Convert = Converter (struct
-      let ignore_implicit_cast = ignore_implicit_cast
-      let ignore_paren = ignore_paren
-      let ignore_paren_in_types = ignore_paren_in_types
-    end) in
+    let module Convert = Converter (struct let options = options end) in
     Convert.expr_of_cxcursor cur
 
   let stmt_of_cxcursor
-      ?(ignore_implicit_cast = true) ?(ignore_paren = true)
-      ?(ignore_paren_in_types = true)
+      ?(options = Options.make ())
       cur =
-    let module Convert = Converter (struct
-      let ignore_implicit_cast = ignore_implicit_cast
-      let ignore_paren = ignore_paren
-      let ignore_paren_in_types = ignore_paren_in_types
-    end) in
+    let module Convert = Converter (struct let options = options end) in
     Convert.stmt_of_cxcursor cur
 
   let of_cxtranslationunit
-      ?(ignore_implicit_cast = true) ?(ignore_paren = true)
-      ?(ignore_paren_in_types = true)
+      ?(options = Options.make ())
       tu =
-    let module Convert = Converter (struct
-      let ignore_implicit_cast = ignore_implicit_cast
-      let ignore_paren = ignore_paren
-      let ignore_paren_in_types = ignore_paren_in_types
-    end) in
+    let module Convert = Converter (struct let options = options end) in
     Convert.of_cxtranslationunit tu
+end
+
+module Type = struct
+  module Self = struct
+    type t = Ast.qual_type
+
+    let equal = Ast.equal_qual_type
+
+    let compare = Ast.compare_qual_type
+  end
+
+  include Self
+
+  module Map = Map.Make (Self)
 end
 
 let string_of_cxerrorcode cxerrorcode =

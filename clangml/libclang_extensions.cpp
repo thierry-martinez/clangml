@@ -205,6 +205,36 @@ MakeCXType(clang::QualType T, CXTranslationUnit TU)
 }
 
 extern "C" {
+  bool
+  clang_equal_cxint(CXInt a, CXInt b)
+  {
+    if (auto i = static_cast<llvm::APInt *>(a.data)) {
+      if (auto j = static_cast<llvm::APInt *>(b.data)) {
+        return *i == *j;
+      }
+    }
+    return false;
+  }
+
+  int
+  clang_compare_cxint(CXInt a, CXInt b)
+  {
+    if (auto i = static_cast<llvm::APInt *>(a.data)) {
+      if (auto j = static_cast<llvm::APInt *>(b.data)) {
+        if (i->ult(*j)) { // sadly, APInt::compare is private
+          return -1;
+        }
+        else if (j->ult(*i)) {
+          return 1;
+        }
+        else {
+          return 0;
+        }
+      }
+    }
+    return -1;
+  }
+
   CXInt
   clang_ext_IntegerLiteral_getValue(CXCursor c)
   {
@@ -248,6 +278,7 @@ extern "C" {
   }
 
   float
+
   clang_ext_Int_bitsToFloat(CXInt c)
   {
     if (auto i = static_cast<llvm::APInt *>(c.data)) {
@@ -309,6 +340,33 @@ extern "C" {
       return MakeCXFloat(e->getValue());
     }
     return Invalid_CXFloat;
+  }
+
+  bool
+  clang_equal_cxfloat(CXFloat a, CXFloat b)
+  {
+    if (auto x = static_cast<llvm::APFloat *>(a.data)) {
+      if (auto y = static_cast<llvm::APFloat *>(b.data)) {
+        return x->compare(*y) == llvm::APFloat::cmpEqual;
+      }
+    }
+    return false;
+  }
+
+  int
+  clang_compare_cxfloat(CXFloat a, CXFloat b)
+  {
+    if (auto x = static_cast<llvm::APFloat *>(a.data)) {
+      if (auto y = static_cast<llvm::APFloat *>(b.data)) {
+        switch (x->compare(*y)) {
+        case llvm::APFloat::cmpLessThan : return -1;
+        case llvm::APFloat::cmpEqual : return 0;
+        case llvm::APFloat::cmpGreaterThan : return 1;
+        case llvm::APFloat::cmpUnordered : ;
+        }
+      }
+    }
+    return -1;
   }
 
   void

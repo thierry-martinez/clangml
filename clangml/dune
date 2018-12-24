@@ -10,4 +10,5 @@
   (library_flags -linkall)
   (flags -open Stdcompat)
   (libraries unix stdcompat)
+  (preprocess (pps ppx_deriving.std))
   (inline_tests (backend ocamlcodoc)))

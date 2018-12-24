@@ -5,6 +5,12 @@ typedef struct {
   void *data;
 } CXInt;
 
+bool
+clang_equal_cxint(CXInt a, CXInt b);
+
+int
+clang_compare_cxint(CXInt a, CXInt b);
+
 CXInt
 clang_ext_IntegerLiteral_getValue(CXCursor c);
 
@@ -41,6 +47,12 @@ clang_ext_Int_getSExtValue(CXInt c);
 typedef struct {
   void *data;
 } CXFloat;
+
+bool
+clang_equal_cxfloat(CXFloat a, CXFloat b);
+
+int
+clang_compare_cxfloat(CXFloat a, CXFloat b);
 
 CXFloat
 clang_ext_FloatingLiteral_getValue(CXCursor c);
