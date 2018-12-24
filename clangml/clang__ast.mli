@@ -291,6 +291,26 @@ let () =
         end
   | _ -> assert false
     ]}*)
+  | Complex of qual_type
+(** Complex number type (C99).
+
+    {[
+let example = "double _Complex c;"
+
+let () =
+  match parse_declaration_list example |> List.rev |> List.hd with
+  | { desc = Var { name = "c";
+      qual_type = { desc = Complex { desc = OtherType Double }}}} -> ()
+  | _ -> assert false
+
+let example = "float _Complex c;"
+
+let () =
+  match parse_declaration_list example |> List.rev |> List.hd with
+  | { desc = Var { name = "c";
+      qual_type = { desc = Complex { desc = OtherType Float }}}} -> ()
+  | _ -> assert false
+    ]} *)
   | Paren of qual_type
 (** Parenthesized type.
 
@@ -321,15 +341,13 @@ let () =
   | OtherType of cxtypekind
 (** Other type.
     {[
-(* TODO: stdbool.h not available
-let example = "#include <stdbool.h>\nbool s;"
+let example = "_Bool s;"
 
 let () =
   match parse_declaration_list example |> List.rev |> List.hd with
   | { desc = Var { name = "s";
       qual_type = { desc = OtherType Bool}}} -> ()
   | _ -> assert false
-*)
     ]}*)
 
 (** Function type. *)

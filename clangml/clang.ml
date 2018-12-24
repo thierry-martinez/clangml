@@ -142,6 +142,9 @@ module Ast = struct
             let function_type =
               cxtype |> function_type_of_cxtype (fun _ -> "") in
             Function function_type
+        | Complex ->
+            let element_type = cxtype |> get_element_type |> of_cxtype in 
+            Complex element_type
         | Unexposed ->
             begin
               match ext_get_type_kind cxtype with
