@@ -11,5 +11,5 @@ build: [
 ]
 install: [make "install"]
 remove: [make "uninstall"]
-depends: ["stdcompat" "conf-clang" "conf-llvm"]
+depends: ["stdcompat" "conf-clang" "conf-llvm" "ppx_deriving"]
 available: [ocaml-version >= "3.07" & ocaml-version < "4.08.0"]
