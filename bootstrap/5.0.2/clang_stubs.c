@@ -5234,6 +5234,38 @@ static void finalize_cxint(value v) {
 DECLARE_OPAQUE(CXInt, cxint, Cxint_val, Val_cxint, finalize_cxint)
 
 CAMLprim value
+clang_equal_cxint_wrapper(value a_ocaml, value b_ocaml)
+{
+  CAMLparam2(a_ocaml, b_ocaml);
+  CXInt a;
+  a = Cxint_val(a_ocaml);
+  CXInt b;
+  b = Cxint_val(b_ocaml);
+  _Bool result = clang_equal_cxint(a, b);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_compare_cxint_wrapper(value a_ocaml, value b_ocaml)
+{
+  CAMLparam2(a_ocaml, b_ocaml);
+  CXInt a;
+  a = Cxint_val(a_ocaml);
+  CXInt b;
+  b = Cxint_val(b_ocaml);
+  int result = clang_compare_cxint(a, b);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
 clang_ext_IntegerLiteral_getValue_wrapper(value c_ocaml)
 {
   CAMLparam1(c_ocaml);
@@ -5384,6 +5416,38 @@ static void finalize_cxfloat(value v) {
   clang_ext_Float_dispose(*((CXFloat *) Data_custom_val(v)));;
 }
 DECLARE_OPAQUE(CXFloat, cxfloat, Cxfloat_val, Val_cxfloat, finalize_cxfloat)
+
+CAMLprim value
+clang_equal_cxfloat_wrapper(value a_ocaml, value b_ocaml)
+{
+  CAMLparam2(a_ocaml, b_ocaml);
+  CXFloat a;
+  a = Cxfloat_val(a_ocaml);
+  CXFloat b;
+  b = Cxfloat_val(b_ocaml);
+  _Bool result = clang_equal_cxfloat(a, b);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_compare_cxfloat_wrapper(value a_ocaml, value b_ocaml)
+{
+  CAMLparam2(a_ocaml, b_ocaml);
+  CXFloat a;
+  a = Cxfloat_val(a_ocaml);
+  CXFloat b;
+  b = Cxfloat_val(b_ocaml);
+  int result = clang_compare_cxfloat(a, b);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
 
 CAMLprim value
 clang_ext_FloatingLiteral_getValue_wrapper(value c_ocaml)

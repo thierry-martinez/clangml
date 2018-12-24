@@ -522,7 +522,7 @@ type cxlinkagekind =
   | NoLinkage 
   | Internal 
   | UniqueExternal 
-  | External 
+  | External [@@deriving (eq, ord)]
 external get_cursor_linkage :
   cxcursor -> cxlinkagekind = "clang_getCursorLinkage_wrapper"
 type cxvisibilitykind =
@@ -621,7 +621,7 @@ type cxtypekind =
   | DependentSizedArray 
   | MemberPointer 
   | Auto 
-  | Elaborated 
+  | Elaborated [@@deriving (eq, ord)]
 type cxtype
 external get_type_kind : cxtype -> cxtypekind = "clang_getTypeKind_wrapper"
 external get_cursor_type : cxcursor -> cxtype = "clang_getCursorType_wrapper"
@@ -705,7 +705,7 @@ type cxcallingconv =
   | PreserveMost 
   | PreserveAll 
   | Invalid 
-  | Unexposed 
+  | Unexposed [@@deriving (eq, ord)]
 external get_function_type_calling_conv :
   cxtype -> cxcallingconv = "clang_getFunctionTypeCallingConv_wrapper"
 external get_result_type : cxtype -> cxtype = "clang_getResultType_wrapper"
@@ -960,6 +960,9 @@ external type_visit_fields :
   cxtype -> (cxcursor -> cxvisitorresult) -> bool =
     "clang_Type_visitFields_wrapper"
 type cxint
+external equal_cxint : cxint -> cxint -> bool = "clang_equal_cxint_wrapper"
+external compare_cxint :
+  cxint -> cxint -> int = "clang_compare_cxint_wrapper"
 external ext_integer_literal_get_value :
   cxcursor -> cxint = "clang_ext_IntegerLiteral_getValue_wrapper"
 external ext_int_is_valid : cxint -> bool = "clang_ext_Int_isValid_wrapper"
@@ -980,6 +983,10 @@ external ext_int_get_bool_value :
 external ext_int_get_sext_value :
   cxint -> Int64.t = "clang_ext_Int_getSExtValue_wrapper"
 type cxfloat
+external equal_cxfloat :
+  cxfloat -> cxfloat -> bool = "clang_equal_cxfloat_wrapper"
+external compare_cxfloat :
+  cxfloat -> cxfloat -> int = "clang_compare_cxfloat_wrapper"
 external ext_floating_literal_get_value :
   cxcursor -> cxfloat = "clang_ext_FloatingLiteral_getValue_wrapper"
 external ext_float_is_valid :
@@ -1004,7 +1011,7 @@ type clang_ext_unaryoperatorkind =
   | Real 
   | Imag 
   | Extension 
-  | Coawait 
+  | Coawait [@@deriving (eq, ord)]
 external ext_unary_operator_get_opcode :
   cxcursor -> clang_ext_unaryoperatorkind =
     "clang_ext_UnaryOperator_getOpcode_wrapper"
@@ -1043,7 +1050,7 @@ type clang_ext_binaryoperatorkind =
   | AndAssign 
   | XorAssign 
   | OrAssign 
-  | Comma 
+  | Comma [@@deriving (eq, ord)]
 external ext_binary_operator_get_opcode :
   cxcursor -> clang_ext_binaryoperatorkind =
     "clang_ext_BinaryOperator_getOpcode_wrapper"
@@ -1069,7 +1076,7 @@ type clang_ext_elaboratedtypekeyword =
   | Class 
   | Enum 
   | Typename 
-  | None 
+  | None [@@deriving (eq, ord)]
 external ext_elaborated_type_get_keyword :
   cxtype -> clang_ext_elaboratedtypekeyword =
     "clang_ext_ElaboratedType_getKeyword_wrapper"
