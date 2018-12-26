@@ -259,11 +259,26 @@ let add_result type_interface function_interface =
 
 type constant_interface = {
     success : bool;
+    preferred : bool;
   }
 
-let empty_constant_interface = { success = false }
+let empty_constant_interface = {
+    success = false;
+    preferred = false;
+  }
 
-let union_constant_interfaces a b = { success = a.success || b.success }
+let set_success interface = {
+    interface with success = true
+  }
+
+let set_preferred interface = {
+    interface with preferred = true
+  }
+
+let union_constant_interfaces a b = {
+    success = a.success || b.success;
+    preferred = a.preferred || b.preferred;
+  }
 
 type enum_interface = {
     constants : (Pcre.regexp * constant_interface) list;
@@ -1223,12 +1238,19 @@ let translate_enum_decl context cur =
     begin
       match Clang.get_cursor_kind cur with
       | EnumConstantDecl ->
+          let name = Clang.get_cursor_spelling cur in
+          let interface = get_constant name interface in
           let value = Clang.get_enum_constant_decl_value cur in
-          if not (Int_hashtbl.mem already_bound value) then
+          if not (Int_hashtbl.mem already_bound value) ||
+            (if interface.preferred then
+               begin
+                 constructors_ref := List.filter (fun (_, v) -> v <> value) !constructors_ref;
+                 true
+               end
+            else
+              false) then
             begin
               Int_hashtbl.add already_bound value ();
-              let name = Clang.get_cursor_spelling cur in
-              let interface = get_constant name interface in
               if interface.success then
                 result := Some name
               else
@@ -1773,6 +1795,18 @@ let main cflags llvm_config prefix =
        make_destructor "clang_disposeTranslationUnit") |>
     add_type (Pcre.regexp "^CXTranslationUnit$|^CXCursor$|^CXType$")
       (empty_type_interface |> carry_reference) |>
+    add_enum (Pcre.regexp "^CXCursorKind$")
+      (empty_enum_interface |>
+       add_constant (Pcre.regexp "^CXCursor_UnexposedExpr$")
+        (empty_constant_interface |> set_preferred) |>
+       add_constant (Pcre.regexp "^CXCursor_UnexposedAttr$")
+        (empty_constant_interface |> set_preferred) |>
+       add_constant (Pcre.regexp "^CXCursor_UnexposedStmt$")
+        (empty_constant_interface |> set_preferred) |>
+       add_constant (Pcre.regexp "^CXCursor_InvalidFile$")
+        (empty_constant_interface |> set_preferred) |>
+       add_constant (Pcre.regexp "^CXCursor_ObjCSuperClassRef$")
+        (empty_constant_interface |> set_preferred)) |>
     add_function (Pcre.regexp "^clang_") (rename_function rename_clang) |>
     add_function (Pcre.regexp "^clang_createTranslationUnitFromSourceFile$")
       (empty_function_interface |>
@@ -1869,10 +1903,10 @@ let main cflags llvm_config prefix =
         add_attributes [(loc "deriving", PStr [pstr_eval (pexp_tuple [pexp_ident (loc (Longident.Lident "eq")); pexp_ident (loc (Longident.Lident "ord"))])])]) |>
     add_enum (Pcre.regexp "^CXErrorCode$")
       (empty_enum_interface |>
-        add_constant (Pcre.regexp "^CXError_Success$") { success = true }) |>
+        add_constant (Pcre.regexp "^CXError_Success$") (empty_constant_interface |> set_success)) |>
     add_enum (Pcre.regexp "^CXSaveError$")
       (empty_enum_interface |>
-        add_constant (Pcre.regexp "^CXSaveError_None$") { success = true }) |>
+        add_constant (Pcre.regexp "^CXSaveError_None$") (empty_constant_interface |> set_success)) |>
     add_struct (Pcre.regexp "^CXUnsavedFile$")
       (empty_struct_interface |>
         add_field (Sized_string {length = "Length"; contents = "Contents"})) |>
@@ -1954,7 +1988,7 @@ let main cflags llvm_config prefix =
         add_result (empty_type_interface |> reinterpret_as Int)) |>
     add_enum (Pcre.regexp "^CXLoadDiag_Error$")
       (empty_enum_interface |>
-        add_constant (Pcre.regexp "^CXLoadDiag_None$") { success = true }) |>
+        add_constant (Pcre.regexp "^CXLoadDiag_None$") (empty_constant_interface |> set_success)) |>
     add_function (Pcre.regexp "^clang_loadDiagnostics$")
       (empty_function_interface |>
         add_argument (output (Name "error")) |>

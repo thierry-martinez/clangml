@@ -554,7 +554,7 @@ module Ast = struct
             | [init] -> init |> expr_of_cxcursor
             | _ -> failwith "expr_of_cxcursor (CompoundLiteralExpr)" in
           CompoundLiteral { qual_type; init }
-      | FirstExpr (* TODO: UnexposedExpr! *) ->
+      | UnexposedExpr ->
           begin
             match ext_get_cursor_kind cxcursor with
             | ImplicitCastExpr ->
