@@ -668,7 +668,8 @@ extern "C" {
   }
 
   CXString
-  clang_ext_AsmStmt_GetAsmString(CXCursor c) {
+  clang_ext_AsmStmt_GetAsmString(CXCursor c)
+  {
     const clang::Stmt *s = getCursorStmt(c);
     switch (s->getStmtClass()) {
     case clang::Stmt::GCCAsmStmtClass:;
@@ -680,5 +681,25 @@ extern "C" {
     default:
       return cxstring_createRef("");
     }
+  }
+
+  enum clang_ext_CharacterKind
+  clang_ext_CharacterLiteral_GetCharacterKind(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CharacterLiteral>(getCursorStmt(c))) {
+      return static_cast<enum clang_ext_CharacterKind>(e->getKind());
+    }
+    return ECK_Ascii;
+  }
+
+  unsigned
+  clang_ext_CharacterLiteral_GetValue(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CharacterLiteral>(getCursorStmt(c))) {
+      return e->getValue();
+    }
+    return 0;
   }
 }

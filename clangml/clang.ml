@@ -480,6 +480,16 @@ module Ast = struct
           FloatingLiteral f
       | StringLiteral ->
           StringLiteral (ext_string_literal_get_string cxcursor)
+      | CharacterLiteral ->
+          let kind = ext_character_literal_get_character_kind cxcursor in
+          let value = ext_character_literal_get_value cxcursor in
+          CharacterLiteral { kind; value }
+      | ImaginaryLiteral ->
+          let sub_expr =
+            match list_of_children cxcursor with
+            | [operand] -> expr_of_cxcursor operand
+            | _ -> failwith "expr_of_cxcursor (ImaginaryLiteral)" in
+          ImaginaryLiteral sub_expr
       | UnaryOperator ->
           let operand =
             match list_of_children cxcursor with

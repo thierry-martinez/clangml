@@ -196,3 +196,18 @@ clang_ext_VariableArrayType_GetSizeExpr(CXType c);
 
 CXString
 clang_ext_AsmStmt_GetAsmString(CXCursor c);
+
+enum clang_ext_CharacterKind {
+  ECK_Ascii,
+  ECK_Wide,
+  ECK_UTF8,
+  ECK_UTF16,
+  ECK_UTF32
+};
+
+enum clang_ext_CharacterKind
+clang_ext_CharacterLiteral_GetCharacterKind(CXCursor c);
+
+unsigned
+clang_ext_CharacterLiteral_GetValue(CXCursor c);
+

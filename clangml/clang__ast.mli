@@ -1042,6 +1042,45 @@ let () =
   | [{ desc = Expr (StringLiteral "Hello!")}] -> ()
   | _ -> assert false
     ]}*)
+  | CharacterLiteral of {
+      kind : clang_ext_characterkind;
+      value : int;
+    }
+(** Character literal.
+    {[
+let example = "'a';"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Expr (CharacterLiteral { kind = Ascii; value = 0x61 })}] -> ()
+  | _ -> assert false
+
+let example = "u'a';"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Expr (CharacterLiteral { kind = UTF16; value = 0x61 })}] -> ()
+  | _ -> assert false
+    ]}*)
+  | ImaginaryLiteral of expr
+(** Imaginary literal.
+    {[
+let example = "1i;"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Expr (ImaginaryLiteral { desc = IntegerLiteral one })}] ->
+      assert (Clang.int_of_cxint one = 1)
+  | _ -> assert false
+
+let example = "2.5i;"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Expr (ImaginaryLiteral { desc = FloatingLiteral x })}] ->
+      assert (Clang.ext_float_convert_to_double x = 2.5)
+  | _ -> assert false
+    ]}*)
   | UnaryOperator of {
       kind : clang_ext_unaryoperatorkind;
       operand : expr;
