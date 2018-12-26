@@ -1267,3 +1267,14 @@ external ext_variable_array_type_get_size_expr :
   cxtype -> cxcursor = "clang_ext_VariableArrayType_GetSizeExpr_wrapper"
 external ext_asm_stmt_get_asm_string :
   cxcursor -> string = "clang_ext_AsmStmt_GetAsmString_wrapper"
+type clang_ext_characterkind =
+  | Ascii 
+  | Wide 
+  | UTF8 
+  | UTF16 
+  | UTF32 [@@deriving (eq, ord)]
+external ext_character_literal_get_character_kind :
+  cxcursor -> clang_ext_characterkind =
+    "clang_ext_CharacterLiteral_GetCharacterKind_wrapper"
+external ext_character_literal_get_value :
+  cxcursor -> int = "clang_ext_CharacterLiteral_GetValue_wrapper"

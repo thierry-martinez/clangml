@@ -5695,3 +5695,59 @@ clang_disposeString(result);
   }
 }
 
+enum clang_ext_CharacterKind
+Clang_ext_characterkind_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return ECK_Ascii;
+  case 1: return ECK_Wide;
+  case 2: return ECK_UTF8;
+  case 3: return ECK_UTF16;
+  case 4: return ECK_UTF32;
+  }
+  failwith_fmt("invalid value for Clang_ext_characterkind_val: %d", Int_val(ocaml));
+  return ECK_Ascii;
+}
+
+value
+Val_clang_ext_characterkind(enum clang_ext_CharacterKind v)
+{
+  switch (v) {
+  case ECK_Ascii: return Val_int(0);
+  case ECK_Wide: return Val_int(1);
+  case ECK_UTF8: return Val_int(2);
+  case ECK_UTF16: return Val_int(3);
+  case ECK_UTF32: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_characterkind: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CharacterLiteral_GetCharacterKind_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  enum clang_ext_CharacterKind result = clang_ext_CharacterLiteral_GetCharacterKind(c);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_characterkind(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CharacterLiteral_GetValue_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  unsigned int result = clang_ext_CharacterLiteral_GetValue(c);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
