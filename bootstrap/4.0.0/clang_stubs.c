@@ -1608,7 +1608,7 @@ Cxcursorkind_val(value ocaml)
   case 36: return CXCursor_ObjCSynthesizeDecl;
   case 37: return CXCursor_ObjCDynamicDecl;
   case 38: return CXCursor_CXXAccessSpecifier;
-  case 39: return CXCursor_FirstRef;
+  case 39: return CXCursor_ObjCSuperClassRef;
   case 40: return CXCursor_ObjCProtocolRef;
   case 41: return CXCursor_ObjCClassRef;
   case 42: return CXCursor_TypeRef;
@@ -1619,11 +1619,11 @@ Cxcursorkind_val(value ocaml)
   case 47: return CXCursor_LabelRef;
   case 48: return CXCursor_OverloadedDeclRef;
   case 49: return CXCursor_VariableRef;
-  case 50: return CXCursor_FirstInvalid;
+  case 50: return CXCursor_InvalidFile;
   case 51: return CXCursor_NoDeclFound;
   case 52: return CXCursor_NotImplemented;
   case 53: return CXCursor_InvalidCode;
-  case 54: return CXCursor_FirstExpr;
+  case 54: return CXCursor_UnexposedExpr;
   case 55: return CXCursor_DeclRefExpr;
   case 56: return CXCursor_MemberRefExpr;
   case 57: return CXCursor_CallExpr;
@@ -1672,7 +1672,7 @@ Cxcursorkind_val(value ocaml)
   case 100: return CXCursor_ObjCSelfExpr;
   case 101: return CXCursor_OMPArraySectionExpr;
   case 102: return CXCursor_ObjCAvailabilityCheckExpr;
-  case 103: return CXCursor_FirstStmt;
+  case 103: return CXCursor_UnexposedStmt;
   case 104: return CXCursor_LabelStmt;
   case 105: return CXCursor_CompoundStmt;
   case 106: return CXCursor_CaseStmt;
@@ -1753,7 +1753,7 @@ Cxcursorkind_val(value ocaml)
   case 181: return CXCursor_OMPTargetTeamsDistributeParallelForSimdDirective;
   case 182: return CXCursor_OMPTargetTeamsDistributeSimdDirective;
   case 183: return CXCursor_TranslationUnit;
-  case 184: return CXCursor_FirstAttr;
+  case 184: return CXCursor_UnexposedAttr;
   case 185: return CXCursor_IBActionAttr;
   case 186: return CXCursor_IBOutletAttr;
   case 187: return CXCursor_IBOutletCollectionAttr;
@@ -1830,7 +1830,7 @@ Val_cxcursorkind(enum CXCursorKind v)
   case CXCursor_ObjCSynthesizeDecl: return Val_int(36);
   case CXCursor_ObjCDynamicDecl: return Val_int(37);
   case CXCursor_CXXAccessSpecifier: return Val_int(38);
-  case CXCursor_FirstRef: return Val_int(39);
+  case CXCursor_ObjCSuperClassRef: return Val_int(39);
   case CXCursor_ObjCProtocolRef: return Val_int(40);
   case CXCursor_ObjCClassRef: return Val_int(41);
   case CXCursor_TypeRef: return Val_int(42);
@@ -1841,11 +1841,11 @@ Val_cxcursorkind(enum CXCursorKind v)
   case CXCursor_LabelRef: return Val_int(47);
   case CXCursor_OverloadedDeclRef: return Val_int(48);
   case CXCursor_VariableRef: return Val_int(49);
-  case CXCursor_FirstInvalid: return Val_int(50);
+  case CXCursor_InvalidFile: return Val_int(50);
   case CXCursor_NoDeclFound: return Val_int(51);
   case CXCursor_NotImplemented: return Val_int(52);
   case CXCursor_InvalidCode: return Val_int(53);
-  case CXCursor_FirstExpr: return Val_int(54);
+  case CXCursor_UnexposedExpr: return Val_int(54);
   case CXCursor_DeclRefExpr: return Val_int(55);
   case CXCursor_MemberRefExpr: return Val_int(56);
   case CXCursor_CallExpr: return Val_int(57);
@@ -1894,7 +1894,7 @@ Val_cxcursorkind(enum CXCursorKind v)
   case CXCursor_ObjCSelfExpr: return Val_int(100);
   case CXCursor_OMPArraySectionExpr: return Val_int(101);
   case CXCursor_ObjCAvailabilityCheckExpr: return Val_int(102);
-  case CXCursor_FirstStmt: return Val_int(103);
+  case CXCursor_UnexposedStmt: return Val_int(103);
   case CXCursor_LabelStmt: return Val_int(104);
   case CXCursor_CompoundStmt: return Val_int(105);
   case CXCursor_CaseStmt: return Val_int(106);
@@ -1975,7 +1975,7 @@ Val_cxcursorkind(enum CXCursorKind v)
   case CXCursor_OMPTargetTeamsDistributeParallelForSimdDirective: return Val_int(181);
   case CXCursor_OMPTargetTeamsDistributeSimdDirective: return Val_int(182);
   case CXCursor_TranslationUnit: return Val_int(183);
-  case CXCursor_FirstAttr: return Val_int(184);
+  case CXCursor_UnexposedAttr: return Val_int(184);
   case CXCursor_IBActionAttr: return Val_int(185);
   case CXCursor_IBOutletAttr: return Val_int(186);
   case CXCursor_IBOutletCollectionAttr: return Val_int(187);
@@ -5136,7 +5136,21 @@ clang_ext_Int_getSExtValue_wrapper(value c_ocaml)
   CAMLparam1(c_ocaml);
   CXInt c;
   c = Cxint_val(c_ocaml);
-  int64_t result = clang_ext_Int_getSExtValue(c);
+  int result = clang_ext_Int_getSExtValue(c);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_Int_getSExtValue64_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXInt c;
+  c = Cxint_val(c_ocaml);
+  int64_t result = clang_ext_Int_getSExtValue64(c);
   {
     CAMLlocal1(data);
     data = copy_int64(result);

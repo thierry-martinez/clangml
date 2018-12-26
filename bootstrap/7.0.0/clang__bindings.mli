@@ -354,7 +354,7 @@ type cxcursorkind =
   | ObjCSynthesizeDecl 
   | ObjCDynamicDecl 
   | CXXAccessSpecifier 
-  | FirstRef 
+  | ObjCSuperClassRef 
   | ObjCProtocolRef 
   | ObjCClassRef 
   | TypeRef 
@@ -365,11 +365,11 @@ type cxcursorkind =
   | LabelRef 
   | OverloadedDeclRef 
   | VariableRef 
-  | FirstInvalid 
+  | InvalidFile 
   | NoDeclFound 
   | NotImplemented 
   | InvalidCode 
-  | FirstExpr 
+  | UnexposedExpr 
   | DeclRefExpr 
   | MemberRefExpr 
   | CallExpr 
@@ -419,7 +419,7 @@ type cxcursorkind =
   | OMPArraySectionExpr 
   | ObjCAvailabilityCheckExpr 
   | FixedPointLiteral 
-  | FirstStmt 
+  | UnexposedStmt 
   | LabelStmt 
   | CompoundStmt 
   | CaseStmt 
@@ -500,7 +500,7 @@ type cxcursorkind =
   | OMPTargetTeamsDistributeParallelForSimdDirective 
   | OMPTargetTeamsDistributeSimdDirective 
   | TranslationUnit 
-  | FirstAttr 
+  | UnexposedAttr 
   | IBActionAttr 
   | IBOutletAttr 
   | IBOutletCollectionAttr 
@@ -1136,7 +1136,9 @@ external ext_int_get_min_signed_bits :
 external ext_int_get_bool_value :
   cxint -> bool = "clang_ext_Int_getBoolValue_wrapper"
 external ext_int_get_sext_value :
-  cxint -> Int64.t = "clang_ext_Int_getSExtValue_wrapper"
+  cxint -> int = "clang_ext_Int_getSExtValue_wrapper"
+external ext_int_get_sext_value64 :
+  cxint -> Int64.t = "clang_ext_Int_getSExtValue64_wrapper"
 type cxfloat
 external equal_cxfloat :
   cxfloat -> cxfloat -> bool = "clang_equal_cxfloat_wrapper"
