@@ -67,21 +67,51 @@ let has_error tu =
 
 let int64_of_cxint_opt cxint =
   if ext_int_get_min_signed_bits cxint <= 64 then
-    Some (ext_int_get_sext_value cxint)
+    Some (ext_int_get_sext_value64 cxint)
   else
     None
 
 let int64_of_cxint cxint =
   if ext_int_get_min_signed_bits cxint <= 64 then
-    ext_int_get_sext_value cxint
+    ext_int_get_sext_value64 cxint
   else
     failwith "int64_of_cxint"
 
 let int_of_cxint_opt cxint =
-  int64_of_cxint_opt cxint |> Option.map Int64.to_int
+  if ext_int_get_min_signed_bits cxint <= Sys.int_size then
+    Some (ext_int_get_sext_value cxint)
+  else
+    None
 
 let int_of_cxint cxint =
-  int64_of_cxint cxint |> Int64.to_int
+  if ext_int_get_min_signed_bits cxint <= Sys.int_size then
+    ext_int_get_sext_value cxint
+  else
+    failwith "int_of_cxint"
+
+let string_of_cxerrorcode cxerrorcode =
+  match cxerrorcode with
+  | Failure -> "generic error code, no further details are available"
+  | Crashed -> "libclang crashed while performing the requested operation"
+  | InvalidArguments -> "the arguments violate the function contract"
+  | ASTReadError -> "an AST deserialization error has occurred"
+
+let parse_file ?(index = create_index true true)
+    ?(command_line_args = []) ?(unsaved_files = [])
+    ?(options = default_editing_translation_unit_options ()) filename =
+  match
+    parse_translation_unit2 index filename (Array.of_list command_line_args)
+      (Array.of_list unsaved_files) options
+  with
+  | Ok cxtranslationunit -> cxtranslationunit
+  | Error cxerrorcode -> failwith (string_of_cxerrorcode cxerrorcode)
+
+let parse_string ?index ?(filename = "<string>.c")
+    ?command_line_args ?(unsaved_files = [])
+    ?options contents =
+  parse_file ?index ?command_line_args
+    ~unsaved_files:({ filename; contents } :: unsaved_files)
+    ?options filename
 
 module Ast = struct
   include Clang__ast
@@ -106,7 +136,6 @@ module Ast = struct
   module type OptionsS = sig
     val options : Options.t
   end
-
 
   module Converter (Options : OptionsS) = struct
     let rec of_cxtype cxtype =
@@ -252,24 +281,26 @@ module Ast = struct
       Union { name; fields }
 
     and fields_of_cxcursor cxcursor =
-      list_of_children cxcursor |> List.map @@ fun cxcursor ->
-        match get_cursor_kind cxcursor with
-        | FieldDecl ->
-            let name = get_cursor_spelling cxcursor in
-            let qual_type = get_cursor_type cxcursor |> of_cxtype in
-            let bitfield =
-              if cursor_is_bit_field cxcursor then
-                match list_of_children cxcursor with
-                | [bitfield] -> Some (expr_of_cxcursor bitfield)
-                | _ -> failwith "fields_of_cxcursor (bitfield)"
-              else
-                None in
-            { cxcursor; desc = Named { name; qual_type; bitfield }}
-        | UnionDecl ->
-            { cxcursor; desc = AnonymousUnion (fields_of_cxcursor cxcursor)}
-        | StructDecl ->
-            { cxcursor; desc = AnonymousStruct (fields_of_cxcursor cxcursor)}
-        | _ -> failwith "fields_of_cxcursor"
+      list_of_children cxcursor |> List.map field_of_cxcursor
+
+    and field_of_cxcursor cxcursor =
+      match get_cursor_kind cxcursor with
+      | FieldDecl ->
+          let name = get_cursor_spelling cxcursor in
+          let qual_type = get_cursor_type cxcursor |> of_cxtype in
+          let bitfield =
+            if cursor_is_bit_field cxcursor then
+              match list_of_children cxcursor with
+              | [bitfield] -> Some (expr_of_cxcursor bitfield)
+              | _ -> failwith "field_of_cxcursor (bitfield)"
+            else
+              None in
+          { cxcursor; desc = Named { name; qual_type; bitfield }}
+      | UnionDecl ->
+          { cxcursor; desc = AnonymousUnion (fields_of_cxcursor cxcursor)}
+      | StructDecl ->
+          { cxcursor; desc = AnonymousStruct (fields_of_cxcursor cxcursor)}
+      | _ -> failwith "field_of_cxcursor"
 
     and stmt_of_cxcursor cxcursor =
       let desc =
@@ -573,11 +604,56 @@ module Ast = struct
     let module Convert = Converter (struct let options = options end) in
     Convert.stmt_of_cxcursor cur
 
+  let field_of_cxcursor
+      ?(options = Options.make ())
+      cur =
+    let module Convert = Converter (struct let options = options end) in
+    Convert.field_of_cxcursor cur
+
+  let decl_of_cxcursor
+      ?(options = Options.make ())
+      cur =
+    let module Convert = Converter (struct let options = options end) in
+    Convert.decl_of_cxcursor cur
+
   let of_cxtranslationunit
       ?(options = Options.make ())
       tu =
     let module Convert = Converter (struct let options = options end) in
     Convert.of_cxtranslationunit tu
+
+  let get_enum_constant_decl_value enum_constant =
+    get_enum_constant_decl_value enum_constant.cxcursor
+
+  let get_field_decl_bit_width field =
+    get_field_decl_bit_width field.cxcursor
+
+  let get_typedef_decl_underlying_type ?options decl =
+    get_typedef_decl_underlying_type decl.cxcursor |> of_cxtype ?options
+
+  let list_of_type_fields ?options qual_type =
+    qual_type.cxtype |> list_of_type_fields |> List.map @@
+      field_of_cxcursor ?options
+
+  let get_type_declaration ?options qual_type =
+    get_type_declaration qual_type.cxtype |> decl_of_cxcursor ?options
+
+  let get_typedef_underlying_type ?options qual_type =
+    Clang__bindings.get_type_declaration qual_type.cxtype |>
+      Clang__bindings.get_typedef_decl_underlying_type |>
+      of_cxtype ?options
+
+  let parse_file ?index ?command_line_args ?unsaved_files ?clang_options
+      ?options filename =
+    parse_file ?index ?command_line_args ?unsaved_files ?options:clang_options
+      filename |>
+    of_cxtranslationunit ?options
+
+  let parse_string ?index ?filename ?command_line_args ?unsaved_files
+      ?clang_options ?options string =
+    parse_string ?index ?filename ?command_line_args ?unsaved_files
+      ?options:clang_options string |>
+    of_cxtranslationunit ?options
 end
 
 module Type = struct
@@ -594,26 +670,44 @@ module Type = struct
   module Map = Map.Make (Self)
 end
 
-let string_of_cxerrorcode cxerrorcode =
-  match cxerrorcode with
-  | Failure -> "generic error code, no further details are available"
-  | Crashed -> "libclang crashed while performing the requested operation"
-  | InvalidArguments -> "the arguments violate the function contract"
-  | ASTReadError -> "an AST deserialization error has occurred"
+module Expr = struct
+  module Self = struct
+    type t = Ast.expr
 
-let parse_file ?(index = create_index true true)
-    ?(command_line_args = []) ?(unsaved_files = [])
-    ?(options = default_editing_translation_unit_options ()) filename =
-  match
-    parse_translation_unit2 index filename (Array.of_list command_line_args)
-      (Array.of_list unsaved_files) options
-  with
-  | Ok cxtranslationunit -> cxtranslationunit
-  | Error cxerrorcode -> failwith (string_of_cxerrorcode cxerrorcode)
+    let equal = Ast.equal_expr
 
-let parse_string ?index ?(filename = "<string>.c")
-    ?command_line_args ?(unsaved_files = [])
-    ?options contents =
-  parse_file ?index ?command_line_args
-    ~unsaved_files:({ filename; contents } :: unsaved_files)
-    ?options filename
+    let compare = Ast.compare_expr
+  end
+
+  include Self
+
+  module Map = Map.Make (Self)
+end
+
+module Stmt = struct
+  module Self = struct
+    type t = Ast.stmt
+
+    let equal = Ast.equal_stmt
+
+    let compare = Ast.compare_stmt
+  end
+
+  include Self
+
+  module Map = Map.Make (Self)
+end
+
+module Decl = struct
+  module Self = struct
+    type t = Ast.decl
+
+    let equal = Ast.equal_decl
+
+    let compare = Ast.compare_decl
+  end
+
+  include Self
+
+  module Map = Map.Make (Self)
+end

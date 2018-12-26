@@ -41,8 +41,11 @@ clang_ext_Int_getMinSignedBits(CXInt c);
 bool
 clang_ext_Int_getBoolValue(CXInt c);
 
-int64_t
+int
 clang_ext_Int_getSExtValue(CXInt c);
+
+int64_t
+clang_ext_Int_getSExtValue64(CXInt c);
 
 typedef struct {
   void *data;

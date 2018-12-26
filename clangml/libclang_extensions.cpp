@@ -323,8 +323,17 @@ extern "C" {
     return false;
   }
 
-  int64_t
+  int
   clang_ext_Int_getSExtValue(CXInt c)
+  {
+    if (auto i = static_cast<llvm::APInt *>(c.data)) {
+      return i->getSExtValue();
+    }
+    return 0;
+  }
+
+  int64_t
+  clang_ext_Int_getSExtValue64(CXInt c)
   {
     if (auto i = static_cast<llvm::APInt *>(c.data)) {
       return i->getSExtValue();

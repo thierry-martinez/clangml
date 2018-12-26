@@ -28,9 +28,7 @@ various programs.
     {[
 let parse_declaration_list ?filename ?options source =
   prerr_endline source;
-  (Clang.parse_string ?filename source |>
-      Clang.Ast.of_cxtranslationunit ?options)
-    .desc.items
+  (Clang.Ast.parse_string ?filename ?options source).desc.items
    ]}*)
 
 type cast_kind =
@@ -206,11 +204,14 @@ let () =
   | [{ desc = Enum _ };
      { desc = Var { name = "e"; qual_type = { desc = Elaborated {
       keyword = Enum;
-      named_type = { cxtype; desc = Enum "" }}}}}] ->
-        let values = cxtype |> Clang.get_type_declaration |>
-          Clang.list_of_children |> List.map @@ fun cur ->
-            Clang.get_cursor_spelling cur,
-            Clang.get_enum_constant_decl_value cur in
+      named_type = { desc = Enum "" } as named_type }}}}] ->
+        let values =
+          match Clang.Ast.get_type_declaration named_type with
+          | { desc = Enum { constants }} ->
+              constants |> List.map @@ fun (constant : Clang.Ast.enum_constant) ->
+                constant.desc.name,
+                Clang.Ast.get_enum_constant_decl_value constant
+          | _ -> assert false in
         assert (values = ["A", 0; "B", 1; "C", 2]);
   | _ -> assert false
     ]}*)
@@ -240,15 +241,16 @@ let () =
   | [{ desc = Struct _ };
      { desc = Var { name = "s"; qual_type = { desc = Elaborated {
       keyword = Struct;
-      named_type = { cxtype; desc = Record "" }}}}}] ->
-        let fields = cxtype |> Clang.list_of_type_fields |>
-          List.map @@ fun cur ->
-            Clang.get_cursor_spelling cur,
-            Clang.get_cursor_type cur |> Clang.Ast.of_cxtype in
+      named_type = { desc = Record "" } as named_type }}}}] ->
+        let fields = named_type |> Clang.Ast.list_of_type_fields in
         begin
           match fields with
-          | ["i", { desc = OtherType Int };
-             "f", { desc = OtherType Float }] -> ()
+          | [ { desc = Named {
+                  name = "i";
+                  qual_type = { desc = OtherType Int }}};
+              { desc = Named {
+                  name = "f";
+                  qual_type = { desc = OtherType Float }}}] -> ()
           | _ -> assert false
         end
   | _ -> assert false
@@ -260,15 +262,16 @@ let () =
   | [{ desc = Union _ };
      { desc = Var { name = "u"; qual_type = { desc = Elaborated {
       keyword = Union;
-      named_type = { cxtype; desc = Record "" }}}}}] ->
-        let fields = cxtype |> Clang.list_of_type_fields |>
-          List.map @@ fun cur ->
-            Clang.get_cursor_spelling cur,
-            Clang.get_cursor_type cur |> Clang.Ast.of_cxtype in
+      named_type = { desc = Record "" } as named_type }}}}] ->
+        let fields = named_type |> Clang.Ast.list_of_type_fields in
         begin
           match fields with
-          | ["i", { desc = OtherType Int };
-             "f", { desc = OtherType Float }] -> ()
+          | [ { desc = Named {
+                  name = "i";
+                  qual_type = { desc = OtherType Int }}};
+              { desc = Named {
+                  name = "f";
+                  qual_type = { desc = OtherType Float }}}] -> ()
           | _ -> assert false
         end
   | _ -> assert false
@@ -282,16 +285,18 @@ let () =
   match parse_declaration_list example with
   | [{ desc = Struct _ }; { desc = Typedef _ };
      { desc = Var { name = "s";
-       qual_type = { cxtype; desc = Typedef "struct_t" }}}] ->
-        let fields = cxtype |> Clang.get_type_declaration |>
-          Clang.get_typedef_decl_underlying_type |> Clang.list_of_type_fields |>
-          List.map @@ fun cur ->
-            Clang.get_cursor_spelling cur,
-            Clang.get_cursor_type cur |> Clang.Ast.of_cxtype in
+       qual_type = { desc = Typedef "struct_t" } as qual_type }}] ->
+        let fields = qual_type |>
+          Clang.Ast.get_typedef_underlying_type |>
+          Clang.Ast.list_of_type_fields in
         begin
           match fields with
-          | ["i", { desc = OtherType Int };
-             "f", { desc = OtherType Float }] -> ()
+          | [ { desc = Named {
+                  name = "i";
+                  qual_type = { desc = OtherType Int }}};
+              { desc = Named {
+                  name = "f";
+                  qual_type = { desc = OtherType Float }}}] -> ()
           | _ -> assert false
         end
   | _ -> assert false
@@ -1388,15 +1393,15 @@ let () =
   | [{ desc = Enum {
       name = "e";
       constants = [
-        { cxcursor = a; desc = { name = "A"; init = None }};
-        { cxcursor = b; desc = {
+        { desc = { name = "A"; init = None }} as a;
+        { desc = {
           name = "B";
-          init = Some { desc = IntegerLiteral two }}};
-        { cxcursor = c; desc = { name = "C"; init = None }}] }}] ->
+          init = Some { desc = IntegerLiteral two }}} as b;
+        { desc = { name = "C"; init = None }} as c] }}] ->
         assert (Clang.int_of_cxint two = 2);
-        assert (Clang.get_enum_constant_decl_value a = 0);
-        assert (Clang.get_enum_constant_decl_value b = 2);
-        assert (Clang.get_enum_constant_decl_value c = 3)
+        assert (Clang.Ast.get_enum_constant_decl_value a = 0);
+        assert (Clang.Ast.get_enum_constant_decl_value b = 2);
+        assert (Clang.Ast.get_enum_constant_decl_value c = 3)
   | _ -> assert false
     ]}*)
   | Struct of {
@@ -1425,9 +1430,9 @@ let () =
   | [{ desc = Struct {
       name = "s";
       fields = [
-        { cxcursor; desc = Named { name = "a";
+        { desc = Named { name = "a";
           qual_type = { desc = OtherType Int};
-          bitfield = Some { desc = IntegerLiteral one }}};
+          bitfield = Some { desc = IntegerLiteral one }}} as a;
         { desc = Named { name = "b";
           qual_type = { desc = OtherType Int};
           bitfield = Some { desc = IntegerLiteral two }}};
@@ -1436,7 +1441,7 @@ let () =
           bitfield = None}}] }}] ->
       assert (Clang.int_of_cxint one = 1);
       assert (Clang.int_of_cxint two = 2);
-      assert (Clang.get_field_decl_bit_width cxcursor = 1)
+      assert (Clang.Ast.get_field_decl_bit_width a = 1)
   | _ -> assert false
     ]}*)
   | Union of {
@@ -1465,9 +1470,9 @@ let () =
   | [{ desc = Union {
       name = "u";
       fields = [
-        { cxcursor; desc = Named { name = "a";
+        { desc = Named { name = "a";
           qual_type = { desc = OtherType Int};
-          bitfield = Some { desc = IntegerLiteral one }}};
+          bitfield = Some { desc = IntegerLiteral one }}} as a;
         { desc = Named { name = "b";
           qual_type = { desc = OtherType Int};
           bitfield = Some { desc = IntegerLiteral two }}};
@@ -1476,7 +1481,7 @@ let () =
           bitfield = None}}] }}] ->
       assert (Clang.int_of_cxint one = 1);
       assert (Clang.int_of_cxint two = 2);
-      assert (Clang.get_field_decl_bit_width cxcursor = 1)
+      assert (Clang.Ast.get_field_decl_bit_width a = 1)
   | _ -> assert false
     ]}*)
   | Typedef of {
@@ -1523,24 +1528,26 @@ let () =
   | [{ desc = Union {
         name = "";
         fields = [
-          { desc = Named { name = "i";
-            qual_type = { desc = OtherType Int}}};
-          { desc = Named { name = "f";
-            qual_type = { desc = OtherType Float}}}] }};
-      { cxcursor; desc = Typedef {
+          { desc = Named {
+              name = "i";
+              qual_type = { desc = OtherType Int}}};
+          { desc = Named {
+              name = "f";
+              qual_type = { desc = OtherType Float}}}] }};
+      { desc = Typedef {
         name = "u_t";
         underlying_type = { desc = Elaborated {
           keyword = Union;
-          named_type = { desc = Record "" }}}}}] ->
-        let fields = cxcursor |>
-          Clang.get_typedef_decl_underlying_type |> Clang.list_of_type_fields |>
-          List.map @@ fun cur ->
-            Clang.get_cursor_spelling cur,
-            Clang.get_cursor_type cur |> Clang.Ast.of_cxtype in
+          named_type = { desc = Record "" }}} as underlying_type }}] ->
+        let fields = underlying_type |> Clang.Ast.list_of_type_fields in
         begin
           match fields with
-          | ["i", { desc = OtherType Int };
-             "f", { desc = OtherType Float }] -> ()
+          | [ { desc = Named {
+                  name = "i";
+                  qual_type = { desc = OtherType Int}}};
+              { desc = Named {
+                  name = "f";
+                  qual_type = { desc = OtherType Float}}}] -> ()
           | _ -> assert false
         end
   | _ -> assert false
