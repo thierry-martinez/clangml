@@ -150,6 +150,13 @@ MakeCXCursorInvalid(CXCursorKind K, CXTranslationUnit TU)
   return C;
 }
 
+static CXType
+MakeCXTypeInvalid(CXTranslationUnit TU)
+{
+  CXType CT = { CXType_Invalid, { nullptr, TU }};
+  return CT;
+}
+
 /* MakeCXCursor is not exported in libclang.
    The following implementation makes a (not well-formed) cursor on an
    OpaqueValueExpr with E as source expression. Visiting the (single) child of
@@ -701,5 +708,25 @@ extern "C" {
       return e->getValue();
     }
     return 0;
+  }
+
+  enum clang_ext_UnaryExpr
+  clang_ext_UnaryExpr_GetKind(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::UnaryExprOrTypeTraitExpr>(getCursorStmt(c))) {
+      return static_cast<enum clang_ext_UnaryExpr>(e->getKind());
+    }
+    return UETT_SizeOf;
+  }
+
+  CXType
+  clang_ext_UnaryExpr_GetArgumentType(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::UnaryExprOrTypeTraitExpr>(getCursorStmt(c))) {
+      return MakeCXType(e->getArgumentType(), getCursorTU(c));
+    }
+    return MakeCXTypeInvalid(getCursorTU(c));
   }
 }

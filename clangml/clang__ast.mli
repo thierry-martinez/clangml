@@ -26,9 +26,9 @@ declaration list:
 this function is used in the following examples to check the AST of
 various programs.
     {[
-let parse_declaration_list ?filename ?options source =
+let parse_declaration_list ?filename ?command_line_args ?options source =
   prerr_endline source;
-  (Clang.Ast.parse_string ?filename ?options source).desc.items
+  (Clang.Ast.parse_string ?filename ?command_line_args ?options source).desc.items
    ]}*)
 
 type cast_kind =
@@ -506,10 +506,10 @@ statement list (by putting it in the context of a function):
 this function is used in the following examples to check the AST of
 various types.
     {[
-let parse_statement_list ?filename ?options source =
+let parse_statement_list ?filename ?command_line_args ?options source =
   match
     Printf.sprintf "int f(void) { %s }" source |>
-    parse_declaration_list ?filename ?options
+    parse_declaration_list ?filename ?command_line_args ?options
   with
   | [{ desc = Function { stmt = Some { desc = Compound items }}}] -> items
   | _ -> assert false
@@ -1055,6 +1055,21 @@ let () =
   | [{ desc = Expr (CharacterLiteral { kind = Ascii; value = 0x61 })}] -> ()
   | _ -> assert false
 
+let example = "L'a';"
+
+let () =
+  match parse_statement_list example with
+  | [{ desc = Expr (CharacterLiteral { kind = Wide; value = 0x61 })}] -> ()
+  | _ -> assert false
+
+let example = "u8'a';"
+
+let () =
+  match parse_statement_list ~filename:"<string>.cpp"
+      ~command_line_args:["-std=c++1z"] example with
+  | [{ desc = Expr (CharacterLiteral { kind = UTF8; value = 0x61 })}] -> ()
+  | _ -> assert false
+
 let example = "u'a';"
 
 let () =
@@ -1158,8 +1173,6 @@ let () =
     }
 (** Cast.
 
-    Implicit casts are removed in the AST unless ~ignore_implicit_cast:false is
-    passed to the converting function.
     {[
 let example = {| (void * ) "Hello"; |}
 
@@ -1170,7 +1183,24 @@ let () =
       qual_type = { desc = Pointer _ };
       operand = { desc = StringLiteral "Hello" }})}] -> ()
   | _ -> assert false
-    ]}*)
+    ]}
+
+    Implicit casts are removed in the AST unless [~ignore_implicit_cast:false] is
+    passed to the converting function.
+
+    {[
+let example = {| int i; i; |}
+
+let () =
+  match parse_statement_list example
+    ~options:(Clang.Ast.Options.make ~ignore_implicit_cast:false ()) with
+  | [{ desc = Decl _ }; { desc = Expr (Cast {
+      kind = Implicit;
+      qual_type = { desc = OtherType Int };
+      operand = { desc = DeclRef "i" }})}] -> ()
+  | _ -> assert false
+    ]}
+*)
   | Member of {
       base : expr;
       arrow : bool;
@@ -1279,6 +1309,27 @@ let () =
   | [{ desc = Expr (IntegerLiteral one)}] ->
       assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
+    ]}
+
+    Warning: some expressions are parenthesized before Clang<7.0.0 and
+    are no longer parenthesized from Clang>=7.0.0.
+    {[
+let example = {| int i; sizeof(i); |}
+
+let () =
+  match parse_statement_list example
+    ~options:(Clang.Ast.Options.make ~ignore_paren:false ()) with
+  | [ { desc = Decl _ };
+      { desc = Expr (UnaryExpr {
+          kind = SizeOf;
+          argument = ArgumentExpr { desc = DeclRef "i" }})}] ->
+      assert (Clang.get_clang_version () >= "clang version 7.0.0")
+  | [ { desc = Decl _ };
+      { desc = Expr (UnaryExpr {
+          kind = SizeOf;
+          argument = ArgumentExpr { desc = Paren { desc = DeclRef "i" }}})}] ->
+      assert (Clang.get_clang_version () < "clang version 7.0.0")
+  | _ -> assert false
     ]}*)
   | AddrLabel of string
 (** Label address (Labels as Values GNU extension).
@@ -1332,10 +1383,64 @@ let () =
       assert (Clang.int_of_cxint two = 2)
   | _ -> assert false
     ]}*)
+  | UnaryExpr of {
+      kind : clang_ext_unaryexpr;
+      argument : unary_expr_or_type_trait;
+    }
+(** Unary expr: sizeof, alignof (C++11), ...
+    {[
+
+let example = {| int i; sizeof(i); |}
+
+let () =
+  match parse_statement_list example with
+  | [ { desc = Decl _ };
+      { desc = Expr (UnaryExpr {
+          kind = SizeOf;
+          argument = ArgumentExpr { desc = DeclRef "i" }})}] -> ()
+  | _ -> assert false
+
+let example = {| sizeof(int); |}
+
+let () =
+  match parse_statement_list example with
+  | [ { desc = Expr (UnaryExpr {
+          kind = SizeOf;
+          argument = ArgumentType { desc = OtherType Int }})}] -> ()
+  | _ -> assert false
+
+let example = {| alignof(int); |}
+
+let () =
+  match parse_statement_list ~filename:"<string>.cpp" example
+      ~command_line_args:["-std=c++11"] with
+  | [ { desc = Expr (UnaryExpr {
+          kind = AlignOf;
+          argument = ArgumentType { desc = OtherType Int }})}] -> ()
+  | _ -> assert false
+    ]}
+
+    From Clang>=6.0.0, [alignof] is available by default with C++.
+
+    {[
+let () =
+  if Clang.get_clang_version () >= "clang version 6.0.0" then
+    match parse_statement_list ~filename:"<string>.cpp" example with
+    | [ { desc = Expr (UnaryExpr {
+            kind = AlignOf;
+            argument = ArgumentType { desc = OtherType Int }})}] -> ()
+    | _ -> assert false
+    ]}
+*)
   | UnexposedExpr of {
       s : string;
     }
   | OtherExpr
+  [@@deriving eq, ord]
+
+and unary_expr_or_type_trait =
+  | ArgumentExpr of expr
+  | ArgumentType of qual_type
   [@@deriving eq, ord]
 
 and decl = decl_desc node

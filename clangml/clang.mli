@@ -1,4 +1,4 @@
-(** Low-level interface *)
+(** {2 Low-level interface } *)
 
 (** The module includes {!module:Clang__bindings} which contains the
 auto-generated wrappers over [libclang] and some extensions defined in
@@ -29,13 +29,13 @@ val seq_of_diagnostics : cxtranslationunit -> cxdiagnostic Seq.t
     produced for the given translation unit *)
 
 val is_error : cxdiagnosticseverity -> bool
-(** [is_error d] returns whether [[d] is [Error] or [Fatal]. *)
+(** [is_error d] returns whether [d] is [Error] or [Fatal]. *)
 
 val has_error : cxtranslationunit -> bool
-(** [[has_error tu] returns whether the given translation unit produced an
+(** [has_error tu] returns whether the translation unit [tu] produced an
     error. *)
 
-(** Integer conversion *)
+(** {2 Integer conversions } *)
 
 val int64_of_cxint_opt : cxint -> Int64.t option
 (** [int64_of_cxint_opt x] returns [Some i] if [x] is representable as
@@ -67,7 +67,7 @@ val parse_string : ?index:cxindex -> ?filename:string ->
       ?options:Cxtranslationunit_flags.t ->
         string -> cxtranslationunit
 
-(** Abstract syntax tree *)
+(** {2 Abstract syntax tree} *)
 
 module Ast : sig
   (** The module includes {!module:Clang__ast} which contains the declaration of
@@ -80,11 +80,22 @@ module Ast : sig
     include Clang__ast
   end
 
+  (** {!type:Options.t} stores flags that change the construction of the abstract
+      syntax tree. Beware that the nodes that are ignored by default can differ
+      from one version of Clang to the other. *)
   module Options : sig
     type t = {
         ignore_implicit_cast : bool [@default true];
+        (** Ignore implicit cast nodes in expressions.
+            See {!const:Clang__ast.Cast} for examples. *)
+
         ignore_paren : bool [@default true];
+        (** Ignore parenthese nodes in expressions.
+            See {!type:Clang__ast.expr} for examples. *)
+
         ignore_paren_in_types : bool [@default true];
+        (** Ignore parenthese nodes in types.
+            See {!type:Clang__ast.qual_type} for examples. *)
       }
           [@@deriving make]
   end

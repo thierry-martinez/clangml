@@ -211,3 +211,16 @@ clang_ext_CharacterLiteral_GetCharacterKind(CXCursor c);
 unsigned
 clang_ext_CharacterLiteral_GetValue(CXCursor c);
 
+/* From clang/Basic/TypeTraits.h */
+enum clang_ext_UnaryExpr {
+  UETT_SizeOf,
+  UETT_AlignOf,
+  UETT_VecStep,
+  UETT_OpenMPRequiredSimdAlign,
+};
+
+enum clang_ext_UnaryExpr
+clang_ext_UnaryExpr_GetKind(CXCursor c);
+
+CXType
+clang_ext_UnaryExpr_GetArgumentType(CXCursor c);

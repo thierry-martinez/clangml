@@ -16,10 +16,14 @@ clangml : $(CLANGML_CMXA) $(LIBCLANGML_STUBS_A)
 .PHONY : stubgen
 stubgen : $(STUBGEN_EXE)
 
-$(CLANGML_CMXA) : clangml/clang.ml clangml/clang.mli clangml/clang__ast.mli clangml/clang__bindings.ml
+$(CLANGML_CMXA) : \
+		clangml/clang.ml clangml/clang.mli clangml/clang__ast.mli \
+		clangml/clang__bindings.ml
 	$(DUNE) build clangml/clangml.cmxa
 
-$(LIBCLANGML_STUBS_A) : clangml/clang_stubs.c clangml/libclang_extensions.cpp clangml/libclang_extensions.h clangml/stubgen.h
+$(LIBCLANGML_STUBS_A) : \
+		clangml/clang_stubs.c clangml/libclang_extensions.cpp \
+		clangml/libclang_extensions.h clangml/stubgen.h
 	$(DUNE) build clangml/libclangml_stubs.a
 
 $(STUBGEN_EXE) : $(CLANGML_CMXA) stubgen/stubgen.ml
@@ -43,13 +47,18 @@ _build/default/clangml.install : \
 	dune build @install
 
 install : _build/default/clangml.install
-	- test -z $(INSTALL_NAME_TOOL) || $(INSTALL_NAME_TOOL) -add_rpath $(LLVM_LIBDIR) _build/install/default/lib/stublibs/dllclangml_stubs.so
+	- test -z $(INSTALL_NAME_TOOL) || \
+		$(INSTALL_NAME_TOOL) -add_rpath $(LLVM_LIBDIR) \
+			_build/install/default/lib/stublibs/dllclangml_stubs.so
 	dune install
 
 .mli.doc.ml :
 	$(OCAMLCODOC) $<
 
 .PHONY : tests
-
 tests :
 	dune runtest
+
+.PHONY : doc
+doc :
+	dune build @doc

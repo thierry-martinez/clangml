@@ -564,6 +564,17 @@ module Ast = struct
             | [init] -> init |> expr_of_cxcursor
             | _ -> failwith "expr_of_cxcursor (CompoundLiteralExpr)" in
           CompoundLiteral { qual_type; init }
+      | UnaryExpr ->
+          let kind = cxcursor |> ext_unary_expr_get_kind in
+          let argument =
+            match list_of_children cxcursor with
+            | [argument] -> ArgumentExpr (argument |> expr_of_cxcursor)
+            | [] ->
+                let qual_type =
+                  cxcursor |> ext_unary_expr_get_argument_type |> of_cxtype in
+                ArgumentType qual_type
+            | _ -> failwith "expr_of_cxcursor (UnaryExpr)" in
+          UnaryExpr { kind; argument }
       | UnexposedExpr ->
           begin
             match ext_get_cursor_kind cxcursor with
