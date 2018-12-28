@@ -135,8 +135,8 @@ module Ast = struct
 
   module Options = struct
     type t = {
-        ignore_implicit_cast : bool [@default false];
-        ignore_paren : bool [@default false];
+        ignore_implicit_cast : bool [@default true];
+        ignore_paren : bool [@default true];
         ignore_paren_in_types : bool [@default true];
       }
           [@@deriving make]

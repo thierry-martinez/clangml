@@ -122,7 +122,10 @@ AC_SUBST([LLVM_LIBDIR], [[`$LLVM_CONFIG --libdir`]])
 
 AC_SUBST([CFLAGS], [["$LLVM_CFLAGS"]])
 
-AC_SUBST([CPPFLAGS], [["$LLVM_CFLAGS"]])
+AS_IF([test "x$LLVM_VERSION" = "x3.8.0" -o "x$LLVM_VERSION" = "x3.8.1"],
+  [AC_SUBST([LLVM_3_8], [[-DLLVM_3_8]])])
+
+AC_SUBST([CPPFLAGS], [["$LLVM_CFLAGS $LLVM_3_8"]])
 
 AC_CHECK_HEADERS([clang-c/Index.h], [],
   [AC_MSG_ERROR([[Header clang-c/Index.h not found]])])
@@ -181,6 +184,7 @@ AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang_stubs.c], [clangml/clang_stubs.c])
 AC_CONFIG_FILES([
   Makefile
   config/cflags.sexp
+  config/cppflags.sexp
   config/ldflags.sexp
   config/ldflags_quoted.sexp
   config/libs.sexp
