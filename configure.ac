@@ -35,7 +35,7 @@ AC_SUBST([OCAMLDOC], [["$OCAMLFIND ocamldoc"]])
 AC_SUBST([OCAMLDEP], [["$OCAMLFIND ocamldep"]])
 AC_SUBST([OCAMLMKLIB], [["$OCAMLFIND ocamlmklib"]])
 AC_CHECK_OCAMLFIND_PKG([stdcompat])
-AC_CHECK_OCAMLFIND_PKG([ppx_deriving.std])
+AC_CHECK_OCAMLFIND_PKG([ppx_deriving])
 
 AS_IF([test "x$OCAMLOPT" = "x"],
   [AS_IF([test "x$OCAMLC" = "x"],
