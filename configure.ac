@@ -122,10 +122,7 @@ AC_SUBST([LLVM_LIBDIR], [[`$LLVM_CONFIG --libdir`]])
 
 AC_SUBST([CFLAGS], [["$LLVM_CFLAGS"]])
 
-AS_IF([test "x$LLVM_VERSION" = "x3.8.0" -o "x$LLVM_VERSION" = "x3.8.1"],
-  [AC_SUBST([LLVM_3_8], [[-DLLVM_3_8]])])
-
-AC_SUBST([CPPFLAGS], [["$LLVM_CFLAGS $LLVM_3_8"]])
+AC_SUBST([CPPFLAGS], [["$LLVM_CFLAGS"]])
 
 AC_CHECK_HEADERS([clang-c/Index.h], [],
   [AC_MSG_ERROR([[Header clang-c/Index.h not found]])])
