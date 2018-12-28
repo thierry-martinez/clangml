@@ -125,14 +125,6 @@ let parse_string ?index ?(filename = "<string>.c")
 module Ast = struct
   include Clang__ast
 
-  let rec list_last l =
-    match l with
-    | [] -> failwith "list_last"
-    | [last] -> [], last
-    | hd :: tl ->
-        let tl, last = list_last tl in
-        hd :: tl, last
-
   module Options = struct
     type t = {
         ignore_implicit_cast : bool [@default true];
@@ -256,7 +248,7 @@ module Ast = struct
       let init =
         if ext_var_decl_has_init cxcursor then
           begin
-            let _, init_value = list_last (list_of_children cxcursor) in
+            let init_value = list_of_children cxcursor |> List.rev |> List.hd in
             Some (expr_of_cxcursor init_value)
           end
         else
