@@ -85,8 +85,8 @@ module Ast : sig
   (** The module includes {!module:Clang__ast} which contains the declaration of
       the abstract syntax tree. Since the abstract syntax tree is a pure type
       declaration without value definition, the declaration is written in a
-      separate module, the interface and the implementation of which have the
-      same contents (and we use a symbolic link to ensure that).
+      separate module, written in an implementation file (.ml) without
+      interface file (.mli)).
    *)
   include module type of struct
     include Clang__ast

@@ -183,12 +183,12 @@ module Ast = struct
         | Unexposed ->
             begin
               match ext_get_type_kind cxtype with
-              | Paren -> Paren (cxtype |> ext_get_inner_type |> of_cxtype)
+              | Paren -> ParenType (cxtype |> ext_get_inner_type |> of_cxtype)
               | _ -> OtherType (get_type_kind cxtype)
             end
         | _ -> OtherType (get_type_kind cxtype) in
       match desc with
-      | Paren inner when Options.options.ignore_paren_in_types -> inner
+      | ParenType inner when Options.options.ignore_paren_in_types -> inner
       | _ ->
           { cxtype; desc;
             const = is_const_qualified_type cxtype;
@@ -209,7 +209,7 @@ module Ast = struct
             let name = get_cursor_spelling cxcursor in
             let underlying_type = cxcursor |>
             get_typedef_decl_underlying_type |> of_cxtype in
-            Typedef { name; underlying_type }
+            TypedefDecl { name; underlying_type }
         | _ -> OtherDecl
 
     and function_decl_of_cxcursor cxcursor =
@@ -269,7 +269,7 @@ module Ast = struct
                 | _ -> failwith "enum_decl_of_cxcursor (init)" in
               { cxcursor; desc = { name; init } }
           | _ -> failwith "enum_decl_of_cxcursor" in
-      Enum { name; constants }
+      EnumDecl { name; constants }
 
     and struct_decl_of_cxcursor cxcursor =
       let name = get_cursor_spelling cxcursor in
