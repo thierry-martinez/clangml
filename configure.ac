@@ -19,10 +19,9 @@ AC_DEFUN([AC_OCAMLFIND_PKG],
       AC_SUBST([$1], [])])])
 
 AC_DEFUN([AC_CHECK_OCAMLFIND_PKG],
-  [AC_MSG_CHECKING([for ocamlfind package $2])
-   AS_IF([$OCAMLFIND query $2 >/dev/null 2>&1],
-     [AC_MSG_RESULT([yes])
-      AC_SUBST([$1], [$2])],
+  [AC_MSG_CHECKING([for ocamlfind package $1])
+   AS_IF([$OCAMLFIND query $1 >/dev/null 2>&1],
+     [AC_MSG_RESULT([yes])],
      [AC_MSG_ERROR([not found])])])
 
 AC_CHECK_TOOL([OCAMLFIND], [ocamlfind], [])
