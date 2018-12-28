@@ -1785,6 +1785,11 @@ let main cflags llvm_config prefix =
   let llvm_cflags = run_llvm_config llvm_config ["--cflags"] in
   let cflags = cflags |> List.map @@ String.split_on_char ',' |> List.flatten in
   let clang_options = cflags @ String.split_on_char ' ' llvm_cflags @ ["-I"; List.fold_left Filename.concat llvm_prefix ["lib"; "clang"; llvm_version; "include"]; "-I"; "/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include/"] in
+  let clang_options =
+    if llvm_version = "3.8.0" || llvm_version = "3.8.1" then
+      clang_options @ ["-DLLVM_3_8"]
+    else
+      clang_options in
   let module_interface =
     empty_module_interface |>
     add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|clang_VirtualFileOverlay_writeToBuffer|clang_free|constructUSR|clang_executeOnThread|clang_getDiagnosticCategoryName|^clang_getDefinitionSpellingAndExtent$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_annotateTokens$|^clang_getFileUniqueID$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$") hidden_function_interface |>
