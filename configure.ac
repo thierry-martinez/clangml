@@ -22,7 +22,8 @@ AC_DEFUN([AC_CHECK_OCAMLFIND_PKG],
   [AC_MSG_CHECKING([for ocamlfind package $1])
    AS_IF([$OCAMLFIND query $1 >/dev/null 2>&1],
      [AC_MSG_RESULT([yes])],
-     [AC_MSG_ERROR([not found])])])
+     [AC_MSG_RESULT([no])
+      AC_MSG_ERROR([Package $1 not found. Hint: opam install $1.])])])
 
 AC_CHECK_TOOL([OCAMLFIND], [ocamlfind], [])
 AS_IF([test "x$OCAMLFIND" = "x"],
