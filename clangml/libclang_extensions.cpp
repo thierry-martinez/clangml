@@ -285,7 +285,6 @@ extern "C" {
   }
 
   float
-
   clang_ext_Int_bitsToFloat(CXInt c)
   {
     if (auto i = static_cast<llvm::APInt *>(c.data)) {

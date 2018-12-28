@@ -53,6 +53,18 @@ val int_of_cxint : cxint -> int
 (** [int_of_cxint x] returns [i] if [x] is representable as
     an integer value [i], or raises [Failure _] otherwise. *)
 
+val string_of_cxint : cxint -> string
+(** [string_of_cxint f] is an alias for
+    {!val:Clang__bindings.ext_int_to_string}, radix 10 and signed. *)
+
+val float_of_cxfloat : cxfloat -> float
+(** [float_of_cxfloat f] is an alias for
+    {!val:Clang__bindings.ext_float_convert_to_double}. *)
+
+val string_of_cxfloat : cxfloat -> string
+(** [string_of_cxfloat f] is an alias for
+    {!val:Clang__bindings.ext_float_to_string}. *)
+
 val string_of_cxerrorcode : cxerrorcode -> string
 
 val parse_file : ?index:cxindex ->

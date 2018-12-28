@@ -89,6 +89,15 @@ let int_of_cxint cxint =
   else
     failwith "int_of_cxint"
 
+let string_of_cxint cxint =
+  ext_int_to_string cxint 10 true
+
+let float_of_cxfloat cxfloat =
+  ext_float_convert_to_double cxfloat
+
+let string_of_cxfloat cxfloat =
+  ext_float_to_string cxfloat
+
 let string_of_cxerrorcode cxerrorcode =
   match cxerrorcode with
   | Failure -> "generic error code, no further details are available"
@@ -126,8 +135,8 @@ module Ast = struct
 
   module Options = struct
     type t = {
-        ignore_implicit_cast : bool [@default true];
-        ignore_paren : bool [@default true];
+        ignore_implicit_cast : bool [@default false];
+        ignore_paren : bool [@default false];
         ignore_paren_in_types : bool [@default true];
       }
           [@@deriving make]
