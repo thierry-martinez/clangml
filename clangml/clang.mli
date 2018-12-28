@@ -131,6 +131,9 @@ module Ast : sig
 
   val get_typedef_decl_underlying_type : ?options:Options.t -> decl -> qual_type
 
+  val iter_type_fields : ?options:Options.t ->
+    (field -> unit) -> qual_type -> unit
+
   val list_of_type_fields : ?options:Options.t -> qual_type -> field list
 
   val get_type_declaration : ?options:Options.t -> qual_type -> decl

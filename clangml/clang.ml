@@ -653,6 +653,10 @@ module Ast = struct
   let get_typedef_decl_underlying_type ?options decl =
     get_typedef_decl_underlying_type decl.cxcursor |> of_cxtype ?options
 
+  let iter_type_fields ?options f qual_type =
+    qual_type.cxtype |> iter_type_fields @@ fun x ->
+      f (field_of_cxcursor ?options x)
+
   let list_of_type_fields ?options qual_type =
     qual_type.cxtype |> list_of_type_fields |> List.map @@
       field_of_cxcursor ?options
