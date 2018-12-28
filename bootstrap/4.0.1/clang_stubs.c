@@ -5838,3 +5838,58 @@ clang_ext_CharacterLiteral_GetValue_wrapper(value c_ocaml)
   }
 }
 
+enum clang_ext_UnaryExpr
+Clang_ext_unaryexpr_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return UETT_SizeOf;
+  case 1: return UETT_AlignOf;
+  case 2: return UETT_VecStep;
+  case 3: return UETT_OpenMPRequiredSimdAlign;
+  }
+  failwith_fmt("invalid value for Clang_ext_unaryexpr_val: %d", Int_val(ocaml));
+  return UETT_SizeOf;
+}
+
+value
+Val_clang_ext_unaryexpr(enum clang_ext_UnaryExpr v)
+{
+  switch (v) {
+  case UETT_SizeOf: return Val_int(0);
+  case UETT_AlignOf: return Val_int(1);
+  case UETT_VecStep: return Val_int(2);
+  case UETT_OpenMPRequiredSimdAlign: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_unaryexpr: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_UnaryExpr_GetKind_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  enum clang_ext_UnaryExpr result = clang_ext_UnaryExpr_GetKind(c);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_unaryexpr(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_UnaryExpr_GetArgumentType_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  CXType result = clang_ext_UnaryExpr_GetArgumentType(c);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(1);
+  Store_field(data, 0, Val_cxtype(result));
+    CAMLreturn(data);
+  }
+}
+
