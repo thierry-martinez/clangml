@@ -13,6 +13,42 @@ type 'a node = {
   }
   [@@deriving eq, ord, show]
 
+class ['self] base_iter =
+  object (self)
+    method visit_node : 'env 'a . ('env -> 'a -> unit) -> 'env -> 'a node -> unit =
+      fun visit_desc env node -> visit_desc env node.desc
+
+    method visit_cxint : 'env . 'env -> cxint -> unit =
+      fun _env _ -> ()
+
+    method visit_cxfloat : 'env . 'env -> cxfloat -> unit =
+      fun _env _ -> ()
+
+    method visit_clang_ext_elaboratedtypekeyword : 'env . 'env -> clang_ext_elaboratedtypekeyword -> unit =
+      fun _env _ -> ()
+
+    method visit_cxtypekind : 'env . 'env -> cxtypekind -> unit =
+      fun _env _ -> ()
+
+    method visit_cxcallingconv : 'env . 'env -> cxcallingconv -> unit =
+      fun _env _ -> ()
+
+    method visit_cxlinkagekind : 'env . 'env -> cxlinkagekind -> unit =
+      fun _env _ -> ()
+
+    method visit_clang_ext_characterkind : 'env . 'env -> clang_ext_characterkind -> unit =
+      fun _env _ -> ()
+
+    method visit_clang_ext_unaryexpr : 'env . 'env -> clang_ext_unaryexpr -> unit =
+      fun _env _ -> ()
+
+    method visit_clang_ext_unaryoperatorkind : 'env . 'env -> clang_ext_unaryoperatorkind -> unit =
+      fun _env _ -> ()
+
+    method visit_clang_ext_binaryoperatorkind : 'env . 'env -> clang_ext_binaryoperatorkind -> unit =
+      fun _env _ -> ()
+  end
+
 (*{[
 open Stdcompat
 
@@ -45,10 +81,6 @@ let parse_declaration_list ?filename ?command_line_args ?options source =
     Clang.Ast.parse_string ?filename ?command_line_args ?options source in
   ast.desc.items
    ]}*)
-
-type cast_kind =
-  | CStyle
-  | Implicit [@@deriving eq, ord, show]
 
 (** Qualified type. *)
 type qual_type = {
@@ -514,7 +546,6 @@ let () =
     ]}
  *)
 }
-
 (** Statement.
 
 The following example declares the function [parse_statement_list]
@@ -1450,6 +1481,10 @@ let () =
     }
   | OtherExpr
 
+and cast_kind =
+  | CStyle
+  | Implicit
+
 and unary_expr_or_type_trait =
   | ArgumentExpr of expr
   | ArgumentType of qual_type
@@ -1772,7 +1807,7 @@ and var_decl_desc = {
     qual_type : qual_type;
     init : expr option
   }
-    [@@deriving show, eq, ord]
+    [@@deriving show, eq, ord, visitors { variety = "iter"; ancestors = ["base_iter"] }]
 
 type translation_unit_desc = {
     filename : string; items : decl list

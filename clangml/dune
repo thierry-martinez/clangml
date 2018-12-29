@@ -9,6 +9,6 @@
   (cxx_names libclang_extensions)
   (library_flags -linkall)
   (flags -open Stdcompat)
-  (libraries unix stdcompat)
-  (preprocess (pps ppx_deriving.std))
+  (libraries unix stdcompat visitors.ppx visitors.runtime)
+  (preprocess (pps ppx_deriving.std visitors.ppx))
   (inline_tests (backend ocamlcodoc)))
