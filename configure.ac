@@ -85,15 +85,15 @@ AC_ARG_WITH([llvm-config],
             AS_IF([test "x$LLVM_CONFIG" = "x"],
               [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-4`]])
                AS_IF([test "x$LLVM_CONFIG" = "x"],
-                 [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-3`]])
-                  AS_IF([test "x$LLVM_CONFIG" = "x"],
-                    AS_IF([test -f /usr/local/opt/llvm/bin/llvm-config],
-                      [AC_SUBST([LLVM_CONFIG], [[/usr/local/opt/llvm/bin/llvm-config]])]))])])])])])
+                 [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-3`]])])])])])])
    AS_IF([test "x$LLVM_CONFIG" = "x"],
-     [AC_MSG_RESULT([[not found in PATH]])
-      AC_MSG_ERROR(
-        [[llvm-config not available (you may use --with-llvm-config=)]])])
-   AC_MSG_RESULT([[$LLVM_CONFIG (found in PATH)]])])
+     [AS_IF([test -f /usr/local/opt/llvm/bin/llvm-config],
+       [AC_SUBST([LLVM_CONFIG], [[/usr/local/opt/llvm/bin/llvm-config]])
+        AC_MSG_RESULT([[$LLVM_CONFIG (homebrew)]])],
+       [AC_MSG_RESULT([[not found in PATH]])
+        AC_MSG_ERROR(
+          [[llvm-config not available (you may use --with-llvm-config=)]])])],
+     [AC_MSG_RESULT([[$LLVM_CONFIG (found in PATH)]])])])
 
 AC_MSG_CHECKING([llvm-config version])
 AC_SUBST([LLVM_VERSION], [[`$LLVM_CONFIG --version`]])
