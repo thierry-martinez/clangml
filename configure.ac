@@ -85,7 +85,10 @@ AC_ARG_WITH([llvm-config],
             AS_IF([test "x$LLVM_CONFIG" = "x"],
               [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-4`]])
                AS_IF([test "x$LLVM_CONFIG" = "x"],
-                 [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-3`]])])])])])])
+                 [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-3`]])
+                  AS_IF([test "x$LLVM_CONFIG" = "x"],
+                    AS_IF([test -f /usr/local/opt/llvm/bin/llvm-config],
+                      [AC_SUBST([LLVM_CONFIG], [[/usr/local/opt/llvm/bin/llvm-config]])]))])])])])])
    AS_IF([test "x$LLVM_CONFIG" = "x"],
      [AC_MSG_RESULT([[not found in PATH]])
       AC_MSG_ERROR(
