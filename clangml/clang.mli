@@ -171,6 +171,10 @@ module Type : sig
 
   val of_cxtype : ?options:Ast.Options.t -> cxtype -> t
 
+  val of_cursor : ?options:Ast.Options.t -> cxcursor -> t
+
+  val of_node : ?options:Ast.Options.t -> 'a Ast.node -> t
+
   val iter_fields : ?options:Ast.Options.t ->
     (Ast.field -> unit) -> t -> unit
 

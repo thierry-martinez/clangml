@@ -738,6 +738,12 @@ module Type = struct
 
   let of_cxtype = Ast.of_cxtype
 
+  let of_cursor ?options cursor =
+    get_cursor_type cursor |> of_cxtype ?options
+
+  let of_node ?options node =
+    Ast.cursor_of_node node |> of_cursor ?options
+
   let get_size_of (ty : t) = type_get_size_of ty.cxtype
 
   let get_align_of (ty : t) = type_get_size_of ty.cxtype
