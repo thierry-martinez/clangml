@@ -4,13 +4,32 @@ open Clang__bindings
 
 (** Most of the AST nodes carry the [cxcursor] from where they come from
     in the Clang translation unit. *)
+
+type source_location = cxsourcelocation
+
+type decoration =
+  | No
+  | Cursor of cxcursor
+  | Location of source_location
+
 type 'a node = {
-    cxcursor : cxcursor
+    decoration : decoration
       [@equal fun _ _ -> true]
       [@compare fun _ _ -> 0]
       [@opaque];
     desc : 'a;
   }
+  [@@deriving eq, ord, show]
+
+type elaborated_type_keyword = clang_ext_elaboratedtypekeyword
+
+and character_kind = clang_ext_characterkind
+
+and unary_expr_kind = clang_ext_unaryexpr
+
+and unary_operator_kind = clang_ext_unaryoperatorkind
+
+and binary_operator_kind = clang_ext_binaryoperatorkind
   [@@deriving eq, ord, show]
 
 class ['self] base_iter =
@@ -24,7 +43,7 @@ class ['self] base_iter =
     method visit_cxfloat : 'env . 'env -> cxfloat -> unit =
       fun _env _ -> ()
 
-    method visit_clang_ext_elaboratedtypekeyword : 'env . 'env -> clang_ext_elaboratedtypekeyword -> unit =
+    method visit_elaborated_type_keyword : 'env . 'env -> elaborated_type_keyword -> unit =
       fun _env _ -> ()
 
     method visit_cxtypekind : 'env . 'env -> cxtypekind -> unit =
@@ -36,17 +55,55 @@ class ['self] base_iter =
     method visit_cxlinkagekind : 'env . 'env -> cxlinkagekind -> unit =
       fun _env _ -> ()
 
-    method visit_clang_ext_characterkind : 'env . 'env -> clang_ext_characterkind -> unit =
+    method visit_character_kind : 'env . 'env -> character_kind -> unit =
       fun _env _ -> ()
 
-    method visit_clang_ext_unaryexpr : 'env . 'env -> clang_ext_unaryexpr -> unit =
+    method visit_unary_expr_kind : 'env . 'env -> unary_expr_kind -> unit =
       fun _env _ -> ()
 
-    method visit_clang_ext_unaryoperatorkind : 'env . 'env -> clang_ext_unaryoperatorkind -> unit =
+    method visit_unary_operator_kind : 'env . 'env -> unary_operator_kind -> unit =
       fun _env _ -> ()
 
-    method visit_clang_ext_binaryoperatorkind : 'env . 'env -> clang_ext_binaryoperatorkind -> unit =
+    method visit_binary_operator_kind : 'env . 'env -> binary_operator_kind -> unit =
       fun _env _ -> ()
+  end
+
+class virtual ['self] base_reduce =
+  object (self : 'self)
+    inherit [_] VisitorsRuntime.reduce
+
+    method visit_node : 'env 'a . ('env -> 'a -> 'monoid) -> 'env -> 'a node -> 'monoid =
+      fun visit_desc env node -> visit_desc env node.desc
+
+    method visit_cxint : 'env . 'env -> cxint -> 'monoid =
+      fun _env _ -> self#zero
+
+    method visit_cxfloat : 'env . 'env -> cxfloat -> 'monoid =
+      fun _env _ -> self#zero
+
+    method visit_elaborated_type_keyword : 'env . 'env -> elaborated_type_keyword -> 'monoid =
+      fun _env _ -> self#zero
+
+    method visit_cxtypekind : 'env . 'env -> cxtypekind -> 'monoid =
+      fun _env _ -> self#zero
+
+    method visit_cxcallingconv : 'env . 'env -> cxcallingconv -> 'monoid =
+      fun _env _ -> self#zero
+
+    method visit_cxlinkagekind : 'env . 'env -> cxlinkagekind -> 'monoid =
+      fun _env _ -> self#zero
+
+    method visit_character_kind : 'env . 'env -> character_kind -> 'monoid =
+      fun _env _ -> self#zero
+
+    method visit_unary_expr_kind : 'env . 'env -> unary_expr_kind -> 'monoid =
+      fun _env _ -> self#zero
+
+    method visit_unary_operator_kind : 'env . 'env -> unary_operator_kind -> 'monoid =
+      fun _env _ -> self#zero
+
+    method visit_binary_operator_kind : 'env . 'env -> binary_operator_kind -> 'monoid =
+      fun _env _ -> self#zero
   end
 
 (*{[
@@ -226,7 +283,7 @@ let () =
   | _ -> assert false
     ]}*)
   | Elaborated of {
-      keyword : clang_ext_elaboratedtypekeyword;
+      keyword : elaborated_type_keyword;
       named_type : qual_type;
     }
 (** Elaborated type.
@@ -253,11 +310,11 @@ let () =
       keyword = Enum;
       named_type = { desc = Enum "" } as named_type }}}}] ->
         let values =
-          match Clang.Ast.get_type_declaration named_type with
+          match Clang.Type.get_declaration named_type with
           | { desc = EnumDecl { constants }} ->
               constants |> List.map @@ fun (constant : Clang.Ast.enum_constant) ->
                 constant.desc.name,
-                Clang.Ast.get_enum_constant_decl_value constant
+                Clang.Enum_constant.get_value constant
           | _ -> assert false in
         assert (values = ["A", 0; "B", 1; "C", 2]);
   | _ -> assert false
@@ -289,7 +346,7 @@ let () =
      { desc = Var { name = "s"; qual_type = { desc = Elaborated {
       keyword = Struct;
       named_type = { desc = Record "" } as named_type }}}}] ->
-        let fields = named_type |> Clang.Ast.list_of_type_fields in
+        let fields = named_type |> Clang.Type.list_of_fields in
         begin
           match fields with
           | [ { desc = Named {
@@ -310,7 +367,7 @@ let () =
      { desc = Var { name = "u"; qual_type = { desc = Elaborated {
       keyword = Union;
       named_type = { desc = Record "" } as named_type }}}}] ->
-        let fields = named_type |> Clang.Ast.list_of_type_fields in
+        let fields = named_type |> Clang.Type.list_of_fields in
         begin
           match fields with
           | [ { desc = Named {
@@ -334,8 +391,8 @@ let () =
      { desc = Var { name = "s";
        qual_type = { desc = Typedef "struct_t" } as qual_type }}] ->
         let fields = qual_type |>
-          Clang.Ast.get_typedef_underlying_type |>
-          Clang.Ast.list_of_type_fields in
+          Clang.Type.get_typedef_underlying_type |>
+          Clang.Type.list_of_fields in
         begin
           match fields with
           | [ { desc = Named {
@@ -1091,7 +1148,7 @@ let () =
   | _ -> assert false
     ]}*)
   | CharacterLiteral of {
-      kind : clang_ext_characterkind;
+      kind : character_kind;
       value : int;
     }
 (** Character literal.
@@ -1146,7 +1203,7 @@ let () =
   | _ -> assert false
     ]}*)
   | UnaryOperator of {
-      kind : clang_ext_unaryoperatorkind;
+      kind : unary_operator_kind;
       operand : expr;
     }
 (** Unary operator.
@@ -1172,7 +1229,7 @@ let () =
     ]}*)
   | BinaryOperator of {
       lhs : expr;
-      kind : clang_ext_binaryoperatorkind;
+      kind : binary_operator_kind;
       rhs : expr;
     }
 (** Binary operator.
@@ -1427,7 +1484,7 @@ let () =
   | _ -> assert false
     ]}*)
   | UnaryExpr of {
-      kind : clang_ext_unaryexpr;
+      kind : unary_expr_kind;
       argument : unary_expr_or_type_trait;
     }
 (** Unary expr: sizeof, alignof (C++11), ...
@@ -1588,9 +1645,9 @@ let () =
           init = Some { desc = IntegerLiteral two }}} as b;
         { desc = { name = "C"; init = None }} as c] }}] ->
         assert (Clang.int_of_cxint two = 2);
-        assert (Clang.Ast.get_enum_constant_decl_value a = 0);
-        assert (Clang.Ast.get_enum_constant_decl_value b = 2);
-        assert (Clang.Ast.get_enum_constant_decl_value c = 3)
+        assert (Clang.Enum_constant.get_value a = 0);
+        assert (Clang.Enum_constant.get_value b = 2);
+        assert (Clang.Enum_constant.get_value c = 3)
   | _ -> assert false
     ]}*)
   | Struct of {
@@ -1630,7 +1687,7 @@ let () =
           bitfield = None}}] }}] ->
       assert (Clang.int_of_cxint one = 1);
       assert (Clang.int_of_cxint two = 2);
-      assert (Clang.Ast.get_field_decl_bit_width a = 1)
+      assert (Clang.Field.get_bit_width a = 1)
   | _ -> assert false
     ]}*)
   | Union of {
@@ -1670,7 +1727,7 @@ let () =
           bitfield = None}}] }}] ->
       assert (Clang.int_of_cxint one = 1);
       assert (Clang.int_of_cxint two = 2);
-      assert (Clang.Ast.get_field_decl_bit_width a = 1)
+      assert (Clang.Field.get_bit_width a = 1)
   | _ -> assert false
     ]}*)
   | TypedefDecl of {
@@ -1728,7 +1785,7 @@ let () =
         underlying_type = { desc = Elaborated {
           keyword = Union;
           named_type = { desc = Record "" }}} as underlying_type }}] ->
-        let fields = underlying_type |> Clang.Ast.list_of_type_fields in
+        let fields = underlying_type |> Clang.Type.list_of_fields in
         begin
           match fields with
           | [ { desc = Named {
@@ -1807,7 +1864,9 @@ and var_decl_desc = {
     qual_type : qual_type;
     init : expr option
   }
-    [@@deriving show, eq, ord, visitors { variety = "iter"; ancestors = ["base_iter"] }]
+    [@@deriving show, eq, ord,
+      visitors { variety = "iter"; ancestors = ["base_iter"] },
+      visitors { variety = "reduce"; ancestors = ["base_reduce"] }]
 
 type translation_unit_desc = {
     filename : string; items : decl list

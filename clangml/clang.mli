@@ -92,6 +92,36 @@ module Ast : sig
     include Clang__ast
   end
 
+  val node : ?decoration:decoration -> ?cursor:cxcursor ->
+    ?location:source_location -> 'a -> 'a node
+  (** [node desc] returns a node with the given [desc] value. The associated
+      [cxcursor] is the null cursor (returned by {val:get_null_cursor}). This
+      function can be used to build ASTs from scratch. *)
+
+  val cursor_of_decoration : decoration -> cxcursor
+
+  val cursor_of_node : 'a node -> cxcursor
+
+  val location_of_decoration : decoration -> source_location
+
+  val location_of_node : 'a node -> source_location
+
+  type concrete_location = {
+      filename : string;
+      line : int;
+      column : int
+    }
+
+  val get_presumed_location : source_location -> concrete_location
+
+  val get_expansion_location : source_location -> concrete_location
+
+  val string_of_elaborated_type_keyword : elaborated_type_keyword -> string
+
+  val string_of_unary_operator_kind : unary_operator_kind -> string
+
+  val string_of_binary_operator_kind : binary_operator_kind -> string
+
   (** {!type:Options.t} stores flags that change the construction of the abstract
       syntax tree. Beware that the nodes that are ignored by default can differ
       from one version of Clang to the other. *)
@@ -112,33 +142,8 @@ module Ast : sig
           [@@deriving make]
   end
 
-  val of_cxtype : ?options:Options.t -> cxtype -> qual_type
-
-  val expr_of_cxcursor : ?options:Options.t -> cxcursor -> expr
-
-  val stmt_of_cxcursor : ?options:Options.t -> cxcursor -> stmt
-
-  val decl_of_cxcursor : ?options:Options.t -> cxcursor -> decl
-
-  val field_of_cxcursor : ?options:Options.t -> cxcursor -> field
-
   val of_cxtranslationunit : ?options:Options.t -> cxtranslationunit ->
     translation_unit
-
-  val get_enum_constant_decl_value : enum_constant -> int
-
-  val get_field_decl_bit_width : field -> int
-
-  val get_typedef_decl_underlying_type : ?options:Options.t -> decl -> qual_type
-
-  val iter_type_fields : ?options:Options.t ->
-    (field -> unit) -> qual_type -> unit
-
-  val list_of_type_fields : ?options:Options.t -> qual_type -> field list
-
-  val get_type_declaration : ?options:Options.t -> qual_type -> decl
-
-  val get_typedef_underlying_type : ?options:Options.t -> qual_type -> qual_type
 
   val parse_file : ?index:cxindex ->
     ?command_line_args:string list ->
@@ -163,6 +168,21 @@ module Type : sig
   val compare : t -> t -> int
 
   module Map : Map.S with type key = t
+
+  val of_cxtype : ?options:Ast.Options.t -> cxtype -> t
+
+  val iter_fields : ?options:Ast.Options.t ->
+    (Ast.field -> unit) -> t -> unit
+
+  val list_of_fields : ?options:Ast.Options.t -> t -> Ast.field list
+
+  val get_declaration : ?options:Ast.Options.t -> t -> Ast.decl
+
+  val get_typedef_underlying_type : ?options:Ast.Options.t -> t -> t
+
+  val get_align_of : t -> int
+
+  val get_size_of : t -> int
 end
 
 module Expr : sig
@@ -173,6 +193,8 @@ module Expr : sig
   val compare : t -> t -> int
 
   module Map : Map.S with type key = t
+
+  val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
 end
 
 module Stmt : sig
@@ -183,6 +205,8 @@ module Stmt : sig
   val compare : t -> t -> int
 
   module Map : Map.S with type key = t
+
+  val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
 end
 
 module Decl : sig
@@ -193,4 +217,36 @@ module Decl : sig
   val compare : t -> t -> int
 
   module Map : Map.S with type key = t
+
+  val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
+
+  val get_typedef_underlying_type : ?options:Ast.Options.t -> t -> Type.t
+end
+
+module Enum_constant : sig
+  type t = Ast.enum_constant
+
+  val equal : t -> t -> bool
+
+  val compare : t -> t -> int
+
+  module Map : Map.S with type key = t
+
+  val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
+
+  val get_value : t -> int
+end
+
+module Field : sig
+  type t = Ast.field
+
+  val equal : t -> t -> bool
+
+  val compare : t -> t -> int
+
+  module Map : Map.S with type key = t
+
+  val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
+
+  val get_bit_width : t -> int
 end
