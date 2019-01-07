@@ -338,14 +338,14 @@ module Ast = struct
       | FieldDecl ->
           let name = get_cursor_spelling cursor in
           let qual_type = get_cursor_type cursor |> of_cxtype in
-          let bitfield =
+          let bitwidth =
             if cursor_is_bit_field cursor then
               match list_of_children cursor with
-              | [bitfield] -> Some (expr_of_cxcursor bitfield)
-              | _ -> failwith "field_of_cxcursor (bitfield)"
+              | [bitwidth] -> Some (expr_of_cxcursor bitwidth)
+              | _ -> failwith "field_of_cxcursor (bitwidth)"
             else
               None in
-          node ~cursor (Named { name; qual_type; bitfield })
+          node ~cursor (Named { name; qual_type; bitwidth })
       | UnionDecl ->
           node ~cursor (AnonymousUnion (fields_of_cxcursor cursor))
       | StructDecl ->
@@ -495,7 +495,8 @@ module Ast = struct
         | ReturnStmt ->
             let value =
               match list_of_children cursor with
-              | [value] -> expr_of_cxcursor value
+              | [value] -> Some (expr_of_cxcursor value)
+              | [] -> None
               | _ -> failwith "stmt_of_cxcursor (ReturnStmt)" in
             Return value
         | GCCAsmStmt ->
@@ -556,14 +557,14 @@ module Ast = struct
           BinaryOperator { lhs; kind; rhs }
       | DeclRefExpr -> DeclRef (get_cursor_spelling cxcursor)
       | CallExpr ->
-          let f, args =
+          let callee, args =
             match list_of_children cxcursor with
-            | f :: args ->
-                let f = f |> expr_of_cxcursor in
+            | callee :: args ->
+                let callee = callee |> expr_of_cxcursor in
                 let args = args |> List.map expr_of_cxcursor in
-                f, args
+                callee, args
             | _ -> failwith "expr_of_cxcursor (CallExpr)" in
-          Call { f; args }
+          Call { callee; args }
       | CStyleCastExpr ->
           let qual_type = get_cursor_type cxcursor |> of_cxtype in
           let operand =
@@ -581,11 +582,11 @@ module Ast = struct
           let arrow = ext_member_ref_expr_is_arrow cxcursor in
           Member { base; arrow; field };
       | ArraySubscriptExpr ->
-          let lhs, rhs =
+          let base, index =
             match list_of_children cxcursor with
-            | [lhs; rhs] -> expr_of_cxcursor lhs, expr_of_cxcursor rhs
+            | [base; index] -> expr_of_cxcursor base, expr_of_cxcursor index
             | _ -> failwith "expr_of_cxcursor (ArraySubscriptExpr)" in
-          ArraySubscript { lhs; rhs }
+          ArraySubscript { base; index }
       | ConditionalOperator ->
           let cond, then_branch, else_branch =
             match list_of_children cxcursor |> List.map expr_of_cxcursor with

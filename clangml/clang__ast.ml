@@ -611,9 +611,9 @@ statement list (by putting it in the context of a function):
 this function is used in the following examples to check Clang.Ast.pp_decl the AST of
 various types.
     {[
-let parse_statement_list ?filename ?command_line_args ?options source =
+let parse_statement_list ?(return_type = "int") ?filename ?command_line_args ?options source =
   match
-    Printf.sprintf "int f(void) { %s }" source |>
+    Printf.sprintf "%s f(void) { %s }" return_type source |>
     parse_declaration_list ?filename ?command_line_args ?options
   with
   | [{ desc = Function { stmt = Some { desc = Compound items }}}] -> items
@@ -837,7 +837,7 @@ let () =
         { desc = Case {
           lhs = { desc = IntegerLiteral one' };
           body = { desc =
-            Expr (Call { f = { desc = DeclRef "f" }; args = [] })}}};
+            Expr (Call { callee = { desc = DeclRef "f" }; args = [] })}}};
         { desc = Break };
         { desc = Case {
           lhs = { desc = IntegerLiteral two };
@@ -864,7 +864,7 @@ let () =
         { desc = Case {
           lhs = { desc = IntegerLiteral one' };
           body = { desc =
-            Expr (Call { f = { desc = DeclRef "f" }; args = [] })}}};
+            Expr (Call { callee = { desc = DeclRef "f" }; args = [] })}}};
         { desc = Break };
         { desc = Case {
           lhs = { desc = IntegerLiteral two };
@@ -891,7 +891,7 @@ let () =
         { desc = Case {
           lhs = { desc = IntegerLiteral one' };
           body = { desc =
-            Expr (Call { f = { desc = DeclRef "f" }; args = [] })}}};
+            Expr (Call { callee = { desc = DeclRef "f" }; args = [] })}}};
         { desc = Break };
         { desc = Case {
           lhs = { desc = IntegerLiteral two };
@@ -925,7 +925,7 @@ let () =
           lhs = { desc = IntegerLiteral one' };
           rhs = None;
           body = { desc =
-            Expr (Call { f = { desc = DeclRef "f" }; args = [] })}}};
+            Expr (Call { callee = { desc = DeclRef "f" }; args = [] })}}};
         { desc = Break };
         { desc = Case {
           lhs = { desc = IntegerLiteral two };
@@ -998,7 +998,7 @@ let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Do {
       body = { desc = Compound [{ desc =
-        Expr (Call { f = { desc = DeclRef "f" }; args = [] })}] };
+        Expr (Call { callee = { desc = DeclRef "f" }; args = [] })}] };
       cond = { desc = IntegerLiteral one }}}] ->
       assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
@@ -1096,14 +1096,22 @@ let () =
    ]}*)
   | MSAsm of string
 (** MS assembler statement. *)
-  | Return of expr
+  | Return of expr option
 (** Return statement.
     {[
+let example = "return;"
+
+let () =
+  check Clang.Ast.pp_stmt (parse_statement_list ~return_type:"void" example) @@
+  fun ast -> match ast with
+  | [{ desc = Return None }] -> ()
+  | _ -> assert false
+
 let example = "return 1;"
 
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
-  | [{ desc = Return { desc = IntegerLiteral one }}] ->
+  | [{ desc = Return (Some { desc = IntegerLiteral one })}] ->
       assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
    ]}*)
@@ -1257,7 +1265,7 @@ let () =
   | _ -> assert false
     ]} *)
   | Call of {
-      f : expr;
+      callee : expr;
       args : expr list;
     }
 (** Function call.
@@ -1267,7 +1275,7 @@ let example = "void g(int); g(1);"
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr (Call {
-      f = { desc = DeclRef "g" };
+      callee = { desc = DeclRef "g" };
       args = [{ desc = IntegerLiteral one }] })}] ->
       assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
@@ -1344,8 +1352,8 @@ let () =
   | _ -> assert false
     ]}*)
   | ArraySubscript of {
-      lhs : expr;
-      rhs : expr;
+      base : expr;
+      index : expr;
     }
 (** Array subscript
     {[
@@ -1355,8 +1363,8 @@ let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr (BinaryOperator {
       lhs = { desc = ArraySubscript {
-        lhs = { desc = DeclRef "a" };
-        rhs = { desc = IntegerLiteral zero}}};
+        base = { desc = DeclRef "a" };
+        index = { desc = IntegerLiteral zero}}};
       kind = Assign;
       rhs = { desc = IntegerLiteral one}})}] ->
       assert (Clang.int_of_cxint zero = 0);
@@ -1678,13 +1686,13 @@ let () =
       fields = [
         { desc = Named { name = "a";
           qual_type = { desc = OtherType Int};
-          bitfield = Some { desc = IntegerLiteral one }}} as a;
+          bitwidth = Some { desc = IntegerLiteral one }}} as a;
         { desc = Named { name = "b";
           qual_type = { desc = OtherType Int};
-          bitfield = Some { desc = IntegerLiteral two }}};
+          bitwidth = Some { desc = IntegerLiteral two }}};
         { desc = Named { name = "c";
           qual_type = { desc = OtherType Int};
-          bitfield = None}}] }}] ->
+          bitwidth = None}}] }}] ->
       assert (Clang.int_of_cxint one = 1);
       assert (Clang.int_of_cxint two = 2);
       assert (Clang.Field.get_bit_width a = 1)
@@ -1718,13 +1726,13 @@ let () =
       fields = [
         { desc = Named { name = "a";
           qual_type = { desc = OtherType Int};
-          bitfield = Some { desc = IntegerLiteral one }}} as a;
+          bitwidth = Some { desc = IntegerLiteral one }}} as a;
         { desc = Named { name = "b";
           qual_type = { desc = OtherType Int};
-          bitfield = Some { desc = IntegerLiteral two }}};
+          bitwidth = Some { desc = IntegerLiteral two }}};
         { desc = Named { name = "c";
           qual_type = { desc = OtherType Int};
-          bitfield = None}}] }}] ->
+          bitwidth = None}}] }}] ->
       assert (Clang.int_of_cxint one = 1);
       assert (Clang.int_of_cxint two = 2);
       assert (Clang.Field.get_bit_width a = 1)
@@ -1806,7 +1814,7 @@ and field_desc =
   | Named of  {
       name : string;
       qual_type : qual_type;
-      bitfield : expr option;
+      bitwidth : expr option;
     }
   | AnonymousUnion of field list
 (** Anonymous union
