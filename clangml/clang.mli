@@ -167,6 +167,8 @@ module Type : sig
 
   val compare : t -> t -> int
 
+  module Set : Set.S with type elt = t
+
   module Map : Map.S with type key = t
 
   val of_cxtype : ?options:Ast.Options.t -> cxtype -> t
@@ -196,6 +198,8 @@ module Expr : sig
 
   val compare : t -> t -> int
 
+  module Set : Set.S with type elt = t
+
   module Map : Map.S with type key = t
 
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
@@ -208,6 +212,8 @@ module Stmt : sig
 
   val compare : t -> t -> int
 
+  module Set : Set.S with type elt = t
+
   module Map : Map.S with type key = t
 
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
@@ -219,6 +225,8 @@ module Decl : sig
   val equal : t -> t -> bool
 
   val compare : t -> t -> int
+
+  module Set : Set.S with type elt = t
 
   module Map : Map.S with type key = t
 
@@ -234,6 +242,8 @@ module Enum_constant : sig
 
   val compare : t -> t -> int
 
+  module Set : Set.S with type elt = t
+
   module Map : Map.S with type key = t
 
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
@@ -247,6 +257,8 @@ module Field : sig
   val equal : t -> t -> bool
 
   val compare : t -> t -> int
+
+  module Set : Set.S with type elt = t
 
   module Map : Map.S with type key = t
 

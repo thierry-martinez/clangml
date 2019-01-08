@@ -692,6 +692,8 @@ module Decl = struct
 
   include Self
 
+  module Set = Set.Make (Self)
+
   module Map = Map.Make (Self)
 
   let of_cxcursor ?(options = Ast.Options.make ()) cur =
@@ -714,6 +716,8 @@ module Field = struct
 
   include Self
 
+  module Set = Set.Make (Self)
+
   module Map = Map.Make (Self)
 
   let of_cxcursor ?(options = Ast.Options.make ()) cur =
@@ -734,6 +738,8 @@ module Type = struct
   end
 
   include Self
+
+  module Set = Set.Make (Self)
 
   module Map = Map.Make (Self)
 
@@ -777,6 +783,8 @@ module Expr = struct
 
   include Self
 
+  module Set = Set.Make (Self)
+
   module Map = Map.Make (Self)
 
   let of_cxcursor ?(options = Ast.Options.make ()) cur =
@@ -795,6 +803,8 @@ module Stmt = struct
 
   include Self
 
+  module Set = Set.Make (Self)
+
   module Map = Map.Make (Self)
 
   let of_cxcursor ?(options = Ast.Options.make ()) cur =
@@ -812,6 +822,8 @@ module Enum_constant = struct
   end
 
   include Self
+
+  module Set = Set.Make (Self)
 
   module Map = Map.Make (Self)
 
