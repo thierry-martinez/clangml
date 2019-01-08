@@ -68,14 +68,14 @@ pipeline {
     }
     post {
         failure {
-            mail to: 'Thierry.Martinez@inria.fr'
-            subject: "ClangML CI failure: ${currentBuild.fullDisplayName}",
-            body: "Something is wrong with ${env.BUILD_URL}"
+            mail to: 'Thierry.Martinez@inria.fr',
+                subject: "ClangML CI failure: ${currentBuild.fullDisplayName}",
+                body: "Something is wrong with ${env.BUILD_URL}"
         }
         changed {
-            mail to: 'Thierry.Martinez@inria.fr'
-            subject: "ClangML CI status changed: ${currentBuild.fullDisplayName}",
-            body: "Something changed with ${env.BUILD_URL}"
+            mail to: 'Thierry.Martinez@inria.fr',
+                subject: "ClangML CI status changed: ${currentBuild.fullDisplayName}",
+                body: "Something changed with ${env.BUILD_URL}"
         }
     }
 }
