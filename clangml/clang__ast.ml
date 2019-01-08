@@ -248,9 +248,7 @@ let () =
       size = 42 }}}}] -> ()
   | _ -> assert false
     ]}*)
-  | IncompleteArray of {
-      element : qual_type;
-    }
+  | IncompleteArray of qual_type
 (** Incomplete array.
     {[
 let example = "struct s { int i; char array[]; };"
@@ -259,8 +257,8 @@ let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
   | [{ desc = Struct { name = "s"; fields = [
       { desc = Named { name = "i"; qual_type = { desc = BuiltinType Int}}};
-      { desc = Named { name = "array"; qual_type = { desc = IncompleteArray {
-        element = { desc = BuiltinType Char_S }}}}}] }}] -> ()
+      { desc = Named { name = "array"; qual_type = { desc =
+        IncompleteArray { desc = BuiltinType Char_S }}}}] }}] -> ()
   | _ -> assert false
     ]}*)
   | VariableArray of {

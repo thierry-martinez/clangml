@@ -195,7 +195,7 @@ module Ast = struct
             ConstantArray { element; size }
         | IncompleteArray ->
             let element = cxtype |> get_array_element_type |> of_cxtype in
-            IncompleteArray { element }
+            IncompleteArray element
         | VariableArray ->
             let element = cxtype |> get_array_element_type |> of_cxtype in
             let size =
