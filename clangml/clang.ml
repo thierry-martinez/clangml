@@ -231,9 +231,9 @@ module Ast = struct
             begin
               match ext_get_type_kind cxtype with
               | Paren -> ParenType (cxtype |> ext_get_inner_type |> of_cxtype)
-              | _ -> OtherType (get_type_kind cxtype)
+              | _ -> BuiltinType (get_type_kind cxtype)
             end
-        | _ -> OtherType (get_type_kind cxtype) in
+        | _ -> BuiltinType (get_type_kind cxtype) in
       match desc with
       | ParenType inner when Options.options.ignore_paren_in_types -> inner
       | _ ->

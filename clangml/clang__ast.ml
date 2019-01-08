@@ -30,6 +30,8 @@ and unary_expr_kind = clang_ext_unaryexpr
 and unary_operator_kind = clang_ext_unaryoperatorkind
 
 and binary_operator_kind = clang_ext_binaryoperatorkind
+
+and builtin_type = cxtypekind
   [@@deriving eq, ord, show]
 
 class ['self] base_iter =
@@ -46,7 +48,7 @@ class ['self] base_iter =
     method visit_elaborated_type_keyword : 'env . 'env -> elaborated_type_keyword -> unit =
       fun _env _ -> ()
 
-    method visit_cxtypekind : 'env . 'env -> cxtypekind -> unit =
+    method visit_builtin_type : 'env . 'env -> builtin_type -> unit =
       fun _env _ -> ()
 
     method visit_cxcallingconv : 'env . 'env -> cxcallingconv -> unit =
@@ -84,7 +86,7 @@ class virtual ['self] base_reduce =
     method visit_elaborated_type_keyword : 'env . 'env -> elaborated_type_keyword -> 'monoid =
       fun _env _ -> self#zero
 
-    method visit_cxtypekind : 'env . 'env -> cxtypekind -> 'monoid =
+    method visit_builtin_type : 'env . 'env -> builtin_type -> 'monoid =
       fun _env _ -> self#zero
 
     method visit_cxcallingconv : 'env . 'env -> cxcallingconv -> 'monoid =
@@ -155,7 +157,7 @@ let () =
   | [{ desc = Var { name = "one";
       qual_type = {
         const = true;
-        desc = OtherType Int};
+        desc = BuiltinType Int};
       init = Some { desc = IntegerLiteral one }}}] ->
       assert (Clang.int_of_cxint one = 1)
   | _ -> assert false
@@ -167,7 +169,7 @@ let () =
   | [{ desc = Var { name = "x";
       qual_type = {
         const = false;
-        desc = OtherType Int};
+        desc = BuiltinType Int};
       init = None }}] -> ()
   | _ -> assert false
      ]}*)
@@ -181,7 +183,7 @@ let () =
   | [{ desc = Var { name = "x";
       qual_type = {
         volatile = true;
-        desc = OtherType Int}}}] -> ()
+        desc = BuiltinType Int}}}] -> ()
   | _ -> assert false
 
 let example = "int x;"
@@ -191,7 +193,7 @@ let () =
   | [{ desc = Var { name = "x";
       qual_type = {
         volatile = false;
-        desc = OtherType Int}}}] -> ()
+        desc = BuiltinType Int}}}] -> ()
   | _ -> assert false
     ]}*)
     restrict : bool;
@@ -203,7 +205,7 @@ let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
   | [{ desc = Var { name = "x"; qual_type = {
       restrict = true;
-      desc = Pointer { desc = OtherType Int }}}}] -> ()
+      desc = Pointer { desc = BuiltinType Int }}}}] -> ()
   | _ -> assert false
 
 let example = "int * x;"
@@ -212,7 +214,7 @@ let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
   | [{ desc = Var { name = "x"; qual_type = {
       restrict = false;
-      desc = Pointer { desc = OtherType Int }}}}] -> ()
+      desc = Pointer { desc = BuiltinType Int }}}}] -> ()
   | _ -> assert false
     ]}*)
     desc : type_desc;
@@ -228,7 +230,7 @@ let example = "char *s;"
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
   | [{ desc = Var { name = "s"; qual_type = { desc =
-      Pointer { desc = OtherType Char_S }}}}] -> ()
+      Pointer { desc = BuiltinType Char_S }}}}] -> ()
   | _ -> assert false
     ]}*)
   | ConstantArray of {
@@ -242,7 +244,7 @@ let example = "char s[42];"
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
   | [{ desc = Var { name = "s"; qual_type = { desc = ConstantArray {
-      element = { desc = OtherType Char_S };
+      element = { desc = BuiltinType Char_S };
       size = 42 }}}}] -> ()
   | _ -> assert false
     ]}*)
@@ -256,9 +258,9 @@ let example = "struct s { int i; char array[]; };"
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
   | [{ desc = Struct { name = "s"; fields = [
-      { desc = Named { name = "i"; qual_type = { desc = OtherType Int}}};
+      { desc = Named { name = "i"; qual_type = { desc = BuiltinType Int}}};
       { desc = Named { name = "array"; qual_type = { desc = IncompleteArray {
-        element = { desc = OtherType Char_S }}}}}] }}] -> ()
+        element = { desc = BuiltinType Char_S }}}}}] }}] -> ()
   | _ -> assert false
     ]}*)
   | VariableArray of {
@@ -272,12 +274,12 @@ let example = "void f(int i, char array[i]);"
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
   | [{ desc = Function { name = "f"; function_type =
-      { result = { desc = OtherType Void };
+      { result = { desc = BuiltinType Void };
         args = Some {
           non_variadic = [
-            ("i", { desc = OtherType Int });
+            ("i", { desc = BuiltinType Int });
             ("array", { desc = VariableArray {
-               element = { desc = OtherType Char_S };
+               element = { desc = BuiltinType Char_S };
                size = { desc = DeclRef "i" }}})];
           variadic = false }}}}] -> ()
   | _ -> assert false
@@ -328,7 +330,7 @@ let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
   | [{ desc = Var { name = "p"; qual_type = { desc =
       Pointer { desc = FunctionType {
-        result = { desc = OtherType Int };
+        result = { desc = BuiltinType Int };
         args = Some { non_variadic = []; variadic = false}}}}}}] -> ()
   | _ -> assert false
     ]}*)
@@ -351,10 +353,10 @@ let () =
           match fields with
           | [ { desc = Named {
                   name = "i";
-                  qual_type = { desc = OtherType Int }}};
+                  qual_type = { desc = BuiltinType Int }}};
               { desc = Named {
                   name = "f";
-                  qual_type = { desc = OtherType Float }}}] -> ()
+                  qual_type = { desc = BuiltinType Float }}}] -> ()
           | _ -> assert false
         end
   | _ -> assert false
@@ -372,10 +374,10 @@ let () =
           match fields with
           | [ { desc = Named {
                   name = "i";
-                  qual_type = { desc = OtherType Int }}};
+                  qual_type = { desc = BuiltinType Int }}};
               { desc = Named {
                   name = "f";
-                  qual_type = { desc = OtherType Float }}}] -> ()
+                  qual_type = { desc = BuiltinType Float }}}] -> ()
           | _ -> assert false
         end
   | _ -> assert false
@@ -397,10 +399,10 @@ let () =
           match fields with
           | [ { desc = Named {
                   name = "i";
-                  qual_type = { desc = OtherType Int }}};
+                  qual_type = { desc = BuiltinType Int }}};
               { desc = Named {
                   name = "f";
-                  qual_type = { desc = OtherType Float }}}] -> ()
+                  qual_type = { desc = BuiltinType Float }}}] -> ()
           | _ -> assert false
         end
   | _ -> assert false
@@ -415,7 +417,7 @@ let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast ->
   match ast |> List.rev |> List.hd with
   | { desc = Var { name = "c";
-      qual_type = { desc = Complex { desc = OtherType Double }}}} -> ()
+      qual_type = { desc = Complex { desc = BuiltinType Double }}}} -> ()
   | _ -> assert false
 
 let example = "float _Complex c;"
@@ -424,7 +426,7 @@ let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast ->
   match ast |> List.rev |> List.hd with
   | { desc = Var { name = "c";
-      qual_type = { desc = Complex { desc = OtherType Float }}}} -> ()
+      qual_type = { desc = Complex { desc = BuiltinType Float }}}} -> ()
   | _ -> assert false
     ]} *)
   | ParenType of qual_type
@@ -444,20 +446,20 @@ let () =
   fun ast -> match ast with
   | [{ desc = Var { name = "p"; qual_type = { desc =
       Pointer { desc = FunctionType {
-        result = { desc = OtherType Int };
+        result = { desc = BuiltinType Int };
         args = Some { non_variadic = []; variadic = false}}}}}}] ->
       assert (Clang.get_clang_version () >= "clang version 7.0.0")
   | [{ desc = Var { name = "p"; qual_type = { desc =
       Pointer { desc = ParenType { desc = FunctionType {
-        result = { desc = OtherType Int };
+        result = { desc = BuiltinType Int };
         args = Some { non_variadic = []; variadic = false}}}}}}}] ->
       assert (Clang.get_clang_version () < "clang version 7.0.0")
   | _ -> assert false
     ]}
 
 *)
-  | OtherType of cxtypekind
-(** Other type.
+  | BuiltinType of builtin_type
+(** Built-in type.
     {[
 let example = "_Bool s;"
 
@@ -465,7 +467,7 @@ let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast ->
   match ast |> List.rev |> List.hd with
   | { desc = Var { name = "s";
-      qual_type = { desc = OtherType Bool}}} -> ()
+      qual_type = { desc = BuiltinType Bool}}} -> ()
   | _ -> assert false
     ]}*)
 (** Function type. *)
@@ -501,7 +503,7 @@ let () =
     check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
     | [{ desc = Function {
         name = "f"; 
-        function_type = { result = { desc = OtherType Void }}}}] -> ()
+        function_type = { result = { desc = BuiltinType Void }}}}] -> ()
     | _ -> assert false
 
 let example = "f(void);"
@@ -510,7 +512,7 @@ let () =
     check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
     | [{ desc = Function {
         name = "f"; 
-        function_type = { result = { desc = OtherType Int }}}}] -> ()
+        function_type = { result = { desc = BuiltinType Int }}}}] -> ()
     | _ -> assert false
     ]}*)
 
@@ -559,7 +561,7 @@ let () =
     | [{ desc = Function {
         name = "f"; 
         function_type = { args = Some {
-          non_variadic = ["i", { desc = OtherType Int }];
+          non_variadic = ["i", { desc = BuiltinType Int }];
           variadic = false }}}}] -> ()
     | _ -> assert false
 
@@ -570,7 +572,7 @@ let () =
     | [{ desc = Function {
         name = "f"; 
         function_type = { args = Some {
-          non_variadic = ["", { desc = OtherType Int }];
+          non_variadic = ["", { desc = BuiltinType Int }];
           variadic = false }}}}] -> ()
     | _ -> assert false
 
@@ -582,7 +584,7 @@ let () =
         name = "f"; 
         underlying_type = { desc =
           Pointer { desc = FunctionType { args = Some {
-            non_variadic = ["", { desc = OtherType Int }];
+            non_variadic = ["", { desc = BuiltinType Int }];
             variadic = false }}}}}}] -> ()
     | _ -> assert false
     ]}
@@ -597,7 +599,7 @@ let () =
     | [{ desc = Function {
         name = "f"; 
         function_type = { args = Some {
-          non_variadic = ["i", { desc = OtherType Int }];
+          non_variadic = ["i", { desc = BuiltinType Int }];
           variadic = true }}}}] -> ()
     | _ -> assert false
     ]}
@@ -701,7 +703,7 @@ let () =
   | [{ desc = For {
       init = Some { desc = Decl [{ desc = Var {
         name = "i";
-        qual_type = { desc = OtherType Int};
+        qual_type = { desc = BuiltinType Int};
         init = Some { desc = IntegerLiteral zero}}}] };
       condition_variable = None;
       cond = Some { desc = Expr (BinaryOperator {
@@ -724,11 +726,11 @@ let () =
   | [{ desc = For {
       init = Some { desc = Decl [{ desc = Var {
         name = "i";
-        qual_type = { desc = OtherType Int};
+        qual_type = { desc = BuiltinType Int};
         init = Some { desc = IntegerLiteral zero}}}] };
       condition_variable = Some { desc = {
         name = "j";
-        qual_type = { desc = OtherType Int};
+        qual_type = { desc = BuiltinType Int};
         init = Some { desc = BinaryOperator {
           lhs = { desc = DeclRef "i"};
           kind = Sub;
@@ -791,7 +793,7 @@ let () =
   | [{ desc = If {
        init = None;
        condition_variable = Some ({ desc = {
-         qual_type = { desc = OtherType Int};
+         qual_type = { desc = BuiltinType Int};
          name = "i";
          init = Some { desc = IntegerLiteral one }}});
        cond = { desc = DeclRef "i"};
@@ -808,7 +810,7 @@ let () =
   | [{ desc = If {
        init = Some { desc = Decl [{ desc = Var {
          name = "i";
-         qual_type = { desc = OtherType Int };
+         qual_type = { desc = BuiltinType Int };
          init = Some { desc = IntegerLiteral one }}}] };
        condition_variable = None;
        then_branch = { desc = Compound [{
@@ -856,7 +858,7 @@ let () =
   | [{ desc = Switch {
       init = None;
       condition_variable = Some ({ desc = {
-         qual_type = { desc = OtherType Int};
+         qual_type = { desc = BuiltinType Int};
          name = "i";
          init = Some { desc = IntegerLiteral one }}});
       cond = { desc = DeclRef "i" };
@@ -883,7 +885,7 @@ let () =
   | [{ desc = Switch {
       init = Some { desc = Decl [{ desc = Var {
          name = "i";
-         qual_type = { desc = OtherType Int };
+         qual_type = { desc = BuiltinType Int };
          init = Some { desc = IntegerLiteral one }}}] };
       condition_variable = None;
       cond = { desc = DeclRef "i" };
@@ -968,7 +970,7 @@ let () =
   check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp" example) @@ fun ast -> match ast with
   | [{ desc = While {
       condition_variable = Some ({ desc = {
-         qual_type = { desc = OtherType Int};
+         qual_type = { desc = BuiltinType Int};
          name = "i";
          init = Some { desc = IntegerLiteral one }}});
       cond = { desc = DeclRef "i" };
@@ -1047,7 +1049,7 @@ let () =
         body = { desc = Expr (IntegerLiteral one)}}};
       { desc = Decl [{ desc = Var {
         name = "ptr";
-        qual_type = { desc = Pointer { desc = OtherType Void }};
+        qual_type = { desc = Pointer { desc = BuiltinType Void }};
         init = Some { desc = AddrLabel "label" }}}] };
       { desc = IndirectGoto { desc = DeclRef "ptr"}}] ->
       assert (Clang.int_of_cxint one = 1)
@@ -1311,7 +1313,7 @@ let () =
   fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr (Cast {
       kind = Implicit;
-      qual_type = { desc = OtherType Int };
+      qual_type = { desc = BuiltinType Int };
       operand = { desc = DeclRef "i" }})}] -> ()
   | _ -> assert false
     ]}
@@ -1461,7 +1463,7 @@ let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
   | [{ desc = Var { name = "a"; qual_type = {
       desc = ConstantArray {
-        element = { desc = OtherType Int };
+        element = { desc = BuiltinType Int };
         size = 2 }};
       init = Some { desc = InitList [
         { desc = IntegerLiteral one };
@@ -1482,7 +1484,7 @@ let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Expr (CompoundLiteral {
       qual_type = { desc = ConstantArray {
-        element = { desc = OtherType Int };
+        element = { desc = BuiltinType Int };
         size = 2 }};
       init = { desc = InitList [
         { desc = IntegerLiteral one };
@@ -1514,7 +1516,7 @@ let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [ { desc = Expr (UnaryExpr {
           kind = SizeOf;
-          argument = ArgumentType { desc = OtherType Int }})}] -> ()
+          argument = ArgumentType { desc = BuiltinType Int }})}] -> ()
   | _ -> assert false
 
 let example = {| alignof(int); |}
@@ -1525,7 +1527,7 @@ let () =
   fun ast -> match ast with
   | [ { desc = Expr (UnaryExpr {
           kind = AlignOf;
-          argument = ArgumentType { desc = OtherType Int }})}] -> ()
+          argument = ArgumentType { desc = BuiltinType Int }})}] -> ()
   | _ -> assert false
     ]}
 
@@ -1537,7 +1539,7 @@ let () =
     check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp" example) @@ fun ast -> match ast with
     | [ { desc = Expr (UnaryExpr {
             kind = AlignOf;
-            argument = ArgumentType { desc = OtherType Int }})}] -> ()
+            argument = ArgumentType { desc = BuiltinType Int }})}] -> ()
     | _ -> assert false
     ]}
 *)
@@ -1573,7 +1575,7 @@ let () =
       linkage = External;
       function_type = {
         calling_conv = C;
-        result = { desc = OtherType Int};
+        result = { desc = BuiltinType Int};
         args = Some { non_variadic = []; variadic = false }};
       name = "f";
       stmt = Some { desc = Compound [] }}}] -> ()
@@ -1587,9 +1589,9 @@ let () =
       linkage = Internal;
       function_type = {
         calling_conv = C;
-        result = { desc = OtherType Int};
+        result = { desc = BuiltinType Int};
         args = Some {
-          non_variadic = [("x", { desc = OtherType Int})];
+          non_variadic = [("x", { desc = BuiltinType Int})];
           variadic = false }};
       name = "f";
       stmt = None }}] -> ()
@@ -1604,7 +1606,7 @@ let () =
     check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
   | [{ desc = Var {
       linkage = External;
-      qual_type = { const = false; desc = OtherType Int };
+      qual_type = { const = false; desc = BuiltinType Int };
       name = "x";
       init = Some ({ desc = IntegerLiteral one })}}] ->
       assert (Clang.int_of_cxint one = 1)
@@ -1616,7 +1618,7 @@ let () =
     check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
   | [{ desc = Var {
       linkage = External;
-      qual_type = { const = true; desc = OtherType Int };
+      qual_type = { const = true; desc = BuiltinType Int };
       name = "x";
       init = Some ({ desc = IntegerLiteral one })}}] ->
       assert (Clang.int_of_cxint one = 1)
@@ -1628,7 +1630,7 @@ let () =
     check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
   | [{ desc = Var {
       linkage = Internal;
-      qual_type = { const = false; desc = OtherType Int };
+      qual_type = { const = false; desc = BuiltinType Int };
       name = "x";
       init = Some ({ desc = IntegerLiteral one })}}] ->
       assert (Clang.int_of_cxint one = 1)
@@ -1672,9 +1674,9 @@ let () =
       name = "s";
       fields = [
         { desc = Named { name = "i";
-          qual_type = { desc = OtherType Int}}};
+          qual_type = { desc = BuiltinType Int}}};
         { desc = Named { name = "f";
-          qual_type = { desc = OtherType Float}}}] }}] -> ()
+          qual_type = { desc = BuiltinType Float}}}] }}] -> ()
   | _ -> assert false
 
 let example = {| struct s { int a:1; int b:2; int c; }; |}
@@ -1685,13 +1687,13 @@ let () =
       name = "s";
       fields = [
         { desc = Named { name = "a";
-          qual_type = { desc = OtherType Int};
+          qual_type = { desc = BuiltinType Int};
           bitwidth = Some { desc = IntegerLiteral one }}} as a;
         { desc = Named { name = "b";
-          qual_type = { desc = OtherType Int};
+          qual_type = { desc = BuiltinType Int};
           bitwidth = Some { desc = IntegerLiteral two }}};
         { desc = Named { name = "c";
-          qual_type = { desc = OtherType Int};
+          qual_type = { desc = BuiltinType Int};
           bitwidth = None}}] }}] ->
       assert (Clang.int_of_cxint one = 1);
       assert (Clang.int_of_cxint two = 2);
@@ -1712,9 +1714,9 @@ let () =
       name = "u";
       fields = [
         { desc = Named { name = "i";
-          qual_type = { desc = OtherType Int}}};
+          qual_type = { desc = BuiltinType Int}}};
         { desc = Named { name = "f";
-          qual_type = { desc = OtherType Float}}}] }}] -> ()
+          qual_type = { desc = BuiltinType Float}}}] }}] -> ()
   | _ -> assert false
 
 let example = {| union u { int a:1; int b:2; int c; }; |}
@@ -1725,13 +1727,13 @@ let () =
       name = "u";
       fields = [
         { desc = Named { name = "a";
-          qual_type = { desc = OtherType Int};
+          qual_type = { desc = BuiltinType Int};
           bitwidth = Some { desc = IntegerLiteral one }}} as a;
         { desc = Named { name = "b";
-          qual_type = { desc = OtherType Int};
+          qual_type = { desc = BuiltinType Int};
           bitwidth = Some { desc = IntegerLiteral two }}};
         { desc = Named { name = "c";
-          qual_type = { desc = OtherType Int};
+          qual_type = { desc = BuiltinType Int};
           bitwidth = None}}] }}] ->
       assert (Clang.int_of_cxint one = 1);
       assert (Clang.int_of_cxint two = 2);
@@ -1754,7 +1756,7 @@ let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
   | [{ desc = TypedefDecl {
       name = "int_t";
-      underlying_type = { desc = OtherType Int }}}] -> ()
+      underlying_type = { desc = BuiltinType Int }}}] -> ()
   | _ -> assert false
 
 let example = {| typedef union u { int i; float f } u_t; |}
@@ -1765,9 +1767,9 @@ let () =
         name = "u";
         fields = [
           { desc = Named { name = "i";
-            qual_type = { desc = OtherType Int}}};
+            qual_type = { desc = BuiltinType Int}}};
           { desc = Named { name = "f";
-            qual_type = { desc = OtherType Float}}}] }};
+            qual_type = { desc = BuiltinType Float}}}] }};
       { desc = TypedefDecl {
         name = "u_t";
         underlying_type = { desc = Elaborated {
@@ -1784,10 +1786,10 @@ let () =
         fields = [
           { desc = Named {
               name = "i";
-              qual_type = { desc = OtherType Int}}};
+              qual_type = { desc = BuiltinType Int}}};
           { desc = Named {
               name = "f";
-              qual_type = { desc = OtherType Float}}}] }};
+              qual_type = { desc = BuiltinType Float}}}] }};
       { desc = TypedefDecl {
         name = "u_t";
         underlying_type = { desc = Elaborated {
@@ -1798,10 +1800,10 @@ let () =
           match fields with
           | [ { desc = Named {
                   name = "i";
-                  qual_type = { desc = OtherType Int}}};
+                  qual_type = { desc = BuiltinType Int}}};
               { desc = Named {
                   name = "f";
-                  qual_type = { desc = OtherType Float}}}] -> ()
+                  qual_type = { desc = BuiltinType Float}}}] -> ()
           | _ -> assert false
         end
   | _ -> assert false
@@ -1827,12 +1829,12 @@ let () =
       name = "s";
       fields = [
         { desc = Named { name = "label";
-          qual_type = { desc = OtherType Int}}};
+          qual_type = { desc = BuiltinType Int}}};
         { desc = AnonymousUnion [
           { desc = Named { name = "i";
-            qual_type = { desc = OtherType Int}}};
+            qual_type = { desc = BuiltinType Int}}};
           { desc = Named { name = "f";
-            qual_type = { desc = OtherType Float}}}] }] }}] -> ()
+            qual_type = { desc = BuiltinType Float}}}] }] }}] -> ()
   | _ -> assert false
     ]}*)
   | AnonymousStruct of field list
@@ -1846,12 +1848,12 @@ let () =
       name = "s";
       fields = [
         { desc = Named { name = "single";
-          qual_type = { desc = OtherType Int}}};
+          qual_type = { desc = BuiltinType Int}}};
         { desc = AnonymousStruct [
           { desc = Named { name = "i";
-            qual_type = { desc = OtherType Int}}};
+            qual_type = { desc = BuiltinType Int}}};
           { desc = Named { name = "f";
-            qual_type = { desc = OtherType Float}}}] }] }}] -> ()
+            qual_type = { desc = BuiltinType Float}}}] }] }}] -> ()
   | _ -> assert false
     ]}*)
 
