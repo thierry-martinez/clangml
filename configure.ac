@@ -18,12 +18,18 @@ AC_DEFUN([AC_OCAMLFIND_PKG],
      [AC_MSG_RESULT([no])
       AC_SUBST([$1], [])])])
 
+AC_SUBST([missing_packages], [])
+AC_SUBST([has_missing_packages], [no])
+
 AC_DEFUN([AC_CHECK_OCAMLFIND_PKG],
   [AC_MSG_CHECKING([for ocamlfind package $1])
    AS_IF([$OCAMLFIND query $1 >/dev/null 2>&1],
      [AC_MSG_RESULT([yes])],
      [AC_MSG_RESULT([no])
-      AC_MSG_ERROR([Package $1 not found. Hint: opam install $1.])])])
+      AC_SUBST([missing_packages], [["$missing_packages $1"]])
+      AS_IF([test "x$has_missing_packages" = "xno"],
+        [AC_SUBST([has_missing_packages], [single])],
+        [AC_SUBST([has_missing_packages], [multiple])])])])
 
 AC_CHECK_TOOL([OCAMLFIND], [ocamlfind], [])
 AS_IF([test "x$OCAMLFIND" = "x"],
@@ -37,6 +43,11 @@ AC_SUBST([OCAMLMKLIB], [["$OCAMLFIND ocamlmklib"]])
 AC_CHECK_OCAMLFIND_PKG([stdcompat])
 AC_CHECK_OCAMLFIND_PKG([ppx_deriving])
 AC_CHECK_OCAMLFIND_PKG([visitors])
+
+AS_IF([test "x$has_missing_packages" = "xsingle"],
+  [AC_MSG_ERROR([Package$missing_packages not found. Hint: opam install$missing_packages.])],
+  [AS_IF([test "x$has_missing_packages" = "xmultiple"],
+    [AC_MSG_ERROR([Packages not found:$missing_packages. Hint: opam install$missing_packages.])])])
 
 AS_IF([test "x$OCAMLOPT" = "x"],
   [AS_IF([test "x$OCAMLC" = "x"],
