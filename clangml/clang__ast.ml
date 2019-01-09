@@ -82,6 +82,50 @@ class ['self] base_iter =
       fun _env _ -> ()
   end
 
+class ['self] base_map =
+  object (self)
+    method visit_open_node : 'env 'a 'qual_type . ('env -> 'a -> 'a) -> ('env -> 'qual_type -> 'qual_type) -> 'env -> ('a, 'qual_type) open_node -> ('a, 'qual_type) open_node =
+      fun visit_desc visit_qual_type env { decoration; desc } ->
+        let decoration =
+          match decoration with
+          | Cursor cursor -> Cursor cursor
+          | Custom custom ->
+              Custom { custom with
+                qual_type = Option.map (visit_qual_type env) custom.qual_type } in
+        { decoration;
+          desc = visit_desc env desc }
+
+    method visit_integer_literal : 'env . 'env -> integer_literal -> integer_literal =
+      fun _env i -> i
+
+    method visit_floating_literal : 'env . 'env -> floating_literal -> floating_literal =
+      fun _env f -> f
+
+    method visit_elaborated_type_keyword : 'env . 'env -> elaborated_type_keyword -> elaborated_type_keyword =
+      fun _env k -> k
+
+    method visit_builtin_type : 'env . 'env -> builtin_type -> builtin_type =
+      fun _env t -> t
+
+    method visit_cxcallingconv : 'env . 'env -> cxcallingconv -> cxcallingconv =
+      fun _env c -> c
+
+    method visit_cxlinkagekind : 'env . 'env -> cxlinkagekind -> cxlinkagekind =
+      fun _env k -> k
+
+    method visit_character_kind : 'env . 'env -> character_kind -> character_kind =
+      fun _env k -> k
+
+    method visit_unary_expr_kind : 'env . 'env -> unary_expr_kind -> unary_expr_kind =
+      fun _env k -> k
+
+    method visit_unary_operator_kind : 'env . 'env -> unary_operator_kind -> unary_operator_kind =
+      fun _env k -> k
+
+    method visit_binary_operator_kind : 'env . 'env -> binary_operator_kind -> binary_operator_kind =
+      fun _env k -> k
+  end
+
 class virtual ['self] base_reduce =
   object (self : 'self)
     inherit [_] VisitorsRuntime.reduce
@@ -1896,6 +1940,7 @@ and var_decl_desc = {
   }
     [@@deriving show, eq, ord,
       visitors { variety = "iter"; ancestors = ["base_iter"] },
+      visitors { variety = "map"; ancestors = ["base_map"] },
       visitors { variety = "reduce"; ancestors = ["base_reduce"] }]
 
 type decoration = qual_type open_decoration
