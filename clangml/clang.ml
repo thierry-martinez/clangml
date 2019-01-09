@@ -563,7 +563,7 @@ module Ast = struct
       match desc with
       | Decl [{ desc = OtherDecl }] ->
           let expr = expr_of_cxcursor cursor in
-          node ~decoration:expr.decoration (Expr expr.desc)
+          node ~decoration:expr.decoration (Expr expr)
       | _ -> node ~cursor desc
 
     and expr_of_cxcursor cursor =
