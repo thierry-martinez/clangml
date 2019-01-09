@@ -164,6 +164,53 @@ class virtual ['self] base_reduce =
       fun _env _ -> self#zero
   end
 
+class virtual ['self] base_mapreduce =
+  object (self : 'self)
+    inherit [_] VisitorsRuntime.mapreduce
+
+    method visit_open_node : 'env 'a 'qual_type . ('env -> 'a -> 'a * 'monoid) -> ('env -> 'qual_type -> 'qual_type * 'monoid) -> 'env -> ('a, 'qual_type) open_node -> ('a, 'qual_type) open_node * 'monoid =
+      fun visit_desc visit_qual_type env { decoration; desc } ->
+        let decoration, decoration_value =
+          match decoration with
+          | Cursor cursor -> Cursor cursor, self#zero
+          | Custom custom ->
+              let qual_type, decoration_value =
+                self#visit_option visit_qual_type env custom.qual_type in
+              Custom { custom with qual_type }, decoration_value in
+        let desc, desc_value = visit_desc env desc in
+        { decoration; desc }, self#plus decoration_value desc_value
+
+    method visit_integer_literal : 'env . 'env -> integer_literal -> integer_literal * 'monoid =
+      fun _env i -> i, self#zero
+
+    method visit_floating_literal : 'env . 'env -> floating_literal -> floating_literal * 'monoid =
+      fun _env f -> f, self#zero
+
+    method visit_elaborated_type_keyword : 'env . 'env -> elaborated_type_keyword -> elaborated_type_keyword * 'monoid =
+      fun _env k -> k, self#zero
+
+    method visit_builtin_type : 'env . 'env -> builtin_type -> builtin_type * 'monoid =
+      fun _env t -> t, self#zero
+
+    method visit_cxcallingconv : 'env . 'env -> cxcallingconv -> cxcallingconv * 'monoid =
+      fun _env c -> c, self#zero
+
+    method visit_cxlinkagekind : 'env . 'env -> cxlinkagekind -> cxlinkagekind * 'monoid =
+      fun _env k -> k, self#zero
+
+    method visit_character_kind : 'env . 'env -> character_kind -> character_kind * 'monoid =
+      fun _env k -> k, self#zero
+
+    method visit_unary_expr_kind : 'env . 'env -> unary_expr_kind -> unary_expr_kind * 'monoid =
+      fun _env k -> k, self#zero
+
+    method visit_unary_operator_kind : 'env . 'env -> unary_operator_kind -> unary_operator_kind * 'monoid =
+      fun _env k -> k, self#zero
+
+    method visit_binary_operator_kind : 'env . 'env -> binary_operator_kind -> binary_operator_kind * 'monoid =
+      fun _env k -> k, self#zero
+  end
+
 (*{[
 open Stdcompat
 
@@ -1941,7 +1988,8 @@ and var_decl_desc = {
     [@@deriving show, eq, ord,
       visitors { variety = "iter"; ancestors = ["base_iter"] },
       visitors { variety = "map"; ancestors = ["base_map"] },
-      visitors { variety = "reduce"; ancestors = ["base_reduce"] }]
+      visitors { variety = "reduce"; ancestors = ["base_reduce"] },
+      visitors { variety = "mapreduce"; ancestors = ["base_mapreduce"] }]
 
 type decoration = qual_type open_decoration
 
