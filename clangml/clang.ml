@@ -173,6 +173,45 @@ module Ast = struct
 
   let string_of_binary_operator_kind = ext_binary_operator_get_opcode_spelling
 
+  let literal_of_int i = Int i
+
+  let int64_of_literal_opt i =
+    match i with
+    | Int i -> Some (Int64.of_int i)
+    | CXInt i -> int64_of_cxint_opt i
+
+  let int64_of_literal i =
+    match i with
+    | Int i -> Int64.of_int i
+    | CXInt i -> int64_of_cxint i
+
+  let int_of_literal_opt i =
+    match i with
+    | Int i -> Some i
+    | CXInt i -> int_of_cxint_opt i
+
+  let int_of_literal i =
+    match i with
+    | Int i -> i
+    | CXInt i -> int_of_cxint i
+
+  let string_of_integer_literal i =
+    match i with
+    | Int i -> string_of_int i
+    | CXInt i -> string_of_cxint i
+
+  let literal_of_float f = Float f
+
+  let float_of_literal f =
+    match f with
+    | Float f -> f
+    | CXFloat f -> float_of_cxfloat f
+
+  let string_of_floating_literal f =
+    match f with
+    | Float f -> string_of_float f
+    | CXFloat f -> string_of_cxfloat f
+
   module Options = struct
     type t = {
         ignore_implicit_cast : bool [@default true];
@@ -526,10 +565,10 @@ module Ast = struct
       match get_cursor_kind cxcursor with
       | IntegerLiteral ->
           let i = ext_integer_literal_get_value cxcursor in
-          IntegerLiteral i
+          IntegerLiteral (CXInt i)
       | FloatingLiteral ->
           let f = ext_floating_literal_get_value cxcursor in
-          FloatingLiteral f
+          FloatingLiteral (CXFloat f)
       | StringLiteral ->
           StringLiteral (ext_string_literal_get_string cxcursor)
       | CharacterLiteral ->
@@ -743,6 +782,9 @@ module Type = struct
   module Set = Set.Make (Self)
 
   module Map = Map.Make (Self)
+
+  let make ?(const = false) ?(volatile = false) ?(restrict = false) desc : t =
+    { cxtype = get_cursor_type (get_null_cursor ()); const; volatile; restrict; desc }
 
   let of_cxtype = Ast.of_cxtype
 

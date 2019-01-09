@@ -122,6 +122,38 @@ module Ast : sig
 
   val string_of_binary_operator_kind : binary_operator_kind -> string
 
+  val literal_of_int : int -> integer_literal
+
+  val int64_of_literal_opt : integer_literal -> Int64.t option
+  (** [int64_of_literal_opt x] returns [Some i] if [x] is representable as
+      a 64-bit integer value [i], or [None] otherwise. *)
+  
+  val int64_of_literal : integer_literal -> Int64.t
+  (** [int64_of_literal x] returns [i] if [x] is representable as
+      a 64-bit integer value [i], or raises [Failure _] otherwise. *)
+  
+  val int_of_literal_opt : integer_literal -> int option
+  (** [int_of_literal_opt x] returns [Some i] if [x] is representable as
+      an integer value [i], or [None] otherwise. *)
+  
+  val int_of_literal : integer_literal -> int
+  (** [int_of_literal x] returns [i] if [x] is representable as
+      an integer value [i], or raises [Failure _] otherwise. *)
+  
+  val string_of_integer_literal : integer_literal -> string
+  (** [string_of_integer_literal f] is an alias for
+      {!val:Clang__bindings.ext_int_to_string}, radix 10 and signed. *)
+  
+  val literal_of_float : float -> floating_literal
+
+  val float_of_literal : floating_literal -> float
+  (** [float_of_cxfloat f] is an alias for
+      {!val:Clang__bindings.ext_float_convert_to_double}. *)
+  
+  val string_of_floating_literal : floating_literal -> string
+  (** [string_of_float_literal f] is an alias for
+      {!val:Clang__bindings.ext_float_to_string}. *)
+
   (** {!type:Options.t} stores flags that change the construction of the abstract
       syntax tree. Beware that the nodes that are ignored by default can differ
       from one version of Clang to the other. *)
@@ -170,6 +202,8 @@ module Type : sig
   module Set : Set.S with type elt = t
 
   module Map : Map.S with type key = t
+
+  val make : ?const:bool -> ?volatile:bool -> ?restrict:bool -> Ast.type_desc -> t
 
   val of_cxtype : ?options:Ast.Options.t -> cxtype -> t
 

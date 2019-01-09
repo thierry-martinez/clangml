@@ -36,15 +36,25 @@ and binary_operator_kind = clang_ext_binaryoperatorkind
 and builtin_type = cxtypekind
   [@@deriving eq, ord, show]
 
+type integer_literal =
+  | Int of int
+  | CXInt of cxint
+  [@@deriving eq, ord]
+
+type floating_literal =
+  | Float of float
+  | CXFloat of cxfloat
+  [@@deriving eq, ord]
+
 class ['self] base_iter =
   object (self)
     method visit_open_node : 'env 'a 'qual_type . ('env -> 'a -> unit) -> ('env -> 'qual_type -> unit) -> 'env -> ('a, 'qual_type) open_node -> unit =
       fun visit_desc _visit_qual_type env open_node -> visit_desc env open_node.desc
 
-    method visit_cxint : 'env . 'env -> cxint -> unit =
+    method visit_integer_literal : 'env . 'env -> integer_literal -> unit =
       fun _env _ -> ()
 
-    method visit_cxfloat : 'env . 'env -> cxfloat -> unit =
+    method visit_floating_literal : 'env . 'env -> floating_literal -> unit =
       fun _env _ -> ()
 
     method visit_elaborated_type_keyword : 'env . 'env -> elaborated_type_keyword -> unit =
@@ -79,10 +89,10 @@ class virtual ['self] base_reduce =
     method visit_open_node : 'env 'a 'qual_type . ('env -> 'a -> 'monoid) -> ('env -> 'qual_type -> 'monoid) -> 'env -> ('a, 'qual_type) open_node -> 'monoid =
       fun visit_desc _visit_qual_type env open_node -> visit_desc env open_node.desc
 
-    method visit_cxint : 'env . 'env -> cxint -> 'monoid =
+    method visit_integer_literal : 'env . 'env -> integer_literal -> 'monoid =
       fun _env _ -> self#zero
 
-    method visit_cxfloat : 'env . 'env -> cxfloat -> 'monoid =
+    method visit_floating_literal : 'env . 'env -> floating_literal -> 'monoid =
       fun _env _ -> self#zero
 
     method visit_elaborated_type_keyword : 'env . 'env -> elaborated_type_keyword -> 'monoid =
@@ -161,7 +171,7 @@ let () =
         const = true;
         desc = BuiltinType Int};
       init = Some { desc = IntegerLiteral one }}}] ->
-      assert (Clang.int_of_cxint one = 1)
+      assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
 
 let example = "int x;"
@@ -692,8 +702,8 @@ let () =
         operand = { desc = DeclRef "i"}})};
       body = { desc = Compound [{ desc =
         Expr (DeclRef "i")}] }}}] ->
-      assert (Clang.int_of_cxint zero = 0);
-      assert (Clang.int_of_cxint four = 4)
+      assert (Clang.Ast.int_of_literal zero = 0);
+      assert (Clang.Ast.int_of_literal four = 4)
   | _ -> assert false
 
 let example = "for (int i = 0; i < 4; i++) { i; }"
@@ -715,8 +725,8 @@ let () =
         operand = { desc = DeclRef "i"}})};
       body = { desc = Compound [{ desc =
         Expr (DeclRef "i")}] }}}] ->
-      assert (Clang.int_of_cxint zero = 0);
-      assert (Clang.int_of_cxint four = 4)
+      assert (Clang.Ast.int_of_literal zero = 0);
+      assert (Clang.Ast.int_of_literal four = 4)
   | _ -> assert false
 
 let example = "for (int i = 0; int j = i - 1; i--) { j; }"
@@ -741,8 +751,8 @@ let () =
         operand = { desc = DeclRef "i"}})};
       body = { desc = Compound [{ desc =
         Expr (DeclRef "j")}] }}}] ->
-      assert (Clang.int_of_cxint zero = 0);
-      assert (Clang.int_of_cxint one = 1)
+      assert (Clang.Ast.int_of_literal zero = 0);
+      assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
     ]}*)
   | If of {
@@ -766,9 +776,9 @@ let () =
          desc = Expr (IntegerLiteral two)}] };
        else_branch = Some { desc = Compound [{
          desc = Expr (IntegerLiteral three) }] }}}] ->
-      assert (Clang.int_of_cxint one = 1);
-      assert (Clang.int_of_cxint two = 2);
-      assert (Clang.int_of_cxint three = 3)
+      assert (Clang.Ast.int_of_literal one = 1);
+      assert (Clang.Ast.int_of_literal two = 2);
+      assert (Clang.Ast.int_of_literal three = 3)
   | _ -> assert false
 
 let example = "if (1) { 2; }"
@@ -782,8 +792,8 @@ let () =
        then_branch = { desc = Compound [{
          desc = Expr (IntegerLiteral two)}] };
        else_branch = None }}] ->
-      assert (Clang.int_of_cxint one = 1);
-      assert (Clang.int_of_cxint two = 2)
+      assert (Clang.Ast.int_of_literal one = 1);
+      assert (Clang.Ast.int_of_literal two = 2)
   | _ -> assert false
 
 let example = "if (int i = 1) { i; }"
@@ -800,7 +810,7 @@ let () =
        then_branch = { desc = Compound [{
          desc = Expr (DeclRef "i")}] };
        else_branch = None }}] ->
-      assert (Clang.int_of_cxint one = 1)
+      assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
 
 let example = "if (int i = 1; i) { i; }"
@@ -816,7 +826,7 @@ let () =
        then_branch = { desc = Compound [{
          desc = Expr (DeclRef "i")}] };
        else_branch = None }}] ->
-      assert (Clang.int_of_cxint one = 1)
+      assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
    ]}*)
   | Switch of {
@@ -845,9 +855,9 @@ let () =
           lhs = { desc = IntegerLiteral two };
           body = { desc = Break }}};
         { desc = Default { desc = Null }}] }}}] ->
-      assert (Clang.int_of_cxint one = 1);
-      assert (Clang.int_of_cxint one' = 1);
-      assert (Clang.int_of_cxint two = 2)
+      assert (Clang.Ast.int_of_literal one = 1);
+      assert (Clang.Ast.int_of_literal one' = 1);
+      assert (Clang.Ast.int_of_literal two = 2)
   | _ -> assert false
 
 let example =
@@ -872,9 +882,9 @@ let () =
           lhs = { desc = IntegerLiteral two };
           body = { desc = Break }}};
         { desc = Default { desc = Null }}] }}}] ->
-      assert (Clang.int_of_cxint one = 1);
-      assert (Clang.int_of_cxint one' = 1);
-      assert (Clang.int_of_cxint two = 2)
+      assert (Clang.Ast.int_of_literal one = 1);
+      assert (Clang.Ast.int_of_literal one' = 1);
+      assert (Clang.Ast.int_of_literal two = 2)
   | _ -> assert false
 
 let example =
@@ -899,9 +909,9 @@ let () =
           lhs = { desc = IntegerLiteral two };
           body = { desc = Break }}};
         { desc = Default { desc = Null }}] }}}] ->
-      assert (Clang.int_of_cxint one = 1);
-      assert (Clang.int_of_cxint one' = 1);
-      assert (Clang.int_of_cxint two = 2)
+      assert (Clang.Ast.int_of_literal one = 1);
+      assert (Clang.Ast.int_of_literal one' = 1);
+      assert (Clang.Ast.int_of_literal two = 2)
   | _ -> assert false
     ]}*)
   | Case of {
@@ -934,10 +944,10 @@ let () =
           rhs = Some { desc = IntegerLiteral three };
           body = { desc = Break }}};
         { desc = Default { desc = Null }}] }}}] ->
-      assert (Clang.int_of_cxint one = 1);
-      assert (Clang.int_of_cxint one' = 1);
-      assert (Clang.int_of_cxint two = 2);
-      assert (Clang.int_of_cxint three = 3)
+      assert (Clang.Ast.int_of_literal one = 1);
+      assert (Clang.Ast.int_of_literal one' = 1);
+      assert (Clang.Ast.int_of_literal two = 2);
+      assert (Clang.Ast.int_of_literal three = 3)
   | _ -> assert false
     ]}*)
   | Default of stmt
@@ -961,7 +971,7 @@ let () =
       condition_variable = None;
       cond = { desc = IntegerLiteral one };
       body = { desc = Null }}}] ->
-      assert (Clang.int_of_cxint one = 1);
+      assert (Clang.Ast.int_of_literal one = 1);
   | _ -> assert false
 
 let example = "while (int i = 1) { i; }"
@@ -975,7 +985,7 @@ let () =
          init = Some { desc = IntegerLiteral one }}});
       cond = { desc = DeclRef "i" };
       body = { desc = Compound [{ desc = Expr (DeclRef "i")}] }}}] ->
-      assert (Clang.int_of_cxint one = 1);
+      assert (Clang.Ast.int_of_literal one = 1);
   | _ -> assert false
     ]}*)
   | Do of {
@@ -991,7 +1001,7 @@ let () =
   | [{ desc = Do {
       body = { desc = Null };
       cond = { desc = IntegerLiteral one }}}] ->
-      assert (Clang.int_of_cxint one = 1);
+      assert (Clang.Ast.int_of_literal one = 1);
   | _ -> assert false
 
 let example = "do { f(); } while (1);"
@@ -1002,7 +1012,7 @@ let () =
       body = { desc = Compound [{ desc =
         Expr (Call { callee = { desc = DeclRef "f" }; args = [] })}] };
       cond = { desc = IntegerLiteral one }}}] ->
-      assert (Clang.int_of_cxint one = 1)
+      assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
     ]}*)
   | Label of {
@@ -1019,8 +1029,8 @@ let () =
         label = "label";
         body = { desc = Expr (IntegerLiteral one)}}};
       { desc = Expr (IntegerLiteral two)}] ->
-      assert (Clang.int_of_cxint one = 1);
-      assert (Clang.int_of_cxint two = 2)
+      assert (Clang.Ast.int_of_literal one = 1);
+      assert (Clang.Ast.int_of_literal two = 2)
   | _ -> assert false
     ]}*)
   | Goto of label_ref
@@ -1034,7 +1044,7 @@ let () =
         label = "label";
         body = { desc = Expr (IntegerLiteral one)}}};
       { desc = Goto "label" }] ->
-      assert (Clang.int_of_cxint one = 1)
+      assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
     ]}*)
   | IndirectGoto of expr
@@ -1052,7 +1062,7 @@ let () =
         qual_type = { desc = Pointer { desc = BuiltinType Void }};
         init = Some { desc = AddrLabel "label" }}}] };
       { desc = IndirectGoto { desc = DeclRef "ptr"}}] ->
-      assert (Clang.int_of_cxint one = 1)
+      assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
     ]}*)
   | Continue
@@ -1114,7 +1124,7 @@ let example = "return 1;"
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Return (Some { desc = IntegerLiteral one })}] ->
-      assert (Clang.int_of_cxint one = 1)
+      assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
    ]}*)
   | Decl of decl list
@@ -1123,8 +1133,13 @@ let () =
 and expr = (expr_desc, qual_type) open_node
 
 and expr_desc =
-  | IntegerLiteral of cxint
-        [@printer fun fmt i -> fprintf fmt "%s" (ext_int_to_string i 10 true)]
+  | IntegerLiteral of integer_literal
+        [@printer fun fmt i ->
+          let s =
+            match i with
+            | Int i -> string_of_int i
+            | CXInt i -> ext_int_to_string i 10 true in
+          fprintf fmt "%s" s]
 (** Integer literal.
     {[
 let example = "0;"
@@ -1132,11 +1147,16 @@ let example = "0;"
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Expr (IntegerLiteral zero)}] ->
-      assert (Clang.int_of_cxint zero = 0)
+      assert (Clang.Ast.int_of_literal zero = 0)
   | _ -> assert false
     ]}*)
-  | FloatingLiteral of cxfloat
-        [@printer fun fmt f -> fprintf fmt "%s" (ext_float_to_string f)]
+  | FloatingLiteral of floating_literal
+        [@printer fun fmt f ->
+          let s =
+            match f with
+            | Float f -> string_of_float f
+            | CXFloat f -> ext_float_to_string f in
+          fprintf fmt "%s" s]
 (** Floating literal.
     {[
 let example = "0.5;"
@@ -1144,7 +1164,7 @@ let example = "0.5;"
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Expr (FloatingLiteral f)}] ->
-    assert (Clang.float_of_cxfloat f = 0.5)
+    assert (Clang.Ast.float_of_literal f = 0.5)
   | _ -> assert false
     ]}*)
   | StringLiteral of string
@@ -1201,7 +1221,7 @@ let example = "1i;"
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Expr (ImaginaryLiteral { desc = IntegerLiteral one })}] ->
-      assert (Clang.int_of_cxint one = 1)
+      assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
 
 let example = "2.5i;"
@@ -1209,7 +1229,7 @@ let example = "2.5i;"
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Expr (ImaginaryLiteral { desc = FloatingLiteral x })}] ->
-      assert (Clang.float_of_cxfloat x = 2.5)
+      assert (Clang.Ast.float_of_literal x = 2.5)
   | _ -> assert false
     ]}*)
   | UnaryOperator of {
@@ -1225,7 +1245,7 @@ let () =
   | [{ desc = Expr (UnaryOperator {
       kind = Plus;
       operand = { desc = IntegerLiteral one}})}] ->
-      assert (Clang.int_of_cxint one = 1)
+      assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
 
 let example = "int x; &x;"
@@ -1252,8 +1272,8 @@ let () =
       lhs = { desc = IntegerLiteral one};
       kind = Add;
       rhs = { desc = IntegerLiteral two}})}] ->
-      assert (Clang.int_of_cxint one = 1);
-      assert (Clang.int_of_cxint two = 2)
+      assert (Clang.Ast.int_of_literal one = 1);
+      assert (Clang.Ast.int_of_literal two = 2)
   | _ -> assert false
     ]} *)
   | DeclRef of string
@@ -1279,7 +1299,7 @@ let () =
   | [{ desc = Decl _ }; { desc = Expr (Call {
       callee = { desc = DeclRef "g" };
       args = [{ desc = IntegerLiteral one }] })}] ->
-      assert (Clang.int_of_cxint one = 1)
+      assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
     ]} *)
   | Cast of {
@@ -1336,7 +1356,7 @@ let () =
         field = { desc = "i" }}};
       kind = Assign;
       rhs = { desc = IntegerLiteral zero}})}] ->
-      assert (Clang.int_of_cxint zero = 0)
+      assert (Clang.Ast.int_of_literal zero = 0)
   | _ -> assert false
 
 let example = {| struct s { int i } *p; p->i = 0; |}
@@ -1350,7 +1370,7 @@ let () =
         field = { desc = "i" }}};
       kind = Assign;
       rhs = { desc = IntegerLiteral zero}})}] ->
-      assert (Clang.int_of_cxint zero = 0)
+      assert (Clang.Ast.int_of_literal zero = 0)
   | _ -> assert false
     ]}*)
   | ArraySubscript of {
@@ -1369,8 +1389,8 @@ let () =
         index = { desc = IntegerLiteral zero}}};
       kind = Assign;
       rhs = { desc = IntegerLiteral one}})}] ->
-      assert (Clang.int_of_cxint zero = 0);
-      assert (Clang.int_of_cxint one = 1)
+      assert (Clang.Ast.int_of_literal zero = 0);
+      assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
     ]}*)
   | ConditionalOperator of {
@@ -1389,9 +1409,9 @@ let () =
       cond = { desc = IntegerLiteral one };
       then_branch = Some { desc = IntegerLiteral two };
       else_branch = { desc = IntegerLiteral three }})}] ->
-      assert (Clang.int_of_cxint one = 1);
-      assert (Clang.int_of_cxint two = 2);
-      assert (Clang.int_of_cxint three = 3)
+      assert (Clang.Ast.int_of_literal one = 1);
+      assert (Clang.Ast.int_of_literal two = 2);
+      assert (Clang.Ast.int_of_literal three = 3)
   | _ -> assert false
 
 let example = {| 1 ? : 3; |}
@@ -1402,8 +1422,8 @@ let () =
       cond = { desc = IntegerLiteral one };
       then_branch = None;
       else_branch = { desc = IntegerLiteral three }})}] ->
-      assert (Clang.int_of_cxint one = 1);
-      assert (Clang.int_of_cxint three = 3)
+      assert (Clang.Ast.int_of_literal one = 1);
+      assert (Clang.Ast.int_of_literal three = 3)
   | _ -> assert false
     ]}*)
   | Paren of expr
@@ -1419,13 +1439,13 @@ let () =
     ~options:(Clang.Ast.Options.make ~ignore_paren:false ())) @@
   fun ast -> match ast with
   | [{ desc = Expr (Paren ({ desc = IntegerLiteral one}))}] ->
-      assert (Clang.int_of_cxint one = 1)
+      assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
 
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Expr (IntegerLiteral one)}] ->
-      assert (Clang.int_of_cxint one = 1)
+      assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
 
 let example = {| int i; sizeof(i); |}
@@ -1468,8 +1488,8 @@ let () =
       init = Some { desc = InitList [
         { desc = IntegerLiteral one };
         { desc = IntegerLiteral two }] }}}] ->
-      assert (Clang.int_of_cxint one = 1);
-      assert (Clang.int_of_cxint two = 2)
+      assert (Clang.Ast.int_of_literal one = 1);
+      assert (Clang.Ast.int_of_literal two = 2)
   | _ -> assert false
     ]}*)
   | CompoundLiteral of {
@@ -1489,8 +1509,8 @@ let () =
       init = { desc = InitList [
         { desc = IntegerLiteral one };
         { desc = IntegerLiteral two }] }})}] ->
-      assert (Clang.int_of_cxint one = 1);
-      assert (Clang.int_of_cxint two = 2)
+      assert (Clang.Ast.int_of_literal one = 1);
+      assert (Clang.Ast.int_of_literal two = 2)
   | _ -> assert false
     ]}*)
   | UnaryExpr of {
@@ -1609,7 +1629,7 @@ let () =
       qual_type = { const = false; desc = BuiltinType Int };
       name = "x";
       init = Some ({ desc = IntegerLiteral one })}}] ->
-      assert (Clang.int_of_cxint one = 1)
+      assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
 
 let example = {| const int x = 1; |}
@@ -1621,7 +1641,7 @@ let () =
       qual_type = { const = true; desc = BuiltinType Int };
       name = "x";
       init = Some ({ desc = IntegerLiteral one })}}] ->
-      assert (Clang.int_of_cxint one = 1)
+      assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
 
 let example = {| static int x = 1; |}
@@ -1633,7 +1653,7 @@ let () =
       qual_type = { const = false; desc = BuiltinType Int };
       name = "x";
       init = Some ({ desc = IntegerLiteral one })}}] ->
-      assert (Clang.int_of_cxint one = 1)
+      assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
     ]}*)
   | EnumDecl of {
@@ -1654,7 +1674,7 @@ let () =
           name = "B";
           init = Some { desc = IntegerLiteral two }}} as b;
         { desc = { name = "C"; init = None }} as c] }}] ->
-        assert (Clang.int_of_cxint two = 2);
+        assert (Clang.Ast.int_of_literal two = 2);
         assert (Clang.Enum_constant.get_value a = 0);
         assert (Clang.Enum_constant.get_value b = 2);
         assert (Clang.Enum_constant.get_value c = 3)
@@ -1695,8 +1715,8 @@ let () =
         { desc = Named { name = "c";
           qual_type = { desc = BuiltinType Int};
           bitwidth = None}}] }}] ->
-      assert (Clang.int_of_cxint one = 1);
-      assert (Clang.int_of_cxint two = 2);
+      assert (Clang.Ast.int_of_literal one = 1);
+      assert (Clang.Ast.int_of_literal two = 2);
       assert (Clang.Field.get_bit_width a = 1)
   | _ -> assert false
     ]}*)
@@ -1735,8 +1755,8 @@ let () =
         { desc = Named { name = "c";
           qual_type = { desc = BuiltinType Int};
           bitwidth = None}}] }}] ->
-      assert (Clang.int_of_cxint one = 1);
-      assert (Clang.int_of_cxint two = 2);
+      assert (Clang.Ast.int_of_literal one = 1);
+      assert (Clang.Ast.int_of_literal two = 2);
       assert (Clang.Field.get_bit_width a = 1)
   | _ -> assert false
     ]}*)
