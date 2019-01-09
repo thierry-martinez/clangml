@@ -7,13 +7,15 @@ open Clang__bindings
 
 type source_location = cxsourcelocation
 
-type decoration =
-  | No
+type 'qual_type open_decoration =
   | Cursor of cxcursor
-  | Location of source_location
+  | Custom of {
+      location : source_location option;
+      qual_type : 'qual_type option;
+    }
 
-type 'a node = {
-    decoration : decoration
+type ('a, 'qual_type) open_node = {
+    decoration : 'qual_type open_decoration
       [@equal fun _ _ -> true]
       [@compare fun _ _ -> 0]
       [@opaque];
@@ -36,8 +38,8 @@ and builtin_type = cxtypekind
 
 class ['self] base_iter =
   object (self)
-    method visit_node : 'env 'a . ('env -> 'a -> unit) -> 'env -> 'a node -> unit =
-      fun visit_desc env node -> visit_desc env node.desc
+    method visit_open_node : 'env 'a 'qual_type . ('env -> 'a -> unit) -> ('env -> 'qual_type -> unit) -> 'env -> ('a, 'qual_type) open_node -> unit =
+      fun visit_desc _visit_qual_type env open_node -> visit_desc env open_node.desc
 
     method visit_cxint : 'env . 'env -> cxint -> unit =
       fun _env _ -> ()
@@ -74,8 +76,8 @@ class virtual ['self] base_reduce =
   object (self : 'self)
     inherit [_] VisitorsRuntime.reduce
 
-    method visit_node : 'env 'a . ('env -> 'a -> 'monoid) -> 'env -> 'a node -> 'monoid =
-      fun visit_desc env node -> visit_desc env node.desc
+    method visit_open_node : 'env 'a 'qual_type . ('env -> 'a -> 'monoid) -> ('env -> 'qual_type -> 'monoid) -> 'env -> ('a, 'qual_type) open_node -> 'monoid =
+      fun visit_desc _visit_qual_type env open_node -> visit_desc env open_node.desc
 
     method visit_cxint : 'env . 'env -> cxint -> 'monoid =
       fun _env _ -> self#zero
@@ -619,7 +621,7 @@ let parse_statement_list ?(return_type = "int") ?filename ?command_line_args ?op
   | [{ desc = Function { stmt = Some { desc = Compound items }}}] -> items
   | _ -> assert false
     ]}*)
-and stmt = stmt_desc node
+and stmt = (stmt_desc, qual_type) open_node
 and stmt_desc =
   | Null
 (** Null statement.
@@ -1073,7 +1075,7 @@ let () =
   | [{ desc = For { body = { desc = Break } }}] -> ()
   | _ -> assert false
    ]}*)
-  | GCCAsm of string * string node list
+  | GCCAsm of string * (string, qual_type) open_node list
 (** GCC assembler statement.
     {[
 let example = {|
@@ -1118,7 +1120,7 @@ let () =
   | Decl of decl list
   | Expr of expr_desc
 
-and expr = expr_desc node
+and expr = (expr_desc, qual_type) open_node
 
 and expr_desc =
   | IntegerLiteral of cxint
@@ -1319,7 +1321,7 @@ let () =
   | Member of {
       base : expr;
       arrow : bool;
-      field : string node;
+      field : (string, qual_type) open_node;
     }
 (** Member dot or arrow
     {[
@@ -1554,7 +1556,7 @@ and unary_expr_or_type_trait =
   | ArgumentExpr of expr
   | ArgumentType of qual_type
 
-and decl = decl_desc node
+and decl = (decl_desc, qual_type) open_node
 
 and decl_desc =
   | Function of {
@@ -1808,7 +1810,7 @@ let () =
     ]}*)
   | OtherDecl
 
-and field = field_desc node
+and field = (field_desc, qual_type) open_node
 
 and field_desc =
   | Named of  {
@@ -1857,14 +1859,14 @@ let () =
 
 and label_ref = string
 
-and enum_constant = enum_constant_desc node
+and enum_constant = (enum_constant_desc, qual_type) open_node
 
 and enum_constant_desc = {
     name : string;
     init : expr option;
   }
 
-and var_decl = var_decl_desc node
+and var_decl = (var_decl_desc, qual_type) open_node
 
 and var_decl_desc = {
     linkage : cxlinkagekind;
@@ -1875,6 +1877,10 @@ and var_decl_desc = {
     [@@deriving show, eq, ord,
       visitors { variety = "iter"; ancestors = ["base_iter"] },
       visitors { variety = "reduce"; ancestors = ["base_reduce"] }]
+
+type decoration = qual_type open_decoration
+
+type 'a node = ('a, qual_type) open_node
 
 type translation_unit_desc = {
     filename : string; items : decl list

@@ -125,20 +125,19 @@ let parse_string ?index ?(filename = "<string>.c")
 module Ast = struct
   include Clang__ast
 
-  let node ?decoration ?cursor ?location desc =
+  let node ?decoration ?cursor ?location ?qual_type desc =
     let decoration : decoration =
-      match decoration, cursor, location with
-      | None, None, None -> No
-      | Some decoration, None, None -> decoration
-      | None, Some cursor, None -> Cursor cursor
-      | None, None, Some location -> Location location
+      match decoration, cursor, location, qual_type with
+      | Some decoration, None, None, None -> decoration
+      | None, Some cursor, None, None -> Cursor cursor
+      | None, None, location, qual_type -> Custom { location; qual_type }
       | _ -> invalid_arg "node" in
     { decoration; desc }
 
   let cursor_of_decoration decoration =
     match decoration with
     | Cursor cursor -> cursor
-    | No | Location _ -> get_null_cursor ()
+    | Custom _ -> get_null_cursor ()
 
   let cursor_of_node node =
     cursor_of_decoration node.decoration
@@ -146,8 +145,10 @@ module Ast = struct
   let location_of_decoration decoration =
     match decoration with
     | Cursor cursor -> get_cursor_location cursor
-    | Location location -> location
-    | No -> get_cursor_location (get_null_cursor ())
+    | Custom { location } ->
+        match location with
+        | Some location -> location
+        | None -> get_cursor_location (get_null_cursor ())
 
   let location_of_node node =
     location_of_decoration node.decoration
@@ -748,8 +749,16 @@ module Type = struct
   let of_cursor ?options cursor =
     get_cursor_type cursor |> of_cxtype ?options
 
-  let of_node ?options node =
-    Ast.cursor_of_node node |> of_cursor ?options
+  let of_decoration ?options (decoration : Ast.decoration) =
+    match decoration with
+    | Cursor cursor -> of_cursor ?options cursor
+    | Custom { qual_type } ->
+        match qual_type with
+        | Some qual_type -> qual_type
+        | None -> invalid_arg "of_decoration"
+
+  let of_node ?options (node : 'a Ast.node) =
+    of_decoration ?options node.decoration
 
   let get_size_of (ty : t) = type_get_size_of ty.cxtype
 

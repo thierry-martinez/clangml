@@ -93,7 +93,7 @@ module Ast : sig
   end
 
   val node : ?decoration:decoration -> ?cursor:cxcursor ->
-    ?location:source_location -> 'a -> 'a node
+    ?location:source_location -> ?qual_type:qual_type -> 'a -> 'a node
   (** [node desc] returns a node with the given [desc] value. The associated
       [cxcursor] is the null cursor (returned by {val:get_null_cursor}). This
       function can be used to build ASTs from scratch. *)
@@ -174,6 +174,8 @@ module Type : sig
   val of_cxtype : ?options:Ast.Options.t -> cxtype -> t
 
   val of_cursor : ?options:Ast.Options.t -> cxcursor -> t
+
+  val of_decoration : ?options:Ast.Options.t -> Ast.decoration -> t
 
   val of_node : ?options:Ast.Options.t -> 'a Ast.node -> t
 
