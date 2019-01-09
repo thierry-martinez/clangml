@@ -1366,6 +1366,17 @@ let () =
       assert (Clang.Ast.int_of_literal one = 1);
       assert (Clang.Ast.int_of_literal two = 2)
   | _ -> assert false
+
+let example = "int i = 2; i *= 3;"
+
+let () =
+  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  | [{ desc = Decl _ }; { desc = Expr (BinaryOperator {
+      lhs = { desc = DeclRef "i"};
+      kind = MulAssign;
+      rhs = { desc = IntegerLiteral three}})}] ->
+      assert (Clang.Ast.int_of_literal three = 3)
+  | _ -> assert false
     ]} *)
   | DeclRef of string
 (** Declaration reference.

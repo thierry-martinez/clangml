@@ -600,7 +600,7 @@ module Ast = struct
             | _ -> invalid_structure "expr_of_cxcursor (UnaryOperator)" cursor in
           let kind = ext_unary_operator_get_opcode cursor in
           UnaryOperator { kind; operand }
-      | BinaryOperator ->
+      | BinaryOperator | CompoundAssignOperator ->
           let lhs, rhs =
             match list_of_children cursor with
             | [lhs; rhs] -> expr_of_cxcursor lhs, expr_of_cxcursor rhs
