@@ -754,9 +754,9 @@ let () =
     ]}
     *)
   | For of {
-      init : stmt option; (** C++ *)
+      init : stmt option;
       condition_variable : var_decl option; (** C++ *)
-      cond : stmt option;
+      cond : expr option;
       inc : stmt option;
       body : stmt;
     }
@@ -784,10 +784,10 @@ let () =
         kind = Assign;
         rhs = { desc = IntegerLiteral zero}}}};
       condition_variable = None;
-      cond = Some { desc = Expr { desc = BinaryOperator {
+      cond = Some { desc = BinaryOperator {
         lhs = { desc = DeclRef "i"};
         kind = LT;
-        rhs = { desc = IntegerLiteral four}}}};
+        rhs = { desc = IntegerLiteral four}}};
       inc = Some { desc = Expr { desc = UnaryOperator {
         kind = PostInc;
         operand = { desc = DeclRef "i"}}}};
@@ -807,10 +807,10 @@ let () =
         qual_type = { desc = BuiltinType Int};
         init = Some { desc = IntegerLiteral zero}}}] };
       condition_variable = None;
-      cond = Some { desc = Expr { desc = BinaryOperator {
+      cond = Some { desc = BinaryOperator {
         lhs = { desc = DeclRef "i"};
         kind = LT;
-        rhs = { desc = IntegerLiteral four}}}};
+        rhs = { desc = IntegerLiteral four }}};
       inc = Some { desc = Expr { desc = UnaryOperator {
         kind = PostInc;
         operand = { desc = DeclRef "i"}}}};
@@ -836,7 +836,7 @@ let () =
           lhs = { desc = DeclRef "i"};
           kind = Sub;
           rhs = { desc = IntegerLiteral one}}}}};
-      cond = Some { desc = Expr { desc = DeclRef "j" }};
+      cond = Some { desc = DeclRef "j" };
       inc = Some { desc = Expr { desc = UnaryOperator {
         kind = PostDec;
         operand = { desc = DeclRef "i"}}}};

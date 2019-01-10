@@ -429,7 +429,7 @@ module Ast = struct
                 None in
             let cond =
               if children_set land 4 <> 0 then
-                Some (stmt_of_cxcursor (Queue.pop queue))
+                Some (expr_of_cxcursor (Queue.pop queue))
               else
                 None in
             let inc =
