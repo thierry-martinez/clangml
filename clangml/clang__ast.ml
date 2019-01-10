@@ -1040,6 +1040,32 @@ let () =
       assert (Clang.Ast.int_of_literal two = 2);
       assert (Clang.Ast.int_of_literal three = 3)
   | _ -> assert false
+
+let example = "switch (1) { case 1: case 2: case 3: default: ;}"
+
+let () =
+  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  | [{ desc = Switch {
+      init = None;
+      condition_variable = None;
+      cond = { desc = IntegerLiteral one };
+      body = { desc = Compound [
+        { desc = Case {
+          lhs = { desc = IntegerLiteral one' };
+          rhs = None;
+          body = { desc = Case {
+            lhs = { desc = IntegerLiteral two };
+            rhs = None;
+            body = { desc = Case {
+              lhs = { desc = IntegerLiteral three };
+              rhs = None;
+              body = { desc = Default { desc = Null }}}}}}}}] }}}] ->
+      assert (Clang.Ast.int_of_literal one = 1);
+      assert (Clang.Ast.int_of_literal one' = 1);
+      assert (Clang.Ast.int_of_literal two = 2);
+      assert (Clang.Ast.int_of_literal three = 3)
+  | _ -> assert false
+
     ]}*)
   | Default of stmt
 (** Default statement.
