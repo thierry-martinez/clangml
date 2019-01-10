@@ -214,9 +214,9 @@ module Type : sig
   val of_node : ?options:Ast.Options.t -> 'a Ast.node -> t
 
   val iter_fields : ?options:Ast.Options.t ->
-    (Ast.field -> unit) -> t -> unit
+    (Ast.decl -> unit) -> t -> unit
 
-  val list_of_fields : ?options:Ast.Options.t -> t -> Ast.field list
+  val list_of_fields : ?options:Ast.Options.t -> t -> Ast.decl list
 
   val get_declaration : ?options:Ast.Options.t -> t -> Ast.decl
 
@@ -269,6 +269,8 @@ module Decl : sig
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
 
   val get_typedef_underlying_type : ?options:Ast.Options.t -> t -> Type.t
+
+  val get_field_bit_width : t -> int
 end
 
 module Enum_constant : sig
@@ -285,20 +287,4 @@ module Enum_constant : sig
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
 
   val get_value : t -> int
-end
-
-module Field : sig
-  type t = Ast.field
-
-  val equal : t -> t -> bool
-
-  val compare : t -> t -> int
-
-  module Set : Set.S with type elt = t
-
-  module Map : Map.S with type key = t
-
-  val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
-
-  val get_bit_width : t -> int
 end

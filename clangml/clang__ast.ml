@@ -359,8 +359,8 @@ let example = "struct s { int i; char array[]; };"
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
   | [{ desc = Struct { name = "s"; fields = [
-      { desc = Named { name = "i"; qual_type = { desc = BuiltinType Int}}};
-      { desc = Named { name = "array"; qual_type = { desc =
+      { desc = Field { name = "i"; qual_type = { desc = BuiltinType Int}}};
+      { desc = Field { name = "array"; qual_type = { desc =
         IncompleteArray { desc = BuiltinType Char_S }}}}] }}] -> ()
   | _ -> assert false
     ]}*)
@@ -452,10 +452,10 @@ let () =
         let fields = named_type |> Clang.Type.list_of_fields in
         begin
           match fields with
-          | [ { desc = Named {
+          | [ { desc = Field {
                   name = "i";
                   qual_type = { desc = BuiltinType Int }}};
-              { desc = Named {
+              { desc = Field {
                   name = "f";
                   qual_type = { desc = BuiltinType Float }}}] -> ()
           | _ -> assert false
@@ -473,10 +473,10 @@ let () =
         let fields = named_type |> Clang.Type.list_of_fields in
         begin
           match fields with
-          | [ { desc = Named {
+          | [ { desc = Field {
                   name = "i";
                   qual_type = { desc = BuiltinType Int }}};
-              { desc = Named {
+              { desc = Field {
                   name = "f";
                   qual_type = { desc = BuiltinType Float }}}] -> ()
           | _ -> assert false
@@ -498,10 +498,10 @@ let () =
           Clang.Type.list_of_fields in
         begin
           match fields with
-          | [ { desc = Named {
+          | [ { desc = Field {
                   name = "i";
                   qual_type = { desc = BuiltinType Int }}};
-              { desc = Named {
+              { desc = Field {
                   name = "f";
                   qual_type = { desc = BuiltinType Float }}}] -> ()
           | _ -> assert false
@@ -1810,7 +1810,7 @@ let () =
     ]}*)
   | Struct of {
       name : string;
-      fields : field list;
+      fields : decl list;
     }
 (** Structure declaration.
     {[
@@ -1821,9 +1821,9 @@ let () =
   | [{ desc = Struct {
       name = "s";
       fields = [
-        { desc = Named { name = "i";
+        { desc = Field { name = "i";
           qual_type = { desc = BuiltinType Int}}};
-        { desc = Named { name = "f";
+        { desc = Field { name = "f";
           qual_type = { desc = BuiltinType Float}}}] }}] -> ()
   | _ -> assert false
 
@@ -1834,23 +1834,39 @@ let () =
   | [{ desc = Struct {
       name = "s";
       fields = [
-        { desc = Named { name = "a";
+        { desc = Field { name = "a";
           qual_type = { desc = BuiltinType Int};
           bitwidth = Some { desc = IntegerLiteral one }}} as a;
-        { desc = Named { name = "b";
+        { desc = Field { name = "b";
           qual_type = { desc = BuiltinType Int};
           bitwidth = Some { desc = IntegerLiteral two }}};
-        { desc = Named { name = "c";
+        { desc = Field { name = "c";
           qual_type = { desc = BuiltinType Int};
           bitwidth = None}}] }}] ->
       assert (Clang.Ast.int_of_literal one = 1);
       assert (Clang.Ast.int_of_literal two = 2);
-      assert (Clang.Field.get_bit_width a = 1)
+      assert (Clang.Decl.get_field_bit_width a = 1)
+  | _ -> assert false
+
+let example = {| union s { int single; struct { int i; float f; };}; |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  | [{ desc = Union {
+      name = "s";
+      fields = [
+        { desc = Field { name = "single";
+          qual_type = { desc = BuiltinType Int}}};
+        { desc = Struct { name = ""; fields = [
+          { desc = Field { name = "i";
+            qual_type = { desc = BuiltinType Int}}};
+          { desc = Field { name = "f";
+            qual_type = { desc = BuiltinType Float}}}] }}] }}] -> ()
   | _ -> assert false
     ]}*)
   | Union of {
       name : string;
-      fields : field list;
+      fields : decl list;
     }
 (** Union declaration.
     {[
@@ -1861,9 +1877,9 @@ let () =
   | [{ desc = Union {
       name = "u";
       fields = [
-        { desc = Named { name = "i";
+        { desc = Field { name = "i";
           qual_type = { desc = BuiltinType Int}}};
-        { desc = Named { name = "f";
+        { desc = Field { name = "f";
           qual_type = { desc = BuiltinType Float}}}] }}] -> ()
   | _ -> assert false
 
@@ -1874,18 +1890,34 @@ let () =
   | [{ desc = Union {
       name = "u";
       fields = [
-        { desc = Named { name = "a";
+        { desc = Field { name = "a";
           qual_type = { desc = BuiltinType Int};
           bitwidth = Some { desc = IntegerLiteral one }}} as a;
-        { desc = Named { name = "b";
+        { desc = Field { name = "b";
           qual_type = { desc = BuiltinType Int};
           bitwidth = Some { desc = IntegerLiteral two }}};
-        { desc = Named { name = "c";
+        { desc = Field { name = "c";
           qual_type = { desc = BuiltinType Int};
           bitwidth = None}}] }}] ->
       assert (Clang.Ast.int_of_literal one = 1);
       assert (Clang.Ast.int_of_literal two = 2);
-      assert (Clang.Field.get_bit_width a = 1)
+      assert (Clang.Decl.get_field_bit_width a = 1)
+  | _ -> assert false
+
+let example = {| struct s { int label; union { int i; float f; };}; |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  | [{ desc = Struct {
+      name = "s";
+      fields = [
+        { desc = Field { name = "label";
+          qual_type = { desc = BuiltinType Int}}};
+        { desc = Union { name = ""; fields = [
+          { desc = Field { name = "i";
+            qual_type = { desc = BuiltinType Int}}};
+          { desc = Field { name = "f";
+            qual_type = { desc = BuiltinType Float}}}] }}] }}] -> ()
   | _ -> assert false
     ]}*)
   | TypedefDecl of {
@@ -1914,9 +1946,9 @@ let () =
   | [{ desc = Union {
         name = "u";
         fields = [
-          { desc = Named { name = "i";
+          { desc = Field { name = "i";
             qual_type = { desc = BuiltinType Int}}};
-          { desc = Named { name = "f";
+          { desc = Field { name = "f";
             qual_type = { desc = BuiltinType Float}}}] }};
       { desc = TypedefDecl {
         name = "u_t";
@@ -1932,10 +1964,10 @@ let () =
   | [{ desc = Union {
         name = "";
         fields = [
-          { desc = Named {
+          { desc = Field {
               name = "i";
               qual_type = { desc = BuiltinType Int}}};
-          { desc = Named {
+          { desc = Field {
               name = "f";
               qual_type = { desc = BuiltinType Float}}}] }};
       { desc = TypedefDecl {
@@ -1946,64 +1978,45 @@ let () =
         let fields = underlying_type |> Clang.Type.list_of_fields in
         begin
           match fields with
-          | [ { desc = Named {
+          | [ { desc = Field {
                   name = "i";
                   qual_type = { desc = BuiltinType Int}}};
-              { desc = Named {
+              { desc = Field {
                   name = "f";
                   qual_type = { desc = BuiltinType Float}}}] -> ()
           | _ -> assert false
         end
   | _ -> assert false
     ]}*)
-  | OtherDecl
-
-and field = (field_desc, qual_type) open_node
-
-and field_desc =
-  | Named of  {
+  | Field of  {
       name : string;
       qual_type : qual_type;
       bitwidth : expr option;
     }
-  | AnonymousUnion of field list
-(** Anonymous union
+(** Record (struct or union) field.
     {[
-let example = {| struct s { int label; union { int i; float f; };}; |}
+let example = {| struct s { int label; union u { int i; float f; } data;}; |}
 
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
   | [{ desc = Struct {
       name = "s";
       fields = [
-        { desc = Named { name = "label";
+        { desc = Field { name = "label";
           qual_type = { desc = BuiltinType Int}}};
-        { desc = AnonymousUnion [
-          { desc = Named { name = "i";
+        { desc = Union { name = "u"; fields = [
+          { desc = Field { name = "i";
             qual_type = { desc = BuiltinType Int}}};
-          { desc = Named { name = "f";
-            qual_type = { desc = BuiltinType Float}}}] }] }}] -> ()
+          { desc = Field { name = "f";
+            qual_type = { desc = BuiltinType Float}}}] }};
+        { desc = Field { name = "data";
+          qual_type = { desc = Elaborated {
+            keyword = Union;
+            named_type = { desc = Record "u" }}}}}] }}] -> ()
   | _ -> assert false
-    ]}*)
-  | AnonymousStruct of field list
-(** Anonymous struct
-    {[
-let example = {| union s { int single; struct { int i; float f; };}; |}
-
-let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
-  | [{ desc = Union {
-      name = "s";
-      fields = [
-        { desc = Named { name = "single";
-          qual_type = { desc = BuiltinType Int}}};
-        { desc = AnonymousStruct [
-          { desc = Named { name = "i";
-            qual_type = { desc = BuiltinType Int}}};
-          { desc = Named { name = "f";
-            qual_type = { desc = BuiltinType Float}}}] }] }}] -> ()
-  | _ -> assert false
-    ]}*)
+    ]}
+*)
+  | OtherDecl
 
 and label_ref = string
 

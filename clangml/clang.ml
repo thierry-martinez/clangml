@@ -297,30 +297,46 @@ module Ast = struct
     and decl_of_cxcursor cursor =
       node ~cursor (decl_desc_of_cxcursor cursor)
 
-    and decl_desc_of_cxcursor cxcursor =
-        match get_cursor_kind cxcursor with
-        | FunctionDecl -> function_decl_of_cxcursor cxcursor
-        | VarDecl -> Var (var_decl_desc_of_cxcursor cxcursor)
-        | StructDecl -> struct_decl_of_cxcursor cxcursor
-        | UnionDecl -> union_decl_of_cxcursor cxcursor
-        | EnumDecl -> enum_decl_of_cxcursor cxcursor
+    and decl_desc_of_cxcursor cursor =
+        match get_cursor_kind cursor with
+        | FunctionDecl -> function_decl_of_cxcursor cursor
+        | VarDecl -> Var (var_decl_desc_of_cxcursor cursor)
+        | StructDecl -> struct_decl_of_cxcursor cursor
+        | UnionDecl -> union_decl_of_cxcursor cursor
+        | EnumDecl -> enum_decl_of_cxcursor cursor
         | TypedefDecl ->
-            let name = get_cursor_spelling cxcursor in
-            let underlying_type = cxcursor |>
+            let name = get_cursor_spelling cursor in
+            let underlying_type = cursor |>
             get_typedef_decl_underlying_type |> of_cxtype in
             TypedefDecl { name; underlying_type }
+        | FieldDecl ->
+            let name = get_cursor_spelling cursor in
+            let qual_type = get_cursor_type cursor |> of_cxtype in
+            let bitwidth =
+              if cursor_is_bit_field cursor then
+                match list_of_children cursor with
+                | [bitwidth] -> Some (expr_of_cxcursor bitwidth)
+                | _ -> invalid_structure "field_of_cxcursor (bitwidth)" cursor
+              else
+                None in
+            Field { name; qual_type; bitwidth }
         | _ -> OtherDecl
 
-    and function_decl_of_cxcursor cxcursor =
-      let linkage = cxcursor |> get_cursor_linkage in
-      let function_type = cxcursor |> get_cursor_type |>
+    and function_decl_of_cxcursor cursor =
+      let linkage = cursor |> get_cursor_linkage in
+      let function_type = cursor |> get_cursor_type |>
         function_type_of_cxtype @@ fun i ->
-          cursor_get_argument cxcursor i |> get_cursor_spelling in
-      let name = get_cursor_spelling cxcursor in
-      let stmt =
-        List.nth_opt (list_of_children cxcursor)
-          (cursor_get_num_arguments cxcursor) |>
-        Option.map stmt_of_cxcursor in
+          cursor_get_argument cursor i |> get_cursor_spelling in
+      let name = get_cursor_spelling cursor in
+      let stmt : stmt option =
+        match list_of_children cursor with
+        | [] -> None
+        | children ->
+            let last = List.hd (List.rev children) in
+            if get_cursor_kind last = CompoundStmt then
+              Some (stmt_of_cxcursor last)
+            else
+              None in
       Function { linkage; function_type; name; stmt }
 
     and function_type_of_cxtype get_argument_name cxtype =
@@ -340,24 +356,24 @@ module Ast = struct
     and var_decl_of_cxcursor cursor =
       node ~cursor (var_decl_desc_of_cxcursor cursor)
 
-    and var_decl_desc_of_cxcursor cxcursor =
-      let linkage = cxcursor |> get_cursor_linkage in
-      let name = get_cursor_spelling cxcursor in
-      let qual_type = of_cxtype (get_cursor_type cxcursor) in
+    and var_decl_desc_of_cxcursor cursor =
+      let linkage = cursor |> get_cursor_linkage in
+      let name = get_cursor_spelling cursor in
+      let qual_type = of_cxtype (get_cursor_type cursor) in
       let init =
-        if ext_var_decl_has_init cxcursor then
+        if ext_var_decl_has_init cursor then
           begin
-            let init_value = list_of_children cxcursor |> List.rev |> List.hd in
+            let init_value = list_of_children cursor |> List.rev |> List.hd in
             Some (expr_of_cxcursor init_value)
           end
         else
           None in
       { linkage; name; qual_type; init }
 
-    and enum_decl_of_cxcursor cxcursor =
-      let name = get_cursor_spelling cxcursor in
+    and enum_decl_of_cxcursor cursor =
+      let name = get_cursor_spelling cursor in
       let constants =
-        list_of_children cxcursor |> List.map @@ fun cursor ->
+        list_of_children cursor |> List.map @@ fun cursor ->
           match get_cursor_kind cursor with
           | EnumConstantDecl -> enum_constant_of_cxcursor cursor
           | _ -> invalid_structure "enum_decl_of_cxcursor" cursor in
@@ -372,37 +388,18 @@ module Ast = struct
         | _ -> invalid_structure "enum_constant_of_cxcursor (init)" cursor in
       node ~cursor { name; init }
 
-    and struct_decl_of_cxcursor cxcursor =
-      let name = get_cursor_spelling cxcursor in
-      let fields = fields_of_cxcursor cxcursor in
+    and struct_decl_of_cxcursor cursor =
+      let name = get_cursor_spelling cursor in
+      let fields = fields_of_cxcursor cursor in
       Struct { name; fields }
 
-    and union_decl_of_cxcursor cxcursor =
-      let name = get_cursor_spelling cxcursor in
-      let fields = fields_of_cxcursor cxcursor in
+    and union_decl_of_cxcursor cursor =
+      let name = get_cursor_spelling cursor in
+      let fields = fields_of_cxcursor cursor in
       Union { name; fields }
 
-    and fields_of_cxcursor cxcursor =
-      list_of_children cxcursor |> List.map field_of_cxcursor
-
-    and field_of_cxcursor cursor =
-      match get_cursor_kind cursor with
-      | FieldDecl ->
-          let name = get_cursor_spelling cursor in
-          let qual_type = get_cursor_type cursor |> of_cxtype in
-          let bitwidth =
-            if cursor_is_bit_field cursor then
-              match list_of_children cursor with
-              | [bitwidth] -> Some (expr_of_cxcursor bitwidth)
-              | _ -> invalid_structure "field_of_cxcursor (bitwidth)" cursor
-            else
-              None in
-          node ~cursor (Named { name; qual_type; bitwidth })
-      | UnionDecl ->
-          node ~cursor (AnonymousUnion (fields_of_cxcursor cursor))
-      | StructDecl ->
-          node ~cursor (AnonymousStruct (fields_of_cxcursor cursor))
-      | _ -> invalid_structure "field_of_cxcursor" cursor
+    and fields_of_cxcursor cursor =
+      list_of_children cursor |> List.map decl_of_cxcursor
 
     and stmt_of_cxcursor cursor =
       let desc =
@@ -755,28 +752,8 @@ module Decl = struct
   let get_typedef_underlying_type ?options decl =
     decl |> Ast.cursor_of_node |>
     get_typedef_decl_underlying_type |> Ast.of_cxtype ?options
-end
 
-module Field = struct
-  module Self = struct
-    type t = Ast.field
-
-    let equal = Ast.equal_field
-
-    let compare = Ast.compare_field
-  end
-
-  include Self
-
-  module Set = Set.Make (Self)
-
-  module Map = Map.Make (Self)
-
-  let of_cxcursor ?(options = Ast.Options.make ()) cur =
-    let module Convert = Ast.Converter (struct let options = options end) in
-    Convert.field_of_cxcursor cur
-
-  let get_bit_width field =
+  let get_field_bit_width field =
     field |> Ast.cursor_of_node |> get_field_decl_bit_width
 end
 
@@ -828,11 +805,11 @@ module Type = struct
 
   let iter_fields ?options f (qual_type : t) =
     qual_type.cxtype |> iter_type_fields @@ fun x ->
-      f (Field.of_cxcursor ?options x)
+      f (Decl.of_cxcursor ?options x)
 
   let list_of_fields ?options (qual_type : t) =
     qual_type.cxtype |> list_of_type_fields |> List.map @@
-      Field.of_cxcursor ?options
+      Decl.of_cxcursor ?options
 end
 
 module Expr = struct

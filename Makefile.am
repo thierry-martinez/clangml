@@ -18,7 +18,7 @@ stubgen : $(STUBGEN_EXE)
 
 $(CLANGML_CMXA) : \
 		clangml/clang.ml clangml/clang.mli \
-		clangml/clang__bindings.ml
+		clangml/clang__bindings.ml clangml/clang__ast.ml
 	$(DUNE) build clangml/clangml.cmxa
 
 $(LIBCLANGML_STUBS_A) : \
