@@ -82,10 +82,10 @@ val parse_string : ?index:cxindex -> ?filename:string ->
 (** {2 Abstract syntax tree} *)
 
 module Ast : sig
-  (** The module includes {!module:Clang__ast} which contains the declaration of
-      the abstract syntax tree. Since the abstract syntax tree is a pure type
-      declaration without value definition, the declaration is written in a
-      separate module, written in an implementation file (.ml) without
+  (** The module includes {!module:Clang__ast} which contains the declaration
+      of the abstract syntax tree. Since the abstract syntax tree is a pure
+      type declaration without value definition, the declaration is written in
+      a separate module, written in an implementation file (.ml) without
       interface file (.mli)).
    *)
   include module type of struct
@@ -154,9 +154,9 @@ module Ast : sig
   (** [string_of_float_literal f] is an alias for
       {!val:Clang__bindings.ext_float_to_string}. *)
 
-  (** {!type:Options.t} stores flags that change the construction of the abstract
-      syntax tree. Beware that the nodes that are ignored by default can differ
-      from one version of Clang to the other. *)
+  (** {!type:Options.t} stores flags that change the construction of the
+      abstract syntax tree. Beware that the nodes that are ignored by default
+      can differ from one version of Clang to the other. *)
   module Options : sig
     type t = {
         ignore_implicit_cast : bool [@default true];
@@ -203,7 +203,8 @@ module Type : sig
 
   module Map : Map.S with type key = t
 
-  val make : ?const:bool -> ?volatile:bool -> ?restrict:bool -> Ast.type_desc -> t
+  val make : ?const:bool -> ?volatile:bool -> ?restrict:bool ->
+    Ast.type_desc -> t
 
   val of_cxtype : ?options:Ast.Options.t -> cxtype -> t
 

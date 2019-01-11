@@ -60,7 +60,8 @@ let is_error diagnostic_severity =
 let has_error tu =
   try
     seq_of_diagnostics tu |>
-    Seq.iter (fun d -> if is_error (get_diagnostic_severity d) then raise Exit);
+    Seq.iter (fun d ->
+      if is_error (get_diagnostic_severity d) then raise Exit);
     false
   with Exit ->
     true
@@ -167,7 +168,8 @@ module Ast = struct
     let file, line, column, _offset = get_expansion_location source_location in
     { filename = get_file_name file; line; column }
 
-  let string_of_elaborated_type_keyword = ext_elaborated_type_get_keyword_spelling
+  let string_of_elaborated_type_keyword =
+    ext_elaborated_type_get_keyword_spelling
 
   let string_of_unary_operator_kind = ext_unary_operator_get_opcode_spelling
 
@@ -494,7 +496,8 @@ module Ast = struct
             let body =
               match list_of_children cursor with
               | [body] -> stmt_of_cxcursor body
-              | _ -> invalid_structure "stmt_of_cxcursor (DefaultStmt)" cursor in
+              | _ ->
+                  invalid_structure "stmt_of_cxcursor (DefaultStmt)" cursor in
             Default body
         | WhileStmt ->
             let children_set = ext_while_stmt_get_children_set cursor in
@@ -532,7 +535,7 @@ module Ast = struct
             let target =
               match list_of_children cursor with
               | [target] -> expr_of_cxcursor target
-              | _ -> invalid_structure "stmt_of_cxcursor (IndirectGotoStmt)" cursor in
+              | _ -> invalid_structure "stmt_of_cxcursor" cursor in
             IndirectGoto target
         | ContinueStmt ->
             Continue
@@ -546,7 +549,7 @@ module Ast = struct
               match list_of_children cursor with
               | [value] -> Some (expr_of_cxcursor value)
               | [] -> None
-              | _ -> invalid_structure "stmt_of_cxcursor (ReturnStmt)" cursor in
+              | _ -> invalid_structure "stmt_of_cxcursor" cursor in
             Return value
         | GCCAsmStmt ->
             let code = ext_asm_stmt_get_asm_string cursor in
@@ -566,7 +569,8 @@ module Ast = struct
     and expr_of_cxcursor cursor =
       match expr_desc_of_cxcursor cursor with
       | Paren subexpr when Options.options.ignore_paren -> subexpr
-      | Cast { kind = Implicit; operand } when Options.options.ignore_implicit_cast ->
+      | Cast { kind = Implicit; operand }
+        when Options.options.ignore_implicit_cast ->
           operand
       | desc -> node ~cursor desc
 
@@ -588,20 +592,20 @@ module Ast = struct
           let sub_expr =
             match list_of_children cursor with
             | [operand] -> expr_of_cxcursor operand
-            | _ -> invalid_structure "expr_desc_of_cxcursor (ImaginaryLiteral)" cursor in
+            | _ -> invalid_structure "expr_desc_of_cxcursor" cursor in
           ImaginaryLiteral sub_expr
       | UnaryOperator ->
           let operand =
             match list_of_children cursor with
             | [operand] -> expr_of_cxcursor operand
-            | _ -> invalid_structure "expr_of_cxcursor (UnaryOperator)" cursor in
+            | _ -> invalid_structure "expr_of_cxcursor" cursor in
           let kind = ext_unary_operator_get_opcode cursor in
           UnaryOperator { kind; operand }
       | BinaryOperator | CompoundAssignOperator ->
           let lhs, rhs =
             match list_of_children cursor with
             | [lhs; rhs] -> expr_of_cxcursor lhs, expr_of_cxcursor rhs
-            | _ -> invalid_structure "expr_of_cxcursor (BinaryOperator)" cursor in
+            | _ -> invalid_structure "expr_of_cxcursor" cursor in
           let kind = ext_binary_operator_get_opcode cursor in
           BinaryOperator { lhs; kind; rhs }
       | DeclRefExpr -> DeclRef (get_cursor_spelling cursor)
@@ -619,7 +623,7 @@ module Ast = struct
           let operand =
             match list_of_children cursor with
             | [operand] | [_; operand] -> expr_of_cxcursor operand
-            | _ -> invalid_structure "expr_of_cxcursor (CStyleCastExpr)" cursor in
+            | _ -> invalid_structure "expr_of_cxcursor" cursor in
           Cast { kind = CStyle; qual_type; operand }
       | MemberRefExpr ->
           let base =
@@ -634,26 +638,26 @@ module Ast = struct
           let base, index =
             match list_of_children cursor with
             | [base; index] -> expr_of_cxcursor base, expr_of_cxcursor index
-            | _ -> invalid_structure "expr_of_cxcursor (ArraySubscriptExpr)" cursor in
+            | _ -> invalid_structure "expr_of_cxcursor" cursor in
           ArraySubscript { base; index }
       | ConditionalOperator ->
           let cond, then_branch, else_branch =
             match list_of_children cursor |> List.map expr_of_cxcursor with
             | [cond; then_branch; else_branch] ->
                 cond, Some then_branch, else_branch
-            | _ -> invalid_structure "expr_of_cxcursor (ConditionalOperator)" cursor in
+            | _ -> invalid_structure "expr_of_cxcursor" cursor in
           ConditionalOperator { cond; then_branch; else_branch }
       | ParenExpr ->
           let subexpr =
             match list_of_children cursor with
             | [subexpr] -> expr_of_cxcursor subexpr
-            | _ -> invalid_structure "expr_of_cxcursor (ParenExpr)" cursor in
+            | _ -> invalid_structure "expr_of_cxcursor" cursor in
           Paren subexpr
       | AddrLabelExpr ->
           let label =
             match list_of_children cursor with
             | [label] -> get_cursor_spelling label
-            | _ -> invalid_structure "expr_of_cxcursor (AddrLabelExpr)" cursor in
+            | _ -> invalid_structure "expr_of_cxcursor" cursor in
           AddrLabel label
       | InitListExpr ->
           InitList (list_of_children cursor |> List.map expr_of_cxcursor)
@@ -662,7 +666,7 @@ module Ast = struct
           let init =
             match list_of_children cursor with
             | [init] -> init |> expr_of_cxcursor
-            | _ -> invalid_structure "expr_of_cxcursor (CompoundLiteralExpr)" cursor in
+            | _ -> invalid_structure "expr_of_cxcursor" cursor in
           CompoundLiteral { qual_type; init }
       | UnaryExpr ->
           let kind = cursor |> ext_unary_expr_get_kind in
@@ -682,7 +686,7 @@ module Ast = struct
                 let operand =
                   match list_of_children cursor with
                   | [operand] | [_; operand] -> expr_of_cxcursor operand
-                  | _ -> invalid_structure "expr_of_cxcursor (ImplicitCastExpr)" cursor in
+                  | _ -> invalid_structure "expr_of_cxcursor" cursor in
                 let qual_type = get_cursor_type cursor |> of_cxtype in
                 Cast { kind = Implicit; qual_type; operand }
             | BinaryConditionalOperator ->
@@ -692,7 +696,7 @@ module Ast = struct
                   | [_; cond; _; else_branch] ->
                       cond, else_branch
                   | _ ->
-                      invalid_structure "expr_of_cxcursor (BinaryConditionalOperator)" cursor in
+                      invalid_structure "expr_of_cxcursor" cursor in
                 ConditionalOperator { cond; then_branch = None; else_branch }
             | Unknown -> UnexposedExpr { s = get_cursor_spelling cursor }
           end
@@ -773,7 +777,8 @@ module Type = struct
   module Map = Map.Make (Self)
 
   let make ?(const = false) ?(volatile = false) ?(restrict = false) desc : t =
-    { cxtype = get_cursor_type (get_null_cursor ()); const; volatile; restrict; desc }
+    { cxtype = get_cursor_type (get_null_cursor ());
+      const; volatile; restrict; desc }
 
   let of_cxtype = Ast.of_cxtype
 
