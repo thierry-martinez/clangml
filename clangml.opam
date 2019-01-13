@@ -11,5 +11,11 @@ build: [
 ]
 install: [make "install"]
 remove: [make "uninstall"]
-depends: ["stdcompat" "conf-clang" "ppx_deriving" "visitors"]
+depends: [
+  "stdcompat"
+  "conf-clang"
+  "ppx_deriving"
+  "visitors"
+  "dune" {>= "1.2"}
+]
 available: [ocaml-version >= "4.02" & ocaml-version < "4.08.0"]
