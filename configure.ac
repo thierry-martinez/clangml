@@ -122,6 +122,16 @@ AS_IF([test "x$LLVM_VERSION" = "x"],
   [AC_MSG_ERROR([[unable to run $LLVM_CONFIG --version]])])
 AC_MSG_RESULT([[$LLVM_VERSION]])
 
+AC_ARG_WITH([llvm-version],
+  AS_HELP_STRING([--with-llvm-version=VERSION],
+    [Sets the LLVM version.]),
+  [AC_SUBST([LLVM_VERSION], [$with_llvm_version])
+   AC_MSG_NOTICE([[Will consider bindings for version $LLVM_VERSION (--with-llvm-version)]])])
+
+AS_IF([test -d $srcdir/bootstrap/$LLVM_VERSION],
+  [true],
+  [AC_MSG_ERROR([LLVM version $LLVM_VERSION not supported. Please report: thierry.martinez@inria.fr . You may try to force another bindings version with ./configure --with-llvm-version= (to obtain the list of supported versions: ls $srcdir/bootstrap).])])
+
 AC_SUBST([LLVM_CFLAGS], [[`$LLVM_CONFIG --cflags `]])
 
 AC_SUBST([LLVM_LDFLAGS], [[`$LLVM_CONFIG --ldflags`]])
