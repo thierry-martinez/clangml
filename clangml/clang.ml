@@ -259,11 +259,6 @@ module Ast = struct
         | Pointer ->
             let pointee = cxtype |> get_pointee_type |> of_cxtype in
             Pointer pointee
-        | Elaborated ->
-            Elaborated {
-              keyword = ext_elaborated_type_get_keyword cxtype;
-              named_type = type_get_named_type cxtype |> of_cxtype;
-            }
         | Enum ->
             let name = cxtype |> get_type_declaration |> get_cursor_spelling in
             Enum name
@@ -281,13 +276,17 @@ module Ast = struct
         | Complex ->
             let element_type = cxtype |> get_element_type |> of_cxtype in 
             Complex element_type
-        | Unexposed ->
+        | _ ->
             begin
               match ext_get_type_kind cxtype with
               | Paren -> ParenType (cxtype |> ext_get_inner_type |> of_cxtype)
+              | Elaborated -> (* Here for Clang 3.8.1 *)
+                  Elaborated {
+                    keyword = ext_elaborated_type_get_keyword cxtype;
+                    named_type = ext_type_get_named_type cxtype |> of_cxtype;
+                  }
               | _ -> BuiltinType (get_type_kind cxtype)
-            end
-        | _ -> BuiltinType (get_type_kind cxtype) in
+            end in
       match desc with
       | ParenType inner when Options.options.ignore_paren_in_types -> inner
       | _ ->
@@ -669,16 +668,7 @@ module Ast = struct
             | _ -> invalid_structure "expr_of_cxcursor" cursor in
           CompoundLiteral { qual_type; init }
       | UnaryExpr ->
-          let kind = cursor |> ext_unary_expr_get_kind in
-          let argument =
-            match list_of_children cursor with
-            | [argument] -> ArgumentExpr (argument |> expr_of_cxcursor)
-            | [] ->
-                let qual_type =
-                  cursor |> ext_unary_expr_get_argument_type |> of_cxtype in
-                ArgumentType qual_type
-            | _ -> invalid_structure "expr_of_cxcursor (UnaryExpr)" cursor in
-          UnaryExpr { kind; argument }
+          unary_expr_of_cxcursor cursor
       | UnexposedExpr ->
           begin
             match ext_get_cursor_kind cursor with
@@ -698,9 +688,23 @@ module Ast = struct
                   | _ ->
                       invalid_structure "expr_of_cxcursor" cursor in
                 ConditionalOperator { cond; then_branch = None; else_branch }
+            | UnaryExprOrTypeTraitExpr -> (* for Clang 3.8.1 *)
+                unary_expr_of_cxcursor cursor
             | Unknown -> UnexposedExpr { s = get_cursor_spelling cursor }
           end
       | _ -> OtherExpr
+
+    and unary_expr_of_cxcursor cursor =
+      let kind = cursor |> ext_unary_expr_get_kind in
+      let argument =
+        match list_of_children cursor with
+        | [argument] -> ArgumentExpr (argument |> expr_of_cxcursor)
+        | [] ->
+            let qual_type =
+              cursor |> ext_unary_expr_get_argument_type |> of_cxtype in
+            ArgumentType qual_type
+        | _ -> invalid_structure "expr_of_cxcursor (UnaryExpr)" cursor in
+      UnaryExpr { kind; argument }
 
     let translation_unit_of_cxcursor cursor =
       let filename = get_cursor_spelling cursor in

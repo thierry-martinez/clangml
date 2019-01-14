@@ -122,10 +122,14 @@ AS_IF([test "x$LLVM_VERSION" = "x"],
   [AC_MSG_ERROR([[unable to run $LLVM_CONFIG --version]])])
 AC_MSG_RESULT([[$LLVM_VERSION]])
 
+# Some version equivalences
+AS_IF([test "x$LLVM_VERSION" = "x3.8.0"],
+  [AC_SUBST([LLVM_VERSION], [[3.8.1]])])
+
 AC_ARG_WITH([llvm-version],
   AS_HELP_STRING([--with-llvm-version=VERSION],
     [Sets the LLVM version.]),
-  [AC_SUBST([LLVM_VERSION], [$with_llvm_version])
+  [AC_SUBST([LLVM_VERSION], [["$with_llvm_version"]])
    AC_MSG_NOTICE([[Will consider bindings for version $LLVM_VERSION (--with-llvm-version)]])])
 
 AS_IF([test -d $srcdir/bootstrap/$LLVM_VERSION],
@@ -140,9 +144,12 @@ AC_SUBST([LLVM_LIBS], [[`$LLVM_CONFIG --libs`]])
 
 AC_SUBST([LLVM_LIBDIR], [[`$LLVM_CONFIG --libdir`]])
 
-AC_SUBST([CFLAGS], [["$LLVM_CFLAGS"]])
+AC_SUBST([LLVM_VERSION_MACRO],
+  [[LLVM_VERSION_`echo $LLVM_VERSION | sed 's/[.]/_/g'`]])
 
-AC_SUBST([CPPFLAGS], [["$LLVM_CFLAGS"]])
+AC_SUBST([CFLAGS], [["$LLVM_CFLAGS -D$LLVM_VERSION_MACRO -I$srcdir/clangml"]])
+
+AC_SUBST([CPPFLAGS], [["$LLVM_CFLAGS -D$LLVM_VERSION_MACRO -I$srcdir/clangml"]])
 
 AC_CHECK_HEADERS([clang-c/Index.h], [],
   [AC_MSG_ERROR([[Header clang-c/Index.h not found]])])

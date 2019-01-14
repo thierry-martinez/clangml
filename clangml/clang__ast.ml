@@ -591,7 +591,12 @@ let () =
     check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
     | [{ desc = Function {
         name = "f"; 
-        function_type = { calling_conv = X86VectorCall }}}] -> ()
+        function_type = { calling_conv = X86VectorCall }}}] ->
+        assert (Clang.get_clang_version () >= "clang version 3.9.0")
+    | [{ desc = Function {
+        name = "f"; 
+        function_type = { calling_conv = C }}}] ->
+        assert (Clang.get_clang_version () < "clang version 3.9.0")
     | _ -> assert false
     ]}
  *)
@@ -904,21 +909,27 @@ let () =
       assert (Clang.Ast.int_of_literal one = 1)
   | _ -> assert false
 
+    ]}
+
+    Init statements in [if] (C++17) are available since 3.9.0.
+
+    {[
 let example = "if (int i = 1; i) { i; }"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp" example) @@ fun ast -> match ast with
-  | [{ desc = If {
-       init = Some { desc = Decl [{ desc = Var {
-         name = "i";
-         qual_type = { desc = BuiltinType Int };
-         init = Some { desc = IntegerLiteral one }}}] };
-       condition_variable = None;
-       then_branch = { desc = Compound [{
-         desc = Expr { desc = DeclRef "i" }}] };
-       else_branch = None }}] ->
-      assert (Clang.Ast.int_of_literal one = 1)
-  | _ -> assert false
+  if Clang.get_clang_version () >= "clang version 3.9.0" then
+    check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp" example) @@ fun ast -> match ast with
+    | [{ desc = If {
+         init = Some { desc = Decl [{ desc = Var {
+           name = "i";
+           qual_type = { desc = BuiltinType Int };
+           init = Some { desc = IntegerLiteral one }}}] };
+         condition_variable = None;
+         then_branch = { desc = Compound [{
+           desc = Expr { desc = DeclRef "i" }}] };
+         else_branch = None }}] ->
+        assert (Clang.Ast.int_of_literal one = 1)
+    | _ -> assert false
    ]}*)
   | Switch of {
       init : stmt option; (** C++17 *)
@@ -977,33 +988,39 @@ let () =
       assert (Clang.Ast.int_of_literal one' = 1);
       assert (Clang.Ast.int_of_literal two = 2)
   | _ -> assert false
+    ]}
 
+
+    Init statements in [if] (C++17) are available since 3.9.0.
+
+    {[
 let example =
   "switch (int i = 1; i) { case 1: f(); break; case 2: break; default:;}"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp" example) @@ fun ast -> match ast with
-  | [{ desc = Switch {
-      init = Some { desc = Decl [{ desc = Var {
-         name = "i";
-         qual_type = { desc = BuiltinType Int };
-         init = Some { desc = IntegerLiteral one }}}] };
-      condition_variable = None;
-      cond = { desc = DeclRef "i" };
-      body = { desc = Compound [
-        { desc = Case {
-          lhs = { desc = IntegerLiteral one' };
-          body = { desc =
-            Expr { desc = Call { callee = { desc = DeclRef "f" }; args = [] }}}}};
-        { desc = Break };
-        { desc = Case {
-          lhs = { desc = IntegerLiteral two };
-          body = { desc = Break }}};
-        { desc = Default { desc = Null }}] }}}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
-      assert (Clang.Ast.int_of_literal one' = 1);
-      assert (Clang.Ast.int_of_literal two = 2)
-  | _ -> assert false
+  if Clang.get_clang_version () >= "clang version 3.9.0" then
+    check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp" example) @@ fun ast -> match ast with
+    | [{ desc = Switch {
+        init = Some { desc = Decl [{ desc = Var {
+           name = "i";
+           qual_type = { desc = BuiltinType Int };
+           init = Some { desc = IntegerLiteral one }}}] };
+        condition_variable = None;
+        cond = { desc = DeclRef "i" };
+        body = { desc = Compound [
+          { desc = Case {
+            lhs = { desc = IntegerLiteral one' };
+            body = { desc =
+              Expr { desc = Call { callee = { desc = DeclRef "f" }; args = [] }}}}};
+          { desc = Break };
+          { desc = Case {
+            lhs = { desc = IntegerLiteral two };
+            body = { desc = Break }}};
+          { desc = Default { desc = Null }}] }}}] ->
+        assert (Clang.Ast.int_of_literal one = 1);
+        assert (Clang.Ast.int_of_literal one' = 1);
+        assert (Clang.Ast.int_of_literal two = 2)
+    | _ -> assert false
     ]}*)
   | Case of {
       lhs : expr;

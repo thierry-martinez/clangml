@@ -77,7 +77,7 @@ clang_ext_StringLiteral_GetString(CXCursor c);
 
 enum clang_ext_UnaryOperatorKind {
   #define UNARY_OPERATION(Name, Spelling) CLANG_EXT_UNARY_OPERATOR_##Name,
-  #include <clang/AST/OperationKinds.def>
+  #include "clangml_OperationKinds.def"
 };
 
 enum clang_ext_UnaryOperatorKind
@@ -89,7 +89,7 @@ clang_ext_UnaryOperator_getOpcodeSpelling(
 
 enum clang_ext_BinaryOperatorKind {
   #define BINARY_OPERATION(Name, Spelling) CLANG_EXT_BINARY_OPERATOR_##Name,
-  #include <clang/AST/OperationKinds.def>
+  #include "clangml_OperationKinds.def"
 };
 
 enum clang_ext_BinaryOperatorKind
@@ -173,6 +173,7 @@ clang_ext_Stmt_GetClassKind(CXCursor c);
 enum clang_ext_CursorKind {
   ECK_ImplicitCastExpr,
   ECK_BinaryConditionalOperator,
+  ECK_UnaryExprOrTypeTraitExpr, /* for Clang 3.8.1 */
   ECK_Unknown
 };
 
@@ -182,6 +183,7 @@ clang_ext_GetCursorKind(CXCursor c);
 enum clang_ext_TypeKind {
   ETK_Invalid,
   ETK_Paren,
+  ETK_Elaborated, /* for Clang 3.8.1 */
   ETK_Unknown
 };
 
@@ -224,3 +226,6 @@ clang_ext_UnaryExpr_GetKind(CXCursor c);
 
 CXType
 clang_ext_UnaryExpr_GetArgumentType(CXCursor c);
+
+CXType
+clang_ext_Type_getNamedType(CXType CT);

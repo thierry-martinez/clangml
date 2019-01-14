@@ -185,7 +185,7 @@ MakeCXCursor(clang::Expr *E, CXTranslationUnit TU)
    default statement with S as substatement. Visiting the (single) child of
    this cursor calls libclang's MakeCXCursor on S.
 */
-static CXCursor
+static CXCursor __attribute__((unused))
 MakeCXCursor(const clang::Stmt *S, CXTranslationUnit TU)
 {
   clang::DefaultStmt CS(
@@ -445,7 +445,7 @@ extern "C" {
 #define UNARY_OPERATION(Name, Spelling)        \
       case CLANG_EXT_UNARY_OPERATOR_##Name:     \
         return cxstring_createRef(Spelling);
-#include <clang/AST/OperationKinds.def>
+#include "clangml_OperationKinds.def"
     }
     //llvm_unreachable("Unsupported BinaryOperatorKind");
     return cxstring_createRef("");
@@ -469,7 +469,7 @@ extern "C" {
 #define BINARY_OPERATION(Name, Spelling)        \
       case CLANG_EXT_BINARY_OPERATOR_##Name:     \
         return cxstring_createRef(Spelling);
-#include <clang/AST/OperationKinds.def>
+#include "clangml_OperationKinds.def"
     }
     //llvm_unreachable("Unsupported BinaryOperatorKind");
     return cxstring_createRef("");
@@ -502,9 +502,11 @@ extern "C" {
   {
     if (auto S = llvm::dyn_cast_or_null<clang::IfStmt>(getCursorStmt(c))) {
       unsigned Result = 0;
+      #ifndef LLVM_VERSION_3_8_1
       if (S->getInit()) {
         Result |= CLANG_EXT_IF_STMT_INIT;
       }
+      #endif
       if (S->getConditionVariable()) {
         Result |= CLANG_EXT_IF_STMT_CONDITION_VARIABLE;
       }
@@ -519,9 +521,11 @@ extern "C" {
   CXCursor
   clang_ext_IfStmt_getInit(CXCursor c)
   {
+    #ifndef LLVM_VERSION_3_8_1
     if (auto S = llvm::dyn_cast_or_null<clang::IfStmt>(getCursorStmt(c))) {
       return MakeCXCursor(S->getInit(), getCursorTU(c));
     }
+    #endif
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
   }
 
@@ -530,9 +534,11 @@ extern "C" {
   {
     if (auto S = llvm::dyn_cast_or_null<clang::SwitchStmt>(getCursorStmt(c))) {
       unsigned Result = 0;
+      #ifndef LLVM_VERSION_3_8_1
       if (S->getInit()) {
         Result |= CLANG_EXT_SWITCH_STMT_INIT;
       }
+      #endif
       if (S->getConditionVariable()) {
         Result |= CLANG_EXT_SWITCH_STMT_CONDITION_VARIABLE;
       }
@@ -544,9 +550,11 @@ extern "C" {
   CXCursor
   clang_ext_SwitchStmt_getInit(CXCursor c)
   {
+    #ifndef LLVM_VERSION_3_8_1
     if (auto S = llvm::dyn_cast_or_null<clang::SwitchStmt>(getCursorStmt(c))) {
       return MakeCXCursor(S->getInit(), getCursorTU(c));
     }
+    #endif
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
   }
 
@@ -625,6 +633,7 @@ extern "C" {
     switch (s->getStmtClass()) {
     CASE(ImplicitCastExpr);
     CASE(BinaryConditionalOperator);
+    CASE(UnaryExprOrTypeTraitExpr);
     default:
       return ECK_Unknown;
     }
@@ -639,6 +648,7 @@ extern "C" {
       #define CASE(X) case clang::Type::X: return ETK_##X
       switch (TP->getTypeClass()) {
       CASE(Paren);
+      CASE(Elaborated); /* For Clang 3.8.1 */
       default:
         return ETK_Unknown;
       }
@@ -728,4 +738,21 @@ extern "C" {
     }
     return MakeCXTypeInvalid(getCursorTU(c));
   }
+
+  CXType
+  clang_ext_Type_getNamedType(CXType CT)
+  {
+    #ifdef LLVM_VERSION_3_8_1
+    clang::QualType T = GetQualType(CT);
+    const clang::Type *TP = T.getTypePtrOrNull();
+
+    if (TP && TP->getTypeClass() == clang::Type::Elaborated)
+      return MakeCXType(llvm::cast<clang::ElaboratedType>(TP)->getNamedType(), GetTU(CT));
+
+    return MakeCXTypeInvalid(GetTU(CT));
+    #else
+    return clang_Type_getNamedType(CT);
+    #endif
+  }
+
 }

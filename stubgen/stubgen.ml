@@ -1780,11 +1780,20 @@ let output_warning channel =
 "
 
 let main cflags llvm_config prefix =
-  let llvm_version = run_llvm_config llvm_config ["--version"] in
-  let llvm_prefix = run_llvm_config llvm_config ["--prefix"] in
-  let llvm_cflags = run_llvm_config llvm_config ["--cflags"] in
+  let llvm_flags =
+    match llvm_config with
+    | None -> []
+    | Some llvm_config ->
+        let llvm_version = run_llvm_config llvm_config ["--version"] in
+        let llvm_prefix = run_llvm_config llvm_config ["--prefix"] in
+        let llvm_cflags = run_llvm_config llvm_config ["--cflags"] in
+        String.split_on_char ' ' llvm_cflags @
+        ["-I"; List.fold_left Filename.concat llvm_prefix
+           ["lib"; "clang"; llvm_version; "include"]; "-I";
+         "/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include/";
+         "-DLLVM_VERSION_" ^ String.map (fun c -> if c = '.' then '_' else c) llvm_version] in
   let cflags = cflags |> List.map @@ String.split_on_char ',' |> List.flatten in
-  let clang_options = cflags @ String.split_on_char ' ' llvm_cflags @ ["-I"; List.fold_left Filename.concat llvm_prefix ["lib"; "clang"; llvm_version; "include"]; "-I"; "/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include/"] in
+  let clang_options = cflags @ llvm_flags in
   let module_interface =
     empty_module_interface |>
     add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|clang_VirtualFileOverlay_writeToBuffer|clang_free|constructUSR|clang_executeOnThread|clang_getDiagnosticCategoryName|^clang_getDefinitionSpellingAndExtent$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_annotateTokens$|^clang_getFileUniqueID$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$") hidden_function_interface |>
@@ -2080,12 +2089,13 @@ let option_cflags =
 let option_llvm_config =
   let doc = "Path to llvm-config" in
   Cmdliner.Arg.(
-    required & pos 0 (some non_dir_file) None & info [] ~docv:"LLVM_CONFIG" ~doc)
+    value & opt (some non_dir_file) None &
+    info ["llvm-config"] ~docv:"LLVM_CONFIG" ~doc)
 
 let option_prefix =
   let doc = "Prefix path for output files" in
   Cmdliner.Arg.(
-    required & pos 1 (some string) None & info [] ~docv:"LLVM_CONFIG" ~doc)
+    required & pos 0 (some string) None & info [] ~docv:"PREFIX" ~doc)
 
 let options = Cmdliner.Term.(
     const main $ option_cflags $ option_llvm_config $ option_prefix)
