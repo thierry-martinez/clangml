@@ -197,6 +197,7 @@ AS_IF([test -d clangml],
 
 cp $srcdir/dune-project .
 cp $srcdir/clangml.opam .
+cp $srcdir/clangml/clangml_OperationKinds.def clangml/
 
 AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang__bindings.ml], [clangml/clang__bindings.ml])
 
