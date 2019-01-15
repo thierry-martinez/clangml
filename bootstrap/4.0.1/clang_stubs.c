@@ -262,7 +262,7 @@ clang_getFileName_wrapper(value SFile_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -545,7 +545,7 @@ clang_getPresumedLocation_wrapper(value location_ocaml)
   {
     CAMLlocal1(field);
     field = caml_copy_string(clang_getCString(filename));
-clang_disposeString(filename);
+                    clang_disposeString(filename);
     Store_field(data, 0, field);
   }
   {
@@ -839,7 +839,7 @@ clang_loadDiagnostics_wrapper(value file_ocaml)
   {
     CAMLlocal1(field);
     field = caml_copy_string(clang_getCString(errorString));
-clang_disposeString(errorString);
+                    clang_disposeString(errorString);
     Store_field(data, 1, field);
   }
 
@@ -918,7 +918,7 @@ clang_formatDiagnostic_wrapper(value Diagnostic_ocaml, value Options_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -1001,7 +1001,7 @@ clang_getDiagnosticSpelling_wrapper(value arg_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -1020,13 +1020,13 @@ clang_getDiagnosticOption_wrapper(value Diag_ocaml)
   {
     CAMLlocal1(field);
     field = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     Store_field(data, 0, field);
   }
   {
     CAMLlocal1(field);
     field = caml_copy_string(clang_getCString(Disable));
-clang_disposeString(Disable);
+                    clang_disposeString(Disable);
     Store_field(data, 1, field);
   }
 
@@ -1058,7 +1058,7 @@ clang_getDiagnosticCategoryText_wrapper(value arg_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -1124,7 +1124,7 @@ clang_getDiagnosticFixIt_wrapper(value Diagnostic_ocaml, value FixIt_ocaml, valu
   {
     CAMLlocal1(field);
     field = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     Store_field(data, 0, field);
   }
   {
@@ -1147,7 +1147,7 @@ clang_getTranslationUnitSpelling_wrapper(value CTUnit_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -2741,7 +2741,7 @@ clang_getTypeSpelling_wrapper(value CT_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -3128,7 +3128,7 @@ clang_getDeclObjCTypeEncoding_wrapper(value C_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -3143,7 +3143,7 @@ clang_Type_getObjCEncoding_wrapper(value type_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -3158,7 +3158,7 @@ clang_getTypeKindSpelling_wrapper(value K_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -3788,7 +3788,7 @@ clang_getCursorUSR_wrapper(value arg_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -3803,7 +3803,7 @@ clang_getCursorSpelling_wrapper(value arg_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -3836,7 +3836,7 @@ clang_getCursorDisplayName_wrapper(value arg_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -4029,7 +4029,7 @@ clang_Cursor_getRawCommentText_wrapper(value C_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -4044,7 +4044,7 @@ clang_Cursor_getBriefCommentText_wrapper(value C_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -4059,7 +4059,7 @@ clang_Cursor_getMangling_wrapper(value arg_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -4078,7 +4078,7 @@ data = caml_alloc(result->Count, 0);
 for (unsigned int i = 0; i < result->Count; i++) {
   CAMLlocal1(field);
   field = caml_copy_string(clang_getCString(result->Strings[i]));
-clang_disposeString(result->Strings[i]);
+                    clang_disposeString(result->Strings[i]);
   Store_field(data, i, field);
 }
 clang_disposeStringSet(result);
@@ -4156,7 +4156,7 @@ clang_Module_getName_wrapper(value Module_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -4171,7 +4171,7 @@ clang_Module_getFullName_wrapper(value Module_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -4422,7 +4422,7 @@ clang_getCursorKindSpelling_wrapper(value Kind_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -4525,7 +4525,7 @@ clang_getCompletionChunkText_wrapper(value completion_string_ocaml, value chunk_
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -4614,7 +4614,7 @@ clang_getCompletionAnnotation_wrapper(value completion_string_ocaml, value annot
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -4629,7 +4629,7 @@ clang_getCompletionParent_wrapper(value completion_string_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -4644,7 +4644,7 @@ clang_getCompletionBriefComment_wrapper(value completion_string_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -4683,7 +4683,7 @@ clang_getClangVersion_wrapper()
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -5039,7 +5039,7 @@ clang_ext_Int_toString_wrapper(value c_ocaml, value Radix_ocaml, value isSigned_
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -5233,7 +5233,7 @@ clang_ext_Float_toString_wrapper(value f_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -5262,7 +5262,7 @@ clang_ext_StringLiteral_GetString_wrapper(value c_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -5337,7 +5337,7 @@ clang_ext_UnaryOperator_getOpcodeSpelling_wrapper(value Kind_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -5448,7 +5448,7 @@ clang_ext_BinaryOperator_getOpcodeSpelling_wrapper(value Kind_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -5597,7 +5597,7 @@ clang_ext_ElaboratedType_getKeywordSpelling_wrapper(value keyword_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -5640,7 +5640,7 @@ clang_ext_Stmt_GetClassName_wrapper(value c_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -5781,7 +5781,7 @@ clang_ext_AsmStmt_GetAsmString_wrapper(value c_ocaml)
   {
     CAMLlocal1(data);
     data = caml_copy_string(clang_getCString(result));
-clang_disposeString(result);
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }

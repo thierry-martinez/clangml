@@ -250,18 +250,6 @@ clang_CXIndex_getGlobalOptions_wrapper(value arg_ocaml)
   }
 }
 
-CAMLprim value
-clang_CXIndex_setInvocationEmissionPathOption_wrapper(value arg_ocaml, value Path_ocaml)
-{
-  CAMLparam2(arg_ocaml, Path_ocaml);
-  CXIndex arg;
-  arg = Cxindex_val(arg_ocaml);
-  const char * Path;
-  Path = String_val(Path_ocaml);
-  clang_CXIndex_setInvocationEmissionPathOption(arg, Path);
-  CAMLreturn(Val_unit);
-}
-
 DECLARE_OPAQUE(CXFile, cxfile, Cxfile_val, Val_cxfile, custom_finalize_default)
 
 CAMLprim value
@@ -326,31 +314,6 @@ clang_getFile_wrapper(value tu_ocaml, value file_name_ocaml)
   {
     CAMLlocal1(data);
     data = Val_cxfile(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_getFileContents_wrapper(value tu_ocaml, value file_ocaml)
-{
-  CAMLparam2(tu_ocaml, file_ocaml);
-  CXTranslationUnit tu;
-  tu = Cxtranslationunit_val(Field(tu_ocaml, 0));
-  CXFile file;
-  file = Cxfile_val(file_ocaml);
-  size_t size;
-  const char * result = clang_getFileContents(tu, file, &size);
-  {
-    CAMLlocal1(data);
-      if (result == NULL) {
-    data = Val_int(0);
-  }
-  else {
-    data = caml_alloc(1, 0);
-    Store_field(data, 0, caml_alloc_initialized_string(size, result));
-    
-  };
-
     CAMLreturn(data);
   }
 }
@@ -754,27 +717,6 @@ clang_getSkippedRanges_wrapper(value tu_ocaml, value file_ocaml)
   CXFile file;
   file = Cxfile_val(file_ocaml);
   CXSourceRangeList * result = clang_getSkippedRanges(tu, file);
-  {
-    CAMLlocal1(data);
-    
-data = caml_alloc(result->count, 0);
-for (unsigned int i = 0; i < result->count; i++) {
-  CAMLlocal1(field);
-  field = Val_cxsourcerange(result->ranges[i]);
-  Store_field(data, i, field);
-}
-clang_disposeSourceRangeList(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_getAllSkippedRanges_wrapper(value tu_ocaml)
-{
-  CAMLparam1(tu_ocaml);
-  CXTranslationUnit tu;
-  tu = Cxtranslationunit_val(Field(tu_ocaml, 0));
-  CXSourceRangeList * result = clang_getAllSkippedRanges(tu);
   {
     CAMLlocal1(data);
     
@@ -1483,20 +1425,6 @@ clang_saveTranslationUnit_wrapper(value TU_ocaml, value FileName_ocaml, value op
   }}
 
 CAMLprim value
-clang_suspendTranslationUnit_wrapper(value arg_ocaml)
-{
-  CAMLparam1(arg_ocaml);
-  CXTranslationUnit arg;
-  arg = Cxtranslationunit_val(Field(arg_ocaml, 0));
-  unsigned int result = clang_suspendTranslationUnit(arg);
-  {
-    CAMLlocal1(data);
-    data = Val_int(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
 clang_defaultReparseOptions_wrapper(value TU_ocaml)
 {
   CAMLparam1(TU_ocaml);
@@ -1616,51 +1544,6 @@ clang_getCXTUResourceUsage_wrapper(value TU_ocaml)
   }
 }
 
-DECLARE_OPAQUE(CXTargetInfo, cxtargetinfo, Cxtargetinfo_val, Val_cxtargetinfo, custom_finalize_default)
-
-CAMLprim value
-clang_getTranslationUnitTargetInfo_wrapper(value CTUnit_ocaml)
-{
-  CAMLparam1(CTUnit_ocaml);
-  CXTranslationUnit CTUnit;
-  CTUnit = Cxtranslationunit_val(Field(CTUnit_ocaml, 0));
-  CXTargetInfo result = clang_getTranslationUnitTargetInfo(CTUnit);
-  {
-    CAMLlocal1(data);
-    data = Val_cxtargetinfo(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_TargetInfo_getTriple_wrapper(value Info_ocaml)
-{
-  CAMLparam1(Info_ocaml);
-  CXTargetInfo Info;
-  Info = Cxtargetinfo_val(Info_ocaml);
-  CXString result = clang_TargetInfo_getTriple(Info);
-  {
-    CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
-                    clang_disposeString(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_TargetInfo_getPointerWidth_wrapper(value Info_ocaml)
-{
-  CAMLparam1(Info_ocaml);
-  CXTargetInfo Info;
-  Info = Cxtargetinfo_val(Info_ocaml);
-  int result = clang_TargetInfo_getPointerWidth(Info);
-  {
-    CAMLlocal1(data);
-    data = Val_int(result);
-    CAMLreturn(data);
-  }
-}
-
 enum CXCursorKind
 Cxcursorkind_val(value ocaml)
 {
@@ -1767,117 +1650,95 @@ Cxcursorkind_val(value ocaml)
   case 99: return CXCursor_ObjCBoolLiteralExpr;
   case 100: return CXCursor_ObjCSelfExpr;
   case 101: return CXCursor_OMPArraySectionExpr;
-  case 102: return CXCursor_ObjCAvailabilityCheckExpr;
-  case 103: return CXCursor_UnexposedStmt;
-  case 104: return CXCursor_LabelStmt;
-  case 105: return CXCursor_CompoundStmt;
-  case 106: return CXCursor_CaseStmt;
-  case 107: return CXCursor_DefaultStmt;
-  case 108: return CXCursor_IfStmt;
-  case 109: return CXCursor_SwitchStmt;
-  case 110: return CXCursor_WhileStmt;
-  case 111: return CXCursor_DoStmt;
-  case 112: return CXCursor_ForStmt;
-  case 113: return CXCursor_GotoStmt;
-  case 114: return CXCursor_IndirectGotoStmt;
-  case 115: return CXCursor_ContinueStmt;
-  case 116: return CXCursor_BreakStmt;
-  case 117: return CXCursor_ReturnStmt;
-  case 118: return CXCursor_GCCAsmStmt;
-  case 119: return CXCursor_ObjCAtTryStmt;
-  case 120: return CXCursor_ObjCAtCatchStmt;
-  case 121: return CXCursor_ObjCAtFinallyStmt;
-  case 122: return CXCursor_ObjCAtThrowStmt;
-  case 123: return CXCursor_ObjCAtSynchronizedStmt;
-  case 124: return CXCursor_ObjCAutoreleasePoolStmt;
-  case 125: return CXCursor_ObjCForCollectionStmt;
-  case 126: return CXCursor_CXXCatchStmt;
-  case 127: return CXCursor_CXXTryStmt;
-  case 128: return CXCursor_CXXForRangeStmt;
-  case 129: return CXCursor_SEHTryStmt;
-  case 130: return CXCursor_SEHExceptStmt;
-  case 131: return CXCursor_SEHFinallyStmt;
-  case 132: return CXCursor_MSAsmStmt;
-  case 133: return CXCursor_NullStmt;
-  case 134: return CXCursor_DeclStmt;
-  case 135: return CXCursor_OMPParallelDirective;
-  case 136: return CXCursor_OMPSimdDirective;
-  case 137: return CXCursor_OMPForDirective;
-  case 138: return CXCursor_OMPSectionsDirective;
-  case 139: return CXCursor_OMPSectionDirective;
-  case 140: return CXCursor_OMPSingleDirective;
-  case 141: return CXCursor_OMPParallelForDirective;
-  case 142: return CXCursor_OMPParallelSectionsDirective;
-  case 143: return CXCursor_OMPTaskDirective;
-  case 144: return CXCursor_OMPMasterDirective;
-  case 145: return CXCursor_OMPCriticalDirective;
-  case 146: return CXCursor_OMPTaskyieldDirective;
-  case 147: return CXCursor_OMPBarrierDirective;
-  case 148: return CXCursor_OMPTaskwaitDirective;
-  case 149: return CXCursor_OMPFlushDirective;
-  case 150: return CXCursor_SEHLeaveStmt;
-  case 151: return CXCursor_OMPOrderedDirective;
-  case 152: return CXCursor_OMPAtomicDirective;
-  case 153: return CXCursor_OMPForSimdDirective;
-  case 154: return CXCursor_OMPParallelForSimdDirective;
-  case 155: return CXCursor_OMPTargetDirective;
-  case 156: return CXCursor_OMPTeamsDirective;
-  case 157: return CXCursor_OMPTaskgroupDirective;
-  case 158: return CXCursor_OMPCancellationPointDirective;
-  case 159: return CXCursor_OMPCancelDirective;
-  case 160: return CXCursor_OMPTargetDataDirective;
-  case 161: return CXCursor_OMPTaskLoopDirective;
-  case 162: return CXCursor_OMPTaskLoopSimdDirective;
-  case 163: return CXCursor_OMPDistributeDirective;
-  case 164: return CXCursor_OMPTargetEnterDataDirective;
-  case 165: return CXCursor_OMPTargetExitDataDirective;
-  case 166: return CXCursor_OMPTargetParallelDirective;
-  case 167: return CXCursor_OMPTargetParallelForDirective;
-  case 168: return CXCursor_OMPTargetUpdateDirective;
-  case 169: return CXCursor_OMPDistributeParallelForDirective;
-  case 170: return CXCursor_OMPDistributeParallelForSimdDirective;
-  case 171: return CXCursor_OMPDistributeSimdDirective;
-  case 172: return CXCursor_OMPTargetParallelForSimdDirective;
-  case 173: return CXCursor_OMPTargetSimdDirective;
-  case 174: return CXCursor_OMPTeamsDistributeDirective;
-  case 175: return CXCursor_OMPTeamsDistributeSimdDirective;
-  case 176: return CXCursor_OMPTeamsDistributeParallelForSimdDirective;
-  case 177: return CXCursor_OMPTeamsDistributeParallelForDirective;
-  case 178: return CXCursor_OMPTargetTeamsDirective;
-  case 179: return CXCursor_OMPTargetTeamsDistributeDirective;
-  case 180: return CXCursor_OMPTargetTeamsDistributeParallelForDirective;
-  case 181: return CXCursor_OMPTargetTeamsDistributeParallelForSimdDirective;
-  case 182: return CXCursor_OMPTargetTeamsDistributeSimdDirective;
-  case 183: return CXCursor_TranslationUnit;
-  case 184: return CXCursor_UnexposedAttr;
-  case 185: return CXCursor_IBActionAttr;
-  case 186: return CXCursor_IBOutletAttr;
-  case 187: return CXCursor_IBOutletCollectionAttr;
-  case 188: return CXCursor_CXXFinalAttr;
-  case 189: return CXCursor_CXXOverrideAttr;
-  case 190: return CXCursor_AnnotateAttr;
-  case 191: return CXCursor_AsmLabelAttr;
-  case 192: return CXCursor_PackedAttr;
-  case 193: return CXCursor_PureAttr;
-  case 194: return CXCursor_ConstAttr;
-  case 195: return CXCursor_NoDuplicateAttr;
-  case 196: return CXCursor_CUDAConstantAttr;
-  case 197: return CXCursor_CUDADeviceAttr;
-  case 198: return CXCursor_CUDAGlobalAttr;
-  case 199: return CXCursor_CUDAHostAttr;
-  case 200: return CXCursor_CUDASharedAttr;
-  case 201: return CXCursor_VisibilityAttr;
-  case 202: return CXCursor_DLLExport;
-  case 203: return CXCursor_DLLImport;
-  case 204: return CXCursor_PreprocessingDirective;
-  case 205: return CXCursor_MacroDefinition;
-  case 206: return CXCursor_MacroExpansion;
-  case 207: return CXCursor_InclusionDirective;
-  case 208: return CXCursor_ModuleImportDecl;
-  case 209: return CXCursor_TypeAliasTemplateDecl;
-  case 210: return CXCursor_StaticAssert;
-  case 211: return CXCursor_FriendDecl;
-  case 212: return CXCursor_OverloadCandidate;
+  case 102: return CXCursor_UnexposedStmt;
+  case 103: return CXCursor_LabelStmt;
+  case 104: return CXCursor_CompoundStmt;
+  case 105: return CXCursor_CaseStmt;
+  case 106: return CXCursor_DefaultStmt;
+  case 107: return CXCursor_IfStmt;
+  case 108: return CXCursor_SwitchStmt;
+  case 109: return CXCursor_WhileStmt;
+  case 110: return CXCursor_DoStmt;
+  case 111: return CXCursor_ForStmt;
+  case 112: return CXCursor_GotoStmt;
+  case 113: return CXCursor_IndirectGotoStmt;
+  case 114: return CXCursor_ContinueStmt;
+  case 115: return CXCursor_BreakStmt;
+  case 116: return CXCursor_ReturnStmt;
+  case 117: return CXCursor_GCCAsmStmt;
+  case 118: return CXCursor_ObjCAtTryStmt;
+  case 119: return CXCursor_ObjCAtCatchStmt;
+  case 120: return CXCursor_ObjCAtFinallyStmt;
+  case 121: return CXCursor_ObjCAtThrowStmt;
+  case 122: return CXCursor_ObjCAtSynchronizedStmt;
+  case 123: return CXCursor_ObjCAutoreleasePoolStmt;
+  case 124: return CXCursor_ObjCForCollectionStmt;
+  case 125: return CXCursor_CXXCatchStmt;
+  case 126: return CXCursor_CXXTryStmt;
+  case 127: return CXCursor_CXXForRangeStmt;
+  case 128: return CXCursor_SEHTryStmt;
+  case 129: return CXCursor_SEHExceptStmt;
+  case 130: return CXCursor_SEHFinallyStmt;
+  case 131: return CXCursor_MSAsmStmt;
+  case 132: return CXCursor_NullStmt;
+  case 133: return CXCursor_DeclStmt;
+  case 134: return CXCursor_OMPParallelDirective;
+  case 135: return CXCursor_OMPSimdDirective;
+  case 136: return CXCursor_OMPForDirective;
+  case 137: return CXCursor_OMPSectionsDirective;
+  case 138: return CXCursor_OMPSectionDirective;
+  case 139: return CXCursor_OMPSingleDirective;
+  case 140: return CXCursor_OMPParallelForDirective;
+  case 141: return CXCursor_OMPParallelSectionsDirective;
+  case 142: return CXCursor_OMPTaskDirective;
+  case 143: return CXCursor_OMPMasterDirective;
+  case 144: return CXCursor_OMPCriticalDirective;
+  case 145: return CXCursor_OMPTaskyieldDirective;
+  case 146: return CXCursor_OMPBarrierDirective;
+  case 147: return CXCursor_OMPTaskwaitDirective;
+  case 148: return CXCursor_OMPFlushDirective;
+  case 149: return CXCursor_SEHLeaveStmt;
+  case 150: return CXCursor_OMPOrderedDirective;
+  case 151: return CXCursor_OMPAtomicDirective;
+  case 152: return CXCursor_OMPForSimdDirective;
+  case 153: return CXCursor_OMPParallelForSimdDirective;
+  case 154: return CXCursor_OMPTargetDirective;
+  case 155: return CXCursor_OMPTeamsDirective;
+  case 156: return CXCursor_OMPTaskgroupDirective;
+  case 157: return CXCursor_OMPCancellationPointDirective;
+  case 158: return CXCursor_OMPCancelDirective;
+  case 159: return CXCursor_OMPTargetDataDirective;
+  case 160: return CXCursor_OMPTaskLoopDirective;
+  case 161: return CXCursor_OMPTaskLoopSimdDirective;
+  case 162: return CXCursor_OMPDistributeDirective;
+  case 163: return CXCursor_TranslationUnit;
+  case 164: return CXCursor_UnexposedAttr;
+  case 165: return CXCursor_IBActionAttr;
+  case 166: return CXCursor_IBOutletAttr;
+  case 167: return CXCursor_IBOutletCollectionAttr;
+  case 168: return CXCursor_CXXFinalAttr;
+  case 169: return CXCursor_CXXOverrideAttr;
+  case 170: return CXCursor_AnnotateAttr;
+  case 171: return CXCursor_AsmLabelAttr;
+  case 172: return CXCursor_PackedAttr;
+  case 173: return CXCursor_PureAttr;
+  case 174: return CXCursor_ConstAttr;
+  case 175: return CXCursor_NoDuplicateAttr;
+  case 176: return CXCursor_CUDAConstantAttr;
+  case 177: return CXCursor_CUDADeviceAttr;
+  case 178: return CXCursor_CUDAGlobalAttr;
+  case 179: return CXCursor_CUDAHostAttr;
+  case 180: return CXCursor_CUDASharedAttr;
+  case 181: return CXCursor_VisibilityAttr;
+  case 182: return CXCursor_DLLExport;
+  case 183: return CXCursor_DLLImport;
+  case 184: return CXCursor_PreprocessingDirective;
+  case 185: return CXCursor_MacroDefinition;
+  case 186: return CXCursor_MacroExpansion;
+  case 187: return CXCursor_InclusionDirective;
+  case 188: return CXCursor_ModuleImportDecl;
+  case 189: return CXCursor_TypeAliasTemplateDecl;
+  case 190: return CXCursor_OverloadCandidate;
   }
   failwith_fmt("invalid value for Cxcursorkind_val: %d", Int_val(ocaml));
   return CXCursor_UnexposedDecl;
@@ -1989,117 +1850,95 @@ Val_cxcursorkind(enum CXCursorKind v)
   case CXCursor_ObjCBoolLiteralExpr: return Val_int(99);
   case CXCursor_ObjCSelfExpr: return Val_int(100);
   case CXCursor_OMPArraySectionExpr: return Val_int(101);
-  case CXCursor_ObjCAvailabilityCheckExpr: return Val_int(102);
-  case CXCursor_UnexposedStmt: return Val_int(103);
-  case CXCursor_LabelStmt: return Val_int(104);
-  case CXCursor_CompoundStmt: return Val_int(105);
-  case CXCursor_CaseStmt: return Val_int(106);
-  case CXCursor_DefaultStmt: return Val_int(107);
-  case CXCursor_IfStmt: return Val_int(108);
-  case CXCursor_SwitchStmt: return Val_int(109);
-  case CXCursor_WhileStmt: return Val_int(110);
-  case CXCursor_DoStmt: return Val_int(111);
-  case CXCursor_ForStmt: return Val_int(112);
-  case CXCursor_GotoStmt: return Val_int(113);
-  case CXCursor_IndirectGotoStmt: return Val_int(114);
-  case CXCursor_ContinueStmt: return Val_int(115);
-  case CXCursor_BreakStmt: return Val_int(116);
-  case CXCursor_ReturnStmt: return Val_int(117);
-  case CXCursor_GCCAsmStmt: return Val_int(118);
-  case CXCursor_ObjCAtTryStmt: return Val_int(119);
-  case CXCursor_ObjCAtCatchStmt: return Val_int(120);
-  case CXCursor_ObjCAtFinallyStmt: return Val_int(121);
-  case CXCursor_ObjCAtThrowStmt: return Val_int(122);
-  case CXCursor_ObjCAtSynchronizedStmt: return Val_int(123);
-  case CXCursor_ObjCAutoreleasePoolStmt: return Val_int(124);
-  case CXCursor_ObjCForCollectionStmt: return Val_int(125);
-  case CXCursor_CXXCatchStmt: return Val_int(126);
-  case CXCursor_CXXTryStmt: return Val_int(127);
-  case CXCursor_CXXForRangeStmt: return Val_int(128);
-  case CXCursor_SEHTryStmt: return Val_int(129);
-  case CXCursor_SEHExceptStmt: return Val_int(130);
-  case CXCursor_SEHFinallyStmt: return Val_int(131);
-  case CXCursor_MSAsmStmt: return Val_int(132);
-  case CXCursor_NullStmt: return Val_int(133);
-  case CXCursor_DeclStmt: return Val_int(134);
-  case CXCursor_OMPParallelDirective: return Val_int(135);
-  case CXCursor_OMPSimdDirective: return Val_int(136);
-  case CXCursor_OMPForDirective: return Val_int(137);
-  case CXCursor_OMPSectionsDirective: return Val_int(138);
-  case CXCursor_OMPSectionDirective: return Val_int(139);
-  case CXCursor_OMPSingleDirective: return Val_int(140);
-  case CXCursor_OMPParallelForDirective: return Val_int(141);
-  case CXCursor_OMPParallelSectionsDirective: return Val_int(142);
-  case CXCursor_OMPTaskDirective: return Val_int(143);
-  case CXCursor_OMPMasterDirective: return Val_int(144);
-  case CXCursor_OMPCriticalDirective: return Val_int(145);
-  case CXCursor_OMPTaskyieldDirective: return Val_int(146);
-  case CXCursor_OMPBarrierDirective: return Val_int(147);
-  case CXCursor_OMPTaskwaitDirective: return Val_int(148);
-  case CXCursor_OMPFlushDirective: return Val_int(149);
-  case CXCursor_SEHLeaveStmt: return Val_int(150);
-  case CXCursor_OMPOrderedDirective: return Val_int(151);
-  case CXCursor_OMPAtomicDirective: return Val_int(152);
-  case CXCursor_OMPForSimdDirective: return Val_int(153);
-  case CXCursor_OMPParallelForSimdDirective: return Val_int(154);
-  case CXCursor_OMPTargetDirective: return Val_int(155);
-  case CXCursor_OMPTeamsDirective: return Val_int(156);
-  case CXCursor_OMPTaskgroupDirective: return Val_int(157);
-  case CXCursor_OMPCancellationPointDirective: return Val_int(158);
-  case CXCursor_OMPCancelDirective: return Val_int(159);
-  case CXCursor_OMPTargetDataDirective: return Val_int(160);
-  case CXCursor_OMPTaskLoopDirective: return Val_int(161);
-  case CXCursor_OMPTaskLoopSimdDirective: return Val_int(162);
-  case CXCursor_OMPDistributeDirective: return Val_int(163);
-  case CXCursor_OMPTargetEnterDataDirective: return Val_int(164);
-  case CXCursor_OMPTargetExitDataDirective: return Val_int(165);
-  case CXCursor_OMPTargetParallelDirective: return Val_int(166);
-  case CXCursor_OMPTargetParallelForDirective: return Val_int(167);
-  case CXCursor_OMPTargetUpdateDirective: return Val_int(168);
-  case CXCursor_OMPDistributeParallelForDirective: return Val_int(169);
-  case CXCursor_OMPDistributeParallelForSimdDirective: return Val_int(170);
-  case CXCursor_OMPDistributeSimdDirective: return Val_int(171);
-  case CXCursor_OMPTargetParallelForSimdDirective: return Val_int(172);
-  case CXCursor_OMPTargetSimdDirective: return Val_int(173);
-  case CXCursor_OMPTeamsDistributeDirective: return Val_int(174);
-  case CXCursor_OMPTeamsDistributeSimdDirective: return Val_int(175);
-  case CXCursor_OMPTeamsDistributeParallelForSimdDirective: return Val_int(176);
-  case CXCursor_OMPTeamsDistributeParallelForDirective: return Val_int(177);
-  case CXCursor_OMPTargetTeamsDirective: return Val_int(178);
-  case CXCursor_OMPTargetTeamsDistributeDirective: return Val_int(179);
-  case CXCursor_OMPTargetTeamsDistributeParallelForDirective: return Val_int(180);
-  case CXCursor_OMPTargetTeamsDistributeParallelForSimdDirective: return Val_int(181);
-  case CXCursor_OMPTargetTeamsDistributeSimdDirective: return Val_int(182);
-  case CXCursor_TranslationUnit: return Val_int(183);
-  case CXCursor_UnexposedAttr: return Val_int(184);
-  case CXCursor_IBActionAttr: return Val_int(185);
-  case CXCursor_IBOutletAttr: return Val_int(186);
-  case CXCursor_IBOutletCollectionAttr: return Val_int(187);
-  case CXCursor_CXXFinalAttr: return Val_int(188);
-  case CXCursor_CXXOverrideAttr: return Val_int(189);
-  case CXCursor_AnnotateAttr: return Val_int(190);
-  case CXCursor_AsmLabelAttr: return Val_int(191);
-  case CXCursor_PackedAttr: return Val_int(192);
-  case CXCursor_PureAttr: return Val_int(193);
-  case CXCursor_ConstAttr: return Val_int(194);
-  case CXCursor_NoDuplicateAttr: return Val_int(195);
-  case CXCursor_CUDAConstantAttr: return Val_int(196);
-  case CXCursor_CUDADeviceAttr: return Val_int(197);
-  case CXCursor_CUDAGlobalAttr: return Val_int(198);
-  case CXCursor_CUDAHostAttr: return Val_int(199);
-  case CXCursor_CUDASharedAttr: return Val_int(200);
-  case CXCursor_VisibilityAttr: return Val_int(201);
-  case CXCursor_DLLExport: return Val_int(202);
-  case CXCursor_DLLImport: return Val_int(203);
-  case CXCursor_PreprocessingDirective: return Val_int(204);
-  case CXCursor_MacroDefinition: return Val_int(205);
-  case CXCursor_MacroExpansion: return Val_int(206);
-  case CXCursor_InclusionDirective: return Val_int(207);
-  case CXCursor_ModuleImportDecl: return Val_int(208);
-  case CXCursor_TypeAliasTemplateDecl: return Val_int(209);
-  case CXCursor_StaticAssert: return Val_int(210);
-  case CXCursor_FriendDecl: return Val_int(211);
-  case CXCursor_OverloadCandidate: return Val_int(212);
+  case CXCursor_UnexposedStmt: return Val_int(102);
+  case CXCursor_LabelStmt: return Val_int(103);
+  case CXCursor_CompoundStmt: return Val_int(104);
+  case CXCursor_CaseStmt: return Val_int(105);
+  case CXCursor_DefaultStmt: return Val_int(106);
+  case CXCursor_IfStmt: return Val_int(107);
+  case CXCursor_SwitchStmt: return Val_int(108);
+  case CXCursor_WhileStmt: return Val_int(109);
+  case CXCursor_DoStmt: return Val_int(110);
+  case CXCursor_ForStmt: return Val_int(111);
+  case CXCursor_GotoStmt: return Val_int(112);
+  case CXCursor_IndirectGotoStmt: return Val_int(113);
+  case CXCursor_ContinueStmt: return Val_int(114);
+  case CXCursor_BreakStmt: return Val_int(115);
+  case CXCursor_ReturnStmt: return Val_int(116);
+  case CXCursor_GCCAsmStmt: return Val_int(117);
+  case CXCursor_ObjCAtTryStmt: return Val_int(118);
+  case CXCursor_ObjCAtCatchStmt: return Val_int(119);
+  case CXCursor_ObjCAtFinallyStmt: return Val_int(120);
+  case CXCursor_ObjCAtThrowStmt: return Val_int(121);
+  case CXCursor_ObjCAtSynchronizedStmt: return Val_int(122);
+  case CXCursor_ObjCAutoreleasePoolStmt: return Val_int(123);
+  case CXCursor_ObjCForCollectionStmt: return Val_int(124);
+  case CXCursor_CXXCatchStmt: return Val_int(125);
+  case CXCursor_CXXTryStmt: return Val_int(126);
+  case CXCursor_CXXForRangeStmt: return Val_int(127);
+  case CXCursor_SEHTryStmt: return Val_int(128);
+  case CXCursor_SEHExceptStmt: return Val_int(129);
+  case CXCursor_SEHFinallyStmt: return Val_int(130);
+  case CXCursor_MSAsmStmt: return Val_int(131);
+  case CXCursor_NullStmt: return Val_int(132);
+  case CXCursor_DeclStmt: return Val_int(133);
+  case CXCursor_OMPParallelDirective: return Val_int(134);
+  case CXCursor_OMPSimdDirective: return Val_int(135);
+  case CXCursor_OMPForDirective: return Val_int(136);
+  case CXCursor_OMPSectionsDirective: return Val_int(137);
+  case CXCursor_OMPSectionDirective: return Val_int(138);
+  case CXCursor_OMPSingleDirective: return Val_int(139);
+  case CXCursor_OMPParallelForDirective: return Val_int(140);
+  case CXCursor_OMPParallelSectionsDirective: return Val_int(141);
+  case CXCursor_OMPTaskDirective: return Val_int(142);
+  case CXCursor_OMPMasterDirective: return Val_int(143);
+  case CXCursor_OMPCriticalDirective: return Val_int(144);
+  case CXCursor_OMPTaskyieldDirective: return Val_int(145);
+  case CXCursor_OMPBarrierDirective: return Val_int(146);
+  case CXCursor_OMPTaskwaitDirective: return Val_int(147);
+  case CXCursor_OMPFlushDirective: return Val_int(148);
+  case CXCursor_SEHLeaveStmt: return Val_int(149);
+  case CXCursor_OMPOrderedDirective: return Val_int(150);
+  case CXCursor_OMPAtomicDirective: return Val_int(151);
+  case CXCursor_OMPForSimdDirective: return Val_int(152);
+  case CXCursor_OMPParallelForSimdDirective: return Val_int(153);
+  case CXCursor_OMPTargetDirective: return Val_int(154);
+  case CXCursor_OMPTeamsDirective: return Val_int(155);
+  case CXCursor_OMPTaskgroupDirective: return Val_int(156);
+  case CXCursor_OMPCancellationPointDirective: return Val_int(157);
+  case CXCursor_OMPCancelDirective: return Val_int(158);
+  case CXCursor_OMPTargetDataDirective: return Val_int(159);
+  case CXCursor_OMPTaskLoopDirective: return Val_int(160);
+  case CXCursor_OMPTaskLoopSimdDirective: return Val_int(161);
+  case CXCursor_OMPDistributeDirective: return Val_int(162);
+  case CXCursor_TranslationUnit: return Val_int(163);
+  case CXCursor_UnexposedAttr: return Val_int(164);
+  case CXCursor_IBActionAttr: return Val_int(165);
+  case CXCursor_IBOutletAttr: return Val_int(166);
+  case CXCursor_IBOutletCollectionAttr: return Val_int(167);
+  case CXCursor_CXXFinalAttr: return Val_int(168);
+  case CXCursor_CXXOverrideAttr: return Val_int(169);
+  case CXCursor_AnnotateAttr: return Val_int(170);
+  case CXCursor_AsmLabelAttr: return Val_int(171);
+  case CXCursor_PackedAttr: return Val_int(172);
+  case CXCursor_PureAttr: return Val_int(173);
+  case CXCursor_ConstAttr: return Val_int(174);
+  case CXCursor_NoDuplicateAttr: return Val_int(175);
+  case CXCursor_CUDAConstantAttr: return Val_int(176);
+  case CXCursor_CUDADeviceAttr: return Val_int(177);
+  case CXCursor_CUDAGlobalAttr: return Val_int(178);
+  case CXCursor_CUDAHostAttr: return Val_int(179);
+  case CXCursor_CUDASharedAttr: return Val_int(180);
+  case CXCursor_VisibilityAttr: return Val_int(181);
+  case CXCursor_DLLExport: return Val_int(182);
+  case CXCursor_DLLImport: return Val_int(183);
+  case CXCursor_PreprocessingDirective: return Val_int(184);
+  case CXCursor_MacroDefinition: return Val_int(185);
+  case CXCursor_MacroExpansion: return Val_int(186);
+  case CXCursor_InclusionDirective: return Val_int(187);
+  case CXCursor_ModuleImportDecl: return Val_int(188);
+  case CXCursor_TypeAliasTemplateDecl: return Val_int(189);
+  case CXCursor_OverloadCandidate: return Val_int(190);
   }
   failwith_fmt("invalid value for Val_cxcursorkind: %d", v);
   return Val_int(0);
@@ -2260,20 +2099,6 @@ clang_isAttribute_wrapper(value arg_ocaml)
   {
     CAMLlocal1(data);
     data = Val_bool(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_Cursor_hasAttrs_wrapper(value C_ocaml)
-{
-  CAMLparam1(C_ocaml);
-  CXCursor C;
-  C = Cxcursor_val(Field(C_ocaml, 0));
-  unsigned int result = clang_Cursor_hasAttrs(C);
-  {
-    CAMLlocal1(data);
-    data = Val_int(result);
     CAMLreturn(data);
   }
 }
@@ -2496,44 +2321,6 @@ clang_getCursorLanguage_wrapper(value cursor_ocaml)
   }
 }
 
-enum CXTLSKind
-Cxtlskind_val(value ocaml)
-{
-  switch (Int_val(ocaml)) {
-  case 0: return CXTLS_None;
-  case 1: return CXTLS_Dynamic;
-  case 2: return CXTLS_Static;
-  }
-  failwith_fmt("invalid value for Cxtlskind_val: %d", Int_val(ocaml));
-  return CXTLS_None;
-}
-
-value
-Val_cxtlskind(enum CXTLSKind v)
-{
-  switch (v) {
-  case CXTLS_None: return Val_int(0);
-  case CXTLS_Dynamic: return Val_int(1);
-  case CXTLS_Static: return Val_int(2);
-  }
-  failwith_fmt("invalid value for Val_cxtlskind: %d", v);
-  return Val_int(0);
-}
-
-CAMLprim value
-clang_getCursorTLSKind_wrapper(value cursor_ocaml)
-{
-  CAMLparam1(cursor_ocaml);
-  CXCursor cursor;
-  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
-  enum CXTLSKind result = clang_getCursorTLSKind(cursor);
-  {
-    CAMLlocal1(data);
-    data = Val_cxtlskind(result);
-    CAMLreturn(data);
-  }
-}
-
 CAMLprim value
 clang_Cursor_getTranslationUnit_wrapper(value arg_ocaml)
 {
@@ -2746,70 +2533,25 @@ Cxtypekind_val(value ocaml)
   case 27: return CXType_ObjCId;
   case 28: return CXType_ObjCClass;
   case 29: return CXType_ObjCSel;
-  case 30: return CXType_Float128;
-  case 31: return CXType_Half;
-  case 32: return CXType_Float16;
-  case 33: return CXType_Complex;
-  case 34: return CXType_Pointer;
-  case 35: return CXType_BlockPointer;
-  case 36: return CXType_LValueReference;
-  case 37: return CXType_RValueReference;
-  case 38: return CXType_Record;
-  case 39: return CXType_Enum;
-  case 40: return CXType_Typedef;
-  case 41: return CXType_ObjCInterface;
-  case 42: return CXType_ObjCObjectPointer;
-  case 43: return CXType_FunctionNoProto;
-  case 44: return CXType_FunctionProto;
-  case 45: return CXType_ConstantArray;
-  case 46: return CXType_Vector;
-  case 47: return CXType_IncompleteArray;
-  case 48: return CXType_VariableArray;
-  case 49: return CXType_DependentSizedArray;
-  case 50: return CXType_MemberPointer;
-  case 51: return CXType_Auto;
-  case 52: return CXType_Elaborated;
-  case 53: return CXType_Pipe;
-  case 54: return CXType_OCLImage1dRO;
-  case 55: return CXType_OCLImage1dArrayRO;
-  case 56: return CXType_OCLImage1dBufferRO;
-  case 57: return CXType_OCLImage2dRO;
-  case 58: return CXType_OCLImage2dArrayRO;
-  case 59: return CXType_OCLImage2dDepthRO;
-  case 60: return CXType_OCLImage2dArrayDepthRO;
-  case 61: return CXType_OCLImage2dMSAARO;
-  case 62: return CXType_OCLImage2dArrayMSAARO;
-  case 63: return CXType_OCLImage2dMSAADepthRO;
-  case 64: return CXType_OCLImage2dArrayMSAADepthRO;
-  case 65: return CXType_OCLImage3dRO;
-  case 66: return CXType_OCLImage1dWO;
-  case 67: return CXType_OCLImage1dArrayWO;
-  case 68: return CXType_OCLImage1dBufferWO;
-  case 69: return CXType_OCLImage2dWO;
-  case 70: return CXType_OCLImage2dArrayWO;
-  case 71: return CXType_OCLImage2dDepthWO;
-  case 72: return CXType_OCLImage2dArrayDepthWO;
-  case 73: return CXType_OCLImage2dMSAAWO;
-  case 74: return CXType_OCLImage2dArrayMSAAWO;
-  case 75: return CXType_OCLImage2dMSAADepthWO;
-  case 76: return CXType_OCLImage2dArrayMSAADepthWO;
-  case 77: return CXType_OCLImage3dWO;
-  case 78: return CXType_OCLImage1dRW;
-  case 79: return CXType_OCLImage1dArrayRW;
-  case 80: return CXType_OCLImage1dBufferRW;
-  case 81: return CXType_OCLImage2dRW;
-  case 82: return CXType_OCLImage2dArrayRW;
-  case 83: return CXType_OCLImage2dDepthRW;
-  case 84: return CXType_OCLImage2dArrayDepthRW;
-  case 85: return CXType_OCLImage2dMSAARW;
-  case 86: return CXType_OCLImage2dArrayMSAARW;
-  case 87: return CXType_OCLImage2dMSAADepthRW;
-  case 88: return CXType_OCLImage2dArrayMSAADepthRW;
-  case 89: return CXType_OCLImage3dRW;
-  case 90: return CXType_OCLSampler;
-  case 91: return CXType_OCLEvent;
-  case 92: return CXType_OCLQueue;
-  case 93: return CXType_OCLReserveID;
+  case 30: return CXType_Complex;
+  case 31: return CXType_Pointer;
+  case 32: return CXType_BlockPointer;
+  case 33: return CXType_LValueReference;
+  case 34: return CXType_RValueReference;
+  case 35: return CXType_Record;
+  case 36: return CXType_Enum;
+  case 37: return CXType_Typedef;
+  case 38: return CXType_ObjCInterface;
+  case 39: return CXType_ObjCObjectPointer;
+  case 40: return CXType_FunctionNoProto;
+  case 41: return CXType_FunctionProto;
+  case 42: return CXType_ConstantArray;
+  case 43: return CXType_Vector;
+  case 44: return CXType_IncompleteArray;
+  case 45: return CXType_VariableArray;
+  case 46: return CXType_DependentSizedArray;
+  case 47: return CXType_MemberPointer;
+  case 48: return CXType_Auto;
   }
   failwith_fmt("invalid value for Cxtypekind_val: %d", Int_val(ocaml));
   return CXType_Invalid;
@@ -2849,70 +2591,25 @@ Val_cxtypekind(enum CXTypeKind v)
   case CXType_ObjCId: return Val_int(27);
   case CXType_ObjCClass: return Val_int(28);
   case CXType_ObjCSel: return Val_int(29);
-  case CXType_Float128: return Val_int(30);
-  case CXType_Half: return Val_int(31);
-  case CXType_Float16: return Val_int(32);
-  case CXType_Complex: return Val_int(33);
-  case CXType_Pointer: return Val_int(34);
-  case CXType_BlockPointer: return Val_int(35);
-  case CXType_LValueReference: return Val_int(36);
-  case CXType_RValueReference: return Val_int(37);
-  case CXType_Record: return Val_int(38);
-  case CXType_Enum: return Val_int(39);
-  case CXType_Typedef: return Val_int(40);
-  case CXType_ObjCInterface: return Val_int(41);
-  case CXType_ObjCObjectPointer: return Val_int(42);
-  case CXType_FunctionNoProto: return Val_int(43);
-  case CXType_FunctionProto: return Val_int(44);
-  case CXType_ConstantArray: return Val_int(45);
-  case CXType_Vector: return Val_int(46);
-  case CXType_IncompleteArray: return Val_int(47);
-  case CXType_VariableArray: return Val_int(48);
-  case CXType_DependentSizedArray: return Val_int(49);
-  case CXType_MemberPointer: return Val_int(50);
-  case CXType_Auto: return Val_int(51);
-  case CXType_Elaborated: return Val_int(52);
-  case CXType_Pipe: return Val_int(53);
-  case CXType_OCLImage1dRO: return Val_int(54);
-  case CXType_OCLImage1dArrayRO: return Val_int(55);
-  case CXType_OCLImage1dBufferRO: return Val_int(56);
-  case CXType_OCLImage2dRO: return Val_int(57);
-  case CXType_OCLImage2dArrayRO: return Val_int(58);
-  case CXType_OCLImage2dDepthRO: return Val_int(59);
-  case CXType_OCLImage2dArrayDepthRO: return Val_int(60);
-  case CXType_OCLImage2dMSAARO: return Val_int(61);
-  case CXType_OCLImage2dArrayMSAARO: return Val_int(62);
-  case CXType_OCLImage2dMSAADepthRO: return Val_int(63);
-  case CXType_OCLImage2dArrayMSAADepthRO: return Val_int(64);
-  case CXType_OCLImage3dRO: return Val_int(65);
-  case CXType_OCLImage1dWO: return Val_int(66);
-  case CXType_OCLImage1dArrayWO: return Val_int(67);
-  case CXType_OCLImage1dBufferWO: return Val_int(68);
-  case CXType_OCLImage2dWO: return Val_int(69);
-  case CXType_OCLImage2dArrayWO: return Val_int(70);
-  case CXType_OCLImage2dDepthWO: return Val_int(71);
-  case CXType_OCLImage2dArrayDepthWO: return Val_int(72);
-  case CXType_OCLImage2dMSAAWO: return Val_int(73);
-  case CXType_OCLImage2dArrayMSAAWO: return Val_int(74);
-  case CXType_OCLImage2dMSAADepthWO: return Val_int(75);
-  case CXType_OCLImage2dArrayMSAADepthWO: return Val_int(76);
-  case CXType_OCLImage3dWO: return Val_int(77);
-  case CXType_OCLImage1dRW: return Val_int(78);
-  case CXType_OCLImage1dArrayRW: return Val_int(79);
-  case CXType_OCLImage1dBufferRW: return Val_int(80);
-  case CXType_OCLImage2dRW: return Val_int(81);
-  case CXType_OCLImage2dArrayRW: return Val_int(82);
-  case CXType_OCLImage2dDepthRW: return Val_int(83);
-  case CXType_OCLImage2dArrayDepthRW: return Val_int(84);
-  case CXType_OCLImage2dMSAARW: return Val_int(85);
-  case CXType_OCLImage2dArrayMSAARW: return Val_int(86);
-  case CXType_OCLImage2dMSAADepthRW: return Val_int(87);
-  case CXType_OCLImage2dArrayMSAADepthRW: return Val_int(88);
-  case CXType_OCLImage3dRW: return Val_int(89);
-  case CXType_OCLSampler: return Val_int(90);
-  case CXType_OCLEvent: return Val_int(91);
-  case CXType_OCLQueue: return Val_int(92);
-  case CXType_OCLReserveID: return Val_int(93);
+  case CXType_Complex: return Val_int(30);
+  case CXType_Pointer: return Val_int(31);
+  case CXType_BlockPointer: return Val_int(32);
+  case CXType_LValueReference: return Val_int(33);
+  case CXType_RValueReference: return Val_int(34);
+  case CXType_Record: return Val_int(35);
+  case CXType_Enum: return Val_int(36);
+  case CXType_Typedef: return Val_int(37);
+  case CXType_ObjCInterface: return Val_int(38);
+  case CXType_ObjCObjectPointer: return Val_int(39);
+  case CXType_FunctionNoProto: return Val_int(40);
+  case CXType_FunctionProto: return Val_int(41);
+  case CXType_ConstantArray: return Val_int(42);
+  case CXType_Vector: return Val_int(43);
+  case CXType_IncompleteArray: return Val_int(44);
+  case CXType_VariableArray: return Val_int(45);
+  case CXType_DependentSizedArray: return Val_int(46);
+  case CXType_MemberPointer: return Val_int(47);
+  case CXType_Auto: return Val_int(48);
   }
   failwith_fmt("invalid value for Val_cxtypekind: %d", v);
   return Val_int(0);
@@ -3237,48 +2934,6 @@ clang_isConstQualifiedType_wrapper(value T_ocaml)
 }
 
 CAMLprim value
-clang_Cursor_isMacroFunctionLike_wrapper(value C_ocaml)
-{
-  CAMLparam1(C_ocaml);
-  CXCursor C;
-  C = Cxcursor_val(Field(C_ocaml, 0));
-  unsigned int result = clang_Cursor_isMacroFunctionLike(C);
-  {
-    CAMLlocal1(data);
-    data = Val_bool(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_Cursor_isMacroBuiltin_wrapper(value C_ocaml)
-{
-  CAMLparam1(C_ocaml);
-  CXCursor C;
-  C = Cxcursor_val(Field(C_ocaml, 0));
-  unsigned int result = clang_Cursor_isMacroBuiltin(C);
-  {
-    CAMLlocal1(data);
-    data = Val_bool(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_Cursor_isFunctionInlined_wrapper(value C_ocaml)
-{
-  CAMLparam1(C_ocaml);
-  CXCursor C;
-  C = Cxcursor_val(Field(C_ocaml, 0));
-  unsigned int result = clang_Cursor_isFunctionInlined(C);
-  {
-    CAMLlocal1(data);
-    data = Val_bool(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
 clang_isVolatileQualifiedType_wrapper(value T_ocaml)
 {
   CAMLparam1(T_ocaml);
@@ -3302,35 +2957,6 @@ clang_isRestrictQualifiedType_wrapper(value T_ocaml)
   {
     CAMLlocal1(data);
     data = Val_bool(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_getAddressSpace_wrapper(value T_ocaml)
-{
-  CAMLparam1(T_ocaml);
-  CXType T;
-  T = Cxtype_val(Field(T_ocaml, 0));
-  unsigned int result = clang_getAddressSpace(T);
-  {
-    CAMLlocal1(data);
-    data = Val_int(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_getTypedefName_wrapper(value CT_ocaml)
-{
-  CAMLparam1(CT_ocaml);
-  CXType CT;
-  CT = Cxtype_val(Field(CT_ocaml, 0));
-  CXString result = clang_getTypedefName(CT);
-  {
-    CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
-                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -3383,21 +3009,6 @@ clang_getDeclObjCTypeEncoding_wrapper(value C_ocaml)
 }
 
 CAMLprim value
-clang_Type_getObjCEncoding_wrapper(value type_ocaml)
-{
-  CAMLparam1(type_ocaml);
-  CXType type;
-  type = Cxtype_val(Field(type_ocaml, 0));
-  CXString result = clang_Type_getObjCEncoding(type);
-  {
-    CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
-                    clang_disposeString(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
 clang_getTypeKindSpelling_wrapper(value K_ocaml)
 {
   CAMLparam1(K_ocaml);
@@ -3424,16 +3035,12 @@ Cxcallingconv_val(value ocaml)
   case 5: return CXCallingConv_X86Pascal;
   case 6: return CXCallingConv_AAPCS;
   case 7: return CXCallingConv_AAPCS_VFP;
-  case 8: return CXCallingConv_X86RegCall;
-  case 9: return CXCallingConv_IntelOclBicc;
-  case 10: return CXCallingConv_Win64;
-  case 11: return CXCallingConv_X86_64SysV;
-  case 12: return CXCallingConv_X86VectorCall;
-  case 13: return CXCallingConv_Swift;
-  case 14: return CXCallingConv_PreserveMost;
-  case 15: return CXCallingConv_PreserveAll;
-  case 16: return CXCallingConv_Invalid;
-  case 17: return CXCallingConv_Unexposed;
+  case 8: return CXCallingConv_IntelOclBicc;
+  case 9: return CXCallingConv_X86_64Win64;
+  case 10: return CXCallingConv_X86_64SysV;
+  case 11: return CXCallingConv_X86VectorCall;
+  case 12: return CXCallingConv_Invalid;
+  case 13: return CXCallingConv_Unexposed;
   }
   failwith_fmt("invalid value for Cxcallingconv_val: %d", Int_val(ocaml));
   return CXCallingConv_Default;
@@ -3451,16 +3058,12 @@ Val_cxcallingconv(enum CXCallingConv v)
   case CXCallingConv_X86Pascal: return Val_int(5);
   case CXCallingConv_AAPCS: return Val_int(6);
   case CXCallingConv_AAPCS_VFP: return Val_int(7);
-  case CXCallingConv_X86RegCall: return Val_int(8);
-  case CXCallingConv_IntelOclBicc: return Val_int(9);
-  case CXCallingConv_Win64: return Val_int(10);
-  case CXCallingConv_X86_64SysV: return Val_int(11);
-  case CXCallingConv_X86VectorCall: return Val_int(12);
-  case CXCallingConv_Swift: return Val_int(13);
-  case CXCallingConv_PreserveMost: return Val_int(14);
-  case CXCallingConv_PreserveAll: return Val_int(15);
-  case CXCallingConv_Invalid: return Val_int(16);
-  case CXCallingConv_Unexposed: return Val_int(17);
+  case CXCallingConv_IntelOclBicc: return Val_int(8);
+  case CXCallingConv_X86_64Win64: return Val_int(9);
+  case CXCallingConv_X86_64SysV: return Val_int(10);
+  case CXCallingConv_X86VectorCall: return Val_int(11);
+  case CXCallingConv_Invalid: return Val_int(12);
+  case CXCallingConv_Unexposed: return Val_int(13);
   }
   failwith_fmt("invalid value for Val_cxcallingconv: %d", v);
   return Val_int(0);
@@ -3492,20 +3095,6 @@ clang_getResultType_wrapper(value T_ocaml)
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
   Store_field(data, 1, Field(T_ocaml, 1));
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_getExceptionSpecificationType_wrapper(value T_ocaml)
-{
-  CAMLparam1(T_ocaml);
-  CXType T;
-  T = Cxtype_val(Field(T_ocaml, 0));
-  int result = clang_getExceptionSpecificationType(T);
-  {
-    CAMLlocal1(data);
-    data = Val_int(result);
     CAMLreturn(data);
   }
 }
@@ -3568,20 +3157,6 @@ clang_getCursorResultType_wrapper(value C_ocaml)
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
   Store_field(data, 1, Field(C_ocaml, 1));
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_getCursorExceptionSpecificationType_wrapper(value C_ocaml)
-{
-  CAMLparam1(C_ocaml);
-  CXCursor C;
-  C = Cxcursor_val(Field(C_ocaml, 0));
-  int result = clang_getCursorExceptionSpecificationType(C);
-  {
-    CAMLlocal1(data);
-    data = Val_int(result);
     CAMLreturn(data);
   }
 }
@@ -3656,36 +3231,6 @@ clang_getArraySize_wrapper(value T_ocaml)
   {
     CAMLlocal1(data);
     data = Val_int(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_Type_getNamedType_wrapper(value T_ocaml)
-{
-  CAMLparam1(T_ocaml);
-  CXType T;
-  T = Cxtype_val(Field(T_ocaml, 0));
-  CXType result = clang_Type_getNamedType(T);
-  {
-    CAMLlocal1(data);
-    data = caml_alloc_tuple(2);
-  Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Field(T_ocaml, 1));
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_Type_isTransparentTagTypedef_wrapper(value T_ocaml)
-{
-  CAMLparam1(T_ocaml);
-  CXType T;
-  T = Cxtype_val(Field(T_ocaml, 0));
-  unsigned int result = clang_Type_isTransparentTagTypedef(T);
-  {
-    CAMLlocal1(data);
-    data = Val_bool(result);
     CAMLreturn(data);
   }
 }
@@ -4297,46 +3842,6 @@ clang_Cursor_isVariadic_wrapper(value C_ocaml)
 }
 
 CAMLprim value
-clang_Cursor_isExternalSymbol_wrapper(value C_ocaml)
-{
-  CAMLparam1(C_ocaml);
-  CXCursor C;
-  C = Cxcursor_val(Field(C_ocaml, 0));
-  CXString language;
-  CXString definedIn;
-  unsigned int isGenerated;
-  unsigned int result = clang_Cursor_isExternalSymbol(C, &language, &definedIn, &isGenerated);
-  if (result) {
-    CAMLlocal2(ocaml_result, data);
-    ocaml_result = caml_alloc(1, 0);
-    data = caml_alloc_tuple(3);
-  {
-    CAMLlocal1(field);
-    field = caml_copy_string(clang_getCString(language));
-                    clang_disposeString(language);
-    Store_field(data, 0, field);
-  }
-  {
-    CAMLlocal1(field);
-    field = caml_copy_string(clang_getCString(definedIn));
-                    clang_disposeString(definedIn);
-    Store_field(data, 1, field);
-  }
-  {
-    CAMLlocal1(field);
-    field = Val_int(isGenerated);
-    Store_field(data, 2, field);
-  }
-
-    Store_field(ocaml_result, 0, data);
-    
-    CAMLreturn(ocaml_result);
-  }
-  else {
-    CAMLreturn(Val_int(0));
-  }}
-
-CAMLprim value
 clang_Cursor_getCommentRange_wrapper(value C_ocaml)
 {
   CAMLparam1(C_ocaml);
@@ -4402,28 +3907,6 @@ clang_Cursor_getCXXManglings_wrapper(value arg_ocaml)
   CXCursor arg;
   arg = Cxcursor_val(Field(arg_ocaml, 0));
   CXStringSet * result = clang_Cursor_getCXXManglings(arg);
-  {
-    CAMLlocal1(data);
-    
-data = caml_alloc(result->Count, 0);
-for (unsigned int i = 0; i < result->Count; i++) {
-  CAMLlocal1(field);
-  field = caml_copy_string(clang_getCString(result->Strings[i]));
-                    clang_disposeString(result->Strings[i]);
-  Store_field(data, i, field);
-}
-clang_disposeStringSet(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_Cursor_getObjCManglings_wrapper(value arg_ocaml)
-{
-  CAMLparam1(arg_ocaml);
-  CXCursor arg;
-  arg = Cxcursor_val(Field(arg_ocaml, 0));
-  CXStringSet * result = clang_Cursor_getObjCManglings(arg);
   {
     CAMLlocal1(data);
     
@@ -4578,82 +4061,12 @@ clang_Module_getTopLevelHeader_wrapper(value arg_ocaml, value Module_ocaml, valu
 }
 
 CAMLprim value
-clang_CXXConstructor_isConvertingConstructor_wrapper(value C_ocaml)
-{
-  CAMLparam1(C_ocaml);
-  CXCursor C;
-  C = Cxcursor_val(Field(C_ocaml, 0));
-  unsigned int result = clang_CXXConstructor_isConvertingConstructor(C);
-  {
-    CAMLlocal1(data);
-    data = Val_bool(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_CXXConstructor_isCopyConstructor_wrapper(value C_ocaml)
-{
-  CAMLparam1(C_ocaml);
-  CXCursor C;
-  C = Cxcursor_val(Field(C_ocaml, 0));
-  unsigned int result = clang_CXXConstructor_isCopyConstructor(C);
-  {
-    CAMLlocal1(data);
-    data = Val_bool(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_CXXConstructor_isDefaultConstructor_wrapper(value C_ocaml)
-{
-  CAMLparam1(C_ocaml);
-  CXCursor C;
-  C = Cxcursor_val(Field(C_ocaml, 0));
-  unsigned int result = clang_CXXConstructor_isDefaultConstructor(C);
-  {
-    CAMLlocal1(data);
-    data = Val_bool(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_CXXConstructor_isMoveConstructor_wrapper(value C_ocaml)
-{
-  CAMLparam1(C_ocaml);
-  CXCursor C;
-  C = Cxcursor_val(Field(C_ocaml, 0));
-  unsigned int result = clang_CXXConstructor_isMoveConstructor(C);
-  {
-    CAMLlocal1(data);
-    data = Val_bool(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
 clang_CXXField_isMutable_wrapper(value C_ocaml)
 {
   CAMLparam1(C_ocaml);
   CXCursor C;
   C = Cxcursor_val(Field(C_ocaml, 0));
   unsigned int result = clang_CXXField_isMutable(C);
-  {
-    CAMLlocal1(data);
-    data = Val_bool(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_CXXMethod_isDefaulted_wrapper(value C_ocaml)
-{
-  CAMLparam1(C_ocaml);
-  CXCursor C;
-  C = Cxcursor_val(Field(C_ocaml, 0));
-  unsigned int result = clang_CXXMethod_isDefaulted(C);
   {
     CAMLlocal1(data);
     data = Val_bool(result);
@@ -4696,34 +4109,6 @@ clang_CXXMethod_isVirtual_wrapper(value C_ocaml)
   CXCursor C;
   C = Cxcursor_val(Field(C_ocaml, 0));
   unsigned int result = clang_CXXMethod_isVirtual(C);
-  {
-    CAMLlocal1(data);
-    data = Val_bool(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_CXXRecord_isAbstract_wrapper(value C_ocaml)
-{
-  CAMLparam1(C_ocaml);
-  CXCursor C;
-  C = Cxcursor_val(Field(C_ocaml, 0));
-  unsigned int result = clang_CXXRecord_isAbstract(C);
-  {
-    CAMLlocal1(data);
-    data = Val_bool(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_EnumDecl_isScoped_wrapper(value C_ocaml)
-{
-  CAMLparam1(C_ocaml);
-  CXCursor C;
-  C = Cxcursor_val(Field(C_ocaml, 0));
-  unsigned int result = clang_EnumDecl_isScoped(C);
   {
     CAMLlocal1(data);
     data = Val_bool(result);
@@ -5077,152 +4462,6 @@ clang_toggleCrashRecovery_wrapper(value isEnabled_ocaml)
   isEnabled = Int_val(isEnabled_ocaml);
   clang_toggleCrashRecovery(isEnabled);
   CAMLreturn(Val_unit);
-}
-
-DECLARE_OPAQUE(CXEvalResult, cxevalresult, Cxevalresult_val, Val_cxevalresult, custom_finalize_default)
-
-CAMLprim value
-clang_Cursor_Evaluate_wrapper(value C_ocaml)
-{
-  CAMLparam1(C_ocaml);
-  CXCursor C;
-  C = Cxcursor_val(Field(C_ocaml, 0));
-  CXEvalResult result = clang_Cursor_Evaluate(C);
-  {
-    CAMLlocal1(data);
-    data = Val_cxevalresult(result);
-    CAMLreturn(data);
-  }
-}
-
-CXEvalResultKind
-Cxevalresultkind_val(value ocaml)
-{
-  switch (Int_val(ocaml)) {
-  case 0: return CXEval_Int;
-  case 1: return CXEval_Float;
-  case 2: return CXEval_ObjCStrLiteral;
-  case 3: return CXEval_StrLiteral;
-  case 4: return CXEval_CFStr;
-  case 5: return CXEval_Other;
-  case 6: return CXEval_UnExposed;
-  }
-  failwith_fmt("invalid value for Cxevalresultkind_val: %d", Int_val(ocaml));
-  return CXEval_Int;
-}
-
-value
-Val_cxevalresultkind(CXEvalResultKind v)
-{
-  switch (v) {
-  case CXEval_Int: return Val_int(0);
-  case CXEval_Float: return Val_int(1);
-  case CXEval_ObjCStrLiteral: return Val_int(2);
-  case CXEval_StrLiteral: return Val_int(3);
-  case CXEval_CFStr: return Val_int(4);
-  case CXEval_Other: return Val_int(5);
-  case CXEval_UnExposed: return Val_int(6);
-  }
-  failwith_fmt("invalid value for Val_cxevalresultkind: %d", v);
-  return Val_int(0);
-}
-
-CAMLprim value
-clang_EvalResult_getKind_wrapper(value E_ocaml)
-{
-  CAMLparam1(E_ocaml);
-  CXEvalResult E;
-  E = Cxevalresult_val(E_ocaml);
-  CXEvalResultKind result = clang_EvalResult_getKind(E);
-  {
-    CAMLlocal1(data);
-    data = Val_cxevalresultkind(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_EvalResult_getAsInt_wrapper(value E_ocaml)
-{
-  CAMLparam1(E_ocaml);
-  CXEvalResult E;
-  E = Cxevalresult_val(E_ocaml);
-  int result = clang_EvalResult_getAsInt(E);
-  {
-    CAMLlocal1(data);
-    data = Val_int(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_EvalResult_getAsLongLong_wrapper(value E_ocaml)
-{
-  CAMLparam1(E_ocaml);
-  CXEvalResult E;
-  E = Cxevalresult_val(E_ocaml);
-  long long result = clang_EvalResult_getAsLongLong(E);
-  {
-    CAMLlocal1(data);
-    data = Val_int(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_EvalResult_isUnsignedInt_wrapper(value E_ocaml)
-{
-  CAMLparam1(E_ocaml);
-  CXEvalResult E;
-  E = Cxevalresult_val(E_ocaml);
-  unsigned int result = clang_EvalResult_isUnsignedInt(E);
-  {
-    CAMLlocal1(data);
-    data = Val_bool(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_EvalResult_getAsUnsigned_wrapper(value E_ocaml)
-{
-  CAMLparam1(E_ocaml);
-  CXEvalResult E;
-  E = Cxevalresult_val(E_ocaml);
-  unsigned long long result = clang_EvalResult_getAsUnsigned(E);
-  {
-    CAMLlocal1(data);
-    data = Val_int(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_EvalResult_getAsDouble_wrapper(value E_ocaml)
-{
-  CAMLparam1(E_ocaml);
-  CXEvalResult E;
-  E = Cxevalresult_val(E_ocaml);
-  double result = clang_EvalResult_getAsDouble(E);
-  {
-    CAMLlocal1(data);
-    data = caml_copy_double(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_EvalResult_getAsStr_wrapper(value E_ocaml)
-{
-  CAMLparam1(E_ocaml);
-  CXEvalResult E;
-  E = Cxevalresult_val(E_ocaml);
-  const char * result = clang_EvalResult_getAsStr(E);
-  {
-    CAMLlocal1(data);
-    data = caml_copy_string(result);
-    CAMLreturn(data);
-  }
 }
 
 DECLARE_OPAQUE(CXRemapping, cxremapping, Cxremapping_val, Val_cxremapping, custom_finalize_default)
@@ -5652,43 +4891,43 @@ enum clang_ext_UnaryOperatorKind
 Clang_ext_unaryoperatorkind_val(value ocaml)
 {
   switch (Int_val(ocaml)) {
-  case 0: return CLANG_EXT_UNARY_OPERATOR_PostInc;
-  case 1: return CLANG_EXT_UNARY_OPERATOR_PostDec;
-  case 2: return CLANG_EXT_UNARY_OPERATOR_PreInc;
-  case 3: return CLANG_EXT_UNARY_OPERATOR_PreDec;
-  case 4: return CLANG_EXT_UNARY_OPERATOR_AddrOf;
-  case 5: return CLANG_EXT_UNARY_OPERATOR_Deref;
-  case 6: return CLANG_EXT_UNARY_OPERATOR_Plus;
-  case 7: return CLANG_EXT_UNARY_OPERATOR_Minus;
-  case 8: return CLANG_EXT_UNARY_OPERATOR_Not;
-  case 9: return CLANG_EXT_UNARY_OPERATOR_LNot;
-  case 10: return CLANG_EXT_UNARY_OPERATOR_Real;
-  case 11: return CLANG_EXT_UNARY_OPERATOR_Imag;
-  case 12: return CLANG_EXT_UNARY_OPERATOR_Extension;
-  case 13: return CLANG_EXT_UNARY_OPERATOR_Coawait;
+  case 0: return CLANG_EXT_UNARY_OPERATOR_UO_PostInc;
+  case 1: return CLANG_EXT_UNARY_OPERATOR_UO_PostDec;
+  case 2: return CLANG_EXT_UNARY_OPERATOR_UO_PreInc;
+  case 3: return CLANG_EXT_UNARY_OPERATOR_UO_PreDec;
+  case 4: return CLANG_EXT_UNARY_OPERATOR_UO_AddrOf;
+  case 5: return CLANG_EXT_UNARY_OPERATOR_UO_Deref;
+  case 6: return CLANG_EXT_UNARY_OPERATOR_UO_Plus;
+  case 7: return CLANG_EXT_UNARY_OPERATOR_UO_Minus;
+  case 8: return CLANG_EXT_UNARY_OPERATOR_UO_Not;
+  case 9: return CLANG_EXT_UNARY_OPERATOR_UO_LNot;
+  case 10: return CLANG_EXT_UNARY_OPERATOR_UO_Real;
+  case 11: return CLANG_EXT_UNARY_OPERATOR_UO_Imag;
+  case 12: return CLANG_EXT_UNARY_OPERATOR_UO_Extension;
+  case 13: return CLANG_EXT_UNARY_OPERATOR_UO_Coawait;
   }
   failwith_fmt("invalid value for Clang_ext_unaryoperatorkind_val: %d", Int_val(ocaml));
-  return CLANG_EXT_UNARY_OPERATOR_PostInc;
+  return CLANG_EXT_UNARY_OPERATOR_UO_PostInc;
 }
 
 value
 Val_clang_ext_unaryoperatorkind(enum clang_ext_UnaryOperatorKind v)
 {
   switch (v) {
-  case CLANG_EXT_UNARY_OPERATOR_PostInc: return Val_int(0);
-  case CLANG_EXT_UNARY_OPERATOR_PostDec: return Val_int(1);
-  case CLANG_EXT_UNARY_OPERATOR_PreInc: return Val_int(2);
-  case CLANG_EXT_UNARY_OPERATOR_PreDec: return Val_int(3);
-  case CLANG_EXT_UNARY_OPERATOR_AddrOf: return Val_int(4);
-  case CLANG_EXT_UNARY_OPERATOR_Deref: return Val_int(5);
-  case CLANG_EXT_UNARY_OPERATOR_Plus: return Val_int(6);
-  case CLANG_EXT_UNARY_OPERATOR_Minus: return Val_int(7);
-  case CLANG_EXT_UNARY_OPERATOR_Not: return Val_int(8);
-  case CLANG_EXT_UNARY_OPERATOR_LNot: return Val_int(9);
-  case CLANG_EXT_UNARY_OPERATOR_Real: return Val_int(10);
-  case CLANG_EXT_UNARY_OPERATOR_Imag: return Val_int(11);
-  case CLANG_EXT_UNARY_OPERATOR_Extension: return Val_int(12);
-  case CLANG_EXT_UNARY_OPERATOR_Coawait: return Val_int(13);
+  case CLANG_EXT_UNARY_OPERATOR_UO_PostInc: return Val_int(0);
+  case CLANG_EXT_UNARY_OPERATOR_UO_PostDec: return Val_int(1);
+  case CLANG_EXT_UNARY_OPERATOR_UO_PreInc: return Val_int(2);
+  case CLANG_EXT_UNARY_OPERATOR_UO_PreDec: return Val_int(3);
+  case CLANG_EXT_UNARY_OPERATOR_UO_AddrOf: return Val_int(4);
+  case CLANG_EXT_UNARY_OPERATOR_UO_Deref: return Val_int(5);
+  case CLANG_EXT_UNARY_OPERATOR_UO_Plus: return Val_int(6);
+  case CLANG_EXT_UNARY_OPERATOR_UO_Minus: return Val_int(7);
+  case CLANG_EXT_UNARY_OPERATOR_UO_Not: return Val_int(8);
+  case CLANG_EXT_UNARY_OPERATOR_UO_LNot: return Val_int(9);
+  case CLANG_EXT_UNARY_OPERATOR_UO_Real: return Val_int(10);
+  case CLANG_EXT_UNARY_OPERATOR_UO_Imag: return Val_int(11);
+  case CLANG_EXT_UNARY_OPERATOR_UO_Extension: return Val_int(12);
+  case CLANG_EXT_UNARY_OPERATOR_UO_Coawait: return Val_int(13);
   }
   failwith_fmt("invalid value for Val_clang_ext_unaryoperatorkind: %d", v);
   return Val_int(0);
@@ -5727,81 +4966,79 @@ enum clang_ext_BinaryOperatorKind
 Clang_ext_binaryoperatorkind_val(value ocaml)
 {
   switch (Int_val(ocaml)) {
-  case 0: return CLANG_EXT_BINARY_OPERATOR_PtrMemD;
-  case 1: return CLANG_EXT_BINARY_OPERATOR_PtrMemI;
-  case 2: return CLANG_EXT_BINARY_OPERATOR_Mul;
-  case 3: return CLANG_EXT_BINARY_OPERATOR_Div;
-  case 4: return CLANG_EXT_BINARY_OPERATOR_Rem;
-  case 5: return CLANG_EXT_BINARY_OPERATOR_Add;
-  case 6: return CLANG_EXT_BINARY_OPERATOR_Sub;
-  case 7: return CLANG_EXT_BINARY_OPERATOR_Shl;
-  case 8: return CLANG_EXT_BINARY_OPERATOR_Shr;
-  case 9: return CLANG_EXT_BINARY_OPERATOR_Cmp;
-  case 10: return CLANG_EXT_BINARY_OPERATOR_LT;
-  case 11: return CLANG_EXT_BINARY_OPERATOR_GT;
-  case 12: return CLANG_EXT_BINARY_OPERATOR_LE;
-  case 13: return CLANG_EXT_BINARY_OPERATOR_GE;
-  case 14: return CLANG_EXT_BINARY_OPERATOR_EQ;
-  case 15: return CLANG_EXT_BINARY_OPERATOR_NE;
-  case 16: return CLANG_EXT_BINARY_OPERATOR_And;
-  case 17: return CLANG_EXT_BINARY_OPERATOR_Xor;
-  case 18: return CLANG_EXT_BINARY_OPERATOR_Or;
-  case 19: return CLANG_EXT_BINARY_OPERATOR_LAnd;
-  case 20: return CLANG_EXT_BINARY_OPERATOR_LOr;
-  case 21: return CLANG_EXT_BINARY_OPERATOR_Assign;
-  case 22: return CLANG_EXT_BINARY_OPERATOR_MulAssign;
-  case 23: return CLANG_EXT_BINARY_OPERATOR_DivAssign;
-  case 24: return CLANG_EXT_BINARY_OPERATOR_RemAssign;
-  case 25: return CLANG_EXT_BINARY_OPERATOR_AddAssign;
-  case 26: return CLANG_EXT_BINARY_OPERATOR_SubAssign;
-  case 27: return CLANG_EXT_BINARY_OPERATOR_ShlAssign;
-  case 28: return CLANG_EXT_BINARY_OPERATOR_ShrAssign;
-  case 29: return CLANG_EXT_BINARY_OPERATOR_AndAssign;
-  case 30: return CLANG_EXT_BINARY_OPERATOR_XorAssign;
-  case 31: return CLANG_EXT_BINARY_OPERATOR_OrAssign;
-  case 32: return CLANG_EXT_BINARY_OPERATOR_Comma;
+  case 0: return CLANG_EXT_BINARY_OPERATOR_BO_PtrMemD;
+  case 1: return CLANG_EXT_BINARY_OPERATOR_BO_PtrMemI;
+  case 2: return CLANG_EXT_BINARY_OPERATOR_BO_Mul;
+  case 3: return CLANG_EXT_BINARY_OPERATOR_BO_Div;
+  case 4: return CLANG_EXT_BINARY_OPERATOR_BO_Rem;
+  case 5: return CLANG_EXT_BINARY_OPERATOR_BO_Add;
+  case 6: return CLANG_EXT_BINARY_OPERATOR_BO_Sub;
+  case 7: return CLANG_EXT_BINARY_OPERATOR_BO_Shl;
+  case 8: return CLANG_EXT_BINARY_OPERATOR_BO_Shr;
+  case 9: return CLANG_EXT_BINARY_OPERATOR_BO_LT;
+  case 10: return CLANG_EXT_BINARY_OPERATOR_BO_GT;
+  case 11: return CLANG_EXT_BINARY_OPERATOR_BO_LE;
+  case 12: return CLANG_EXT_BINARY_OPERATOR_BO_GE;
+  case 13: return CLANG_EXT_BINARY_OPERATOR_BO_EQ;
+  case 14: return CLANG_EXT_BINARY_OPERATOR_BO_NE;
+  case 15: return CLANG_EXT_BINARY_OPERATOR_BO_And;
+  case 16: return CLANG_EXT_BINARY_OPERATOR_BO_Xor;
+  case 17: return CLANG_EXT_BINARY_OPERATOR_BO_Or;
+  case 18: return CLANG_EXT_BINARY_OPERATOR_BO_LAnd;
+  case 19: return CLANG_EXT_BINARY_OPERATOR_BO_LOr;
+  case 20: return CLANG_EXT_BINARY_OPERATOR_BO_Assign;
+  case 21: return CLANG_EXT_BINARY_OPERATOR_BO_MulAssign;
+  case 22: return CLANG_EXT_BINARY_OPERATOR_BO_DivAssign;
+  case 23: return CLANG_EXT_BINARY_OPERATOR_BO_RemAssign;
+  case 24: return CLANG_EXT_BINARY_OPERATOR_BO_AddAssign;
+  case 25: return CLANG_EXT_BINARY_OPERATOR_BO_SubAssign;
+  case 26: return CLANG_EXT_BINARY_OPERATOR_BO_ShlAssign;
+  case 27: return CLANG_EXT_BINARY_OPERATOR_BO_ShrAssign;
+  case 28: return CLANG_EXT_BINARY_OPERATOR_BO_AndAssign;
+  case 29: return CLANG_EXT_BINARY_OPERATOR_BO_XorAssign;
+  case 30: return CLANG_EXT_BINARY_OPERATOR_BO_OrAssign;
+  case 31: return CLANG_EXT_BINARY_OPERATOR_BO_Comma;
   }
   failwith_fmt("invalid value for Clang_ext_binaryoperatorkind_val: %d", Int_val(ocaml));
-  return CLANG_EXT_BINARY_OPERATOR_PtrMemD;
+  return CLANG_EXT_BINARY_OPERATOR_BO_PtrMemD;
 }
 
 value
 Val_clang_ext_binaryoperatorkind(enum clang_ext_BinaryOperatorKind v)
 {
   switch (v) {
-  case CLANG_EXT_BINARY_OPERATOR_PtrMemD: return Val_int(0);
-  case CLANG_EXT_BINARY_OPERATOR_PtrMemI: return Val_int(1);
-  case CLANG_EXT_BINARY_OPERATOR_Mul: return Val_int(2);
-  case CLANG_EXT_BINARY_OPERATOR_Div: return Val_int(3);
-  case CLANG_EXT_BINARY_OPERATOR_Rem: return Val_int(4);
-  case CLANG_EXT_BINARY_OPERATOR_Add: return Val_int(5);
-  case CLANG_EXT_BINARY_OPERATOR_Sub: return Val_int(6);
-  case CLANG_EXT_BINARY_OPERATOR_Shl: return Val_int(7);
-  case CLANG_EXT_BINARY_OPERATOR_Shr: return Val_int(8);
-  case CLANG_EXT_BINARY_OPERATOR_Cmp: return Val_int(9);
-  case CLANG_EXT_BINARY_OPERATOR_LT: return Val_int(10);
-  case CLANG_EXT_BINARY_OPERATOR_GT: return Val_int(11);
-  case CLANG_EXT_BINARY_OPERATOR_LE: return Val_int(12);
-  case CLANG_EXT_BINARY_OPERATOR_GE: return Val_int(13);
-  case CLANG_EXT_BINARY_OPERATOR_EQ: return Val_int(14);
-  case CLANG_EXT_BINARY_OPERATOR_NE: return Val_int(15);
-  case CLANG_EXT_BINARY_OPERATOR_And: return Val_int(16);
-  case CLANG_EXT_BINARY_OPERATOR_Xor: return Val_int(17);
-  case CLANG_EXT_BINARY_OPERATOR_Or: return Val_int(18);
-  case CLANG_EXT_BINARY_OPERATOR_LAnd: return Val_int(19);
-  case CLANG_EXT_BINARY_OPERATOR_LOr: return Val_int(20);
-  case CLANG_EXT_BINARY_OPERATOR_Assign: return Val_int(21);
-  case CLANG_EXT_BINARY_OPERATOR_MulAssign: return Val_int(22);
-  case CLANG_EXT_BINARY_OPERATOR_DivAssign: return Val_int(23);
-  case CLANG_EXT_BINARY_OPERATOR_RemAssign: return Val_int(24);
-  case CLANG_EXT_BINARY_OPERATOR_AddAssign: return Val_int(25);
-  case CLANG_EXT_BINARY_OPERATOR_SubAssign: return Val_int(26);
-  case CLANG_EXT_BINARY_OPERATOR_ShlAssign: return Val_int(27);
-  case CLANG_EXT_BINARY_OPERATOR_ShrAssign: return Val_int(28);
-  case CLANG_EXT_BINARY_OPERATOR_AndAssign: return Val_int(29);
-  case CLANG_EXT_BINARY_OPERATOR_XorAssign: return Val_int(30);
-  case CLANG_EXT_BINARY_OPERATOR_OrAssign: return Val_int(31);
-  case CLANG_EXT_BINARY_OPERATOR_Comma: return Val_int(32);
+  case CLANG_EXT_BINARY_OPERATOR_BO_PtrMemD: return Val_int(0);
+  case CLANG_EXT_BINARY_OPERATOR_BO_PtrMemI: return Val_int(1);
+  case CLANG_EXT_BINARY_OPERATOR_BO_Mul: return Val_int(2);
+  case CLANG_EXT_BINARY_OPERATOR_BO_Div: return Val_int(3);
+  case CLANG_EXT_BINARY_OPERATOR_BO_Rem: return Val_int(4);
+  case CLANG_EXT_BINARY_OPERATOR_BO_Add: return Val_int(5);
+  case CLANG_EXT_BINARY_OPERATOR_BO_Sub: return Val_int(6);
+  case CLANG_EXT_BINARY_OPERATOR_BO_Shl: return Val_int(7);
+  case CLANG_EXT_BINARY_OPERATOR_BO_Shr: return Val_int(8);
+  case CLANG_EXT_BINARY_OPERATOR_BO_LT: return Val_int(9);
+  case CLANG_EXT_BINARY_OPERATOR_BO_GT: return Val_int(10);
+  case CLANG_EXT_BINARY_OPERATOR_BO_LE: return Val_int(11);
+  case CLANG_EXT_BINARY_OPERATOR_BO_GE: return Val_int(12);
+  case CLANG_EXT_BINARY_OPERATOR_BO_EQ: return Val_int(13);
+  case CLANG_EXT_BINARY_OPERATOR_BO_NE: return Val_int(14);
+  case CLANG_EXT_BINARY_OPERATOR_BO_And: return Val_int(15);
+  case CLANG_EXT_BINARY_OPERATOR_BO_Xor: return Val_int(16);
+  case CLANG_EXT_BINARY_OPERATOR_BO_Or: return Val_int(17);
+  case CLANG_EXT_BINARY_OPERATOR_BO_LAnd: return Val_int(18);
+  case CLANG_EXT_BINARY_OPERATOR_BO_LOr: return Val_int(19);
+  case CLANG_EXT_BINARY_OPERATOR_BO_Assign: return Val_int(20);
+  case CLANG_EXT_BINARY_OPERATOR_BO_MulAssign: return Val_int(21);
+  case CLANG_EXT_BINARY_OPERATOR_BO_DivAssign: return Val_int(22);
+  case CLANG_EXT_BINARY_OPERATOR_BO_RemAssign: return Val_int(23);
+  case CLANG_EXT_BINARY_OPERATOR_BO_AddAssign: return Val_int(24);
+  case CLANG_EXT_BINARY_OPERATOR_BO_SubAssign: return Val_int(25);
+  case CLANG_EXT_BINARY_OPERATOR_BO_ShlAssign: return Val_int(26);
+  case CLANG_EXT_BINARY_OPERATOR_BO_ShrAssign: return Val_int(27);
+  case CLANG_EXT_BINARY_OPERATOR_BO_AndAssign: return Val_int(28);
+  case CLANG_EXT_BINARY_OPERATOR_BO_XorAssign: return Val_int(29);
+  case CLANG_EXT_BINARY_OPERATOR_BO_OrAssign: return Val_int(30);
+  case CLANG_EXT_BINARY_OPERATOR_BO_Comma: return Val_int(31);
   }
   failwith_fmt("invalid value for Val_clang_ext_binaryoperatorkind: %d", v);
   return Val_int(0);
