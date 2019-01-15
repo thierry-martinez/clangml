@@ -748,7 +748,7 @@ tgt); }, Regular
         | _ -> assert false
       end
   | _ ->
-      match Clang.ext_get_type_kind ty with
+      match Clang.ext_get_type_kind ty with (* for Ocaml 3.8 *)
       | Elaborated ->
           let full_type_name = Clang.get_type_spelling ty in
           begin
@@ -1333,7 +1333,7 @@ let translate_typedef_decl context cur =
   let name = Clang.get_cursor_spelling cur in
   let underlying_type = Clang.get_typedef_decl_underlying_type cur in
   if
-    match Clang.get_type_kind underlying_type,
+    match Clang.ext_get_type_kind underlying_type, (* for Ocaml 3.8 *)
       get_elaborated_type (Clang.get_type_spelling underlying_type) with
     | Elaborated, Some (Enum type_name) ->
         begin
