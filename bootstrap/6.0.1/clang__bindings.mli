@@ -1204,12 +1204,14 @@ external ext_stmt_get_class_kind :
 type clang_ext_cursorkind =
   | ImplicitCastExpr 
   | BinaryConditionalOperator 
+  | UnaryExprOrTypeTraitExpr 
   | Unknown 
 external ext_get_cursor_kind :
   cxcursor -> clang_ext_cursorkind = "clang_ext_GetCursorKind_wrapper"
 type clang_ext_typekind =
   | Invalid 
   | Paren 
+  | Elaborated 
   | Unknown 
 external ext_get_type_kind :
   cxtype -> clang_ext_typekind = "clang_ext_GetTypeKind_wrapper"
@@ -1239,3 +1241,5 @@ external ext_unary_expr_get_kind :
   cxcursor -> clang_ext_unaryexpr = "clang_ext_UnaryExpr_GetKind_wrapper"
 external ext_unary_expr_get_argument_type :
   cxcursor -> cxtype = "clang_ext_UnaryExpr_GetArgumentType_wrapper"
+external ext_type_get_named_type :
+  cxtype -> cxtype = "clang_ext_Type_getNamedType_wrapper"

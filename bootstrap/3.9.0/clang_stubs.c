@@ -5578,7 +5578,8 @@ Clang_ext_cursorkind_val(value ocaml)
   switch (Int_val(ocaml)) {
   case 0: return ECK_ImplicitCastExpr;
   case 1: return ECK_BinaryConditionalOperator;
-  case 2: return ECK_Unknown;
+  case 2: return ECK_UnaryExprOrTypeTraitExpr;
+  case 3: return ECK_Unknown;
   }
   failwith_fmt("invalid value for Clang_ext_cursorkind_val: %d", Int_val(ocaml));
   return ECK_ImplicitCastExpr;
@@ -5590,7 +5591,8 @@ Val_clang_ext_cursorkind(enum clang_ext_CursorKind v)
   switch (v) {
   case ECK_ImplicitCastExpr: return Val_int(0);
   case ECK_BinaryConditionalOperator: return Val_int(1);
-  case ECK_Unknown: return Val_int(2);
+  case ECK_UnaryExprOrTypeTraitExpr: return Val_int(2);
+  case ECK_Unknown: return Val_int(3);
   }
   failwith_fmt("invalid value for Val_clang_ext_cursorkind: %d", v);
   return Val_int(0);
@@ -5616,7 +5618,8 @@ Clang_ext_typekind_val(value ocaml)
   switch (Int_val(ocaml)) {
   case 0: return ETK_Invalid;
   case 1: return ETK_Paren;
-  case 2: return ETK_Unknown;
+  case 2: return ETK_Elaborated;
+  case 3: return ETK_Unknown;
   }
   failwith_fmt("invalid value for Clang_ext_typekind_val: %d", Int_val(ocaml));
   return ETK_Invalid;
@@ -5628,7 +5631,8 @@ Val_clang_ext_typekind(enum clang_ext_TypeKind v)
   switch (v) {
   case ETK_Invalid: return Val_int(0);
   case ETK_Paren: return Val_int(1);
-  case ETK_Unknown: return Val_int(2);
+  case ETK_Elaborated: return Val_int(2);
+  case ETK_Unknown: return Val_int(3);
   }
   failwith_fmt("invalid value for Val_clang_ext_typekind: %d", v);
   return Val_int(0);
@@ -5798,6 +5802,21 @@ clang_ext_UnaryExpr_GetArgumentType_wrapper(value c_ocaml)
   CXCursor c;
   c = Cxcursor_val(Field(c_ocaml, 0));
   CXType result = clang_ext_UnaryExpr_GetArgumentType(c);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(1);
+  Store_field(data, 0, Val_cxtype(result));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_Type_getNamedType_wrapper(value CT_ocaml)
+{
+  CAMLparam1(CT_ocaml);
+  CXType CT;
+  CT = Cxtype_val(Field(CT_ocaml, 0));
+  CXType result = clang_ext_Type_getNamedType(CT);
   {
     CAMLlocal1(data);
     data = caml_alloc_tuple(1);
