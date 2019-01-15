@@ -747,34 +747,36 @@ tgt); }, Regular
         | None -> default_type (Clang.get_type_spelling ty)
         | _ -> assert false
       end
-  | Elaborated ->
-      let full_type_name = Clang.get_type_spelling ty in
-      begin
-        match get_elaborated_type full_type_name with
-        | None -> failwith full_type_name
-        | Some (Enum type_name) -> find_enum_info type_name
-        | Some (Struct type_name) ->
-            let struct_info =
-              try
-                String_hashtbl.find context.struct_table type_name
-              with Not_found ->
-                failwith ("Unknown struct " ^ type_name) in
-            let common_info, struct_info = struct_info in
-            Lazy.force common_info, Struct struct_info
-      end
   | _ ->
-      let type_name = Clang.get_type_spelling ty in
-      match type_name with
-      | "CXString" ->
-          { ocamltype = ocaml_string;
-            c_of_ocaml = (fun _ -> assert false);
-            ocaml_of_c = (fun fmt ~src ~params ~references ~tgt ->
-  Printf.fprintf fmt "%s = caml_copy_string(clang_getCString(%s));
-clang_disposeString(%s);" tgt src src) }, Regular
-      | "uint64_t" | "int64_t" ->
-          int64_type_info
+      match Clang.ext_get_type_kind ty with
+      | Elaborated ->
+          let full_type_name = Clang.get_type_spelling ty in
+          begin
+            match get_elaborated_type full_type_name with
+            | None -> failwith full_type_name
+            | Some (Enum type_name) -> find_enum_info type_name
+            | Some (Struct type_name) ->
+                let struct_info =
+                  try
+                    String_hashtbl.find context.struct_table type_name
+                  with Not_found ->
+                    failwith ("Unknown struct " ^ type_name) in
+                let common_info, struct_info = struct_info in
+                Lazy.force common_info, Struct struct_info
+          end
       | _ ->
-          default_type type_name
+          let type_name = Clang.get_type_spelling ty in
+          match type_name with
+          | "CXString" ->
+              { ocamltype = ocaml_string;
+                c_of_ocaml = (fun _ -> assert false);
+                ocaml_of_c = (fun fmt ~src ~params ~references ~tgt ->
+                  Printf.fprintf fmt "%s = caml_copy_string(clang_getCString(%s));
+                    clang_disposeString(%s);" tgt src src) }, Regular
+          | "uint64_t" | "int64_t" ->
+              int64_type_info
+          | _ ->
+              default_type type_name
 
 let make_tuple list =
   match list with
@@ -1787,11 +1789,15 @@ let main cflags llvm_config prefix =
         let llvm_version = run_llvm_config llvm_config ["--version"] in
         let llvm_prefix = run_llvm_config llvm_config ["--prefix"] in
         let llvm_cflags = run_llvm_config llvm_config ["--cflags"] in
+        let equivalent_llvm_version =
+          match llvm_version with
+          | "3.8.0" -> "3.8.1"
+          | _ -> llvm_version in
         String.split_on_char ' ' llvm_cflags @
         ["-I"; List.fold_left Filename.concat llvm_prefix
            ["lib"; "clang"; llvm_version; "include"]; "-I";
          "/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include/";
-         "-DLLVM_VERSION_" ^ String.map (fun c -> if c = '.' then '_' else c) llvm_version] in
+         "-DLLVM_VERSION_" ^ String.map (fun c -> if c = '.' then '_' else c) equivalent_llvm_version] in
   let cflags = cflags |> List.map @@ String.split_on_char ',' |> List.flatten in
   let clang_options = cflags @ llvm_flags in
   let module_interface =
