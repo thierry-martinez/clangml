@@ -116,7 +116,7 @@ pipeline {
         changed {
             mail to: 'Thierry.Martinez@inria.fr',
                 subject:
-                    ClangML CI status changed: ${currentBuild.fullDisplayName}",
+                  "ClangML CI status changed: ${currentBuild.fullDisplayName}",
                 body: "Something changed with ${env.BUILD_URL}"
         }
     }
