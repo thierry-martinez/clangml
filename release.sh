@@ -5,8 +5,7 @@ tagname="v$version"
 git config --global user.email "Thierry.Martinez@inria.fr"
 git config --global user.name "Thierry Martinez"
 current_dir="`pwd`"
-
-git log -1 --format=%B >commit_message
+[ -f commit_message ] || git log -1 --format=%B >commit_message
 git pull origin releases
 git merge origin/master
 git fetch origin bootstrap
@@ -23,7 +22,7 @@ url="https://gitlab.inria.fr/tmartine/clangml/-/archive/$tagname/$archive"
 wget "$url"
 md5=`md5sum "$archive" | cut -d " " -f 1`
 cd ~/opam-repository
-git pull origin master
+git checkout "$branch" || git pull origin master && git pull origin master
 branch="clangml.$version"
 git checkout -b "$branch"
 repo="packages/clangml/clangml.$version"
