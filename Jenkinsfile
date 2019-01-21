@@ -94,6 +94,7 @@ pipeline {
             }
         }
         stage('Commit to bootstrap branch') {
+            when { allOf { branch 'master' } }
             steps {
                 script {
                     def commit = sh (
@@ -114,7 +115,7 @@ pipeline {
         stage('Deploy') {
             when { allOf { branch 'master'; changelog '^Release:' } }
             steps {
-                sh 'src/release.sh'
+                sh 'cd src && ./release.sh'
             }
         }
     }
