@@ -5,6 +5,7 @@ tagname="v$version"
 git config --global user.email "Thierry.Martinez@inria.fr"
 git config --global user.name "Thierry Martinez"
 current_dir="`pwd`"
+
 git log -1 --format=%B >commit_message
 git pull origin releases
 git merge origin/master
