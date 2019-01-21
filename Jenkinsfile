@@ -19,8 +19,8 @@ pipeline {
                 sh '''
                     eval $(opam env) && \
                     mkdir build && cd build && \
-                    ../src/configure --with-llvm-config=\
-                        /media/llvms/7.0.1/bin/llvm-config
+                    ../src/configure \
+                        --with-llvm-config=/media/llvms/7.0.1/bin/llvm-config
                    '''
             }
         }
@@ -48,17 +48,17 @@ pipeline {
                         def llvm_dir = "/media/llvms/$llvm_version"
                         def llvm_config = "$llvm_dir/bin/llvm-config"
                         def bootstrap_dir = "src/bootstrap/$llvm_version"
+                        def include_dir =
+                            "$llvm_dir/lib/clang/$llvm_version/include"
                         branches[llvm_version] = {
                             node {
                                 sh """
                                     cd $pwd && \
                                     mkdir -p $bootstrap_dir && \
                                     build/_build/default/stubgen/stubgen.exe \
-                                        --cc=-I,build,\
-                                            -I,$llvm_dir/lib/\
-                                                clang/$llvm_version/include \
-                                            --llvm-config=$llvm_config \
-                                            $bootstrap_dir/
+                                        --cc=-I,build,-I,$include_dir \
+                                        --llvm-config=$llvm_config \
+                                        $bootstrap_dir/
                                    """
                                 sh """
                                     cd $pwd && \
