@@ -112,6 +112,11 @@ pipeline {
                 }
             }
         }
+        stage('opam installation') {
+            steps {
+                sh 'opam pin add -y clangml file://$PWD/src'
+            }
+        }
         stage('Deploy') {
             when { allOf { branch 'master'; changelog '^Release:' } }
             steps {
