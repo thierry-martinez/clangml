@@ -2,15 +2,9 @@
 set -e
 version="`cat VERSION`"
 tagname="v$version"
-commit="`git rev-parse HEAD`"
 git config --global user.email "Thierry.Martinez@inria.fr"
 git config --global user.name "Thierry Martinez"
-cd ~/clangml
-git pull origin master
-if [[ "`git rev-parse HEAD`" != "$commit" ]]; then
-    echo "Too recent commit!"
-    exit 1
-fi
+current_dir="`pwd`"
 git log -1 --format=%B >commit_message
 git pull origin releases
 git merge origin/master
@@ -34,14 +28,14 @@ git checkout -b "$branch"
 repo="packages/clangml/clangml.$version"
 mkdir -p "$repo"
 opamfile="$repo/opam"
-cp ~/clangml/clangml.opam "$opamfile"
-cat >>$opamfile <<EOF
+cp "$current_dir/clangml.opam" "$opamfile"
+cat >>"$opamfile" <<EOF
 url {
   src: "$url"
   checksum: "md5=$md5"
 }
 EOF
 git add "$opamfile"
-git commit -F ~/clangml/commit_message
+git commit -F "$current_dir/commit_message"
 git push perso "$branch"
 git checkout master
