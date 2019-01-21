@@ -112,7 +112,7 @@ pipeline {
             }
         }
         stage('Deploy') {
-            when { allOf { branch 'master' changelog '^Release:' } }
+            when { allOf { branch 'master'; changelog '^Release:' } }
             steps {
                 sh './release.sh'
             }
