@@ -72,7 +72,7 @@ pipeline {
                                 sh """
                                     cd $pwd/$llvm_version/ && \
                                     mkdir current && \
-                                    build/_build/default/stubgen/stubgen.exe \
+                                    _build/default/stubgen/stubgen.exe \
                                         --cc=-I,build,-I,$include_dir \
                                         --llvm-config=$llvm_config \
                                         current/ && \
