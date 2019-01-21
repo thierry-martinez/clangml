@@ -112,12 +112,9 @@ pipeline {
             }
         }
         stage('Deploy') {
+            when { allOf { branch 'master' changelog '^Release:' } }
             steps {
-                sh '''
-                    if git log -1 --format=%s | grep -q ^Release:; then
-                        ./release.sh
-                    fi
-                   '''
+                sh './release.sh'
             }
         }
     }
