@@ -7,12 +7,21 @@ pipeline {
             steps {
                 sh 'mkdir src'
                 sh 'mv * src/ || true'
-                sh 'cd src && tar -xf ~/bootstrap.tar.xz && aclocal && automake --add-missing && autoreconf'
+                sh '''
+                    cd src && \
+                    tar -xf ~/bootstrap.tar.xz && \
+                    aclocal && automake --add-missing && autoreconf
+                   '''
             }
         }
         stage('Configure') {
             steps {
-                sh 'eval $(opam env) && mkdir build && cd build && ../src/configure --with-llvm-config=/media/llvms/7.0.1/bin/llvm-config'
+                sh '''
+                    eval $(opam env) && \
+                    mkdir build && cd build && \
+                    ../src/configure --with-llvm-config=\
+                        /media/llvms/7.0.1/bin/llvm-config
+                   '''
             }
         }
         stage('Build') {
@@ -36,10 +45,29 @@ pipeline {
                     def branches = [:]
                     for (i in llvm_versions) {
                         def llvm_version = i
+                        def llvm_dir = "/media/llvms/$llvm_version"
+                        def llvm_config = "$llvm_dir/bin/llvm-config"
+                        def bootstrap_dir = "src/bootstrap/$llvm_version"
                         branches[llvm_version] = {
                             node {
-                                sh "cd $pwd && mkdir -p src/bootstrap/$llvm_version/ && build/_build/default/stubgen/stubgen.exe --cc=-I,build,-I,/media/llvms/$llvm_version/lib/clang/$llvm_version/include --llvm-config=/media/llvms/$llvm_version/bin/llvm-config src/bootstrap/$llvm_version/"
-                                sh "cd $pwd && mkdir $llvm_version/ && cd $llvm_version/ && ../src/configure --with-llvm-config=/media/llvms/$llvm_version/bin/llvm-config && make clangml stubgen"
+                                sh """
+                                    cd $pwd && \
+                                    mkdir -p $bootstrap_dir && \
+                                    build/_build/default/stubgen/stubgen.exe \
+                                        --cc=-I,build,\
+                                            -I,$llvm_dir/lib/\
+                                                clang/$llvm_version/include \
+                                            --llvm-config=$llvm_config \
+                                            $bootstrap_dir/
+                                   """
+                                sh """
+                                    cd $pwd && \
+                                    mkdir $llvm_version/ && \
+                                    cd $llvm_version/ && \
+                                    ../src/configure \
+                                        --with-llvm-config=$llvm_config && \
+                                    make clangml stubgen
+                                   """
                                 sh "cd $pwd/$llvm_version/ && make tests"
                             }
                         }
@@ -47,7 +75,8 @@ pipeline {
                     parallel branches
                 }
                 sh 'cd src && tar -cf bootstrap.tar.xz bootstrap/'
-                archiveArtifacts artifacts: 'src/bootstrap.tar.xz', fingerprint: true
+                archiveArtifacts artifacts: 'src/bootstrap.tar.xz',
+                    fingerprint: true
             }
         }
         stage('Commit to bootstrap branch') {
@@ -60,9 +89,21 @@ pipeline {
                     sh 'git checkout origin/bootstrap'
                     sh 'tar -xf src/bootstrap.tar.xz'
                     sh 'git add bootstrap'
-                    sh "git commit -m 'generated files for commit $commit' || true"
+                    sh """
+                        git commit -m 'generated files for commit $commit' || \
+                        true
+                       """
                     sh 'git push origin HEAD:bootstrap'
                 }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh '''
+                    if git log -1 --format=%s | grep -q ^Release:; then
+                        ./release.sh
+                    fi
+                   '''
             }
         }
     }
@@ -74,7 +115,8 @@ pipeline {
         }
         changed {
             mail to: 'Thierry.Martinez@inria.fr',
-                subject: "ClangML CI status changed: ${currentBuild.fullDisplayName}",
+                subject:
+                    ClangML CI status changed: ${currentBuild.fullDisplayName}",
                 body: "Something changed with ${env.BUILD_URL}"
         }
     }

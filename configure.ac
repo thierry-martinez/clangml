@@ -1,4 +1,4 @@
-AC_INIT([[clangml]], [1], [[Thierry.Martinez@inria.fr]], [[clangml]],
+AC_INIT([[clangml]], [m4_esyscmd([cat VERSION])], [[Thierry.Martinez@inria.fr]], [[clangml]],
   [[https://github.com/thierry.martinez/clangml/]])
 AM_INIT_AUTOMAKE
 
