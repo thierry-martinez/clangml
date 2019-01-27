@@ -14,7 +14,10 @@ clang_getBuildSessionTimestamp_wrapper()
   }
 }
 
-DECLARE_OPAQUE(CXVirtualFileOverlay, cxvirtualfileoverlay, Cxvirtualfileoverlay_val, Val_cxvirtualfileoverlay, custom_finalize_default)
+static void finalize_cxvirtualfileoverlay(value v) {
+  clang_VirtualFileOverlay_dispose(*((CXVirtualFileOverlay *) Data_custom_val(v)));;
+}
+DECLARE_OPAQUE(CXVirtualFileOverlay, cxvirtualfileoverlay, Cxvirtualfileoverlay_val, Val_cxvirtualfileoverlay, finalize_cxvirtualfileoverlay)
 
 CAMLprim value
 clang_VirtualFileOverlay_create_wrapper(value options_ocaml)
