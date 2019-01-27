@@ -1,6 +1,7 @@
-AC_INIT([[clangml]], [m4_esyscmd([cat VERSION])], [[Thierry.Martinez@inria.fr]], [[clangml]],
+AC_INIT([[clangml]], [m4_esyscmd([cat VERSION])],
+  [[Thierry.Martinez@inria.fr]], [[clangml]],
   [[https://github.com/thierry.martinez/clangml/]])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign]) dnl to allow README.md
 
 AC_PROG_LN_S
 
