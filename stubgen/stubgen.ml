@@ -1817,6 +1817,9 @@ let main cflags llvm_config prefix =
        make_destructor "clang_disposeTranslationUnit") |>
     add_type (Pcre.regexp "^CXTranslationUnit$|^CXCursor$|^CXType$")
       (empty_type_interface |> carry_reference) |>
+    add_type (Pcre.regexp "^CXVirtualFileOverlay$")
+      (empty_type_interface |>
+       make_destructor "clang_VirtualFileOverlay_dispose") |>
     add_enum (Pcre.regexp "^CXCursorKind$")
       (empty_enum_interface |>
        add_constant (Pcre.regexp "^CXCursor_UnexposedExpr$")
