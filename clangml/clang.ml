@@ -145,28 +145,29 @@ module Ast = struct
 
   let location_of_decoration decoration =
     match decoration with
-    | Cursor cursor -> get_cursor_location cursor
+    | Cursor cursor -> Clang (get_cursor_location cursor)
     | Custom { location } ->
         match location with
         | Some location -> location
-        | None -> get_cursor_location (get_null_cursor ())
+        | None -> Clang (get_cursor_location (get_null_cursor ()))
 
   let location_of_node node =
     location_of_decoration node.decoration
 
-  type concrete_location = {
-      filename : string;
-      line : int;
-      column : int
-    }
-
   let get_presumed_location source_location =
-    let filename, line, column = get_presumed_location source_location in
-    { filename; line; column }
+    match source_location with
+    | Clang source_location ->
+        let filename, line, column = get_presumed_location source_location in
+        { filename; line; column }
+    | Concrete concrete_location -> concrete_location
 
   let get_expansion_location source_location =
-    let file, line, column, _offset = get_expansion_location source_location in
-    { filename = get_file_name file; line; column }
+    match source_location with
+    | Clang source_location ->
+        let file, line, column, _offset =
+          get_expansion_location source_location in
+        { filename = get_file_name file; line; column }
+    | Concrete concrete_location -> concrete_location
 
   let string_of_elaborated_type_keyword =
     ext_elaborated_type_get_keyword_spelling
@@ -802,7 +803,7 @@ module Type = struct
 
   let get_size_of (ty : t) = type_get_size_of ty.cxtype
 
-  let get_align_of (ty : t) = type_get_size_of ty.cxtype
+  let get_align_of (ty : t) = type_get_align_of ty.cxtype
 
   let get_typedef_underlying_type ?options (qual_type : t) =
     Clang__bindings.get_type_declaration qual_type.cxtype |>

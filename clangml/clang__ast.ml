@@ -2,10 +2,87 @@
 
 open Clang__bindings
 
-(** Most of the AST nodes carry the [cxcursor] from where they come from
-    in the Clang translation unit. *)
+(** {2 Aliases} *)
 
-type source_location = cxsourcelocation
+(** The following aliases provide more readable names for some types
+from libclang. *)
+
+type elaborated_type_keyword = clang_ext_elaboratedtypekeyword
+(** Keyword associated to an elaborated type: [struct], [union],
+    [enum], ... *)
+
+and character_kind = clang_ext_characterkind
+(** Character kind: ASCII, UTF8, UTF16, ... *)
+
+and unary_expr_kind = clang_ext_unaryexpr
+(** Kind of unary expression: [sizeof], [alignof], ... *)
+
+and unary_operator_kind = clang_ext_unaryoperatorkind
+(** Kind of unary operator: [_++], [++_], [-_], [&_], ... *)
+
+and binary_operator_kind = clang_ext_binaryoperatorkind
+(** Kind of binary operator: [_+_], [_=_], [_+=_], [_<<_], ... *)
+
+and builtin_type = cxtypekind
+(** libclang's type kinds: [Int], [Void], [Bool], ... *)
+  [@@deriving eq, ord, show]
+
+(** {2 Abstractions from libclang's types} *)
+
+(** The following types describe locations and literals that can be either
+ produced by libclang or constructed from OCaml values to allow OCaml
+    programs to construct parts of AST (for
+    instance, to apply a transformation to the AST). *)
+
+(** A {!type:source_location} can either be an internal
+    {!type:cxsourcelocation} from libclang or a
+    {!type:concrete_location}.
+    {!type:concrete_location} can be obtained from
+    {!type:source_location} with {!val:Clang.Ast.get_presumed_location}
+    or {!val:Clang.Ast.get_expansion_location}: these functions are
+    identical for {!type:source_location} constructed from
+    {!type:concrete_location}, and call {!val:Clang.get_presumed_location}
+    and {!val:Clang.get_expansion_location} for libclang's locations.
+ *)
+type concrete_location = {
+  filename : string;
+  line : int;
+  column : int
+  }
+
+type source_location =
+  | Clang of cxsourcelocation
+  | Concrete of concrete_location
+
+type integer_literal =
+  | Int of int
+  | CXInt of cxint
+  [@@deriving eq, ord]
+
+type floating_literal =
+  | Float of float
+  | CXFloat of cxfloat
+  [@@deriving eq, ord]
+
+(** {2 Nodes and decorations} *)
+
+(** AST nodes are of type ['a ]{!type:node} for some ['a] and
+    carry a {!type:decoration}.
+    If the node comes for a translation unit parsed by clang,
+    the decoration is of the form {!const:Cursor}[ cursor],
+    where [cursor] points to the corresponding node in clang
+    internal AST.
+    Decorations
+    can be of the form {!const:Custom}[ custom_decoration],
+    where the inlined record [custom_decoration] may optionnally
+    carry a location, or a type, or both.
+
+    To break type recursion between [qual_type] and [decoration],
+    open types ['qual_type open_decoration] and
+    [('a, 'qual_type) open_node] are defined first, and then
+    {!type:node} and {!type:decoration} are defined as alias
+    with ['qual_type = qual_type].
+ *)
 
 type 'qual_type open_decoration =
   | Cursor of cxcursor
@@ -23,28 +100,11 @@ type ('a, 'qual_type) open_node = {
   }
   [@@deriving eq, ord, show]
 
-type elaborated_type_keyword = clang_ext_elaboratedtypekeyword
+(** {2 Visitors for nodes}
 
-and character_kind = clang_ext_characterkind
-
-and unary_expr_kind = clang_ext_unaryexpr
-
-and unary_operator_kind = clang_ext_unaryoperatorkind
-
-and binary_operator_kind = clang_ext_binaryoperatorkind
-
-and builtin_type = cxtypekind
-  [@@deriving eq, ord, show]
-
-type integer_literal =
-  | Int of int
-  | CXInt of cxint
-  [@@deriving eq, ord]
-
-type floating_literal =
-  | Float of float
-  | CXFloat of cxfloat
-  [@@deriving eq, ord]
+    The following classes define base classes for deriving visitors
+    for AST nodes.
+ *)
 
 class ['self] base_iter =
   object (self)
@@ -229,6 +289,8 @@ let check pp ast checker =
       (Format.pp_print_list pp) ast;
     incr failure_count
 ]}*)
+
+(** {2 Types and nodes} *)
 
 (**
 The following example declares the function [parse_declaration_list]
