@@ -1,0 +1,14 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+pages:
+  script:
+  - git checkout origin/master clangml dune-project
+  - dune build @doc
+  - cp -r _build/default/_doc/_html static/doc
+  - hugo
+  artifacts:
+    paths:
+    - public
+  only:
+  - pages
