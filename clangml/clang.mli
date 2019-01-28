@@ -30,8 +30,7 @@ val parse_string : ?index:cxindex -> ?filename:string ->
     ?unsaved_files:cxunsavedfile list ->
       ?options:Cxtranslationunit_flags.t ->
         string -> cxtranslationunit
-(** [parse_string ?index ?filename ?command_line_args ?unsaved_files ?options
-    contents]
+(** [parse_string ?index ?filename ?command_line_args ?unsaved_files ?options contents]
   parses string [contents] and returns its translation unit.
     This function calls {!val:Clang.parse_file} with an unsaved file called
     [filename] (by default, [<string>.c]) with [contents]: this unsaved file
@@ -80,8 +79,7 @@ module Ast : sig
         ?clang_options:Cxtranslationunit_flags.t ->
           ?options:Options.t ->
             string -> translation_unit
-  (** [parse_file ?index ?command_line_args ?unsaved_files ?clang_options
-      ?options filename]
+  (** [parse_file ?index ?command_line_args ?unsaved_files ?clang_options ?options filename]
   parses file [filename] and returns its translation unit.
     This function is equivalent to {!val:Clang.parse_file} (where [options]
       becomes [clang_options]), but returns the high-level representation
@@ -93,8 +91,7 @@ module Ast : sig
         ?clang_options:Cxtranslationunit_flags.t ->
           ?options:Options.t ->
             string -> translation_unit
-  (** [parse_string ?index ?filename ?command_line_args ?unsaved_files
-    ?clang_options ?options contents]
+  (** [parse_string ?index ?filename ?command_line_args ?unsaved_files ?clang_options ?options contents]
   parses string [contents] and returns its translation unit.
     This function is equivalent to {!val:Clang.parse_string} (where [options]
       becomes [clang_options]), but returns the high-level representation
@@ -213,8 +210,7 @@ module Type : sig
       If [node] has been constructed without type decoration,
       [Invalid_arg _] is raised.
       It is equivalent to
-      [Clang.Type.of_decoration ?options
-        (Clang.Ast.decoration_of_node node)].*)
+      [Clang.Type.of_decoration ?options (Clang.Ast.decoration_of_node node)].*)
 
   val make : ?const:bool -> ?volatile:bool -> ?restrict:bool ->
     Ast.type_desc -> t
@@ -239,8 +235,7 @@ module Type : sig
       of the fields belonging to the record type [ty]
       (either a struct or union).
       It is equivalent to
-     [Clang.iter_type_fields (fun d -> f (Clang.Decl.of_cursor ?options d))
-        ty.cxtype].
+     [Clang.iter_type_fields (fun d -> f (Clang.Decl.of_cursor ?options d)) ty.cxtype].
    *)
 
   val list_of_fields : ?options:Ast.Options.t -> t -> Ast.decl list
@@ -248,8 +243,7 @@ module Type : sig
       nodes of the fields belonging to the record type [ty] (either a struct
       or union).
       It is equivalent to
-     [List.map (Clang.Decl.of_cursor ?options) (Clang.list_of_type_fields
-        ty.cxtype)].
+     [List.map (Clang.Decl.of_cursor ?options) (Clang.list_of_type_fields ty.cxtype)].
    *)
 
   val get_declaration : ?options:Ast.Options.t -> t -> Ast.decl
@@ -262,8 +256,7 @@ module Type : sig
   (** [get_declaration ?options ty] returns the underlying type of a typedef
       [ty].
       It is equivalent to
-      [Clang.Type.of_cxtype ?options (Clang.get_typedef_decl_underlying_type
-        (Clang.get_type_declaration ty.cxtype))]. *)
+      [Clang.Type.of_cxtype ?options (Clang.get_typedef_decl_underlying_type (Clang.get_type_declaration ty.cxtype))]. *)
 
   val get_align_of : t -> int
   (** [get_align_of ty] returns the alignment of [ty] in bytes.
@@ -328,8 +321,7 @@ module Decl : sig
   (** [get_declaration ?options decl] returns the underlying type of a
       typedef [decl].
       It is equivalent to
-      [Clang.Type.of_cxtype ?options (Clang.get_typedef_decl_underlying_type
-        (Clang.Ast.cursor_of_node decl))]. *)
+      [Clang.Type.of_cxtype ?options (Clang.get_typedef_decl_underlying_type (Clang.Ast.cursor_of_node decl))]. *)
 
   val get_field_bit_width : t -> int
   (** [get_field_bit_width d] returns the bit width of the field
