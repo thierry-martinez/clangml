@@ -14,7 +14,7 @@ execute `./bootstrap.sh`.
 
 clangml's `configure` relies on `llvm-config` to find clang's library.
 By default, `llvm-config` is searched in PATH, or you may
-specify a path with `./configure --with-llvm-config=...'.
+specify a path with `./configure --with-llvm-config=...`.
 
 clangml requires some dependencies:
 `opam install dune stdcompat ppx_deriving visitors`.
