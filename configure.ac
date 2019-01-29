@@ -126,6 +126,18 @@ AC_MSG_RESULT([[$LLVM_VERSION]])
 # Some version equivalences
 AS_IF([test "x$LLVM_VERSION" = "x3.8.0"],
   [AC_SUBST([LLVM_VERSION], [[3.8.1]])])
+AS_IF([test "x$LLVM_VERSION" = "x3.9.0"],
+  [AC_SUBST([LLVM_VERSION], [[3.9.1]])])
+AS_IF([test "x$LLVM_VERSION" = "x4.0.0"],
+  [AC_SUBST([LLVM_VERSION], [[4.0.1]])])
+AS_IF([test "x$LLVM_VERSION" = "x5.0.0"],
+  [AC_SUBST([LLVM_VERSION], [[5.0.2]])])
+AS_IF([test "x$LLVM_VERSION" = "x5.0.1"],
+  [AC_SUBST([LLVM_VERSION], [[5.0.2]])])
+AS_IF([test "x$LLVM_VERSION" = "x6.0.0"],
+  [AC_SUBST([LLVM_VERSION], [[6.0.1]])])
+AS_IF([test "x$LLVM_VERSION" = "x7.0.0"],
+  [AC_SUBST([LLVM_VERSION], [[7.0.1]])])
 
 AC_ARG_WITH([llvm-version],
   AS_HELP_STRING([--with-llvm-version=VERSION],
