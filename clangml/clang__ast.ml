@@ -1325,6 +1325,7 @@ let () =
    ]}*)
   | Decl of decl list
   | Expr of expr
+  | OtherStmt
 
 and expr = (expr_desc, qual_type) open_node
 

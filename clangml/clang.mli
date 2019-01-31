@@ -25,6 +25,14 @@ val parse_file : ?index:cxindex ->
     See also {!val:Clang.Ast.parse_file} which returns a pattern-matchable
     representation of the AST. *)
 
+val parse_file_res : ?index:cxindex ->
+  ?command_line_args:string list ->
+    ?unsaved_files:cxunsavedfile list ->
+      ?options:Cxtranslationunit_flags.t ->
+        string -> (cxtranslationunit, cxerrorcode) result
+(** Equivalent to {!val:parse_file} but returns a [result] instead of
+    raising [Failure _] if parsing fails. *)
+
 val parse_string : ?index:cxindex -> ?filename:string ->
   ?command_line_args:string list ->
     ?unsaved_files:cxunsavedfile list ->
@@ -39,6 +47,14 @@ val parse_string : ?index:cxindex -> ?filename:string ->
     (for instance, [<string>.cpp]).
     See also {!val:Clang.Ast.parse_string} which returns a pattern-matchable
     representation of the AST. *)
+
+val parse_string_res : ?index:cxindex -> ?filename:string ->
+  ?command_line_args:string list ->
+    ?unsaved_files:cxunsavedfile list ->
+      ?options:Cxtranslationunit_flags.t ->
+        string -> (cxtranslationunit, cxerrorcode) result
+(** Equivalent to {!val:parse_string} but returns a [result] instead of
+    raising [Failure _] if parsing fails. *)
 
 (** {2 Abstract syntax tree} *)
 
@@ -85,6 +101,15 @@ module Ast : sig
       becomes [clang_options]), but returns the high-level representation
    of the translation unit (as obtained by {!val:of_cxtranslationunit}). *)
 
+  val parse_file_res : ?index:cxindex ->
+    ?command_line_args:string list ->
+      ?unsaved_files:cxunsavedfile list ->
+        ?clang_options:Cxtranslationunit_flags.t ->
+          ?options:Options.t ->
+            string -> (translation_unit, cxerrorcode) result
+  (** Equivalent to {!val:parse_file} but returns a [result] instead of
+    raising [Failure _] if parsing fails. *)
+
   val parse_string : ?index:cxindex -> ?filename:string ->
     ?command_line_args:string list ->
       ?unsaved_files:cxunsavedfile list ->
@@ -96,6 +121,15 @@ module Ast : sig
     This function is equivalent to {!val:Clang.parse_string} (where [options]
       becomes [clang_options]), but returns the high-level representation
    of the translation unit (as obtained by {!val:of_cxtranslationunit}). *)
+
+  val parse_string_res : ?index:cxindex -> ?filename:string ->
+    ?command_line_args:string list ->
+      ?unsaved_files:cxunsavedfile list ->
+        ?clang_options:Cxtranslationunit_flags.t ->
+          ?options:Options.t ->
+            string -> (translation_unit, cxerrorcode) result
+  (** Equivalent to {!val:parse_string_res} but returns a [result] instead of
+    raising [Failure _] if parsing fails. *)
 
   val of_cxtranslationunit : ?options:Options.t -> cxtranslationunit ->
     translation_unit

@@ -106,22 +106,34 @@ let string_of_cxerrorcode cxerrorcode =
   | InvalidArguments -> "the arguments violate the function contract"
   | ASTReadError -> "an AST deserialization error has occurred"
 
-let parse_file ?(index = create_index true true)
+let parse_file_res ?(index = create_index true true)
     ?(command_line_args = []) ?(unsaved_files = [])
     ?(options = default_editing_translation_unit_options ()) filename =
+  parse_translation_unit2 index filename (Array.of_list command_line_args)
+    (Array.of_list unsaved_files) options
+
+let parse_file ?index ?command_line_args ?unsaved_files ?options filename =
   match
-    parse_translation_unit2 index filename (Array.of_list command_line_args)
-      (Array.of_list unsaved_files) options
+    parse_file_res ?index ?command_line_args ?unsaved_files ?options filename
   with
   | Ok cxtranslationunit -> cxtranslationunit
   | Error cxerrorcode -> failwith (string_of_cxerrorcode cxerrorcode)
 
-let parse_string ?index ?(filename = "<string>.c")
+let parse_string_res ?index ?(filename = "<string>.c")
     ?command_line_args ?(unsaved_files = [])
     ?options contents =
-  parse_file ?index ?command_line_args
+  parse_file_res ?index ?command_line_args
     ~unsaved_files:({ filename; contents } :: unsaved_files)
     ?options filename
+
+let parse_string ?index ?filename ?command_line_args ?unsaved_files ?options
+    contents =
+  match
+    parse_string_res ?index ?filename ?command_line_args ?unsaved_files ?options
+      contents
+  with
+  | Ok cxtranslationunit -> cxtranslationunit
+  | Error cxerrorcode -> failwith (string_of_cxerrorcode cxerrorcode)
 
 module Ast = struct
   include Clang__ast
@@ -153,21 +165,6 @@ module Ast = struct
 
   let location_of_node node =
     location_of_decoration node.decoration
-
-  let get_presumed_location source_location =
-    match source_location with
-    | Clang source_location ->
-        let filename, line, column = get_presumed_location source_location in
-        { filename; line; column }
-    | Concrete concrete_location -> concrete_location
-
-  let get_expansion_location source_location =
-    match source_location with
-    | Clang source_location ->
-        let file, line, column, _offset =
-          get_expansion_location source_location in
-        { filename = get_file_name file; line; column }
-    | Concrete concrete_location -> concrete_location
 
   let string_of_elaborated_type_keyword =
     ext_elaborated_type_get_keyword_spelling
@@ -229,17 +226,13 @@ module Ast = struct
   end
 
   module Converter (Options : OptionsS) = struct
-    let invalid_structure function_name cxcursor =
-      let format_cursor fmt cxcursor =
-        Format.fprintf fmt "@[(%s:@ %s)@]"
-          (get_cursor_spelling cxcursor)
-          (get_cursor_kind_spelling (get_cursor_kind cxcursor)) in
-      let buffer = Buffer.create 16 in
-      Format.fprintf (Format.formatter_of_buffer buffer) "%s:@ %a:@ %a@."
-        function_name
-        format_cursor cxcursor
-        (Format.pp_print_list format_cursor) (list_of_children cxcursor);
-      invalid_arg (Buffer.contents buffer)
+    exception Invalid_structure
+
+    let filter_attributes list =
+      list |> List.filter @@ fun cursor ->
+        match get_cursor_kind cursor with
+        | UnexposedAttr -> false
+        | _ -> true
 
     let rec of_cxtype cxtype =
       let desc =
@@ -300,6 +293,7 @@ module Ast = struct
       node ~cursor (decl_desc_of_cxcursor cursor)
 
     and decl_desc_of_cxcursor cursor =
+      try
         match get_cursor_kind cursor with
         | FunctionDecl -> function_decl_of_cxcursor cursor
         | VarDecl -> Var (var_decl_desc_of_cxcursor cursor)
@@ -318,11 +312,12 @@ module Ast = struct
               if cursor_is_bit_field cursor then
                 match list_of_children cursor with
                 | [bitwidth] -> Some (expr_of_cxcursor bitwidth)
-                | _ -> invalid_structure "field_of_cxcursor (bitwidth)" cursor
+                | _ -> raise Invalid_structure
               else
                 None in
             Field { name; qual_type; bitwidth }
         | _ -> OtherDecl
+      with Invalid_structure -> OtherDecl
 
     and function_decl_of_cxcursor cursor =
       let linkage = cursor |> get_cursor_linkage in
@@ -378,16 +373,16 @@ module Ast = struct
         list_of_children cursor |> List.map @@ fun cursor ->
           match get_cursor_kind cursor with
           | EnumConstantDecl -> enum_constant_of_cxcursor cursor
-          | _ -> invalid_structure "enum_decl_of_cxcursor" cursor in
+          | _ -> raise Invalid_structure in
       EnumDecl { name; constants }
 
     and enum_constant_of_cxcursor cursor =
       let name = get_cursor_spelling cursor in
       let init =
-        match list_of_children cursor with
+        match filter_attributes (list_of_children cursor) with
         | [init] -> Some (expr_of_cxcursor init)
         | [] -> None
-        | _ -> invalid_structure "enum_constant_of_cxcursor (init)" cursor in
+        | _ -> raise Invalid_structure in
       node ~cursor { name; init }
 
     and struct_decl_of_cxcursor cursor =
@@ -405,161 +400,163 @@ module Ast = struct
 
     and stmt_of_cxcursor cursor =
       let desc =
-        match get_cursor_kind cursor with
-        | NullStmt ->
-            Null
-        | CompoundStmt ->
-            let items =
-              cursor |> list_of_children |> List.map stmt_of_cxcursor in
-            Compound items
-        | ForStmt ->
-            let children_set = ext_for_stmt_get_children_set cursor in
-            let queue = Queue.create () in
-            cursor |> iter_children (fun cur -> Queue.add cur queue);
-            let init =
-              if children_set land 1 <> 0 then
-                Some (stmt_of_cxcursor (Queue.pop queue))
-              else
-                None in
-            let condition_variable =
-              if children_set land 2 <> 0 then
-                Some (var_decl_of_cxcursor (Queue.pop queue))
-              else
-                None in
-            let cond =
-              if children_set land 4 <> 0 then
-                Some (expr_of_cxcursor (Queue.pop queue))
-              else
-                None in
-            let inc =
-              if children_set land 8 <> 0 then
-                Some (stmt_of_cxcursor (Queue.pop queue))
-              else
-                None in
-            let body = stmt_of_cxcursor (Queue.pop queue) in
-            assert (Queue.is_empty queue);
-            For { init; condition_variable; cond; inc; body }
-        | IfStmt ->
-            let children_set = ext_if_stmt_get_children_set cursor in
-            let queue = Queue.create () in
-            cursor |> iter_children (fun cur -> Queue.add cur queue);
-            let init =
-              if children_set land 1 <> 0 then
-                Some (ext_if_stmt_get_init cursor |> stmt_of_cxcursor)
-              else
-                None in
-            let condition_variable =
-              if children_set land 2 <> 0 then
-                Some (var_decl_of_cxcursor (Queue.pop queue))
-              else
-                None in
-            let cond = expr_of_cxcursor (Queue.pop queue) in
-            let then_branch = stmt_of_cxcursor (Queue.pop queue) in
-            let else_branch =
-              if children_set land 4 <> 0 then
-                Some (stmt_of_cxcursor (Queue.pop queue))
-              else
-                None in
-            assert (Queue.is_empty queue);
-            If { init; condition_variable; cond; then_branch; else_branch }
-        | SwitchStmt ->
-            let children_set = ext_switch_stmt_get_children_set cursor in
-            let queue = Queue.create () in
-            cursor |> iter_children (fun cur -> Queue.add cur queue);
-            let init =
-              if children_set land 1 <> 0 then
-                Some (ext_switch_stmt_get_init cursor |> stmt_of_cxcursor)
-              else
-                None in
-            let condition_variable =
-              if children_set land 2 <> 0 then
-                Some (var_decl_of_cxcursor (Queue.pop queue))
-              else
-                None in
-            let cond = expr_of_cxcursor (Queue.pop queue) in
-            let body = stmt_of_cxcursor (Queue.pop queue) in
-            assert (Queue.is_empty queue);
-            Switch { init; condition_variable; cond; body }
-        | CaseStmt ->
-            let lhs, rhs, body =
-              match list_of_children cursor with
-              | [lhs; rhs; body] ->
-                  lhs, Some (expr_of_cxcursor rhs), body
-              | [lhs; body] ->
-                  lhs, None, body
-              | _ ->
-                  invalid_structure "stmt_of_cxcursor (CaseStmt)" cursor in
-            let lhs = expr_of_cxcursor lhs in
-            let body = stmt_of_cxcursor body in
-            Case { lhs; rhs; body }
-        | DefaultStmt ->
-            let body =
-              match list_of_children cursor with
-              | [body] -> stmt_of_cxcursor body
-              | _ ->
-                  invalid_structure "stmt_of_cxcursor (DefaultStmt)" cursor in
-            Default body
-        | WhileStmt ->
-            let children_set = ext_while_stmt_get_children_set cursor in
-            let queue = Queue.create () in
-            cursor |> iter_children (fun cur -> Queue.add cur queue);
-            let condition_variable =
-              if children_set land 1 <> 0 then
-                Some (var_decl_of_cxcursor (Queue.pop queue))
-              else
-                None in
-            let cond = expr_of_cxcursor (Queue.pop queue) in
-            let body = stmt_of_cxcursor (Queue.pop queue) in
-            assert (Queue.is_empty queue);
-            While { condition_variable; cond; body }
-        | DoStmt ->
-            let body, cond =
-              match list_of_children cursor with
-              | [body; cond] -> stmt_of_cxcursor body, expr_of_cxcursor cond
-              | _ -> invalid_structure "stmt_of_cxcursor (DoStmt)" cursor in
-            Do { body; cond }
-        | LabelStmt ->
-            let label = cursor |> get_cursor_spelling in
-            let body =
-              match list_of_children cursor with
-              | [body] -> stmt_of_cxcursor body
-              | _ -> invalid_structure "stmt_of_cxcursor (LabelStmt)" cursor in
-            Label { label; body }
-        | GotoStmt ->
-            let label =
-              match list_of_children cursor with
-              | [label] -> label |> get_cursor_spelling
-              | _ -> invalid_structure "stmt_of_cxcursor (GotoStmt)" cursor in
-            Goto label
-        | IndirectGotoStmt ->
-            let target =
-              match list_of_children cursor with
-              | [target] -> expr_of_cxcursor target
-              | _ -> invalid_structure "stmt_of_cxcursor" cursor in
-            IndirectGoto target
-        | ContinueStmt ->
-            Continue
-        | BreakStmt ->
-            Break
-        | DeclStmt ->
-            let decl = list_of_children cursor |> List.map decl_of_cxcursor in
-            Decl decl
-        | ReturnStmt ->
-            let value =
-              match list_of_children cursor with
-              | [value] -> Some (expr_of_cxcursor value)
-              | [] -> None
-              | _ -> invalid_structure "stmt_of_cxcursor" cursor in
-            Return value
-        | GCCAsmStmt ->
-            let code = ext_asm_stmt_get_asm_string cursor in
-            let parameters =
-              list_of_children cursor |> List.map @@ fun cursor ->
-                node ~cursor (get_cursor_spelling cursor) in
-            GCCAsm (code, parameters)
-        | MSAsmStmt ->
-            MSAsm (ext_asm_stmt_get_asm_string cursor)
-        | _ -> Decl [node ~cursor (decl_desc_of_cxcursor cursor)] in
+        try
+          match get_cursor_kind cursor with
+          | NullStmt ->
+              Null
+          | CompoundStmt ->
+              let items =
+                cursor |> list_of_children |> List.map stmt_of_cxcursor in
+              Compound items
+          | ForStmt ->
+              let children_set = ext_for_stmt_get_children_set cursor in
+              let queue = Queue.create () in
+              cursor |> iter_children (fun cur -> Queue.add cur queue);
+              let init =
+                if children_set land 1 <> 0 then
+                  Some (stmt_of_cxcursor (Queue.pop queue))
+                else
+                  None in
+              let condition_variable =
+                if children_set land 2 <> 0 then
+                  Some (var_decl_of_cxcursor (Queue.pop queue))
+                else
+                  None in
+              let cond =
+                if children_set land 4 <> 0 then
+                  Some (expr_of_cxcursor (Queue.pop queue))
+                else
+                  None in
+              let inc =
+                if children_set land 8 <> 0 then
+                  Some (stmt_of_cxcursor (Queue.pop queue))
+                else
+                  None in
+              let body = stmt_of_cxcursor (Queue.pop queue) in
+              assert (Queue.is_empty queue);
+              For { init; condition_variable; cond; inc; body }
+          | IfStmt ->
+              let children_set = ext_if_stmt_get_children_set cursor in
+              let queue = Queue.create () in
+              cursor |> iter_children (fun cur -> Queue.add cur queue);
+              let init =
+                if children_set land 1 <> 0 then
+                  Some (ext_if_stmt_get_init cursor |> stmt_of_cxcursor)
+                else
+                  None in
+              let condition_variable =
+                if children_set land 2 <> 0 then
+                  Some (var_decl_of_cxcursor (Queue.pop queue))
+                else
+                  None in
+              let cond = expr_of_cxcursor (Queue.pop queue) in
+              let then_branch = stmt_of_cxcursor (Queue.pop queue) in
+              let else_branch =
+                if children_set land 4 <> 0 then
+                  Some (stmt_of_cxcursor (Queue.pop queue))
+                else
+                  None in
+              assert (Queue.is_empty queue);
+              If { init; condition_variable; cond; then_branch; else_branch }
+          | SwitchStmt ->
+              let children_set = ext_switch_stmt_get_children_set cursor in
+              let queue = Queue.create () in
+              cursor |> iter_children (fun cur -> Queue.add cur queue);
+              let init =
+                if children_set land 1 <> 0 then
+                  Some (ext_switch_stmt_get_init cursor |> stmt_of_cxcursor)
+                else
+                  None in
+              let condition_variable =
+                if children_set land 2 <> 0 then
+                  Some (var_decl_of_cxcursor (Queue.pop queue))
+                else
+                  None in
+              let cond = expr_of_cxcursor (Queue.pop queue) in
+              let body = stmt_of_cxcursor (Queue.pop queue) in
+              assert (Queue.is_empty queue);
+              Switch { init; condition_variable; cond; body }
+          | CaseStmt ->
+              let lhs, rhs, body =
+                match list_of_children cursor with
+                | [lhs; rhs; body] ->
+                    lhs, Some (expr_of_cxcursor rhs), body
+                | [lhs; body] ->
+                    lhs, None, body
+                | _ ->
+                    raise Invalid_structure in
+              let lhs = expr_of_cxcursor lhs in
+              let body = stmt_of_cxcursor body in
+              Case { lhs; rhs; body }
+          | DefaultStmt ->
+              let body =
+                match list_of_children cursor with
+                | [body] -> stmt_of_cxcursor body
+                | _ ->
+                    raise Invalid_structure in
+              Default body
+          | WhileStmt ->
+              let children_set = ext_while_stmt_get_children_set cursor in
+              let queue = Queue.create () in
+              cursor |> iter_children (fun cur -> Queue.add cur queue);
+              let condition_variable =
+                if children_set land 1 <> 0 then
+                  Some (var_decl_of_cxcursor (Queue.pop queue))
+                else
+                  None in
+              let cond = expr_of_cxcursor (Queue.pop queue) in
+              let body = stmt_of_cxcursor (Queue.pop queue) in
+              assert (Queue.is_empty queue);
+              While { condition_variable; cond; body }
+          | DoStmt ->
+              let body, cond =
+                match list_of_children cursor with
+                | [body; cond] -> stmt_of_cxcursor body, expr_of_cxcursor cond
+                | _ -> raise Invalid_structure in
+              Do { body; cond }
+          | LabelStmt ->
+              let label = cursor |> get_cursor_spelling in
+              let body =
+                match list_of_children cursor with
+                | [body] -> stmt_of_cxcursor body
+                | _ -> raise Invalid_structure in
+              Label { label; body }
+          | GotoStmt ->
+              let label =
+                match list_of_children cursor with
+                | [label] -> label |> get_cursor_spelling
+                | _ -> raise Invalid_structure in
+              Goto label
+          | IndirectGotoStmt ->
+              let target =
+                match list_of_children cursor with
+                | [target] -> expr_of_cxcursor target
+                | _ -> raise Invalid_structure in
+              IndirectGoto target
+          | ContinueStmt ->
+              Continue
+          | BreakStmt ->
+              Break
+          | DeclStmt ->
+              let decl = list_of_children cursor |> List.map decl_of_cxcursor in
+              Decl decl
+          | ReturnStmt ->
+              let value =
+                match list_of_children cursor with
+                | [value] -> Some (expr_of_cxcursor value)
+                | [] -> None
+                | _ -> raise Invalid_structure in
+              Return value
+          | GCCAsmStmt ->
+              let code = ext_asm_stmt_get_asm_string cursor in
+              let parameters =
+                list_of_children cursor |> List.map @@ fun cursor ->
+                  node ~cursor (get_cursor_spelling cursor) in
+              GCCAsm (code, parameters)
+          | MSAsmStmt ->
+              MSAsm (ext_asm_stmt_get_asm_string cursor)
+          | _ -> Decl [node ~cursor (decl_desc_of_cxcursor cursor)]
+        with Invalid_structure -> OtherStmt in
       match desc with
       | Decl [{ desc = OtherDecl }] ->
           let expr = expr_of_cxcursor cursor in
@@ -575,125 +572,127 @@ module Ast = struct
       | desc -> node ~cursor desc
 
     and expr_desc_of_cxcursor cursor =
-      match get_cursor_kind cursor with
-      | IntegerLiteral ->
-          let i = ext_integer_literal_get_value cursor in
-          IntegerLiteral (CXInt i)
-      | FloatingLiteral ->
-          let f = ext_floating_literal_get_value cursor in
-          FloatingLiteral (CXFloat f)
-      | StringLiteral ->
-          StringLiteral (ext_string_literal_get_string cursor)
-      | CharacterLiteral ->
-          let kind = ext_character_literal_get_character_kind cursor in
-          let value = ext_character_literal_get_value cursor in
-          CharacterLiteral { kind; value }
-      | ImaginaryLiteral ->
-          let sub_expr =
-            match list_of_children cursor with
-            | [operand] -> expr_of_cxcursor operand
-            | _ -> invalid_structure "expr_desc_of_cxcursor" cursor in
-          ImaginaryLiteral sub_expr
-      | UnaryOperator ->
-          let operand =
-            match list_of_children cursor with
-            | [operand] -> expr_of_cxcursor operand
-            | _ -> invalid_structure "expr_of_cxcursor" cursor in
-          let kind = ext_unary_operator_get_opcode cursor in
-          UnaryOperator { kind; operand }
-      | BinaryOperator | CompoundAssignOperator ->
-          let lhs, rhs =
-            match list_of_children cursor with
-            | [lhs; rhs] -> expr_of_cxcursor lhs, expr_of_cxcursor rhs
-            | _ -> invalid_structure "expr_of_cxcursor" cursor in
-          let kind = ext_binary_operator_get_opcode cursor in
-          BinaryOperator { lhs; kind; rhs }
-      | DeclRefExpr -> DeclRef (get_cursor_spelling cursor)
-      | CallExpr ->
-          let callee, args =
-            match list_of_children cursor with
-            | callee :: args ->
-                let callee = callee |> expr_of_cxcursor in
-                let args = args |> List.map expr_of_cxcursor in
-                callee, args
-            | _ -> invalid_structure "expr_of_cxcursor (CallExpr)" cursor in
-          Call { callee; args }
-      | CStyleCastExpr ->
-          let qual_type = get_cursor_type cursor |> of_cxtype in
-          let operand =
-            match list_of_children cursor with
-            | [operand] | [_; operand] -> expr_of_cxcursor operand
-            | _ -> invalid_structure "expr_of_cxcursor" cursor in
-          Cast { kind = CStyle; qual_type; operand }
-      | MemberRefExpr ->
-          let base =
-            match list_of_children cursor with
-            | [lhs] -> expr_of_cxcursor lhs
-            | _ -> invalid_structure "expr_of_cxcursor" cursor in
-          let field = get_cursor_referenced cursor in
-          let field = node ~cursor:field (get_cursor_spelling field) in
-          let arrow = ext_member_ref_expr_is_arrow cursor in
-          Member { base; arrow; field };
-      | ArraySubscriptExpr ->
-          let base, index =
-            match list_of_children cursor with
-            | [base; index] -> expr_of_cxcursor base, expr_of_cxcursor index
-            | _ -> invalid_structure "expr_of_cxcursor" cursor in
-          ArraySubscript { base; index }
-      | ConditionalOperator ->
-          let cond, then_branch, else_branch =
-            match list_of_children cursor |> List.map expr_of_cxcursor with
-            | [cond; then_branch; else_branch] ->
-                cond, Some then_branch, else_branch
-            | _ -> invalid_structure "expr_of_cxcursor" cursor in
-          ConditionalOperator { cond; then_branch; else_branch }
-      | ParenExpr ->
-          let subexpr =
-            match list_of_children cursor with
-            | [subexpr] -> expr_of_cxcursor subexpr
-            | _ -> invalid_structure "expr_of_cxcursor" cursor in
-          Paren subexpr
-      | AddrLabelExpr ->
-          let label =
-            match list_of_children cursor with
-            | [label] -> get_cursor_spelling label
-            | _ -> invalid_structure "expr_of_cxcursor" cursor in
-          AddrLabel label
-      | InitListExpr ->
-          InitList (list_of_children cursor |> List.map expr_of_cxcursor)
-      | CompoundLiteralExpr ->
-          let qual_type = cursor |> get_cursor_type |> of_cxtype in
-          let init =
-            match list_of_children cursor with
-            | [init] -> init |> expr_of_cxcursor
-            | _ -> invalid_structure "expr_of_cxcursor" cursor in
-          CompoundLiteral { qual_type; init }
-      | UnaryExpr ->
-          unary_expr_of_cxcursor cursor
-      | UnexposedExpr ->
-          begin
-            match ext_get_cursor_kind cursor with
-            | ImplicitCastExpr ->
-                let operand =
-                  match list_of_children cursor with
-                  | [operand] | [_; operand] -> expr_of_cxcursor operand
-                  | _ -> invalid_structure "expr_of_cxcursor" cursor in
-                let qual_type = get_cursor_type cursor |> of_cxtype in
-                Cast { kind = Implicit; qual_type; operand }
-            | BinaryConditionalOperator ->
-                let cond, else_branch =
-                  match
-                    list_of_children cursor |> List.map expr_of_cxcursor with
-                  | [_; cond; _; else_branch] ->
-                      cond, else_branch
-                  | _ ->
-                      invalid_structure "expr_of_cxcursor" cursor in
-                ConditionalOperator { cond; then_branch = None; else_branch }
-            | UnaryExprOrTypeTraitExpr -> (* for Clang 3.8.1 *)
-                unary_expr_of_cxcursor cursor
-            | Unknown -> UnexposedExpr { s = get_cursor_spelling cursor }
-          end
-      | _ -> OtherExpr
+      try
+        match get_cursor_kind cursor with
+        | IntegerLiteral ->
+            let i = ext_integer_literal_get_value cursor in
+            IntegerLiteral (CXInt i)
+        | FloatingLiteral ->
+            let f = ext_floating_literal_get_value cursor in
+            FloatingLiteral (CXFloat f)
+        | StringLiteral ->
+            StringLiteral (ext_string_literal_get_string cursor)
+        | CharacterLiteral ->
+            let kind = ext_character_literal_get_character_kind cursor in
+            let value = ext_character_literal_get_value cursor in
+            CharacterLiteral { kind; value }
+        | ImaginaryLiteral ->
+            let sub_expr =
+              match list_of_children cursor with
+              | [operand] -> expr_of_cxcursor operand
+              | _ -> raise Invalid_structure in
+            ImaginaryLiteral sub_expr
+        | UnaryOperator ->
+            let operand =
+              match list_of_children cursor with
+              | [operand] -> expr_of_cxcursor operand
+              | _ -> raise Invalid_structure in
+            let kind = ext_unary_operator_get_opcode cursor in
+            UnaryOperator { kind; operand }
+        | BinaryOperator | CompoundAssignOperator ->
+            let lhs, rhs =
+              match list_of_children cursor with
+              | [lhs; rhs] -> expr_of_cxcursor lhs, expr_of_cxcursor rhs
+              | _ -> raise Invalid_structure in
+            let kind = ext_binary_operator_get_opcode cursor in
+            BinaryOperator { lhs; kind; rhs }
+        | DeclRefExpr -> DeclRef (get_cursor_spelling cursor)
+        | CallExpr ->
+            let callee, args =
+              match list_of_children cursor with
+              | callee :: args ->
+                  let callee = callee |> expr_of_cxcursor in
+                  let args = args |> List.map expr_of_cxcursor in
+                  callee, args
+              | _ -> raise Invalid_structure in
+            Call { callee; args }
+        | CStyleCastExpr ->
+            let qual_type = get_cursor_type cursor |> of_cxtype in
+            let operand =
+              match list_of_children cursor with
+              | [operand] | [_; operand] -> expr_of_cxcursor operand
+              | _ -> raise Invalid_structure in
+            Cast { kind = CStyle; qual_type; operand }
+        | MemberRefExpr ->
+            let base =
+              match list_of_children cursor with
+              | [lhs] -> expr_of_cxcursor lhs
+              | _ -> raise Invalid_structure in
+            let field = get_cursor_referenced cursor in
+            let field = node ~cursor:field (get_cursor_spelling field) in
+            let arrow = ext_member_ref_expr_is_arrow cursor in
+            Member { base; arrow; field };
+        | ArraySubscriptExpr ->
+            let base, index =
+              match list_of_children cursor with
+              | [base; index] -> expr_of_cxcursor base, expr_of_cxcursor index
+              | _ -> raise Invalid_structure in
+            ArraySubscript { base; index }
+        | ConditionalOperator ->
+            let cond, then_branch, else_branch =
+              match list_of_children cursor |> List.map expr_of_cxcursor with
+              | [cond; then_branch; else_branch] ->
+                  cond, Some then_branch, else_branch
+              | _ -> raise Invalid_structure in
+            ConditionalOperator { cond; then_branch; else_branch }
+        | ParenExpr ->
+            let subexpr =
+              match list_of_children cursor with
+              | [subexpr] -> expr_of_cxcursor subexpr
+              | _ -> raise Invalid_structure in
+            Paren subexpr
+        | AddrLabelExpr ->
+            let label =
+              match list_of_children cursor with
+              | [label] -> get_cursor_spelling label
+              | _ -> raise Invalid_structure in
+            AddrLabel label
+        | InitListExpr ->
+            InitList (list_of_children cursor |> List.map expr_of_cxcursor)
+        | CompoundLiteralExpr ->
+            let qual_type = cursor |> get_cursor_type |> of_cxtype in
+            let init =
+              match list_of_children cursor with
+              | [init] -> init |> expr_of_cxcursor
+              | _ -> raise Invalid_structure in
+            CompoundLiteral { qual_type; init }
+        | UnaryExpr ->
+            unary_expr_of_cxcursor cursor
+        | UnexposedExpr ->
+            begin
+              match ext_get_cursor_kind cursor with
+              | ImplicitCastExpr ->
+                  let operand =
+                    match list_of_children cursor with
+                    | [operand] | [_; operand] -> expr_of_cxcursor operand
+                    | _ -> raise Invalid_structure in
+                  let qual_type = get_cursor_type cursor |> of_cxtype in
+                  Cast { kind = Implicit; qual_type; operand }
+              | BinaryConditionalOperator ->
+                  let cond, else_branch =
+                    match
+                      list_of_children cursor |> List.map expr_of_cxcursor with
+                    | [_; cond; _; else_branch] ->
+                        cond, else_branch
+                    | _ ->
+                        raise Invalid_structure in
+                  ConditionalOperator { cond; then_branch = None; else_branch }
+              | UnaryExprOrTypeTraitExpr -> (* for Clang 3.8.1 *)
+                  unary_expr_of_cxcursor cursor
+              | Unknown -> UnexposedExpr { s = get_cursor_spelling cursor }
+            end
+        | _ -> OtherExpr
+      with Invalid_structure -> OtherExpr
 
     and unary_expr_of_cxcursor cursor =
       let kind = cursor |> ext_unary_expr_get_kind in
@@ -704,7 +703,7 @@ module Ast = struct
             let qual_type =
               cursor |> ext_unary_expr_get_argument_type |> of_cxtype in
             ArgumentType qual_type
-        | _ -> invalid_structure "expr_of_cxcursor (UnaryExpr)" cursor in
+        | _ -> raise Invalid_structure in
       UnaryExpr { kind; argument }
 
     let translation_unit_of_cxcursor cursor =
@@ -726,17 +725,43 @@ module Ast = struct
     let module Convert = Converter (struct let options = options end) in
     Convert.of_cxtranslationunit tu
 
+  let parse_file_res ?index ?command_line_args ?unsaved_files ?clang_options
+      ?options filename =
+    parse_file_res ?index ?command_line_args ?unsaved_files ?options:clang_options
+      filename |> Result.map @@ of_cxtranslationunit ?options
+
   let parse_file ?index ?command_line_args ?unsaved_files ?clang_options
       ?options filename =
     parse_file ?index ?command_line_args ?unsaved_files ?options:clang_options
       filename |>
     of_cxtranslationunit ?options
 
+  let parse_string_res ?index ?filename ?command_line_args ?unsaved_files
+      ?clang_options ?options string =
+    parse_string_res ?index ?filename ?command_line_args ?unsaved_files
+      ?options:clang_options string |>
+    Result.map @@ of_cxtranslationunit ?options
+
   let parse_string ?index ?filename ?command_line_args ?unsaved_files
       ?clang_options ?options string =
     parse_string ?index ?filename ?command_line_args ?unsaved_files
       ?options:clang_options string |>
     of_cxtranslationunit ?options
+
+  let get_presumed_location source_location =
+    match source_location with
+    | Clang source_location ->
+        let filename, line, column = get_presumed_location source_location in
+        { filename; line; column }
+    | Concrete concrete_location -> concrete_location
+
+  let get_expansion_location source_location =
+    match source_location with
+    | Clang source_location ->
+        let file, line, column, _offset =
+          get_expansion_location source_location in
+        { filename = get_file_name file; line; column }
+    | Concrete concrete_location -> concrete_location
 end
 
 module Decl = struct
