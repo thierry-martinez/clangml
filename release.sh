@@ -13,7 +13,7 @@ echo AM_MAINTAINER_MODE >>configure.ac
 aclocal
 autoreconf
 ./bootstrap.sh
-git add configure.ac Makefile.in aclocal.m4 configure bootstrap
+git add -f configure.ac Makefile.in aclocal.m4 configure bootstrap
 git commit -a -m "Version $version"
 git tag -f -a "$tagname" -m "Version $version"
 git push origin "$tagname"
