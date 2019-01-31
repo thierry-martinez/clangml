@@ -16,7 +16,7 @@ autoreconf
 git add -f configure.ac Makefile.in aclocal.m4 configure bootstrap
 git commit -a -m "Version $version"
 git tag -f -a "$tagname" -m "Version $version"
-git push origin "$tagname"
+git push -f origin "$tagname"
 archive="clangml-$tagname.tar.gz"
 url="https://gitlab.inria.fr/tmartine/clangml/-/archive/$tagname/$archive"
 wget "$url"
