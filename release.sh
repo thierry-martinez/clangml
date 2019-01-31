@@ -20,7 +20,11 @@ git push origin "$tagname"
 archive="clangml-$tagname.tar.gz"
 url="https://gitlab.inria.fr/tmartine/clangml/-/archive/$tagname/$archive"
 wget "$url"
-md5=`md5sum "$archive" | cut -d " " -f 1`
+if which md5 >/dev/null; then
+    md5=`md5 -q "$archive"`
+else
+    md5=`md5sum "$archive" | cut -d " " -f 1`
+fi
 cd ~/opam-repository
 git checkout "$branch" || git pull origin master && git pull origin master
 branch="clangml.$version"
