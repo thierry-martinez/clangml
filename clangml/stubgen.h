@@ -74,3 +74,13 @@ failwith_fmt(const char* format, ...)
 #define Not_bool_val(X) (!Bool_val(X))
 
 #define Val_not_bool(X) (Val_bool(!(X)))
+
+static inline value
+Safe_field(value V, mlsize_t I) {
+  if (Is_block(V) && I < Wosize_val(V)) {
+    return Field(V, I);
+  }
+  else {
+    return Val_int(0);
+  }
+}
