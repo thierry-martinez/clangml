@@ -162,11 +162,11 @@ type type_spec =
 type type_interface = {
     reinterpret_as : type_spec option;
     destructor : (string -> string) option;
-    carry_reference : bool;
+    carry_reference : string option;
   }
 
 let empty_type_interface =
-  { reinterpret_as = None; destructor = None; carry_reference = false }
+  { reinterpret_as = None; destructor = None; carry_reference = None }
 
 let union_option a b =
   match a, b with
@@ -179,7 +179,7 @@ let union_option a b =
 let union_type_interfaces a b =
   { reinterpret_as = union_option a.reinterpret_as b.reinterpret_as;
     destructor = union_option a.destructor b.destructor;
-    carry_reference = a.carry_reference || b.carry_reference}
+    carry_reference = union_option a.carry_reference b.carry_reference}
 
 let reinterpret_as type_spec type_interface =
   { type_interface with reinterpret_as = union_option type_interface.reinterpret_as (Some type_spec) }
@@ -187,8 +187,8 @@ let reinterpret_as type_spec type_interface =
 let destructor destructor type_interface =
   { type_interface with destructor = union_option type_interface.destructor (Some destructor) }
 
-let carry_reference type_interface =
-  { type_interface with carry_reference = true }
+let carry_reference type_name type_interface =
+  { type_interface with carry_reference = Some type_name }
 
 let integer_enum enum = reinterpret_as (Enum enum)
 
@@ -203,7 +203,6 @@ type argument_interface =
   | Update of argument
   | Fixed_value of { argument : argument; value : string }
   | Type_interface of { argument : argument; interface : type_interface }
-  | Reference of argument * (string -> string)
   | Closure of {
       pointer : argument;
       data_caller : argument;
@@ -407,7 +406,7 @@ let make_common_type_info ?type_interface ?converter ocaml_type_name =
   let ocaml_of_c = name_of_ocaml_of_c converter in
   let c_of_ocaml, ocaml_of_c =
     match type_interface with
-    | Some { carry_reference = true } ->
+    | Some { carry_reference = Some _ } ->
         let c_of_ocaml fmt ~src ~params ~references ~tgt =
           Printf.fprintf fmt "%s = %s(Field(%s, 0));" tgt c_of_ocaml src in
         let ocaml_of_c fmt ~src ~params ~references ~tgt =
@@ -1438,6 +1437,17 @@ let rec get_argument_type ty =
   | CXType ty | Update ty -> ty
   | _ -> failwith "get_argument_type"
 
+let array_find p a =
+  let rec aux i =
+    if i < Array.length a then
+      if p (Array.unsafe_get a i) then
+        Some i
+      else
+        aux (succ i)
+    else
+      None in
+  aux 0
+
 let translate_function_decl context cur =
   let name = Clang.get_cursor_spelling cur in
   let function_interface = get_function name context.module_interface in
@@ -1452,7 +1462,6 @@ let translate_function_decl context cur =
     CXType (Clang.get_arg_type ty i)) in
   let outputs = ref [] in
   let arg_interfaces = Array.make num_args empty_type_interface in
-  let references = ref [] in
   let apply_argument_rule (rule : argument_interface) =
     match rule with
     | Array { length; contents } ->
@@ -1531,13 +1540,53 @@ let translate_function_decl context cur =
     | Type_interface { argument; interface } ->
         let argument = find_argument argument index in
         arg_interfaces.(argument) <- union_type_interfaces arg_interfaces.(argument)
-          interface
-    | Reference (argument, accessor) ->
-        references := (find_argument argument index, accessor) :: !references in
+          interface in
   List.iter apply_argument_rule function_interface.arguments;
   let outputs = List.rev !outputs in
   let result_type = Clang.get_result_type ty in
   let parameters = ref [| |] in
+  let result_type_interface =
+    get_type (Clang.get_type_spelling result_type) context.module_interface in
+  let result_type_interface =
+    union_type_interfaces result_type_interface function_interface.result in
+  let references =
+    match result_type_interface.carry_reference with
+    | None -> []
+    | Some ty ->
+        match args |> array_find (fun i -> match i with CXType ty' -> Clang.get_type_spelling ty' = ty | _ -> false) with
+        | Some index ->
+            [(index, fun x -> x)]
+        | None ->
+            match args |> array_find (fun i -> match i with CXType ty' ->
+              begin
+                let type_interface = get_type (Clang.get_type_spelling ty') context.module_interface in
+                match type_interface.carry_reference with
+                | None -> false
+                | Some ty' -> ty = ty'
+               end
+| _ ->
+ false) with
+            | Some index ->
+                [(index, fun x -> Printf.sprintf "Safe_field(%s, 1)" x)]
+            | None ->
+            match args |> array_find (fun i -> match i with CXType ty' ->
+              begin
+                let type_interface = get_type (Clang.get_type_spelling ty') context.module_interface in
+                match type_interface.carry_reference with
+                | None -> false
+                | Some ty' ->
+                let type_interface = get_type ty' context.module_interface in
+                match type_interface.carry_reference with
+                | None -> false
+                | Some ty' -> ty = ty'
+               end
+| _ ->
+ false) with
+            | Some index ->
+                [(index, fun x -> Printf.sprintf "Safe_field(Safe_field(%s, 1), 1)" x)]
+            | None ->
+                Printf.fprintf stderr "warning: reference not found in %s\n" name;
+                [] in
   let result_type_info =
     find_type_info ~parameters context function_interface.result result_type in
   let used_arg_names = String_hashtbl.create 17 in
@@ -1565,7 +1614,7 @@ let translate_function_decl context cur =
       args.(param) <- Output { output_type = CXType ty; on_success = true; on_error = false };
       param in
   let references =
-    !references |> Array.of_list in
+    references |> Array.of_list in
   let result_ty = translate_type_info ~outputs:(List.map (fun o -> { o with desc = translate_type_info (snd o.desc) }) real_outputs) result_type_info in
   let pval_type =
     if num_args = 0 then
@@ -1821,11 +1870,22 @@ let main cflags llvm_config prefix =
     add_type (Pcre.regexp "^CXTranslationUnit$")
       (empty_type_interface |>
        make_destructor "clang_disposeTranslationUnit") |>
-    add_type (Pcre.regexp "^CXTranslationUnit$|^CXCursor$|^CXType$")
-      (empty_type_interface |> carry_reference) |>
+    add_type (Pcre.regexp "^CXTranslationUnit$")
+      (empty_type_interface |> carry_reference "CXIndex") |>
+    add_type (Pcre.regexp "^CXCursor$|^CXType$|^CXFile$|^CXModule$|^CXSourceRange$|^CXSourceLocation$")
+      (empty_type_interface |> carry_reference "CXTranslationUnit") |>
     add_type (Pcre.regexp "^CXVirtualFileOverlay$")
       (empty_type_interface |>
        make_destructor "clang_VirtualFileOverlay_dispose") |>
+    add_type (Pcre.regexp "^CXModuleMapDescriptor$")
+      (empty_type_interface |>
+       make_destructor "clang_ModuleMapDescriptor_dispose") |>
+    add_type (Pcre.regexp "^CXDiagnosticSet$")
+      (empty_type_interface |>
+       make_destructor "clang_disposeDiagnosticSet") |>
+    add_type (Pcre.regexp "^CXTUResourceUsage$")
+      (empty_type_interface |>
+       make_destructor "clang_disposeCXTUResourceUsage") |>
     add_enum (Pcre.regexp "^CXCursorKind$")
       (empty_enum_interface |>
        add_constant (Pcre.regexp "^CXCursor_UnexposedExpr$")
@@ -1844,18 +1904,6 @@ let main cflags llvm_config prefix =
         add_argument (Array {
           length = Name "num_clang_command_line_args";
           contents = Name "clang_command_line_args" })) |>
-    add_function (Pcre.regexp "^clang_createTranslationUnit(FromSourceFile|2)?$|^clang_parseTranslationUnit(2(FullArgv)?)?")
-      (empty_function_interface |>
-        add_argument (Reference (Name "CIdx", (fun x -> x)))) |>
-    add_function (Pcre.regexp "^clang_get(TranslationUnit)?Cursor$")
-      (empty_function_interface |>
-        add_argument (Reference (Index 0, (fun x -> x)))) |>
-    add_function (Pcre.regexp "^clang_Cursor_getTranslationUnit$")
-      (empty_function_interface |>
-        add_argument (Reference (Index 0, (fun x -> Printf.sprintf "Field(Field(%s, 1), 1)" x)))) |>
-    add_function (Pcre.regexp "^clang_getCursor(Semantic|Lexical)Parent$|^clang_getOverriddenCursors$|^clang_Cursor_getArgument$|^clang_getTypeDeclaration$|^clang_getOverloadedDecl$|^clang_getCursorReferenced$|^clang_getCursorDefinition$|^clang_getCanonicalCursor$|^clang_getSpecializedCursorTemplate$|^clang_ext_IfStmt_getInit$|^clang_ext_SwitchStmt_getInit$|^clang_ext_VariableArrayType_GetSizeExpr$|^clang_getCursorType$|^clang_getTypedefDeclUnderlyingType$|^clang_getEnumDeclIntegerType$|^clang_Cursor_getTemplateArgumentType$|^clang_getCanonicalType$|^clang_getPointeeType$|^clang_getResultType$|^clang_getArgType$|^clang_getCursorResultType$|^clang_getElementType$|^clang_getArrayElementType$|^clang_Type_getNamedType$|^clang_Type_getClassType$|^clang_Type_getTemplateArgumentAsType$|^clang_getIBOutletCollectionType$|^clang_Cursor_getReceiverType$|^clang_ext_GetInnerType$")
-      (empty_function_interface |>
-        add_argument (Reference (Index 0, (fun x -> Printf.sprintf "Field(%s, 1)" x)))) |>
     add_function (Pcre.regexp "^clang_parseTranslationUnit|^clang_indexSourceFile")
       (empty_function_interface |>
         add_argument (Array {
