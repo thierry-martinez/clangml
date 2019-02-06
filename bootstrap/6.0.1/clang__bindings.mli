@@ -907,7 +907,7 @@ external cursor_get_comment_range :
 external cursor_get_raw_comment_text :
   cxcursor -> string = "clang_Cursor_getRawCommentText_wrapper"
 external cursor_get_brief_comment_text :
-  cxcursor -> string = "clang_Cursor_getBriefCommentText_wrapper"
+  cxcursor -> string option = "clang_Cursor_getBriefCommentText_wrapper"
 external cursor_get_mangling :
   cxcursor -> string = "clang_Cursor_getMangling_wrapper"
 external cursor_get_cxxmanglings :

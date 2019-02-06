@@ -475,7 +475,7 @@ clang_getRange_wrapper(value begin_ocaml, value end_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxsourcerange(result));
-  Store_field(data, 1, Safe_field(begin_ocaml, 1));
+  Store_field(data, 1, safe_field(begin_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -715,7 +715,7 @@ clang_getRangeStart_wrapper(value range_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxsourcelocation(result));
-  Store_field(data, 1, Safe_field(range_ocaml, 1));
+  Store_field(data, 1, safe_field(range_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -731,7 +731,7 @@ clang_getRangeEnd_wrapper(value range_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxsourcelocation(result));
-  Store_field(data, 1, Safe_field(range_ocaml, 1));
+  Store_field(data, 1, safe_field(range_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -2506,7 +2506,7 @@ clang_Cursor_getTranslationUnit_wrapper(value arg_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtranslationunit(result));
-  Store_field(data, 1, Safe_field(Safe_field(arg_ocaml, 1), 1));
+  Store_field(data, 1, safe_field(safe_field(arg_ocaml, 1), 1));
     CAMLreturn(data);
   }
 }
@@ -2568,7 +2568,7 @@ clang_getCursorSemanticParent_wrapper(value cursor_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
-  Store_field(data, 1, Safe_field(cursor_ocaml, 1));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -2584,7 +2584,7 @@ clang_getCursorLexicalParent_wrapper(value cursor_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
-  Store_field(data, 1, Safe_field(cursor_ocaml, 1));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -2623,7 +2623,7 @@ clang_getIncludedFile_wrapper(value cursor_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxfile(result));
-  Store_field(data, 1, Safe_field(cursor_ocaml, 1));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -2657,7 +2657,7 @@ clang_getCursorLocation_wrapper(value arg_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxsourcelocation(result));
-  Store_field(data, 1, Safe_field(arg_ocaml, 1));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -2673,7 +2673,7 @@ clang_getCursorExtent_wrapper(value arg_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxsourcerange(result));
-  Store_field(data, 1, Safe_field(arg_ocaml, 1));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -2910,7 +2910,7 @@ clang_getCursorType_wrapper(value C_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(C_ocaml, 1));
+  Store_field(data, 1, safe_field(C_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -2941,7 +2941,7 @@ clang_getTypedefDeclUnderlyingType_wrapper(value C_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(C_ocaml, 1));
+  Store_field(data, 1, safe_field(C_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -2957,7 +2957,7 @@ clang_getEnumDeclIntegerType_wrapper(value C_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(C_ocaml, 1));
+  Store_field(data, 1, safe_field(C_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -3031,7 +3031,7 @@ clang_Cursor_getArgument_wrapper(value C_ocaml, value i_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
-  Store_field(data, 1, Safe_field(C_ocaml, 1));
+  Store_field(data, 1, safe_field(C_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -3117,7 +3117,7 @@ clang_Cursor_getTemplateArgumentType_wrapper(value C_ocaml, value I_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(C_ocaml, 1));
+  Store_field(data, 1, safe_field(C_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -3181,7 +3181,7 @@ clang_getCanonicalType_wrapper(value T_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(T_ocaml, 1));
+  Store_field(data, 1, safe_field(T_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -3310,7 +3310,7 @@ clang_getPointeeType_wrapper(value T_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(T_ocaml, 1));
+  Store_field(data, 1, safe_field(T_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -3326,7 +3326,7 @@ clang_getTypeDeclaration_wrapper(value T_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
-  Store_field(data, 1, Safe_field(T_ocaml, 1));
+  Store_field(data, 1, safe_field(T_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -3455,7 +3455,7 @@ clang_getResultType_wrapper(value T_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(T_ocaml, 1));
+  Store_field(data, 1, safe_field(T_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -3501,7 +3501,7 @@ clang_getArgType_wrapper(value T_ocaml, value i_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(T_ocaml, 1));
+  Store_field(data, 1, safe_field(T_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -3531,7 +3531,7 @@ clang_getCursorResultType_wrapper(value C_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(C_ocaml, 1));
+  Store_field(data, 1, safe_field(C_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -3575,7 +3575,7 @@ clang_getElementType_wrapper(value T_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(T_ocaml, 1));
+  Store_field(data, 1, safe_field(T_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -3605,7 +3605,7 @@ clang_getArrayElementType_wrapper(value T_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(T_ocaml, 1));
+  Store_field(data, 1, safe_field(T_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -3635,7 +3635,7 @@ clang_Type_getNamedType_wrapper(value T_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(T_ocaml, 1));
+  Store_field(data, 1, safe_field(T_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -3679,7 +3679,7 @@ clang_Type_getClassType_wrapper(value T_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(T_ocaml, 1));
+  Store_field(data, 1, safe_field(T_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -3769,7 +3769,7 @@ clang_Type_getTemplateArgumentAsType_wrapper(value T_ocaml, value i_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(T_ocaml, 1));
+  Store_field(data, 1, safe_field(T_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -3955,7 +3955,7 @@ clang_getOverloadedDecl_wrapper(value cursor_ocaml, value index_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
-  Store_field(data, 1, Safe_field(cursor_ocaml, 1));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -3971,7 +3971,7 @@ clang_getIBOutletCollectionType_wrapper(value arg_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(arg_ocaml, 1));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -4078,7 +4078,7 @@ clang_Cursor_getSpellingNameRange_wrapper(value arg_ocaml, value pieceIndex_ocam
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxsourcerange(result));
-  Store_field(data, 1, Safe_field(arg_ocaml, 1));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -4109,7 +4109,7 @@ clang_getCursorReferenced_wrapper(value arg_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
-  Store_field(data, 1, Safe_field(arg_ocaml, 1));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -4125,7 +4125,7 @@ clang_getCursorDefinition_wrapper(value arg_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
-  Store_field(data, 1, Safe_field(arg_ocaml, 1));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -4155,7 +4155,7 @@ clang_getCanonicalCursor_wrapper(value arg_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
-  Store_field(data, 1, Safe_field(arg_ocaml, 1));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -4199,7 +4199,7 @@ clang_Cursor_getReceiverType_wrapper(value C_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(C_ocaml, 1));
+  Store_field(data, 1, safe_field(C_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -4313,7 +4313,7 @@ clang_Cursor_getCommentRange_wrapper(value C_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxsourcerange(result));
-  Store_field(data, 1, Safe_field(C_ocaml, 1));
+  Store_field(data, 1, safe_field(C_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -4342,7 +4342,7 @@ clang_Cursor_getBriefCommentText_wrapper(value C_ocaml)
   CXString result = clang_Cursor_getBriefCommentText(C);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(safe_string(clang_getCString(result)));
+    data = Val_string_option(clang_getCString(result));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -4398,7 +4398,7 @@ clang_Cursor_getModule_wrapper(value C_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxmodule(result));
-  Store_field(data, 1, Safe_field(C_ocaml, 1));
+  Store_field(data, 1, safe_field(C_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -4432,7 +4432,7 @@ clang_Module_getASTFile_wrapper(value Module_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxfile(result));
-  Store_field(data, 1, Safe_field(Module_ocaml, 1));
+  Store_field(data, 1, safe_field(Module_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -4448,7 +4448,7 @@ clang_Module_getParent_wrapper(value Module_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxmodule(result));
-  Store_field(data, 1, Safe_field(Module_ocaml, 1));
+  Store_field(data, 1, safe_field(Module_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -4712,7 +4712,7 @@ clang_getSpecializedCursorTemplate_wrapper(value C_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
-  Store_field(data, 1, Safe_field(C_ocaml, 1));
+  Store_field(data, 1, safe_field(C_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -4732,7 +4732,7 @@ clang_getCursorReferenceNameRange_wrapper(value C_ocaml, value NameFlags_ocaml, 
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxsourcerange(result));
-  Store_field(data, 1, Safe_field(C_ocaml, 1));
+  Store_field(data, 1, safe_field(C_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -5298,7 +5298,7 @@ clang_Cursor_getParsedComment_wrapper(value C_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcomment(result));
-  Store_field(data, 1, Safe_field(C_ocaml, 1));
+  Store_field(data, 1, safe_field(C_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -5388,7 +5388,7 @@ clang_Comment_getChild_wrapper(value Comment_ocaml, value ChildIdx_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcomment(result));
-  Store_field(data, 1, Safe_field(Comment_ocaml, 1));
+  Store_field(data, 1, safe_field(Comment_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -5656,7 +5656,7 @@ clang_BlockCommandComment_getParagraph_wrapper(value Comment_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcomment(result));
-  Store_field(data, 1, Safe_field(Comment_ocaml, 1));
+  Store_field(data, 1, safe_field(Comment_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -6422,7 +6422,7 @@ clang_ext_IfStmt_getInit_wrapper(value c_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
-  Store_field(data, 1, Safe_field(c_ocaml, 1));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -6452,7 +6452,7 @@ clang_ext_SwitchStmt_getInit_wrapper(value c_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
-  Store_field(data, 1, Safe_field(c_ocaml, 1));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -6680,7 +6680,7 @@ clang_ext_GetInnerType_wrapper(value c_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(c_ocaml, 1));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -6696,7 +6696,7 @@ clang_ext_VariableArrayType_GetSizeExpr_wrapper(value c_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
-  Store_field(data, 1, Safe_field(c_ocaml, 1));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -6823,7 +6823,7 @@ clang_ext_UnaryExpr_GetArgumentType_wrapper(value c_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(c_ocaml, 1));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -6839,7 +6839,7 @@ clang_ext_Type_getNamedType_wrapper(value CT_ocaml)
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, Safe_field(CT_ocaml, 1));
+  Store_field(data, 1, safe_field(CT_ocaml, 1));
     CAMLreturn(data);
   }
 }
