@@ -20,6 +20,9 @@ let output_subst f channel template =
 let pconst_integer ?suffix value =
   Parsetree.Pconst_integer (value, suffix)
 
+let pconst_string ?delim value =
+  Parsetree.Pconst_string (value, delim)
+
 let pconst_of_int i =
   pconst_integer (string_of_int i)
 
@@ -553,6 +556,15 @@ let add_primitive context value_description =
   context.sig_accu <- psig_value value_description :: context.sig_accu;
   context.struct_accu <- pstr_primitive value_description :: context.struct_accu
 
+let escape_doc doc =
+  Pcre.replace ~pat:"[][@{}]" ~templ:"\\$&" doc
+
+let make_doc_attributes cur =
+  match Clang.cursor_get_brief_comment_text cur with
+  | None -> []
+  | Some doc ->
+      [loc "ocaml.doc", Parsetree.PStr [pstr_eval (pexp_constant (pconst_string (escape_doc doc)))]]
+
 let rec find_type_info ?(declare_abstract = true) ?parameters context type_interface ty =
   let find_enum_info type_name =
     let enum_info =
@@ -1026,34 +1038,34 @@ let translate_struct_decl' context cur typedef name =
       | FieldDecl ->
           let name = Clang.get_cursor_spelling cur in
           let ty = Clang.get_cursor_type cur in
-          fields_ref := (name, ty) :: !fields_ref
+          fields_ref := (name, (ty, cur)) :: !fields_ref
       | _ -> ()
     end;
     Continue));
   let fields = List.rev !fields_ref in
   let ocaml_fields_ref =
-    ref (fields |>List.map (fun (name, ty) -> Unknown (name, ty))) in
+    ref (fields |>List.map (fun (name, (ty, cur)) -> Unknown (name, ty), cur)) in
   let apply_field_rule (rule : field_interface) =
     match rule with
     | Sized_string { length; contents } ->
-        let length, fields = !ocaml_fields_ref |> list_chop (fun field ->
+        let length, fields = !ocaml_fields_ref |> list_chop (fun (field, _) ->
           match field with
           | Unknown (name, ty) when name = length -> Some (name, ty)
           | _ -> None) in
-        ocaml_fields_ref := fields |> list_mutate (fun field ->
+        ocaml_fields_ref := fields |> list_mutate (fun (field, cur) ->
           match field with
           | Unknown (name, ty) when name = contents ->
-              Some (Sized_string {length; contents = (name, ty)})
+              Some (Sized_string {length; contents = (name, ty)}, cur)
           | _ -> None) in
   List.iter apply_field_rule interface.fields;
   let ocaml_fields = !ocaml_fields_ref in
   let common_info = make_common_type_info ~type_interface ocaml_type_name in
-  let recognize_type field_type =
+  let recognize_type (field_type, cur) =
     match field_type with
     | Unknown (name, ty) ->
         Translated (name, ty,
-          find_type_info ~declare_abstract:false context empty_type_interface ty)
-      | ty -> ty in
+          find_type_info ~declare_abstract:false context empty_type_interface ty), cur
+      | ty -> ty, cur in
   let record_fields =
     lazy (
       try Some (List.map recognize_type ocaml_fields)
@@ -1082,7 +1094,7 @@ static value __attribute__((unused))
   CAMLlocal2(ocaml, string);
   ocaml = caml_alloc_tuple(%d);
 " (name_of_ocaml_of_c ocaml_type_name) type_name nb_fields;
-          fields |> List.iteri (fun i field ->
+          fields |> List.iteri (fun i (field, _) ->
             match field with
             | Unknown _ -> assert false
             | Sized_string { contents = (contents, _); length = (length, _) } ->
@@ -1111,7 +1123,7 @@ static %s __attribute__((unused))
   CAMLparam1(ocaml);
   %s v;
 " type_name (name_of_c_of_ocaml ocaml_type_name) type_name;
-          fields |> List.iteri (fun i field ->
+          fields |> List.iteri (fun i (field, _) ->
             match field with
             | Unknown _ -> assert false
             | Sized_string { contents = (contents, _); length = (length, _) } ->
@@ -1133,17 +1145,19 @@ static %s __attribute__((unused))
   CAMLreturnT(%s, v);
 }
 " type_name;
-          let fields = fields |> List.map (fun field ->
+          let fields = fields |> List.map @@ fun (field, cur) ->
+            let pld_attributes = make_doc_attributes cur in
             match field with
             | Unknown _ -> assert false
             | Sized_string { contents = (name, _) } ->
                 label_declaration (loc (String.lowercase_ascii name))
-                  ocaml_string
+                  ocaml_string ~pld_attributes
             | Translated (name, _, ty) ->
                 label_declaration (loc (String.lowercase_ascii name))
-                  (translate_type_info ty)) in
+                  (translate_type_info ty) ~pld_attributes in
           Ptype_record fields in
-    let type_decl = type_declaration (loc ocaml_type_name) ~ptype_kind in
+    let ptype_attributes = make_doc_attributes cur in
+    let type_decl = type_declaration (loc ocaml_type_name) ~ptype_kind ~ptype_attributes in
     add_type_declaration context [type_decl] in
   let decl_made = ref false in
   let make_decl () =
@@ -1162,7 +1176,7 @@ static %s __attribute__((unused))
   let used_arg_names = String_hashtbl.create 17 in
   let print_accessor { field_name; accessor_name; stub_name } =
     make_decl ();
-    let field_type = List.assoc field_name fields in
+    let field_type, _ = List.assoc field_name fields in
     print_ocaml_primitive context.chan_stubs stub_name ["value arg_ocaml"]
       (fun channel ->
          Printf.fprintf channel "
@@ -1243,7 +1257,7 @@ let translate_enum_decl context cur =
           if not (Int_hashtbl.mem already_bound value) ||
             (if interface.preferred then
                begin
-                 constructors_ref := List.filter (fun (_, v) -> v <> value) !constructors_ref;
+                 constructors_ref := List.filter (fun (_, (v, _)) -> v <> value) !constructors_ref;
                  true
                end
             else
@@ -1253,7 +1267,7 @@ let translate_enum_decl context cur =
               if interface.success then
                 result := Some name
               else
-                constructors_ref := (name, value) :: !constructors_ref
+                constructors_ref := (name, (value, cur)) :: !constructors_ref
             end
       | _ -> ()
     end;
@@ -1272,11 +1286,12 @@ let translate_enum_decl context cur =
           name, String.sub name (index + 1) (String.length name - index - 1), value)
           constructors in
   let ocaml_constructors =
-    List.map (fun (_, name, _) ->
-      constructor_declaration (loc (String.capitalize_ascii name)))
+    List.map (fun (_, name, (_, cur)) ->
+      let pcd_attributes = make_doc_attributes cur in
+      constructor_declaration (loc (String.capitalize_ascii name)) ~pcd_attributes)
       constructors in
   let common_info = make_common_type_info ~type_interface ocaml_type_name in
-  let enum_info = { result; constructors } in
+  let enum_info = { result; constructors = List.map (fun (a, b, (c, _)) -> (a, b, c)) constructors } in
   let make_decl () =
     let type_name =
       if typedef then name
@@ -1313,9 +1328,10 @@ let translate_enum_decl context cur =
   return Val_int(0);
 }\n\n"
       (name_of_ocaml_of_c ocaml_type_name);
+    let doc_attributes = make_doc_attributes cur in
     let type_decl =
       type_declaration ~ptype_kind:(Ptype_variant ocaml_constructors)
-        ~ptype_attributes:interface.attributes
+        ~ptype_attributes:(doc_attributes @ interface.attributes)
         (loc ocaml_type_name) in
     add_type_declaration context [type_decl] in
   if typedef then
@@ -1804,7 +1820,8 @@ let translate_function_decl context cur =
             print_list (List.init nb_args
               (fun i -> Printf.sprintf "argv[%d]" i)));
       [bytecode_name; wrapper_name] in
-  let desc = value_description pval_name pval_type ~pval_prim in
+  let pval_attributes = make_doc_attributes cur in
+  let desc = value_description pval_name pval_type ~pval_prim ~pval_attributes in
   add_primitive context desc
 
 let rename_clang name =
