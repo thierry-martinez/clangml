@@ -770,7 +770,7 @@ tgt); }, Regular
               { ocamltype = ocaml_string;
                 c_of_ocaml = (fun _ -> assert false);
                 ocaml_of_c = (fun fmt ~src ~params ~references ~tgt ->
-                  Printf.fprintf fmt "%s = caml_copy_string(clang_getCString(%s));
+                  Printf.fprintf fmt "%s = caml_copy_string(safe_string(clang_getCString(%s)));
                     clang_disposeString(%s);" tgt src src) }, Regular
           | "uint64_t" | "int64_t" ->
               int64_type_info
