@@ -1880,7 +1880,7 @@ let main cflags llvm_config prefix =
        make_destructor "clang_disposeTranslationUnit") |>
     add_type (Pcre.regexp "^CXTranslationUnit$")
       (empty_type_interface |> carry_reference "CXIndex") |>
-    add_type (Pcre.regexp "^CXCursor$|^CXType$|^CXFile$|^CXModule$|^CXSourceRange$|^CXSourceLocation$")
+    add_type (Pcre.regexp "^CXCursor$|^CXType$|^CXFile$|^CXModule$|^CXSourceRange$|^CXSourceLocation$|^CXComment$")
       (empty_type_interface |> carry_reference "CXTranslationUnit") |>
     add_type (Pcre.regexp "^CXVirtualFileOverlay$")
       (empty_type_interface |>
@@ -2108,6 +2108,7 @@ let main cflags llvm_config prefix =
         (Array.of_list clang_options)
         [| { filename = "source.c"; contents = "\
 #include <clang-c/Index.h>
+#include <clang-c/Documentation.h>
 #include \"clangml/libclang_extensions.h\"" } |]
         Clang.Cxtranslationunit_flags.none with
     | Error _ -> failwith "Error!"
@@ -2121,6 +2122,7 @@ let main cflags llvm_config prefix =
     output_string chan_stubs "\
 #include \"stubgen.h\"
 #include <clang-c/Index.h>
+#include <clang-c/Documentation.h>
 #include \"libclang_extensions.h\"
 #include <stdio.h>
 ";
