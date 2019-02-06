@@ -905,6 +905,102 @@ type cxvisitorresult =
 external type_visit_fields :
   cxtype -> (cxcursor -> cxvisitorresult) -> bool =
     "clang_Type_visitFields_wrapper"
+type cxcomment
+external cursor_get_parsed_comment :
+  cxcursor -> cxcomment = "clang_Cursor_getParsedComment_wrapper"
+type cxcommentkind =
+  | Null 
+  | Text 
+  | InlineCommand 
+  | HTMLStartTag 
+  | HTMLEndTag 
+  | Paragraph 
+  | BlockCommand 
+  | ParamCommand 
+  | TParamCommand 
+  | VerbatimBlockCommand 
+  | VerbatimBlockLine 
+  | VerbatimLine 
+  | FullComment 
+external comment_get_kind :
+  cxcomment -> cxcommentkind = "clang_Comment_getKind_wrapper"
+external comment_get_num_children :
+  cxcomment -> int = "clang_Comment_getNumChildren_wrapper"
+external comment_get_child :
+  cxcomment -> int -> cxcomment = "clang_Comment_getChild_wrapper"
+external comment_is_whitespace :
+  cxcomment -> bool = "clang_Comment_isWhitespace_wrapper"
+external inline_content_comment_has_trailing_newline :
+  cxcomment -> int = "clang_InlineContentComment_hasTrailingNewline_wrapper"
+external text_comment_get_text :
+  cxcomment -> string = "clang_TextComment_getText_wrapper"
+external inline_command_comment_get_command_name :
+  cxcomment -> string = "clang_InlineCommandComment_getCommandName_wrapper"
+type cxcommentinlinecommandrenderkind =
+  | Normal 
+  | Bold 
+  | Monospaced 
+  | Emphasized 
+external inline_command_comment_get_render_kind :
+  cxcomment -> cxcommentinlinecommandrenderkind =
+    "clang_InlineCommandComment_getRenderKind_wrapper"
+external inline_command_comment_get_num_args :
+  cxcomment -> int = "clang_InlineCommandComment_getNumArgs_wrapper"
+external inline_command_comment_get_arg_text :
+  cxcomment -> int -> string =
+    "clang_InlineCommandComment_getArgText_wrapper"
+external htmltag_comment_get_tag_name :
+  cxcomment -> string = "clang_HTMLTagComment_getTagName_wrapper"
+external htmlstart_tag_comment_is_self_closing :
+  cxcomment -> bool = "clang_HTMLStartTagComment_isSelfClosing_wrapper"
+external htmlstart_tag_get_num_attrs :
+  cxcomment -> int = "clang_HTMLStartTag_getNumAttrs_wrapper"
+external htmlstart_tag_get_attr_name :
+  cxcomment -> int -> string = "clang_HTMLStartTag_getAttrName_wrapper"
+external htmlstart_tag_get_attr_value :
+  cxcomment -> int -> string = "clang_HTMLStartTag_getAttrValue_wrapper"
+external block_command_comment_get_command_name :
+  cxcomment -> string = "clang_BlockCommandComment_getCommandName_wrapper"
+external block_command_comment_get_num_args :
+  cxcomment -> int = "clang_BlockCommandComment_getNumArgs_wrapper"
+external block_command_comment_get_arg_text :
+  cxcomment -> int -> string = "clang_BlockCommandComment_getArgText_wrapper"
+external block_command_comment_get_paragraph :
+  cxcomment -> cxcomment = "clang_BlockCommandComment_getParagraph_wrapper"
+external param_command_comment_get_param_name :
+  cxcomment -> string = "clang_ParamCommandComment_getParamName_wrapper"
+external param_command_comment_is_param_index_valid :
+  cxcomment -> bool = "clang_ParamCommandComment_isParamIndexValid_wrapper"
+external param_command_comment_get_param_index :
+  cxcomment -> int = "clang_ParamCommandComment_getParamIndex_wrapper"
+external param_command_comment_is_direction_explicit :
+  cxcomment -> bool = "clang_ParamCommandComment_isDirectionExplicit_wrapper"
+type cxcommentparampassdirection =
+  | In 
+  | Out 
+  | InOut 
+external param_command_comment_get_direction :
+  cxcomment -> cxcommentparampassdirection =
+    "clang_ParamCommandComment_getDirection_wrapper"
+external tparam_command_comment_get_param_name :
+  cxcomment -> string = "clang_TParamCommandComment_getParamName_wrapper"
+external tparam_command_comment_is_param_position_valid :
+  cxcomment -> bool =
+    "clang_TParamCommandComment_isParamPositionValid_wrapper"
+external tparam_command_comment_get_depth :
+  cxcomment -> int = "clang_TParamCommandComment_getDepth_wrapper"
+external tparam_command_comment_get_index :
+  cxcomment -> int -> int = "clang_TParamCommandComment_getIndex_wrapper"
+external verbatim_block_line_comment_get_text :
+  cxcomment -> string = "clang_VerbatimBlockLineComment_getText_wrapper"
+external verbatim_line_comment_get_text :
+  cxcomment -> string = "clang_VerbatimLineComment_getText_wrapper"
+external htmltag_comment_get_as_string :
+  cxcomment -> string = "clang_HTMLTagComment_getAsString_wrapper"
+external full_comment_get_as_html :
+  cxcomment -> string = "clang_FullComment_getAsHTML_wrapper"
+external full_comment_get_as_xml :
+  cxcomment -> string = "clang_FullComment_getAsXML_wrapper"
 type cxint
 external equal_cxint : cxint -> cxint -> bool = "clang_equal_cxint_wrapper"
 external compare_cxint :

@@ -3,6 +3,7 @@
  * (except by continuous integration on the dedicated bootstrap branch). */
 #include "stubgen.h"
 #include <clang-c/Index.h>
+#include <clang-c/Documentation.h>
 #include "libclang_extensions.h"
 #include <stdio.h>
 CAMLprim value
@@ -5803,6 +5804,611 @@ clang_Type_visitFields_wrapper(value T_ocaml, value visitor_ocaml)
   {
     CAMLlocal1(data);
     data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+DECLARE_OPAQUE(CXComment, cxcomment, Cxcomment_val, Val_cxcomment, custom_finalize_default)
+
+CAMLprim value
+clang_Cursor_getParsedComment_wrapper(value C_ocaml)
+{
+  CAMLparam1(C_ocaml);
+  CXCursor C;
+  C = Cxcursor_val(Field(C_ocaml, 0));
+  CXComment result = clang_Cursor_getParsedComment(C);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcomment(result));
+  Store_field(data, 1, Safe_field(C_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+enum CXCommentKind
+Cxcommentkind_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CXComment_Null;
+  case 1: return CXComment_Text;
+  case 2: return CXComment_InlineCommand;
+  case 3: return CXComment_HTMLStartTag;
+  case 4: return CXComment_HTMLEndTag;
+  case 5: return CXComment_Paragraph;
+  case 6: return CXComment_BlockCommand;
+  case 7: return CXComment_ParamCommand;
+  case 8: return CXComment_TParamCommand;
+  case 9: return CXComment_VerbatimBlockCommand;
+  case 10: return CXComment_VerbatimBlockLine;
+  case 11: return CXComment_VerbatimLine;
+  case 12: return CXComment_FullComment;
+  }
+  failwith_fmt("invalid value for Cxcommentkind_val: %d", Int_val(ocaml));
+  return CXComment_Null;
+}
+
+value
+Val_cxcommentkind(enum CXCommentKind v)
+{
+  switch (v) {
+  case CXComment_Null: return Val_int(0);
+  case CXComment_Text: return Val_int(1);
+  case CXComment_InlineCommand: return Val_int(2);
+  case CXComment_HTMLStartTag: return Val_int(3);
+  case CXComment_HTMLEndTag: return Val_int(4);
+  case CXComment_Paragraph: return Val_int(5);
+  case CXComment_BlockCommand: return Val_int(6);
+  case CXComment_ParamCommand: return Val_int(7);
+  case CXComment_TParamCommand: return Val_int(8);
+  case CXComment_VerbatimBlockCommand: return Val_int(9);
+  case CXComment_VerbatimBlockLine: return Val_int(10);
+  case CXComment_VerbatimLine: return Val_int(11);
+  case CXComment_FullComment: return Val_int(12);
+  }
+  failwith_fmt("invalid value for Val_cxcommentkind: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_Comment_getKind_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  enum CXCommentKind result = clang_Comment_getKind(Comment);
+  {
+    CAMLlocal1(data);
+    data = Val_cxcommentkind(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_Comment_getNumChildren_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int result = clang_Comment_getNumChildren(Comment);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_Comment_getChild_wrapper(value Comment_ocaml, value ChildIdx_ocaml)
+{
+  CAMLparam2(Comment_ocaml, ChildIdx_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int ChildIdx;
+  ChildIdx = Int_val(ChildIdx_ocaml);
+  CXComment result = clang_Comment_getChild(Comment, ChildIdx);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcomment(result));
+  Store_field(data, 1, Safe_field(Comment_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_Comment_isWhitespace_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int result = clang_Comment_isWhitespace(Comment);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_InlineContentComment_hasTrailingNewline_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int result = clang_InlineContentComment_hasTrailingNewline(Comment);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_TextComment_getText_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  CXString result = clang_TextComment_getText(Comment);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(clang_getCString(result));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_InlineCommandComment_getCommandName_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  CXString result = clang_InlineCommandComment_getCommandName(Comment);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(clang_getCString(result));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+enum CXCommentInlineCommandRenderKind
+Cxcommentinlinecommandrenderkind_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CXCommentInlineCommandRenderKind_Normal;
+  case 1: return CXCommentInlineCommandRenderKind_Bold;
+  case 2: return CXCommentInlineCommandRenderKind_Monospaced;
+  case 3: return CXCommentInlineCommandRenderKind_Emphasized;
+  }
+  failwith_fmt("invalid value for Cxcommentinlinecommandrenderkind_val: %d", Int_val(ocaml));
+  return CXCommentInlineCommandRenderKind_Normal;
+}
+
+value
+Val_cxcommentinlinecommandrenderkind(enum CXCommentInlineCommandRenderKind v)
+{
+  switch (v) {
+  case CXCommentInlineCommandRenderKind_Normal: return Val_int(0);
+  case CXCommentInlineCommandRenderKind_Bold: return Val_int(1);
+  case CXCommentInlineCommandRenderKind_Monospaced: return Val_int(2);
+  case CXCommentInlineCommandRenderKind_Emphasized: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_cxcommentinlinecommandrenderkind: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_InlineCommandComment_getRenderKind_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  enum CXCommentInlineCommandRenderKind result = clang_InlineCommandComment_getRenderKind(Comment);
+  {
+    CAMLlocal1(data);
+    data = Val_cxcommentinlinecommandrenderkind(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_InlineCommandComment_getNumArgs_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int result = clang_InlineCommandComment_getNumArgs(Comment);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_InlineCommandComment_getArgText_wrapper(value Comment_ocaml, value ArgIdx_ocaml)
+{
+  CAMLparam2(Comment_ocaml, ArgIdx_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int ArgIdx;
+  ArgIdx = Int_val(ArgIdx_ocaml);
+  CXString result = clang_InlineCommandComment_getArgText(Comment, ArgIdx);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(clang_getCString(result));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_HTMLTagComment_getTagName_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  CXString result = clang_HTMLTagComment_getTagName(Comment);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(clang_getCString(result));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_HTMLStartTagComment_isSelfClosing_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int result = clang_HTMLStartTagComment_isSelfClosing(Comment);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_HTMLStartTag_getNumAttrs_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int result = clang_HTMLStartTag_getNumAttrs(Comment);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_HTMLStartTag_getAttrName_wrapper(value Comment_ocaml, value AttrIdx_ocaml)
+{
+  CAMLparam2(Comment_ocaml, AttrIdx_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int AttrIdx;
+  AttrIdx = Int_val(AttrIdx_ocaml);
+  CXString result = clang_HTMLStartTag_getAttrName(Comment, AttrIdx);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(clang_getCString(result));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_HTMLStartTag_getAttrValue_wrapper(value Comment_ocaml, value AttrIdx_ocaml)
+{
+  CAMLparam2(Comment_ocaml, AttrIdx_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int AttrIdx;
+  AttrIdx = Int_val(AttrIdx_ocaml);
+  CXString result = clang_HTMLStartTag_getAttrValue(Comment, AttrIdx);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(clang_getCString(result));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_BlockCommandComment_getCommandName_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  CXString result = clang_BlockCommandComment_getCommandName(Comment);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(clang_getCString(result));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_BlockCommandComment_getNumArgs_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int result = clang_BlockCommandComment_getNumArgs(Comment);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_BlockCommandComment_getArgText_wrapper(value Comment_ocaml, value ArgIdx_ocaml)
+{
+  CAMLparam2(Comment_ocaml, ArgIdx_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int ArgIdx;
+  ArgIdx = Int_val(ArgIdx_ocaml);
+  CXString result = clang_BlockCommandComment_getArgText(Comment, ArgIdx);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(clang_getCString(result));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_BlockCommandComment_getParagraph_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  CXComment result = clang_BlockCommandComment_getParagraph(Comment);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcomment(result));
+  Store_field(data, 1, Safe_field(Comment_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ParamCommandComment_getParamName_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  CXString result = clang_ParamCommandComment_getParamName(Comment);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(clang_getCString(result));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ParamCommandComment_isParamIndexValid_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int result = clang_ParamCommandComment_isParamIndexValid(Comment);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ParamCommandComment_getParamIndex_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int result = clang_ParamCommandComment_getParamIndex(Comment);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ParamCommandComment_isDirectionExplicit_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int result = clang_ParamCommandComment_isDirectionExplicit(Comment);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+enum CXCommentParamPassDirection
+Cxcommentparampassdirection_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CXCommentParamPassDirection_In;
+  case 1: return CXCommentParamPassDirection_Out;
+  case 2: return CXCommentParamPassDirection_InOut;
+  }
+  failwith_fmt("invalid value for Cxcommentparampassdirection_val: %d", Int_val(ocaml));
+  return CXCommentParamPassDirection_In;
+}
+
+value
+Val_cxcommentparampassdirection(enum CXCommentParamPassDirection v)
+{
+  switch (v) {
+  case CXCommentParamPassDirection_In: return Val_int(0);
+  case CXCommentParamPassDirection_Out: return Val_int(1);
+  case CXCommentParamPassDirection_InOut: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_cxcommentparampassdirection: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ParamCommandComment_getDirection_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  enum CXCommentParamPassDirection result = clang_ParamCommandComment_getDirection(Comment);
+  {
+    CAMLlocal1(data);
+    data = Val_cxcommentparampassdirection(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_TParamCommandComment_getParamName_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  CXString result = clang_TParamCommandComment_getParamName(Comment);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(clang_getCString(result));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_TParamCommandComment_isParamPositionValid_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int result = clang_TParamCommandComment_isParamPositionValid(Comment);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_TParamCommandComment_getDepth_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int result = clang_TParamCommandComment_getDepth(Comment);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_TParamCommandComment_getIndex_wrapper(value Comment_ocaml, value Depth_ocaml)
+{
+  CAMLparam2(Comment_ocaml, Depth_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  unsigned int Depth;
+  Depth = Int_val(Depth_ocaml);
+  unsigned int result = clang_TParamCommandComment_getIndex(Comment, Depth);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_VerbatimBlockLineComment_getText_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  CXString result = clang_VerbatimBlockLineComment_getText(Comment);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(clang_getCString(result));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_VerbatimLineComment_getText_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  CXString result = clang_VerbatimLineComment_getText(Comment);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(clang_getCString(result));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_HTMLTagComment_getAsString_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  CXString result = clang_HTMLTagComment_getAsString(Comment);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(clang_getCString(result));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_FullComment_getAsHTML_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  CXString result = clang_FullComment_getAsHTML(Comment);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(clang_getCString(result));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_FullComment_getAsXML_wrapper(value Comment_ocaml)
+{
+  CAMLparam1(Comment_ocaml);
+  CXComment Comment;
+  Comment = Cxcomment_val(Field(Comment_ocaml, 0));
+  CXString result = clang_FullComment_getAsXML(Comment);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(clang_getCString(result));
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }
