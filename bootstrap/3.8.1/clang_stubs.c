@@ -271,7 +271,7 @@ clang_getFileName_wrapper(value SFile_ocaml)
   CXString result = clang_getFileName(SFile);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -565,7 +565,7 @@ clang_getPresumedLocation_wrapper(value location_ocaml)
     data = caml_alloc_tuple(3);
   {
     CAMLlocal1(field);
-    field = caml_copy_string(clang_getCString(filename));
+    field = caml_copy_string(safe_string(clang_getCString(filename)));
                     clang_disposeString(filename);
     Store_field(data, 0, field);
   }
@@ -849,7 +849,7 @@ clang_loadDiagnostics_wrapper(value file_ocaml)
   }
   {
     CAMLlocal1(field);
-    field = caml_copy_string(clang_getCString(errorString));
+    field = caml_copy_string(safe_string(clang_getCString(errorString)));
                     clang_disposeString(errorString);
     Store_field(data, 1, field);
   }
@@ -928,7 +928,7 @@ clang_formatDiagnostic_wrapper(value Diagnostic_ocaml, value Options_ocaml)
   CXString result = clang_formatDiagnostic(Diagnostic, Options);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -1012,7 +1012,7 @@ clang_getDiagnosticSpelling_wrapper(value arg_ocaml)
   CXString result = clang_getDiagnosticSpelling(arg);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -1031,13 +1031,13 @@ clang_getDiagnosticOption_wrapper(value Diag_ocaml)
     data = caml_alloc_tuple(2);
   {
     CAMLlocal1(field);
-    field = caml_copy_string(clang_getCString(result));
+    field = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     Store_field(data, 0, field);
   }
   {
     CAMLlocal1(field);
-    field = caml_copy_string(clang_getCString(Disable));
+    field = caml_copy_string(safe_string(clang_getCString(Disable)));
                     clang_disposeString(Disable);
     Store_field(data, 1, field);
   }
@@ -1069,7 +1069,7 @@ clang_getDiagnosticCategoryText_wrapper(value arg_ocaml)
   CXString result = clang_getDiagnosticCategoryText(arg);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -1136,7 +1136,7 @@ clang_getDiagnosticFixIt_wrapper(value Diagnostic_ocaml, value FixIt_ocaml, valu
     data = caml_alloc_tuple(2);
   {
     CAMLlocal1(field);
-    field = caml_copy_string(clang_getCString(result));
+    field = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     Store_field(data, 0, field);
   }
@@ -1160,7 +1160,7 @@ clang_getTranslationUnitSpelling_wrapper(value CTUnit_ocaml)
   CXString result = clang_getTranslationUnitSpelling(CTUnit);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -2697,7 +2697,7 @@ clang_getTypeSpelling_wrapper(value CT_ocaml)
   CXString result = clang_getTypeSpelling(CT);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -3042,7 +3042,7 @@ clang_getDeclObjCTypeEncoding_wrapper(value C_ocaml)
   CXString result = clang_getDeclObjCTypeEncoding(C);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -3057,7 +3057,7 @@ clang_getTypeKindSpelling_wrapper(value K_ocaml)
   CXString result = clang_getTypeKindSpelling(K);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -3663,7 +3663,7 @@ clang_getCursorUSR_wrapper(value arg_ocaml)
   CXString result = clang_getCursorUSR(arg);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -3678,7 +3678,7 @@ clang_getCursorSpelling_wrapper(value arg_ocaml)
   CXString result = clang_getCursorSpelling(arg);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -3713,7 +3713,7 @@ clang_getCursorDisplayName_wrapper(value arg_ocaml)
   CXString result = clang_getCursorDisplayName(arg);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -3908,7 +3908,7 @@ clang_Cursor_getRawCommentText_wrapper(value C_ocaml)
   CXString result = clang_Cursor_getRawCommentText(C);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -3923,7 +3923,7 @@ clang_Cursor_getBriefCommentText_wrapper(value C_ocaml)
   CXString result = clang_Cursor_getBriefCommentText(C);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -3938,7 +3938,7 @@ clang_Cursor_getMangling_wrapper(value arg_ocaml)
   CXString result = clang_Cursor_getMangling(arg);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -3957,7 +3957,7 @@ clang_Cursor_getCXXManglings_wrapper(value arg_ocaml)
 data = caml_alloc(result->Count, 0);
 for (unsigned int i = 0; i < result->Count; i++) {
   CAMLlocal1(field);
-  field = caml_copy_string(clang_getCString(result->Strings[i]));
+  field = caml_copy_string(safe_string(clang_getCString(result->Strings[i])));
                     clang_disposeString(result->Strings[i]);
   Store_field(data, i, field);
 }
@@ -4043,7 +4043,7 @@ clang_Module_getName_wrapper(value Module_ocaml)
   CXString result = clang_Module_getName(Module);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -4058,7 +4058,7 @@ clang_Module_getFullName_wrapper(value Module_ocaml)
   CXString result = clang_Module_getFullName(Module);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -4243,7 +4243,7 @@ clang_getCursorKindSpelling_wrapper(value Kind_ocaml)
   CXString result = clang_getCursorKindSpelling(Kind);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -4346,7 +4346,7 @@ clang_getCompletionChunkText_wrapper(value completion_string_ocaml, value chunk_
   CXString result = clang_getCompletionChunkText(completion_string, chunk_number);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -4435,7 +4435,7 @@ clang_getCompletionAnnotation_wrapper(value completion_string_ocaml, value annot
   CXString result = clang_getCompletionAnnotation(completion_string, annotation_number);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -4450,7 +4450,7 @@ clang_getCompletionParent_wrapper(value completion_string_ocaml)
   CXString result = clang_getCompletionParent(completion_string, NULL);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -4465,7 +4465,7 @@ clang_getCompletionBriefComment_wrapper(value completion_string_ocaml)
   CXString result = clang_getCompletionBriefComment(completion_string);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -4504,7 +4504,7 @@ clang_getClangVersion_wrapper()
   CXString result = clang_getClangVersion();
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -4781,7 +4781,7 @@ clang_TextComment_getText_wrapper(value Comment_ocaml)
   CXString result = clang_TextComment_getText(Comment);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -4796,7 +4796,7 @@ clang_InlineCommandComment_getCommandName_wrapper(value Comment_ocaml)
   CXString result = clang_InlineCommandComment_getCommandName(Comment);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -4867,7 +4867,7 @@ clang_InlineCommandComment_getArgText_wrapper(value Comment_ocaml, value ArgIdx_
   CXString result = clang_InlineCommandComment_getArgText(Comment, ArgIdx);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -4882,7 +4882,7 @@ clang_HTMLTagComment_getTagName_wrapper(value Comment_ocaml)
   CXString result = clang_HTMLTagComment_getTagName(Comment);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -4927,7 +4927,7 @@ clang_HTMLStartTag_getAttrName_wrapper(value Comment_ocaml, value AttrIdx_ocaml)
   CXString result = clang_HTMLStartTag_getAttrName(Comment, AttrIdx);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -4944,7 +4944,7 @@ clang_HTMLStartTag_getAttrValue_wrapper(value Comment_ocaml, value AttrIdx_ocaml
   CXString result = clang_HTMLStartTag_getAttrValue(Comment, AttrIdx);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -4959,7 +4959,7 @@ clang_BlockCommandComment_getCommandName_wrapper(value Comment_ocaml)
   CXString result = clang_BlockCommandComment_getCommandName(Comment);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -4990,7 +4990,7 @@ clang_BlockCommandComment_getArgText_wrapper(value Comment_ocaml, value ArgIdx_o
   CXString result = clang_BlockCommandComment_getArgText(Comment, ArgIdx);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -5021,7 +5021,7 @@ clang_ParamCommandComment_getParamName_wrapper(value Comment_ocaml)
   CXString result = clang_ParamCommandComment_getParamName(Comment);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -5116,7 +5116,7 @@ clang_TParamCommandComment_getParamName_wrapper(value Comment_ocaml)
   CXString result = clang_TParamCommandComment_getParamName(Comment);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -5175,7 +5175,7 @@ clang_VerbatimBlockLineComment_getText_wrapper(value Comment_ocaml)
   CXString result = clang_VerbatimBlockLineComment_getText(Comment);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -5190,7 +5190,7 @@ clang_VerbatimLineComment_getText_wrapper(value Comment_ocaml)
   CXString result = clang_VerbatimLineComment_getText(Comment);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -5205,7 +5205,7 @@ clang_HTMLTagComment_getAsString_wrapper(value Comment_ocaml)
   CXString result = clang_HTMLTagComment_getAsString(Comment);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -5220,7 +5220,7 @@ clang_FullComment_getAsHTML_wrapper(value Comment_ocaml)
   CXString result = clang_FullComment_getAsHTML(Comment);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -5235,7 +5235,7 @@ clang_FullComment_getAsXML_wrapper(value Comment_ocaml)
   CXString result = clang_FullComment_getAsXML(Comment);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -5319,7 +5319,7 @@ clang_ext_Int_toString_wrapper(value c_ocaml, value Radix_ocaml, value isSigned_
   CXString result = clang_ext_Int_toString(c, Radix, isSigned);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -5513,7 +5513,7 @@ clang_ext_Float_toString_wrapper(value f_ocaml)
   CXString result = clang_ext_Float_toString(f);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -5542,7 +5542,7 @@ clang_ext_StringLiteral_GetString_wrapper(value c_ocaml)
   CXString result = clang_ext_StringLiteral_GetString(c);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -5617,7 +5617,7 @@ clang_ext_UnaryOperator_getOpcodeSpelling_wrapper(value Kind_ocaml)
   CXString result = clang_ext_UnaryOperator_getOpcodeSpelling(Kind);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -5728,7 +5728,7 @@ clang_ext_BinaryOperator_getOpcodeSpelling_wrapper(value Kind_ocaml)
   CXString result = clang_ext_BinaryOperator_getOpcodeSpelling(Kind);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -5877,7 +5877,7 @@ clang_ext_ElaboratedType_getKeywordSpelling_wrapper(value keyword_ocaml)
   CXString result = clang_ext_ElaboratedType_getKeywordSpelling(keyword);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -5920,7 +5920,7 @@ clang_ext_Stmt_GetClassName_wrapper(value c_ocaml)
   CXString result = clang_ext_Stmt_GetClassName(c);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
@@ -6061,7 +6061,7 @@ clang_ext_AsmStmt_GetAsmString_wrapper(value c_ocaml)
   CXString result = clang_ext_AsmStmt_GetAsmString(c);
   {
     CAMLlocal1(data);
-    data = caml_copy_string(clang_getCString(result));
+    data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
     CAMLreturn(data);
   }
