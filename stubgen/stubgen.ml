@@ -559,11 +559,11 @@ let add_primitive context value_description =
 let escape_doc doc =
   Pcre.replace ~pat:"[][@{}]" ~templ:"\\$&" doc
 
-let make_doc_attributes cur = [] (*
+let make_doc_attributes cur =
   match Clang.cursor_get_brief_comment_text cur with
   | None -> []
   | Some doc ->
-      [loc "ocaml.doc", Parsetree.PStr [pstr_eval (pexp_constant (pconst_string (escape_doc doc)))]]*)
+      [loc "ocaml.doc", Parsetree.PStr [pstr_eval (pexp_constant (pconst_string (escape_doc doc)))]]
 
 let rec find_type_info ?(declare_abstract = true) ?parameters context type_interface ty =
   let find_enum_info type_name =
