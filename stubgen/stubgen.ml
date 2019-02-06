@@ -148,6 +148,31 @@ let make_ocaml_type_name s =
     | _ -> ()) s;
   Buffer.contents buffer
 
+type converter =
+    out_channel -> src:string -> params:string array -> references:string array
+      -> tgt:string -> unit
+
+type common_type_info = {
+    ocamltype : Parsetree.core_type;
+    c_of_ocaml : converter;
+    ocaml_of_c : converter;
+  }
+
+type enum_info = {
+    result : string option;
+    constructors : (string * string * int) list;
+  }
+
+type struct_info = unit
+
+type type_info =
+  | Void
+  | Regular
+  | Bool
+  | Not_bool
+  | Enum of enum_info
+  | Struct of struct_info
+
 type argument =
   | Index of int
   | Name of string
@@ -158,6 +183,7 @@ type type_spec =
   | Array_struct of { contents : string; length : string }
   | Sized_string of { can_be_null : bool; length : argument }
   | Set_of of string
+  | Type_info of common_type_info * type_info
 
 type type_interface = {
     reinterpret_as : type_spec option;
@@ -172,9 +198,7 @@ let union_option a b =
   match a, b with
   | None, other
   | other, None -> other
-  | Some a, Some b ->
-      assert (a = b);
-      Some a
+  | Some a, Some b -> Some b
 
 let union_type_interfaces a b =
   { reinterpret_as = union_option a.reinterpret_as b.reinterpret_as;
@@ -379,15 +403,6 @@ let add_struct struct_name struct_interface module_interface =
   { module_interface with structs =
     (struct_name, struct_interface) :: module_interface.structs }
 
-type converter =
-    out_channel -> src:string -> params:string array -> references:string array -> tgt:string -> unit
-
-type common_type_info = {
-    ocamltype : Parsetree.core_type;
-    c_of_ocaml : converter;
-    ocaml_of_c : converter;
-  }
-
 let simple_converter name fmt ~src ~params ~references ~tgt =
   Printf.fprintf fmt "%s = %s(%s);" tgt name src
 
@@ -420,21 +435,6 @@ let make_common_type_info ?type_interface ?converter ocaml_type_name =
         simple_converter c_of_ocaml, simple_converter ocaml_of_c in
   { ocamltype = ptyp_constr (loc (Longident.Lident ocaml_type_name));
     c_of_ocaml; ocaml_of_c; }
-
-type enum_info = {
-    result : string option;
-    constructors : (string * string * int) list;
-  }
-
-type struct_info = unit
-
-type type_info =
-  | Void
-  | Regular
-  | Bool
-  | Not_bool
-  | Enum of enum_info
-  | Struct of struct_info
 
 type translation_context = {
     module_interface : module_interface;
@@ -564,7 +564,7 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
     Lazy.force common_info, (Enum enum_info : type_info) in
   let default_type type_name =
     let type_interface = union_type_interfaces
-      type_interface (get_type type_name context.module_interface) in
+      (get_type type_name context.module_interface) type_interface in
     match type_interface.reinterpret_as with
     | Some Int ->
         { ocamltype = int_info.ocamltype;
@@ -572,7 +572,9 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
             Printf.fprintf fmt "%s = (%s) Int_val(%s);" tgt type_name src);
           ocaml_of_c = (fun fmt ~src ~params ~references ~tgt ->
             Printf.fprintf fmt "%s = Val_int((int) %s);" tgt src); }, Regular
-    | _ ->
+    | Some (Type_info (common_type_info, type_info)) -> common_type_info, type_info
+    | None ->
+        begin
     match String_hashtbl.find_opt context.type_table type_name with
     | Some (common_info, type_info) ->
         Lazy.force common_info, type_info
@@ -590,7 +592,9 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
           Regular in
         String_hashtbl.add context.type_table type_name (lazy common_info, type_info);
         add_type_declaration context [type_declaration (loc ocaml_type_name)];
-        common_info, type_info in
+        common_info, type_info
+        end
+    | _ -> assert false in
   match Clang.get_type_kind ty with
   | Void ->
       { ocamltype = ptyp_constr (loc (Longident.Lident "unit"));
@@ -766,12 +770,6 @@ tgt); }, Regular
       | _ ->
           let type_name = Clang.get_type_spelling ty in
           match type_name with
-          | "CXString" ->
-              { ocamltype = ocaml_string;
-                c_of_ocaml = (fun _ -> assert false);
-                ocaml_of_c = (fun fmt ~src ~params ~references ~tgt ->
-                  Printf.fprintf fmt "%s = caml_copy_string(safe_string(clang_getCString(%s)));
-                    clang_disposeString(%s);" tgt src src) }, Regular
           | "uint64_t" | "int64_t" ->
               int64_type_info
           | _ ->
@@ -1567,7 +1565,7 @@ let translate_function_decl context cur =
 | _ ->
  false) with
             | Some index ->
-                [(index, fun x -> Printf.sprintf "Safe_field(%s, 1)" x)]
+                [(index, fun x -> Printf.sprintf "safe_field(%s, 1)" x)]
             | None ->
             match args |> array_find (fun i -> match i with CXType ty' ->
               begin
@@ -1583,12 +1581,12 @@ let translate_function_decl context cur =
 | _ ->
  false) with
             | Some index ->
-                [(index, fun x -> Printf.sprintf "Safe_field(Safe_field(%s, 1), 1)" x)]
+                [(index, fun x -> Printf.sprintf "safe_field(safe_field(%s, 1), 1)" x)]
             | None ->
                 Printf.fprintf stderr "warning: reference not found in %s\n" name;
                 [] in
   let result_type_info =
-    find_type_info ~parameters context function_interface.result result_type in
+    find_type_info ~parameters context result_type_interface result_type in
   let used_arg_names = String_hashtbl.create 17 in
   let wrapper_arg_names = Array.map (fun arg_name ->
     let arg_name =
@@ -1866,6 +1864,13 @@ let main cflags llvm_config prefix =
   let module_interface =
     empty_module_interface |>
     add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|clang_VirtualFileOverlay_writeToBuffer|clang_free|constructUSR|clang_executeOnThread|clang_getDiagnosticCategoryName|^clang_getDefinitionSpellingAndExtent$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_annotateTokens$|^clang_getFileUniqueID$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$") hidden_function_interface |>
+    add_type (Pcre.regexp "^CXString$")
+      (empty_type_interface |>
+       reinterpret_as (Type_info ({ ocamltype = ocaml_string;
+                c_of_ocaml = (fun _ -> assert false);
+                ocaml_of_c = (fun fmt ~src ~params ~references ~tgt ->
+                  Printf.fprintf fmt "%s = caml_copy_string(safe_string(clang_getCString(%s)));
+                    clang_disposeString(%s);" tgt src src) }, Regular))) |>
     add_type (Pcre.regexp "^CXInt$")
       (empty_type_interface |>
        make_destructor "clang_ext_Int_dispose") |>
@@ -2099,7 +2104,15 @@ let main cflags llvm_config prefix =
       (empty_function_interface |>
         add_result (empty_type_interface |>
           reinterpret_as (Array_struct { length = "Count"; contents = "Strings" }) |>
-          make_destructor "clang_disposeStringSet")) in
+          make_destructor "clang_disposeStringSet")) |>
+    add_function (Pcre.regexp "^clang_Cursor_getBriefCommentText$")
+      (empty_function_interface |>
+        add_result (empty_type_interface |>
+          reinterpret_as (Type_info ({ ocamltype = ocaml_option ocaml_string;
+                c_of_ocaml = (fun _ -> assert false);
+                ocaml_of_c = (fun fmt ~src ~params ~references ~tgt ->
+                  Printf.fprintf fmt "%s = Val_string_option(clang_getCString(%s));
+                    clang_disposeString(%s);" tgt src src) }, Regular)))) in
   let idx = Clang.create_index true true in
   let tu =
     match

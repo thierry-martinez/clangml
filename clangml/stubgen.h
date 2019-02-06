@@ -76,6 +76,7 @@ failwith_fmt(const char* format, ...)
 #define Val_not_bool(X) (Val_bool(!(X)))
 
 static inline value
+ __attribute__((unused))
 Safe_field(value V, mlsize_t I)
 {
   if (Is_block(V) && I < Wosize_val(V)) {
@@ -87,16 +88,39 @@ Safe_field(value V, mlsize_t I)
 }
 
 static inline value
+ __attribute__((unused))
 safe_field(value V, mlsize_t I)
 {
   return Safe_field(V, I);
 }
 
 static inline const char *
+ __attribute__((unused))
 safe_string(const char *s)
 {
   if (s == NULL) {
     return "";
   }
   return s;
+}
+
+static value
+ __attribute__((unused))
+Val_option(value x)
+{
+  CAMLparam1(x);
+  value tgt = caml_alloc(1, 0);
+  Store_field(tgt, 0, x);
+  CAMLreturn(tgt);
+}
+
+static value
+ __attribute__((unused))
+Val_string_option(const char *s)
+{
+  CAMLparam0();
+  if (s == NULL) {
+    return Val_int(0);
+  }
+  CAMLreturn(Val_option(caml_copy_string(s)));
 }
