@@ -10,6 +10,6 @@
   (preprocessor_deps (file "clangml_OperationKinds.def"))
   (library_flags -linkall)
   (flags -open Stdcompat)
-  (libraries unix stdcompat visitors.ppx visitors.runtime)
+  (libraries unix stdcompat visitors.runtime)
   (preprocess (pps ppx_deriving.std visitors.ppx))
   (inline_tests (backend ocamlcodoc)))
