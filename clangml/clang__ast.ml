@@ -2112,6 +2112,12 @@ and var_decl_desc = {
     qual_type : qual_type;
     init : expr option
   }
+
+and translation_unit_desc = {
+    filename : string; items : decl list
+  }
+
+and translation_unit = (translation_unit_desc, qual_type) open_node
     [@@deriving show, eq, ord,
       visitors { variety = "iter"; ancestors = ["base_iter"] },
       visitors { variety = "map"; ancestors = ["base_map"] },
@@ -2121,12 +2127,6 @@ and var_decl_desc = {
 type decoration = qual_type open_decoration
 
 type 'a node = ('a, qual_type) open_node
-
-type translation_unit_desc = {
-    filename : string; items : decl list
-  }
-
-type translation_unit = translation_unit_desc node
 
 (*{[
 let () =
