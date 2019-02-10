@@ -21,6 +21,7 @@ git tag -f -a "$tagname" -m "Version $version"
 git push -f origin "$tagname"
 archive="clangml-$tagname.tar.gz"
 url="https://gitlab.inria.fr/tmartine/clangml/-/archive/$tagname/$archive"
+rm -f "$archive"
 wget "$url"
 if which md5 >/dev/null; then
     md5=`md5 -q "$archive"`
