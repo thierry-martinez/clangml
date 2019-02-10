@@ -306,7 +306,8 @@ let parse_declaration_list ?filename ?command_line_args ?options source =
   ast.desc.items
    ]}*)
 
-(** Qualified type. *)
+(** {3 Qualified types } *)
+
 type qual_type = {
     cxtype : cxtype
       [@equal fun _ _ -> true]
@@ -387,7 +388,6 @@ let () =
     desc : type_desc;
   }
 
-(** Type description. *)
 and type_desc =
   | Pointer of qual_type
 (** Pointer.
@@ -635,6 +635,7 @@ let () =
       qual_type = { desc = BuiltinType Bool}}} -> ()
   | _ -> assert false
     ]}*)
+
 (** Function type. *)
 and function_type = {
   calling_conv : cxcallingconv;
@@ -713,7 +714,6 @@ let () =
  *)
 }
 
-
 (** Function arguments. *)
 and args = {
   non_variadic : (string * qual_type) list;
@@ -775,7 +775,8 @@ let () =
     ]}
  *)
 }
-(** Statement.
+
+(** {3 Statements}
 
 The following example declares the function [parse_statement_list]
 that returns the AST obtained from the parsing of [source] string as a
@@ -791,7 +792,9 @@ let parse_statement_list ?(return_type = "int") ?filename ?command_line_args ?op
   | [{ desc = Function { body = Some { desc = Compound items }}}] -> items
   | _ -> assert false
     ]}*)
+
 and stmt = (stmt_desc, qual_type) open_node
+
 and stmt_desc =
   | Null
 (** Null statement.
@@ -1304,6 +1307,8 @@ let () =
   | Expr of expr
   | OtherStmt
 
+(** {3 Expressions} *)
+
 and expr = (expr_desc, qual_type) open_node
 
 and expr_desc =
@@ -1778,6 +1783,8 @@ and unary_expr_or_type_trait =
   | ArgumentExpr of expr
   | ArgumentType of qual_type
 
+(** {3 Declarations} *)
+
 and decl = (decl_desc, qual_type) open_node
 
 and decl_desc =
@@ -2113,11 +2120,13 @@ and var_decl_desc = {
     init : expr option
   }
 
+(** {3 Translation units} *)
+
+and translation_unit = (translation_unit_desc, qual_type) open_node
+
 and translation_unit_desc = {
     filename : string; items : decl list
   }
-
-and translation_unit = (translation_unit_desc, qual_type) open_node
     [@@deriving show, eq, ord,
       visitors { variety = "iter"; ancestors = ["base_iter"] },
       visitors { variety = "map"; ancestors = ["base_map"] },
