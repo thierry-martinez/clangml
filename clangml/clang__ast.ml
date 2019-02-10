@@ -345,7 +345,8 @@ let () =
 let example = "volatile int x;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl (parse_declaration_list example) @@
+  fun ast -> match ast with
   | [{ desc = Var { name = "x";
       qual_type = {
         volatile = true;
@@ -1382,7 +1383,8 @@ let () =
 let example = "\"Hello!\";"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt (parse_statement_list example) @@
+  fun ast -> match ast with
   | [{ desc = Expr { desc = StringLiteral "Hello!" }}] -> ()
   | _ -> assert false
     ]}*)

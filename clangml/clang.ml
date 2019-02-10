@@ -284,7 +284,8 @@ module Ast = struct
               | _ -> BuiltinType (get_type_kind cxtype)
             end in
       match desc with
-      | ParenType inner when Options.options.ignore_paren_in_types -> inner
+      | ParenType inner when Options.options.ignore_paren_in_types ->
+          { inner with cxtype }
       | _ ->
           { cxtype; desc;
             const = is_const_qualified_type cxtype;
