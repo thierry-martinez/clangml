@@ -567,10 +567,11 @@ module Ast = struct
 
     and expr_of_cxcursor cursor =
       match expr_desc_of_cxcursor cursor with
-      | Paren subexpr when Options.options.ignore_paren -> subexpr
+      | Paren subexpr when Options.options.ignore_paren ->
+          node ~cursor subexpr.desc
       | Cast { kind = Implicit; operand }
         when Options.options.ignore_implicit_cast ->
-          operand
+          node ~cursor operand.desc
       | desc -> node ~cursor desc
 
     and expr_desc_of_cxcursor cursor =
