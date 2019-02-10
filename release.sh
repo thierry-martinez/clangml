@@ -42,5 +42,5 @@ url {
 EOF
 git add "$opamfile"
 git commit -F "$current_dir/commit_message"
-git push perso "$branch"
+git push -f perso "$branch"
 git checkout master
