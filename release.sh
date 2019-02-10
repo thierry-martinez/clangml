@@ -28,7 +28,7 @@ fi
 cd ~/opam-repository
 git checkout "$branch" || git pull origin master && git pull origin master
 branch="clangml.$version"
-git checkout -b "$branch"
+git checkout -B "$branch"
 repo="packages/clangml/clangml.$version"
 mkdir -p "$repo"
 opamfile="$repo/opam"
