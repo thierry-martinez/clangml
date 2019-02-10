@@ -318,19 +318,20 @@ type qual_type = {
 let example = "const int one = 1;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl (parse_declaration_list example) @@
+  fun ast -> match ast with
   | [{ desc = Var { name = "one";
       qual_type = {
         const = true;
         desc = BuiltinType Int};
-      init = Some { desc = IntegerLiteral one }}}] ->
-      assert (Clang.Ast.int_of_literal one = 1)
+      init = Some { desc = IntegerLiteral (Int 1)}}}] -> ()
   | _ -> assert false
 
 let example = "int x;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl (parse_declaration_list example) @@
+  fun ast -> match ast with
   | [{ desc = Var { name = "x";
       qual_type = {
         const = false;
@@ -844,73 +845,70 @@ let () =
 let example = "int i; for (i = 0; i < 4; i++) { i; }"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt (parse_statement_list example) @@
+  fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = For {
       init = Some { desc = Expr { desc = BinaryOperator {
         lhs = { desc = DeclRef "i"};
         kind = Assign;
-        rhs = { desc = IntegerLiteral zero}}}};
+        rhs = { desc = IntegerLiteral (Int 0)}}}};
       condition_variable = None;
       cond = Some { desc = BinaryOperator {
         lhs = { desc = DeclRef "i"};
         kind = LT;
-        rhs = { desc = IntegerLiteral four}}};
+        rhs = { desc = IntegerLiteral (Int 4)}}};
       inc = Some { desc = Expr { desc = UnaryOperator {
         kind = PostInc;
         operand = { desc = DeclRef "i"}}}};
       body = { desc = Compound [{ desc =
-        Expr { desc = DeclRef "i" }}] }}}] ->
-      assert (Clang.Ast.int_of_literal zero = 0);
-      assert (Clang.Ast.int_of_literal four = 4)
+        Expr { desc = DeclRef "i" }}] }}}] -> ()
   | _ -> assert false
 
 let example = "for (int i = 0; i < 4; i++) { i; }"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt (parse_statement_list example) @@
+  fun ast -> match ast with
   | [{ desc = For {
       init = Some { desc = Decl [{ desc = Var {
         name = "i";
         qual_type = { desc = BuiltinType Int};
-        init = Some { desc = IntegerLiteral zero}}}] };
+        init = Some { desc = IntegerLiteral (Int 0)}}}] };
       condition_variable = None;
       cond = Some { desc = BinaryOperator {
         lhs = { desc = DeclRef "i"};
         kind = LT;
-        rhs = { desc = IntegerLiteral four }}};
+        rhs = { desc = IntegerLiteral (Int 4)}}};
       inc = Some { desc = Expr { desc = UnaryOperator {
         kind = PostInc;
         operand = { desc = DeclRef "i"}}}};
       body = { desc = Compound [{ desc =
-        Expr { desc = DeclRef "i" }}] }}}] ->
-      assert (Clang.Ast.int_of_literal zero = 0);
-      assert (Clang.Ast.int_of_literal four = 4)
+        Expr { desc = DeclRef "i" }}] }}}] -> ()
   | _ -> assert false
 
 let example = "for (int i = 0; int j = i - 1; i--) { j; }"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp" example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt (parse_statement_list
+    ~filename:"<string>.cpp" example) @@ fun ast -> match ast with
   | [{ desc = For {
       init = Some { desc = Decl [{ desc = Var {
         name = "i";
         qual_type = { desc = BuiltinType Int};
-        init = Some { desc = IntegerLiteral zero}}}] };
+        init = Some { desc = IntegerLiteral (Int 0)}}}] };
       condition_variable = Some { desc = {
         name = "j";
         qual_type = { desc = BuiltinType Int};
         init = Some { desc = BinaryOperator {
           lhs = { desc = DeclRef "i"};
           kind = Sub;
-          rhs = { desc = IntegerLiteral one}}}}};
+          rhs = { desc = IntegerLiteral (Int 1)}}}}};
       cond = Some { desc = DeclRef "j" };
       inc = Some { desc = Expr { desc = UnaryOperator {
         kind = PostDec;
         operand = { desc = DeclRef "i"}}}};
       body = { desc = Compound [{ desc =
-        Expr { desc = DeclRef "j" }}] }}}] ->
-      assert (Clang.Ast.int_of_literal zero = 0);
-      assert (Clang.Ast.int_of_literal one = 1)
+        Expr { desc = DeclRef "j" }}] }}}] -> ()
   | _ -> assert false
     ]}*)
   | If of {
@@ -925,50 +923,48 @@ let () =
 let example = "if (1) { 2; } else { 3; }"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt (parse_statement_list example) @@
+  fun ast -> match ast with
   | [{ desc = If {
        init = None;
        condition_variable = None;
-       cond = { desc = IntegerLiteral one };
+       cond = { desc = IntegerLiteral (Int 1)};
        then_branch = { desc = Compound [{
-         desc = Expr { desc = IntegerLiteral two }}] };
+         desc = Expr { desc = IntegerLiteral (Int 2)}}] };
        else_branch = Some { desc = Compound [{
-         desc = Expr { desc = IntegerLiteral three }}] }}}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
-      assert (Clang.Ast.int_of_literal two = 2);
-      assert (Clang.Ast.int_of_literal three = 3)
+         desc = Expr { desc = IntegerLiteral (Int 3)}}] }}}] -> ()
   | _ -> assert false
 
 let example = "if (1) { 2; }"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt (parse_statement_list example) @@
+  fun ast -> match ast with
   | [{ desc = If {
        init = None;
        condition_variable = None;
-       cond = { desc = IntegerLiteral one };
+       cond = { desc = IntegerLiteral (Int 1)};
        then_branch = { desc = Compound [{
-         desc = Expr { desc = IntegerLiteral two }}] };
-       else_branch = None }}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
-      assert (Clang.Ast.int_of_literal two = 2)
+         desc = Expr { desc = IntegerLiteral (Int 2)}}] };
+       else_branch = None }}] -> ()
   | _ -> assert false
 
 let example = "if (int i = 1) { i; }"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp" example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt
+    (parse_statement_list ~filename:"<string>.cpp" example) @@
+  fun ast -> match ast with
   | [{ desc = If {
        init = None;
        condition_variable = Some ({ desc = {
          qual_type = { desc = BuiltinType Int};
          name = "i";
-         init = Some { desc = IntegerLiteral one }}});
+         init = Some { desc = IntegerLiteral (Int 1) }}});
        cond = { desc = DeclRef "i"};
        then_branch = { desc = Compound [{
          desc = Expr { desc = DeclRef "i" }}] };
-       else_branch = None }}] ->
-      assert (Clang.Ast.int_of_literal one = 1)
+       else_branch = None }}] -> ()
   | _ -> assert false
 
     ]}
@@ -1008,20 +1004,17 @@ let () =
   | [{ desc = Switch {
       init = None;
       condition_variable = None;
-      cond = { desc = IntegerLiteral one };
+      cond = { desc = IntegerLiteral (Int 1)};
       body = { desc = Compound [
         { desc = Case {
-          lhs = { desc = IntegerLiteral one' };
+          lhs = { desc = IntegerLiteral (Int 1)};
           body = { desc =
             Expr { desc = Call { callee = { desc = DeclRef "f" }; args = [] }}}}};
         { desc = Break };
         { desc = Case {
-          lhs = { desc = IntegerLiteral two };
+          lhs = { desc = IntegerLiteral (Int 2)};
           body = { desc = Break }}};
-        { desc = Default { desc = Null }}] }}}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
-      assert (Clang.Ast.int_of_literal one' = 1);
-      assert (Clang.Ast.int_of_literal two = 2)
+        { desc = Default { desc = Null }}] }}}] -> ()
   | _ -> assert false
 
 let example =
@@ -1034,21 +1027,18 @@ let () =
       condition_variable = Some ({ desc = {
          qual_type = { desc = BuiltinType Int};
          name = "i";
-         init = Some { desc = IntegerLiteral one }}});
+         init = Some { desc = IntegerLiteral (Int 1)}}});
       cond = { desc = DeclRef "i" };
       body = { desc = Compound [
         { desc = Case {
-          lhs = { desc = IntegerLiteral one' };
+          lhs = { desc = IntegerLiteral (Int 1)};
           body = { desc =
             Expr { desc = Call { callee = { desc = DeclRef "f" }; args = [] }}}}};
         { desc = Break };
         { desc = Case {
-          lhs = { desc = IntegerLiteral two };
+          lhs = { desc = IntegerLiteral (Int 2)};
           body = { desc = Break }}};
-        { desc = Default { desc = Null }}] }}}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
-      assert (Clang.Ast.int_of_literal one' = 1);
-      assert (Clang.Ast.int_of_literal two = 2)
+        { desc = Default { desc = Null }}] }}}] -> ()
   | _ -> assert false
     ]}
 
@@ -1061,27 +1051,27 @@ let example =
 
 let () =
   if Clang.get_clang_version () >= "clang version 3.9.0" then
-    check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp" example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_stmt
+    (parse_statement_list ~filename:"<string>.cpp" example) @@
+    fun ast -> match ast with
     | [{ desc = Switch {
         init = Some { desc = Decl [{ desc = Var {
            name = "i";
            qual_type = { desc = BuiltinType Int };
-           init = Some { desc = IntegerLiteral one }}}] };
+           init = Some { desc = IntegerLiteral (Int 1)}}}] };
         condition_variable = None;
         cond = { desc = DeclRef "i" };
         body = { desc = Compound [
           { desc = Case {
-            lhs = { desc = IntegerLiteral one' };
+            lhs = { desc = IntegerLiteral (Int 1)};
             body = { desc =
-              Expr { desc = Call { callee = { desc = DeclRef "f" }; args = [] }}}}};
+              Expr { desc = Call {
+                callee = { desc = DeclRef "f" }; args = [] }}}}};
           { desc = Break };
           { desc = Case {
-            lhs = { desc = IntegerLiteral two };
+            lhs = { desc = IntegerLiteral (Int 2)};
             body = { desc = Break }}};
-          { desc = Default { desc = Null }}] }}}] ->
-        assert (Clang.Ast.int_of_literal one = 1);
-        assert (Clang.Ast.int_of_literal one' = 1);
-        assert (Clang.Ast.int_of_literal two = 2)
+          { desc = Default { desc = Null }}] }}}] -> ()
     | _ -> assert false
     ]}*)
   | Case of {
@@ -1097,27 +1087,25 @@ let () =
 let example = "switch (1) { case 1: f(); break; case 2 ... 3: break; default:;}"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt (parse_statement_list example)
+  @@ fun ast -> match ast with
   | [{ desc = Switch {
       init = None;
       condition_variable = None;
-      cond = { desc = IntegerLiteral one };
+      cond = { desc = IntegerLiteral (Int 1)};
       body = { desc = Compound [
         { desc = Case {
-          lhs = { desc = IntegerLiteral one' };
+          lhs = { desc = IntegerLiteral (Int 1)};
           rhs = None;
           body = { desc =
-            Expr { desc = Call { callee = { desc = DeclRef "f" }; args = [] }}}}};
+            Expr { desc = Call {
+              callee = { desc = DeclRef "f" }; args = [] }}}}};
         { desc = Break };
         { desc = Case {
-          lhs = { desc = IntegerLiteral two };
-          rhs = Some { desc = IntegerLiteral three };
+          lhs = { desc = IntegerLiteral (Int 2)};
+          rhs = Some { desc = IntegerLiteral (Int 3)};
           body = { desc = Break }}};
-        { desc = Default { desc = Null }}] }}}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
-      assert (Clang.Ast.int_of_literal one' = 1);
-      assert (Clang.Ast.int_of_literal two = 2);
-      assert (Clang.Ast.int_of_literal three = 3)
+        { desc = Default { desc = Null }}] }}}] -> ()
   | _ -> assert false
 
 let example = "switch (1) { case 1: case 2: case 3: default: ;}"
@@ -1127,22 +1115,18 @@ let () =
   | [{ desc = Switch {
       init = None;
       condition_variable = None;
-      cond = { desc = IntegerLiteral one };
+      cond = { desc = IntegerLiteral (Int 1)};
       body = { desc = Compound [
         { desc = Case {
-          lhs = { desc = IntegerLiteral one' };
+          lhs = { desc = IntegerLiteral (Int 1)};
           rhs = None;
           body = { desc = Case {
-            lhs = { desc = IntegerLiteral two };
+            lhs = { desc = IntegerLiteral (Int 2)};
             rhs = None;
             body = { desc = Case {
-              lhs = { desc = IntegerLiteral three };
+              lhs = { desc = IntegerLiteral (Int 3)};
               rhs = None;
-              body = { desc = Default { desc = Null }}}}}}}}] }}}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
-      assert (Clang.Ast.int_of_literal one' = 1);
-      assert (Clang.Ast.int_of_literal two = 2);
-      assert (Clang.Ast.int_of_literal three = 3)
+              body = { desc = Default { desc = Null }}}}}}}}] }}}] -> ()
   | _ -> assert false
 
     ]}*)
@@ -1165,23 +1149,23 @@ let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = While {
       condition_variable = None;
-      cond = { desc = IntegerLiteral one };
-      body = { desc = Null }}}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
+      cond = { desc = IntegerLiteral (Int 1)};
+      body = { desc = Null }}}] -> ()
   | _ -> assert false
 
 let example = "while (int i = 1) { i; }"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp" example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt
+    (parse_statement_list ~filename:"<string>.cpp" example) @@
+  fun ast -> match ast with
   | [{ desc = While {
       condition_variable = Some ({ desc = {
          qual_type = { desc = BuiltinType Int};
          name = "i";
-         init = Some { desc = IntegerLiteral one }}});
+         init = Some { desc = IntegerLiteral (Int 1)}}});
       cond = { desc = DeclRef "i" };
-      body = { desc = Compound [{ desc = Expr { desc = DeclRef "i" }}] }}}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
+      body = { desc = Compound [{ desc = Expr { desc = DeclRef "i" }}] }}}] -> ()
   | _ -> assert false
     ]}*)
   | Do of {
@@ -1196,8 +1180,7 @@ let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Do {
       body = { desc = Null };
-      cond = { desc = IntegerLiteral one }}}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
+      cond = { desc = IntegerLiteral (Int 1)}}}] -> ()
   | _ -> assert false
 
 let example = "do { f(); } while (1);"
@@ -1207,8 +1190,7 @@ let () =
   | [{ desc = Do {
       body = { desc = Compound [{ desc =
         Expr { desc = Call { callee = { desc = DeclRef "f" }; args = [] }}}] };
-      cond = { desc = IntegerLiteral one }}}] ->
-      assert (Clang.Ast.int_of_literal one = 1)
+      cond = { desc = IntegerLiteral (Int 1)}}}] -> ()
   | _ -> assert false
     ]}*)
   | Label of {
@@ -1223,10 +1205,8 @@ let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Label {
         label = "label";
-        body = { desc = Expr { desc = IntegerLiteral one }}}};
-      { desc = Expr { desc = IntegerLiteral two }}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
-      assert (Clang.Ast.int_of_literal two = 2)
+        body = { desc = Expr { desc = IntegerLiteral (Int 1)}}}};
+      { desc = Expr { desc = IntegerLiteral (Int 2)}}] -> ()
   | _ -> assert false
     ]}*)
   | Goto of label_ref
@@ -1238,9 +1218,8 @@ let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Label {
         label = "label";
-        body = { desc = Expr { desc = IntegerLiteral one }}}};
-      { desc = Goto "label" }] ->
-      assert (Clang.Ast.int_of_literal one = 1)
+        body = { desc = Expr { desc = IntegerLiteral (Int 1)}}}};
+      { desc = Goto "label" }] -> ()
   | _ -> assert false
     ]}*)
   | IndirectGoto of expr
@@ -1252,13 +1231,12 @@ let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Label {
         label = "label";
-        body = { desc = Expr { desc = IntegerLiteral one }}}};
+        body = { desc = Expr { desc = IntegerLiteral (Int 1)}}}};
       { desc = Decl [{ desc = Var {
         name = "ptr";
         qual_type = { desc = Pointer { desc = BuiltinType Void }};
         init = Some { desc = AddrLabel "label" }}}] };
-      { desc = IndirectGoto { desc = DeclRef "ptr"}}] ->
-      assert (Clang.Ast.int_of_literal one = 1)
+      { desc = IndirectGoto { desc = DeclRef "ptr"}}] -> ()
   | _ -> assert false
     ]}*)
   | Continue
@@ -1319,8 +1297,7 @@ let example = "return 1;"
 
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
-  | [{ desc = Return (Some { desc = IntegerLiteral one })}] ->
-      assert (Clang.Ast.int_of_literal one = 1)
+  | [{ desc = Return (Some { desc = IntegerLiteral (Int 1)})}] -> ()
   | _ -> assert false
    ]}*)
   | Decl of decl list
@@ -1338,14 +1315,38 @@ and expr_desc =
             | CXInt i -> ext_int_to_string i 10 true in
           fprintf fmt "%s" s]
 (** Integer literal.
+    By default, integer literals are converted if possible into {!constr:Int}
+    and integers too large to be represented as [int] are not converted.
+    Integer literals can be preserved as {!constr:CXInt}
+    by turning {!recfield:Clang.convert_integer_literals} option false.
     {[
 let example = "0;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
-  | [{ desc = Expr { desc = IntegerLiteral zero }}] ->
+  check Clang.Ast.pp_stmt (parse_statement_list
+    ~options:(Clang.Ast.Options.make ~convert_integer_literals:true ())
+    example) @@ fun ast -> match ast with
+  | [{ desc = Expr { desc = IntegerLiteral (Int 0) }}] -> ()
+  | _ -> assert false
+
+let () =
+  check Clang.Ast.pp_stmt (parse_statement_list
+    ~options:(Clang.Ast.Options.make ~convert_integer_literals:false ())
+    example) @@ fun ast -> match ast with
+  | [{ desc = Expr { desc = IntegerLiteral (CXInt _ as zero) }}] ->
       assert (Clang.Ast.int_of_literal zero = 0)
   | _ -> assert false
+
+let large_int = Int64.add (Int64.of_int max_int) 1L
+let example = Printf.sprintf "%Ld;" large_int
+
+let () =
+  check Clang.Ast.pp_stmt (parse_statement_list example) @@
+  fun ast -> match ast with
+  | [{ desc = Expr { desc = IntegerLiteral (CXInt _ as large_int') }}] ->
+      assert (Clang.Ast.int64_of_literal large_int' = large_int)
+  | _ -> assert false
+
     ]}*)
   | FloatingLiteral of floating_literal
         [@printer fun fmt f ->
@@ -1417,16 +1418,16 @@ let example = "1i;"
 
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
-  | [{ desc = Expr { desc = ImaginaryLiteral { desc = IntegerLiteral one } }}] ->
-      assert (Clang.Ast.int_of_literal one = 1)
+  | [{ desc = Expr { desc =
+      ImaginaryLiteral { desc = IntegerLiteral (Int 1)} }}] -> ()
   | _ -> assert false
 
 let example = "2.5i;"
 
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
-  | [{ desc = Expr { desc = ImaginaryLiteral { desc = FloatingLiteral x } }}] ->
-      assert (Clang.Ast.float_of_literal x = 2.5)
+  | [{ desc = Expr { desc =
+      ImaginaryLiteral { desc = FloatingLiteral (Float 2.5)}}}] -> ()
   | _ -> assert false
     ]}*)
   | UnaryOperator of {
@@ -1441,8 +1442,7 @@ let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Expr { desc = UnaryOperator {
       kind = Plus;
-      operand = { desc = IntegerLiteral one}} }}] ->
-      assert (Clang.Ast.int_of_literal one = 1)
+      operand = { desc = IntegerLiteral (Int 1)}}}}] -> ()
   | _ -> assert false
 
 let example = "int x; &x;"
@@ -1466,11 +1466,9 @@ let example = "1 + 2;"
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Expr { desc = BinaryOperator {
-      lhs = { desc = IntegerLiteral one};
+      lhs = { desc = IntegerLiteral (Int 1)};
       kind = Add;
-      rhs = { desc = IntegerLiteral two}} }}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
-      assert (Clang.Ast.int_of_literal two = 2)
+      rhs = { desc = IntegerLiteral (Int 2)}}}}] -> ()
   | _ -> assert false
 
 let example = "int i = 2; i *= 3;"
@@ -1480,8 +1478,7 @@ let () =
   | [{ desc = Decl _ }; { desc = Expr { desc = BinaryOperator {
       lhs = { desc = DeclRef "i"};
       kind = MulAssign;
-      rhs = { desc = IntegerLiteral three}} }}] ->
-      assert (Clang.Ast.int_of_literal three = 3)
+      rhs = { desc = IntegerLiteral (Int 3)}}}}] -> ()
   | _ -> assert false
     ]} *)
   | DeclRef of string
@@ -1506,8 +1503,7 @@ let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = Call {
       callee = { desc = DeclRef "g" };
-      args = [{ desc = IntegerLiteral one }] } }}] ->
-      assert (Clang.Ast.int_of_literal one = 1)
+      args = [{ desc = IntegerLiteral (Int 1)}] }}}] -> ()
   | _ -> assert false
     ]} *)
   | Cast of {
@@ -1563,8 +1559,7 @@ let () =
         arrow = false;
         field = { desc = "i" }}};
       kind = Assign;
-      rhs = { desc = IntegerLiteral zero}} }}] ->
-      assert (Clang.Ast.int_of_literal zero = 0)
+      rhs = { desc = IntegerLiteral (Int 0)}}}}] -> ()
   | _ -> assert false
 
 let example = {| struct s { int i } *p; p->i = 0; |}
@@ -1577,8 +1572,7 @@ let () =
         arrow = true;
         field = { desc = "i" }}};
       kind = Assign;
-      rhs = { desc = IntegerLiteral zero}} }}] ->
-      assert (Clang.Ast.int_of_literal zero = 0)
+      rhs = { desc = IntegerLiteral (Int 0)}}}}] -> ()
   | _ -> assert false
     ]}*)
   | ArraySubscript of {
@@ -1594,11 +1588,9 @@ let () =
   | [{ desc = Decl _ }; { desc = Expr { desc = BinaryOperator {
       lhs = { desc = ArraySubscript {
         base = { desc = DeclRef "a" };
-        index = { desc = IntegerLiteral zero}}};
+        index = { desc = IntegerLiteral (Int 0)}}};
       kind = Assign;
-      rhs = { desc = IntegerLiteral one}} }}] ->
-      assert (Clang.Ast.int_of_literal zero = 0);
-      assert (Clang.Ast.int_of_literal one = 1)
+      rhs = { desc = IntegerLiteral (Int 1)}}}}] -> ()
   | _ -> assert false
     ]}*)
   | ConditionalOperator of {
@@ -1614,12 +1606,9 @@ let example = {| 1 ? 2 : 3; |}
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Expr { desc = ConditionalOperator {
-      cond = { desc = IntegerLiteral one };
-      then_branch = Some { desc = IntegerLiteral two };
-      else_branch = { desc = IntegerLiteral three }} }}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
-      assert (Clang.Ast.int_of_literal two = 2);
-      assert (Clang.Ast.int_of_literal three = 3)
+      cond = { desc = IntegerLiteral (Int 1)};
+      then_branch = Some { desc = IntegerLiteral (Int 2)};
+      else_branch = { desc = IntegerLiteral (Int 3)}}}}] -> ()
   | _ -> assert false
 
 let example = {| 1 ? : 3; |}
@@ -1627,11 +1616,9 @@ let example = {| 1 ? : 3; |}
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
   | [{ desc = Expr { desc = ConditionalOperator {
-      cond = { desc = IntegerLiteral one };
+      cond = { desc = IntegerLiteral (Int 1)};
       then_branch = None;
-      else_branch = { desc = IntegerLiteral three }} }}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
-      assert (Clang.Ast.int_of_literal three = 3)
+      else_branch = { desc = IntegerLiteral (Int 3)}}}}] -> ()
   | _ -> assert false
     ]}*)
   | Paren of expr
@@ -1646,14 +1633,12 @@ let () =
   check Clang.Ast.pp_stmt (parse_statement_list example
     ~options:(Clang.Ast.Options.make ~ignore_paren:false ())) @@
   fun ast -> match ast with
-  | [{ desc = Expr { desc = Paren { desc = IntegerLiteral one }}}] ->
-      assert (Clang.Ast.int_of_literal one = 1)
+  | [{ desc = Expr { desc = Paren { desc = IntegerLiteral (Int 1)}}}] -> ()
   | _ -> assert false
 
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
-  | [{ desc = Expr { desc = IntegerLiteral one }}] ->
-      assert (Clang.Ast.int_of_literal one = 1)
+  | [{ desc = Expr { desc = IntegerLiteral (Int 1)}}] -> ()
   | _ -> assert false
 
 let example = {| int i; sizeof(i); |}
@@ -1694,10 +1679,8 @@ let () =
         element = { desc = BuiltinType Int };
         size = 2 }};
       init = Some { desc = InitList [
-        { desc = IntegerLiteral one };
-        { desc = IntegerLiteral two }] }}}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
-      assert (Clang.Ast.int_of_literal two = 2)
+        { desc = IntegerLiteral (Int 1)};
+        { desc = IntegerLiteral (Int 2)}] }}}] -> ()
   | _ -> assert false
     ]}*)
   | CompoundLiteral of {
@@ -1715,10 +1698,8 @@ let () =
         element = { desc = BuiltinType Int };
         size = 2 }};
       init = { desc = InitList [
-        { desc = IntegerLiteral one };
-        { desc = IntegerLiteral two }] }} }}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
-      assert (Clang.Ast.int_of_literal two = 2)
+        { desc = IntegerLiteral (Int 1)};
+        { desc = IntegerLiteral (Int 2)}] }} }}] -> ()
   | _ -> assert false
     ]}*)
   | UnaryExpr of {
@@ -1806,13 +1787,14 @@ let () =
         result = { desc = BuiltinType Int};
         args = Some { non_variadic = []; variadic = false }};
       name = "f";
-      stmt = Some { desc = Compound [] }}}] -> ()
+      body = Some { desc = Compound [] }}}] -> ()
   | _ -> assert false
 
 let example = {| static int f(int x); |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl (parse_declaration_list example) @@
+  fun ast -> match ast with
   | [{ desc = Function {
       linkage = Internal;
       function_type = {
@@ -1831,37 +1813,37 @@ let () =
 let example = {| int x = 1; |}
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_decl (parse_declaration_list example) @@
+    fun ast -> match ast with
   | [{ desc = Var {
       linkage = External;
       qual_type = { const = false; desc = BuiltinType Int };
       name = "x";
-      init = Some ({ desc = IntegerLiteral one })}}] ->
-      assert (Clang.Ast.int_of_literal one = 1)
+      init = Some ({ desc = IntegerLiteral (Int 1)})}}] -> ()
   | _ -> assert false
 
 let example = {| const int x = 1; |}
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_decl (parse_declaration_list example) @@
+    fun ast -> match ast with
   | [{ desc = Var {
       linkage = External;
       qual_type = { const = true; desc = BuiltinType Int };
       name = "x";
-      init = Some ({ desc = IntegerLiteral one })}}] ->
-      assert (Clang.Ast.int_of_literal one = 1)
+      init = Some ({ desc = IntegerLiteral (Int 1)})}}] -> ()
   | _ -> assert false
 
 let example = {| static int x = 1; |}
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_decl (parse_declaration_list example) @@
+    fun ast -> match ast with
   | [{ desc = Var {
       linkage = Internal;
       qual_type = { const = false; desc = BuiltinType Int };
       name = "x";
-      init = Some ({ desc = IntegerLiteral one })}}] ->
-      assert (Clang.Ast.int_of_literal one = 1)
+      init = Some ({ desc = IntegerLiteral (Int 1)})}}] -> ()
   | _ -> assert false
     ]}*)
   | EnumDecl of {
@@ -1880,9 +1862,8 @@ let () =
         { desc = { name = "A"; init = None }} as a;
         { desc = {
           name = "B";
-          init = Some { desc = IntegerLiteral two }}} as b;
+          init = Some { desc = IntegerLiteral (Int 2)}}} as b;
         { desc = { name = "C"; init = None }} as c] }}] ->
-        assert (Clang.Ast.int_of_literal two = 2);
         assert (Clang.Enum_constant.get_value a = 0);
         assert (Clang.Enum_constant.get_value b = 2);
         assert (Clang.Enum_constant.get_value c = 3)
@@ -1916,15 +1897,13 @@ let () =
       fields = [
         { desc = Field { name = "a";
           qual_type = { desc = BuiltinType Int};
-          bitwidth = Some { desc = IntegerLiteral one }}} as a;
+          bitwidth = Some { desc = IntegerLiteral (Int 1)}}} as a;
         { desc = Field { name = "b";
           qual_type = { desc = BuiltinType Int};
-          bitwidth = Some { desc = IntegerLiteral two }}};
+          bitwidth = Some { desc = IntegerLiteral (Int 2)}}};
         { desc = Field { name = "c";
           qual_type = { desc = BuiltinType Int};
           bitwidth = None}}] }}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
-      assert (Clang.Ast.int_of_literal two = 2);
       assert (Clang.Decl.get_field_bit_width a = 1)
   | _ -> assert false
 
@@ -1972,15 +1951,13 @@ let () =
       fields = [
         { desc = Field { name = "a";
           qual_type = { desc = BuiltinType Int};
-          bitwidth = Some { desc = IntegerLiteral one }}} as a;
+          bitwidth = Some { desc = IntegerLiteral (Int 1)}}} as a;
         { desc = Field { name = "b";
           qual_type = { desc = BuiltinType Int};
-          bitwidth = Some { desc = IntegerLiteral two }}};
+          bitwidth = Some { desc = IntegerLiteral (Int 2)}}};
         { desc = Field { name = "c";
           qual_type = { desc = BuiltinType Int};
           bitwidth = None}}] }}] ->
-      assert (Clang.Ast.int_of_literal one = 1);
-      assert (Clang.Ast.int_of_literal two = 2);
       assert (Clang.Decl.get_field_bit_width a = 1)
   | _ -> assert false
 

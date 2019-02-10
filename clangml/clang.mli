@@ -85,6 +85,14 @@ module Ast : sig
         ignore_paren_in_types : bool [@default true];
         (** Ignore parenthese nodes in types.
             See {!type:Clang__ast.qual_type} for examples. *)
+
+        convert_integer_literals : bool [@default true];
+        (** Convert integer literals into {!constr:Clang__ast.Int}.
+            See {!constr:Clang__ast.IntegerLiteral} for examples. *)
+
+        convert_floating_literals : bool [@default true];
+        (** Convert floating literals into {!constr:Clang__ast.Float}.
+            See {!constr:Clang__ast.FloatingLiteral} for examples. *)
       }
           [@@deriving make]
   end

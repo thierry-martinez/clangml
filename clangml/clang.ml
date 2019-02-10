@@ -217,6 +217,8 @@ module Ast = struct
         ignore_implicit_cast : bool [@default true];
         ignore_paren : bool [@default true];
         ignore_paren_in_types : bool [@default true];
+        convert_integer_literals : bool [@default true];
+        convert_floating_literals : bool [@default true];
       }
           [@@deriving make]
   end
@@ -576,10 +578,20 @@ module Ast = struct
         match get_cursor_kind cursor with
         | IntegerLiteral ->
             let i = ext_integer_literal_get_value cursor in
-            IntegerLiteral (CXInt i)
+            let literal =
+              if Options.options.convert_integer_literals then
+                match int_of_cxint_opt i with
+                | None -> CXInt i
+                | Some i -> Int i
+              else CXInt i in
+            IntegerLiteral literal
         | FloatingLiteral ->
             let f = ext_floating_literal_get_value cursor in
-            FloatingLiteral (CXFloat f)
+            let literal =
+              if Options.options.convert_floating_literals then
+                Float (float_of_cxfloat f)
+              else CXFloat f in
+            FloatingLiteral literal
         | StringLiteral ->
             StringLiteral (ext_string_literal_get_string cursor)
         | CharacterLiteral ->
