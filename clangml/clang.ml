@@ -327,7 +327,7 @@ module Ast = struct
         function_type_of_cxtype @@ fun i ->
           cursor_get_argument cursor i |> get_cursor_spelling in
       let name = get_cursor_spelling cursor in
-      let stmt : stmt option =
+      let body : stmt option =
         match list_of_children cursor with
         | [] -> None
         | children ->
@@ -336,7 +336,7 @@ module Ast = struct
               Some (stmt_of_cxcursor last)
             else
               None in
-      Function { linkage; function_type; name; stmt }
+      Function { linkage; function_type; name; body }
 
     and function_type_of_cxtype get_argument_name cxtype =
       let calling_conv = cxtype |> get_function_type_calling_conv in

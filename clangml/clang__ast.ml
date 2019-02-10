@@ -787,7 +787,7 @@ let parse_statement_list ?(return_type = "int") ?filename ?command_line_args ?op
     Printf.sprintf "%s f(void) { %s }" return_type source |>
     parse_declaration_list ?filename ?command_line_args ?options
   with
-  | [{ desc = Function { stmt = Some { desc = Compound items }}}] -> items
+  | [{ desc = Function { body = Some { desc = Compound items }}}] -> items
   | _ -> assert false
     ]}*)
 and stmt = (stmt_desc, qual_type) open_node
@@ -981,12 +981,11 @@ let () =
          init = Some { desc = Decl [{ desc = Var {
            name = "i";
            qual_type = { desc = BuiltinType Int };
-           init = Some { desc = IntegerLiteral one }}}] };
+           init = Some { desc = IntegerLiteral (Int 1) }}}] };
          condition_variable = None;
          then_branch = { desc = Compound [{
            desc = Expr { desc = DeclRef "i" }}] };
-         else_branch = None }}] ->
-        assert (Clang.Ast.int_of_literal one = 1)
+         else_branch = None }}] -> ()
     | _ -> assert false
    ]}*)
   | Switch of {
@@ -1356,11 +1355,23 @@ let () =
             | CXFloat f -> ext_float_to_string f in
           fprintf fmt "%s" s]
 (** Floating literal.
+
+    By default, floating literals are converted into {!constr:Float}.
+    Floating literals can be preserved as {!constr:CXFloat}
+    by turning {!recfield:Clang.convert_floating_literals} option false.
     {[
 let example = "0.5;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt (parse_statement_list example) @@
+  fun ast -> match ast with
+  | [{ desc = Expr { desc = FloatingLiteral (Float 0.5) }}] -> ()
+  | _ -> assert false
+
+let () =
+  check Clang.Ast.pp_stmt (parse_statement_list
+    ~options:(Clang.Ast.Options.make ~convert_floating_literals:true ())
+    example) @@ fun ast -> match ast with
   | [{ desc = Expr { desc = FloatingLiteral f }}] ->
     assert (Clang.Ast.float_of_literal f = 0.5)
   | _ -> assert false
@@ -1772,9 +1783,12 @@ and decl_desc =
       linkage : cxlinkagekind;
       function_type : function_type;
       name : string;
-      stmt : stmt option;
+      body : stmt option;
     }
 (** Function definition or forward declaration.
+    In case of function definition, we should have
+    [body = Some { desc = Compound list; _ }] for some [list].
+    In case of forward declaration, [body = None].
     {[
 let example = {| int f(void) {} |}
 
@@ -1804,7 +1818,7 @@ let () =
           non_variadic = [("x", { desc = BuiltinType Int})];
           variadic = false }};
       name = "f";
-      stmt = None }}] -> ()
+      body = None }}] -> ()
   | _ -> assert false
     ]}*)
   | Var of var_decl_desc
