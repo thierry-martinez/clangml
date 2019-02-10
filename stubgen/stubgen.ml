@@ -1880,7 +1880,7 @@ let main cflags llvm_config prefix =
   let clang_options = cflags @ llvm_flags in
   let module_interface =
     empty_module_interface |>
-    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|clang_VirtualFileOverlay_writeToBuffer|clang_free|constructUSR|clang_executeOnThread|clang_getDiagnosticCategoryName|^clang_getDefinitionSpellingAndExtent$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_annotateTokens$|^clang_getFileUniqueID$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$") hidden_function_interface |>
+    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|^clang_free$|constructUSR|^clang_executeOnThread$|^clang_getDiagnosticCategoryName$|^clang_getDefinitionSpellingAndExtent$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_annotateTokens$|^clang_getFileUniqueID$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$") hidden_function_interface |>
     add_type (Pcre.regexp "^CXString$")
       (empty_type_interface |>
        reinterpret_as (Type_info ({ ocamltype = ocaml_string;
@@ -2050,7 +2050,7 @@ let main cflags llvm_config prefix =
     add_function (Pcre.regexp "^clang_indexLoc_getFileLocation$")
       (empty_function_interface |>
         add_argument (output_on_success (Name "indexFile"))) |>
-    add_function (Pcre.regexp "^clang_ModuleMapDescriptor_writeToBuffer$")
+    add_function (Pcre.regexp "^clang_(ModuleMapDescriptor|VirtualFileOverlay)_writeToBuffer$")
       (empty_function_interface |>
         add_argument (Sized_string {length = Name "out_buffer_size"; contents = Name "out_buffer_ptr"}) |>
         add_argument (Type_interface {argument = Name "out_buffer_ptr"; interface = empty_type_interface |> make_destructor "clang_free"}) |>
