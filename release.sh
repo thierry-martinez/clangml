@@ -9,6 +9,7 @@ current_dir="`pwd`"
 git pull origin releases
 git rebase origin/master
 git fetch origin bootstrap
+grep -q AM_MAINTAINER_MODE configure.ac || \
 echo AM_MAINTAINER_MODE >>configure.ac
 aclocal
 autoreconf
