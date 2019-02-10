@@ -77,11 +77,11 @@ type floating_literal =
     where the inlined record [custom_decoration] may optionnally
     carry a location, or a type, or both.
 
-    To break type recursion between [qual_type] and [decoration],
-    open types ['qual_type open_decoration] and
-    [('a, 'qual_type) open_node] are defined first, and then
-    {!type:node} and {!type:decoration} are defined as alias
-    with ['qual_type = qual_type].
+    To break type recursion between {!type:qual_type} and {!type:decoration},
+    open types ['qual_type ]{!type:open_decoration} and
+    [('a, 'qual_type) ]{!type:open_node} are defined first, and then
+    {!type:node} and {!type:decoration} are defined as aliases
+    with ['qual_type = ]{!type:qual_type}.
  *)
 
 type 'qual_type open_decoration =
