@@ -116,6 +116,34 @@ clang_VirtualFileOverlay_setCaseSensitivity_wrapper(value arg_ocaml, value caseS
     CAMLreturn(ocaml_result);
   }}
 
+CAMLprim value
+clang_VirtualFileOverlay_writeToBuffer_wrapper(value arg_ocaml, value options_ocaml)
+{
+  CAMLparam2(arg_ocaml, options_ocaml);
+  CXVirtualFileOverlay arg;
+  arg = Cxvirtualfileoverlay_val(arg_ocaml);
+  unsigned int options;
+  options = Int_val(options_ocaml);
+  unsigned int out_buffer_size;
+  char * out_buffer_ptr;
+  enum CXErrorCode result = clang_VirtualFileOverlay_writeToBuffer(arg, options, &out_buffer_ptr, &out_buffer_size);
+  if (result == CXError_Success) {
+    CAMLlocal2(ocaml_result, data);
+    ocaml_result = caml_alloc(1, 0);
+    data = caml_alloc_initialized_string(out_buffer_size, out_buffer_ptr);
+clang_free(out_buffer_ptr);
+    Store_field(ocaml_result, 0, data);
+    CAMLreturn(ocaml_result);
+  }
+  else {
+    CAMLlocal2(ocaml_result, data);
+    ocaml_result = caml_alloc(1, 1);
+    data = Val_cxerrorcode(result);
+    Store_field(ocaml_result, 0, data);
+    
+    CAMLreturn(ocaml_result);
+  }}
+
 static void finalize_cxmodulemapdescriptor(value v) {
   clang_ModuleMapDescriptor_dispose(*((CXModuleMapDescriptor *) Data_custom_val(v)));;
 }

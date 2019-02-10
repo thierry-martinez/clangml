@@ -28,6 +28,10 @@ external virtual_file_overlay_set_case_sensitivity :
   cxvirtualfileoverlay -> int -> (unit, cxerrorcode) result =
     "clang_VirtualFileOverlay_setCaseSensitivity_wrapper"[@@ocaml.doc
                                                            "Set the case sensitivity for the CXVirtualFileOverlay object. The CXVirtualFileOverlay object is case-sensitive by default, this option can be used to override the default."]
+external virtual_file_overlay_write_to_buffer :
+  cxvirtualfileoverlay -> int -> (string, cxerrorcode) result =
+    "clang_VirtualFileOverlay_writeToBuffer_wrapper"[@@ocaml.doc
+                                                      "Write out the CXVirtualFileOverlay object to a char buffer."]
 type cxmodulemapdescriptor
 external module_map_descriptor_create :
   int -> cxmodulemapdescriptor = "clang_ModuleMapDescriptor_create_wrapper"
