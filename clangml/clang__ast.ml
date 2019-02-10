@@ -422,7 +422,7 @@ let example = "struct s { int i; char array[]; };"
 
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
-  | [{ desc = Struct { name = "s"; fields = [
+  | [{ desc = RecordDecl { keyword = Struct; name = "s"; fields = [
       { desc = Field { name = "i"; qual_type = { desc = BuiltinType Int}}};
       { desc = Field { name = "array"; qual_type = { desc =
         IncompleteArray { desc = BuiltinType Char_S }}}}] }}] -> ()
@@ -509,7 +509,7 @@ let example = "struct { int i; float f; } s;"
 
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
-  | [{ desc = Struct _ };
+  | [{ desc = RecordDecl { keyword = Struct }};
      { desc = Var { name = "s"; qual_type = { desc = Elaborated {
       keyword = Struct;
       named_type = { desc = Record "" } as named_type }}}}] ->
@@ -530,7 +530,7 @@ let example = "union { int i; float f; } u;"
 
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
-  | [{ desc = Union _ };
+  | [{ desc = RecordDecl { keyword = Union }};
      { desc = Var { name = "u"; qual_type = { desc = Elaborated {
       keyword = Union;
       named_type = { desc = Record "" } as named_type }}}}] ->
@@ -554,7 +554,7 @@ let example = "typedef struct { int i; float f; } struct_t; struct_t s;"
 
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
-  | [{ desc = Struct _ }; { desc = TypedefDecl _ };
+  | [{ desc = RecordDecl { keyword = Struct }}; { desc = TypedefDecl _ };
      { desc = Var { name = "s";
        qual_type = { desc = Typedef "struct_t" } as qual_type }}] ->
         let fields = qual_type |>
@@ -1885,17 +1885,19 @@ let () =
         assert (Clang.Enum_constant.get_value c = 3)
   | _ -> assert false
     ]}*)
-  | Struct of {
+  | RecordDecl of {
+      keyword : elaborated_type_keyword;
       name : string;
       fields : decl list;
     }
-(** Structure declaration.
+(** Record declaration ([struct] or [union]).
     {[
 let example = {| struct s { int i; float f; }; |}
 
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
-  | [{ desc = Struct {
+  | [{ desc = RecordDecl {
+      keyword = Struct;
       name = "s";
       fields = [
         { desc = Field { name = "i";
@@ -1908,7 +1910,8 @@ let example = {| struct s { int a:1; int b:2; int c; }; |}
 
 let () =
     check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
-  | [{ desc = Struct {
+  | [{ desc = RecordDecl {
+      keyword = Struct;
       name = "s";
       fields = [
         { desc = Field { name = "a";
@@ -1923,33 +1926,12 @@ let () =
       assert (Clang.Decl.get_field_bit_width a = 1)
   | _ -> assert false
 
-let example = {| union s { int single; struct { int i; float f; };}; |}
-
-let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
-  | [{ desc = Union {
-      name = "s";
-      fields = [
-        { desc = Field { name = "single";
-          qual_type = { desc = BuiltinType Int}}};
-        { desc = Struct { name = ""; fields = [
-          { desc = Field { name = "i";
-            qual_type = { desc = BuiltinType Int}}};
-          { desc = Field { name = "f";
-            qual_type = { desc = BuiltinType Float}}}] }}] }}] -> ()
-  | _ -> assert false
-    ]}*)
-  | Union of {
-      name : string;
-      fields : decl list;
-    }
-(** Union declaration.
-    {[
 let example = {| union u { int i; float f; }; |}
 
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
-  | [{ desc = Union {
+  | [{ desc = RecordDecl {
+      keyword = Union;
       name = "u";
       fields = [
         { desc = Field { name = "i";
@@ -1962,7 +1944,8 @@ let example = {| union u { int a:1; int b:2; int c; }; |}
 
 let () =
     check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
-  | [{ desc = Union {
+  | [{ desc = RecordDecl {
+      keyword = Union;
       name = "u";
       fields = [
         { desc = Field { name = "a";
@@ -1981,12 +1964,30 @@ let example = {| struct s { int label; union { int i; float f; };}; |}
 
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
-  | [{ desc = Struct {
+  | [{ desc = RecordDecl {
+      keyword = Struct;
       name = "s";
       fields = [
         { desc = Field { name = "label";
           qual_type = { desc = BuiltinType Int}}};
-        { desc = Union { name = ""; fields = [
+        { desc = RecordDecl { keyword = Union; name = ""; fields = [
+          { desc = Field { name = "i";
+            qual_type = { desc = BuiltinType Int}}};
+          { desc = Field { name = "f";
+            qual_type = { desc = BuiltinType Float}}}] }}] }}] -> ()
+  | _ -> assert false
+
+let example = {| union s { int single; struct { int i; float f; };}; |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  | [{ desc = RecordDecl {
+      keyword = Union;
+      name = "s";
+      fields = [
+        { desc = Field { name = "single";
+          qual_type = { desc = BuiltinType Int}}};
+        { desc = RecordDecl { keyword = Struct; name = ""; fields = [
           { desc = Field { name = "i";
             qual_type = { desc = BuiltinType Int}}};
           { desc = Field { name = "f";
@@ -2016,7 +2017,8 @@ let example = {| typedef union u { int i; float f } u_t; |}
 
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
-  | [{ desc = Union {
+  | [{ desc = RecordDecl {
+        keyword = Union;
         name = "u";
         fields = [
           { desc = Field { name = "i";
@@ -2034,7 +2036,8 @@ let example = {| typedef union { int i; float f } u_t; |}
 
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
-  | [{ desc = Union {
+  | [{ desc = RecordDecl {
+        keyword = Union;
         name = "";
         fields = [
           { desc = Field {
@@ -2072,12 +2075,13 @@ let example = {| struct s { int label; union u { int i; float f; } data;}; |}
 
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
-  | [{ desc = Struct {
+  | [{ desc = RecordDecl {
+      keyword = Struct;
       name = "s";
       fields = [
         { desc = Field { name = "label";
           qual_type = { desc = BuiltinType Int}}};
-        { desc = Union { name = "u"; fields = [
+        { desc = RecordDecl { keyword = Union; name = "u"; fields = [
           { desc = Field { name = "i";
             qual_type = { desc = BuiltinType Int}}};
           { desc = Field { name = "f";
