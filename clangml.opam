@@ -12,7 +12,7 @@ build: [
   ["dune" "build" "-p" name "-j" jobs]]
 depends: [
   "stdcompat"
-  "conf-clang"
+  "conf-libclang"
   "ppx_deriving"
   "visitors"
   "dune" {>= "1.2"}
