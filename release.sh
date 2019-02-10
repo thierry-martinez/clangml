@@ -6,6 +6,7 @@ git config --global user.email "Thierry.Martinez@inria.fr"
 git config --global user.name "Thierry Martinez"
 current_dir="`pwd`"
 [ -f commit_message ] || git log -1 --format=%B >commit_message
+git checkout -B releases
 git pull origin releases
 git rebase origin/master
 git fetch origin bootstrap
