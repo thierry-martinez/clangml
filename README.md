@@ -48,7 +48,7 @@ The module [`Clang__ast`][19] uses [ppx_deriving][5] and [visitors][6] to make t
 data structure comparable, showable and visitable.
 The documentation of most of the nodes contains examples that can be used as references
 for how syntactic constructions are parsed, and that are extracted with [ocamlcodoc][20]
-and serve as unit tests with [dune runtest] (or, equivalently, [make tests]).
+and serve as unit tests with `dune runtest` (or, equivalently, `make tests`).
 
 [19]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang__ast/index.html
 [20]: https://gitlab.inria.fr/tmartine/ocamlcodoc
