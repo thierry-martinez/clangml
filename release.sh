@@ -26,9 +26,10 @@ if which md5 >/dev/null; then
 else
     md5=`md5sum "$archive" | cut -d " " -f 1`
 fi
+git checkout master
 cd ~/opam-repository
-git checkout "$branch" || git pull origin master && git pull origin master
 branch="clangml.$version"
+git checkout "$branch" || git pull origin master && git pull origin master
 git checkout -B "$branch"
 repo="packages/clangml/clangml.$version"
 mkdir -p "$repo"
@@ -42,5 +43,5 @@ url {
 EOF
 git add "$opamfile"
 git commit -F "$current_dir/commit_message"
-git push -f perso "$branch"
+git push perso "$branch"
 git checkout master
