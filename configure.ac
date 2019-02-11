@@ -177,7 +177,7 @@ AC_SUBST([LDFLAGS],
   [["$STRIPPED_LLVM_LDFLAGS -Wl,-rpath,$LLVM_LIBDIR"]])
 
 AC_SUBST([LIBS],
-  [["-lclang -lclangAST -lclangLex -lclangBasic $LLVM_LIBS -lpthread -lcurses -lstdc++"]])
+  [["-lclang -lclangAST -lclangLex -lclangBasic $LLVM_LIBS -lpthread -lstdc++"]])
 
 AC_CHECK_LIB([clang], [clang_createIndex], [],
   [AC_MSG_ERROR([[libclang not found]])])
