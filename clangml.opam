@@ -13,6 +13,7 @@ build: [
 depends: [
   "stdcompat"
   "conf-libclang"
+  "conf-ncurses"
   "ppx_deriving"
   "visitors"
   "dune" {>= "1.2"}
