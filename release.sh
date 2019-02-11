@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -ex
 version="`cat VERSION`"
 tagname="v$version"
 git config --global user.email "Thierry.Martinez@inria.fr"
@@ -8,12 +8,11 @@ current_dir="`pwd`"
 [ -f commit_message ] || git log -1 --format=%B >commit_message
 git checkout -B releases
 git pull origin releases
+git fetch origin master
 git rebase origin/master
 git fetch origin bootstrap
 grep -q AM_MAINTAINER_MODE configure.ac || \
 echo AM_MAINTAINER_MODE >>configure.ac
-aclocal
-autoreconf
 ./bootstrap.sh
 git add -f configure.ac Makefile.in aclocal.m4 configure bootstrap
 git commit -a -m "Version $version"
