@@ -17,4 +17,4 @@ depends: [
   "ppx_deriving"
   "visitors"
   "dune" {>= "1.2"}
-  "ocaml" {>= "4.02.0" & < "4.08.0"}]
+  "ocaml" {>= "4.04.0" & < "4.08.0"}]
