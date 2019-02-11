@@ -184,7 +184,7 @@ type type_spec =
   | Int
   | Enum of string
   | Array_struct of { contents : string; length : string }
-  | Sized_string of { can_be_null : bool; length : argument }
+  | Sized_string of { length : argument }
   | Set_of of string
   | Type_info of common_type_info * type_info
 
@@ -192,10 +192,11 @@ type type_interface = {
     reinterpret_as : type_spec option;
     destructor : (string -> string) option;
     carry_reference : string option;
+    null_is_none : bool;
   }
 
 let empty_type_interface =
-  { reinterpret_as = None; destructor = None; carry_reference = None }
+  { reinterpret_as = None; destructor = None; carry_reference = None; null_is_none = false }
 
 let union_option a b =
   match a, b with
@@ -206,7 +207,8 @@ let union_option a b =
 let union_type_interfaces a b =
   { reinterpret_as = union_option a.reinterpret_as b.reinterpret_as;
     destructor = union_option a.destructor b.destructor;
-    carry_reference = union_option a.carry_reference b.carry_reference}
+    carry_reference = union_option a.carry_reference b.carry_reference;
+    null_is_none = a.null_is_none || b.null_is_none }
 
 let reinterpret_as type_spec type_interface =
   { type_interface with reinterpret_as = union_option type_interface.reinterpret_as (Some type_spec) }
@@ -222,6 +224,9 @@ let integer_enum enum = reinterpret_as (Enum enum)
 let integer_boolean = integer_enum "bool"
 
 let integer_zero_is_true = integer_enum "not bool"
+
+let null_is_none type_interface =
+  { type_interface with null_is_none = true }
 
 type argument_interface =
   | Array of { length : argument; contents : argument }
@@ -574,9 +579,10 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
         failwith ("Unknown enum " ^ type_name) in
     let common_info, enum_info = enum_info in
     Lazy.force common_info, (Enum enum_info : type_info) in
-  let default_type type_name =
-    let type_interface = union_type_interfaces
+  let type_name = Clang.get_type_spelling ty in
+  let type_interface = union_type_interfaces
       (get_type type_name context.module_interface) type_interface in
+  let default_type type_name =
     match type_interface.reinterpret_as with
     | Some Int ->
         { ocamltype = int_info.ocamltype;
@@ -607,6 +613,7 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
         common_info, type_info
         end
     | _ -> assert false in
+  let common_info, type_info =
   match Clang.get_type_kind ty with
   | Void ->
       { ocamltype = ptyp_constr (loc (Longident.Lident "unit"));
@@ -674,7 +681,7 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
   | Pointer when Clang.get_type_kind (Clang.get_pointee_type ty) = Char_S ->
       begin
         match type_interface.reinterpret_as with
-        | Some (Sized_string { can_be_null; length }) ->
+        | Some (Sized_string { length }) ->
             begin
               match parameters with
               | None -> assert false
@@ -682,33 +689,11 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
                   parameters := [| length |]
             end;
             let ocamltype, template_c_of_ocaml, template_ocaml_of_c =
-              if can_be_null then
-                ocaml_option ocaml_string, "  \
-  if (Is_long($src)) {
-    $tgt = NULL;
-  }
-  else {
-    CAMLlocal1(field);
-    field = Field($src, 0);
-    $length = caml_string_length(field);
-    $tgt = String_val(field);
-  };
-", "  \
-  if ($src == NULL) {
-    $tgt = Val_int(0);
-  }
-  else {
-    $tgt = caml_alloc(1, 0);
-    Store_field($tgt, 0, caml_alloc_initialized_string($length, $src));
-    $destructor
-  };
-"
-            else
                 ocaml_string, "  \
   $length = caml_string_length($src);
   $tgt = String_val($src);
 ", "  \
-  $tgt = caml_alloc_initialized_string($length, $src));
+  $tgt = caml_alloc_initialized_string($length, $src);
   $destructor
 " in
           let subst ~src ~tgt ~length var =
@@ -780,12 +765,41 @@ tgt); }, Regular
                 Lazy.force common_info, Struct struct_info
           end
       | _ ->
-          let type_name = Clang.get_type_spelling ty in
           match type_name with
           | "uint64_t" | "int64_t" ->
               int64_type_info
           | _ ->
-              default_type type_name
+              default_type type_name in
+  if type_interface.null_is_none then
+    let common_info =
+      { ocamltype = ocaml_option common_info.ocamltype;
+        c_of_ocaml = (fun channel ~src ~params ~references ~tgt ->
+          Printf.fprintf channel "\
+  if (Is_long(%s)) {
+    %s = NULL;
+  }
+  else {
+    CAMLlocal1(option_value);
+    option_value = Field(%s, 0);
+    %t
+  };
+" src tgt src (common_info.c_of_ocaml ~src:"option_value" ~params ~references ~tgt));
+        ocaml_of_c = (fun channel ~src ~params ~references ~tgt ->
+          Printf.fprintf channel "\
+  if (%s == NULL) {
+    %s = Val_int(0);
+  }
+  else {
+    CAMLlocal1(option_value);
+    %t
+    %s = caml_alloc(1, 0);
+    Store_field(%s, 0, option_value);
+  };
+" src tgt (common_info.ocaml_of_c ~src ~params ~references ~tgt:"option_value") tgt tgt) }
+    in
+    common_info, type_info
+  else
+    common_info, type_info
 
 let make_tuple list =
   match list with
@@ -1934,6 +1948,9 @@ let main cflags llvm_config prefix =
         add_argument (Array {
           length = Name "num_clang_command_line_args";
           contents = Name "clang_command_line_args" })) |>
+    add_function (Pcre.regexp "^clang_parseTranslationUnit$")
+      (empty_function_interface |>
+        add_result (empty_type_interface |> null_is_none)) |>
     add_function (Pcre.regexp "^clang_parseTranslationUnit|^clang_indexSourceFile")
       (empty_function_interface |>
         add_argument (Array {
@@ -2058,7 +2075,8 @@ let main cflags llvm_config prefix =
     add_function (Pcre.regexp "^clang_getFileContents$")
       (empty_function_interface |>
         add_result (empty_type_interface |>
-          reinterpret_as (Sized_string { can_be_null = true; length = Name "size" }))) |>
+          reinterpret_as (Sized_string { length = Name "size" }) |>
+          null_is_none)) |>
     add_function (Pcre.regexp "^clang_getDiagnosticOption$")
       (empty_function_interface |>
         add_argument (output_on_success (Name "Disable"))) |>
