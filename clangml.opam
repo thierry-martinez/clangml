@@ -14,6 +14,7 @@ depends: [
   "stdcompat"
   "conf-libclang"
   "conf-ncurses"
+  "conf-zlib"
   "ppx_deriving"
   "visitors"
   "dune" {>= "1.2"}
