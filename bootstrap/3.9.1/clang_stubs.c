@@ -1333,9 +1333,18 @@ clang_parseTranslationUnit_wrapper(value CIdx_ocaml, value source_filename_ocaml
   CXTranslationUnit result = clang_parseTranslationUnit(CIdx, source_filename, (const char *const *) command_line_args, num_command_line_args, (struct CXUnsavedFile *) unsaved_files, num_unsaved_files, options);
   {
     CAMLlocal1(data);
-    data = caml_alloc_tuple(2);
-  Store_field(data, 0, Val_cxtranslationunit(result));
-  Store_field(data, 1, CIdx_ocaml);
+    if (result == NULL) {
+    data = Val_int(0);
+  }
+  else {
+    CAMLlocal1(option_value);
+    option_value = caml_alloc_tuple(2);
+  Store_field(option_value, 0, Val_cxtranslationunit(result));
+  Store_field(option_value, 1, CIdx_ocaml);
+    data = caml_alloc(1, 0);
+    Store_field(data, 0, option_value);
+  };
+
     CAMLreturn(data);
   }
 }

@@ -337,9 +337,10 @@ external parse_translation_unit :
   cxindex ->
     string ->
       string array ->
-        cxunsavedfile array -> Cxtranslationunit_flags.t -> cxtranslationunit
-    = "clang_parseTranslationUnit_wrapper"[@@ocaml.doc
-                                            "Same as clang_parseTranslationUnit2, but returns the CXTranslationUnit instead of an error code. In case of an error this routine returns a NULL CXTranslationUnit, without further detailed error codes."]
+        cxunsavedfile array ->
+          Cxtranslationunit_flags.t -> cxtranslationunit option =
+    "clang_parseTranslationUnit_wrapper"[@@ocaml.doc
+                                          "Same as clang_parseTranslationUnit2, but returns the CXTranslationUnit instead of an error code. In case of an error this routine returns a NULL CXTranslationUnit, without further detailed error codes."]
 external parse_translation_unit2 :
   cxindex ->
     string ->
