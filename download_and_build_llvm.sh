@@ -5,12 +5,12 @@ if [ -z "$version" ]; then
     echo Missing version argument. >/dev/fd/2
     exit 1
 fi
-if [ "$version" < 3.5 ]; then
+if [ "$version" "<" 3.5 ]; then
     suffix=.tar.gz
 else
     suffix=.tar.xz
 fi
-case $version
+case $version in
     3.5*) export CC=4.8
 esac
 wget http://releases.llvm.org/$version/llvm-$version.src$suffix
