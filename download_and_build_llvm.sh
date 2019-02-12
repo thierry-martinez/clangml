@@ -7,10 +7,10 @@ if [ -z "$version" ]; then
 fi
 if [ "$version" "<" 3.4.1 ]; then
     cfe=clang
-    cfe_archive=clang-$version
+    dir_suffix=
 else
     cfe=cfe
-    cfe_archive=cfe-$version.src
+    dir_suffix=.src
 fi
 if [ "$version" "<" 3.5 ]; then
     suffix=.tar.gz
@@ -33,9 +33,9 @@ wget http://releases.llvm.org/$version/llvm-$version.src$suffix
 tar -xf llvm-$version.src$suffix
 wget http://releases.llvm.org/$version/$cfe-$version.src$suffix
 tar -xf $cfe-$version.src$suffix
-mv $cfe_archive llvm-$version.src/tools/clang
+mv $cfe-$version$dir_suffix llvm-$version$dir_suffix/tools/clang
 mkdir llvm-$version.build
 pushd llvm-$version.build
-    cmake ../llvm-$version.src -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX
+    cmake ../llvm-$version$dir_suffix -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX
     cmake --build .
 popd
