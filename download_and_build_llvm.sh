@@ -18,7 +18,7 @@ else
     suffix=.tar.xz
 fi
 if [ "$version" "<" 3.6 ]; then
-    if which -s gcc-4.9; then
+    if which gcc-4.9 >/dev/null 2>/dev/null; then
         CC=gcc-4.9
         CXX+=g++-4.9
     else
