@@ -2016,7 +2016,7 @@ let main cflags llvm_config prefix =
         add_argument (output_on_success (Name "out_TU"))) |>
     add_function (Pcre.regexp "^clang_visitChildren$")
       (empty_function_interface |>
-        add_result (empty_type_interface |> integer_boolean) |>
+        add_result (empty_type_interface |> integer_zero_is_true) |>
         add_argument (Closure {
           pointer = Name "visitor";
           data_caller = Name "client_data";

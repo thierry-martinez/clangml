@@ -14,11 +14,11 @@ let iter_children f c =
         Break
     end
   then
+    assert (!exn_ref = None)
+  else
     match !exn_ref with
     | None -> assert false
     | Some exn -> raise exn
-  else
-    assert (!exn_ref = None)
 
 let list_of_children c =
   let children_ref = ref [] in
