@@ -170,6 +170,12 @@ AS_IF([test `printf "$LLVM_VERSION\n3.5" | sort | head -n1` = "3.5"],
   [AC_SUBST([IF_CLANG_BEFORE_3_5], [""])
    AC_SUBST([ENDIF_CLANG_BEFORE_3_5], [""])])
 
+AS_IF([test `printf "$LLVM_VERSION\n3.7" | sort | head -n1` = "3.7"],
+  [AC_SUBST([IF_CLANG_BEFORE_3_7], ["(*"])
+   AC_SUBST([ENDIF_CLANG_BEFORE_3_7], ["*)"])],
+  [AC_SUBST([IF_CLANG_BEFORE_3_7], [""])
+   AC_SUBST([ENDIF_CLANG_BEFORE_3_7], [""])])
+
 AC_SUBST([LLVM_CFLAGS], [[`$LLVM_CONFIG --cflags `]])
 
 AC_SUBST([LLVM_LDFLAGS], [[`$LLVM_CONFIG --ldflags`]])
