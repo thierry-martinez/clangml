@@ -30,7 +30,7 @@ type cxvisitorresult =
   | Continue
 
 let type_visit_fields ty visitor =
-  visit_children (ty |> get_type_declaration) (fun cur _parent ->
+  not (visit_children (ty |> get_type_declaration) (fun cur _parent ->
     match get_cursor_kind cur with
     | FieldDecl ->
         begin
@@ -38,5 +38,5 @@ let type_visit_fields ty visitor =
           | Break -> Break
           | Continue -> Continue
         end
-    | _ -> Continue)
+    | _ -> Continue))
 @ENDIF_CLANG_BEFORE_3_7@
