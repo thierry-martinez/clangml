@@ -1441,7 +1441,9 @@ let () =
         ~command_line_args:["-std=c++1z"] example) @@
     fun ast -> match ast with
     | [{ desc = Expr { desc = CharacterLiteral { kind = UTF8; value = 0x61 } }}]
-      -> ()
+      -> assert (Clang.get_clang_version () >= "clang version 3.7.0")
+    | [{ desc = Expr { desc = CharacterLiteral { kind = Ascii; value = 0x61 } }}]
+      -> assert (Clang.get_clang_version () < "clang version 3.7.0")
     | _ -> assert false
 
 let example = "u'a';"
@@ -1451,7 +1453,9 @@ let () =
     check Clang.Ast.pp_stmt (parse_statement_list example)
     @@ fun ast -> match ast with
     | [{ desc = Expr { desc = CharacterLiteral { kind = UTF16; value = 0x61 } }}]
-      -> ()
+      -> assert (Clang.get_clang_version () >= "clang version 3.7.0")
+    | [{ desc = Expr { desc = CharacterLiteral { kind = UTF8; value = 0x61 } }}]
+      -> assert (Clang.get_clang_version () < "clang version 3.7.0")
     | _ -> assert false
     ]}*)
   | ImaginaryLiteral of expr
