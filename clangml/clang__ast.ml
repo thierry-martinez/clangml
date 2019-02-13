@@ -671,7 +671,12 @@ let () =
     | [{ desc = Function {
         name = "f"; 
         function_type = { calling_conv = AAPCS }}}] ->
-        ()
+        assert (Clang.get_clang_version >= "3.9.0")
+    | [{ desc = Function {
+        name = "f";
+        function_type = { calling_conv = C }}}] ->
+        assert (Clang.get_clang_version < "3.9.0")
+      (* Old clangs do not seem to expose calling conventions. *)
     | _ -> assert false
     ]}
  *)
