@@ -522,7 +522,11 @@ let () =
               { desc = Field {
                   name = "f";
                   qual_type = { desc = BuiltinType Float }}}] -> ()
-          | _ -> assert false
+          | _ ->
+              Format.eprintf "%a@." (Format.pp_print_list
+                ~pp_sep:Format.pp_print_newline
+                Clang.Ast.pp_decl) fields;
+              assert false
         end
   | _ -> assert false
 
@@ -543,7 +547,11 @@ let () =
               { desc = Field {
                   name = "f";
                   qual_type = { desc = BuiltinType Float }}}] -> ()
-          | _ -> assert false
+          | _ ->
+              Format.eprintf "%a@." (Format.pp_print_list
+                ~pp_sep:Format.pp_print_newline
+                Clang.Ast.pp_decl) fields;
+              assert false
         end
   | _ -> assert false
     ]}*)
@@ -568,7 +576,11 @@ let () =
               { desc = Field {
                   name = "f";
                   qual_type = { desc = BuiltinType Float }}}] -> ()
-          | _ -> assert false
+          | _ ->
+              Format.eprintf "%a@." (Format.pp_print_list
+                ~pp_sep:Format.pp_print_newline
+                Clang.Ast.pp_decl) fields;
+              assert false
         end
   | _ -> assert false
     ]}*)
@@ -1411,21 +1423,27 @@ let () =
   | [{ desc = Expr { desc = CharacterLiteral { kind = Wide; value = 0x61 } }}] -> ()
   | _ -> assert false
 
+
 let example = "u8'a';"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp"
-      ~command_line_args:["-std=c++1z"] example) @@
-  fun ast -> match ast with
-  | [{ desc = Expr { desc = CharacterLiteral { kind = UTF8; value = 0x61 } }}] -> ()
-  | _ -> assert false
+  if Clang.get_clang_version () >= "clang version 3.5" then
+    check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp"
+        ~command_line_args:["-std=c++1z"] example) @@
+    fun ast -> match ast with
+    | [{ desc = Expr { desc = CharacterLiteral { kind = UTF8; value = 0x61 } }}]
+      -> ()
+    | _ -> assert false
 
 let example = "u'a';"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
-  | [{ desc = Expr { desc = CharacterLiteral { kind = UTF16; value = 0x61 } }}] -> ()
-  | _ -> assert false
+  if Clang.get_clang_version () >= "clang version 3.5" then
+    check Clang.Ast.pp_stmt (parse_statement_list example)
+    @@ fun ast -> match ast with
+    | [{ desc = Expr { desc = CharacterLiteral { kind = UTF16; value = 0x61 } }}]
+      -> ()
+    | _ -> assert false
     ]}*)
   | ImaginaryLiteral of expr
 (** Imaginary literal.
