@@ -67,8 +67,7 @@ pipeline {
                                     mkdir $llvm_version/ && \
                                     cd $llvm_version/ && \
                                     ../src/configure \
-                                        --with-llvm-config=$llvm_config \
-                                        CC=$cc CXX=$cxx && \
+                                        --with-llvm-config=$llvm_config && \
                                     make clangml
                                    """
                                 if (llvm_version != "3.5.2") {
