@@ -2065,7 +2065,11 @@ let () =
               { desc = Field {
                   name = "f";
                   qual_type = { desc = BuiltinType Float}}}] -> ()
-          | _ -> assert false
+          | fields ->
+              Format.eprintf "%a@." (Format.pp_print_list
+                ~pp_sep:Format.pp_print_newline
+                Clang.Ast.pp_decl) fields;
+              assert false
         end
   | _ -> assert false
     ]}*)
