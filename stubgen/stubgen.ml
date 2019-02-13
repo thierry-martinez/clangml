@@ -1867,6 +1867,13 @@ let output_warning_c channel =
 /* %s */
 " (Pcre.replace ~pat:"\n" ~templ:"\n * " warning_text)
 
+let string_remove_suffix ~suffix s =
+  let ls = String.length s and lsuffix = String.length suffix in
+  if lsuffix <= ls && String.sub s (ls - lsuffix) (lsuffix) = suffix then
+    String.sub s 0 (ls - lsuffix)
+  else
+    s
+
 let main cflags llvm_config prefix =
   let llvm_flags, llvm_version =
     match llvm_config with
@@ -1875,6 +1882,7 @@ let main cflags llvm_config prefix =
         let llvm_version = run_llvm_config llvm_config ["--version"] in
         let llvm_prefix = run_llvm_config llvm_config ["--prefix"] in
         let llvm_cflags = run_llvm_config llvm_config ["--cflags"] in
+        let llvm_version = string_remove_suffix ~suffix:"svn" llvm_version in
         let equivalent_llvm_version =
           match llvm_version with
           | "3.4"

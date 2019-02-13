@@ -123,6 +123,9 @@ AS_IF([test "x$LLVM_VERSION" = "x"],
   [AC_MSG_ERROR([[unable to run $LLVM_CONFIG --version]])])
 AC_MSG_RESULT([[$LLVM_VERSION]])
 
+AC_SUBST([LLVM_VERSION],
+  [[`echo $LLVM_VERSION | sed 's/svn$//'`]])
+
 # Some version equivalences
 AS_IF([test "x$LLVM_VERSION" = "x3.4"],
   [AC_SUBST([LLVM_VERSION], [[3.4.2]])])
