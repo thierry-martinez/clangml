@@ -10,21 +10,6 @@
 extern "C" {
   #include "libclang_extensions.h"
 }
-#ifdef LLVM_VERSION_3_4_2
-#define LLVM_VERSION_BEFORE_3_9_0
-#endif
-#ifdef LLVM_VERSION_3_5_2
-#define LLVM_VERSION_BEFORE_3_9_0
-#endif
-#ifdef LLVM_VERSION_3_6_2
-#define LLVM_VERSION_BEFORE_3_9_0
-#endif
-#ifdef LLVM_VERSION_3_7_1
-#define LLVM_VERSION_BEFORE_3_9_0
-#endif
-#ifdef LLVM_VERSION_3_8_1
-#define LLVM_VERSION_BEFORE_3_9_0
-#endif
 
 // Copied from clang source tree: tools/libclang/CXString.cpp
 enum CXStringFlag {
