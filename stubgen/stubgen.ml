@@ -2162,6 +2162,10 @@ let main cflags llvm_config prefix =
                   Printf.fprintf fmt "%s = Val_string_option(clang_getCString(%s));
                     clang_disposeString(%s);" tgt src src) }, Regular)))) in
   let idx = Clang.create_index true true in
+  Format.printf "%a@." (Format.pp_print_list
+    ~pp_sep:(fun fmt () -> Format.pp_print_string fmt " ")
+      Format.pp_print_string)
+    clang_options;
   let tu =
     match
       Clang.parse_translation_unit2 idx
