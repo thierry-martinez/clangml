@@ -50,20 +50,16 @@ pipeline {
                         def bootstrap_dir = "src/bootstrap/$llvm_version"
                         def include_dir =
                             "$llvm_dir/lib/clang/$llvm_version/include"
-                        def cc =
-                            if i < "3.6" {
-                              "gcc-4.8"
-                            }
-                            else {
-                              "gcc"
-                            }
-                        def cxx =
-                            if i < "3.6" {
-                              "g++-4.8"
-                            }
-                            else {
-                              "g++"
-                            }
+                        def cc
+                        def cxx
+                        if (i < "3.6") {
+                            cc = "gcc-4.8"
+                            cxx = "g++-4.8"
+                        }
+                        else {
+                            cc= "gcc"
+                            cxx = "g++"
+                        }
                         branches[llvm_version] = {
                             node {
                                 sh """
