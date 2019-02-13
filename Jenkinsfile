@@ -52,14 +52,6 @@ pipeline {
                             "$llvm_dir/lib/clang/$llvm_version/include"
                         def cc
                         def cxx
-                        if (i < "3.6") {
-                            cc = "gcc-4.8"
-                            cxx = "g++-4.8"
-                        }
-                        else {
-                            cc= "gcc"
-                            cxx = "g++"
-                        }
                         branches[llvm_version] = {
                             node {
                                 sh """
@@ -77,23 +69,26 @@ pipeline {
                                     ../src/configure \
                                         --with-llvm-config=$llvm_config \
                                         CC=$cc CXX=$cxx && \
-                                    make clangml stubgen
+                                    make clangml
                                    """
-                                sh "cd $pwd/$llvm_version/ && make tests"
-                                sh """
-                                    cd $pwd/$llvm_version/ && \
-                                    mkdir current && \
-                                    _build/default/stubgen/stubgen.exe \
-                                        --cc=-I,build,-I,$include_dir \
-                                        --llvm-config=$llvm_config \
-                                        current/ && \
-                                    diff clangml/clang__bindings.ml \
-                                      current/clang__bindings.ml && \
-                                    diff clangml/clang__bindings.mli \
-                                      current/clang__bindings.mli && \
-                                    diff clangml/clang_stubs.c \
-                                      current/clang_stubs.c
-                                   """
+                                if (llvm_version != "3.5.2") {
+                                   sh "cd $pwd/$llvm_version/ && make tests"
+                                   sh """
+                                       cd $pwd/$llvm_version/ && \
+                                       make stubgen && \
+                                       mkdir current && \
+                                       _build/default/stubgen/stubgen.exe \
+                                           --cc=-I,build,-I,$include_dir \
+                                           --llvm-config=$llvm_config \
+                                           current/ && \
+                                       diff clangml/clang__bindings.ml \
+                                         current/clang__bindings.ml && \
+                                       diff clangml/clang__bindings.mli \
+                                         current/clang__bindings.mli && \
+                                       diff clangml/clang_stubs.c \
+                                         current/clang_stubs.c
+                                      """
+                                 }
                             }
                         }
                     }
