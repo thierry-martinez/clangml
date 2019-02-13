@@ -1913,6 +1913,10 @@ let main cflags llvm_config prefix =
       integer_zero_is_true
     else
       integer_enum "CXErrorCode" in
+  let clang_free =
+    match llvm_version with
+    | Some llvm_version when llvm_version < "3.7" -> "free"
+    | _ -> "clang_free" in
   let module_interface =
     empty_module_interface |>
     add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|^clang_free$|constructUSR|^clang_executeOnThread$|^clang_getDiagnosticCategoryName$|^clang_getDefinitionSpellingAndExtent$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_annotateTokens$|^clang_getFileUniqueID$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$") hidden_function_interface |>
@@ -2091,7 +2095,7 @@ let main cflags llvm_config prefix =
     add_function (Pcre.regexp "^clang_(ModuleMapDescriptor|VirtualFileOverlay)_writeToBuffer$")
       (empty_function_interface |>
         add_argument (Sized_string {length = Name "out_buffer_size"; contents = Name "out_buffer_ptr"}) |>
-        add_argument (Type_interface {argument = Name "out_buffer_ptr"; interface = empty_type_interface |> make_destructor "clang_free"}) |>
+        add_argument (Type_interface {argument = Name "out_buffer_ptr"; interface = empty_type_interface |> make_destructor clang_free }) |>
         add_argument (output_on_success (Name "out_buffer_ptr"))) |>
     add_function (Pcre.regexp "^clang_getFileContents$")
       (empty_function_interface |>
