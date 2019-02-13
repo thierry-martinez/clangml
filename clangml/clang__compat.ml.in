@@ -21,7 +21,7 @@ let parse_translation_unit2 index filename command_line_args unsaved_files
   | None -> Error Failure
   | Some tu -> Ok tu
 (** Compatibility wrapper for [parse_translation_unit].
-    In case of error, [Error Failure] will be returned. *)    
+    In case of error, [Error Failure] will be returned. *)
 @ENDIF_CLANG_BEFORE_3_5@
 
 @IF_CLANG_BEFORE_3_7@
