@@ -650,18 +650,16 @@ let () =
         function_type = { calling_conv = C }}}] -> ()
     | _ -> assert false
 
-let example = "__aapcs void f(void);"
+let example = {| __attribute((pcs("aapcs"))) void f(void); |}
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_decl (
+      parse_declaration_list ~command_line_args:["-target"; "arm"] example) @@
+    fun ast -> match ast with
     | [{ desc = Function {
         name = "f"; 
         function_type = { calling_conv = AAPCS }}}] ->
-        assert (Clang.get_clang_version () >= "clang version 3.9.0")
-    | [{ desc = Function {
-        name = "f"; 
-        function_type = { calling_conv = C }}}] ->
-        assert (Clang.get_clang_version () < "clang version 3.9.0")
+        ()
     | _ -> assert false
     ]}
  *)
