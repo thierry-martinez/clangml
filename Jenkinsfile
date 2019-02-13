@@ -50,6 +50,20 @@ pipeline {
                         def bootstrap_dir = "src/bootstrap/$llvm_version"
                         def include_dir =
                             "$llvm_dir/lib/clang/$llvm_version/include"
+                        def cc =
+                            if i < "3.6" {
+                              "gcc-4.8"
+                            }
+                            else {
+                              "gcc"
+                            }
+                        def cxx =
+                            if i < "3.6" {
+                              "g++-4.8"
+                            }
+                            else {
+                              "g++"
+                            }
                         branches[llvm_version] = {
                             node {
                                 sh """
@@ -65,7 +79,8 @@ pipeline {
                                     mkdir $llvm_version/ && \
                                     cd $llvm_version/ && \
                                     ../src/configure \
-                                        --with-llvm-config=$llvm_config && \
+                                        --with-llvm-config=$llvm_config \
+                                        CC=$cc CXX=$cxx && \
                                     make clangml stubgen
                                    """
                                 sh "cd $pwd/$llvm_version/ && make tests"
