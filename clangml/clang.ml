@@ -1,5 +1,7 @@
 include Clang__bindings
 
+include Clang__compat
+
 let iter_children f c =
   let exn_ref = ref (None : exn option) in
   if

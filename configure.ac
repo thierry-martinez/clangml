@@ -124,6 +124,18 @@ AS_IF([test "x$LLVM_VERSION" = "x"],
 AC_MSG_RESULT([[$LLVM_VERSION]])
 
 # Some version equivalences
+AS_IF([test "x$LLVM_VERSION" = "x3.4"],
+  [AC_SUBST([LLVM_VERSION], [[3.4.2]])])
+AS_IF([test "x$LLVM_VERSION" = "x3.4.1"],
+  [AC_SUBST([LLVM_VERSION], [[3.4.2]])])
+AS_IF([test "x$LLVM_VERSION" = "x3.5.0"],
+  [AC_SUBST([LLVM_VERSION], [[3.5.2]])])
+AS_IF([test "x$LLVM_VERSION" = "x3.5.1"],
+  [AC_SUBST([LLVM_VERSION], [[3.5.2]])])
+AS_IF([test "x$LLVM_VERSION" = "x3.6.0"],
+  [AC_SUBST([LLVM_VERSION], [[3.6.2]])])
+AS_IF([test "x$LLVM_VERSION" = "x3.6.1"],
+  [AC_SUBST([LLVM_VERSION], [[3.6.2]])])
 AS_IF([test "x$LLVM_VERSION" = "x3.8.0"],
   [AC_SUBST([LLVM_VERSION], [[3.8.1]])])
 AS_IF([test "x$LLVM_VERSION" = "x3.9.0"],
@@ -148,6 +160,12 @@ AC_ARG_WITH([llvm-version],
 AS_IF([test -d $srcdir/bootstrap/$LLVM_VERSION],
   [true],
   [AC_MSG_ERROR([LLVM version $LLVM_VERSION not supported. Please report: thierry.martinez@inria.fr . You may try to force another bindings version with ./configure --with-llvm-version= (to obtain the list of supported versions: ls $srcdir/bootstrap).])])
+
+AS_IF([test `printf "$LLVM_VERSION\n3.5" | sort | head -n1` = "3.5"],
+  [AC_SUBST([IF_CLANG_BEFORE_3_5], ["(*"])
+   AC_SUBST([ENDIF_CLANG_BEFORE_3_5], ["*)"])],
+  [AC_SUBST([IF_CLANG_BEFORE_3_5], [""])
+   AC_SUBST([ENDIF_CLANG_BEFORE_3_5], [""])])
 
 AC_SUBST([LLVM_CFLAGS], [[`$LLVM_CONFIG --cflags `]])
 
@@ -227,6 +245,7 @@ AC_CONFIG_FILES([
   config/ldflags_quoted.sexp
   config/libs.sexp
   config/libs_quoted.sexp
+  clangml/clang__compat.ml
 ])
 
 AC_OUTPUT

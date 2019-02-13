@@ -1,4 +1,4 @@
-#ifdef LLVM_VERSION_3_8_1
+#ifdef LLVM_VERSION_BEFORE_3_9_0
 #ifndef BINARY_OPERATION
 #  define BINARY_OPERATION(Name, Spelling)
 #endif
@@ -52,7 +52,9 @@ UNARY_OPERATION(UO_LNot, "!")
 UNARY_OPERATION(UO_Real, "__real")
 UNARY_OPERATION(UO_Imag, "__imag")
 UNARY_OPERATION(UO_Extension, "__extension__")
+#ifdef LLVM_VERSION_3_8_1
 UNARY_OPERATION(UO_Coawait, "co_await")
+#endif
 #undef BINARY_OPERATION
 #undef UNARY_OPERATION
 #else

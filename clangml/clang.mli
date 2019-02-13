@@ -7,6 +7,13 @@ include module type of struct
   include Clang__bindings
 end
 
+(** The module includes {!module:Clang__compat} which contains
+    compatibility implementations for some functions and type
+    definitions that are missing in old versions of Clang API. *)
+include module type of struct
+  include Clang__compat
+end
+
 (** {2 Parsing files and strings } *)
 
 val parse_file : ?index:cxindex ->

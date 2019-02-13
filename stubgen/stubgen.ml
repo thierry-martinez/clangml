@@ -1868,19 +1868,26 @@ let output_warning_c channel =
 " (Pcre.replace ~pat:"\n" ~templ:"\n * " warning_text)
 
 let main cflags llvm_config prefix =
-  let llvm_flags =
+  let llvm_flags, llvm_version =
     match llvm_config with
-    | None -> []
+    | None -> [], None
     | Some llvm_config ->
         let llvm_version = run_llvm_config llvm_config ["--version"] in
         let llvm_prefix = run_llvm_config llvm_config ["--prefix"] in
         let llvm_cflags = run_llvm_config llvm_config ["--cflags"] in
         let equivalent_llvm_version =
           match llvm_version with
+          | "3.4"
+          | "3.4.1" -> "3.4.2"
+          | "3.5.0"
+          | "3.5.1" -> "3.5.2"
+          | "3.6.0"
+          | "3.6.1" -> "3.6.2"
+          | "3.7.0" -> "3.7.1"
           | "3.8.0" -> "3.8.1"
           | "3.9.0" -> "3.9.1"
           | "4.0.0" -> "4.0.1"
-          | "5.0.0" -> "5.0.2"
+          | "5.0.0"
           | "5.0.1" -> "5.0.2"
           | "6.0.0" -> "6.0.1"
           | "7.0.0" -> "7.0.1"
@@ -1889,9 +1896,15 @@ let main cflags llvm_config prefix =
         ["-I"; List.fold_left Filename.concat llvm_prefix
            ["lib"; "clang"; llvm_version; "include"]; "-I";
          "/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include/";
-         "-DLLVM_VERSION_" ^ String.map (fun c -> if c = '.' then '_' else c) equivalent_llvm_version] in
+         "-DLLVM_VERSION_" ^ String.map (fun c -> if c = '.' then '_' else c) equivalent_llvm_version],
+        Some equivalent_llvm_version in
   let cflags = cflags |> List.map @@ String.split_on_char ',' |> List.flatten in
   let clang_options = cflags @ llvm_flags in
+  let result_cxerrorcode =
+    if llvm_version = Some "3.4.2" then
+      integer_zero_is_true
+    else
+      integer_enum "CXErrorCode" in
   let module_interface =
     empty_module_interface |>
     add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|^clang_free$|constructUSR|^clang_executeOnThread$|^clang_getDiagnosticCategoryName$|^clang_getDefinitionSpellingAndExtent$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_annotateTokens$|^clang_getFileUniqueID$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$") hidden_function_interface |>
@@ -2044,14 +2057,14 @@ let main cflags llvm_config prefix =
         add_result (empty_type_interface |> integer_enum "CXSaveError")) |>
     add_function (Pcre.regexp "^clang_reparseTranslationUnit")
       (empty_function_interface |>
-        add_result (empty_type_interface |> integer_enum "CXErrorCode")) |>
+        add_result (empty_type_interface |> result_cxerrorcode)) |>
     add_function (Pcre.regexp "^clang_getFileUniqueID")
       (empty_function_interface |>
         add_result (empty_type_interface |> integer_zero_is_true) |>
         add_argument (output_on_success (Name "outID"))) |>
     add_function (Pcre.regexp "^clang_indexSourceFile")
       (empty_function_interface |>
-        add_result (empty_type_interface |> integer_enum "CXErrorCode") |>
+        add_result (empty_type_interface |> result_cxerrorcode) |>
         add_argument (output_on_success (Name "out_TU"))) |>
     add_function (Pcre.regexp "^clang_((indexLoc_)?getFile|getExpansion|getInstantiation|getSpelling)Location$")
       (empty_function_interface |>
@@ -2156,7 +2169,6 @@ let main cflags llvm_config prefix =
         (Array.of_list clang_options)
         [| { filename = "source.c"; contents = "\
 #include <clang-c/Index.h>
-#include <clang-c/Documentation.h>
 #include \"clangml/libclang_extensions.h\"" } |]
         Clang.Cxtranslationunit_flags.none with
     | Error _ -> failwith "Error!"
@@ -2170,7 +2182,6 @@ let main cflags llvm_config prefix =
     output_string chan_stubs "\
 #include \"stubgen.h\"
 #include <clang-c/Index.h>
-#include <clang-c/Documentation.h>
 #include \"libclang_extensions.h\"
 #include <stdio.h>
 ";
