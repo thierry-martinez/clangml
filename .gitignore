@@ -15,3 +15,4 @@
 /config/cflags.sexp
 /config/ldflags.sexp
 /config/*.sexp
+/clangml/clang__compat.ml
