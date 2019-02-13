@@ -670,17 +670,7 @@ let () =
     fun ast -> match ast with
     | [{ desc = Function {
         name = "f"; 
-        function_type = { calling_conv = AAPCS }}}] ->
-        assert (
-          Clang.get_clang_version () < "clang version 3.5.0" ||
-          Clang.get_clang_version () >= "clang version 3.9.0")
-    | [{ desc = Function {
-        name = "f";
-        function_type = { calling_conv = C }}}] ->
-        assert (
-          Clang.get_clang_version () >= "clang version 3.5.0" &&
-          Clang.get_clang_version () < "clang version 3.9.0")
-      (* Clang 3.5, 3.6, 3.7 do not seem to expose calling conventions. *)
+        function_type = { calling_conv = AAPCS }}}] -> ()
     | _ -> assert false
     ]}
  *)
@@ -1441,9 +1431,9 @@ let () =
         ~command_line_args:["-std=c++1z"] example) @@
     fun ast -> match ast with
     | [{ desc = Expr { desc = CharacterLiteral { kind = UTF8; value = 0x61 } }}]
-      -> assert (Clang.get_clang_version () >= "clang version 3.7.0")
+      -> assert (Clang.get_clang_version () >= "clang version 3.8.0")
     | [{ desc = Expr { desc = CharacterLiteral { kind = Ascii; value = 0x61 } }}]
-      -> assert (Clang.get_clang_version () < "clang version 3.7.0")
+      -> assert (Clang.get_clang_version () < "clang version 3.8.0")
     | _ -> assert false
 
 let example = "u'a';"
