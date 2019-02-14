@@ -187,6 +187,18 @@ AC_SUBST([LLVM_LIBDIR], [[`$LLVM_CONFIG --libdir`]])
 AC_SUBST([LLVM_VERSION_MACRO],
   [[LLVM_VERSION_`echo $LLVM_VERSION | sed 's/[.]/_/g'`]])
 
+
+# These filters enable compilation with gcc.
+# Filter -Wstring-conversion for OpenSUSE
+# Filter -Werror=unguarded-availability-new and -Wcovered-switch-default
+# (which appear with LLVM 7)
+# Filter "-Wdelete-non-virtual-dtor" (warning only)
+AC_SUBST([LLVM_CFLAGS], [["`echo $LLVM_CFLAGS \
+  | sed s/-Wstring-conversion\\ // \
+  | sed s/-Werror=unguarded-availability-new\\ // \
+  | sed s/-Wcovered-switch-default\\ // \
+  | sed s/-Wdelete-non-virtual-dtor\\ //`"]])
+
 AC_SUBST([CFLAGS], [["$LLVM_CFLAGS -D$LLVM_VERSION_MACRO -I$srcdir/clangml"]])
 
 AS_IF([test "x$LLVM_VERSION" = "x3.5.2"],
