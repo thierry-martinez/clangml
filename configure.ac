@@ -220,9 +220,11 @@ AC_SUBST([LDFLAGS],
 AC_CHECK_LIB([clang], [clang_createIndex], [],
   [AC_MSG_ERROR([[libclang not found]])])
 
+AC_SEARCH_LIBS([del_curterm], [curses ncurses])
+
 AC_SUBST([LIBS],
   [["-lclangAST -lclangLex -lclangBasic $LLVM_LIBS -lpthread \
-     -lstdc++ -ldl -lm -lz"]])
+     -lstdc++ -ldl -lm -lz $LIBS"]])
 
 AC_CHECK_LIB([clang], [clang_createIndex], [],
   [AC_MSG_ERROR([[libclang not found]])])
