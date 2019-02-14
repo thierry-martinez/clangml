@@ -187,7 +187,6 @@ AC_SUBST([LLVM_LIBDIR], [[`$LLVM_CONFIG --libdir`]])
 AC_SUBST([LLVM_VERSION_MACRO],
   [[LLVM_VERSION_`echo $LLVM_VERSION | sed 's/[.]/_/g'`]])
 
-
 # These filters enable compilation with gcc.
 # Filter -Wstring-conversion for OpenSUSE
 # Filter -Werror=unguarded-availability-new and -Wcovered-switch-default
@@ -218,8 +217,11 @@ AC_SUBST([STRIPPED_LLVM_LDFLAGS],
 AC_SUBST([LDFLAGS],
   [["$STRIPPED_LLVM_LDFLAGS -Wl,-rpath,$LLVM_LIBDIR"]])
 
+AC_CHECK_LIB([clang], [clang_createIndex], [],
+  [AC_MSG_ERROR([[libclang not found]])])
+
 AC_SUBST([LIBS],
-  [["-lclang -lclangAST -lclangLex -lclangBasic $LLVM_LIBS -lpthread -lcurses \
+  [["-lclangAST -lclangLex -lclangBasic $LLVM_LIBS -lpthread \
      -lstdc++ -ldl -lm -lz"]])
 
 AC_CHECK_LIB([clang], [clang_createIndex], [],
