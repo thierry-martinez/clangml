@@ -70,24 +70,22 @@ pipeline {
                                         --with-llvm-config=$llvm_config && \
                                     make clangml
                                    """
-                                if (llvm_version != "3.5.2") {
-                                   sh "cd $pwd/$llvm_version/ && make tests"
-                                   sh """
-                                       cd $pwd/$llvm_version/ && \
-                                       make stubgen && \
-                                       mkdir current && \
-                                       _build/default/stubgen/stubgen.exe \
-                                           --cc=-I,build,-I,$include_dir \
-                                           --llvm-config=$llvm_config \
-                                           current/ && \
-                                       diff clangml/clang__bindings.ml \
-                                         current/clang__bindings.ml && \
-                                       diff clangml/clang__bindings.mli \
-                                         current/clang__bindings.mli && \
-                                       diff clangml/clang_stubs.c \
-                                         current/clang_stubs.c
-                                      """
-                                 }
+                                sh "cd $pwd/$llvm_version/ && make tests"
+                                sh """
+                                    cd $pwd/$llvm_version/ && \
+                                    make stubgen && \
+                                    mkdir current && \
+                                    _build/default/stubgen/stubgen.exe \
+                                        --cc=-I,build,-I,$include_dir \
+                                        --llvm-config=$llvm_config \
+                                        current/ && \
+                                    diff clangml/clang__bindings.ml \
+                                      current/clang__bindings.ml && \
+                                    diff clangml/clang__bindings.mli \
+                                      current/clang__bindings.mli && \
+                                    diff clangml/clang_stubs.c \
+                                      current/clang_stubs.c
+                                   """
                             }
                         }
                     }

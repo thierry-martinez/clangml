@@ -189,7 +189,10 @@ AC_SUBST([LLVM_VERSION_MACRO],
 
 AC_SUBST([CFLAGS], [["$LLVM_CFLAGS -D$LLVM_VERSION_MACRO -I$srcdir/clangml"]])
 
-AC_SUBST([CPPFLAGS], [["$LLVM_CFLAGS -D$LLVM_VERSION_MACRO -I$srcdir/clangml"]])
+AS_IF([test "x$LVVM_VERSION" = "x3.5.2"],
+  [AC_SUBST([CFLAGS], [["$CFLAGS -D_GLIBCXX_USE_CXX11_ABI=0]])])
+
+AC_SUBST([CPPFLAGS], [["$CFLAGS"]])
 
 AC_CHECK_HEADERS([clang-c/Index.h], [],
   [AC_MSG_ERROR([[Header clang-c/Index.h not found]])])
