@@ -1435,7 +1435,7 @@ let () =
 let example = "u8'a';"
 
 let () =
-  if Clang.get_clang_version () >= "clang version 3.5" then
+  if Clang.get_clang_version () >= "clang version 3.6" then
     check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp"
         ~command_line_args:["-std=c++1z"] example) @@
     fun ast -> match ast with
@@ -1448,7 +1448,7 @@ let () =
 let example = "u'a';"
 
 let () =
-  if Clang.get_clang_version () >= "clang version 3.5" then
+  if Clang.get_clang_version () >= "clang version 3.6" then
     check Clang.Ast.pp_stmt (parse_statement_list example)
     @@ fun ast -> match ast with
     | [{ desc = Expr { desc = CharacterLiteral { kind = UTF16; value = 0x61 } }}]
