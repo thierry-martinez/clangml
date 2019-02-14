@@ -1,6 +1,6 @@
 # clangml: OCaml bindings for clang.
 
-clangml provides bindings for all versions of clang, from 3.8.0 to
+clangml provides bindings for all versions of clang, from 3.4 to
 8.0.0.
 
 ## Installation
