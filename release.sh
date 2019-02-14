@@ -29,8 +29,7 @@ fi
 git checkout master
 cd ~/opam-repository
 branch="clangml.$version"
-git checkout "$branch" || git pull origin master && git pull origin master
-git checkout -B "$branch"
+git checkout "$branch" || ( git pull origin master && git checkout -b "$branch" )
 repo="packages/clangml/clangml.$version"
 mkdir -p "$repo"
 opamfile="$repo/opam"
@@ -42,6 +41,6 @@ url {
 }
 EOF
 git add "$opamfile"
-git commit -F "$current_dir/commit_message"
-git push perso "$branch"
-git checkout master
+#git commit -F "$current_dir/commit_message"
+#git push perso "$branch"
+#git checkout master
