@@ -54,18 +54,18 @@ external create_index :
   exclude_declarations_from_pch:bool -> display_diagnostics:bool -> cxindex =
     "clang_createIndex_wrapper"[@@ocaml.doc
                                  "Provides a shared context for creating translation units."]
-module Cxglobaloptflags =
-  struct
-    type t = int
-    external (+) : t -> t -> t = "%orint"
-    let (-) x y = x land (lnot y)
-    external (&) : t -> t -> t = "%andint"
-    external ( * ) : t -> t -> t = "%xorint"
-    let none = 0
-    let thread_background_priority_for_indexing = 1
-    let thread_background_priority_for_editing = 2
-    let thread_background_priority_for_all = 3
-  end
+module Cxglobaloptflags :
+sig
+  type t
+  external (+) : t -> t -> t = "%orint"
+  val (-) : t -> t -> t
+  external (&) : t -> t -> t = "%andint"
+  external ( * ) : t -> t -> t = "%xorint"
+  val none : t
+  val thread_background_priority_for_indexing : t
+  val thread_background_priority_for_editing : t
+  val thread_background_priority_for_all : t
+end
 external cxindex_set_global_options :
   cxindex -> Cxglobaloptflags.t -> unit =
     "clang_CXIndex_setGlobalOptions_wrapper"[@@ocaml.doc
@@ -196,20 +196,20 @@ external get_diagnostic_set_from_tu :
   cxtranslationunit -> cxdiagnosticset =
     "clang_getDiagnosticSetFromTU_wrapper"[@@ocaml.doc
                                             "Retrieve the complete set of diagnostics associated with a translation unit."]
-module Cxdiagnosticdisplayoptions =
-  struct
-    type t = int
-    external (+) : t -> t -> t = "%orint"
-    let (-) x y = x land (lnot y)
-    external (&) : t -> t -> t = "%andint"
-    external ( * ) : t -> t -> t = "%xorint"
-    let display_source_location = 1
-    let display_column = 2
-    let display_source_ranges = 4
-    let display_option = 8
-    let display_category_id = 16
-    let display_category_name = 32
-  end
+module Cxdiagnosticdisplayoptions :
+sig
+  type t
+  external (+) : t -> t -> t = "%orint"
+  val (-) : t -> t -> t
+  external (&) : t -> t -> t = "%andint"
+  external ( * ) : t -> t -> t = "%xorint"
+  val display_source_location : t
+  val display_column : t
+  val display_source_ranges : t
+  val display_option : t
+  val display_category_id : t
+  val display_category_name : t
+end
 external format_diagnostic :
   cxdiagnostic -> Cxdiagnosticdisplayoptions.t -> string =
     "clang_formatDiagnostic_wrapper"[@@ocaml.doc
@@ -291,24 +291,23 @@ external create_translation_unit2 :
   cxindex -> string -> (cxtranslationunit, cxerrorcode) result =
     "clang_createTranslationUnit2_wrapper"[@@ocaml.doc
                                             "Create a translation unit from an AST file ( -emit-ast)."]
-module Cxtranslationunit_flags =
-  struct
-    type t = int
-    external (+) : t -> t -> t = "%orint"
-    let (-) x y = x land (lnot y)
-    external (&) : t -> t -> t = "%andint"
-    external ( * ) : t -> t -> t = "%xorint"
-    let none = 0
-    let detailed_preprocessing_record = 1
-    let incomplete = 2
-    let precompiled_preamble = 4
-    let cache_completion_results = 8
-    let for_serialization = 16
-    let cxxchained_pch = 32
-    let skip_function_bodies = 64
-    let include_brief_comments_in_code_completion = 128
-    let create_preamble_on_first_parse = 256
-  end
+module Cxtranslationunit_flags :
+sig
+  type t
+  external (+) : t -> t -> t = "%orint"
+  val (-) : t -> t -> t
+  external (&) : t -> t -> t = "%andint"
+  external ( * ) : t -> t -> t = "%xorint"
+  val none : t
+  val detailed_preprocessing_record : t
+  val incomplete : t
+  val precompiled_preamble : t
+  val cache_completion_results : t
+  val for_serialization : t
+  val cxxchained_pch : t
+  val skip_function_bodies : t
+  val include_brief_comments_in_code_completion : t
+end
 external default_editing_translation_unit_options :
   unit -> Cxtranslationunit_flags.t =
     "clang_defaultEditingTranslationUnitOptions_wrapper"[@@ocaml.doc
@@ -330,15 +329,6 @@ external parse_translation_unit2 :
             (cxtranslationunit, cxerrorcode) result =
     "clang_parseTranslationUnit2_wrapper"[@@ocaml.doc
                                            "Parse the given source file and the translation unit corresponding to that file."]
-external parse_translation_unit2_full_argv :
-  cxindex ->
-    string ->
-      string array ->
-        cxunsavedfile array ->
-          Cxtranslationunit_flags.t ->
-            (cxtranslationunit, cxerrorcode) result =
-    "clang_parseTranslationUnit2FullArgv_wrapper"[@@ocaml.doc
-                                                   "Same as clang_parseTranslationUnit2 but requires a full command line for command_line_args including argv\\[0\\]. This is useful if the standard library paths are relative to the binary."]
 external default_save_options :
   cxtranslationunit -> int = "clang_defaultSaveOptions_wrapper"[@@ocaml.doc
                                                                  "Returns the set of flags that is suitable for saving a translation unit."]
@@ -354,29 +344,29 @@ type cxsaveerror =
     "Indicates that the translation unit to be saved was somehow invalid (e.g., NULL)."]
 [@@ocaml.doc
   "Describes the kind of error that occurred (if any) in a call to clang_saveTranslationUnit()."]
-module Cxsavetranslationunit_flags =
-  struct
-    type t = int
-    external (+) : t -> t -> t = "%orint"
-    let (-) x y = x land (lnot y)
-    external (&) : t -> t -> t = "%andint"
-    external ( * ) : t -> t -> t = "%xorint"
-    let none = 0
-  end
+module Cxsavetranslationunit_flags :
+sig
+  type t
+  external (+) : t -> t -> t = "%orint"
+  val (-) : t -> t -> t
+  external (&) : t -> t -> t = "%andint"
+  external ( * ) : t -> t -> t = "%xorint"
+  val none : t
+end
 external save_translation_unit :
   cxtranslationunit ->
     string -> Cxsavetranslationunit_flags.t -> (unit, cxsaveerror) result =
     "clang_saveTranslationUnit_wrapper"[@@ocaml.doc
                                          "Saves a translation unit into a serialized representation of that translation unit on disk."]
-module Cxreparse_flags =
-  struct
-    type t = int
-    external (+) : t -> t -> t = "%orint"
-    let (-) x y = x land (lnot y)
-    external (&) : t -> t -> t = "%andint"
-    external ( * ) : t -> t -> t = "%xorint"
-    let none = 0
-  end
+module Cxreparse_flags :
+sig
+  type t
+  external (+) : t -> t -> t = "%orint"
+  val (-) : t -> t -> t
+  external (&) : t -> t -> t = "%andint"
+  external ( * ) : t -> t -> t = "%xorint"
+  val none : t
+end
 external default_reparse_options :
   cxtranslationunit -> Cxreparse_flags.t =
     "clang_defaultReparseOptions_wrapper"[@@ocaml.doc
@@ -438,7 +428,7 @@ type cxcursorkind =
   | ObjCImplementationDecl [@ocaml.doc "An Objective-C \\@implementation."]
   | ObjCCategoryImplDecl
   [@ocaml.doc "An Objective-C \\@implementation for a category."]
-  | TypedefDecl [@ocaml.doc "A typedef."]
+  | TypedefDecl [@ocaml.doc "A typedef"]
   | CXXMethod [@ocaml.doc "A C++ class method."]
   | Namespace [@ocaml.doc "A C++ namespace."]
   | LinkageSpec [@ocaml.doc "A linkage specification, e.g. 'extern \"C\"'."]
@@ -578,7 +568,6 @@ type cxcursorkind =
   | ObjCBoolLiteralExpr [@ocaml.doc "Objective-c Boolean Literal."]
   | ObjCSelfExpr
   [@ocaml.doc "Represents the \"self\" expression in an Objective-C method."]
-  | OMPArraySectionExpr [@ocaml.doc "OpenMP 4.0 \\[2.4, Array Section\\]."]
   | UnexposedStmt
   [@ocaml.doc
     "A statement whose specific kind is not exposed via this interface."]
@@ -647,14 +636,6 @@ type cxcursorkind =
   [@ocaml.doc "OpenMP parallel for SIMD directive."]
   | OMPTargetDirective [@ocaml.doc "OpenMP target directive."]
   | OMPTeamsDirective [@ocaml.doc "OpenMP teams directive."]
-  | OMPTaskgroupDirective [@ocaml.doc "OpenMP taskgroup directive."]
-  | OMPCancellationPointDirective
-  [@ocaml.doc "OpenMP cancellation point directive."]
-  | OMPCancelDirective [@ocaml.doc "OpenMP cancel directive."]
-  | OMPTargetDataDirective [@ocaml.doc "OpenMP target data directive."]
-  | OMPTaskLoopDirective [@ocaml.doc "OpenMP taskloop directive."]
-  | OMPTaskLoopSimdDirective [@ocaml.doc "OpenMP taskloop simd directive."]
-  | OMPDistributeDirective [@ocaml.doc "OpenMP distribute directive."]
   | TranslationUnit
   [@ocaml.doc "Cursor that represents the translation unit itself."]
   | UnexposedAttr
@@ -708,15 +689,6 @@ type cxcursorkind =
   | CUDASharedAttr
   [@ocaml.doc
     "An attribute whose specific kind is not exposed via this interface."]
-  | VisibilityAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | DLLExport
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | DLLImport
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
   | PreprocessingDirective
   [@ocaml.doc
     "An attribute whose specific kind is not exposed via this interface."]
@@ -729,10 +701,8 @@ type cxcursorkind =
   | InclusionDirective
   [@ocaml.doc
     "An attribute whose specific kind is not exposed via this interface."]
-  | ModuleImportDecl [@ocaml.doc "A module import declaration."]
-  | TypeAliasTemplateDecl [@ocaml.doc "A module import declaration."]
-  | OverloadCandidate [@ocaml.doc "A code completion overload candidate."]
-[@@ocaml.doc "Describes the kind of entity that a cursor refers to."]
+  | ModuleImportDecl [@ocaml.doc "A module import declaration."][@@ocaml.doc
+                                                                  "Describes the kind of entity that a cursor refers to."]
 type cxcursor[@@ocaml.doc
                "A cursor representing some element in the abstract syntax tree for a translation unit."]
 external get_null_cursor : unit -> cxcursor = "clang_getNullCursor_wrapper"
@@ -799,19 +769,6 @@ type cxlinkagekind =
 external get_cursor_linkage :
   cxcursor -> cxlinkagekind = "clang_getCursorLinkage_wrapper"[@@ocaml.doc
                                                                 "Determine the linkage of the entity referred to by a given cursor."]
-type cxvisibilitykind =
-  | Invalid
-  [@ocaml.doc
-    "This value indicates that no visibility information is available for a provided CXCursor."]
-  | Hidden [@ocaml.doc "Symbol not seen by the linker."]
-  | Protected
-  [@ocaml.doc
-    "Symbol seen by the linker but resolves to a symbol inside this object."]
-  | Default
-  [@ocaml.doc "Symbol seen by the linker and acts like a normal symbol."]
-external get_cursor_visibility :
-  cxcursor -> cxvisibilitykind = "clang_getCursorVisibility_wrapper"[@@ocaml.doc
-                                                                    "Describe the visibility of the entity referred to by a cursor."]
 type cxavailabilitykind =
   | Available [@ocaml.doc "The entity is available."]
   | Deprecated
@@ -1017,9 +974,6 @@ type cxtypekind =
     "A type whose specific kind is not exposed via this interface."]
   | MemberPointer
   [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Auto
-  [@ocaml.doc
     "A type whose specific kind is not exposed via this interface."][@@ocaml.doc
                                                                     "Describes the kind of type"]
 [@@deriving (eq, ord, show)]
@@ -1116,6 +1070,7 @@ type cxcallingconv =
   | X86Pascal 
   | AAPCS 
   | AAPCS_VFP 
+  | PnaclCall 
   | IntelOclBicc 
   | X86_64Win64 
   | X86_64SysV 
@@ -1164,12 +1119,6 @@ external type_get_size_of : cxtype -> int = "clang_Type_getSizeOf_wrapper"
 external type_get_offset_of :
   cxtype -> string -> int = "clang_Type_getOffsetOf_wrapper"[@@ocaml.doc
                                                               "Return the offset of a field named S in a record of type T in bits as it would be returned by __offsetof__ as per C++11\\[18.2p4\\]"]
-external cursor_get_offset_of_field :
-  cxcursor -> int = "clang_Cursor_getOffsetOfField_wrapper"[@@ocaml.doc
-                                                             "Return the offset of the field represented by the Cursor."]
-external cursor_is_anonymous :
-  cxcursor -> bool = "clang_Cursor_isAnonymous_wrapper"[@@ocaml.doc
-                                                         "Determine whether the given cursor represents an anonymous record declaration."]
 external type_get_num_template_arguments :
   cxtype -> int = "clang_Type_getNumTemplateArguments_wrapper"[@@ocaml.doc
                                                                 "Returns the number of template arguments for given class template specialization, or -1 if type T is not a class template specialization."]
@@ -1296,9 +1245,6 @@ external cursor_get_brief_comment_text :
 external cursor_get_mangling :
   cxcursor -> string = "clang_Cursor_getMangling_wrapper"[@@ocaml.doc
                                                            "Retrieve the CXString representing the mangled name of the cursor."]
-external cursor_get_cxxmanglings :
-  cxcursor -> string array = "clang_Cursor_getCXXManglings_wrapper"[@@ocaml.doc
-                                                                    "Retrieve the CXStrings representing the mangled symbols of the C++ constructor or destructor at the cursor."]
 type cxmodule
 external cursor_get_module :
   cxcursor -> cxmodule = "clang_Cursor_getModule_wrapper"[@@ocaml.doc
@@ -1330,9 +1276,6 @@ external module_get_top_level_header :
   cxtranslationunit -> cxmodule -> int -> cxfile =
     "clang_Module_getTopLevelHeader_wrapper"[@@ocaml.doc
                                               "Returns the specified top level header associated with the module."]
-external cxxfield_is_mutable :
-  cxcursor -> bool = "clang_CXXField_isMutable_wrapper"[@@ocaml.doc
-                                                         "Determine if a C++ field is declared 'mutable'."]
 external cxxmethod_is_pure_virtual :
   cxcursor -> bool = "clang_CXXMethod_isPureVirtual_wrapper"[@@ocaml.doc
                                                               "Determine if a C++ member function or member function template is pure virtual."]
@@ -1468,13 +1411,173 @@ type cxindexaction
 external index_action_create :
   cxindex -> cxindexaction = "clang_IndexAction_create_wrapper"[@@ocaml.doc
                                                                  "An indexing action/session, to be applied to one or multiple translation units."]
-type cxvisitorresult =
-  | Break 
-  | Continue [@@ocaml.doc "\\@\\{"]
-external type_visit_fields :
-  cxtype -> (cxcursor -> cxvisitorresult) -> bool =
-    "clang_Type_visitFields_wrapper"[@@ocaml.doc
-                                      "Visit the fields of a particular type."]
+type cxcomment[@@ocaml.doc "A parsed comment."]
+external cursor_get_parsed_comment :
+  cxcursor -> cxcomment = "clang_Cursor_getParsedComment_wrapper"[@@ocaml.doc
+                                                                   "Given a cursor that represents a documentable entity (e.g., declaration), return the associated parsed comment as a CXComment_FullComment AST node."]
+type cxcommentkind =
+  | Null
+  [@ocaml.doc
+    "Null comment. No AST node is constructed at the requested location because there is no text or a syntax error."]
+  | Text [@ocaml.doc "Plain text. Inline content."]
+  | InlineCommand
+  [@ocaml.doc
+    "A command with word-like arguments that is considered inline content."]
+  | HTMLStartTag
+  [@ocaml.doc
+    "HTML start tag with attributes (name-value pairs). Considered inline content."]
+  | HTMLEndTag [@ocaml.doc "HTML end tag. Considered inline content."]
+  | Paragraph
+  [@ocaml.doc
+    "A paragraph, contains inline comment. The paragraph itself is block content."]
+  | BlockCommand
+  [@ocaml.doc
+    "A command that has zero or more word-like arguments (number of word-like arguments depends on command name) and a paragraph as an argument. Block command is block content."]
+  | ParamCommand
+  [@ocaml.doc
+    "A \\param or \\arg command that describes the function parameter (name, passing direction, description)."]
+  | TParamCommand
+  [@ocaml.doc
+    "A \\tparam command that describes a template parameter (name and description)."]
+  | VerbatimBlockCommand
+  [@ocaml.doc
+    "A verbatim block command (e. g., preformatted code). Verbatim block has an opening and a closing command and contains multiple lines of text ( CXComment_VerbatimBlockLine child nodes)."]
+  | VerbatimBlockLine
+  [@ocaml.doc
+    "A line of text that is contained within a CXComment_VerbatimBlockCommand node."]
+  | VerbatimLine
+  [@ocaml.doc
+    "A verbatim line command. Verbatim line has an opening command, a single line of text (up to the newline after the opening command) and has no closing command."]
+  | FullComment
+  [@ocaml.doc
+    "A full comment attached to a declaration, contains block content."]
+[@@ocaml.doc
+  "Describes the type of the comment AST node ( CXComment). A comment node can be considered block content (e. g., paragraph), inline content (plain text) or neither (the root AST node)."]
+external comment_get_kind :
+  cxcomment -> cxcommentkind = "clang_Comment_getKind_wrapper"[@@ocaml.doc
+                                                                "Returns the type of the AST node."]
+external comment_get_num_children :
+  cxcomment -> int = "clang_Comment_getNumChildren_wrapper"[@@ocaml.doc
+                                                             "Returns number of children of the AST node."]
+external comment_get_child :
+  cxcomment -> int -> cxcomment = "clang_Comment_getChild_wrapper"[@@ocaml.doc
+                                                                    "Returns the specified child of the AST node."]
+external comment_is_whitespace :
+  cxcomment -> bool = "clang_Comment_isWhitespace_wrapper"[@@ocaml.doc
+                                                            "A CXComment_Paragraph node is considered whitespace if it contains only CXComment_Text nodes that are empty or whitespace."]
+external inline_content_comment_has_trailing_newline :
+  cxcomment -> int = "clang_InlineContentComment_hasTrailingNewline_wrapper"
+[@@ocaml.doc
+  "Returns non-zero if Comment is inline content and has a newline immediately following it in the comment text. Newlines between paragraphs do not count."]
+external text_comment_get_text :
+  cxcomment -> string = "clang_TextComment_getText_wrapper"[@@ocaml.doc
+                                                             "Returns text contained in the AST node."]
+external inline_command_comment_get_command_name :
+  cxcomment -> string = "clang_InlineCommandComment_getCommandName_wrapper"
+[@@ocaml.doc "Returns name of the inline command."]
+type cxcommentinlinecommandrenderkind =
+  | Normal
+  [@ocaml.doc "Command argument should be rendered in a normal font."]
+  | Bold [@ocaml.doc "Command argument should be rendered in a bold font."]
+  | Monospaced
+  [@ocaml.doc "Command argument should be rendered in a monospaced font."]
+  | Emphasized
+  [@ocaml.doc
+    "Command argument should be rendered emphasized (typically italic font)."]
+[@@ocaml.doc
+  "The most appropriate rendering mode for an inline command, chosen on command semantics in Doxygen."]
+external inline_command_comment_get_render_kind :
+  cxcomment -> cxcommentinlinecommandrenderkind =
+    "clang_InlineCommandComment_getRenderKind_wrapper"[@@ocaml.doc
+                                                        "Returns the most appropriate rendering mode, chosen on command semantics in Doxygen."]
+external inline_command_comment_get_num_args :
+  cxcomment -> int = "clang_InlineCommandComment_getNumArgs_wrapper"[@@ocaml.doc
+                                                                    "Returns number of command arguments."]
+external inline_command_comment_get_arg_text :
+  cxcomment -> int -> string =
+    "clang_InlineCommandComment_getArgText_wrapper"[@@ocaml.doc
+                                                     "Returns text of the specified argument."]
+external htmltag_comment_get_tag_name :
+  cxcomment -> string = "clang_HTMLTagComment_getTagName_wrapper"[@@ocaml.doc
+                                                                   "Returns HTML tag name."]
+external htmlstart_tag_comment_is_self_closing :
+  cxcomment -> bool = "clang_HTMLStartTagComment_isSelfClosing_wrapper"
+[@@ocaml.doc
+  "Returns non-zero if tag is self-closing (for example, <br />)."]
+external htmlstart_tag_get_num_attrs :
+  cxcomment -> int = "clang_HTMLStartTag_getNumAttrs_wrapper"[@@ocaml.doc
+                                                               "Returns number of attributes (name-value pairs) attached to the start tag."]
+external htmlstart_tag_get_attr_name :
+  cxcomment -> int -> string = "clang_HTMLStartTag_getAttrName_wrapper"
+[@@ocaml.doc "Returns name of the specified attribute."]
+external htmlstart_tag_get_attr_value :
+  cxcomment -> int -> string = "clang_HTMLStartTag_getAttrValue_wrapper"
+[@@ocaml.doc "Returns value of the specified attribute."]
+external block_command_comment_get_command_name :
+  cxcomment -> string = "clang_BlockCommandComment_getCommandName_wrapper"
+[@@ocaml.doc "Returns name of the block command."]
+external block_command_comment_get_num_args :
+  cxcomment -> int = "clang_BlockCommandComment_getNumArgs_wrapper"[@@ocaml.doc
+                                                                    "Returns number of word-like arguments."]
+external block_command_comment_get_arg_text :
+  cxcomment -> int -> string = "clang_BlockCommandComment_getArgText_wrapper"
+[@@ocaml.doc "Returns text of the specified word-like argument."]
+external block_command_comment_get_paragraph :
+  cxcomment -> cxcomment = "clang_BlockCommandComment_getParagraph_wrapper"
+[@@ocaml.doc "Returns paragraph argument of the block command."]
+external param_command_comment_get_param_name :
+  cxcomment -> string = "clang_ParamCommandComment_getParamName_wrapper"
+[@@ocaml.doc "Returns parameter name."]
+external param_command_comment_is_param_index_valid :
+  cxcomment -> bool = "clang_ParamCommandComment_isParamIndexValid_wrapper"
+[@@ocaml.doc
+  "Returns non-zero if the parameter that this AST node represents was found in the function prototype and clang_ParamCommandComment_getParamIndex function will return a meaningful value."]
+external param_command_comment_get_param_index :
+  cxcomment -> int = "clang_ParamCommandComment_getParamIndex_wrapper"
+[@@ocaml.doc "Returns zero-based parameter index in function prototype."]
+external param_command_comment_is_direction_explicit :
+  cxcomment -> bool = "clang_ParamCommandComment_isDirectionExplicit_wrapper"
+[@@ocaml.doc
+  "Returns non-zero if parameter passing direction was specified explicitly in the comment."]
+type cxcommentparampassdirection =
+  | In [@ocaml.doc "The parameter is an input parameter."]
+  | Out [@ocaml.doc "The parameter is an output parameter."]
+  | InOut [@ocaml.doc "The parameter is an input and output parameter."]
+[@@ocaml.doc
+  "Describes parameter passing direction for \\param or \\arg command."]
+external param_command_comment_get_direction :
+  cxcomment -> cxcommentparampassdirection =
+    "clang_ParamCommandComment_getDirection_wrapper"[@@ocaml.doc
+                                                      "Returns parameter passing direction."]
+external tparam_command_comment_get_param_name :
+  cxcomment -> string = "clang_TParamCommandComment_getParamName_wrapper"
+[@@ocaml.doc "Returns template parameter name."]
+external tparam_command_comment_is_param_position_valid :
+  cxcomment -> bool =
+    "clang_TParamCommandComment_isParamPositionValid_wrapper"[@@ocaml.doc
+                                                               "Returns non-zero if the parameter that this AST node represents was found in the template parameter list and clang_TParamCommandComment_getDepth and clang_TParamCommandComment_getIndex functions will return a meaningful value."]
+external tparam_command_comment_get_depth :
+  cxcomment -> int = "clang_TParamCommandComment_getDepth_wrapper"[@@ocaml.doc
+                                                                    "Returns zero-based nesting depth of this parameter in the template parameter list."]
+external tparam_command_comment_get_index :
+  cxcomment -> int -> int = "clang_TParamCommandComment_getIndex_wrapper"
+[@@ocaml.doc
+  "Returns zero-based parameter index in the template parameter list at a given nesting depth."]
+external verbatim_block_line_comment_get_text :
+  cxcomment -> string = "clang_VerbatimBlockLineComment_getText_wrapper"
+[@@ocaml.doc "Returns text contained in the AST node."]
+external verbatim_line_comment_get_text :
+  cxcomment -> string = "clang_VerbatimLineComment_getText_wrapper"[@@ocaml.doc
+                                                                    "Returns text contained in the AST node."]
+external htmltag_comment_get_as_string :
+  cxcomment -> string = "clang_HTMLTagComment_getAsString_wrapper"[@@ocaml.doc
+                                                                    "Convert an HTML tag AST node to string."]
+external full_comment_get_as_html :
+  cxcomment -> string = "clang_FullComment_getAsHTML_wrapper"[@@ocaml.doc
+                                                               "Convert a given full parsed comment to an HTML fragment."]
+external full_comment_get_as_xml :
+  cxcomment -> string = "clang_FullComment_getAsXML_wrapper"[@@ocaml.doc
+                                                              "Convert a given full parsed comment to an XML document."]
 type cxint
 external equal_cxint : cxint -> cxint -> bool = "clang_equal_cxint_wrapper"
 external compare_cxint :
@@ -1528,8 +1631,7 @@ type clang_ext_unaryoperatorkind =
   | LNot 
   | Real 
   | Imag 
-  | Extension 
-  | Coawait [@@deriving (eq, ord, show)]
+  | Extension [@@deriving (eq, ord, show)]
 external ext_unary_operator_get_opcode :
   cxcursor -> clang_ext_unaryoperatorkind =
     "clang_ext_UnaryOperator_getOpcode_wrapper"

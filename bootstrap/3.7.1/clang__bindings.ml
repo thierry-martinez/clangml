@@ -307,7 +307,6 @@ module Cxtranslationunit_flags =
     let cxxchained_pch = 32
     let skip_function_bodies = 64
     let include_brief_comments_in_code_completion = 128
-    let create_preamble_on_first_parse = 256
   end
 external default_editing_translation_unit_options :
   unit -> Cxtranslationunit_flags.t =
@@ -330,15 +329,6 @@ external parse_translation_unit2 :
             (cxtranslationunit, cxerrorcode) result =
     "clang_parseTranslationUnit2_wrapper"[@@ocaml.doc
                                            "Parse the given source file and the translation unit corresponding to that file."]
-external parse_translation_unit2_full_argv :
-  cxindex ->
-    string ->
-      string array ->
-        cxunsavedfile array ->
-          Cxtranslationunit_flags.t ->
-            (cxtranslationunit, cxerrorcode) result =
-    "clang_parseTranslationUnit2FullArgv_wrapper"[@@ocaml.doc
-                                                   "Same as clang_parseTranslationUnit2 but requires a full command line for command_line_args including argv\\[0\\]. This is useful if the standard library paths are relative to the binary."]
 external default_save_options :
   cxtranslationunit -> int = "clang_defaultSaveOptions_wrapper"[@@ocaml.doc
                                                                  "Returns the set of flags that is suitable for saving a translation unit."]
@@ -438,7 +428,7 @@ type cxcursorkind =
   | ObjCImplementationDecl [@ocaml.doc "An Objective-C \\@implementation."]
   | ObjCCategoryImplDecl
   [@ocaml.doc "An Objective-C \\@implementation for a category."]
-  | TypedefDecl [@ocaml.doc "A typedef."]
+  | TypedefDecl [@ocaml.doc "A typedef"]
   | CXXMethod [@ocaml.doc "A C++ class method."]
   | Namespace [@ocaml.doc "A C++ namespace."]
   | LinkageSpec [@ocaml.doc "A linkage specification, e.g. 'extern \"C\"'."]
@@ -578,7 +568,6 @@ type cxcursorkind =
   | ObjCBoolLiteralExpr [@ocaml.doc "Objective-c Boolean Literal."]
   | ObjCSelfExpr
   [@ocaml.doc "Represents the \"self\" expression in an Objective-C method."]
-  | OMPArraySectionExpr [@ocaml.doc "OpenMP 4.0 \\[2.4, Array Section\\]."]
   | UnexposedStmt
   [@ocaml.doc
     "A statement whose specific kind is not exposed via this interface."]
@@ -651,10 +640,6 @@ type cxcursorkind =
   | OMPCancellationPointDirective
   [@ocaml.doc "OpenMP cancellation point directive."]
   | OMPCancelDirective [@ocaml.doc "OpenMP cancel directive."]
-  | OMPTargetDataDirective [@ocaml.doc "OpenMP target data directive."]
-  | OMPTaskLoopDirective [@ocaml.doc "OpenMP taskloop directive."]
-  | OMPTaskLoopSimdDirective [@ocaml.doc "OpenMP taskloop simd directive."]
-  | OMPDistributeDirective [@ocaml.doc "OpenMP distribute directive."]
   | TranslationUnit
   [@ocaml.doc "Cursor that represents the translation unit itself."]
   | UnexposedAttr
@@ -708,15 +693,6 @@ type cxcursorkind =
   | CUDASharedAttr
   [@ocaml.doc
     "An attribute whose specific kind is not exposed via this interface."]
-  | VisibilityAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | DLLExport
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | DLLImport
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
   | PreprocessingDirective
   [@ocaml.doc
     "An attribute whose specific kind is not exposed via this interface."]
@@ -730,7 +706,6 @@ type cxcursorkind =
   [@ocaml.doc
     "An attribute whose specific kind is not exposed via this interface."]
   | ModuleImportDecl [@ocaml.doc "A module import declaration."]
-  | TypeAliasTemplateDecl [@ocaml.doc "A module import declaration."]
   | OverloadCandidate [@ocaml.doc "A code completion overload candidate."]
 [@@ocaml.doc "Describes the kind of entity that a cursor refers to."]
 type cxcursor[@@ocaml.doc
@@ -799,19 +774,6 @@ type cxlinkagekind =
 external get_cursor_linkage :
   cxcursor -> cxlinkagekind = "clang_getCursorLinkage_wrapper"[@@ocaml.doc
                                                                 "Determine the linkage of the entity referred to by a given cursor."]
-type cxvisibilitykind =
-  | Invalid
-  [@ocaml.doc
-    "This value indicates that no visibility information is available for a provided CXCursor."]
-  | Hidden [@ocaml.doc "Symbol not seen by the linker."]
-  | Protected
-  [@ocaml.doc
-    "Symbol seen by the linker but resolves to a symbol inside this object."]
-  | Default
-  [@ocaml.doc "Symbol seen by the linker and acts like a normal symbol."]
-external get_cursor_visibility :
-  cxcursor -> cxvisibilitykind = "clang_getCursorVisibility_wrapper"[@@ocaml.doc
-                                                                    "Describe the visibility of the entity referred to by a cursor."]
 type cxavailabilitykind =
   | Available [@ocaml.doc "The entity is available."]
   | Deprecated
@@ -1016,9 +978,6 @@ type cxtypekind =
   [@ocaml.doc
     "A type whose specific kind is not exposed via this interface."]
   | MemberPointer
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Auto
   [@ocaml.doc
     "A type whose specific kind is not exposed via this interface."][@@ocaml.doc
                                                                     "Describes the kind of type"]
@@ -1296,9 +1255,6 @@ external cursor_get_brief_comment_text :
 external cursor_get_mangling :
   cxcursor -> string = "clang_Cursor_getMangling_wrapper"[@@ocaml.doc
                                                            "Retrieve the CXString representing the mangled name of the cursor."]
-external cursor_get_cxxmanglings :
-  cxcursor -> string array = "clang_Cursor_getCXXManglings_wrapper"[@@ocaml.doc
-                                                                    "Retrieve the CXStrings representing the mangled symbols of the C++ constructor or destructor at the cursor."]
 type cxmodule
 external cursor_get_module :
   cxcursor -> cxmodule = "clang_Cursor_getModule_wrapper"[@@ocaml.doc
@@ -1330,9 +1286,6 @@ external module_get_top_level_header :
   cxtranslationunit -> cxmodule -> int -> cxfile =
     "clang_Module_getTopLevelHeader_wrapper"[@@ocaml.doc
                                               "Returns the specified top level header associated with the module."]
-external cxxfield_is_mutable :
-  cxcursor -> bool = "clang_CXXField_isMutable_wrapper"[@@ocaml.doc
-                                                         "Determine if a C++ field is declared 'mutable'."]
 external cxxmethod_is_pure_virtual :
   cxcursor -> bool = "clang_CXXMethod_isPureVirtual_wrapper"[@@ocaml.doc
                                                               "Determine if a C++ member function or member function template is pure virtual."]
@@ -1528,8 +1481,7 @@ type clang_ext_unaryoperatorkind =
   | LNot 
   | Real 
   | Imag 
-  | Extension 
-  | Coawait [@@deriving (eq, ord, show)]
+  | Extension [@@deriving (eq, ord, show)]
 external ext_unary_operator_get_opcode :
   cxcursor -> clang_ext_unaryoperatorkind =
     "clang_ext_UnaryOperator_getOpcode_wrapper"

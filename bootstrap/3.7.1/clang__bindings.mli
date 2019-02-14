@@ -54,18 +54,18 @@ external create_index :
   exclude_declarations_from_pch:bool -> display_diagnostics:bool -> cxindex =
     "clang_createIndex_wrapper"[@@ocaml.doc
                                  "Provides a shared context for creating translation units."]
-module Cxglobaloptflags =
-  struct
-    type t = int
-    external (+) : t -> t -> t = "%orint"
-    let (-) x y = x land (lnot y)
-    external (&) : t -> t -> t = "%andint"
-    external ( * ) : t -> t -> t = "%xorint"
-    let none = 0
-    let thread_background_priority_for_indexing = 1
-    let thread_background_priority_for_editing = 2
-    let thread_background_priority_for_all = 3
-  end
+module Cxglobaloptflags :
+sig
+  type t
+  external (+) : t -> t -> t = "%orint"
+  val (-) : t -> t -> t
+  external (&) : t -> t -> t = "%andint"
+  external ( * ) : t -> t -> t = "%xorint"
+  val none : t
+  val thread_background_priority_for_indexing : t
+  val thread_background_priority_for_editing : t
+  val thread_background_priority_for_all : t
+end
 external cxindex_set_global_options :
   cxindex -> Cxglobaloptflags.t -> unit =
     "clang_CXIndex_setGlobalOptions_wrapper"[@@ocaml.doc
@@ -196,20 +196,20 @@ external get_diagnostic_set_from_tu :
   cxtranslationunit -> cxdiagnosticset =
     "clang_getDiagnosticSetFromTU_wrapper"[@@ocaml.doc
                                             "Retrieve the complete set of diagnostics associated with a translation unit."]
-module Cxdiagnosticdisplayoptions =
-  struct
-    type t = int
-    external (+) : t -> t -> t = "%orint"
-    let (-) x y = x land (lnot y)
-    external (&) : t -> t -> t = "%andint"
-    external ( * ) : t -> t -> t = "%xorint"
-    let display_source_location = 1
-    let display_column = 2
-    let display_source_ranges = 4
-    let display_option = 8
-    let display_category_id = 16
-    let display_category_name = 32
-  end
+module Cxdiagnosticdisplayoptions :
+sig
+  type t
+  external (+) : t -> t -> t = "%orint"
+  val (-) : t -> t -> t
+  external (&) : t -> t -> t = "%andint"
+  external ( * ) : t -> t -> t = "%xorint"
+  val display_source_location : t
+  val display_column : t
+  val display_source_ranges : t
+  val display_option : t
+  val display_category_id : t
+  val display_category_name : t
+end
 external format_diagnostic :
   cxdiagnostic -> Cxdiagnosticdisplayoptions.t -> string =
     "clang_formatDiagnostic_wrapper"[@@ocaml.doc
@@ -291,24 +291,23 @@ external create_translation_unit2 :
   cxindex -> string -> (cxtranslationunit, cxerrorcode) result =
     "clang_createTranslationUnit2_wrapper"[@@ocaml.doc
                                             "Create a translation unit from an AST file ( -emit-ast)."]
-module Cxtranslationunit_flags =
-  struct
-    type t = int
-    external (+) : t -> t -> t = "%orint"
-    let (-) x y = x land (lnot y)
-    external (&) : t -> t -> t = "%andint"
-    external ( * ) : t -> t -> t = "%xorint"
-    let none = 0
-    let detailed_preprocessing_record = 1
-    let incomplete = 2
-    let precompiled_preamble = 4
-    let cache_completion_results = 8
-    let for_serialization = 16
-    let cxxchained_pch = 32
-    let skip_function_bodies = 64
-    let include_brief_comments_in_code_completion = 128
-    let create_preamble_on_first_parse = 256
-  end
+module Cxtranslationunit_flags :
+sig
+  type t
+  external (+) : t -> t -> t = "%orint"
+  val (-) : t -> t -> t
+  external (&) : t -> t -> t = "%andint"
+  external ( * ) : t -> t -> t = "%xorint"
+  val none : t
+  val detailed_preprocessing_record : t
+  val incomplete : t
+  val precompiled_preamble : t
+  val cache_completion_results : t
+  val for_serialization : t
+  val cxxchained_pch : t
+  val skip_function_bodies : t
+  val include_brief_comments_in_code_completion : t
+end
 external default_editing_translation_unit_options :
   unit -> Cxtranslationunit_flags.t =
     "clang_defaultEditingTranslationUnitOptions_wrapper"[@@ocaml.doc
@@ -330,15 +329,6 @@ external parse_translation_unit2 :
             (cxtranslationunit, cxerrorcode) result =
     "clang_parseTranslationUnit2_wrapper"[@@ocaml.doc
                                            "Parse the given source file and the translation unit corresponding to that file."]
-external parse_translation_unit2_full_argv :
-  cxindex ->
-    string ->
-      string array ->
-        cxunsavedfile array ->
-          Cxtranslationunit_flags.t ->
-            (cxtranslationunit, cxerrorcode) result =
-    "clang_parseTranslationUnit2FullArgv_wrapper"[@@ocaml.doc
-                                                   "Same as clang_parseTranslationUnit2 but requires a full command line for command_line_args including argv\\[0\\]. This is useful if the standard library paths are relative to the binary."]
 external default_save_options :
   cxtranslationunit -> int = "clang_defaultSaveOptions_wrapper"[@@ocaml.doc
                                                                  "Returns the set of flags that is suitable for saving a translation unit."]
@@ -354,29 +344,29 @@ type cxsaveerror =
     "Indicates that the translation unit to be saved was somehow invalid (e.g., NULL)."]
 [@@ocaml.doc
   "Describes the kind of error that occurred (if any) in a call to clang_saveTranslationUnit()."]
-module Cxsavetranslationunit_flags =
-  struct
-    type t = int
-    external (+) : t -> t -> t = "%orint"
-    let (-) x y = x land (lnot y)
-    external (&) : t -> t -> t = "%andint"
-    external ( * ) : t -> t -> t = "%xorint"
-    let none = 0
-  end
+module Cxsavetranslationunit_flags :
+sig
+  type t
+  external (+) : t -> t -> t = "%orint"
+  val (-) : t -> t -> t
+  external (&) : t -> t -> t = "%andint"
+  external ( * ) : t -> t -> t = "%xorint"
+  val none : t
+end
 external save_translation_unit :
   cxtranslationunit ->
     string -> Cxsavetranslationunit_flags.t -> (unit, cxsaveerror) result =
     "clang_saveTranslationUnit_wrapper"[@@ocaml.doc
                                          "Saves a translation unit into a serialized representation of that translation unit on disk."]
-module Cxreparse_flags =
-  struct
-    type t = int
-    external (+) : t -> t -> t = "%orint"
-    let (-) x y = x land (lnot y)
-    external (&) : t -> t -> t = "%andint"
-    external ( * ) : t -> t -> t = "%xorint"
-    let none = 0
-  end
+module Cxreparse_flags :
+sig
+  type t
+  external (+) : t -> t -> t = "%orint"
+  val (-) : t -> t -> t
+  external (&) : t -> t -> t = "%andint"
+  external ( * ) : t -> t -> t = "%xorint"
+  val none : t
+end
 external default_reparse_options :
   cxtranslationunit -> Cxreparse_flags.t =
     "clang_defaultReparseOptions_wrapper"[@@ocaml.doc
@@ -438,7 +428,7 @@ type cxcursorkind =
   | ObjCImplementationDecl [@ocaml.doc "An Objective-C \\@implementation."]
   | ObjCCategoryImplDecl
   [@ocaml.doc "An Objective-C \\@implementation for a category."]
-  | TypedefDecl [@ocaml.doc "A typedef."]
+  | TypedefDecl [@ocaml.doc "A typedef"]
   | CXXMethod [@ocaml.doc "A C++ class method."]
   | Namespace [@ocaml.doc "A C++ namespace."]
   | LinkageSpec [@ocaml.doc "A linkage specification, e.g. 'extern \"C\"'."]
@@ -578,7 +568,6 @@ type cxcursorkind =
   | ObjCBoolLiteralExpr [@ocaml.doc "Objective-c Boolean Literal."]
   | ObjCSelfExpr
   [@ocaml.doc "Represents the \"self\" expression in an Objective-C method."]
-  | OMPArraySectionExpr [@ocaml.doc "OpenMP 4.0 \\[2.4, Array Section\\]."]
   | UnexposedStmt
   [@ocaml.doc
     "A statement whose specific kind is not exposed via this interface."]
@@ -651,10 +640,6 @@ type cxcursorkind =
   | OMPCancellationPointDirective
   [@ocaml.doc "OpenMP cancellation point directive."]
   | OMPCancelDirective [@ocaml.doc "OpenMP cancel directive."]
-  | OMPTargetDataDirective [@ocaml.doc "OpenMP target data directive."]
-  | OMPTaskLoopDirective [@ocaml.doc "OpenMP taskloop directive."]
-  | OMPTaskLoopSimdDirective [@ocaml.doc "OpenMP taskloop simd directive."]
-  | OMPDistributeDirective [@ocaml.doc "OpenMP distribute directive."]
   | TranslationUnit
   [@ocaml.doc "Cursor that represents the translation unit itself."]
   | UnexposedAttr
@@ -708,15 +693,6 @@ type cxcursorkind =
   | CUDASharedAttr
   [@ocaml.doc
     "An attribute whose specific kind is not exposed via this interface."]
-  | VisibilityAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | DLLExport
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | DLLImport
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
   | PreprocessingDirective
   [@ocaml.doc
     "An attribute whose specific kind is not exposed via this interface."]
@@ -730,7 +706,6 @@ type cxcursorkind =
   [@ocaml.doc
     "An attribute whose specific kind is not exposed via this interface."]
   | ModuleImportDecl [@ocaml.doc "A module import declaration."]
-  | TypeAliasTemplateDecl [@ocaml.doc "A module import declaration."]
   | OverloadCandidate [@ocaml.doc "A code completion overload candidate."]
 [@@ocaml.doc "Describes the kind of entity that a cursor refers to."]
 type cxcursor[@@ocaml.doc
@@ -799,19 +774,6 @@ type cxlinkagekind =
 external get_cursor_linkage :
   cxcursor -> cxlinkagekind = "clang_getCursorLinkage_wrapper"[@@ocaml.doc
                                                                 "Determine the linkage of the entity referred to by a given cursor."]
-type cxvisibilitykind =
-  | Invalid
-  [@ocaml.doc
-    "This value indicates that no visibility information is available for a provided CXCursor."]
-  | Hidden [@ocaml.doc "Symbol not seen by the linker."]
-  | Protected
-  [@ocaml.doc
-    "Symbol seen by the linker but resolves to a symbol inside this object."]
-  | Default
-  [@ocaml.doc "Symbol seen by the linker and acts like a normal symbol."]
-external get_cursor_visibility :
-  cxcursor -> cxvisibilitykind = "clang_getCursorVisibility_wrapper"[@@ocaml.doc
-                                                                    "Describe the visibility of the entity referred to by a cursor."]
 type cxavailabilitykind =
   | Available [@ocaml.doc "The entity is available."]
   | Deprecated
@@ -1016,9 +978,6 @@ type cxtypekind =
   [@ocaml.doc
     "A type whose specific kind is not exposed via this interface."]
   | MemberPointer
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Auto
   [@ocaml.doc
     "A type whose specific kind is not exposed via this interface."][@@ocaml.doc
                                                                     "Describes the kind of type"]
@@ -1296,9 +1255,6 @@ external cursor_get_brief_comment_text :
 external cursor_get_mangling :
   cxcursor -> string = "clang_Cursor_getMangling_wrapper"[@@ocaml.doc
                                                            "Retrieve the CXString representing the mangled name of the cursor."]
-external cursor_get_cxxmanglings :
-  cxcursor -> string array = "clang_Cursor_getCXXManglings_wrapper"[@@ocaml.doc
-                                                                    "Retrieve the CXStrings representing the mangled symbols of the C++ constructor or destructor at the cursor."]
 type cxmodule
 external cursor_get_module :
   cxcursor -> cxmodule = "clang_Cursor_getModule_wrapper"[@@ocaml.doc
@@ -1330,9 +1286,6 @@ external module_get_top_level_header :
   cxtranslationunit -> cxmodule -> int -> cxfile =
     "clang_Module_getTopLevelHeader_wrapper"[@@ocaml.doc
                                               "Returns the specified top level header associated with the module."]
-external cxxfield_is_mutable :
-  cxcursor -> bool = "clang_CXXField_isMutable_wrapper"[@@ocaml.doc
-                                                         "Determine if a C++ field is declared 'mutable'."]
 external cxxmethod_is_pure_virtual :
   cxcursor -> bool = "clang_CXXMethod_isPureVirtual_wrapper"[@@ocaml.doc
                                                               "Determine if a C++ member function or member function template is pure virtual."]
@@ -1528,8 +1481,7 @@ type clang_ext_unaryoperatorkind =
   | LNot 
   | Real 
   | Imag 
-  | Extension 
-  | Coawait [@@deriving (eq, ord, show)]
+  | Extension [@@deriving (eq, ord, show)]
 external ext_unary_operator_get_opcode :
   cxcursor -> clang_ext_unaryoperatorkind =
     "clang_ext_UnaryOperator_getOpcode_wrapper"
