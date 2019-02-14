@@ -8,7 +8,7 @@ bug-reports: "https://gitlab.inria.fr/tmartine/clangml/issues"
 license: "BSD"
 dev-repo: "git+https://gitlab.inria.fr/tmartine/clangml.git"
 build: [
-  ["./configure_with_log.sh %{prefix}%"]
+  ["./configure_with_log.sh" "%{prefix}%"]
   ["dune" "build" "-p" name "-j" jobs]]
 depends: [
   "stdcompat"
