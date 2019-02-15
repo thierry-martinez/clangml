@@ -5,8 +5,13 @@ pipeline {
     stages {
         stage('Prepare') {
             steps {
-                sh 'tar -xf ~/bootstrap.tar.xz'
-                sh 'autoreconf'
+                sh 'mkdir src'
+                sh 'mv * src/ || true'
+                sh '''
+                    cd src && \
+                    tar -xf ~/bootstrap.tar.xz && \
+                    aclocal && automake --add-missing && autoreconf
+                   '''
             }
         }
         stage('Configure') {
@@ -14,7 +19,7 @@ pipeline {
                 sh '''
                     eval $(opam env) && \
                     mkdir build && cd build && \
-                    ../configure \
+                    ../src/configure \
                         --with-llvm-config=/media/llvms/7.0.1/bin/llvm-config
                    '''
             }
@@ -42,7 +47,7 @@ pipeline {
                         def llvm_version = i
                         def llvm_dir = "/media/llvms/$llvm_version"
                         def llvm_config = "$llvm_dir/bin/llvm-config"
-                        def bootstrap_dir = "bootstrap/$llvm_version"
+                        def bootstrap_dir = "src/bootstrap/$llvm_version"
                         def include_dir =
                             "$llvm_dir/lib/clang/$llvm_version/include"
                         def cc
@@ -61,7 +66,7 @@ pipeline {
                                     cd $pwd && \
                                     mkdir $llvm_version/ && \
                                     cd $llvm_version/ && \
-                                    ../configure \
+                                    ../src/configure \
                                         --with-llvm-config=$llvm_config && \
                                     make clangml
                                    """
@@ -86,8 +91,8 @@ pipeline {
                     }
                     parallel branches
                 }
-                sh 'tar -cf bootstrap.tar.xz bootstrap/'
-                archiveArtifacts artifacts: 'bootstrap.tar.xz',
+                sh 'cd src && tar -cf bootstrap.tar.xz bootstrap/'
+                archiveArtifacts artifacts: 'src/bootstrap.tar.xz',
                     fingerprint: true
             }
         }
@@ -100,14 +105,13 @@ pipeline {
                         returnStdout: true
                     ).trim()
                     sh 'git checkout origin/bootstrap'
-                    sh 'tar -xf bootstrap.tar.xz'
+                    sh 'tar -xf src/bootstrap.tar.xz'
                     sh 'git add bootstrap'
                     sh """
                         git commit -m 'generated files for commit $commit' || \
                         true
                        """
                     sh 'git push origin HEAD:bootstrap'
-                    sh 'git checkout master'
                 }
             }
         }
@@ -116,7 +120,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        docker run --rm -v $PWD:/clangml ocaml/opam2:4.07 \
+                        docker run --rm -v $PWD/src:/clangml ocaml/opam2:4.07 \
                             /clangml/opam-pin-and-install.sh
                        """
                 }
@@ -130,19 +134,7 @@ pipeline {
                         script: 'git rev-parse HEAD',
                         returnStdout: true
                     ).trim()
-                    sh 'git checkout origin/releases'
-                    sh 'git reset --soft origin/master'
-                    sh '''
-                        grep -q AM_MAINTAINER_MODE configure.ac || \
-                        echo AM_MAINTAINER_MODE >>configure.ac
-                       '''
-                    sh './bootstrap.sh'
-                    sh 'git add -f configure.ac Makefile.in aclocal.m4 configure bootstrap'
-                    sh "git commit -m 'bootstrapped repository for commit $commit'"
-                    sh 'git push origin HEAD:releases'
-                    sh 'git -f -a "devel" -m "Development version"'
-                    sh 'git push -f origin devel'
-                    sh 'git checkout master'
+                    sh 'cd src && ./commit-release-branch.sh'
                 }
             }
         }
@@ -151,7 +143,7 @@ pipeline {
                 script {
                     sh """
                         docker run --rm -v ocaml/opam2:4.07 \
-                        /clangml/opam-pin-and-install.sh \
+                            /clangml/opam-pin-and-install.sh \
    https://gitlab.inria.fr/tmartine/clangml/-/archive/devel/clangml-devel.tag.gz
                        """
                 }
