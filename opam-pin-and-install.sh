@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -ex
 URL="$1"
-opam update
+( cd opam-repository && git pull )
 opam pin add -yn "$URL"
 opam depext -yi clangml
