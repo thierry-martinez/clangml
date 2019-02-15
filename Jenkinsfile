@@ -133,7 +133,7 @@ pipeline {
         stage('opam installation from devel tag') {
             steps {
                 sh '''
-                    docker run --rm ocaml/opam2:4.07 \
+                    docker run --rm -v $PWD/src:/clangml ocaml/opam2:4.07 \
                         /clangml/opam-pin-and-install.sh \
    https://gitlab.inria.fr/tmartine/clangml/-/archive/devel/clangml-devel.tag.gz
                    '''
