@@ -747,6 +747,32 @@ tgt); }, Regular
         | None -> default_type (Clang.get_type_spelling ty)
         | _ -> assert false
       end
+  | ConstantArray ->
+      begin
+        let element = Clang.get_array_element_type ty in
+        let size = Clang.get_array_size ty in
+        let element_type_info, _ = find_type_info ~declare_abstract context empty_type_interface element in
+        { ocamltype = ptyp_tuple (List.init size (fun _ -> element_type_info.ocamltype));
+          c_of_ocaml = (fun channel ~src ~params ~references ~tgt ->
+                Printf.fprintf channel "
+for (size_t i = 0; i < %d; i++) {
+  CAMLlocal1(ocaml_field);
+  %s field;
+  ocaml_field = Field(%s, i);
+  %t
+  %s[i] = field;
+}
+" size (Clang.get_type_spelling element) src (fun channel -> element_type_info.c_of_ocaml channel ~src:"ocaml_field" ~params:[| |] ~references ~tgt:"field") tgt);
+          ocaml_of_c = (fun channel ~src ~params ~references ~tgt ->
+                Printf.fprintf channel "
+%s = caml_alloc_tuple(%d);
+for (size_t i = 0; i < %d; i++) {
+  CAMLlocal1(field);
+  %t
+  Store_field(%s, i, field);
+}
+" tgt size size (fun channel -> element_type_info.ocaml_of_c channel ~src:(Printf.sprintf "%s[i]" src) ~params:[| |] ~references ~tgt:"field") tgt)}, Regular
+      end
   | _ ->
       match Clang.ext_get_type_kind ty with (* for Ocaml 3.8 *)
       | Elaborated ->
@@ -1079,7 +1105,7 @@ let translate_struct_decl' context cur typedef name =
     | Unknown (name, ty) ->
         Translated (name, ty,
           find_type_info ~declare_abstract:false context empty_type_interface ty), cur
-      | ty -> ty, cur in
+    | ty -> ty, cur in
   let record_fields =
     lazy (
       try Some (List.map recognize_type ocaml_fields)
@@ -1088,7 +1114,7 @@ let translate_struct_decl' context cur typedef name =
     let type_name =
       if typedef then name
       else Printf.sprintf "struct %s" name in
-    let ptype_kind =
+    let (ptype_kind : Parsetree.type_kind), ptype_manifest =
       match Lazy.force record_fields with
       | None ->
           let destructor = make_destructor context type_name ocaml_type_name type_interface in
@@ -1097,37 +1123,80 @@ let translate_struct_decl' context cur typedef name =
             type_name ocaml_type_name (name_of_c_of_ocaml ocaml_type_name)
             (name_of_ocaml_of_c ocaml_type_name)
             destructor;
-          Parsetree.Ptype_abstract
+          Parsetree.Ptype_abstract, None
       | Some fields ->
           let nb_fields = List.length fields in
-          Printf.fprintf context.chan_stubs "\
-static value __attribute__((unused))
-%s(%s v)
-{
-  CAMLparam0();
-  CAMLlocal2(ocaml, string);
-  ocaml = caml_alloc_tuple(%d);
-" (name_of_ocaml_of_c ocaml_type_name) type_name nb_fields;
-          fields |> List.iteri (fun i (field, _) ->
+          let val_field tgt channel field =
+            match field with
+            | Unknown _ -> assert false
+            | Sized_string { contents = (contents, _); length = (length, _) } ->
+                Printf.fprintf channel "\
+    %s = caml_alloc_initialized_string(v.%s, v.%s);"
+                  tgt length contents
+            | Translated (name, _ty, (common_type_info, type_info)) ->
+                common_type_info.ocaml_of_c channel ~src:(Printf.sprintf "v.%s" name) ~params:[| |] ~references:[| |] ~tgt in
+          let field_val src channel field =
             match field with
             | Unknown _ -> assert false
             | Sized_string { contents = (contents, _); length = (length, _) } ->
                 Printf.fprintf context.chan_stubs "\
-  string = caml_alloc_string(v.%s);
-  memcpy(String_val(string), v.%s, v.%s);
-  Store_field(ocaml, %d, string);
-" length contents length i
-            | Translated (name, _ty, (common_type_info, type_info)) ->
-                Printf.fprintf context.chan_stubs
-                  "  \
+  v.%s = caml_string_length(%s);
+  v.%s = String_val(%s);
+" length src contents src
+            | Translated (name, ty, (common_type_info, type_info)) ->
+               common_type_info.c_of_ocaml context.chan_stubs ~src ~params:[| |] ~references:[| |] ~tgt:(Printf.sprintf "v.%s" name) in
+          let field_name field =
+            match field with
+            | Unknown _ -> assert false
+            | Sized_string { contents = (name, _) }
+            | Translated (name, _, _) -> name in
+          let translate_field_type field =
+            match field with
+            | Unknown _ -> assert false
+            | Sized_string { contents = (_name, _) } -> ocaml_string
+            | Translated (_name, _, ty) -> translate_type_info ty in
+          match fields with
+          | [field, _] ->
+              Printf.fprintf context.chan_stubs "\
+static value __attribute__((unused))
+%s(%s v)
+{
+  CAMLparam0();
+  CAMLlocal1(data);
+  %a
+  CAMLreturn(data);
+}
+
+static %s __attribute__((unused))
+%s(value ocaml)
+{
+  CAMLparam1(ocaml);
+  %s v;
+  %a
+  CAMLreturnT(%s, v);
+}
+" (name_of_ocaml_of_c ocaml_type_name) type_name (val_field "data") field
+   type_name (name_of_c_of_ocaml ocaml_type_name) type_name
+   (field_val "ocaml") field type_name;
+              Ptype_abstract, Some (translate_field_type field)
+          | _ ->
+              Printf.fprintf context.chan_stubs "\
+static value __attribute__((unused))
+%s(%s v)
+{
+  CAMLparam0();
+  CAMLlocal1(ocaml);
+  ocaml = caml_alloc_tuple(%d);
+" (name_of_ocaml_of_c ocaml_type_name) type_name nb_fields;
+          fields |> List.iteri (fun i (field, _) ->
+                Printf.fprintf context.chan_stubs "\
   {
      CAMLlocal1(data);
-     %t
+     %a
      Store_field(ocaml, %d, data);
   }
-"
-                  (fun channel -> common_type_info.ocaml_of_c channel ~src:(Printf.sprintf "v.%s" name) ~params:[| |] ~references:[| |] ~tgt:"data") i);
-          Printf.fprintf context.chan_stubs "\
+" (val_field "data") field i);
+              Printf.fprintf context.chan_stubs "\
   CAMLreturn(ocaml);
 }
 
@@ -1138,40 +1207,20 @@ static %s __attribute__((unused))
   %s v;
 " type_name (name_of_c_of_ocaml ocaml_type_name) type_name;
           fields |> List.iteri (fun i (field, _) ->
-            match field with
-            | Unknown _ -> assert false
-            | Sized_string { contents = (contents, _); length = (length, _) } ->
-                Printf.fprintf context.chan_stubs "\
-  v.%s = caml_string_length(Field(ocaml, %d));
-  v.%s = String_val(Field(ocaml, %d));
-" length i contents i
-            | Translated (name, ty, (common_type_info, type_info)) ->
-                Printf.fprintf context.chan_stubs
-                  "{
-                      %s data;
-                      %t
-                      v.%s = data;
-                              }
-"
-                  (Clang.get_type_spelling ty)
-                  (fun channel -> common_type_info.c_of_ocaml channel ~src:(Printf.sprintf "Field(ocaml, %d)" i) ~params:[| |] ~references:[| |] ~tgt:"data") name);
+            field_val (Printf.sprintf "Field(ocaml, %d)" i) context.chan_stubs field);
           Printf.fprintf context.chan_stubs "\
   CAMLreturnT(%s, v);
 }
 " type_name;
           let fields = fields |> List.map @@ fun (field, cur) ->
             let pld_attributes = make_doc_attributes cur in
-            match field with
-            | Unknown _ -> assert false
-            | Sized_string { contents = (name, _) } ->
-                label_declaration (loc (String.lowercase_ascii name))
-                  ocaml_string ~pld_attributes
-            | Translated (name, _, ty) ->
-                label_declaration (loc (String.lowercase_ascii name))
-                  (translate_type_info ty) ~pld_attributes in
-          Ptype_record fields in
+            label_declaration (loc (String.lowercase_ascii (field_name field)))
+              (translate_field_type field) ~pld_attributes in
+                Ptype_record fields, None in
     let ptype_attributes = make_doc_attributes cur in
-    let type_decl = type_declaration (loc ocaml_type_name) ~ptype_kind ~ptype_attributes in
+    let type_decl =
+      type_declaration (loc ocaml_type_name) ~ptype_kind ~ptype_attributes
+        ?ptype_manifest in
     add_type_declaration context [type_decl] in
   let decl_made = ref false in
   let make_decl () =
@@ -1526,7 +1575,7 @@ let translate_function_decl context cur =
               outputs := { desc = (Some output, string_type_info); on_success; on_error } :: !outputs;
               args.(output) <- Output { output_type = Array (length, length_ty, contents_ty); on_success = true; on_error = false };
               args.(length) <- Removed_output args.(length)
-          | _ -> failwith "Argument expected"
+          | _ -> failwith "Argument expected (Output)"
         end
     | Update output ->
         let output = find_argument output index in
@@ -1919,7 +1968,7 @@ let main cflags llvm_config prefix =
     | _ -> "clang_free" in
   let module_interface =
     empty_module_interface |>
-    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|^clang_free$|constructUSR|^clang_executeOnThread$|^clang_getDiagnosticCategoryName$|^clang_getDefinitionSpellingAndExtent$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_annotateTokens$|^clang_getFileUniqueID$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$") hidden_function_interface |>
+    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|^clang_free$|constructUSR|^clang_executeOnThread$|^clang_getDiagnosticCategoryName$|^clang_getDefinitionSpellingAndExtent$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_annotateTokens$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$") hidden_function_interface |>
     add_type (Pcre.regexp "^CXString$")
       (empty_type_interface |>
        reinterpret_as (Type_info ({ ocamltype = ocaml_string;
@@ -2070,7 +2119,7 @@ let main cflags llvm_config prefix =
     add_function (Pcre.regexp "^clang_reparseTranslationUnit")
       (empty_function_interface |>
         add_result (empty_type_interface |> result_cxerrorcode)) |>
-    add_function (Pcre.regexp "^clang_getFileUniqueID")
+    add_function (Pcre.regexp "^clang_getFileUniqueID$")
       (empty_function_interface |>
         add_result (empty_type_interface |> integer_zero_is_true) |>
         add_argument (output_on_success (Name "outID"))) |>
