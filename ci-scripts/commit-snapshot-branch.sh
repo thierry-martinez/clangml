@@ -3,7 +3,7 @@ set -ex
 commit=$(git rev-parse HEAD)
 git checkout snapshot
 git reset --hard master
-git reset --soft snapshot
+git reset --soft origin/snapshot
 grep -q AM_MAINTAINER_MODE configure.ac || \
 echo AM_MAINTAINER_MODE >>configure.ac
 ./bootstrap.sh
