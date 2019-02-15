@@ -127,7 +127,7 @@ pipeline {
         stage('Commit to release branch') {
             when { branch 'master' }
             steps {
-                sh 'cd src && ./commit-release-branch.sh'
+                sh 'src/commit-release-branch.sh'
             }
         }
         stage('opam installation from devel tag') {
