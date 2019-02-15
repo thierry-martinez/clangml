@@ -97,7 +97,7 @@ pipeline {
             }
         }
         stage('Commit to bootstrap branch') {
-            when { allOf { branch 'master' } }
+            when { branch 'master' }
             steps {
                 script {
                     def commit = sh (
@@ -116,14 +116,41 @@ pipeline {
             }
         }
         stage('opam installation') {
+            when { branch 'master' }
             steps {
-                sh 'opam pin add -y clangml file://$PWD/src'
+                sh """
+                    docker run --rm -v $PWD/src:/clangml ocaml/opam2:4.07 \
+                        /clangml/opam-pin-and-install.sh
+                   """
             }
         }
-        stage('Deploy') {
-            when { allOf { branch 'master'; changelog '^Release:' } }
+        stage('Commit to release branch') {
+            when { branch 'master' }
             steps {
-                sh 'cd src && ./release.sh'
+                script {
+                    def commit = sh (
+                        script: 'git rev-parse HEAD',
+                        returnStdout: true
+                    ).trim()
+                    sh 'git checkout origin/releases'
+                    sh """
+                        git merge $(git commit-tree -p HEAD -p origin/master \
+                            -m 'bootstrapped repository for commit $commit' \
+                            $(git show --format='%T' -s origin/master))
+                       """
+                    sh 'git push origin HEAD:releases'
+                    sh 'git -f -a "devel" -m "Development version"'
+                    sh 'git push -f origin devel'
+                }
+            }
+        }
+        stage('opam installation from devel tag') {
+            steps {
+                sh """
+                    docker run --rm -v $PWD/src:/clangml ocaml/opam2:4.07 \
+                        /clangml/opam-pin-and-install.sh \
+   https://gitlab.inria.fr/tmartine/clangml/-/archive/devel/clangml-devel.tag.gz
+                   """
             }
         }
     }
