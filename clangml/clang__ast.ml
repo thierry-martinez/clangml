@@ -279,7 +279,9 @@ let () =
 
 let success_count = ref 0 and failure_count = ref 0
 
-let check pp ast checker =
+let check pp parser source checker =
+  prerr_endline source;
+  let ast = parser source in
   try
     checker ast;
     incr success_count
@@ -300,7 +302,6 @@ this function is used in the following examples to check the AST of
 various programs.
     {[
 let parse_declaration_list ?filename ?command_line_args ?options source =
-  prerr_endline source;
   let ast =
     Clang.Ast.parse_string ?filename ?command_line_args ?options source in
   ast.desc.items
@@ -319,7 +320,7 @@ type qual_type = {
 let example = "const int one = 1;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@
+  check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = Var { name = "one";
       qual_type = {
@@ -331,7 +332,7 @@ let () =
 let example = "int x;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@
+  check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = Var { name = "x";
       qual_type = {
@@ -346,7 +347,7 @@ let () =
 let example = "volatile int x;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@
+  check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = Var { name = "x";
       qual_type = {
@@ -357,7 +358,7 @@ let () =
 let example = "int x;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = Var { name = "x";
       qual_type = {
         volatile = false;
@@ -370,7 +371,7 @@ let () =
 let example = "int * restrict x;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = Var { name = "x"; qual_type = {
       restrict = true;
       desc = Pointer { desc = BuiltinType Int }}}}] -> ()
@@ -379,7 +380,7 @@ let () =
 let example = "int * x;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = Var { name = "x"; qual_type = {
       restrict = false;
       desc = Pointer { desc = BuiltinType Int }}}}] -> ()
@@ -395,7 +396,7 @@ and type_desc =
 let example = "char *s;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = Var { name = "s"; qual_type = { desc =
       Pointer { desc = BuiltinType Char_S }}}}] -> ()
   | _ -> assert false
@@ -409,7 +410,7 @@ let () =
 let example = "char s[42];"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = Var { name = "s"; qual_type = { desc = ConstantArray {
       element = { desc = BuiltinType Char_S };
       size = 42 }}}}] -> ()
@@ -421,7 +422,7 @@ let () =
 let example = "struct s { int i; char array[]; };"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = RecordDecl { keyword = Struct; name = "s"; fields = [
       { desc = Field { name = "i"; qual_type = { desc = BuiltinType Int}}};
       { desc = Field { name = "array"; qual_type = { desc =
@@ -437,7 +438,7 @@ let () =
 let example = "void f(int i, char array[i]);"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = Function { name = "f"; function_type =
       { result = { desc = BuiltinType Void };
         args = Some {
@@ -458,7 +459,7 @@ let () =
 let example = "enum example { A, B, C }; enum example e;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = EnumDecl _ };
      { desc = Var { name = "e"; qual_type = { desc = Elaborated {
       keyword = Enum;
@@ -471,7 +472,7 @@ let () =
 let example = "enum { A, B, C } e;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = EnumDecl _ };
      { desc = Var { name = "e"; qual_type = { desc = Elaborated {
       keyword = Enum;
@@ -492,7 +493,7 @@ let () =
 let example = "int (*p)(void);"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = Var { name = "p"; qual_type = { desc =
       Pointer { desc = FunctionType {
         result = { desc = BuiltinType Int };
@@ -508,7 +509,7 @@ let () =
 let example = "struct { int i; float f; } s;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = RecordDecl { keyword = Struct }};
      { desc = Var { name = "s"; qual_type = { desc = Elaborated {
       keyword = Struct;
@@ -533,7 +534,7 @@ let () =
 let example = "union { int i; float f; } u;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = RecordDecl { keyword = Union }};
      { desc = Var { name = "u"; qual_type = { desc = Elaborated {
       keyword = Union;
@@ -561,7 +562,7 @@ let () =
 let example = "typedef struct { int i; float f; } struct_t; struct_t s;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = RecordDecl { keyword = Struct }}; { desc = TypedefDecl _ };
      { desc = Var { name = "s";
        qual_type = { desc = Typedef "struct_t" } as qual_type }}] ->
@@ -591,7 +592,7 @@ let () =
 let example = "double _Complex c;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast ->
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast ->
   match ast |> List.rev |> List.hd with
   | { desc = Var { name = "c";
       qual_type = { desc = Complex { desc = BuiltinType Double }}}} -> ()
@@ -600,7 +601,7 @@ let () =
 let example = "float _Complex c;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast ->
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast ->
   match ast |> List.rev |> List.hd with
   | { desc = Var { name = "c";
       qual_type = { desc = Complex { desc = BuiltinType Float }}}} -> ()
@@ -618,8 +619,8 @@ let () =
 let example = "int (*p)(void);"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example
-    ~options:(Clang.Ast.Options.make ~ignore_paren_in_types:false ())) @@
+  check Clang.Ast.pp_decl (parse_declaration_list
+    ~options:(Clang.Ast.Options.make ~ignore_paren_in_types:false ())) example @@
   fun ast -> match ast with
   | [{ desc = Var { name = "p"; qual_type = { desc =
       Pointer { desc = FunctionType {
@@ -641,7 +642,7 @@ let () =
 let example = "_Bool s;"
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast ->
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast ->
   match ast |> List.rev |> List.hd with
   | { desc = Var { name = "s";
       qual_type = { desc = BuiltinType Bool}}} -> ()
@@ -656,7 +657,7 @@ and function_type = {
 let example = "void f(void);"
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
     | [{ desc = Function {
         name = "f"; 
         function_type = { calling_conv = C }}}] -> ()
@@ -665,8 +666,9 @@ let () =
 let example = {| __attribute((pcs("aapcs"))) void f(void); |}
 
 let () =
-    check Clang.Ast.pp_decl (
-      parse_declaration_list ~command_line_args:["-target"; "arm"] example) @@
+    check Clang.Ast.pp_decl
+      (parse_declaration_list ~command_line_args:["-target"; "arm"])
+      example @@
     fun ast -> match ast with
     | [{ desc = Function {
         name = "f"; 
@@ -689,7 +691,7 @@ let () =
 let example = "void f(void);"
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
     | [{ desc = Function {
         name = "f"; 
         function_type = { result = { desc = BuiltinType Void }}}}] -> ()
@@ -698,7 +700,7 @@ let () =
 let example = "f(void);"
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
     | [{ desc = Function {
         name = "f"; 
         function_type = { result = { desc = BuiltinType Int }}}}] -> ()
@@ -711,7 +713,7 @@ let () =
 let example = "void f(void);"
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
     | [{ desc = Function {
         name = "f"; 
         function_type = { args = Some {
@@ -722,7 +724,7 @@ let () =
 let example = "void f();"
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
     | [{ desc = Function {
         name = "f"; 
         function_type = { args = None }}}] -> ()
@@ -745,7 +747,7 @@ and args = {
 let example = "void f(int i);"
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
     | [{ desc = Function {
         name = "f"; 
         function_type = { args = Some {
@@ -756,7 +758,7 @@ let () =
 let example = "void f(int);"
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
     | [{ desc = Function {
         name = "f"; 
         function_type = { args = Some {
@@ -767,7 +769,7 @@ let () =
 let example = "typedef void (*f)(int x);"
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
     | [{ desc = TypedefDecl {
         name = "f"; 
         underlying_type = { desc =
@@ -783,7 +785,7 @@ let () =
 let example = "void f(int i, ...);"
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
     | [{ desc = Function {
         name = "f"; 
         function_type = { args = Some {
@@ -820,7 +822,7 @@ and stmt_desc =
 let example = ";"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Null }] -> ()
   | _ -> assert false
     ]}
@@ -831,14 +833,14 @@ let () =
 let example = "{}"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Compound [] }] -> ()
   | _ -> assert false
 
 let example = "{;;}"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Compound [{ desc = Null }; { desc = Null }] }] -> ()
   | _ -> assert false
     ]}
@@ -855,7 +857,7 @@ let () =
 let example = "for (;;) {}"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = For {
       init = None;
       condition_variable = None;
@@ -867,7 +869,7 @@ let () =
 let example = "int i; for (i = 0; i < 4; i++) { i; }"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@
+  check Clang.Ast.pp_stmt parse_statement_list example @@
   fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = For {
       init = Some { desc = Expr { desc = BinaryOperator {
@@ -889,7 +891,7 @@ let () =
 let example = "for (int i = 0; i < 4; i++) { i; }"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@
+  check Clang.Ast.pp_stmt parse_statement_list example @@
   fun ast -> match ast with
   | [{ desc = For {
       init = Some { desc = Decl [{ desc = Var {
@@ -912,7 +914,7 @@ let example = "for (int i = 0; int j = i - 1; i--) { j; }"
 
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list
-    ~filename:"<string>.cpp" example) @@ fun ast -> match ast with
+    ~filename:"<string>.cpp") example @@ fun ast -> match ast with
   | [{ desc = For {
       init = Some { desc = Decl [{ desc = Var {
         name = "i";
@@ -945,7 +947,7 @@ let () =
 let example = "if (1) { 2; } else { 3; }"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@
+  check Clang.Ast.pp_stmt parse_statement_list example @@
   fun ast -> match ast with
   | [{ desc = If {
        init = None;
@@ -960,7 +962,7 @@ let () =
 let example = "if (1) { 2; }"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@
+  check Clang.Ast.pp_stmt parse_statement_list example @@
   fun ast -> match ast with
   | [{ desc = If {
        init = None;
@@ -975,7 +977,7 @@ let example = "if (int i = 1) { i; }"
 
 let () =
   check Clang.Ast.pp_stmt
-    (parse_statement_list ~filename:"<string>.cpp" example) @@
+    (parse_statement_list ~filename:"<string>.cpp") example @@
   fun ast -> match ast with
   | [{ desc = If {
        init = None;
@@ -998,7 +1000,7 @@ let example = "if (int i = 1; i) { i; }"
 
 let () =
   if Clang.get_clang_version () >= "clang version 3.9.0" then
-    check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp" example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp") example @@ fun ast -> match ast with
     | [{ desc = If {
          init = Some { desc = Decl [{ desc = Var {
            name = "i";
@@ -1021,7 +1023,7 @@ let () =
 let example = "switch (1) { case 1: f(); break; case 2: break; default:;}"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Switch {
       init = None;
       condition_variable = None;
@@ -1042,7 +1044,7 @@ let example =
   "switch (int i = 1) { case 1: f(); break; case 2: break; default:;}"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp" example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp") example @@ fun ast -> match ast with
   | [{ desc = Switch {
       init = None;
       condition_variable = Some ({ desc = {
@@ -1073,7 +1075,7 @@ let example =
 let () =
   if Clang.get_clang_version () >= "clang version 3.9.0" then
     check Clang.Ast.pp_stmt
-    (parse_statement_list ~filename:"<string>.cpp" example) @@
+    (parse_statement_list ~filename:"<string>.cpp") example @@
     fun ast -> match ast with
     | [{ desc = Switch {
         init = Some { desc = Decl [{ desc = Var {
@@ -1108,7 +1110,7 @@ let () =
 let example = "switch (1) { case 1: f(); break; case 2 ... 3: break; default:;}"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example)
+  check Clang.Ast.pp_stmt parse_statement_list example
   @@ fun ast -> match ast with
   | [{ desc = Switch {
       init = None;
@@ -1132,7 +1134,7 @@ let () =
 let example = "switch (1) { case 1: case 2: case 3: default: ;}"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Switch {
       init = None;
       condition_variable = None;
@@ -1167,7 +1169,7 @@ let () =
 let example = "while (1);"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = While {
       condition_variable = None;
       cond = { desc = IntegerLiteral (Int 1)};
@@ -1178,7 +1180,7 @@ let example = "while (int i = 1) { i; }"
 
 let () =
   check Clang.Ast.pp_stmt
-    (parse_statement_list ~filename:"<string>.cpp" example) @@
+    (parse_statement_list ~filename:"<string>.cpp") example @@
   fun ast -> match ast with
   | [{ desc = While {
       condition_variable = Some ({ desc = {
@@ -1198,7 +1200,7 @@ let () =
 let example = "do; while (1);"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Do {
       body = { desc = Null };
       cond = { desc = IntegerLiteral (Int 1)}}}] -> ()
@@ -1207,7 +1209,7 @@ let () =
 let example = "do { f(); } while (1);"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Do {
       body = { desc = Compound [{ desc =
         Expr { desc = Call { callee = { desc = DeclRef "f" }; args = [] }}}] };
@@ -1223,7 +1225,7 @@ let () =
 let example = "label: 1; 2;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Label {
         label = "label";
         body = { desc = Expr { desc = IntegerLiteral (Int 1)}}}};
@@ -1236,7 +1238,7 @@ let () =
 let example = "label: 1; goto label;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Label {
         label = "label";
         body = { desc = Expr { desc = IntegerLiteral (Int 1)}}}};
@@ -1249,7 +1251,7 @@ let () =
 let example = "label: 1; void *ptr = &&label; goto *ptr;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Label {
         label = "label";
         body = { desc = Expr { desc = IntegerLiteral (Int 1)}}}};
@@ -1266,7 +1268,7 @@ let () =
 let example = "for (;;) continue;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = For { body = { desc = Continue } }}] -> ()
   | _ -> assert false
    ]}*)
@@ -1276,7 +1278,7 @@ let () =
 let example = "for (;;) break;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = For { body = { desc = Break } }}] -> ()
   | _ -> assert false
    ]}*)
@@ -1294,7 +1296,7 @@ let example = {|
 |}
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Decl _ };
      { desc = GCCAsm (
        "mov %1, %0\n\tadd $1, %0",
@@ -1309,7 +1311,7 @@ let () =
 let example = "return;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list ~return_type:"void" example) @@
+  check Clang.Ast.pp_stmt (parse_statement_list ~return_type:"void") example @@
   fun ast -> match ast with
   | [{ desc = Return None }] -> ()
   | _ -> assert false
@@ -1317,7 +1319,7 @@ let () =
 let example = "return 1;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Return (Some { desc = IntegerLiteral (Int 1)})}] -> ()
   | _ -> assert false
    ]}*)
@@ -1346,16 +1348,15 @@ and expr_desc =
 let example = "0;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list
-    ~options:(Clang.Ast.Options.make ~convert_integer_literals:true ())
-    example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example
+  @@ fun ast -> match ast with
   | [{ desc = Expr { desc = IntegerLiteral (Int 0) }}] -> ()
   | _ -> assert false
 
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list
-    ~options:(Clang.Ast.Options.make ~convert_integer_literals:false ())
-    example) @@ fun ast -> match ast with
+    ~options:(Clang.Ast.Options.make ~convert_integer_literals:false ()))
+    example @@ fun ast -> match ast with
   | [{ desc = Expr { desc = IntegerLiteral (CXInt _ as zero) }}] ->
       assert (Clang.Ast.int_of_literal zero = 0)
   | _ -> assert false
@@ -1364,7 +1365,7 @@ let large_int = Int64.add (Int64.of_int max_int) 1L
 let example = Printf.sprintf "%Ld;" large_int
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@
+  check Clang.Ast.pp_stmt parse_statement_list example @@
   fun ast -> match ast with
   | [{ desc = Expr { desc = IntegerLiteral (CXInt _ as large_int') }}] ->
       assert (Clang.Ast.int64_of_literal large_int' = large_int)
@@ -1387,15 +1388,15 @@ let () =
 let example = "0.5;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@
+  check Clang.Ast.pp_stmt parse_statement_list example @@
   fun ast -> match ast with
   | [{ desc = Expr { desc = FloatingLiteral (Float 0.5) }}] -> ()
   | _ -> assert false
 
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list
-    ~options:(Clang.Ast.Options.make ~convert_floating_literals:true ())
-    example) @@ fun ast -> match ast with
+    ~options:(Clang.Ast.Options.make ~convert_floating_literals:true ()))
+    example @@ fun ast -> match ast with
   | [{ desc = Expr { desc = FloatingLiteral f }}] ->
     assert (Clang.Ast.float_of_literal f = 0.5)
   | _ -> assert false
@@ -1406,7 +1407,7 @@ let () =
 let example = "\"Hello!\";"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@
+  check Clang.Ast.pp_stmt parse_statement_list example @@
   fun ast -> match ast with
   | [{ desc = Expr { desc = StringLiteral "Hello!" }}] -> ()
   | _ -> assert false
@@ -1420,14 +1421,14 @@ let () =
 let example = "'a';"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Expr { desc = CharacterLiteral { kind = Ascii; value = 0x61 } }}] -> ()
   | _ -> assert false
 
 let example = "L'a';"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Expr { desc = CharacterLiteral { kind = Wide; value = 0x61 } }}] -> ()
   | _ -> assert false
 
@@ -1437,7 +1438,7 @@ let example = "u8'a';"
 let () =
   if Clang.get_clang_version () >= "clang version 3.6" then
     check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp"
-        ~command_line_args:["-std=c++1z"] example) @@
+        ~command_line_args:["-std=c++1z"]) example @@
     fun ast -> match ast with
     | [{ desc = Expr { desc = CharacterLiteral { kind = UTF8; value = 0x61 } }}]
       -> assert (Clang.get_clang_version () >= "clang version 3.8.0")
@@ -1449,7 +1450,7 @@ let example = "u'a';"
 
 let () =
   if Clang.get_clang_version () >= "clang version 3.6" then
-    check Clang.Ast.pp_stmt (parse_statement_list example)
+    check Clang.Ast.pp_stmt parse_statement_list example
     @@ fun ast -> match ast with
     | [{ desc = Expr { desc = CharacterLiteral { kind = UTF16; value = 0x61 } }}]
       -> assert (Clang.get_clang_version () >= "clang version 3.8.0")
@@ -1463,7 +1464,7 @@ let () =
 let example = "1i;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Expr { desc =
       ImaginaryLiteral { desc = IntegerLiteral (Int 1)} }}] -> ()
   | _ -> assert false
@@ -1471,7 +1472,7 @@ let () =
 let example = "2.5i;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Expr { desc =
       ImaginaryLiteral { desc = FloatingLiteral (Float 2.5)}}}] -> ()
   | _ -> assert false
@@ -1485,7 +1486,7 @@ let () =
 let example = "+1;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Expr { desc = UnaryOperator {
       kind = Plus;
       operand = { desc = IntegerLiteral (Int 1)}}}}] -> ()
@@ -1494,7 +1495,7 @@ let () =
 let example = "int x; &x;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = UnaryOperator {
       kind = AddrOf;
       operand = { desc = DeclRef "x" }} }}] -> ()
@@ -1510,7 +1511,7 @@ let () =
 let example = "1 + 2;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Expr { desc = BinaryOperator {
       lhs = { desc = IntegerLiteral (Int 1)};
       kind = Add;
@@ -1520,7 +1521,7 @@ let () =
 let example = "int i = 2; i *= 3;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = BinaryOperator {
       lhs = { desc = DeclRef "i"};
       kind = MulAssign;
@@ -1533,7 +1534,7 @@ let () =
 let example = "int i; i;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = DeclRef "i" }}] -> ()
   | _ -> assert false
     ]} *)
@@ -1546,7 +1547,7 @@ let () =
 let example = "void g(int); g(1);"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = Call {
       callee = { desc = DeclRef "g" };
       args = [{ desc = IntegerLiteral (Int 1)}] }}}] -> ()
@@ -1563,7 +1564,7 @@ let () =
 let example = {| (void * ) "Hello"; |}
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Expr { desc = Cast {
       kind = CStyle;
       qual_type = { desc = Pointer _ };
@@ -1578,8 +1579,9 @@ let () =
 let example = {| int i; i; |}
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example
-    ~options:(Clang.Ast.Options.make ~ignore_implicit_cast:false ())) @@
+  check Clang.Ast.pp_stmt (parse_statement_list
+    ~options:(Clang.Ast.Options.make ~ignore_implicit_cast:false ()))
+    example @@
   fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = Cast {
       kind = Implicit;
@@ -1598,7 +1600,7 @@ let () =
 let example = {| struct s { int i } s; s.i = 0; |}
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = BinaryOperator {
       lhs = { desc = Member {
         base = { desc = DeclRef "s" };
@@ -1611,7 +1613,7 @@ let () =
 let example = {| struct s { int i } *p; p->i = 0; |}
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = BinaryOperator {
       lhs = { desc = Member {
         base = { desc = DeclRef "p" };
@@ -1630,7 +1632,7 @@ let () =
 let example = {| int a[1]; a[0] = 1; |}
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = BinaryOperator {
       lhs = { desc = ArraySubscript {
         base = { desc = DeclRef "a" };
@@ -1650,7 +1652,7 @@ let () =
 let example = {| 1 ? 2 : 3; |}
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Expr { desc = ConditionalOperator {
       cond = { desc = IntegerLiteral (Int 1)};
       then_branch = Some { desc = IntegerLiteral (Int 2)};
@@ -1660,7 +1662,7 @@ let () =
 let example = {| 1 ? : 3; |}
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Expr { desc = ConditionalOperator {
       cond = { desc = IntegerLiteral (Int 1)};
       then_branch = None;
@@ -1676,22 +1678,24 @@ let () =
 let example = {| (1); |}
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example
-    ~options:(Clang.Ast.Options.make ~ignore_paren:false ())) @@
+  check Clang.Ast.pp_stmt (parse_statement_list
+    ~options:(Clang.Ast.Options.make ~ignore_paren:false ()))
+    example @@
   fun ast -> match ast with
   | [{ desc = Expr { desc = Paren { desc = IntegerLiteral (Int 1)}}}] -> ()
   | _ -> assert false
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Expr { desc = IntegerLiteral (Int 1)}}] -> ()
   | _ -> assert false
 
 let example = {| int i; sizeof(i); |}
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example
-    ~options:(Clang.Ast.Options.make ~ignore_paren:false ())) @@
+  check Clang.Ast.pp_stmt (parse_statement_list
+    ~options:(Clang.Ast.Options.make ~ignore_paren:false ()))
+    example @@
   fun ast -> match ast with
   | [ { desc = Decl _ };
       { desc = Expr { desc = UnaryExpr {
@@ -1706,7 +1710,7 @@ let () =
 let example = {| label: &&label; |}
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Label {
         label = "label";
         body = { desc = Expr { desc = AddrLabel "label" }}}}] ->
@@ -1719,7 +1723,7 @@ let () =
 let example = {| int a[2] = { 1, 2 }; |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = Var { name = "a"; qual_type = {
       desc = ConstantArray {
         element = { desc = BuiltinType Int };
@@ -1738,7 +1742,7 @@ let () =
 let example = {| (int []) { 1, 2 }; |}
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [{ desc = Expr { desc = CompoundLiteral {
       qual_type = { desc = ConstantArray {
         element = { desc = BuiltinType Int };
@@ -1758,7 +1762,7 @@ let () =
 let example = {| int i; sizeof(i); |}
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [ { desc = Decl _ };
       { desc = Expr { desc = UnaryExpr {
           kind = SizeOf;
@@ -1768,7 +1772,7 @@ let () =
 let example = {| sizeof(int); |}
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_stmt parse_statement_list example @@ fun ast -> match ast with
   | [ { desc = Expr { desc = UnaryExpr {
           kind = SizeOf;
           argument = ArgumentType { desc = BuiltinType Int }} }}] -> ()
@@ -1777,8 +1781,10 @@ let () =
 let example = {| alignof(int); |}
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp" example
-    ~command_line_args:["-std=c++11"]) @@
+  check Clang.Ast.pp_stmt
+    (parse_statement_list ~filename:"<string>.cpp"
+      ~command_line_args:["-std=c++11"])
+    example @@
   fun ast -> match ast with
   | [ { desc = Expr { desc = UnaryExpr {
           kind = AlignOf;
@@ -1791,7 +1797,8 @@ let () =
     {[
 let () =
   if Clang.get_clang_version () >= "clang version 6.0.0" then
-    check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp" example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_stmt (parse_statement_list ~filename:"<string>.cpp")
+    example @@ fun ast -> match ast with
     | [ { desc = Expr { desc = UnaryExpr {
             kind = AlignOf;
             argument = ArgumentType { desc = BuiltinType Int }} }}] -> ()
@@ -1830,7 +1837,7 @@ and decl_desc =
 let example = {| int f(void) {} |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = Function {
       linkage = External;
       function_type = {
@@ -1844,7 +1851,7 @@ let () =
 let example = {| static int f(int x); |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@
+  check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = Function {
       linkage = Internal;
@@ -1864,7 +1871,7 @@ let () =
 let example = {| int x = 1; |}
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@
+    check Clang.Ast.pp_decl parse_declaration_list example @@
     fun ast -> match ast with
   | [{ desc = Var {
       linkage = External;
@@ -1876,7 +1883,7 @@ let () =
 let example = {| const int x = 1; |}
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@
+    check Clang.Ast.pp_decl parse_declaration_list example @@
     fun ast -> match ast with
   | [{ desc = Var {
       linkage = External;
@@ -1888,7 +1895,7 @@ let () =
 let example = {| static int x = 1; |}
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@
+    check Clang.Ast.pp_decl parse_declaration_list example @@
     fun ast -> match ast with
   | [{ desc = Var {
       linkage = Internal;
@@ -1906,7 +1913,7 @@ let () =
 let example = {| enum e { A, B = 2, C }; |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = EnumDecl {
       name = "e";
       constants = [
@@ -1930,7 +1937,7 @@ let () =
 let example = {| struct s { int i; float f; }; |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = RecordDecl {
       keyword = Struct;
       name = "s";
@@ -1944,7 +1951,7 @@ let () =
 let example = {| struct s { int a:1; int b:2; int c; }; |}
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = RecordDecl {
       keyword = Struct;
       name = "s";
@@ -1964,7 +1971,7 @@ let () =
 let example = {| union u { int i; float f; }; |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = RecordDecl {
       keyword = Union;
       name = "u";
@@ -1978,7 +1985,7 @@ let () =
 let example = {| union u { int a:1; int b:2; int c; }; |}
 
 let () =
-    check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+    check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = RecordDecl {
       keyword = Union;
       name = "u";
@@ -1998,7 +2005,7 @@ let () =
 let example = {| struct s { int label; union { int i; float f; };}; |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = RecordDecl {
       keyword = Struct;
       name = "s";
@@ -2015,7 +2022,7 @@ let () =
 let example = {| union s { int single; struct { int i; float f; };}; |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = RecordDecl {
       keyword = Union;
       name = "s";
@@ -2042,7 +2049,7 @@ let () =
 let example = {| typedef int int_t; |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = TypedefDecl {
       name = "int_t";
       underlying_type = { desc = BuiltinType Int }}}] -> ()
@@ -2051,7 +2058,7 @@ let () =
 let example = {| typedef union u { int i; float f } u_t; |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = RecordDecl {
         keyword = Union;
         name = "u";
@@ -2070,7 +2077,7 @@ let () =
 let example = {| typedef union { int i; float f } u_t; |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = RecordDecl {
         keyword = Union;
         name = "";
@@ -2113,7 +2120,7 @@ let () =
 let example = {| struct s { int label; union u { int i; float f; } data;}; |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list example) @@ fun ast -> match ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = RecordDecl {
       keyword = Struct;
       name = "s";
