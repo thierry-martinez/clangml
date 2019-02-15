@@ -120,7 +120,7 @@ pipeline {
             steps {
                 sh '''
                     docker run --rm -v $PWD/src:/clangml ocaml/opam2:4.07 \
-                        /clangml/opam-pin-and-install.sh
+                        /clangml/opam-pin-and-install.sh file:///clangml/
                    '''
             }
         }
