@@ -120,22 +120,23 @@ pipeline {
             steps {
                 sh '''
                     docker run --rm -v $PWD/src:/clangml ocaml/opam2:4.07 \
-                        /clangml/opam-pin-and-install.sh file:///clangml/
+                        /clangml/ci-scripts/opam-pin-and-install.sh \
+                        file:///clangml/
                    '''
             }
         }
-        stage('Commit to release branch') {
+        stage('Commit to snapshot branch') {
             when { branch 'master' }
             steps {
-                sh 'src/commit-release-branch.sh'
+                sh 'src/ci-scripts/commit-snapshot-branch.sh'
             }
         }
         stage('opam installation from devel tag') {
             steps {
                 sh '''
                     docker run --rm -v $PWD/src:/clangml ocaml/opam2:4.07 \
-                        /clangml/opam-pin-and-install.sh \
-   https://gitlab.inria.fr/tmartine/clangml/-/archive/devel/clangml-devel.tag.gz
+                        /clangml/ci-scripts/opam-pin-and-install.sh \
+https://gitlab.inria.fr/tmartine/clangml/-/archive/snapshot/clangml-snapshot.tar.gz
                    '''
             }
         }
