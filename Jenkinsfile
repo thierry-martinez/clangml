@@ -5,7 +5,6 @@ pipeline {
     stages {
         stage('Prepare') {
             steps {
-                sh "echo $PWD"
                 sh 'mkdir src'
                 sh 'mv * src/ || true'
                 sh '''
@@ -17,7 +16,6 @@ pipeline {
         }
         stage('Configure') {
             steps {
-                sh "echo $PWD"
                 sh '''
                     eval $(opam env) && \
                     mkdir build && cd build && \
@@ -28,7 +26,6 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh "echo $PWD"
                 sh 'make -C build clangml'
                 sh 'make -C build stubgen'
             }
@@ -36,7 +33,6 @@ pipeline {
         stage('Generate stubs') {
             steps {
                 script {
-                    sh "echo $PWD"
                     def pwd = sh (
                         script: 'echo $PWD',
                         returnStdout: true
@@ -104,7 +100,6 @@ pipeline {
             when { branch 'master' }
             steps {
                 script {
-                    sh "echo $PWD"
                     def commit = sh (
                         script: 'git rev-parse HEAD',
                         returnStdout: true
@@ -123,23 +118,20 @@ pipeline {
         stage('opam installation') {
             when { branch 'master' }
             steps {
-                sh "echo $PWD"
-                sh """
+                sh '''
                     docker run --rm -v $PWD/src:/clangml ocaml/opam2:4.07 \
                         /clangml/opam-pin-and-install.sh
-                   """
+                   '''
             }
         }
         stage('Commit to release branch') {
             when { branch 'master' }
             steps {
-                sh "echo $PWD"
                 sh 'cd src && ./commit-release-branch.sh'
             }
         }
         stage('opam installation from devel tag') {
             steps {
-                sh "echo $PWD"
                 sh '''
                     docker run --rm -v ocaml/opam2:4.07 \
                         /clangml/opam-pin-and-install.sh \
