@@ -134,9 +134,9 @@ pipeline {
                     ).trim()
                     sh 'git checkout origin/releases'
                     sh """
-                        git merge $(git commit-tree -p HEAD -p origin/master \
+                        git merge $$(git commit-tree -p HEAD -p origin/master \
                             -m 'bootstrapped repository for commit $commit' \
-                            $(git show --format='%T' -s origin/master))
+                            $$(git show --format='%T' -s origin/master))
                        """
                     sh 'git push origin HEAD:releases'
                     sh 'git -f -a "devel" -m "Development version"'
