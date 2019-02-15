@@ -8,17 +8,40 @@ clangml provides bindings for all versions of clang, from 3.4 to
 clangml is installable via `opam`: `opam install clangml`. 
 
 Manual installation requires a bootstrapped source directory.
-Commits from branch `releases` are bootstrapped.
+Commits from branch `snapshot` are bootstrapped: a new snapshot
+is committed by continuous integration after every successful build from
+`master`. 
+
+Snapshot tarball:
+https://gitlab.inria.fr/tmartine/clangml/-/archive/snapshot/clangml-snapshot.tar.gz
+
+To build clangml from snapshot or a bootstrapped source directory,
+you may either:
+* execute `./configure && make && make install`
+(this method is recommended if you have to pass some options to configure);
+* execute
+`opam pin add git+https://gitlab.inria.fr/tmartine/clangml.git#snapshot`.
+
 To initialize the repository from a development branch (e.g., `master`),
-execute `./bootstrap.sh`.
+execute `./bootstrap.sh` first, then `./configure && make && make install` as
+usual.
 
 clangml's `configure` relies on `llvm-config` to find clang's library.
-By default, `llvm-config` is searched in PATH, or you may
+By default, `llvm-config` is searched in PATH, and you may
 specify a path with `./configure --with-llvm-config=...`.
 
 clangml requires some dependencies:
 `opam install dune stdcompat ppx_deriving visitors`.
 Additionnally, to run `make tests`: `opam install ocamlcodoc`.
+
+`libclang` and other external dependencies can be installed with opam depext
+plugin:
+```
+opam pin add -n git+https://gitlab.inria.fr/tmartine/clangml.git#snapshot
+opam depext -i clangml
+```
+(`-n` option asks `opam pin` not to install clangml directly, and `-i` option
+asks `opam depext` to install clangml once dependencies are installed.)
 
 ## Usage
 
