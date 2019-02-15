@@ -3,22 +3,73 @@
 clangml provides bindings for all versions of clang, from 3.4 to
 8.0.0.
 
+## Introduction
+
+It is a complete rewritting of the previous clangml (clangml versions <4.0.0):
+the bindings now rely on automatically generated C stubs to libclang, with
+some extensions when libclang is incomplete.
+Contrary to old clangml versions, the versions of clangml from 4.0.0 are
+independent from the version of the clang library:
+any version of clangml from 4.0.0 can be built with any version of the
+clang library in the supported interval.
+Currently, all versions of clang, from 3.4 to 8.0.0, are supported.
+
+However, clangml is statically linked to libclang, and clangml needs
+to be rebuilt for every version of libclang to run with.
+In addition, the low-level bindings are automatically generated
+from libclang's header and their signature can change from one version
+of libclang to another.
+
+The high-level bindings ([`Clang.Ast`][4], [`Clang.Type`][7],
+[`Clang.Expr`][8], [`Clang.Stmt`][9], [`Clang.Decl`][10]
+and [`Clang.Enum_constant`][11]) provide abstractions
+that are essentially independent from libclang version.
+These abstraction aim mainly to provide an algebraic datatype
+representation of Clang abstract syntax tree (AST).
+It is worth noticing that there can be some differences in the way clang
+parses file from one version to another (in particular, some features of the
+C/C++ languages are only supported by recent versions of clang,
+see some examples in [`Clang__ast`][19] module documentation).
+
 ## Installation
 
-clangml is installable via `opam`: `opam install clangml`. 
+clangml is installable via `opam`: `opam install clangml`.
 
 Manual installation requires a bootstrapped source directory.
-Commits from branch `releases` are bootstrapped.
-To initialize the repository from a development branch (e.g., `master`),
-execute `./bootstrap.sh`.
+Commits from branch `snapshot` are bootstrapped: a new snapshot
+is committed by continuous integration after every successful build from
+`master`.
+
+Snapshot tarball:
+https://gitlab.inria.fr/tmartine/clangml/-/archive/snapshot/clangml-snapshot.tar.gz
+
+To build clangml from snapshot or from a bootstrapped source directory,
+you may either:
+* execute `./configure && make && make install`
+(this method is recommended if you have to pass some options to configure);
+* execute
+`opam pin add git+https://gitlab.inria.fr/tmartine/clangml.git#snapshot`.
+
+To bootstrap the repository from a development branch (e.g., `master`),
+execute `./bootstrap.sh` first, then `./configure && make && make install` as
+usual.
 
 clangml's `configure` relies on `llvm-config` to find clang's library.
-By default, `llvm-config` is searched in PATH, or you may
+By default, `llvm-config` is searched in `PATH`, and you may
 specify a path with `./configure --with-llvm-config=...`.
 
 clangml requires some dependencies:
 `opam install dune stdcompat ppx_deriving visitors`.
 Additionnally, to run `make tests`: `opam install ocamlcodoc`.
+
+`libclang` and other external dependencies can be installed with opam depext
+plugin:
+```
+opam pin add -n git+https://gitlab.inria.fr/tmartine/clangml.git#snapshot
+opam depext -i clangml
+```
+(`-n` option asks `opam pin` not to install clangml directly, and `-i` option
+asks `opam depext` to install clangml once dependencies are installed.)
 
 ## Usage
 

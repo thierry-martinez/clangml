@@ -30,6 +30,11 @@ external get_file_name : cxfile -> string = "clang_getFileName_wrapper"
 [@@ocaml.doc "Retrieve the complete file and path name of the given file."]
 external get_file_time : cxfile -> int = "clang_getFileTime_wrapper"[@@ocaml.doc
                                                                     "Retrieve the last modification time of the given file."]
+type cxfileuniqueid = (int * int * int)[@@ocaml.doc
+                                         "Uniquely identifies a CXFile, that refers to the same underlying file, across an indexing session."]
+external get_file_unique_id :
+  cxfile -> cxfileuniqueid option = "clang_getFileUniqueID_wrapper"[@@ocaml.doc
+                                                                    "Retrieve the unique ID for the given file."]
 type cxtranslationunit
 external is_file_multiple_include_guarded :
   cxtranslationunit -> cxfile -> bool =
