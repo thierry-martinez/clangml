@@ -318,6 +318,58 @@ clang_getFileTime_wrapper(value SFile_ocaml)
   }
 }
 
+static value __attribute__((unused))
+Val_cxfileuniqueid(CXFileUniqueID v)
+{
+  CAMLparam0();
+  CAMLlocal1(data);
+  
+data = caml_alloc_tuple(3);
+for (size_t i = 0; i < 3; i++) {
+  CAMLlocal1(field);
+  field = Val_int(v.data[i]);
+  Store_field(data, i, field);
+}
+
+  CAMLreturn(data);
+}
+
+static CXFileUniqueID __attribute__((unused))
+Cxfileuniqueid_val(value ocaml)
+{
+  CAMLparam1(ocaml);
+  CXFileUniqueID v;
+  
+for (size_t i = 0; i < 3; i++) {
+  CAMLlocal1(ocaml_field);
+  unsigned long long field;
+  ocaml_field = Field(ocaml, i);
+  field = Int_val(ocaml_field);
+  v.data[i] = field;
+}
+
+  CAMLreturnT(CXFileUniqueID, v);
+}
+CAMLprim value
+clang_getFileUniqueID_wrapper(value file_ocaml)
+{
+  CAMLparam1(file_ocaml);
+  CXFile file;
+  file = Cxfile_val(Field(file_ocaml, 0));
+  CXFileUniqueID outID;
+  int result = clang_getFileUniqueID(file, &outID);
+  if (!result) {
+    CAMLlocal2(ocaml_result, data);
+    ocaml_result = caml_alloc(1, 0);
+    data = Val_cxfileuniqueid(outID);
+    Store_field(ocaml_result, 0, data);
+    
+    CAMLreturn(ocaml_result);
+  }
+  else {
+    CAMLreturn(Val_int(0));
+  }}
+
 static void finalize_cxtranslationunit(value v) {
   clang_disposeTranslationUnit(*((CXTranslationUnit *) Data_custom_val(v)));;
 }
@@ -1181,16 +1233,18 @@ static value __attribute__((unused))
 Val_cxunsavedfile(struct CXUnsavedFile v)
 {
   CAMLparam0();
-  CAMLlocal2(ocaml, string);
+  CAMLlocal1(ocaml);
   ocaml = caml_alloc_tuple(2);
-  {
+{
      CAMLlocal1(data);
      data = caml_copy_string(v.Filename);
      Store_field(ocaml, 0, data);
   }
-string = caml_alloc_string(v.Length);
-  memcpy(String_val(string), v.Contents, v.Length);
-  Store_field(ocaml, 1, string);
+{
+     CAMLlocal1(data);
+     data = caml_alloc_initialized_string(v.Length, v.Contents);
+     Store_field(ocaml, 1, data);
+  }
 CAMLreturn(ocaml);
 }
 
@@ -1199,12 +1253,7 @@ Cxunsavedfile_val(value ocaml)
 {
   CAMLparam1(ocaml);
   struct CXUnsavedFile v;
-{
-                      const char * data;
-                      data = String_val(Field(ocaml, 0));
-                      v.Filename = data;
-                              }
-v.Length = caml_string_length(Field(ocaml, 1));
+v.Filename = String_val(Field(ocaml, 0));v.Length = caml_string_length(Field(ocaml, 1));
   v.Contents = String_val(Field(ocaml, 1));
 CAMLreturnT(struct CXUnsavedFile, v);
 }
