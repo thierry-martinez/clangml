@@ -131,7 +131,7 @@ pipeline {
                 sh 'src/ci-scripts/commit-snapshot-branch.sh'
             }
         }
-        stage('opam installation from devel tag') {
+        stage('opam installation from snapshot') {
             steps {
                 sh '''
                     docker run --rm -v $PWD/src:/clangml ocaml/opam2:4.07 \
