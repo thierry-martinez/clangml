@@ -5,7 +5,8 @@ clangml provides bindings for all versions of clang, from 3.4 to
 
 ## Introduction
 
-It is a complete rewritting of the previous clangml (clangml versions <4.0.0):
+This library is a complete rewritting of the previous clangml
+(clangml versions <4.0.0):
 the bindings now rely on automatically generated C stubs to libclang, with
 some extensions when libclang is incomplete.
 Contrary to old clangml versions, the versions of clangml from 4.0.0 are
@@ -33,7 +34,10 @@ see some examples in [`Clang__ast`][19] module documentation).
 
 ## Installation
 
-clangml is installable via `opam`: `opam install clangml`.
+clangml is installable via `opam`:
+```
+opam install clangml
+```
 
 Manual installation requires a bootstrapped source directory.
 Commits from branch `snapshot` are bootstrapped: a new snapshot
@@ -45,6 +49,7 @@ https://gitlab.inria.fr/tmartine/clangml/-/archive/snapshot/clangml-snapshot.tar
 
 To build clangml from snapshot or from a bootstrapped source directory,
 you may either:
+
 * execute `./configure && make && make install`
 (this method is recommended if you have to pass some options to configure);
 * execute
