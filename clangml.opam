@@ -17,5 +17,5 @@ depends: [
   "conf-zlib"
   "ppx_deriving"
   "visitors"
-  "dune" {>= "1.2"}
+  "dune" {build & >= "1.2"}
   "ocaml" {>= "4.04.0" & < "4.08.0"}]
