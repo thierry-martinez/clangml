@@ -1,3 +1,9 @@
+# Upcoming 4.0.0beta2
+
+- Flag dune as a build dependency
+  (suggested by @kit-ty-kate in
+   https://github.com/ocaml/opam-repository/pull/13434)
+
 # 2019-02-11, 4.0.0beta1
 
 - First public release
