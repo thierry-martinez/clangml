@@ -25,7 +25,7 @@ The high-level bindings ([`Clang.Ast`][4], [`Clang.Type`][7],
 [`Clang.Expr`][8], [`Clang.Stmt`][9], [`Clang.Decl`][10]
 and [`Clang.Enum_constant`][11]) provide abstractions
 that are essentially independent from libclang version.
-These abstraction aim mainly to provide an algebraic datatype
+These abstractions aim mainly to provide an algebraic datatype
 representation of Clang abstract syntax tree (AST).
 It is worth noticing that there can be some differences in the way clang
 parses file from one version to another (in particular, some features of the
