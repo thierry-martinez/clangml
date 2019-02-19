@@ -34,9 +34,12 @@ see some examples in [`Clang__ast`][19] module documentation).
 
 ## Installation
 
-clangml is installable via `opam`:
+clangml is installable via `opam`. Since the library relies on external
+dependencies, we suggest to use the depext plugin to install it together
+with the packages needed for your system:
+
 ```
-opam install clangml
+opam depext -i clangml
 ```
 
 Manual installation requires a bootstrapped source directory.
