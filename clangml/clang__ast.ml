@@ -416,6 +416,24 @@ let () =
       size = 42 }}}}] -> ()
   | _ -> assert false
     ]}*)
+  | Vector of {
+      element : qual_type;
+      size : int;
+    }
+(** Vector.
+    {[
+let example = {|
+  #include <stdint.h>
+  int32_t __attribute__((vector_size(16))) v;
+    |}
+
+let () =
+  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match List.rev ast with
+  | { desc = Var { name = "v"; qual_type = { desc = Vector {
+      element = { desc = Typedef "int32_t" };
+      size = 4 }}}} :: _ -> ()
+  | _ -> assert false
+    ]}*)
   | IncompleteArray of qual_type
 (** Incomplete array.
     {[

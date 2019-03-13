@@ -4,6 +4,8 @@
   (suggested by @kit-ty-kate in
    https://github.com/ocaml/opam-repository/pull/13434)
 
+- Vector type
+
 # 2019-02-11, 4.0.0beta1
 
 - First public release

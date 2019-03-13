@@ -245,6 +245,10 @@ module Ast = struct
             let element = cxtype |> get_array_element_type |> of_cxtype in
             let size = cxtype |> get_array_size in
             ConstantArray { element; size }
+        | Vector ->
+            let element = cxtype |> get_element_type |> of_cxtype in
+            let size = cxtype |> get_num_elements in
+            Vector { element; size }
         | IncompleteArray ->
             let element = cxtype |> get_array_element_type |> of_cxtype in
             IncompleteArray element
