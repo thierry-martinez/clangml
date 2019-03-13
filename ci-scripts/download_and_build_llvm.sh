@@ -29,9 +29,18 @@ else
     CC=gcc
     CXX=g++
 fi
-wget http://releases.llvm.org/$version/llvm-$version.src$suffix
+case "$version" in
+*rc*)
+    base_version="${version%rc*}"
+    rc="${version#*rc}"
+    base_url="https://prereleases.llvm.org/$base_version/rc$rc"
+    ;;
+*)
+    base_url="http://releases.llvm.org/$version"
+esac
+wget "$base_url/llvm-$version.src$suffix"
 tar -xf llvm-$version.src$suffix
-wget http://releases.llvm.org/$version/$cfe-$version.src$suffix
+wget "$base_url/$cfe-$version.src$suffix"
 tar -xf $cfe-$version.src$suffix
 mv $cfe-$version$dir_suffix llvm-$version$dir_suffix/tools/clang
 mkdir llvm-$version.build

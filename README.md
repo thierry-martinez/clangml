@@ -1,6 +1,6 @@
-# clangml: OCaml bindings for clang.
+# clangml: OCaml bindings for Clang.
 
-clangml provides bindings for all versions of clang, from 3.4 to
+clangml provides bindings for all versions of Clang, from 3.4 to
 8.0.0.
 
 ## Introduction
@@ -10,10 +10,10 @@ This library is a complete rewritting of the previous clangml
 the bindings now rely on automatically generated C stubs to libclang, with
 some extensions when libclang is incomplete.
 Contrary to old clangml versions, the versions of clangml from 4.0.0 are
-independent from the version of the clang library:
+independent from the version of the Clang library:
 any version of clangml from 4.0.0 can be built with any version of the
-clang library in the supported interval.
-Currently, all versions of clang, from 3.4 to 8.0.0, are supported.
+Clang library in the supported interval.
+Currently, all versions of Clang, from 3.4 to 8.0.0, are supported.
 
 However, clangml is statically linked to libclang, and clangml needs
 to be rebuilt for every version of libclang to run with.
@@ -25,7 +25,7 @@ The high-level bindings ([`Clang.Ast`][4], [`Clang.Type`][7],
 [`Clang.Expr`][8], [`Clang.Stmt`][9], [`Clang.Decl`][10]
 and [`Clang.Enum_constant`][11]) provide abstractions
 that are essentially independent from libclang version.
-These abstraction aim mainly to provide an algebraic datatype
+These abstractions aim mainly to provide an algebraic datatype
 representation of Clang abstract syntax tree (AST).
 It is worth noticing that there can be some differences in the way clang
 parses file from one version to another (in particular, some features of the
@@ -34,9 +34,12 @@ see some examples in [`Clang__ast`][19] module documentation).
 
 ## Installation
 
-clangml is installable via `opam`:
+clangml is installable via `opam`. Since the library relies on external
+dependencies, we suggest to use the depext plugin to install it together
+with the packages needed for your system:
+
 ```
-opam install clangml
+opam depext -i clangml
 ```
 
 Manual installation requires a bootstrapped source directory.
