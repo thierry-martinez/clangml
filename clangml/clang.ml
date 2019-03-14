@@ -5,14 +5,13 @@ include Clang__compat
 let iter_children f c =
   let exn_ref = ref (None : exn option) in
   if
-    visit_children c begin fun cur _par ->
+    visit_children c @@ fun cur _par ->
       try
         f cur;
         Continue
       with exn ->
         exn_ref := Some exn;
         Break
-    end
   then
     assert (!exn_ref = None)
   else
@@ -27,15 +26,15 @@ let list_of_children c =
 
 let iter_type_fields f ty =
   let exn_ref = ref (None : exn option) in
-  assert (
-    type_visit_fields ty begin fun cur ->
+  assert begin
+    type_visit_fields ty @@ fun cur ->
       try
         f cur;
         Continue
       with exn ->
         exn_ref := Some exn;
         Break
-    end);
+  end;
   match !exn_ref with
   | None -> ()
   | Some exn -> raise exn
