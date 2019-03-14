@@ -245,3 +245,15 @@ clang_ext_UnaryExpr_GetArgumentType(CXCursor c);
 
 CXType
 clang_ext_Type_getNamedType(CXType CT);
+
+enum clang_ext_AttrKind {
+  CLANG_EXT_ATTR_None = -1,
+  #define ATTR(Name) CLANG_EXT_ATTR_##Name,
+  #include <clang/Basic/AttrList.inc>
+};
+
+enum clang_ext_AttrKind
+clang_ext_Type_GetAttributeKind(CXType CT);
+
+CXString
+clang_ext_AttrKind_GetSpelling(enum clang_ext_AttrKind AttrKind);
