@@ -447,7 +447,7 @@ extern "C" {
         return cxstring_createRef(Spelling);
 #include "clangml_OperationKinds.def"
     }
-    //llvm_unreachable("Unsupported BinaryOperatorKind");
+    //llvm_unreachable("Unsupported UnaryOperatorKind");
     return cxstring_createRef("");
   }
 
