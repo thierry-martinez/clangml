@@ -447,7 +447,7 @@ extern "C" {
         return cxstring_createRef(Spelling);
 #include "clangml_OperationKinds.def"
     }
-    //llvm_unreachable("Unsupported BinaryOperatorKind");
+    //llvm_unreachable("Unsupported UnaryOperatorKind");
     return cxstring_createRef("");
   }
 
@@ -755,4 +755,26 @@ extern "C" {
     #endif
   }
 
+  enum clang_ext_AttrKind
+  clang_ext_Type_GetAttributeKind(CXType CT)
+  {
+    clang::QualType T = GetQualType(CT);
+    if (auto *ATT = T->getAs<clang::AttributedType>()) {
+      return (enum clang_ext_AttrKind) ATT->getAttrKind();
+    }
+    return CLANG_EXT_ATTR_None;
+  }
+
+  CXString
+  clang_ext_AttrKind_GetSpelling(enum clang_ext_AttrKind AttrKind)
+  {
+    switch (AttrKind) {
+#define ATTR(Name)                              \
+      case CLANG_EXT_ATTR_##Name:               \
+        return cxstring_createRef(#Name);
+#include <clang/Basic/AttrList.inc>
+    default:
+      return cxstring_createRef("");
+    }
+  }
 }

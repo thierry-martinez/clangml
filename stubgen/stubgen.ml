@@ -2242,7 +2242,7 @@ let main cflags llvm_config prefix =
     failwith "Clang compilation error";
   let cur = Clang.get_translation_unit_cursor tu in
   let chan_stubs = open_out (prefix ^ "clang_stubs.c") in
-  protect ~finally:(fun () -> close_out chan_stubs) (fun () ->
+  Fun.protect ~finally:(fun () -> close_out chan_stubs) (fun () ->
     output_warning_c chan_stubs;
     output_string chan_stubs "\
 #include \"stubgen.h\"
@@ -2269,12 +2269,12 @@ let main cflags llvm_config prefix =
       end;
       Continue));
     let chan_intf = open_out (prefix ^ "clang__bindings.mli") in
-    protect ~finally:(fun () -> close_out chan_intf) (fun () ->
+    Fun.protect ~finally:(fun () -> close_out chan_intf) (fun () ->
       output_warning_ml chan_intf;
       Format.fprintf (Format.formatter_of_out_channel chan_intf)
         "%a@." Pprintast.signature (List.rev context.sig_accu));
     let chan_impl = open_out (prefix ^ "clang__bindings.ml") in
-    protect ~finally:(fun () -> close_out chan_intf) (fun () ->
+    Fun.protect ~finally:(fun () -> close_out chan_intf) (fun () ->
       output_warning_ml chan_impl;
       Format.fprintf (Format.formatter_of_out_channel chan_impl)
         "%a@." Pprintast.structure (List.rev context.struct_accu)))
