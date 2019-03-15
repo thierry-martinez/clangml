@@ -2,58 +2,38 @@
    It should not be modified by hand and it should not be versioned
    (except by continuous integration on the dedicated bootstrap branch). *)
 external get_build_session_timestamp :
-  unit -> int = "clang_getBuildSessionTimestamp_wrapper"[@@ocaml.doc
-                                                          "Return the timestamp for use with Clang's -fbuild-session-timestamp= option."]
+  unit -> int = "clang_getBuildSessionTimestamp_wrapper"
 type cxvirtualfileoverlay
 external virtual_file_overlay_create :
   int -> cxvirtualfileoverlay = "clang_VirtualFileOverlay_create_wrapper"
-[@@ocaml.doc
-  "Create a CXVirtualFileOverlay object. Must be disposed with clang_VirtualFileOverlay_dispose()."]
 type cxerrorcode =
-  | Failure
-  [@ocaml.doc "A generic error code, no further details are available."]
-  | Crashed
-  [@ocaml.doc "libclang crashed while performing the requested operation."]
-  | InvalidArguments
-  [@ocaml.doc
-    "The function detected that the arguments violate the function contract."]
-  | ASTReadError [@ocaml.doc "An AST deserialization error has occurred."]
-[@@ocaml.doc "Error codes returned by libclang routines."]
+  | Failure 
+  | Crashed 
+  | InvalidArguments 
+  | ASTReadError 
 external virtual_file_overlay_add_file_mapping :
   cxvirtualfileoverlay ->
     virtual_path:string -> real_path:string -> (unit, cxerrorcode) result =
-    "clang_VirtualFileOverlay_addFileMapping_wrapper"[@@ocaml.doc
-                                                       "Map an absolute virtual file path to an absolute real one. The virtual path must be canonicalized (not contain \".\"/\"..\")."]
+    "clang_VirtualFileOverlay_addFileMapping_wrapper"
 external virtual_file_overlay_set_case_sensitivity :
   cxvirtualfileoverlay -> int -> (unit, cxerrorcode) result =
-    "clang_VirtualFileOverlay_setCaseSensitivity_wrapper"[@@ocaml.doc
-                                                           "Set the case sensitivity for the CXVirtualFileOverlay object. The CXVirtualFileOverlay object is case-sensitive by default, this option can be used to override the default."]
-external virtual_file_overlay_write_to_buffer :
-  cxvirtualfileoverlay -> int -> (string, cxerrorcode) result =
-    "clang_VirtualFileOverlay_writeToBuffer_wrapper"[@@ocaml.doc
-                                                      "Write out the CXVirtualFileOverlay object to a char buffer."]
+    "clang_VirtualFileOverlay_setCaseSensitivity_wrapper"
 type cxmodulemapdescriptor
 external module_map_descriptor_create :
   int -> cxmodulemapdescriptor = "clang_ModuleMapDescriptor_create_wrapper"
-[@@ocaml.doc
-  "Create a CXModuleMapDescriptor object. Must be disposed with clang_ModuleMapDescriptor_dispose()."]
 external module_map_descriptor_set_framework_module_name :
   cxmodulemapdescriptor -> string -> (unit, cxerrorcode) result =
-    "clang_ModuleMapDescriptor_setFrameworkModuleName_wrapper"[@@ocaml.doc
-                                                                "Sets the framework module name that the module.map describes."]
+    "clang_ModuleMapDescriptor_setFrameworkModuleName_wrapper"
 external module_map_descriptor_set_umbrella_header :
   cxmodulemapdescriptor -> string -> (unit, cxerrorcode) result =
-    "clang_ModuleMapDescriptor_setUmbrellaHeader_wrapper"[@@ocaml.doc
-                                                           "Sets the umbrealla header name that the module.map describes."]
+    "clang_ModuleMapDescriptor_setUmbrellaHeader_wrapper"
 external module_map_descriptor_write_to_buffer :
   cxmodulemapdescriptor -> int -> (string, cxerrorcode) result =
-    "clang_ModuleMapDescriptor_writeToBuffer_wrapper"[@@ocaml.doc
-                                                       "Write out the CXModuleMapDescriptor object to a char buffer."]
+    "clang_ModuleMapDescriptor_writeToBuffer_wrapper"
 type cxindex
 external create_index :
   exclude_declarations_from_pch:bool -> display_diagnostics:bool -> cxindex =
-    "clang_createIndex_wrapper"[@@ocaml.doc
-                                 "Provides a shared context for creating translation units."]
+    "clang_createIndex_wrapper"
 module Cxglobaloptflags =
   struct
     type t = int
@@ -68,154 +48,100 @@ module Cxglobaloptflags =
   end
 external cxindex_set_global_options :
   cxindex -> Cxglobaloptflags.t -> unit =
-    "clang_CXIndex_setGlobalOptions_wrapper"[@@ocaml.doc
-                                              "Sets general options associated with a CXIndex."]
+    "clang_CXIndex_setGlobalOptions_wrapper"
 external cxindex_get_global_options :
   cxindex -> Cxglobaloptflags.t = "clang_CXIndex_getGlobalOptions_wrapper"
-[@@ocaml.doc "Gets the general options associated with a CXIndex."]
 external cxindex_set_invocation_emission_path_option :
   cxindex -> string -> unit =
-    "clang_CXIndex_setInvocationEmissionPathOption_wrapper"[@@ocaml.doc
-                                                             "Sets the invocation emission path option in a CXIndex."]
+    "clang_CXIndex_setInvocationEmissionPathOption_wrapper"
 type cxfile
 external get_file_name : cxfile -> string = "clang_getFileName_wrapper"
-[@@ocaml.doc "Retrieve the complete file and path name of the given file."]
-external get_file_time : cxfile -> int = "clang_getFileTime_wrapper"[@@ocaml.doc
-                                                                    "Retrieve the last modification time of the given file."]
-type cxfileuniqueid = (int * int * int)[@@ocaml.doc
-                                         "Uniquely identifies a CXFile, that refers to the same underlying file, across an indexing session."]
-external get_file_unique_id :
-  cxfile -> cxfileuniqueid option = "clang_getFileUniqueID_wrapper"[@@ocaml.doc
-                                                                    "Retrieve the unique ID for the given file."]
+external get_file_time : cxfile -> int = "clang_getFileTime_wrapper"
 type cxtranslationunit
 external is_file_multiple_include_guarded :
   cxtranslationunit -> cxfile -> bool =
-    "clang_isFileMultipleIncludeGuarded_wrapper"[@@ocaml.doc
-                                                  "Determine whether the given header is guarded against multiple inclusions, either with the conventional #ifndef/#define/#endif macro guards or with #pragma once."]
+    "clang_isFileMultipleIncludeGuarded_wrapper"
 external get_file :
-  cxtranslationunit -> string -> cxfile = "clang_getFile_wrapper"[@@ocaml.doc
-                                                                   "Retrieve a file handle within the given translation unit."]
+  cxtranslationunit -> string -> cxfile = "clang_getFile_wrapper"
 external get_file_contents :
   cxtranslationunit -> cxfile -> string option =
-    "clang_getFileContents_wrapper"[@@ocaml.doc
-                                     "Retrieve the buffer associated with the given file."]
+    "clang_getFileContents_wrapper"
 external file_is_equal :
-  cxfile -> cxfile -> bool = "clang_File_isEqual_wrapper"[@@ocaml.doc
-                                                           "Returns non-zero if the file1 and file2 point to the same file, or they are both NULL."]
+  cxfile -> cxfile -> bool = "clang_File_isEqual_wrapper"
 external file_try_get_real_path_name :
-  cxfile -> string = "clang_File_tryGetRealPathName_wrapper"[@@ocaml.doc
-                                                              "Returns the real path name of file."]
-type cxsourcelocation[@@ocaml.doc
-                       "Identifies a specific source location within a translation unit."]
+  cxfile -> string = "clang_File_tryGetRealPathName_wrapper"
+type cxsourcelocation
 external get_null_location :
-  unit -> cxsourcelocation = "clang_getNullLocation_wrapper"[@@ocaml.doc
-                                                              "Retrieve a NULL (invalid) source location."]
+  unit -> cxsourcelocation = "clang_getNullLocation_wrapper"
 external equal_locations :
   cxsourcelocation -> cxsourcelocation -> bool =
-    "clang_equalLocations_wrapper"[@@ocaml.doc
-                                    "Determine whether two source locations, which must refer into the same translation unit, refer to exactly the same point in the source code."]
+    "clang_equalLocations_wrapper"
 external get_location :
   cxtranslationunit -> cxfile -> line:int -> column:int -> cxsourcelocation =
-    "clang_getLocation_wrapper"[@@ocaml.doc
-                                 "Retrieves the source location associated with a given file/line/column in a particular translation unit."]
+    "clang_getLocation_wrapper"
 external get_location_for_offset :
   cxtranslationunit -> cxfile -> int -> cxsourcelocation =
-    "clang_getLocationForOffset_wrapper"[@@ocaml.doc
-                                          "Retrieves the source location associated with a given character offset in a particular translation unit."]
+    "clang_getLocationForOffset_wrapper"
 external location_is_in_system_header :
   cxsourcelocation -> bool = "clang_Location_isInSystemHeader_wrapper"
-[@@ocaml.doc
-  "Returns non-zero if the given source location is in a system header."]
 external location_is_from_main_file :
-  cxsourcelocation -> bool = "clang_Location_isFromMainFile_wrapper"[@@ocaml.doc
-                                                                    "Returns non-zero if the given source location is in the main file of the corresponding translation unit."]
-type cxsourcerange[@@ocaml.doc
-                    "Identifies a half-open character range in the source code."]
+  cxsourcelocation -> bool = "clang_Location_isFromMainFile_wrapper"
+type cxsourcerange
 external get_null_range :
-  unit -> cxsourcerange = "clang_getNullRange_wrapper"[@@ocaml.doc
-                                                        "Retrieve a NULL (invalid) source range."]
+  unit -> cxsourcerange = "clang_getNullRange_wrapper"
 external get_range :
   cxsourcelocation -> cxsourcelocation -> cxsourcerange =
-    "clang_getRange_wrapper"[@@ocaml.doc
-                              "Retrieve a source range given the beginning and ending source locations."]
+    "clang_getRange_wrapper"
 external equal_ranges :
   cxsourcerange -> cxsourcerange -> bool = "clang_equalRanges_wrapper"
-[@@ocaml.doc "Determine whether two ranges are equivalent."]
 external range_is_null : cxsourcerange -> bool = "clang_Range_isNull_wrapper"
-[@@ocaml.doc "Returns non-zero if range is null."]
 external get_expansion_location :
   cxsourcelocation -> (cxfile * int * int * int) =
-    "clang_getExpansionLocation_wrapper"[@@ocaml.doc
-                                          "Retrieve the file, line, column, and offset represented by the given source location."]
+    "clang_getExpansionLocation_wrapper"
 external get_presumed_location :
   cxsourcelocation -> (string * int * int) =
-    "clang_getPresumedLocation_wrapper"[@@ocaml.doc
-                                         "Retrieve the file, line and column represented by the given source location, as specified in a # line directive."]
+    "clang_getPresumedLocation_wrapper"
 external get_instantiation_location :
   cxsourcelocation -> (cxfile * int * int * int) =
-    "clang_getInstantiationLocation_wrapper"[@@ocaml.doc
-                                              "Legacy API to retrieve the file, line, column, and offset represented by the given source location."]
+    "clang_getInstantiationLocation_wrapper"
 external get_spelling_location :
   cxsourcelocation -> (cxfile * int * int * int) =
-    "clang_getSpellingLocation_wrapper"[@@ocaml.doc
-                                         "Retrieve the file, line, column, and offset represented by the given source location."]
+    "clang_getSpellingLocation_wrapper"
 external get_file_location :
   cxsourcelocation -> (cxfile * int * int * int) =
-    "clang_getFileLocation_wrapper"[@@ocaml.doc
-                                     "Retrieve the file, line, column, and offset represented by the given source location."]
+    "clang_getFileLocation_wrapper"
 external get_range_start :
-  cxsourcerange -> cxsourcelocation = "clang_getRangeStart_wrapper"[@@ocaml.doc
-                                                                    "Retrieve a source location representing the first character within a source range."]
+  cxsourcerange -> cxsourcelocation = "clang_getRangeStart_wrapper"
 external get_range_end :
-  cxsourcerange -> cxsourcelocation = "clang_getRangeEnd_wrapper"[@@ocaml.doc
-                                                                   "Retrieve a source location representing the last character within a source range."]
+  cxsourcerange -> cxsourcelocation = "clang_getRangeEnd_wrapper"
 external get_skipped_ranges :
   cxtranslationunit -> cxfile -> cxsourcerange array =
-    "clang_getSkippedRanges_wrapper"[@@ocaml.doc
-                                      "Retrieve all ranges that were skipped by the preprocessor."]
+    "clang_getSkippedRanges_wrapper"
 external get_all_skipped_ranges :
   cxtranslationunit -> cxsourcerange array =
-    "clang_getAllSkippedRanges_wrapper"[@@ocaml.doc
-                                         "Retrieve all ranges from all files that were skipped by the preprocessor."]
+    "clang_getAllSkippedRanges_wrapper"
 type cxdiagnosticset
 external get_num_diagnostics_in_set :
-  cxdiagnosticset -> int = "clang_getNumDiagnosticsInSet_wrapper"[@@ocaml.doc
-                                                                   "Determine the number of diagnostics in a CXDiagnosticSet."]
+  cxdiagnosticset -> int = "clang_getNumDiagnosticsInSet_wrapper"
 type cxdiagnostic
 external get_diagnostic_in_set :
   cxdiagnosticset -> int -> cxdiagnostic = "clang_getDiagnosticInSet_wrapper"
-[@@ocaml.doc
-  "Retrieve a diagnostic associated with the given CXDiagnosticSet."]
 type cxloaddiag_error =
-  | Unknown
-  [@ocaml.doc
-    "Indicates that an unknown error occurred while attempting to deserialize diagnostics."]
-  | CannotLoad
-  [@ocaml.doc
-    "Indicates that the file containing the serialized diagnostics could not be opened."]
-  | InvalidFile
-  [@ocaml.doc
-    "Indicates that the serialized diagnostics file is invalid or corrupt."]
-[@@ocaml.doc
-  "Describes the kind of error that occurred (if any) in a call to clang_loadDiagnostics."]
+  | Unknown 
+  | CannotLoad 
+  | InvalidFile 
 external load_diagnostics :
   string -> (cxdiagnosticset, (cxloaddiag_error * string)) result =
-    "clang_loadDiagnostics_wrapper"[@@ocaml.doc
-                                     "Deserialize a set of diagnostics from a Clang diagnostics bitcode file."]
+    "clang_loadDiagnostics_wrapper"
 external get_child_diagnostics :
   cxdiagnostic -> cxdiagnosticset = "clang_getChildDiagnostics_wrapper"
-[@@ocaml.doc "Retrieve the child diagnostics of a CXDiagnostic."]
 external get_num_diagnostics :
-  cxtranslationunit -> int = "clang_getNumDiagnostics_wrapper"[@@ocaml.doc
-                                                                "Determine the number of diagnostics produced for the given translation unit."]
+  cxtranslationunit -> int = "clang_getNumDiagnostics_wrapper"
 external get_diagnostic :
   cxtranslationunit -> int -> cxdiagnostic = "clang_getDiagnostic_wrapper"
-[@@ocaml.doc
-  "Retrieve a diagnostic associated with the given translation unit."]
 external get_diagnostic_set_from_tu :
   cxtranslationunit -> cxdiagnosticset =
-    "clang_getDiagnosticSetFromTU_wrapper"[@@ocaml.doc
-                                            "Retrieve the complete set of diagnostics associated with a translation unit."]
+    "clang_getDiagnosticSetFromTU_wrapper"
 module Cxdiagnosticdisplayoptions =
   struct
     type t = int
@@ -232,85 +158,53 @@ module Cxdiagnosticdisplayoptions =
   end
 external format_diagnostic :
   cxdiagnostic -> Cxdiagnosticdisplayoptions.t -> string =
-    "clang_formatDiagnostic_wrapper"[@@ocaml.doc
-                                      "Format the given diagnostic in a manner that is suitable for display."]
+    "clang_formatDiagnostic_wrapper"
 external default_diagnostic_display_options :
   unit -> Cxdiagnosticdisplayoptions.t =
-    "clang_defaultDiagnosticDisplayOptions_wrapper"[@@ocaml.doc
-                                                     "Retrieve the set of display options most similar to the default behavior of the clang compiler."]
+    "clang_defaultDiagnosticDisplayOptions_wrapper"
 type cxdiagnosticseverity =
-  | Ignored
-  [@ocaml.doc
-    "A diagnostic that has been suppressed, e.g., by a command-line option."]
-  | Note
-  [@ocaml.doc
-    "This diagnostic is a note that should be attached to the previous (non-note) diagnostic."]
-  | Warning
-  [@ocaml.doc
-    "This diagnostic indicates suspicious code that may not be wrong."]
-  | Error
-  [@ocaml.doc "This diagnostic indicates that the code is ill-formed."]
-  | Fatal
-  [@ocaml.doc
-    "This diagnostic indicates that the code is ill-formed such that future parser recovery is unlikely to produce useful results."]
-[@@ocaml.doc "Describes the severity of a particular diagnostic."]
+  | Ignored 
+  | Note 
+  | Warning 
+  | Error 
+  | Fatal 
 external get_diagnostic_severity :
   cxdiagnostic -> cxdiagnosticseverity =
-    "clang_getDiagnosticSeverity_wrapper"[@@ocaml.doc
-                                           "Determine the severity of the given diagnostic."]
+    "clang_getDiagnosticSeverity_wrapper"
 external get_diagnostic_location :
   cxdiagnostic -> cxsourcelocation = "clang_getDiagnosticLocation_wrapper"
-[@@ocaml.doc "Retrieve the source location of the given diagnostic."]
 external get_diagnostic_spelling :
-  cxdiagnostic -> string = "clang_getDiagnosticSpelling_wrapper"[@@ocaml.doc
-                                                                  "Retrieve the text of the given diagnostic."]
+  cxdiagnostic -> string = "clang_getDiagnosticSpelling_wrapper"
 external get_diagnostic_option :
   cxdiagnostic -> (string * string) = "clang_getDiagnosticOption_wrapper"
-[@@ocaml.doc
-  "Retrieve the name of the command-line option that enabled this diagnostic."]
 external get_diagnostic_category :
-  cxdiagnostic -> int = "clang_getDiagnosticCategory_wrapper"[@@ocaml.doc
-                                                               "Retrieve the category number for this diagnostic."]
+  cxdiagnostic -> int = "clang_getDiagnosticCategory_wrapper"
 external get_diagnostic_category_text :
-  cxdiagnostic -> string = "clang_getDiagnosticCategoryText_wrapper"[@@ocaml.doc
-                                                                    "Retrieve the diagnostic category text for a given diagnostic."]
+  cxdiagnostic -> string = "clang_getDiagnosticCategoryText_wrapper"
 external get_diagnostic_num_ranges :
-  cxdiagnostic -> int = "clang_getDiagnosticNumRanges_wrapper"[@@ocaml.doc
-                                                                "Determine the number of source ranges associated with the given diagnostic."]
+  cxdiagnostic -> int = "clang_getDiagnosticNumRanges_wrapper"
 external get_diagnostic_range :
   cxdiagnostic -> int -> cxsourcerange = "clang_getDiagnosticRange_wrapper"
-[@@ocaml.doc "Retrieve a source range associated with the diagnostic."]
 external get_diagnostic_num_fix_its :
-  cxdiagnostic -> int = "clang_getDiagnosticNumFixIts_wrapper"[@@ocaml.doc
-                                                                "Determine the number of fix-it hints associated with the given diagnostic."]
+  cxdiagnostic -> int = "clang_getDiagnosticNumFixIts_wrapper"
 external get_diagnostic_fix_it :
   cxdiagnostic -> int -> cxsourcerange -> (string * cxsourcerange) =
-    "clang_getDiagnosticFixIt_wrapper"[@@ocaml.doc
-                                        "Retrieve the replacement information for a given fix-it."]
+    "clang_getDiagnosticFixIt_wrapper"
 external get_translation_unit_spelling :
   cxtranslationunit -> string = "clang_getTranslationUnitSpelling_wrapper"
-[@@ocaml.doc "Get the original translation unit source file name."]
-type cxunsavedfile =
-  {
-  filename: string
-    [@ocaml.doc "The file whose contents have not yet been saved."];
-  contents: string
-    [@ocaml.doc "A buffer containing the unsaved contents of this file."]}
-[@@ocaml.doc
-  "Provides the contents of a file that has not yet been saved to disk."]
+type cxunsavedfile = {
+  filename: string ;
+  contents: string }
 external create_translation_unit_from_source_file :
   cxindex ->
     string -> string array -> cxunsavedfile array -> cxtranslationunit =
-    "clang_createTranslationUnitFromSourceFile_wrapper"[@@ocaml.doc
-                                                         "Return the CXTranslationUnit for a given source file and the provided command line arguments one would pass to the compiler."]
+    "clang_createTranslationUnitFromSourceFile_wrapper"
 external create_translation_unit :
   cxindex -> string -> cxtranslationunit =
-    "clang_createTranslationUnit_wrapper"[@@ocaml.doc
-                                           "Same as clang_createTranslationUnit2, but returns the CXTranslationUnit instead of an error code. In case of an error this routine returns a NULL CXTranslationUnit, without further detailed error codes."]
+    "clang_createTranslationUnit_wrapper"
 external create_translation_unit2 :
   cxindex -> string -> (cxtranslationunit, cxerrorcode) result =
-    "clang_createTranslationUnit2_wrapper"[@@ocaml.doc
-                                            "Create a translation unit from an AST file ( -emit-ast)."]
+    "clang_createTranslationUnit2_wrapper"
 module Cxtranslationunit_flags =
   struct
     type t = int
@@ -336,16 +230,13 @@ module Cxtranslationunit_flags =
   end
 external default_editing_translation_unit_options :
   unit -> Cxtranslationunit_flags.t =
-    "clang_defaultEditingTranslationUnitOptions_wrapper"[@@ocaml.doc
-                                                          "Returns the set of flags that is suitable for parsing a translation unit that is being edited."]
+    "clang_defaultEditingTranslationUnitOptions_wrapper"
 external parse_translation_unit :
   cxindex ->
     string ->
       string array ->
-        cxunsavedfile array ->
-          Cxtranslationunit_flags.t -> cxtranslationunit option =
-    "clang_parseTranslationUnit_wrapper"[@@ocaml.doc
-                                          "Same as clang_parseTranslationUnit2, but returns the CXTranslationUnit instead of an error code. In case of an error this routine returns a NULL CXTranslationUnit, without further detailed error codes."]
+        cxunsavedfile array -> Cxtranslationunit_flags.t -> cxtranslationunit
+    = "clang_parseTranslationUnit_wrapper"
 external parse_translation_unit2 :
   cxindex ->
     string ->
@@ -353,8 +244,7 @@ external parse_translation_unit2 :
         cxunsavedfile array ->
           Cxtranslationunit_flags.t ->
             (cxtranslationunit, cxerrorcode) result =
-    "clang_parseTranslationUnit2_wrapper"[@@ocaml.doc
-                                           "Parse the given source file and the translation unit corresponding to that file."]
+    "clang_parseTranslationUnit2_wrapper"
 external parse_translation_unit2_full_argv :
   cxindex ->
     string ->
@@ -362,23 +252,13 @@ external parse_translation_unit2_full_argv :
         cxunsavedfile array ->
           Cxtranslationunit_flags.t ->
             (cxtranslationunit, cxerrorcode) result =
-    "clang_parseTranslationUnit2FullArgv_wrapper"[@@ocaml.doc
-                                                   "Same as clang_parseTranslationUnit2 but requires a full command line for command_line_args including argv\\[0\\]. This is useful if the standard library paths are relative to the binary."]
+    "clang_parseTranslationUnit2FullArgv_wrapper"
 external default_save_options :
-  cxtranslationunit -> int = "clang_defaultSaveOptions_wrapper"[@@ocaml.doc
-                                                                 "Returns the set of flags that is suitable for saving a translation unit."]
+  cxtranslationunit -> int = "clang_defaultSaveOptions_wrapper"
 type cxsaveerror =
-  | Unknown
-  [@ocaml.doc
-    "Indicates that an unknown error occurred while attempting to save the file."]
-  | TranslationErrors
-  [@ocaml.doc
-    "Indicates that errors during translation prevented this attempt to save the translation unit."]
-  | InvalidTU
-  [@ocaml.doc
-    "Indicates that the translation unit to be saved was somehow invalid (e.g., NULL)."]
-[@@ocaml.doc
-  "Describes the kind of error that occurred (if any) in a call to clang_saveTranslationUnit()."]
+  | Unknown 
+  | TranslationErrors 
+  | InvalidTU 
 module Cxsavetranslationunit_flags =
   struct
     type t = int
@@ -391,11 +271,9 @@ module Cxsavetranslationunit_flags =
 external save_translation_unit :
   cxtranslationunit ->
     string -> Cxsavetranslationunit_flags.t -> (unit, cxsaveerror) result =
-    "clang_saveTranslationUnit_wrapper"[@@ocaml.doc
-                                         "Saves a translation unit into a serialized representation of that translation unit on disk."]
+    "clang_saveTranslationUnit_wrapper"
 external suspend_translation_unit :
-  cxtranslationunit -> int = "clang_suspendTranslationUnit_wrapper"[@@ocaml.doc
-                                                                    "Suspend a translation unit in order to free memory associated with it."]
+  cxtranslationunit -> int = "clang_suspendTranslationUnit_wrapper"
 module Cxreparse_flags =
   struct
     type t = int
@@ -407,13 +285,11 @@ module Cxreparse_flags =
   end
 external default_reparse_options :
   cxtranslationunit -> Cxreparse_flags.t =
-    "clang_defaultReparseOptions_wrapper"[@@ocaml.doc
-                                           "Returns the set of flags that is suitable for reparsing a translation unit."]
+    "clang_defaultReparseOptions_wrapper"
 external reparse_translation_unit :
   cxtranslationunit ->
     cxunsavedfile array -> Cxreparse_flags.t -> (unit, cxerrorcode) result =
-    "clang_reparseTranslationUnit_wrapper"[@@ocaml.doc
-                                            "Reparse the source files that produced this translation unit."]
+    "clang_reparseTranslationUnit_wrapper"
 type cxturesourceusagekind =
   | AST 
   | Identifiers 
@@ -428,976 +304,475 @@ type cxturesourceusagekind =
   | Preprocessor 
   | PreprocessingRecord 
   | SourceManager_DataStructures 
-  | Preprocessor_HeaderSearch [@@ocaml.doc
-                                "Categorizes how memory is being used by a translation unit."]
+  | Preprocessor_HeaderSearch 
 external get_turesource_usage_name :
   cxturesourceusagekind -> string = "clang_getTUResourceUsageName_wrapper"
-[@@ocaml.doc
-  "Returns the human-readable null-terminated C string that represents the name of the memory category. This string should never be freed."]
-type cxturesourceusage[@@ocaml.doc
-                        "The memory usage of a CXTranslationUnit, broken into categories."]
+type cxturesourceusage
 external get_cxturesource_usage :
   cxtranslationunit -> cxturesourceusage =
-    "clang_getCXTUResourceUsage_wrapper"[@@ocaml.doc
-                                          "Return the memory usage of a translation unit. This object should be released with clang_disposeCXTUResourceUsage()."]
+    "clang_getCXTUResourceUsage_wrapper"
 type cxtargetinfo
 external get_translation_unit_target_info :
   cxtranslationunit -> cxtargetinfo =
-    "clang_getTranslationUnitTargetInfo_wrapper"[@@ocaml.doc
-                                                  "Get target information for this translation unit."]
+    "clang_getTranslationUnitTargetInfo_wrapper"
 external target_info_get_triple :
-  cxtargetinfo -> string = "clang_TargetInfo_getTriple_wrapper"[@@ocaml.doc
-                                                                 "Get the normalized target triple as a string."]
+  cxtargetinfo -> string = "clang_TargetInfo_getTriple_wrapper"
 external target_info_get_pointer_width :
-  cxtargetinfo -> int = "clang_TargetInfo_getPointerWidth_wrapper"[@@ocaml.doc
-                                                                    "Get the pointer width of the target in bits."]
+  cxtargetinfo -> int = "clang_TargetInfo_getPointerWidth_wrapper"
 type cxcursorkind =
-  | UnexposedDecl
-  [@ocaml.doc
-    "A declaration whose specific kind is not exposed via this interface."]
-  | StructDecl [@ocaml.doc "A C or C++ struct."]
-  | UnionDecl [@ocaml.doc "A C or C++ union."]
-  | ClassDecl [@ocaml.doc "A C++ class."]
-  | EnumDecl [@ocaml.doc "An enumeration."]
-  | FieldDecl
-  [@ocaml.doc
-    "A field (in C) or non-static data member (in C++) in a struct, union, or C++ class."]
-  | EnumConstantDecl [@ocaml.doc "An enumerator constant."]
-  | FunctionDecl [@ocaml.doc "A function."]
-  | VarDecl [@ocaml.doc "A variable."]
-  | ParmDecl [@ocaml.doc "A function or method parameter."]
-  | ObjCInterfaceDecl [@ocaml.doc "An Objective-C \\@interface."]
-  | ObjCCategoryDecl
-  [@ocaml.doc "An Objective-C \\@interface for a category."]
-  | ObjCProtocolDecl [@ocaml.doc "An Objective-C \\@protocol declaration."]
-  | ObjCPropertyDecl [@ocaml.doc "An Objective-C \\@property declaration."]
-  | ObjCIvarDecl [@ocaml.doc "An Objective-C instance variable."]
-  | ObjCInstanceMethodDecl [@ocaml.doc "An Objective-C instance method."]
-  | ObjCClassMethodDecl [@ocaml.doc "An Objective-C class method."]
-  | ObjCImplementationDecl [@ocaml.doc "An Objective-C \\@implementation."]
-  | ObjCCategoryImplDecl
-  [@ocaml.doc "An Objective-C \\@implementation for a category."]
-  | TypedefDecl [@ocaml.doc "A typedef."]
-  | CXXMethod [@ocaml.doc "A C++ class method."]
-  | Namespace [@ocaml.doc "A C++ namespace."]
-  | LinkageSpec [@ocaml.doc "A linkage specification, e.g. 'extern \"C\"'."]
-  | Constructor [@ocaml.doc "A C++ constructor."]
-  | Destructor [@ocaml.doc "A C++ destructor."]
-  | ConversionFunction [@ocaml.doc "A C++ conversion function."]
-  | TemplateTypeParameter [@ocaml.doc "A C++ template type parameter."]
-  | NonTypeTemplateParameter
-  [@ocaml.doc "A C++ non-type template parameter."]
-  | TemplateTemplateParameter
-  [@ocaml.doc "A C++ template template parameter."]
-  | FunctionTemplate [@ocaml.doc "A C++ function template."]
-  | ClassTemplate [@ocaml.doc "A C++ class template."]
-  | ClassTemplatePartialSpecialization
-  [@ocaml.doc "A C++ class template partial specialization."]
-  | NamespaceAlias [@ocaml.doc "A C++ namespace alias declaration."]
-  | UsingDirective [@ocaml.doc "A C++ using directive."]
-  | UsingDeclaration [@ocaml.doc "A C++ using declaration."]
-  | TypeAliasDecl [@ocaml.doc "A C++ alias declaration"]
-  | ObjCSynthesizeDecl
-  [@ocaml.doc "An Objective-C \\@synthesize definition."]
-  | ObjCDynamicDecl [@ocaml.doc "An Objective-C \\@dynamic definition."]
-  | CXXAccessSpecifier [@ocaml.doc "An access specifier."]
-  | ObjCSuperClassRef [@ocaml.doc "An access specifier."]
-  | ObjCProtocolRef [@ocaml.doc "An access specifier."]
-  | ObjCClassRef [@ocaml.doc "An access specifier."]
-  | TypeRef [@ocaml.doc "A reference to a type declaration."]
-  | CXXBaseSpecifier [@ocaml.doc "A reference to a type declaration."]
-  | TemplateRef
-  [@ocaml.doc
-    "A reference to a class template, function template, template template parameter, or class template partial specialization."]
-  | NamespaceRef
-  [@ocaml.doc "A reference to a namespace or namespace alias."]
-  | MemberRef
-  [@ocaml.doc
-    "A reference to a member of a struct, union, or class that occurs in some non-expression context, e.g., a designated initializer."]
-  | LabelRef [@ocaml.doc "A reference to a labeled statement."]
-  | OverloadedDeclRef
-  [@ocaml.doc
-    "A reference to a set of overloaded functions or function templates that has not yet been resolved to a specific function or function template."]
-  | VariableRef
-  [@ocaml.doc
-    "A reference to a variable that occurs in some non-expression context, e.g., a C++ lambda capture list."]
-  | InvalidFile
-  [@ocaml.doc
-    "A reference to a variable that occurs in some non-expression context, e.g., a C++ lambda capture list."]
-  | NoDeclFound
-  [@ocaml.doc
-    "A reference to a variable that occurs in some non-expression context, e.g., a C++ lambda capture list."]
-  | NotImplemented
-  [@ocaml.doc
-    "A reference to a variable that occurs in some non-expression context, e.g., a C++ lambda capture list."]
-  | InvalidCode
-  [@ocaml.doc
-    "A reference to a variable that occurs in some non-expression context, e.g., a C++ lambda capture list."]
-  | UnexposedExpr
-  [@ocaml.doc
-    "An expression whose specific kind is not exposed via this interface."]
-  | DeclRefExpr
-  [@ocaml.doc
-    "An expression that refers to some value declaration, such as a function, variable, or enumerator."]
-  | MemberRefExpr
-  [@ocaml.doc
-    "An expression that refers to a member of a struct, union, class, Objective-C class, etc."]
-  | CallExpr [@ocaml.doc "An expression that calls a function."]
-  | ObjCMessageExpr
-  [@ocaml.doc
-    "An expression that sends a message to an Objective-C object or class."]
-  | BlockExpr [@ocaml.doc "An expression that represents a block literal."]
-  | IntegerLiteral [@ocaml.doc "An integer literal."]
-  | FloatingLiteral [@ocaml.doc "A floating point number literal."]
-  | ImaginaryLiteral [@ocaml.doc "An imaginary number literal."]
-  | StringLiteral [@ocaml.doc "A string literal."]
-  | CharacterLiteral [@ocaml.doc "A character literal."]
-  | ParenExpr [@ocaml.doc "A parenthesized expression, e.g. \"(1)\"."]
-  | UnaryOperator
-  [@ocaml.doc
-    "This represents the unary-expression's (except sizeof and alignof)."]
-  | ArraySubscriptExpr [@ocaml.doc "\\[C99 6.5.2.1\\] Array Subscripting."]
-  | BinaryOperator
-  [@ocaml.doc
-    "A builtin binary operation expression such as \"x + y\" or \"x <= y\"."]
-  | CompoundAssignOperator
-  [@ocaml.doc "Compound assignment such as \"+=\"."]
-  | ConditionalOperator [@ocaml.doc "The ?: ternary operator."]
-  | CStyleCastExpr
-  [@ocaml.doc
-    "An explicit cast in C (C99 6.5.4) or a C-style cast in C++ (C++ \\[expr.cast\\]), which uses the syntax (Type)expr."]
-  | CompoundLiteralExpr [@ocaml.doc "\\[C99 6.5.2.5\\]"]
-  | InitListExpr [@ocaml.doc "Describes an C or C++ initializer list."]
-  | AddrLabelExpr
-  [@ocaml.doc "The GNU address of label extension, representing &&label."]
-  | StmtExpr
-  [@ocaml.doc
-    "This is the GNU Statement Expression extension: (\\{int X=4; X;\\})"]
-  | GenericSelectionExpr [@ocaml.doc "Represents a C11 generic selection."]
-  | GNUNullExpr
-  [@ocaml.doc
-    "Implements the GNU __null extension, which is a name for a null pointer constant that has integral type (e.g., int or long) and is the same size and alignment as a pointer."]
-  | CXXStaticCastExpr [@ocaml.doc "C++'s static_cast<> expression."]
-  | CXXDynamicCastExpr [@ocaml.doc "C++'s dynamic_cast<> expression."]
-  | CXXReinterpretCastExpr
-  [@ocaml.doc "C++'s reinterpret_cast<> expression."]
-  | CXXConstCastExpr [@ocaml.doc "C++'s const_cast<> expression."]
-  | CXXFunctionalCastExpr
-  [@ocaml.doc
-    "Represents an explicit C++ type conversion that uses \"functional\" notion (C++ \\[expr.type.conv\\])."]
-  | CXXTypeidExpr
-  [@ocaml.doc "A C++ typeid expression (C++ \\[expr.typeid\\])."]
-  | CXXBoolLiteralExpr [@ocaml.doc "\\[C++ 2.13.5\\] C++ Boolean Literal."]
-  | CXXNullPtrLiteralExpr
-  [@ocaml.doc "\\[C++0x 2.14.7\\] C++ Pointer Literal."]
-  | CXXThisExpr [@ocaml.doc "Represents the \"this\" expression in C++"]
-  | CXXThrowExpr [@ocaml.doc "\\[C++ 15\\] C++ Throw Expression."]
-  | CXXNewExpr
-  [@ocaml.doc
-    "A new expression for memory allocation and constructor calls, e.g: \"new CXXNewExpr(foo)\"."]
-  | CXXDeleteExpr
-  [@ocaml.doc
-    "A delete expression for memory deallocation and destructor calls, e.g. \"delete\\[\\] pArray\"."]
-  | UnaryExpr
-  [@ocaml.doc "A unary expression. (noexcept, sizeof, or other traits)"]
-  | ObjCStringLiteral
-  [@ocaml.doc "An Objective-C string literal i.e. \"foo\"."]
-  | ObjCEncodeExpr [@ocaml.doc "An Objective-C \\@encode expression."]
-  | ObjCSelectorExpr [@ocaml.doc "An Objective-C \\@selector expression."]
-  | ObjCProtocolExpr [@ocaml.doc "An Objective-C \\@protocol expression."]
-  | ObjCBridgedCastExpr
-  [@ocaml.doc
-    "An Objective-C \"bridged\" cast expression, which casts between Objective-C pointers and C pointers, transferring ownership in the process."]
-  | PackExpansionExpr
-  [@ocaml.doc
-    "Represents a C++0x pack expansion that produces a sequence of expressions."]
-  | SizeOfPackExpr
-  [@ocaml.doc
-    "Represents an expression that computes the length of a parameter pack."]
+  | UnexposedDecl 
+  | StructDecl 
+  | UnionDecl 
+  | ClassDecl 
+  | EnumDecl 
+  | FieldDecl 
+  | EnumConstantDecl 
+  | FunctionDecl 
+  | VarDecl 
+  | ParmDecl 
+  | ObjCInterfaceDecl 
+  | ObjCCategoryDecl 
+  | ObjCProtocolDecl 
+  | ObjCPropertyDecl 
+  | ObjCIvarDecl 
+  | ObjCInstanceMethodDecl 
+  | ObjCClassMethodDecl 
+  | ObjCImplementationDecl 
+  | ObjCCategoryImplDecl 
+  | TypedefDecl 
+  | CXXMethod 
+  | Namespace 
+  | LinkageSpec 
+  | Constructor 
+  | Destructor 
+  | ConversionFunction 
+  | TemplateTypeParameter 
+  | NonTypeTemplateParameter 
+  | TemplateTemplateParameter 
+  | FunctionTemplate 
+  | ClassTemplate 
+  | ClassTemplatePartialSpecialization 
+  | NamespaceAlias 
+  | UsingDirective 
+  | UsingDeclaration 
+  | TypeAliasDecl 
+  | ObjCSynthesizeDecl 
+  | ObjCDynamicDecl 
+  | CXXAccessSpecifier 
+  | ObjCSuperClassRef 
+  | ObjCProtocolRef 
+  | ObjCClassRef 
+  | TypeRef 
+  | CXXBaseSpecifier 
+  | TemplateRef 
+  | NamespaceRef 
+  | MemberRef 
+  | LabelRef 
+  | OverloadedDeclRef 
+  | VariableRef 
+  | InvalidFile 
+  | NoDeclFound 
+  | NotImplemented 
+  | InvalidCode 
+  | UnexposedExpr 
+  | DeclRefExpr 
+  | MemberRefExpr 
+  | CallExpr 
+  | ObjCMessageExpr 
+  | BlockExpr 
+  | IntegerLiteral 
+  | FloatingLiteral 
+  | ImaginaryLiteral 
+  | StringLiteral 
+  | CharacterLiteral 
+  | ParenExpr 
+  | UnaryOperator 
+  | ArraySubscriptExpr 
+  | BinaryOperator 
+  | CompoundAssignOperator 
+  | ConditionalOperator 
+  | CStyleCastExpr 
+  | CompoundLiteralExpr 
+  | InitListExpr 
+  | AddrLabelExpr 
+  | StmtExpr 
+  | GenericSelectionExpr 
+  | GNUNullExpr 
+  | CXXStaticCastExpr 
+  | CXXDynamicCastExpr 
+  | CXXReinterpretCastExpr 
+  | CXXConstCastExpr 
+  | CXXFunctionalCastExpr 
+  | CXXTypeidExpr 
+  | CXXBoolLiteralExpr 
+  | CXXNullPtrLiteralExpr 
+  | CXXThisExpr 
+  | CXXThrowExpr 
+  | CXXNewExpr 
+  | CXXDeleteExpr 
+  | UnaryExpr 
+  | ObjCStringLiteral 
+  | ObjCEncodeExpr 
+  | ObjCSelectorExpr 
+  | ObjCProtocolExpr 
+  | ObjCBridgedCastExpr 
+  | PackExpansionExpr 
+  | SizeOfPackExpr 
   | LambdaExpr 
-  | ObjCBoolLiteralExpr [@ocaml.doc "Objective-c Boolean Literal."]
-  | ObjCSelfExpr
-  [@ocaml.doc "Represents the \"self\" expression in an Objective-C method."]
-  | OMPArraySectionExpr [@ocaml.doc "OpenMP 4.0 \\[2.4, Array Section\\]."]
-  | ObjCAvailabilityCheckExpr [@ocaml.doc "Represents an (...) check."]
-  | FixedPointLiteral [@ocaml.doc "Fixed point literal"]
-  | UnexposedStmt
-  [@ocaml.doc
-    "A statement whose specific kind is not exposed via this interface."]
-  | LabelStmt [@ocaml.doc "A labelled statement in a function."]
-  | CompoundStmt
-  [@ocaml.doc "A group of statements like \\{ stmt stmt \\}."]
-  | CaseStmt [@ocaml.doc "A case statement."]
-  | DefaultStmt [@ocaml.doc "A default statement."]
-  | IfStmt [@ocaml.doc "An if statement"]
-  | SwitchStmt [@ocaml.doc "A switch statement."]
-  | WhileStmt [@ocaml.doc "A while statement."]
-  | DoStmt [@ocaml.doc "A do statement."]
-  | ForStmt [@ocaml.doc "A for statement."]
-  | GotoStmt [@ocaml.doc "A goto statement."]
-  | IndirectGotoStmt [@ocaml.doc "An indirect goto statement."]
-  | ContinueStmt [@ocaml.doc "A continue statement."]
-  | BreakStmt [@ocaml.doc "A break statement."]
-  | ReturnStmt [@ocaml.doc "A return statement."]
-  | GCCAsmStmt [@ocaml.doc "A GCC inline assembly statement extension."]
-  | ObjCAtTryStmt
-  [@ocaml.doc "Objective-C's overall \\@try-\\@catch-\\@finally statement."]
-  | ObjCAtCatchStmt [@ocaml.doc "Objective-C's \\@catch statement."]
-  | ObjCAtFinallyStmt [@ocaml.doc "Objective-C's \\@finally statement."]
-  | ObjCAtThrowStmt [@ocaml.doc "Objective-C's \\@throw statement."]
-  | ObjCAtSynchronizedStmt
-  [@ocaml.doc "Objective-C's \\@synchronized statement."]
-  | ObjCAutoreleasePoolStmt
-  [@ocaml.doc "Objective-C's autorelease pool statement."]
-  | ObjCForCollectionStmt [@ocaml.doc "Objective-C's collection statement."]
-  | CXXCatchStmt [@ocaml.doc "C++'s catch statement."]
-  | CXXTryStmt [@ocaml.doc "C++'s try statement."]
-  | CXXForRangeStmt [@ocaml.doc "C++'s for (* : *) statement."]
-  | SEHTryStmt
-  [@ocaml.doc "Windows Structured Exception Handling's try statement."]
-  | SEHExceptStmt
-  [@ocaml.doc "Windows Structured Exception Handling's except statement."]
-  | SEHFinallyStmt
-  [@ocaml.doc "Windows Structured Exception Handling's finally statement."]
-  | MSAsmStmt [@ocaml.doc "A MS inline assembly statement extension."]
-  | NullStmt [@ocaml.doc "The null statement \";\": C99 6.8.3p3."]
-  | DeclStmt
-  [@ocaml.doc
-    "Adaptor class for mixing declarations with statements and expressions."]
-  | OMPParallelDirective [@ocaml.doc "OpenMP parallel directive."]
-  | OMPSimdDirective [@ocaml.doc "OpenMP SIMD directive."]
-  | OMPForDirective [@ocaml.doc "OpenMP for directive."]
-  | OMPSectionsDirective [@ocaml.doc "OpenMP sections directive."]
-  | OMPSectionDirective [@ocaml.doc "OpenMP section directive."]
-  | OMPSingleDirective [@ocaml.doc "OpenMP single directive."]
-  | OMPParallelForDirective [@ocaml.doc "OpenMP parallel for directive."]
-  | OMPParallelSectionsDirective
-  [@ocaml.doc "OpenMP parallel sections directive."]
-  | OMPTaskDirective [@ocaml.doc "OpenMP task directive."]
-  | OMPMasterDirective [@ocaml.doc "OpenMP master directive."]
-  | OMPCriticalDirective [@ocaml.doc "OpenMP critical directive."]
-  | OMPTaskyieldDirective [@ocaml.doc "OpenMP taskyield directive."]
-  | OMPBarrierDirective [@ocaml.doc "OpenMP barrier directive."]
-  | OMPTaskwaitDirective [@ocaml.doc "OpenMP taskwait directive."]
-  | OMPFlushDirective [@ocaml.doc "OpenMP flush directive."]
-  | SEHLeaveStmt
-  [@ocaml.doc "Windows Structured Exception Handling's leave statement."]
-  | OMPOrderedDirective [@ocaml.doc "OpenMP ordered directive."]
-  | OMPAtomicDirective [@ocaml.doc "OpenMP atomic directive."]
-  | OMPForSimdDirective [@ocaml.doc "OpenMP for SIMD directive."]
-  | OMPParallelForSimdDirective
-  [@ocaml.doc "OpenMP parallel for SIMD directive."]
-  | OMPTargetDirective [@ocaml.doc "OpenMP target directive."]
-  | OMPTeamsDirective [@ocaml.doc "OpenMP teams directive."]
-  | OMPTaskgroupDirective [@ocaml.doc "OpenMP taskgroup directive."]
-  | OMPCancellationPointDirective
-  [@ocaml.doc "OpenMP cancellation point directive."]
-  | OMPCancelDirective [@ocaml.doc "OpenMP cancel directive."]
-  | OMPTargetDataDirective [@ocaml.doc "OpenMP target data directive."]
-  | OMPTaskLoopDirective [@ocaml.doc "OpenMP taskloop directive."]
-  | OMPTaskLoopSimdDirective [@ocaml.doc "OpenMP taskloop simd directive."]
-  | OMPDistributeDirective [@ocaml.doc "OpenMP distribute directive."]
-  | OMPTargetEnterDataDirective
-  [@ocaml.doc "OpenMP target enter data directive."]
-  | OMPTargetExitDataDirective
-  [@ocaml.doc "OpenMP target exit data directive."]
-  | OMPTargetParallelDirective
-  [@ocaml.doc "OpenMP target parallel directive."]
-  | OMPTargetParallelForDirective
-  [@ocaml.doc "OpenMP target parallel for directive."]
-  | OMPTargetUpdateDirective [@ocaml.doc "OpenMP target update directive."]
-  | OMPDistributeParallelForDirective
-  [@ocaml.doc "OpenMP distribute parallel for directive."]
-  | OMPDistributeParallelForSimdDirective
-  [@ocaml.doc "OpenMP distribute parallel for simd directive."]
-  | OMPDistributeSimdDirective
-  [@ocaml.doc "OpenMP distribute simd directive."]
-  | OMPTargetParallelForSimdDirective
-  [@ocaml.doc "OpenMP target parallel for simd directive."]
-  | OMPTargetSimdDirective [@ocaml.doc "OpenMP target simd directive."]
-  | OMPTeamsDistributeDirective
-  [@ocaml.doc "OpenMP teams distribute directive."]
-  | OMPTeamsDistributeSimdDirective
-  [@ocaml.doc "OpenMP teams distribute simd directive."]
-  | OMPTeamsDistributeParallelForSimdDirective
-  [@ocaml.doc "OpenMP teams distribute parallel for simd directive."]
-  | OMPTeamsDistributeParallelForDirective
-  [@ocaml.doc "OpenMP teams distribute parallel for directive."]
-  | OMPTargetTeamsDirective [@ocaml.doc "OpenMP target teams directive."]
-  | OMPTargetTeamsDistributeDirective
-  [@ocaml.doc "OpenMP target teams distribute directive."]
-  | OMPTargetTeamsDistributeParallelForDirective
-  [@ocaml.doc "OpenMP target teams distribute parallel for directive."]
-  | OMPTargetTeamsDistributeParallelForSimdDirective
-  [@ocaml.doc "OpenMP target teams distribute parallel for simd directive."]
-  | OMPTargetTeamsDistributeSimdDirective
-  [@ocaml.doc "OpenMP target teams distribute simd directive."]
-  | TranslationUnit
-  [@ocaml.doc "Cursor that represents the translation unit itself."]
-  | UnexposedAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | IBActionAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | IBOutletAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | IBOutletCollectionAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | CXXFinalAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | CXXOverrideAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | AnnotateAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | AsmLabelAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | PackedAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | PureAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | ConstAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | NoDuplicateAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | CUDAConstantAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | CUDADeviceAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | CUDAGlobalAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | CUDAHostAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | CUDASharedAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | VisibilityAttr
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | DLLExport
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | DLLImport
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | NSReturnsRetained
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | NSReturnsNotRetained
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | NSReturnsAutoreleased
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | NSConsumesSelf
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | NSConsumed
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | ObjCException
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | ObjCNSObject
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | ObjCIndependentClass
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | ObjCPreciseLifetime
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | ObjCReturnsInnerPointer
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | ObjCRequiresSuper
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | ObjCRootClass
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | ObjCSubclassingRestricted
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | ObjCExplicitProtocolImpl
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | ObjCDesignatedInitializer
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | ObjCRuntimeVisible
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | ObjCBoxable
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | FlagEnum
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | PreprocessingDirective
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | MacroDefinition
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | MacroExpansion
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | InclusionDirective
-  [@ocaml.doc
-    "An attribute whose specific kind is not exposed via this interface."]
-  | ModuleImportDecl [@ocaml.doc "A module import declaration."]
-  | TypeAliasTemplateDecl [@ocaml.doc "A module import declaration."]
-  | StaticAssert [@ocaml.doc "A static_assert or _Static_assert node"]
-  | FriendDecl [@ocaml.doc "a friend declaration."]
-  | OverloadCandidate [@ocaml.doc "A code completion overload candidate."]
-[@@ocaml.doc "Describes the kind of entity that a cursor refers to."]
-type cxcursor[@@ocaml.doc
-               "A cursor representing some element in the abstract syntax tree for a translation unit."]
+  | ObjCBoolLiteralExpr 
+  | ObjCSelfExpr 
+  | OMPArraySectionExpr 
+  | ObjCAvailabilityCheckExpr 
+  | FixedPointLiteral 
+  | UnexposedStmt 
+  | LabelStmt 
+  | CompoundStmt 
+  | CaseStmt 
+  | DefaultStmt 
+  | IfStmt 
+  | SwitchStmt 
+  | WhileStmt 
+  | DoStmt 
+  | ForStmt 
+  | GotoStmt 
+  | IndirectGotoStmt 
+  | ContinueStmt 
+  | BreakStmt 
+  | ReturnStmt 
+  | GCCAsmStmt 
+  | ObjCAtTryStmt 
+  | ObjCAtCatchStmt 
+  | ObjCAtFinallyStmt 
+  | ObjCAtThrowStmt 
+  | ObjCAtSynchronizedStmt 
+  | ObjCAutoreleasePoolStmt 
+  | ObjCForCollectionStmt 
+  | CXXCatchStmt 
+  | CXXTryStmt 
+  | CXXForRangeStmt 
+  | SEHTryStmt 
+  | SEHExceptStmt 
+  | SEHFinallyStmt 
+  | MSAsmStmt 
+  | NullStmt 
+  | DeclStmt 
+  | OMPParallelDirective 
+  | OMPSimdDirective 
+  | OMPForDirective 
+  | OMPSectionsDirective 
+  | OMPSectionDirective 
+  | OMPSingleDirective 
+  | OMPParallelForDirective 
+  | OMPParallelSectionsDirective 
+  | OMPTaskDirective 
+  | OMPMasterDirective 
+  | OMPCriticalDirective 
+  | OMPTaskyieldDirective 
+  | OMPBarrierDirective 
+  | OMPTaskwaitDirective 
+  | OMPFlushDirective 
+  | SEHLeaveStmt 
+  | OMPOrderedDirective 
+  | OMPAtomicDirective 
+  | OMPForSimdDirective 
+  | OMPParallelForSimdDirective 
+  | OMPTargetDirective 
+  | OMPTeamsDirective 
+  | OMPTaskgroupDirective 
+  | OMPCancellationPointDirective 
+  | OMPCancelDirective 
+  | OMPTargetDataDirective 
+  | OMPTaskLoopDirective 
+  | OMPTaskLoopSimdDirective 
+  | OMPDistributeDirective 
+  | OMPTargetEnterDataDirective 
+  | OMPTargetExitDataDirective 
+  | OMPTargetParallelDirective 
+  | OMPTargetParallelForDirective 
+  | OMPTargetUpdateDirective 
+  | OMPDistributeParallelForDirective 
+  | OMPDistributeParallelForSimdDirective 
+  | OMPDistributeSimdDirective 
+  | OMPTargetParallelForSimdDirective 
+  | OMPTargetSimdDirective 
+  | OMPTeamsDistributeDirective 
+  | OMPTeamsDistributeSimdDirective 
+  | OMPTeamsDistributeParallelForSimdDirective 
+  | OMPTeamsDistributeParallelForDirective 
+  | OMPTargetTeamsDirective 
+  | OMPTargetTeamsDistributeDirective 
+  | OMPTargetTeamsDistributeParallelForDirective 
+  | OMPTargetTeamsDistributeParallelForSimdDirective 
+  | OMPTargetTeamsDistributeSimdDirective 
+  | TranslationUnit 
+  | UnexposedAttr 
+  | IBActionAttr 
+  | IBOutletAttr 
+  | IBOutletCollectionAttr 
+  | CXXFinalAttr 
+  | CXXOverrideAttr 
+  | AnnotateAttr 
+  | AsmLabelAttr 
+  | PackedAttr 
+  | PureAttr 
+  | ConstAttr 
+  | NoDuplicateAttr 
+  | CUDAConstantAttr 
+  | CUDADeviceAttr 
+  | CUDAGlobalAttr 
+  | CUDAHostAttr 
+  | CUDASharedAttr 
+  | VisibilityAttr 
+  | DLLExport 
+  | DLLImport 
+  | NSReturnsRetained 
+  | NSReturnsNotRetained 
+  | NSReturnsAutoreleased 
+  | NSConsumesSelf 
+  | NSConsumed 
+  | ObjCException 
+  | ObjCNSObject 
+  | ObjCIndependentClass 
+  | ObjCPreciseLifetime 
+  | ObjCReturnsInnerPointer 
+  | ObjCRequiresSuper 
+  | ObjCRootClass 
+  | ObjCSubclassingRestricted 
+  | ObjCExplicitProtocolImpl 
+  | ObjCDesignatedInitializer 
+  | ObjCRuntimeVisible 
+  | ObjCBoxable 
+  | FlagEnum 
+  | PreprocessingDirective 
+  | MacroDefinition 
+  | MacroExpansion 
+  | InclusionDirective 
+  | ModuleImportDecl 
+  | TypeAliasTemplateDecl 
+  | StaticAssert 
+  | FriendDecl 
+  | OverloadCandidate 
+type cxcursor
 external get_null_cursor : unit -> cxcursor = "clang_getNullCursor_wrapper"
-[@@ocaml.doc "Retrieve the NULL cursor, which represents no entity."]
 external get_translation_unit_cursor :
   cxtranslationunit -> cxcursor = "clang_getTranslationUnitCursor_wrapper"
-[@@ocaml.doc
-  "Retrieve the cursor that represents the given translation unit."]
 external equal_cursors :
-  cxcursor -> cxcursor -> bool = "clang_equalCursors_wrapper"[@@ocaml.doc
-                                                               "Determine whether two cursors are equivalent."]
+  cxcursor -> cxcursor -> bool = "clang_equalCursors_wrapper"
 external cursor_is_null : cxcursor -> bool = "clang_Cursor_isNull_wrapper"
-[@@ocaml.doc "Returns non-zero if cursor is null."]
-external hash_cursor : cxcursor -> int = "clang_hashCursor_wrapper"[@@ocaml.doc
-                                                                    "Compute a hash value for the given cursor."]
+external hash_cursor : cxcursor -> int = "clang_hashCursor_wrapper"
 external get_cursor_kind :
-  cxcursor -> cxcursorkind = "clang_getCursorKind_wrapper"[@@ocaml.doc
-                                                            "Retrieve the kind of the given cursor."]
+  cxcursor -> cxcursorkind = "clang_getCursorKind_wrapper"
 external is_declaration :
-  cxcursorkind -> bool = "clang_isDeclaration_wrapper"[@@ocaml.doc
-                                                        "Determine whether the given cursor kind represents a declaration."]
+  cxcursorkind -> bool = "clang_isDeclaration_wrapper"
 external is_invalid_declaration :
-  cxcursor -> bool = "clang_isInvalidDeclaration_wrapper"[@@ocaml.doc
-                                                           "Determine whether the given declaration is invalid."]
+  cxcursor -> bool = "clang_isInvalidDeclaration_wrapper"
 external is_reference : cxcursorkind -> bool = "clang_isReference_wrapper"
-[@@ocaml.doc
-  "Determine whether the given cursor kind represents a simple reference."]
 external is_expression : cxcursorkind -> bool = "clang_isExpression_wrapper"
-[@@ocaml.doc
-  "Determine whether the given cursor kind represents an expression."]
 external is_statement : cxcursorkind -> bool = "clang_isStatement_wrapper"
-[@@ocaml.doc
-  "Determine whether the given cursor kind represents a statement."]
 external is_attribute : cxcursorkind -> bool = "clang_isAttribute_wrapper"
-[@@ocaml.doc
-  "Determine whether the given cursor kind represents an attribute."]
 external cursor_has_attrs : cxcursor -> int = "clang_Cursor_hasAttrs_wrapper"
-[@@ocaml.doc "Determine whether the given cursor has any attributes."]
 external is_invalid : cxcursorkind -> bool = "clang_isInvalid_wrapper"
-[@@ocaml.doc
-  "Determine whether the given cursor kind represents an invalid cursor."]
 external is_translation_unit :
-  cxcursorkind -> bool = "clang_isTranslationUnit_wrapper"[@@ocaml.doc
-                                                            "Determine whether the given cursor kind represents a translation unit."]
+  cxcursorkind -> bool = "clang_isTranslationUnit_wrapper"
 external is_preprocessing :
-  cxcursorkind -> bool = "clang_isPreprocessing_wrapper"[@@ocaml.doc
-                                                          "* Determine whether the given cursor represents a preprocessing element, such as a preprocessor directive or macro instantiation."]
+  cxcursorkind -> bool = "clang_isPreprocessing_wrapper"
 external is_unexposed : cxcursorkind -> bool = "clang_isUnexposed_wrapper"
-[@@ocaml.doc
-  "* Determine whether the given cursor represents a currently unexposed piece of the AST (e.g., CXCursor_UnexposedStmt)."]
 type cxlinkagekind =
-  | Invalid
-  [@ocaml.doc
-    "This value indicates that no linkage information is available for a provided CXCursor."]
-  | NoLinkage
-  [@ocaml.doc
-    "This is the linkage for variables, parameters, and so on that have automatic storage. This covers normal (non-extern) local variables."]
-  | Internal
-  [@ocaml.doc
-    "This is the linkage for static variables and static functions."]
-  | UniqueExternal
-  [@ocaml.doc
-    "This is the linkage for entities with external linkage that live in C++ anonymous namespaces."]
-  | External
-  [@ocaml.doc
-    "This is the linkage for entities with true, external linkage."][@@ocaml.doc
-                                                                    "Describe the linkage of the entity referred to by a cursor."]
-[@@deriving (eq, ord, show)]
+  | Invalid 
+  | NoLinkage 
+  | Internal 
+  | UniqueExternal 
+  | External [@@deriving (eq, ord, show)]
 external get_cursor_linkage :
-  cxcursor -> cxlinkagekind = "clang_getCursorLinkage_wrapper"[@@ocaml.doc
-                                                                "Determine the linkage of the entity referred to by a given cursor."]
+  cxcursor -> cxlinkagekind = "clang_getCursorLinkage_wrapper"
 type cxvisibilitykind =
-  | Invalid
-  [@ocaml.doc
-    "This value indicates that no visibility information is available for a provided CXCursor."]
-  | Hidden [@ocaml.doc "Symbol not seen by the linker."]
-  | Protected
-  [@ocaml.doc
-    "Symbol seen by the linker but resolves to a symbol inside this object."]
-  | Default
-  [@ocaml.doc "Symbol seen by the linker and acts like a normal symbol."]
+  | Invalid 
+  | Hidden 
+  | Protected 
+  | Default 
 external get_cursor_visibility :
-  cxcursor -> cxvisibilitykind = "clang_getCursorVisibility_wrapper"[@@ocaml.doc
-                                                                    "Describe the visibility of the entity referred to by a cursor."]
+  cxcursor -> cxvisibilitykind = "clang_getCursorVisibility_wrapper"
 type cxavailabilitykind =
-  | Available [@ocaml.doc "The entity is available."]
-  | Deprecated
-  [@ocaml.doc
-    "The entity is available, but has been deprecated (and its use is not recommended)."]
-  | NotAvailable
-  [@ocaml.doc "The entity is not available; any use of it will be an error."]
-  | NotAccessible
-  [@ocaml.doc
-    "The entity is available, but not accessible; any use of it will be an error."]
-[@@ocaml.doc
-  "Describes the availability of a particular entity, which indicates whether the use of this entity will result in a warning or error due to it being deprecated or unavailable."]
+  | Available 
+  | Deprecated 
+  | NotAvailable 
+  | NotAccessible 
 external get_cursor_availability :
   cxcursor -> cxavailabilitykind = "clang_getCursorAvailability_wrapper"
-[@@ocaml.doc
-  "Determine the availability of the entity that this cursor refers to, taking the current target platform into account."]
 type cxlanguagekind =
   | Invalid 
   | C 
   | ObjC 
-  | CPlusPlus [@@ocaml.doc
-                "Describe the \"language\" of the entity referred to by a cursor."]
+  | CPlusPlus 
 external get_cursor_language :
-  cxcursor -> cxlanguagekind = "clang_getCursorLanguage_wrapper"[@@ocaml.doc
-                                                                  "Determine the \"language\" of the entity referred to by a given cursor."]
+  cxcursor -> cxlanguagekind = "clang_getCursorLanguage_wrapper"
 type cxtlskind =
   | None 
   | Dynamic 
-  | Static [@@ocaml.doc
-             "Describe the \"thread-local storage (TLS) kind\" of the declaration referred to by a cursor."]
+  | Static 
 external get_cursor_tlskind :
-  cxcursor -> cxtlskind = "clang_getCursorTLSKind_wrapper"[@@ocaml.doc
-                                                            "Determine the \"thread-local storage (TLS) kind\" of the declaration referred to by a cursor."]
+  cxcursor -> cxtlskind = "clang_getCursorTLSKind_wrapper"
 external cursor_get_translation_unit :
   cxcursor -> cxtranslationunit = "clang_Cursor_getTranslationUnit_wrapper"
-[@@ocaml.doc "Returns the translation unit that a cursor originated from."]
 type cxcursorset
 external create_cxcursor_set :
-  unit -> cxcursorset = "clang_createCXCursorSet_wrapper"[@@ocaml.doc
-                                                           "Creates an empty CXCursorSet."]
+  unit -> cxcursorset = "clang_createCXCursorSet_wrapper"
 external cxcursor_set_contains :
   cxcursorset -> cxcursor -> int = "clang_CXCursorSet_contains_wrapper"
-[@@ocaml.doc
-  "Queries a CXCursorSet to see if it contains a specific CXCursor."]
 external cxcursor_set_insert :
   cxcursorset -> cxcursor -> int = "clang_CXCursorSet_insert_wrapper"
-[@@ocaml.doc "Inserts a CXCursor into a CXCursorSet."]
 external get_cursor_semantic_parent :
-  cxcursor -> cxcursor = "clang_getCursorSemanticParent_wrapper"[@@ocaml.doc
-                                                                  "Determine the semantic parent of the given cursor."]
+  cxcursor -> cxcursor = "clang_getCursorSemanticParent_wrapper"
 external get_cursor_lexical_parent :
-  cxcursor -> cxcursor = "clang_getCursorLexicalParent_wrapper"[@@ocaml.doc
-                                                                 "Determine the lexical parent of the given cursor."]
+  cxcursor -> cxcursor = "clang_getCursorLexicalParent_wrapper"
 external get_overridden_cursors :
-  cxcursor -> string = "clang_getOverriddenCursors_wrapper"[@@ocaml.doc
-                                                             "Determine the set of methods that are overridden by the given method."]
+  cxcursor -> string = "clang_getOverriddenCursors_wrapper"
 external get_included_file :
-  cxcursor -> cxfile = "clang_getIncludedFile_wrapper"[@@ocaml.doc
-                                                        "Retrieve the file that is included by the given inclusion directive cursor."]
+  cxcursor -> cxfile = "clang_getIncludedFile_wrapper"
 external get_cursor :
   cxtranslationunit -> cxsourcelocation -> cxcursor =
-    "clang_getCursor_wrapper"[@@ocaml.doc
-                               "Map a source location to the cursor that describes the entity at that location in the source code."]
+    "clang_getCursor_wrapper"
 external get_cursor_location :
-  cxcursor -> cxsourcelocation = "clang_getCursorLocation_wrapper"[@@ocaml.doc
-                                                                    "Retrieve the physical location of the source constructor referenced by the given cursor."]
+  cxcursor -> cxsourcelocation = "clang_getCursorLocation_wrapper"
 external get_cursor_extent :
-  cxcursor -> cxsourcerange = "clang_getCursorExtent_wrapper"[@@ocaml.doc
-                                                               "Retrieve the physical extent of the source construct referenced by the given cursor."]
+  cxcursor -> cxsourcerange = "clang_getCursorExtent_wrapper"
 type cxtypekind =
-  | Invalid
-  [@ocaml.doc
-    "Represents an invalid type (e.g., where no type is available)."]
-  | Unexposed
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Void
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Bool
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Char_U
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | UChar
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Char16
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Char32
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | UShort
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | UInt
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | ULong
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | ULongLong
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | UInt128
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Char_S
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | SChar
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | WChar
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Short
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Int
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Long
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | LongLong
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Int128
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Float
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Double
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | LongDouble
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | NullPtr
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Overload
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Dependent
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | ObjCId
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | ObjCClass
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | ObjCSel
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Float128
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Half
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Float16
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | ShortAccum
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Accum
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | LongAccum
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | UShortAccum
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | UAccum
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | ULongAccum
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Complex
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Pointer
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | BlockPointer
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | LValueReference
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | RValueReference
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Record
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Enum
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Typedef
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | ObjCInterface
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | ObjCObjectPointer
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | FunctionNoProto
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | FunctionProto
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | ConstantArray
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Vector
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | IncompleteArray
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | VariableArray
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | DependentSizedArray
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | MemberPointer
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Auto
-  [@ocaml.doc
-    "A type whose specific kind is not exposed via this interface."]
-  | Elaborated
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | Pipe
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage1dRO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage1dArrayRO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage1dBufferRO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dRO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dArrayRO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dDepthRO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dArrayDepthRO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dMSAARO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dArrayMSAARO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dMSAADepthRO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dArrayMSAADepthRO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage3dRO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage1dWO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage1dArrayWO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage1dBufferWO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dWO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dArrayWO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dDepthWO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dArrayDepthWO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dMSAAWO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dArrayMSAAWO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dMSAADepthWO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dArrayMSAADepthWO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage3dWO
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage1dRW
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage1dArrayRW
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage1dBufferRW
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dRW
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dArrayRW
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dDepthRW
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dArrayDepthRW
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dMSAARW
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dArrayMSAARW
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dMSAADepthRW
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage2dArrayMSAADepthRW
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLImage3dRW
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLSampler
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLEvent
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLQueue
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLReserveID
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | ObjCObject
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | ObjCTypeParam
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | Attributed
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLIntelSubgroupAVCMcePayload
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLIntelSubgroupAVCImePayload
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLIntelSubgroupAVCRefPayload
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLIntelSubgroupAVCSicPayload
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLIntelSubgroupAVCMceResult
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLIntelSubgroupAVCImeResult
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLIntelSubgroupAVCRefResult
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLIntelSubgroupAVCSicResult
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLIntelSubgroupAVCImeResultSingleRefStreamout
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLIntelSubgroupAVCImeResultDualRefStreamout
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLIntelSubgroupAVCImeSingleRefStreamin
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-  | OCLIntelSubgroupAVCImeDualRefStreamin
-  [@ocaml.doc
-    "Represents a type that was referred to using an elaborated type keyword."]
-[@@ocaml.doc "Describes the kind of type"][@@deriving (eq, ord, show)]
-type cxtype[@@ocaml.doc
-             "The type of an element in the abstract syntax tree."]
+  | Invalid 
+  | Unexposed 
+  | Void 
+  | Bool 
+  | Char_U 
+  | UChar 
+  | Char16 
+  | Char32 
+  | UShort 
+  | UInt 
+  | ULong 
+  | ULongLong 
+  | UInt128 
+  | Char_S 
+  | SChar 
+  | WChar 
+  | Short 
+  | Int 
+  | Long 
+  | LongLong 
+  | Int128 
+  | Float 
+  | Double 
+  | LongDouble 
+  | NullPtr 
+  | Overload 
+  | Dependent 
+  | ObjCId 
+  | ObjCClass 
+  | ObjCSel 
+  | Float128 
+  | Half 
+  | Float16 
+  | ShortAccum 
+  | Accum 
+  | LongAccum 
+  | UShortAccum 
+  | UAccum 
+  | ULongAccum 
+  | Complex 
+  | Pointer 
+  | BlockPointer 
+  | LValueReference 
+  | RValueReference 
+  | Record 
+  | Enum 
+  | Typedef 
+  | ObjCInterface 
+  | ObjCObjectPointer 
+  | FunctionNoProto 
+  | FunctionProto 
+  | ConstantArray 
+  | Vector 
+  | IncompleteArray 
+  | VariableArray 
+  | DependentSizedArray 
+  | MemberPointer 
+  | Auto 
+  | Elaborated 
+  | Pipe 
+  | OCLImage1dRO 
+  | OCLImage1dArrayRO 
+  | OCLImage1dBufferRO 
+  | OCLImage2dRO 
+  | OCLImage2dArrayRO 
+  | OCLImage2dDepthRO 
+  | OCLImage2dArrayDepthRO 
+  | OCLImage2dMSAARO 
+  | OCLImage2dArrayMSAARO 
+  | OCLImage2dMSAADepthRO 
+  | OCLImage2dArrayMSAADepthRO 
+  | OCLImage3dRO 
+  | OCLImage1dWO 
+  | OCLImage1dArrayWO 
+  | OCLImage1dBufferWO 
+  | OCLImage2dWO 
+  | OCLImage2dArrayWO 
+  | OCLImage2dDepthWO 
+  | OCLImage2dArrayDepthWO 
+  | OCLImage2dMSAAWO 
+  | OCLImage2dArrayMSAAWO 
+  | OCLImage2dMSAADepthWO 
+  | OCLImage2dArrayMSAADepthWO 
+  | OCLImage3dWO 
+  | OCLImage1dRW 
+  | OCLImage1dArrayRW 
+  | OCLImage1dBufferRW 
+  | OCLImage2dRW 
+  | OCLImage2dArrayRW 
+  | OCLImage2dDepthRW 
+  | OCLImage2dArrayDepthRW 
+  | OCLImage2dMSAARW 
+  | OCLImage2dArrayMSAARW 
+  | OCLImage2dMSAADepthRW 
+  | OCLImage2dArrayMSAADepthRW 
+  | OCLImage3dRW 
+  | OCLSampler 
+  | OCLEvent 
+  | OCLQueue 
+  | OCLReserveID 
+  | ObjCObject 
+  | ObjCTypeParam 
+  | Attributed 
+  | OCLIntelSubgroupAVCMcePayload 
+  | OCLIntelSubgroupAVCImePayload 
+  | OCLIntelSubgroupAVCRefPayload 
+  | OCLIntelSubgroupAVCSicPayload 
+  | OCLIntelSubgroupAVCMceResult 
+  | OCLIntelSubgroupAVCImeResult 
+  | OCLIntelSubgroupAVCRefResult 
+  | OCLIntelSubgroupAVCSicResult 
+  | OCLIntelSubgroupAVCImeResultSingleRefStreamout 
+  | OCLIntelSubgroupAVCImeResultDualRefStreamout 
+  | OCLIntelSubgroupAVCImeSingleRefStreamin 
+  | OCLIntelSubgroupAVCImeDualRefStreamin [@@deriving (eq, ord, show)]
+type cxtype
 external get_type_kind : cxtype -> cxtypekind = "clang_getTypeKind_wrapper"
 external get_cursor_type : cxcursor -> cxtype = "clang_getCursorType_wrapper"
-[@@ocaml.doc "Retrieve the type of a CXCursor (if any)."]
 external get_type_spelling :
-  cxtype -> string = "clang_getTypeSpelling_wrapper"[@@ocaml.doc
-                                                      "Pretty-print the underlying type using the rules of the language of the translation unit from which it came."]
+  cxtype -> string = "clang_getTypeSpelling_wrapper"
 external get_typedef_decl_underlying_type :
-  cxcursor -> cxtype = "clang_getTypedefDeclUnderlyingType_wrapper"[@@ocaml.doc
-                                                                    "Retrieve the underlying type of a typedef declaration."]
+  cxcursor -> cxtype = "clang_getTypedefDeclUnderlyingType_wrapper"
 external get_enum_decl_integer_type :
-  cxcursor -> cxtype = "clang_getEnumDeclIntegerType_wrapper"[@@ocaml.doc
-                                                               "Retrieve the integer type of an enum declaration."]
+  cxcursor -> cxtype = "clang_getEnumDeclIntegerType_wrapper"
 external get_enum_constant_decl_value :
-  cxcursor -> int = "clang_getEnumConstantDeclValue_wrapper"[@@ocaml.doc
-                                                              "Retrieve the integer value of an enum constant declaration as a signed long long."]
+  cxcursor -> int = "clang_getEnumConstantDeclValue_wrapper"
 external get_enum_constant_decl_unsigned_value :
-  cxcursor -> int = "clang_getEnumConstantDeclUnsignedValue_wrapper"[@@ocaml.doc
-                                                                    "Retrieve the integer value of an enum constant declaration as an unsigned long long."]
+  cxcursor -> int = "clang_getEnumConstantDeclUnsignedValue_wrapper"
 external get_field_decl_bit_width :
-  cxcursor -> int = "clang_getFieldDeclBitWidth_wrapper"[@@ocaml.doc
-                                                          "Retrieve the bit width of a bit field declaration as an integer."]
+  cxcursor -> int = "clang_getFieldDeclBitWidth_wrapper"
 external cursor_get_num_arguments :
-  cxcursor -> int = "clang_Cursor_getNumArguments_wrapper"[@@ocaml.doc
-                                                            "Retrieve the number of non-variadic arguments associated with a given cursor."]
+  cxcursor -> int = "clang_Cursor_getNumArguments_wrapper"
 external cursor_get_argument :
-  cxcursor -> int -> cxcursor = "clang_Cursor_getArgument_wrapper"[@@ocaml.doc
-                                                                    "Retrieve the argument cursor of a function or method."]
+  cxcursor -> int -> cxcursor = "clang_Cursor_getArgument_wrapper"
 external cursor_get_num_template_arguments :
-  cxcursor -> int = "clang_Cursor_getNumTemplateArguments_wrapper"[@@ocaml.doc
-                                                                    "Returns the number of template args of a function decl representing a template specialization."]
+  cxcursor -> int = "clang_Cursor_getNumTemplateArguments_wrapper"
 type cxtemplateargumentkind =
   | Null 
   | Type 
@@ -1408,64 +783,43 @@ type cxtemplateargumentkind =
   | TemplateExpansion 
   | Expression 
   | Pack 
-  | Invalid [@@ocaml.doc "Describes the kind of a template argument."]
+  | Invalid 
 external cursor_get_template_argument_kind :
   cxcursor -> int -> cxtemplateargumentkind =
-    "clang_Cursor_getTemplateArgumentKind_wrapper"[@@ocaml.doc
-                                                    "Retrieve the kind of the I'th template argument of the CXCursor C."]
+    "clang_Cursor_getTemplateArgumentKind_wrapper"
 external cursor_get_template_argument_type :
   cxcursor -> int -> cxtype = "clang_Cursor_getTemplateArgumentType_wrapper"
-[@@ocaml.doc
-  "Retrieve a CXType representing the type of a TemplateArgument of a function decl representing a template specialization."]
 external cursor_get_template_argument_value :
   cxcursor -> int -> int = "clang_Cursor_getTemplateArgumentValue_wrapper"
-[@@ocaml.doc
-  "Retrieve the value of an Integral TemplateArgument (of a function decl representing a template specialization) as a signed long long."]
 external cursor_get_template_argument_unsigned_value :
   cxcursor -> int -> int =
-    "clang_Cursor_getTemplateArgumentUnsignedValue_wrapper"[@@ocaml.doc
-                                                             "Retrieve the value of an Integral TemplateArgument (of a function decl representing a template specialization) as an unsigned long long."]
+    "clang_Cursor_getTemplateArgumentUnsignedValue_wrapper"
 external equal_types : cxtype -> cxtype -> bool = "clang_equalTypes_wrapper"
-[@@ocaml.doc "Determine whether two CXTypes represent the same type."]
 external get_canonical_type :
-  cxtype -> cxtype = "clang_getCanonicalType_wrapper"[@@ocaml.doc
-                                                       "Return the canonical type for a CXType."]
+  cxtype -> cxtype = "clang_getCanonicalType_wrapper"
 external is_const_qualified_type :
-  cxtype -> bool = "clang_isConstQualifiedType_wrapper"[@@ocaml.doc
-                                                         "Determine whether a CXType has the \"const\" qualifier set, without looking through typedefs that may have added \"const\" at a different level."]
+  cxtype -> bool = "clang_isConstQualifiedType_wrapper"
 external cursor_is_macro_function_like :
-  cxcursor -> bool = "clang_Cursor_isMacroFunctionLike_wrapper"[@@ocaml.doc
-                                                                 "Determine whether a CXCursor that is a macro, is function like."]
+  cxcursor -> bool = "clang_Cursor_isMacroFunctionLike_wrapper"
 external cursor_is_macro_builtin :
-  cxcursor -> bool = "clang_Cursor_isMacroBuiltin_wrapper"[@@ocaml.doc
-                                                            "Determine whether a CXCursor that is a macro, is a builtin one."]
+  cxcursor -> bool = "clang_Cursor_isMacroBuiltin_wrapper"
 external cursor_is_function_inlined :
-  cxcursor -> bool = "clang_Cursor_isFunctionInlined_wrapper"[@@ocaml.doc
-                                                               "Determine whether a CXCursor that is a function declaration, is an inline declaration."]
+  cxcursor -> bool = "clang_Cursor_isFunctionInlined_wrapper"
 external is_volatile_qualified_type :
-  cxtype -> bool = "clang_isVolatileQualifiedType_wrapper"[@@ocaml.doc
-                                                            "Determine whether a CXType has the \"volatile\" qualifier set, without looking through typedefs that may have added \"volatile\" at a different level."]
+  cxtype -> bool = "clang_isVolatileQualifiedType_wrapper"
 external is_restrict_qualified_type :
-  cxtype -> bool = "clang_isRestrictQualifiedType_wrapper"[@@ocaml.doc
-                                                            "Determine whether a CXType has the \"restrict\" qualifier set, without looking through typedefs that may have added \"restrict\" at a different level."]
+  cxtype -> bool = "clang_isRestrictQualifiedType_wrapper"
 external get_address_space : cxtype -> int = "clang_getAddressSpace_wrapper"
-[@@ocaml.doc "Returns the address space of the given type."]
 external get_typedef_name : cxtype -> string = "clang_getTypedefName_wrapper"
-[@@ocaml.doc "Returns the typedef name of the given type."]
 external get_pointee_type : cxtype -> cxtype = "clang_getPointeeType_wrapper"
-[@@ocaml.doc "For pointer types, returns the type of the pointee."]
 external get_type_declaration :
-  cxtype -> cxcursor = "clang_getTypeDeclaration_wrapper"[@@ocaml.doc
-                                                           "Return the cursor for the declaration of the given type."]
+  cxtype -> cxcursor = "clang_getTypeDeclaration_wrapper"
 external get_decl_obj_ctype_encoding :
-  cxcursor -> string = "clang_getDeclObjCTypeEncoding_wrapper"[@@ocaml.doc
-                                                                "Returns the Objective-C type encoding for the specified declaration."]
+  cxcursor -> string = "clang_getDeclObjCTypeEncoding_wrapper"
 external type_get_obj_cencoding :
-  cxtype -> string = "clang_Type_getObjCEncoding_wrapper"[@@ocaml.doc
-                                                           "Returns the Objective-C type encoding for the specified CXType."]
+  cxtype -> string = "clang_Type_getObjCEncoding_wrapper"
 external get_type_kind_spelling :
-  cxtypekind -> string = "clang_getTypeKindSpelling_wrapper"[@@ocaml.doc
-                                                              "Retrieve the spelling of a given CXTypeKind."]
+  cxtypekind -> string = "clang_getTypeKindSpelling_wrapper"
 type cxcallingconv =
   | Default 
   | C 
@@ -1485,126 +839,79 @@ type cxcallingconv =
   | PreserveAll 
   | AArch64VectorCall 
   | Invalid 
-  | Unexposed [@@ocaml.doc
-                "Describes the calling convention of a function type"]
-[@@deriving (eq, ord, show)]
+  | Unexposed [@@deriving (eq, ord, show)]
 external get_function_type_calling_conv :
   cxtype -> cxcallingconv = "clang_getFunctionTypeCallingConv_wrapper"
-[@@ocaml.doc
-  "Retrieve the calling convention associated with a function type."]
 external get_result_type : cxtype -> cxtype = "clang_getResultType_wrapper"
-[@@ocaml.doc "Retrieve the return type associated with a function type."]
 external get_exception_specification_type :
-  cxtype -> int = "clang_getExceptionSpecificationType_wrapper"[@@ocaml.doc
-                                                                 "Retrieve the exception specification type associated with a function type. This is a value of type CXCursor_ExceptionSpecificationKind."]
+  cxtype -> int = "clang_getExceptionSpecificationType_wrapper"
 external get_num_arg_types : cxtype -> int = "clang_getNumArgTypes_wrapper"
-[@@ocaml.doc
-  "Retrieve the number of non-variadic parameters associated with a function type."]
 external get_arg_type : cxtype -> int -> cxtype = "clang_getArgType_wrapper"
-[@@ocaml.doc "Retrieve the type of a parameter of a function type."]
 external type_get_obj_cobject_base_type :
-  cxtype -> cxtype = "clang_Type_getObjCObjectBaseType_wrapper"[@@ocaml.doc
-                                                                 "Retrieves the base type of the ObjCObjectType."]
+  cxtype -> cxtype = "clang_Type_getObjCObjectBaseType_wrapper"
 external type_get_num_obj_cprotocol_refs :
-  cxtype -> int = "clang_Type_getNumObjCProtocolRefs_wrapper"[@@ocaml.doc
-                                                               "Retrieve the number of protocol references associated with an ObjC object/id."]
+  cxtype -> int = "clang_Type_getNumObjCProtocolRefs_wrapper"
 external type_get_obj_cprotocol_decl :
   cxtype -> int -> cxcursor = "clang_Type_getObjCProtocolDecl_wrapper"
-[@@ocaml.doc
-  "Retrieve the decl for a protocol reference for an ObjC object/id."]
 external type_get_num_obj_ctype_args :
-  cxtype -> int = "clang_Type_getNumObjCTypeArgs_wrapper"[@@ocaml.doc
-                                                           "Retreive the number of type arguments associated with an ObjC object."]
+  cxtype -> int = "clang_Type_getNumObjCTypeArgs_wrapper"
 external type_get_obj_ctype_arg :
-  cxtype -> int -> cxtype = "clang_Type_getObjCTypeArg_wrapper"[@@ocaml.doc
-                                                                 "Retrieve a type argument associated with an ObjC object."]
+  cxtype -> int -> cxtype = "clang_Type_getObjCTypeArg_wrapper"
 external is_function_type_variadic :
-  cxtype -> bool = "clang_isFunctionTypeVariadic_wrapper"[@@ocaml.doc
-                                                           "Return 1 if the CXType is a variadic function type, and 0 otherwise."]
+  cxtype -> bool = "clang_isFunctionTypeVariadic_wrapper"
 external get_cursor_result_type :
-  cxcursor -> cxtype = "clang_getCursorResultType_wrapper"[@@ocaml.doc
-                                                            "Retrieve the return type associated with a given cursor."]
+  cxcursor -> cxtype = "clang_getCursorResultType_wrapper"
 external get_cursor_exception_specification_type :
   cxcursor -> int = "clang_getCursorExceptionSpecificationType_wrapper"
-[@@ocaml.doc
-  "Retrieve the exception specification type associated with a given cursor. This is a value of type CXCursor_ExceptionSpecificationKind."]
-external is_podtype : cxtype -> bool = "clang_isPODType_wrapper"[@@ocaml.doc
-                                                                  "Return 1 if the CXType is a POD (plain old data) type, and 0 otherwise."]
+external is_podtype : cxtype -> bool = "clang_isPODType_wrapper"
 external get_element_type : cxtype -> cxtype = "clang_getElementType_wrapper"
-[@@ocaml.doc "Return the element type of an array, complex, or vector type."]
 external get_num_elements : cxtype -> int = "clang_getNumElements_wrapper"
-[@@ocaml.doc "Return the number of elements of an array or vector type."]
 external get_array_element_type :
-  cxtype -> cxtype = "clang_getArrayElementType_wrapper"[@@ocaml.doc
-                                                          "Return the element type of an array type."]
+  cxtype -> cxtype = "clang_getArrayElementType_wrapper"
 external get_array_size : cxtype -> int = "clang_getArraySize_wrapper"
-[@@ocaml.doc "Return the array size of a constant array."]
 external type_get_named_type :
-  cxtype -> cxtype = "clang_Type_getNamedType_wrapper"[@@ocaml.doc
-                                                        "Retrieve the type named by the qualified-id."]
+  cxtype -> cxtype = "clang_Type_getNamedType_wrapper"
 external type_is_transparent_tag_typedef :
-  cxtype -> bool = "clang_Type_isTransparentTagTypedef_wrapper"[@@ocaml.doc
-                                                                 "Determine if a typedef is 'transparent' tag."]
+  cxtype -> bool = "clang_Type_isTransparentTagTypedef_wrapper"
 type cxtypenullabilitykind =
-  | NonNull [@ocaml.doc "Values of this type can never be null."]
-  | Nullable [@ocaml.doc "Values of this type can be null."]
-  | Unspecified
-  [@ocaml.doc
-    "Whether values of this type can be null is (explicitly) unspecified. This captures a (fairly rare) case where we can't conclude anything about the nullability of the type even though it has been considered."]
-  | Invalid [@ocaml.doc "Nullability is not applicable to this type."]
+  | NonNull 
+  | Nullable 
+  | Unspecified 
+  | Invalid 
 external type_get_nullability :
   cxtype -> cxtypenullabilitykind = "clang_Type_getNullability_wrapper"
-[@@ocaml.doc "Retrieve the nullability kind of a pointer type."]
 external type_get_align_of : cxtype -> int = "clang_Type_getAlignOf_wrapper"
-[@@ocaml.doc
-  "Return the alignment of a type in bytes as per C++\\[expr.alignof\\] standard."]
 external type_get_class_type :
-  cxtype -> cxtype = "clang_Type_getClassType_wrapper"[@@ocaml.doc
-                                                        "Return the class type of an member pointer type."]
+  cxtype -> cxtype = "clang_Type_getClassType_wrapper"
 external type_get_size_of : cxtype -> int = "clang_Type_getSizeOf_wrapper"
-[@@ocaml.doc
-  "Return the size of a type in bytes as per C++\\[expr.sizeof\\] standard."]
 external type_get_offset_of :
-  cxtype -> string -> int = "clang_Type_getOffsetOf_wrapper"[@@ocaml.doc
-                                                              "Return the offset of a field named S in a record of type T in bits as it would be returned by __offsetof__ as per C++11\\[18.2p4\\]"]
+  cxtype -> string -> int = "clang_Type_getOffsetOf_wrapper"
 external type_get_modified_type :
-  cxtype -> cxtype = "clang_Type_getModifiedType_wrapper"[@@ocaml.doc
-                                                           "Return the type that was modified by this attributed type."]
+  cxtype -> cxtype = "clang_Type_getModifiedType_wrapper"
 external cursor_get_offset_of_field :
-  cxcursor -> int = "clang_Cursor_getOffsetOfField_wrapper"[@@ocaml.doc
-                                                             "Return the offset of the field represented by the Cursor."]
+  cxcursor -> int = "clang_Cursor_getOffsetOfField_wrapper"
 external cursor_is_anonymous :
-  cxcursor -> bool = "clang_Cursor_isAnonymous_wrapper"[@@ocaml.doc
-                                                         "Determine whether the given cursor represents an anonymous record declaration."]
+  cxcursor -> bool = "clang_Cursor_isAnonymous_wrapper"
 external type_get_num_template_arguments :
-  cxtype -> int = "clang_Type_getNumTemplateArguments_wrapper"[@@ocaml.doc
-                                                                "Returns the number of template arguments for given template specialization, or -1 if type T is not a template specialization."]
+  cxtype -> int = "clang_Type_getNumTemplateArguments_wrapper"
 external type_get_template_argument_as_type :
   cxtype -> int -> cxtype = "clang_Type_getTemplateArgumentAsType_wrapper"
-[@@ocaml.doc
-  "Returns the type template argument of a template class specialization at given index."]
 type cxrefqualifierkind =
-  | None [@ocaml.doc "No ref-qualifier was provided."]
-  | LValue [@ocaml.doc "An lvalue ref-qualifier was provided ( &)."]
-  | RValue [@ocaml.doc "An rvalue ref-qualifier was provided ( &&)."]
+  | None 
+  | LValue 
+  | RValue 
 external type_get_cxxref_qualifier :
   cxtype -> cxrefqualifierkind = "clang_Type_getCXXRefQualifier_wrapper"
-[@@ocaml.doc "Retrieve the ref-qualifier kind of a function or method."]
 external cursor_is_bit_field :
-  cxcursor -> bool = "clang_Cursor_isBitField_wrapper"[@@ocaml.doc
-                                                        "Returns non-zero if the cursor specifies a Record member that is a bitfield."]
+  cxcursor -> bool = "clang_Cursor_isBitField_wrapper"
 external is_virtual_base : cxcursor -> bool = "clang_isVirtualBase_wrapper"
-[@@ocaml.doc
-  "Returns 1 if the base class specified by the cursor with kind CX_CXXBaseSpecifier is virtual."]
 type cx_cxxaccessspecifier =
   | CXXInvalidAccessSpecifier 
   | CXXPublic 
   | CXXProtected 
-  | CXXPrivate [@@ocaml.doc
-                 "Represents the C++ access control level to a base class for a cursor with kind CX_CXXBaseSpecifier."]
+  | CXXPrivate 
 external get_cxxaccess_specifier :
   cxcursor -> cx_cxxaccessspecifier = "clang_getCXXAccessSpecifier_wrapper"
-[@@ocaml.doc "Returns the access control level for the referenced object."]
 type cx_storageclass =
   | Invalid 
   | None 
@@ -1613,45 +920,28 @@ type cx_storageclass =
   | PrivateExtern 
   | OpenCLWorkGroupLocal 
   | Auto 
-  | Register [@@ocaml.doc
-               "Represents the storage classes as declared in the source. CX_SC_Invalid was added for the case that the passed cursor in not a declaration."]
+  | Register 
 external cursor_get_storage_class :
   cxcursor -> cx_storageclass = "clang_Cursor_getStorageClass_wrapper"
-[@@ocaml.doc
-  "Returns the storage class for a function or variable declaration."]
 external get_num_overloaded_decls :
-  cxcursor -> int = "clang_getNumOverloadedDecls_wrapper"[@@ocaml.doc
-                                                           "Determine the number of overloaded declarations referenced by a CXCursor_OverloadedDeclRef cursor."]
+  cxcursor -> int = "clang_getNumOverloadedDecls_wrapper"
 external get_overloaded_decl :
-  cxcursor -> int -> cxcursor = "clang_getOverloadedDecl_wrapper"[@@ocaml.doc
-                                                                   "Retrieve a cursor for one of the overloaded declarations referenced by a CXCursor_OverloadedDeclRef cursor."]
+  cxcursor -> int -> cxcursor = "clang_getOverloadedDecl_wrapper"
 external get_iboutlet_collection_type :
-  cxcursor -> cxtype = "clang_getIBOutletCollectionType_wrapper"[@@ocaml.doc
-                                                                  "For cursors representing an iboutletcollection attribute, this function returns the collection element type."]
+  cxcursor -> cxtype = "clang_getIBOutletCollectionType_wrapper"
 type cxchildvisitresult =
-  | Break [@ocaml.doc "Terminates the cursor traversal."]
-  | Continue
-  [@ocaml.doc
-    "Continues the cursor traversal with the next sibling of the cursor just visited, without visiting its children."]
-  | Recurse
-  [@ocaml.doc
-    "Recursively traverse the children of this cursor, using the same visitor and client data."]
-[@@ocaml.doc
-  "Describes how the traversal of the children of a particular cursor should proceed after visiting a particular child cursor."]
+  | Break 
+  | Continue 
+  | Recurse 
 external visit_children :
   cxcursor -> (cxcursor -> cxcursor -> cxchildvisitresult) -> bool =
-    "clang_visitChildren_wrapper"[@@ocaml.doc
-                                   "Visit the children of a particular cursor."]
+    "clang_visitChildren_wrapper"
 external get_cursor_usr : cxcursor -> string = "clang_getCursorUSR_wrapper"
-[@@ocaml.doc
-  "Retrieve a Unified Symbol Resolution (USR) for the entity referenced by the given cursor."]
 external get_cursor_spelling :
-  cxcursor -> string = "clang_getCursorSpelling_wrapper"[@@ocaml.doc
-                                                          "Retrieve a name for the entity referenced by this cursor."]
+  cxcursor -> string = "clang_getCursorSpelling_wrapper"
 external cursor_get_spelling_name_range :
   cxcursor -> piece_index:int -> options:int -> cxsourcerange =
-    "clang_Cursor_getSpellingNameRange_wrapper"[@@ocaml.doc
-                                                 "Retrieve a range for a piece that forms the cursors spelling name. Most of the times there is only one range for the complete spelling but for Objective-C methods and Objective-C message expressions, there are multiple pieces for each selector identifier."]
+    "clang_Cursor_getSpellingNameRange_wrapper"
 type cxprintingpolicy
 type cxprintingpolicyproperty =
   | Indentation 
@@ -1679,270 +969,175 @@ type cxprintingpolicyproperty =
   | MSVCFormatting 
   | ConstantsAsWritten 
   | SuppressImplicitBase 
-  | FullyQualifiedName [@@ocaml.doc "Properties for the printing policy."]
+  | FullyQualifiedName 
 external printing_policy_get_property :
   cxprintingpolicy -> cxprintingpolicyproperty -> int =
-    "clang_PrintingPolicy_getProperty_wrapper"[@@ocaml.doc
-                                                "Get a property value for the given printing policy."]
+    "clang_PrintingPolicy_getProperty_wrapper"
 external printing_policy_set_property :
   cxprintingpolicy -> cxprintingpolicyproperty -> int -> unit =
-    "clang_PrintingPolicy_setProperty_wrapper"[@@ocaml.doc
-                                                "Set a property value for the given printing policy."]
+    "clang_PrintingPolicy_setProperty_wrapper"
 external get_cursor_printing_policy :
   cxcursor -> cxprintingpolicy = "clang_getCursorPrintingPolicy_wrapper"
-[@@ocaml.doc "Retrieve the default policy for the cursor."]
 external get_cursor_pretty_printed :
   cxcursor -> cxprintingpolicy -> string =
-    "clang_getCursorPrettyPrinted_wrapper"[@@ocaml.doc
-                                            "Pretty print declarations."]
+    "clang_getCursorPrettyPrinted_wrapper"
 external get_cursor_display_name :
-  cxcursor -> string = "clang_getCursorDisplayName_wrapper"[@@ocaml.doc
-                                                             "Retrieve the display name for the entity referenced by this cursor."]
+  cxcursor -> string = "clang_getCursorDisplayName_wrapper"
 external get_cursor_referenced :
-  cxcursor -> cxcursor = "clang_getCursorReferenced_wrapper"[@@ocaml.doc
-                                                              "For a cursor that is a reference, retrieve a cursor representing the entity that it references."]
+  cxcursor -> cxcursor = "clang_getCursorReferenced_wrapper"
 external get_cursor_definition :
-  cxcursor -> cxcursor = "clang_getCursorDefinition_wrapper"[@@ocaml.doc
-                                                              "For a cursor that is either a reference to or a declaration of some entity, retrieve a cursor that describes the definition of that entity."]
+  cxcursor -> cxcursor = "clang_getCursorDefinition_wrapper"
 external is_cursor_definition :
-  cxcursor -> bool = "clang_isCursorDefinition_wrapper"[@@ocaml.doc
-                                                         "Determine whether the declaration pointed to by this cursor is also a definition of that entity."]
+  cxcursor -> bool = "clang_isCursorDefinition_wrapper"
 external get_canonical_cursor :
-  cxcursor -> cxcursor = "clang_getCanonicalCursor_wrapper"[@@ocaml.doc
-                                                             "Retrieve the canonical cursor corresponding to the given cursor."]
+  cxcursor -> cxcursor = "clang_getCanonicalCursor_wrapper"
 external cursor_get_obj_cselector_index :
-  cxcursor -> int = "clang_Cursor_getObjCSelectorIndex_wrapper"[@@ocaml.doc
-                                                                 "If the cursor points to a selector identifier in an Objective-C method or message expression, this returns the selector index."]
+  cxcursor -> int = "clang_Cursor_getObjCSelectorIndex_wrapper"
 external cursor_is_dynamic_call :
-  cxcursor -> bool = "clang_Cursor_isDynamicCall_wrapper"[@@ocaml.doc
-                                                           "Given a cursor pointing to a C++ method call or an Objective-C message, returns non-zero if the method/message is \"dynamic\", meaning:"]
+  cxcursor -> bool = "clang_Cursor_isDynamicCall_wrapper"
 external cursor_get_receiver_type :
-  cxcursor -> cxtype = "clang_Cursor_getReceiverType_wrapper"[@@ocaml.doc
-                                                               "Given a cursor pointing to an Objective-C message or property reference, or C++ method call, returns the CXType of the receiver."]
+  cxcursor -> cxtype = "clang_Cursor_getReceiverType_wrapper"
 external cursor_get_obj_cproperty_attributes :
   cxcursor -> int -> int = "clang_Cursor_getObjCPropertyAttributes_wrapper"
-[@@ocaml.doc
-  "Given a cursor that represents a property declaration, return the associated property attributes. The bits are formed from CXObjCPropertyAttrKind."]
 external cursor_get_obj_cproperty_getter_name :
   cxcursor -> string = "clang_Cursor_getObjCPropertyGetterName_wrapper"
-[@@ocaml.doc
-  "Given a cursor that represents a property declaration, return the name of the method that implements the getter."]
 external cursor_get_obj_cproperty_setter_name :
   cxcursor -> string = "clang_Cursor_getObjCPropertySetterName_wrapper"
-[@@ocaml.doc
-  "Given a cursor that represents a property declaration, return the name of the method that implements the setter, if any."]
 external cursor_get_obj_cdecl_qualifiers :
-  cxcursor -> int = "clang_Cursor_getObjCDeclQualifiers_wrapper"[@@ocaml.doc
-                                                                  "Given a cursor that represents an Objective-C method or parameter declaration, return the associated Objective-C qualifiers for the return type or the parameter respectively. The bits are formed from CXObjCDeclQualifierKind."]
+  cxcursor -> int = "clang_Cursor_getObjCDeclQualifiers_wrapper"
 external cursor_is_obj_coptional :
-  cxcursor -> bool = "clang_Cursor_isObjCOptional_wrapper"[@@ocaml.doc
-                                                            "Given a cursor that represents an Objective-C method or property declaration, return non-zero if the declaration was affected by \"\\@optional\". Returns zero if the cursor is not such a declaration or it is \"\\@required\"."]
+  cxcursor -> bool = "clang_Cursor_isObjCOptional_wrapper"
 external cursor_is_variadic :
-  cxcursor -> bool = "clang_Cursor_isVariadic_wrapper"[@@ocaml.doc
-                                                        "Returns non-zero if the given cursor is a variadic function or method."]
+  cxcursor -> bool = "clang_Cursor_isVariadic_wrapper"
 external cursor_is_external_symbol :
   cxcursor -> (string * string * int) option =
-    "clang_Cursor_isExternalSymbol_wrapper"[@@ocaml.doc
-                                             "Returns non-zero if the given cursor points to a symbol marked with external_source_symbol attribute."]
+    "clang_Cursor_isExternalSymbol_wrapper"
 external cursor_get_comment_range :
-  cxcursor -> cxsourcerange = "clang_Cursor_getCommentRange_wrapper"[@@ocaml.doc
-                                                                    "Given a cursor that represents a declaration, return the associated comment's source range. The range may include multiple consecutive comments with whitespace in between."]
+  cxcursor -> cxsourcerange = "clang_Cursor_getCommentRange_wrapper"
 external cursor_get_raw_comment_text :
-  cxcursor -> string = "clang_Cursor_getRawCommentText_wrapper"[@@ocaml.doc
-                                                                 "Given a cursor that represents a declaration, return the associated comment text, including comment markers."]
+  cxcursor -> string = "clang_Cursor_getRawCommentText_wrapper"
 external cursor_get_brief_comment_text :
   cxcursor -> string option = "clang_Cursor_getBriefCommentText_wrapper"
-[@@ocaml.doc
-  "Given a cursor that represents a documentable entity (e.g., declaration), return the associated first paragraph."]
 external cursor_get_mangling :
-  cxcursor -> string = "clang_Cursor_getMangling_wrapper"[@@ocaml.doc
-                                                           "Retrieve the CXString representing the mangled name of the cursor."]
+  cxcursor -> string = "clang_Cursor_getMangling_wrapper"
 external cursor_get_cxxmanglings :
-  cxcursor -> string array = "clang_Cursor_getCXXManglings_wrapper"[@@ocaml.doc
-                                                                    "Retrieve the CXStrings representing the mangled symbols of the C++ constructor or destructor at the cursor."]
+  cxcursor -> string array = "clang_Cursor_getCXXManglings_wrapper"
 external cursor_get_obj_cmanglings :
-  cxcursor -> string array = "clang_Cursor_getObjCManglings_wrapper"[@@ocaml.doc
-                                                                    "Retrieve the CXStrings representing the mangled symbols of the ObjC class interface or implementation at the cursor."]
+  cxcursor -> string array = "clang_Cursor_getObjCManglings_wrapper"
 type cxmodule
 external cursor_get_module :
-  cxcursor -> cxmodule = "clang_Cursor_getModule_wrapper"[@@ocaml.doc
-                                                           "Given a CXCursor_ModuleImportDecl cursor, return the associated module."]
+  cxcursor -> cxmodule = "clang_Cursor_getModule_wrapper"
 external get_module_for_file :
   cxtranslationunit -> cxfile -> cxmodule = "clang_getModuleForFile_wrapper"
-[@@ocaml.doc
-  "Given a CXFile header file, return the module that contains it, if one exists."]
 external module_get_astfile :
-  cxmodule -> cxfile = "clang_Module_getASTFile_wrapper"[@@ocaml.doc
-                                                          "Returns the module file where the provided module object came from."]
+  cxmodule -> cxfile = "clang_Module_getASTFile_wrapper"
 external module_get_parent :
-  cxmodule -> cxmodule = "clang_Module_getParent_wrapper"[@@ocaml.doc
-                                                           "Returns the parent of a sub-module or NULL if the given module is top-level, e.g. for 'std.vector' it will return the 'std' module."]
+  cxmodule -> cxmodule = "clang_Module_getParent_wrapper"
 external module_get_name :
-  cxmodule -> string = "clang_Module_getName_wrapper"[@@ocaml.doc
-                                                       "Returns the name of the module, e.g. for the 'std.vector' sub-module it will return \"vector\"."]
+  cxmodule -> string = "clang_Module_getName_wrapper"
 external module_get_full_name :
-  cxmodule -> string = "clang_Module_getFullName_wrapper"[@@ocaml.doc
-                                                           "Returns the full name of the module, e.g. \"std.vector\"."]
+  cxmodule -> string = "clang_Module_getFullName_wrapper"
 external module_is_system :
-  cxmodule -> bool = "clang_Module_isSystem_wrapper"[@@ocaml.doc
-                                                      "Returns non-zero if the module is a system one."]
+  cxmodule -> bool = "clang_Module_isSystem_wrapper"
 external module_get_num_top_level_headers :
   cxtranslationunit -> cxmodule -> int =
-    "clang_Module_getNumTopLevelHeaders_wrapper"[@@ocaml.doc
-                                                  "Returns the number of top level headers associated with this module."]
+    "clang_Module_getNumTopLevelHeaders_wrapper"
 external module_get_top_level_header :
   cxtranslationunit -> cxmodule -> int -> cxfile =
-    "clang_Module_getTopLevelHeader_wrapper"[@@ocaml.doc
-                                              "Returns the specified top level header associated with the module."]
+    "clang_Module_getTopLevelHeader_wrapper"
 external cxxconstructor_is_converting_constructor :
   cxcursor -> bool = "clang_CXXConstructor_isConvertingConstructor_wrapper"
-[@@ocaml.doc "Determine if a C++ constructor is a converting constructor."]
 external cxxconstructor_is_copy_constructor :
   cxcursor -> bool = "clang_CXXConstructor_isCopyConstructor_wrapper"
-[@@ocaml.doc "Determine if a C++ constructor is a copy constructor."]
 external cxxconstructor_is_default_constructor :
   cxcursor -> bool = "clang_CXXConstructor_isDefaultConstructor_wrapper"
-[@@ocaml.doc "Determine if a C++ constructor is the default constructor."]
 external cxxconstructor_is_move_constructor :
   cxcursor -> bool = "clang_CXXConstructor_isMoveConstructor_wrapper"
-[@@ocaml.doc "Determine if a C++ constructor is a move constructor."]
 external cxxfield_is_mutable :
-  cxcursor -> bool = "clang_CXXField_isMutable_wrapper"[@@ocaml.doc
-                                                         "Determine if a C++ field is declared 'mutable'."]
+  cxcursor -> bool = "clang_CXXField_isMutable_wrapper"
 external cxxmethod_is_defaulted :
-  cxcursor -> bool = "clang_CXXMethod_isDefaulted_wrapper"[@@ocaml.doc
-                                                            "Determine if a C++ method is declared '= default'."]
+  cxcursor -> bool = "clang_CXXMethod_isDefaulted_wrapper"
 external cxxmethod_is_pure_virtual :
-  cxcursor -> bool = "clang_CXXMethod_isPureVirtual_wrapper"[@@ocaml.doc
-                                                              "Determine if a C++ member function or member function template is pure virtual."]
+  cxcursor -> bool = "clang_CXXMethod_isPureVirtual_wrapper"
 external cxxmethod_is_static :
-  cxcursor -> bool = "clang_CXXMethod_isStatic_wrapper"[@@ocaml.doc
-                                                         "Determine if a C++ member function or member function template is declared 'static'."]
+  cxcursor -> bool = "clang_CXXMethod_isStatic_wrapper"
 external cxxmethod_is_virtual :
-  cxcursor -> bool = "clang_CXXMethod_isVirtual_wrapper"[@@ocaml.doc
-                                                          "Determine if a C++ member function or member function template is explicitly declared 'virtual' or if it overrides a virtual method from one of the base classes."]
+  cxcursor -> bool = "clang_CXXMethod_isVirtual_wrapper"
 external cxxrecord_is_abstract :
-  cxcursor -> bool = "clang_CXXRecord_isAbstract_wrapper"[@@ocaml.doc
-                                                           "Determine if a C++ record is abstract, i.e. whether a class or struct has a pure virtual member function."]
+  cxcursor -> bool = "clang_CXXRecord_isAbstract_wrapper"
 external enum_decl_is_scoped :
-  cxcursor -> bool = "clang_EnumDecl_isScoped_wrapper"[@@ocaml.doc
-                                                        "Determine if an enum declaration refers to a scoped enum."]
+  cxcursor -> bool = "clang_EnumDecl_isScoped_wrapper"
 external cxxmethod_is_const :
-  cxcursor -> bool = "clang_CXXMethod_isConst_wrapper"[@@ocaml.doc
-                                                        "Determine if a C++ member function or member function template is declared 'const'."]
+  cxcursor -> bool = "clang_CXXMethod_isConst_wrapper"
 external get_template_cursor_kind :
-  cxcursor -> cxcursorkind = "clang_getTemplateCursorKind_wrapper"[@@ocaml.doc
-                                                                    "Given a cursor that represents a template, determine the cursor kind of the specializations would be generated by instantiating the template."]
+  cxcursor -> cxcursorkind = "clang_getTemplateCursorKind_wrapper"
 external get_specialized_cursor_template :
   cxcursor -> cxcursor = "clang_getSpecializedCursorTemplate_wrapper"
-[@@ocaml.doc
-  "Given a cursor that may represent a specialization or instantiation of a template, retrieve the cursor that represents the template that it specializes or from which it was instantiated."]
 external get_cursor_reference_name_range :
   cxcursor -> name_flags:int -> piece_index:int -> cxsourcerange =
-    "clang_getCursorReferenceNameRange_wrapper"[@@ocaml.doc
-                                                 "Given a cursor that references something else, return the source range covering that reference."]
+    "clang_getCursorReferenceNameRange_wrapper"
 external get_cursor_kind_spelling :
-  cxcursorkind -> string = "clang_getCursorKindSpelling_wrapper"[@@ocaml.doc
-                                                                  "These routines are used for testing and debugging, only, and should not be relied upon."]
+  cxcursorkind -> string = "clang_getCursorKindSpelling_wrapper"
 external enable_stack_traces :
   unit -> unit = "clang_enableStackTraces_wrapper"
 type cxcompletionchunkkind =
-  | Optional
-  [@ocaml.doc
-    "A code-completion string that describes \"optional\" text that could be a part of the template (but is not required)."]
-  | TypedText
-  [@ocaml.doc
-    "Text that a user would be expected to type to get this code-completion result."]
-  | Text
-  [@ocaml.doc
-    "Text that should be inserted as part of a code-completion result."]
-  | Placeholder
-  [@ocaml.doc "Placeholder text that should be replaced by the user."]
-  | Informative
-  [@ocaml.doc
-    "Informative text that should be displayed but never inserted as part of the template."]
-  | CurrentParameter
-  [@ocaml.doc
-    "Text that describes the current parameter when code-completion is referring to function call, message send, or template specialization."]
-  | LeftParen
-  [@ocaml.doc
-    "A left parenthesis ('('), used to initiate a function call or signal the beginning of a function parameter list."]
-  | RightParen
-  [@ocaml.doc
-    "A right parenthesis (')'), used to finish a function call or signal the end of a function parameter list."]
-  | LeftBracket [@ocaml.doc "A left bracket ('\\[')."]
-  | RightBracket [@ocaml.doc "A right bracket ('\\]')."]
-  | LeftBrace [@ocaml.doc "A left brace ('\\{')."]
-  | RightBrace [@ocaml.doc "A right brace ('\\}')."]
-  | LeftAngle [@ocaml.doc "A left angle bracket ('<')."]
-  | RightAngle [@ocaml.doc "A right angle bracket ('>')."]
-  | Comma [@ocaml.doc "A comma separator (',')."]
-  | ResultType
-  [@ocaml.doc "Text that specifies the result type of a given result."]
-  | Colon [@ocaml.doc "A colon (':')."]
-  | SemiColon [@ocaml.doc "A semicolon (';')."]
-  | Equal [@ocaml.doc "An '=' sign."]
-  | HorizontalSpace [@ocaml.doc "Horizontal space (' ')."]
-  | VerticalSpace
-  [@ocaml.doc
-    "Vertical space ('\\n'), after which it is generally a good idea to perform indentation."]
-[@@ocaml.doc
-  "Describes a single piece of text within a code-completion string."]
+  | Optional 
+  | TypedText 
+  | Text 
+  | Placeholder 
+  | Informative 
+  | CurrentParameter 
+  | LeftParen 
+  | RightParen 
+  | LeftBracket 
+  | RightBracket 
+  | LeftBrace 
+  | RightBrace 
+  | LeftAngle 
+  | RightAngle 
+  | Comma 
+  | ResultType 
+  | Colon 
+  | SemiColon 
+  | Equal 
+  | HorizontalSpace 
+  | VerticalSpace 
 type cxcompletionstring
 external get_completion_chunk_kind :
   cxcompletionstring -> int -> cxcompletionchunkkind =
-    "clang_getCompletionChunkKind_wrapper"[@@ocaml.doc
-                                            "Determine the kind of a particular chunk within a completion string."]
+    "clang_getCompletionChunkKind_wrapper"
 external get_completion_chunk_text :
   cxcompletionstring -> int -> string =
-    "clang_getCompletionChunkText_wrapper"[@@ocaml.doc
-                                            "Retrieve the text associated with a particular chunk within a completion string."]
+    "clang_getCompletionChunkText_wrapper"
 external get_completion_chunk_completion_string :
   cxcompletionstring -> int -> cxcompletionstring =
-    "clang_getCompletionChunkCompletionString_wrapper"[@@ocaml.doc
-                                                        "Retrieve the completion string associated with a particular chunk within a completion string."]
+    "clang_getCompletionChunkCompletionString_wrapper"
 external get_num_completion_chunks :
-  cxcompletionstring -> int = "clang_getNumCompletionChunks_wrapper"[@@ocaml.doc
-                                                                    "Retrieve the number of chunks in the given code-completion string."]
+  cxcompletionstring -> int = "clang_getNumCompletionChunks_wrapper"
 external get_completion_priority :
-  cxcompletionstring -> int = "clang_getCompletionPriority_wrapper"[@@ocaml.doc
-                                                                    "Determine the priority of this code completion."]
+  cxcompletionstring -> int = "clang_getCompletionPriority_wrapper"
 external get_completion_availability :
   cxcompletionstring -> cxavailabilitykind =
-    "clang_getCompletionAvailability_wrapper"[@@ocaml.doc
-                                               "Determine the availability of the entity that this code-completion string refers to."]
+    "clang_getCompletionAvailability_wrapper"
 external get_completion_num_annotations :
   cxcompletionstring -> int = "clang_getCompletionNumAnnotations_wrapper"
-[@@ocaml.doc
-  "Retrieve the number of annotations associated with the given completion string."]
 external get_completion_annotation :
   cxcompletionstring -> int -> string =
-    "clang_getCompletionAnnotation_wrapper"[@@ocaml.doc
-                                             "Retrieve the annotation associated with the given completion string."]
+    "clang_getCompletionAnnotation_wrapper"
 external get_completion_parent :
-  cxcompletionstring -> string = "clang_getCompletionParent_wrapper"[@@ocaml.doc
-                                                                    "Retrieve the parent context of the given completion string."]
+  cxcompletionstring -> string = "clang_getCompletionParent_wrapper"
 external get_completion_brief_comment :
   cxcompletionstring -> string = "clang_getCompletionBriefComment_wrapper"
-[@@ocaml.doc
-  "Retrieve the brief documentation comment attached to the declaration that corresponds to the given completion string."]
 external get_cursor_completion_string :
   cxcursor -> cxcompletionstring = "clang_getCursorCompletionString_wrapper"
-[@@ocaml.doc
-  "Retrieve a completion string for an arbitrary declaration or macro definition cursor."]
 external default_code_complete_options :
-  unit -> int = "clang_defaultCodeCompleteOptions_wrapper"[@@ocaml.doc
-                                                            "Returns a default set of code-completion options that can be passed to clang_codeCompleteAt()."]
+  unit -> int = "clang_defaultCodeCompleteOptions_wrapper"
 external get_clang_version : unit -> string = "clang_getClangVersion_wrapper"
-[@@ocaml.doc
-  "Return a version string, suitable for showing to a user, but not intended to be parsed (the format is not guaranteed to be stable)."]
 external toggle_crash_recovery :
-  int -> unit = "clang_toggleCrashRecovery_wrapper"[@@ocaml.doc
-                                                     "Enable/disable crash recovery."]
+  int -> unit = "clang_toggleCrashRecovery_wrapper"
 type cxevalresult
 external cursor_evaluate :
-  cxcursor -> cxevalresult = "clang_Cursor_Evaluate_wrapper"[@@ocaml.doc
-                                                              "If cursor is a statement declaration tries to evaluate the statement and if its variable, tries to evaluate its initializer, into its corresponding type."]
+  cxcursor -> cxevalresult = "clang_Cursor_Evaluate_wrapper"
 type cxevalresultkind =
   | Int 
   | Float 
@@ -1953,46 +1148,130 @@ type cxevalresultkind =
   | UnExposed 
 external eval_result_get_kind :
   cxevalresult -> cxevalresultkind = "clang_EvalResult_getKind_wrapper"
-[@@ocaml.doc "Returns the kind of the evaluated result."]
 external eval_result_get_as_int :
-  cxevalresult -> int = "clang_EvalResult_getAsInt_wrapper"[@@ocaml.doc
-                                                             "Returns the evaluation result as integer if the kind is Int."]
+  cxevalresult -> int = "clang_EvalResult_getAsInt_wrapper"
 external eval_result_get_as_long_long :
-  cxevalresult -> int = "clang_EvalResult_getAsLongLong_wrapper"[@@ocaml.doc
-                                                                  "Returns the evaluation result as a long long integer if the kind is Int. This prevents overflows that may happen if the result is returned with clang_EvalResult_getAsInt."]
+  cxevalresult -> int = "clang_EvalResult_getAsLongLong_wrapper"
 external eval_result_is_unsigned_int :
-  cxevalresult -> bool = "clang_EvalResult_isUnsignedInt_wrapper"[@@ocaml.doc
-                                                                   "Returns a non-zero value if the kind is Int and the evaluation result resulted in an unsigned integer."]
+  cxevalresult -> bool = "clang_EvalResult_isUnsignedInt_wrapper"
 external eval_result_get_as_unsigned :
-  cxevalresult -> int = "clang_EvalResult_getAsUnsigned_wrapper"[@@ocaml.doc
-                                                                  "Returns the evaluation result as an unsigned integer if the kind is Int and clang_EvalResult_isUnsignedInt is non-zero."]
+  cxevalresult -> int = "clang_EvalResult_getAsUnsigned_wrapper"
 external eval_result_get_as_double :
-  cxevalresult -> float = "clang_EvalResult_getAsDouble_wrapper"[@@ocaml.doc
-                                                                  "Returns the evaluation result as double if the kind is double."]
+  cxevalresult -> float = "clang_EvalResult_getAsDouble_wrapper"
 external eval_result_get_as_str :
-  cxevalresult -> string = "clang_EvalResult_getAsStr_wrapper"[@@ocaml.doc
-                                                                "Returns the evaluation result as a constant string if the kind is other than Int or float. User must not free this pointer, instead call clang_EvalResult_dispose on the CXEvalResult returned by clang_Cursor_Evaluate."]
+  cxevalresult -> string = "clang_EvalResult_getAsStr_wrapper"
 type cxremapping
 external get_remappings :
-  string -> cxremapping = "clang_getRemappings_wrapper"[@@ocaml.doc
-                                                         "Retrieve a remapping."]
+  string -> cxremapping = "clang_getRemappings_wrapper"
 external get_remappings_from_file_list :
   string array -> cxremapping = "clang_getRemappingsFromFileList_wrapper"
-[@@ocaml.doc "Retrieve a remapping."]
 external remap_get_num_files :
-  cxremapping -> int = "clang_remap_getNumFiles_wrapper"[@@ocaml.doc
-                                                          "Determine the number of remappings."]
+  cxremapping -> int = "clang_remap_getNumFiles_wrapper"
 type cxindexaction
 external index_action_create :
-  cxindex -> cxindexaction = "clang_IndexAction_create_wrapper"[@@ocaml.doc
-                                                                 "An indexing action/session, to be applied to one or multiple translation units."]
+  cxindex -> cxindexaction = "clang_IndexAction_create_wrapper"
 type cxvisitorresult =
   | Break 
-  | Continue [@@ocaml.doc "\\@\\{"]
+  | Continue 
 external type_visit_fields :
   cxtype -> (cxcursor -> cxvisitorresult) -> bool =
-    "clang_Type_visitFields_wrapper"[@@ocaml.doc
-                                      "Visit the fields of a particular type."]
+    "clang_Type_visitFields_wrapper"
+type cxcomment
+external cursor_get_parsed_comment :
+  cxcursor -> cxcomment = "clang_Cursor_getParsedComment_wrapper"
+type cxcommentkind =
+  | Null 
+  | Text 
+  | InlineCommand 
+  | HTMLStartTag 
+  | HTMLEndTag 
+  | Paragraph 
+  | BlockCommand 
+  | ParamCommand 
+  | TParamCommand 
+  | VerbatimBlockCommand 
+  | VerbatimBlockLine 
+  | VerbatimLine 
+  | FullComment 
+external comment_get_kind :
+  cxcomment -> cxcommentkind = "clang_Comment_getKind_wrapper"
+external comment_get_num_children :
+  cxcomment -> int = "clang_Comment_getNumChildren_wrapper"
+external comment_get_child :
+  cxcomment -> int -> cxcomment = "clang_Comment_getChild_wrapper"
+external comment_is_whitespace :
+  cxcomment -> bool = "clang_Comment_isWhitespace_wrapper"
+external inline_content_comment_has_trailing_newline :
+  cxcomment -> int = "clang_InlineContentComment_hasTrailingNewline_wrapper"
+external text_comment_get_text :
+  cxcomment -> string = "clang_TextComment_getText_wrapper"
+external inline_command_comment_get_command_name :
+  cxcomment -> string = "clang_InlineCommandComment_getCommandName_wrapper"
+type cxcommentinlinecommandrenderkind =
+  | Normal 
+  | Bold 
+  | Monospaced 
+  | Emphasized 
+external inline_command_comment_get_render_kind :
+  cxcomment -> cxcommentinlinecommandrenderkind =
+    "clang_InlineCommandComment_getRenderKind_wrapper"
+external inline_command_comment_get_num_args :
+  cxcomment -> int = "clang_InlineCommandComment_getNumArgs_wrapper"
+external inline_command_comment_get_arg_text :
+  cxcomment -> int -> string =
+    "clang_InlineCommandComment_getArgText_wrapper"
+external htmltag_comment_get_tag_name :
+  cxcomment -> string = "clang_HTMLTagComment_getTagName_wrapper"
+external htmlstart_tag_comment_is_self_closing :
+  cxcomment -> bool = "clang_HTMLStartTagComment_isSelfClosing_wrapper"
+external htmlstart_tag_get_num_attrs :
+  cxcomment -> int = "clang_HTMLStartTag_getNumAttrs_wrapper"
+external htmlstart_tag_get_attr_name :
+  cxcomment -> int -> string = "clang_HTMLStartTag_getAttrName_wrapper"
+external htmlstart_tag_get_attr_value :
+  cxcomment -> int -> string = "clang_HTMLStartTag_getAttrValue_wrapper"
+external block_command_comment_get_command_name :
+  cxcomment -> string = "clang_BlockCommandComment_getCommandName_wrapper"
+external block_command_comment_get_num_args :
+  cxcomment -> int = "clang_BlockCommandComment_getNumArgs_wrapper"
+external block_command_comment_get_arg_text :
+  cxcomment -> int -> string = "clang_BlockCommandComment_getArgText_wrapper"
+external block_command_comment_get_paragraph :
+  cxcomment -> cxcomment = "clang_BlockCommandComment_getParagraph_wrapper"
+external param_command_comment_get_param_name :
+  cxcomment -> string = "clang_ParamCommandComment_getParamName_wrapper"
+external param_command_comment_is_param_index_valid :
+  cxcomment -> bool = "clang_ParamCommandComment_isParamIndexValid_wrapper"
+external param_command_comment_get_param_index :
+  cxcomment -> int = "clang_ParamCommandComment_getParamIndex_wrapper"
+external param_command_comment_is_direction_explicit :
+  cxcomment -> bool = "clang_ParamCommandComment_isDirectionExplicit_wrapper"
+type cxcommentparampassdirection =
+  | In 
+  | Out 
+  | InOut 
+external param_command_comment_get_direction :
+  cxcomment -> cxcommentparampassdirection =
+    "clang_ParamCommandComment_getDirection_wrapper"
+external tparam_command_comment_get_param_name :
+  cxcomment -> string = "clang_TParamCommandComment_getParamName_wrapper"
+external tparam_command_comment_is_param_position_valid :
+  cxcomment -> bool =
+    "clang_TParamCommandComment_isParamPositionValid_wrapper"
+external tparam_command_comment_get_depth :
+  cxcomment -> int = "clang_TParamCommandComment_getDepth_wrapper"
+external tparam_command_comment_get_index :
+  cxcomment -> int -> int = "clang_TParamCommandComment_getIndex_wrapper"
+external verbatim_block_line_comment_get_text :
+  cxcomment -> string = "clang_VerbatimBlockLineComment_getText_wrapper"
+external verbatim_line_comment_get_text :
+  cxcomment -> string = "clang_VerbatimLineComment_getText_wrapper"
+external htmltag_comment_get_as_string :
+  cxcomment -> string = "clang_HTMLTagComment_getAsString_wrapper"
+external full_comment_get_as_html :
+  cxcomment -> string = "clang_FullComment_getAsHTML_wrapper"
+external full_comment_get_as_xml :
+  cxcomment -> string = "clang_FullComment_getAsXML_wrapper"
 type cxint
 external equal_cxint : cxint -> cxint -> bool = "clang_equal_cxint_wrapper"
 external compare_cxint :
