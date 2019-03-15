@@ -762,7 +762,7 @@ extern "C" {
     if (auto *ATT = T->getAs<clang::AttributedType>()) {
       return (enum clang_ext_AttrKind) ATT->getAttrKind();
     }
-    return CLANG_EXT_ATTR_None;
+    return CLANG_EXT_ATTR_NoAttr;
   }
 
   CXString
