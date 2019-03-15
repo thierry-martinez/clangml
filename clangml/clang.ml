@@ -281,10 +281,15 @@ module Ast = struct
             begin
               match ext_get_type_kind cxtype with
               | Paren -> ParenType (cxtype |> ext_get_inner_type |> of_cxtype)
-              | Elaborated -> (* Here for Clang 3.8.1 *)
+              | Elaborated -> (* Here for Clang <3.9.0 *)
                   Elaborated {
                     keyword = ext_elaborated_type_get_keyword cxtype;
                     named_type = ext_type_get_named_type cxtype |> of_cxtype;
+                  }
+              | Attributed -> (* Here for Clang <8.0.0 *)
+                  Attributed {
+                    modified_type = type_get_modified_type cxtype |> of_cxtype;
+                    attribute_kind = ext_type_get_attribute_kind cxtype;
                   }
               | _ -> BuiltinType (get_type_kind cxtype)
             end in

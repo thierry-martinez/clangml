@@ -40,3 +40,8 @@ let type_visit_fields ty visitor =
         end
     | _ -> Continue)
 @ENDIF_CLANG_BEFORE_3_7@
+
+@IF_CLANG_BEFORE_8_0@
+let type_get_modified_type ty =
+  ty
+@ENDIF_CLANG_BEFORE_8_0@

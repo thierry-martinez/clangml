@@ -316,9 +316,11 @@ declaration list:
 this function is used in the following examples to check the AST of
 various programs.
     {[
-let parse_declaration_list ?filename ?command_line_args ?options source =
+let parse_declaration_list ?filename ?command_line_args ?options ?clang_options
+    source =
   let ast =
-    Clang.Ast.parse_string ?filename ?command_line_args ?options source in
+    Clang.Ast.parse_string ?filename ?command_line_args ?options ?clang_options
+      source in
   ast.desc.items
    ]}*)
 
@@ -443,7 +445,8 @@ let example = {|
     |}
 
 let () =
-  check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match List.rev ast with
+  check Clang.Ast.pp_decl parse_declaration_list example @@
+  fun ast -> match List.rev ast with
   | { desc = Var { name = "v"; qual_type = { desc = Vector {
       element = { desc = Typedef "int32_t" };
       size = 4 }}}} :: _ -> ()
@@ -648,7 +651,24 @@ let () =
 
     Attributed types are only visible with Clang >=8.0.0 when
     [Cxtranslationunit_flags.include_attributed_types] is set.
-    Otherwise, the type is directly substituted by its modified type. *)
+    Otherwise, the type is directly substituted by its modified type.
+
+    {[
+let example = "int * _Nonnull ptr;"
+
+let () =
+  if Clang.get_clang_version () >= "clang version 8.0.0" then
+    let clang_options = Clang.Cxtranslationunit_flags.(
+      Clang.default_editing_translation_unit_options ()
+      + include_attributed_types) in
+    check Clang.Ast.pp_decl (parse_declaration_list ~clang_options) example @@
+    fun ast ->  match ast with
+    | [{ desc = Var { name = "ptr";
+         qual_type = { desc = Attributed {
+           modified_type = { desc = Pointer { desc = BuiltinType Int }};
+           attribute_kind = TypeNonNull }}}}] -> ()
+    | _ -> assert false
+    ]} *)
   | ParenType of qual_type
 (** Parenthesized type.
 
