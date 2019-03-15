@@ -6622,7 +6622,7 @@ enum clang_ext_AttrKind
 Clang_ext_attrkind_val(value ocaml)
 {
   switch (Int_val(ocaml)) {
-  case 0: return CLANG_EXT_ATTR_None;
+  case 0: return CLANG_EXT_ATTR_NoAttr;
   case 1: return CLANG_EXT_ATTR_FallThrough;
   case 2: return CLANG_EXT_ATTR_Suppress;
   case 3: return CLANG_EXT_ATTR_SwiftContext;
@@ -6861,14 +6861,14 @@ Clang_ext_attrkind_val(value ocaml)
   case 236: return CLANG_EXT_ATTR_Thread;
   }
   failwith_fmt("invalid value for Clang_ext_attrkind_val: %d", Int_val(ocaml));
-  return CLANG_EXT_ATTR_None;
+  return CLANG_EXT_ATTR_NoAttr;
 }
 
 value
 Val_clang_ext_attrkind(enum clang_ext_AttrKind v)
 {
   switch (v) {
-  case CLANG_EXT_ATTR_None: return Val_int(0);
+  case CLANG_EXT_ATTR_NoAttr: return Val_int(0);
   case CLANG_EXT_ATTR_FallThrough: return Val_int(1);
   case CLANG_EXT_ATTR_Suppress: return Val_int(2);
   case CLANG_EXT_ATTR_SwiftContext: return Val_int(3);

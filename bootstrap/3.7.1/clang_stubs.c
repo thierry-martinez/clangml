@@ -5542,7 +5542,7 @@ enum clang_ext_AttrKind
 Clang_ext_attrkind_val(value ocaml)
 {
   switch (Int_val(ocaml)) {
-  case 0: return CLANG_EXT_ATTR_None;
+  case 0: return CLANG_EXT_ATTR_NoAttr;
   case 1: return CLANG_EXT_ATTR_Annotate;
   case 2: return CLANG_EXT_ATTR_CFConsumed;
   case 3: return CLANG_EXT_ATTR_CarriesDependency;
@@ -5718,14 +5718,14 @@ Clang_ext_attrkind_val(value ocaml)
   case 173: return CLANG_EXT_ATTR_Thread;
   }
   failwith_fmt("invalid value for Clang_ext_attrkind_val: %d", Int_val(ocaml));
-  return CLANG_EXT_ATTR_None;
+  return CLANG_EXT_ATTR_NoAttr;
 }
 
 value
 Val_clang_ext_attrkind(enum clang_ext_AttrKind v)
 {
   switch (v) {
-  case CLANG_EXT_ATTR_None: return Val_int(0);
+  case CLANG_EXT_ATTR_NoAttr: return Val_int(0);
   case CLANG_EXT_ATTR_Annotate: return Val_int(1);
   case CLANG_EXT_ATTR_CFConsumed: return Val_int(2);
   case CLANG_EXT_ATTR_CarriesDependency: return Val_int(3);
