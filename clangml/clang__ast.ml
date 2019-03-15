@@ -660,7 +660,7 @@ let () =
   if Clang.get_clang_version () >= "clang version 8.0.0" then
     let clang_options = Clang.Cxtranslationunit_flags.(
       Clang.default_editing_translation_unit_options ()
-      + include_attributed_types) in
+      + Clang.include_attributed_types) in
     check Clang.Ast.pp_decl (parse_declaration_list ~clang_options) example @@
     fun ast ->  match ast with
     | [{ desc = Var { name = "ptr";
