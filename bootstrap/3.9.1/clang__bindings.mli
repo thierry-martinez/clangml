@@ -1710,6 +1710,7 @@ type clang_ext_typekind =
   | Invalid 
   | Paren 
   | Elaborated 
+  | Attributed 
   | Unknown 
 external ext_get_type_kind :
   cxtype -> clang_ext_typekind = "clang_ext_GetTypeKind_wrapper"
