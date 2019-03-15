@@ -45,6 +45,7 @@ tar -xf $cfe-$version.src$suffix
 mv $cfe-$version$dir_suffix llvm-$version$dir_suffix/tools/clang
 mkdir llvm-$version.build
 pushd llvm-$version.build
-    cmake ../llvm-$version$dir_suffix -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX
+    cmake ../llvm-$version$dir_suffix \
+        -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DLLVM_ENABLE_PIC=ON
     cmake --build .
 popd
