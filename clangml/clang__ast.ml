@@ -22,10 +22,10 @@ and unary_operator_kind = clang_ext_unaryoperatorkind
 
 and binary_operator_kind = clang_ext_binaryoperatorkind
 (** Kind of binary operator: [_+_], [_=_], [_+=_], [_<<_], ... *)
-(*
+
 and attribute_kind = clang_ext_attrkind
 (** Kind of attribute: [FallThrough], [NonNull], ... *)
-*)
+
 and builtin_type = cxtypekind
 (** libclang's type kinds: [Int], [Void], [Bool], ... *)
   [@@deriving eq, ord, show]
@@ -143,10 +143,9 @@ class ['self] base_iter =
 
     method visit_binary_operator_kind : 'env . 'env -> binary_operator_kind -> unit =
       fun _env _ -> ()
-(*
+
     method visit_attribute_kind : 'env . 'env -> attribute_kind -> unit =
       fun _env _ -> ()
-*)
   end
 
 class ['self] base_map =
@@ -191,10 +190,9 @@ class ['self] base_map =
 
     method visit_binary_operator_kind : 'env . 'env -> binary_operator_kind -> binary_operator_kind =
       fun _env k -> k
-(*
+
     method visit_attribute_kind : 'env . 'env -> attribute_kind -> attribute_kind =
       fun _env k -> k
-*)
   end
 
 class virtual ['self] base_reduce =
@@ -233,10 +231,9 @@ class virtual ['self] base_reduce =
 
     method visit_binary_operator_kind : 'env . 'env -> binary_operator_kind -> 'monoid =
       fun _env _ -> self#zero
-(*
+
     method visit_attribute_kind : 'env . 'env -> attribute_kind -> 'monoid =
       fun _env _ -> self#zero
-*)
   end
 
 class virtual ['self] base_mapreduce =
@@ -284,10 +281,9 @@ class virtual ['self] base_mapreduce =
 
     method visit_binary_operator_kind : 'env . 'env -> binary_operator_kind -> binary_operator_kind * 'monoid =
       fun _env k -> k, self#zero
-(*
+
     method visit_attribute_kind : 'env . 'env -> attribute_kind -> attribute_kind * 'monoid =
       fun _env k -> k, self#zero
-*)
   end
 
 (*{[
@@ -644,12 +640,10 @@ let () =
       qual_type = { desc = Complex { desc = BuiltinType Float }}}} -> ()
   | _ -> assert false
     ]} *)
-(*
   | Attributed of {
       modified_type : qual_type;
       attribute_kind : attribute_kind;
     }
-*)
 (** Attributed type.
 
     Attributed types are only visible with Clang >=8.0.0 when

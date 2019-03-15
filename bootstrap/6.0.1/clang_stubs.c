@@ -6234,7 +6234,8 @@ Clang_ext_typekind_val(value ocaml)
   case 0: return ETK_Invalid;
   case 1: return ETK_Paren;
   case 2: return ETK_Elaborated;
-  case 3: return ETK_Unknown;
+  case 3: return ETK_Attributed;
+  case 4: return ETK_Unknown;
   }
   failwith_fmt("invalid value for Clang_ext_typekind_val: %d", Int_val(ocaml));
   return ETK_Invalid;
@@ -6247,7 +6248,8 @@ Val_clang_ext_typekind(enum clang_ext_TypeKind v)
   case ETK_Invalid: return Val_int(0);
   case ETK_Paren: return Val_int(1);
   case ETK_Elaborated: return Val_int(2);
-  case ETK_Unknown: return Val_int(3);
+  case ETK_Attributed: return Val_int(3);
+  case ETK_Unknown: return Val_int(4);
   }
   failwith_fmt("invalid value for Val_clang_ext_typekind: %d", v);
   return Val_int(0);

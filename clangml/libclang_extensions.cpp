@@ -648,7 +648,8 @@ extern "C" {
       #define CASE(X) case clang::Type::X: return ETK_##X
       switch (TP->getTypeClass()) {
       CASE(Paren);
-      CASE(Elaborated); /* For Clang 3.8.1 */
+      CASE(Elaborated); /* For Clang <3.9.0 */
+      CASE(Attributed); /* For Clang <8.0.0 */
       default:
         return ETK_Unknown;
       }
