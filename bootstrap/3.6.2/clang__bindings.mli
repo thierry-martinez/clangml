@@ -1759,7 +1759,7 @@ external ext_unary_expr_get_argument_type :
 external ext_type_get_named_type :
   cxtype -> cxtype = "clang_ext_Type_getNamedType_wrapper"
 type clang_ext_attrkind =
-  | None 
+  | NoAttr 
   | Annotate 
   | CFConsumed 
   | CarriesDependency 
@@ -1930,7 +1930,7 @@ type clang_ext_attrkind =
   | ObjCRuntimeName 
   | OpenCLImageAccess 
   | Overloadable 
-  | Thread 
+  | Thread [@@deriving (eq, ord, show)]
 external ext_type_get_attribute_kind :
   cxtype -> clang_ext_attrkind = "clang_ext_Type_GetAttributeKind_wrapper"
 external ext_attr_kind_get_spelling :
