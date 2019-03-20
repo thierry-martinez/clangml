@@ -330,6 +330,8 @@ module Ast = struct
               else
                 None in
             Field { name; qual_type; bitwidth }
+	| CXXAccessSpecifier ->
+	    CXXAccessSpecifier (cursor |> get_cxxaccess_specifier)
         | _ -> OtherDecl
       with Invalid_structure -> OtherDecl
 
