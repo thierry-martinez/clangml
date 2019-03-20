@@ -190,6 +190,7 @@ enum clang_ext_CursorKind {
   ECK_ImplicitCastExpr,
   ECK_BinaryConditionalOperator,
   ECK_UnaryExprOrTypeTraitExpr, /* for Clang <3.9.0 */
+  ECK_EmptyDecl,
   ECK_Unknown
 };
 

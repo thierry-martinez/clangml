@@ -1538,6 +1538,7 @@ type clang_ext_cursorkind =
   | ImplicitCastExpr 
   | BinaryConditionalOperator 
   | UnaryExprOrTypeTraitExpr 
+  | EmptyDecl 
   | Unknown 
 external ext_get_cursor_kind :
   cxcursor -> clang_ext_cursorkind = "clang_ext_GetCursorKind_wrapper"

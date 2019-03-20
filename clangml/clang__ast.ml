@@ -335,7 +335,11 @@ let parse_declaration_list ?filename ?command_line_args ?options ?clang_options
     source =
   let ast =
     Clang.Ast.parse_string ?filename ?command_line_args ?options ?clang_options
-      source in
+      source in (*
+  let tu = Clang.Ast.cursor_of_node ast |> Clang.cursor_get_translation_unit in
+  Clang.seq_of_diagnostics tu |> Seq.iter (fun diagnostics ->
+    prerr_endline (Clang.format_diagnostic diagnostics Clang.Cxdiagnosticdisplayoptions.display_source_location));
+  assert (not (Clang.has_warning_or_error tu)); *)
   ast.desc.items
    ]}*)
 
@@ -2271,6 +2275,21 @@ let () =
         { desc = Var { name = "i";
           qual_type = { desc = BuiltinType Int}}}] }}] -> ()
   | _ -> assert false
+    ]}
+*)
+  | EmptyDecl
+(**
+  Empty declaration.
+
+    {[
+let example = ";"
+(*
+let () =
+  check Clang.Ast.pp_decl parse_declaration_list example @@
+  fun ast -> match ast with
+  | [{ desc = EmptyDecl }] -> ()
+  | _ -> assert false
+*)
     ]}
 *)
   | OtherDecl
