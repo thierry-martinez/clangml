@@ -628,16 +628,29 @@ extern "C" {
   enum clang_ext_CursorKind
   clang_ext_GetCursorKind(CXCursor c)
   {
-    const clang::Stmt *s = getCursorStmt(c);
-    #define CASE(X) case clang::Stmt::X##Class: return ECK_##X
-    switch (s->getStmtClass()) {
-    CASE(ImplicitCastExpr);
-    CASE(BinaryConditionalOperator);
-    CASE(UnaryExprOrTypeTraitExpr);
+    switch (c.kind) {
+    case CXCursor_UnexposedDecl:
+      {
+	const clang::Decl *d = getCursorDecl(c);
+	if (dynamic_cast<const clang::EmptyDecl *>(d)) {
+	  return ECK_EmptyDecl;
+	}
+      }
+      return ECK_Unknown;
     default:
+      if (const clang::Stmt *s = getCursorStmt(c)) {
+        #define CASE(X) case clang::Stmt::X##Class: return ECK_##X
+        switch (s->getStmtClass()) {
+        CASE(ImplicitCastExpr);
+        CASE(BinaryConditionalOperator);
+        CASE(UnaryExprOrTypeTraitExpr);
+        default:
+          return ECK_Unknown;
+        }
+        #undef CASE
+      }
       return ECK_Unknown;
     }
-    #undef CASE
   }
 
   enum clang_ext_TypeKind
