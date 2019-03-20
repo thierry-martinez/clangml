@@ -58,11 +58,25 @@ let is_error diagnostic_severity =
   | Error | Fatal -> true
   | _ -> false
 
+let is_warning_or_error diagnostic_severity =
+  match diagnostic_severity with
+  | Warning | Error | Fatal -> true
+  | _ -> false
+
 let has_error tu =
   try
     seq_of_diagnostics tu |>
     Seq.iter (fun d ->
       if is_error (get_diagnostic_severity d) then raise Exit);
+    false
+  with Exit ->
+    true
+
+let has_warning_or_error tu =
+  try
+    seq_of_diagnostics tu |>
+    Seq.iter (fun d ->
+      if is_warning_or_error (get_diagnostic_severity d) then raise Exit);
     false
   with Exit ->
     true
@@ -336,6 +350,12 @@ module Ast = struct
 	    let name = get_cursor_spelling cursor in
 	    let declarations = list_of_children cursor |> List.map decl_of_cxcursor in
 	    Namespace { name; declarations }
+	| UnexposedDecl ->
+	    begin
+	      match ext_get_cursor_kind cursor with
+	      | EmptyDecl -> EmptyDecl
+	      | _ -> OtherDecl
+	    end
         | _ -> OtherDecl
       with Invalid_structure -> OtherDecl
 
@@ -715,7 +735,7 @@ module Ast = struct
                   ConditionalOperator { cond; then_branch = None; else_branch }
               | UnaryExprOrTypeTraitExpr -> (* for Clang 3.8.1 *)
                   unary_expr_of_cxcursor cursor
-              | Unknown -> UnexposedExpr { s = get_cursor_spelling cursor }
+              | _ -> UnexposedExpr { s = get_cursor_spelling cursor }
             end
         | _ -> OtherExpr
       with Invalid_structure -> OtherExpr

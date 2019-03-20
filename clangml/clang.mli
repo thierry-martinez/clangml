@@ -461,6 +461,13 @@ val seq_of_diagnostics : cxtranslationunit -> cxdiagnostic Seq.t
 val is_error : cxdiagnosticseverity -> bool
 (** [is_error d] returns whether [d] is [Error] or [Fatal]. *)
 
+val is_warning_or_error : cxdiagnosticseverity -> bool
+(** [is_warning_or_error d] returns whether [d] is [Warning] or [Error] or [Fatal]. *)
+
 val has_error : cxtranslationunit -> bool
 (** [has_error tu] returns whether the translation unit [tu] produced an
     error. *)
+
+val has_warning_or_error : cxtranslationunit -> bool
+(** [has_warning_or_error tu] returns whether the translation unit [tu] produced a
+    warning or an error. *)
