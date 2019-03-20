@@ -28,6 +28,9 @@ and attribute_kind = clang_ext_attrkind
 
 and builtin_type = cxtypekind
 (** libclang's type kinds: [Int], [Void], [Bool], ... *)
+
+and cxx_access_specifier = cx_cxxaccessspecifier
+(** C++ access specifier: [public], [private], [protected] *)
   [@@deriving eq, ord, show]
 
 (** {2 Abstractions from libclang's types} *)
@@ -146,6 +149,9 @@ class ['self] base_iter =
 
     method visit_attribute_kind : 'env . 'env -> attribute_kind -> unit =
       fun _env _ -> ()
+
+    method visit_cxx_access_specifier : 'env . 'env -> cxx_access_specifier -> unit =
+      fun _env _ -> ()
   end
 
 class ['self] base_map =
@@ -193,6 +199,9 @@ class ['self] base_map =
 
     method visit_attribute_kind : 'env . 'env -> attribute_kind -> attribute_kind =
       fun _env k -> k
+
+    method visit_cxx_access_specifier : 'env . 'env -> cxx_access_specifier -> cxx_access_specifier =
+      fun _env k -> k
   end
 
 class virtual ['self] base_reduce =
@@ -233,6 +242,9 @@ class virtual ['self] base_reduce =
       fun _env _ -> self#zero
 
     method visit_attribute_kind : 'env . 'env -> attribute_kind -> 'monoid =
+      fun _env _ -> self#zero
+
+    method visit_cxx_access_specifier : 'env . 'env -> cxx_access_specifier -> 'monoid =
       fun _env _ -> self#zero
   end
 
@@ -283,6 +295,9 @@ class virtual ['self] base_mapreduce =
       fun _env k -> k, self#zero
 
     method visit_attribute_kind : 'env . 'env -> attribute_kind -> attribute_kind * 'monoid =
+      fun _env k -> k, self#zero
+
+    method visit_cxx_access_specifier : 'env . 'env -> cxx_access_specifier -> cxx_access_specifier * 'monoid =
       fun _env k -> k, self#zero
   end
 
@@ -2178,7 +2193,8 @@ let () =
       qual_type : qual_type;
       bitwidth : expr option;
     }
-(** Record (struct or union) field.
+(** Record (struct, union or class) field.
+
     {[
 let example = {| struct s { int label; union u { int i; float f; } data;}; |}
 
@@ -2199,6 +2215,37 @@ let () =
           qual_type = { desc = Elaborated {
             keyword = Union;
             named_type = { desc = Record "u" }}}}}] }}] -> ()
+  | _ -> assert false
+    ]}
+*)
+  | CXXAccessSpecifier of cxx_access_specifier
+(** C++ access specifier.
+
+    {[
+let example = {|
+    class c {
+      private: int private_field;
+      protected: int protected_field;
+      public: int public_field;
+    };
+    |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match ast with
+  | [{ desc = RecordDecl {
+      keyword = Class;
+      name = "c";
+      fields = [
+        { desc = CXXAccessSpecifier CXXPrivate };
+        { desc = Field { name = "private_field";
+          qual_type = { desc = BuiltinType Int}}};
+        { desc = CXXAccessSpecifier CXXProtected };
+        { desc = Field { name = "protected_field";
+          qual_type = { desc = BuiltinType Int}}};
+        { desc = CXXAccessSpecifier CXXPublic };
+        { desc = Field { name = "public_field";
+          qual_type = { desc = BuiltinType Int}}}] }}] -> ()
   | _ -> assert false
     ]}
 *)
