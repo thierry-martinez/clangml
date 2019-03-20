@@ -42,7 +42,7 @@ let type_visit_fields ty visitor =
 @ENDIF_CLANG_BEFORE_3_7@
 
 @IF_CLANG_BEFORE_8_0@
-let include_attributed_types = 0
+let include_attributed_types = Cxtranslationunit_flags.none
 
 let type_get_modified_type ty =
   ty
