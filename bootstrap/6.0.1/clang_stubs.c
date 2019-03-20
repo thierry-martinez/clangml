@@ -6194,7 +6194,8 @@ Clang_ext_cursorkind_val(value ocaml)
   case 0: return ECK_ImplicitCastExpr;
   case 1: return ECK_BinaryConditionalOperator;
   case 2: return ECK_UnaryExprOrTypeTraitExpr;
-  case 3: return ECK_Unknown;
+  case 3: return ECK_EmptyDecl;
+  case 4: return ECK_Unknown;
   }
   failwith_fmt("invalid value for Clang_ext_cursorkind_val: %d", Int_val(ocaml));
   return ECK_ImplicitCastExpr;
@@ -6207,7 +6208,8 @@ Val_clang_ext_cursorkind(enum clang_ext_CursorKind v)
   case ECK_ImplicitCastExpr: return Val_int(0);
   case ECK_BinaryConditionalOperator: return Val_int(1);
   case ECK_UnaryExprOrTypeTraitExpr: return Val_int(2);
-  case ECK_Unknown: return Val_int(3);
+  case ECK_EmptyDecl: return Val_int(3);
+  case ECK_Unknown: return Val_int(4);
   }
   failwith_fmt("invalid value for Val_clang_ext_cursorkind: %d", v);
   return Val_int(0);
