@@ -666,7 +666,8 @@ let () =
     | [{ desc = Var { name = "ptr";
          qual_type = { desc = Attributed {
            modified_type = { desc = Pointer { desc = BuiltinType Int }};
-           attribute_kind = TypeNonNull }}}}] -> ()
+           attribute_kind }}}}] ->
+	     assert (attribute_kind = Clang.type_non_null)
     | _ -> assert false
     ]} *)
   | ParenType of qual_type
