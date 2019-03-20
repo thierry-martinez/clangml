@@ -40,3 +40,18 @@ let type_visit_fields ty visitor =
         end
     | _ -> Continue)
 @ENDIF_CLANG_BEFORE_3_7@
+
+@IF_CLANG_BEFORE_8_0@
+let include_attributed_types = Cxtranslationunit_flags.none
+
+let type_get_modified_type ty =
+  ty
+
+let type_non_null = NoAttr
+@ENDIF_CLANG_BEFORE_8_0@
+
+@IF_CLANG_FROM_8_0@
+let include_attributed_types = Cxtranslationunit_flags.include_attributed_types
+
+let type_non_null = TypeNonNull
+@ENDIF_CLANG_FROM_8_0@

@@ -281,10 +281,15 @@ module Ast = struct
             begin
               match ext_get_type_kind cxtype with
               | Paren -> ParenType (cxtype |> ext_get_inner_type |> of_cxtype)
-              | Elaborated -> (* Here for Clang 3.8.1 *)
+              | Elaborated -> (* Here for Clang <3.9.0 *)
                   Elaborated {
                     keyword = ext_elaborated_type_get_keyword cxtype;
                     named_type = ext_type_get_named_type cxtype |> of_cxtype;
+                  }
+              | Attributed -> (* Here for Clang <8.0.0 *)
+                  Attributed {
+                    modified_type = type_get_modified_type cxtype |> of_cxtype;
+                    attribute_kind = ext_type_get_attribute_kind cxtype;
                   }
               | _ -> BuiltinType (get_type_kind cxtype)
             end in
@@ -305,8 +310,9 @@ module Ast = struct
         match get_cursor_kind cursor with
         | FunctionDecl -> function_decl_of_cxcursor cursor
         | VarDecl -> Var (var_decl_desc_of_cxcursor cursor)
-        | StructDecl -> struct_decl_of_cxcursor cursor
-        | UnionDecl -> union_decl_of_cxcursor cursor
+        | StructDecl -> record_decl_of_cxcursor Struct cursor
+        | UnionDecl -> record_decl_of_cxcursor Union cursor
+        | ClassDecl -> record_decl_of_cxcursor Class cursor
         | EnumDecl -> enum_decl_of_cxcursor cursor
         | TypedefDecl ->
             let name = get_cursor_spelling cursor in
@@ -393,15 +399,10 @@ module Ast = struct
         | _ -> raise Invalid_structure in
       node ~cursor { name; init }
 
-    and struct_decl_of_cxcursor cursor =
+    and record_decl_of_cxcursor keyword cursor =
       let name = get_cursor_spelling cursor in
       let fields = fields_of_cxcursor cursor in
-      RecordDecl { keyword = Struct; name; fields }
-
-    and union_decl_of_cxcursor cursor =
-      let name = get_cursor_spelling cursor in
-      let fields = fields_of_cxcursor cursor in
-      RecordDecl { keyword = Union; name; fields }
+      RecordDecl { keyword; name; fields }
 
     and fields_of_cxcursor cursor =
       list_of_children cursor |> List.map decl_of_cxcursor
