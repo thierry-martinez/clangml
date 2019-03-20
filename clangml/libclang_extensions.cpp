@@ -632,9 +632,13 @@ extern "C" {
     case CXCursor_UnexposedDecl:
       {
 	const clang::Decl *d = getCursorDecl(c);
-	if (dynamic_cast<const clang::EmptyDecl *>(d)) {
-	  return ECK_EmptyDecl;
+        #define CASE(X) case clang::Decl::X: return ECK_##X##Decl
+	switch (d->getKind()) {
+	CASE(Empty);
+	default:
+	  return ECK_Unknown;
 	}
+	#undef CASE
       }
       return ECK_Unknown;
     default:
