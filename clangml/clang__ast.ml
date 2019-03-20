@@ -2249,6 +2249,30 @@ let () =
   | _ -> assert false
     ]}
 *)
+  | Namespace of {
+      name : string;
+      declarations : decl list;
+    }
+(** C++ namespace.
+
+    {[
+let example = {|
+    namespace example {
+      int i;
+    }
+    |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match ast with
+  | [{ desc = Namespace {
+      name = "example";
+      declarations = [
+        { desc = Var { name = "i";
+          qual_type = { desc = BuiltinType Int}}}] }}] -> ()
+  | _ -> assert false
+    ]}
+*)
   | OtherDecl
 
 and label_ref = string

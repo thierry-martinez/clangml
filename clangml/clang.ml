@@ -332,6 +332,10 @@ module Ast = struct
             Field { name; qual_type; bitwidth }
 	| CXXAccessSpecifier ->
 	    CXXAccessSpecifier (cursor |> get_cxxaccess_specifier)
+	| Namespace ->
+	    let name = get_cursor_spelling cursor in
+	    let declarations = list_of_children cursor |> List.map decl_of_cxcursor in
+	    Namespace { name; declarations }
         | _ -> OtherDecl
       with Invalid_structure -> OtherDecl
 
