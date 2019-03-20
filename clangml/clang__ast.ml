@@ -2283,13 +2283,12 @@ let () =
 
     {[
 let example = ";"
-(*
+
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = EmptyDecl }] -> ()
   | _ -> assert false
-*)
     ]}
 *)
   | OtherDecl

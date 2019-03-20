@@ -353,9 +353,7 @@ module Ast = struct
 	| UnexposedDecl ->
 	    begin
 	      match ext_get_cursor_kind cursor with
-(*
 	      | EmptyDecl -> EmptyDecl
-*)
 	      | _ -> OtherDecl
 	    end
         | _ -> OtherDecl
