@@ -1445,6 +1445,7 @@ type cx_cxxaccessspecifier =
   | CXXProtected 
   | CXXPrivate [@@ocaml.doc
                  "Represents the C++ access control level to a base class for a cursor with kind CX_CXXBaseSpecifier."]
+[@@deriving (eq, ord, show)]
 external get_cxxaccess_specifier :
   cxcursor -> cx_cxxaccessspecifier = "clang_getCXXAccessSpecifier_wrapper"
 [@@ocaml.doc "Returns the access control level for the referenced object."]
