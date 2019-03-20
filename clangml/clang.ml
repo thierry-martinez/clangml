@@ -310,8 +310,9 @@ module Ast = struct
         match get_cursor_kind cursor with
         | FunctionDecl -> function_decl_of_cxcursor cursor
         | VarDecl -> Var (var_decl_desc_of_cxcursor cursor)
-        | StructDecl -> struct_decl_of_cxcursor cursor
-        | UnionDecl -> union_decl_of_cxcursor cursor
+        | StructDecl -> record_decl_of_cxcursor Struct cursor
+        | UnionDecl -> record_decl_of_cxcursor Union cursor
+        | ClassDecl -> record_decl_of_cxcursor Class cursor
         | EnumDecl -> enum_decl_of_cxcursor cursor
         | TypedefDecl ->
             let name = get_cursor_spelling cursor in
@@ -398,15 +399,10 @@ module Ast = struct
         | _ -> raise Invalid_structure in
       node ~cursor { name; init }
 
-    and struct_decl_of_cxcursor cursor =
+    and record_decl_of_cxcursor keyword cursor =
       let name = get_cursor_spelling cursor in
       let fields = fields_of_cxcursor cursor in
-      RecordDecl { keyword = Struct; name; fields }
-
-    and union_decl_of_cxcursor cursor =
-      let name = get_cursor_spelling cursor in
-      let fields = fields_of_cxcursor cursor in
-      RecordDecl { keyword = Union; name; fields }
+      RecordDecl { keyword; name; fields }
 
     and fields_of_cxcursor cursor =
       list_of_children cursor |> List.map decl_of_cxcursor
