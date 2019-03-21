@@ -351,6 +351,24 @@ module Ast = struct
 	    let name = get_cursor_spelling cursor in
 	    let declarations = list_of_children cursor |> List.map decl_of_cxcursor in
 	    Namespace { name; declarations }
+	| UsingDirective ->
+	    let namespace =
+	      match list_of_children cursor with
+	      | [namespace] -> namespace
+	      | _ -> raise Invalid_structure in
+	    let namespace = get_cursor_spelling namespace in
+	    Using { namespace; decl = None }
+	| UsingDeclaration ->
+	    begin
+	      match list_of_children cursor with
+	      | [namespace_ref; decl_ref] when
+		  get_cursor_kind namespace_ref = NamespaceRef &&
+		  get_cursor_kind decl_ref = OverloadedDeclRef ->
+		  Using {
+		    namespace = get_cursor_spelling namespace_ref;
+		    decl = Some (get_cursor_spelling decl_ref) }
+	      | _ -> raise Invalid_structure
+	    end
 	| UnexposedDecl ->
 	    begin
 	      match ext_get_cursor_kind cursor with
