@@ -2321,6 +2321,41 @@ let () =
   | _ -> assert false
     ]}
 *)
+  | Using of {
+      namespace : string;
+      decl : string option;
+    }
+(** C++ "using" directive and declaration.
+
+    {[
+let example = {|
+    using namespace std;
+    |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match ast with
+  | [{ desc = Using {
+      namespace = "std";
+      decl = None }}] -> ()
+  | _ -> assert false
+
+let example = {|
+    namespace std {
+      void cout() {}
+    }
+    using std::cout;
+    |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match List.hd (List.rev ast) with
+  | { desc = Using {
+      namespace = "std";
+      decl = Some "cout" }} -> ()
+  | _ -> assert false
+    ]}
+*)
   | EmptyDecl
 (**
   Empty declaration.
