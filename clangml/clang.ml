@@ -323,6 +323,7 @@ module Ast = struct
       try
         match get_cursor_kind cursor with
         | FunctionDecl -> function_decl_of_cxcursor cursor
+	| CXXMethod -> cxxmethod_decl_of_cxcursor cursor
         | VarDecl -> Var (var_decl_desc_of_cxcursor cursor)
         | StructDecl -> record_decl_of_cxcursor Struct cursor
         | UnionDecl -> record_decl_of_cxcursor Union cursor
@@ -375,6 +376,28 @@ module Ast = struct
             else
               None in
       Function { linkage; function_type; name; body }
+
+    and cxxmethod_decl_of_cxcursor cursor =
+      let function_type = cursor |> get_cursor_type |>
+        function_type_of_cxtype @@ fun i ->
+          cursor_get_argument cursor i |> get_cursor_spelling in
+      let name = get_cursor_spelling cursor in
+      let children = list_of_children cursor in
+      let type_ref : qual_type option =
+	match children with
+	| type_ref :: _ when get_cursor_kind type_ref = TypeRef ->
+	    Some (type_ref |> get_cursor_type |> of_cxtype)
+	| _ -> None in
+      let body : stmt option =
+        match children with
+        | [] -> None
+        | _ ->
+            let last = List.hd (List.rev children) in
+            if get_cursor_kind last = CompoundStmt then
+              Some (stmt_of_cxcursor last)
+            else
+              None in
+      CXXMethod { type_ref; function_type; name; body }
 
     and function_type_of_cxtype get_argument_name cxtype =
       let calling_conv = cxtype |> get_function_type_calling_conv in

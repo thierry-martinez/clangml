@@ -1947,8 +1947,52 @@ let () =
       body = None }}] -> ()
   | _ -> assert false
     ]}*)
+  | CXXMethod of {
+      type_ref : qual_type option;
+      function_type : function_type;
+      name : string;
+      body : stmt option;
+    }
+(** C++ method.
+
+    {[
+let example = {|
+    class X {
+      int f(char);
+    };
+
+    int X::f(char x) {
+      return 0;
+    }
+ |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match ast with
+  | [{ desc = RecordDecl {
+      keyword = Class;
+      name = "X";
+      fields = [
+        { desc = CXXMethod {
+          type_ref = None;
+          name = "f";
+          function_type = {
+            result = { desc = BuiltinType Int };
+            args = Some { non_variadic = [("", { desc = BuiltinType Char_S })] }};
+          body = None }}] }};
+      { desc = CXXMethod {
+        type_ref = Some { desc = Record "X" };
+        name = "f";
+        function_type = {
+          result = { desc = BuiltinType Int };
+          args = Some { non_variadic = [("x", { desc = BuiltinType Char_S })] }};
+        body = Some { desc = Compound [
+          { desc = Return (Some { desc = IntegerLiteral (Int 0) })}] }}}] -> ()
+  | _ -> assert false
+    ]}*)
   | Var of var_decl_desc
 (** Variable declaration.
+
     {[
 let example = {| int x = 1; |}
 
@@ -1959,7 +2003,7 @@ let () =
       linkage = External;
       qual_type = { const = false; desc = BuiltinType Int };
       name = "x";
-      init = Some ({ desc = IntegerLiteral (Int 1)})}}] -> ()
+      init = Some { desc = IntegerLiteral (Int 1)}}}] -> ()
   | _ -> assert false
 
 let example = {| const int x = 1; |}
@@ -1971,7 +2015,7 @@ let () =
       linkage = External;
       qual_type = { const = true; desc = BuiltinType Int };
       name = "x";
-      init = Some ({ desc = IntegerLiteral (Int 1)})}}] -> ()
+      init = Some { desc = IntegerLiteral (Int 1)}}}] -> ()
   | _ -> assert false
 
 let example = {| static int x = 1; |}
