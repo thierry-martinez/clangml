@@ -1979,7 +1979,8 @@ let () =
       fields = [
         { desc = Template {
             parameters = [{ name = "X"; kind = Class }];
-            decl = { desc = Function {
+            decl = { desc = CXXMethod {
+              type_ref = None;
               function_type = {
                 result = { desc = BuiltinType Int };
                 args = Some { non_variadic = [("", { desc = TemplateTypeParm "X" })] }};

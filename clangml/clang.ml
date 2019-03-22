@@ -318,16 +318,16 @@ module Ast = struct
             volatile = is_volatile_qualified_type cxtype;
             restrict = is_restrict_qualified_type cxtype; }
 
-    and decl_of_cxcursor cursor =
-      node ~cursor (decl_desc_of_cxcursor cursor)
+    and decl_of_cxcursor ?in_record cursor =
+      node ~cursor (decl_desc_of_cxcursor ?in_record cursor)
 
-    and decl_desc_of_cxcursor cursor =
+    and decl_desc_of_cxcursor ?(in_record = false) cursor =
       try
         match get_cursor_kind cursor with
         | FunctionDecl -> function_decl_of_cxcursor cursor (list_of_children cursor)
 	| FunctionTemplate ->
 	    cursor |> make_template @@ fun children ->
-	      cxxmethod_decl_of_cxcursor ~can_be_function:true cursor children
+	      cxxmethod_decl_of_cxcursor ~can_be_function:(not in_record) cursor children
 	| CXXMethod -> cxxmethod_decl_of_cxcursor cursor (list_of_children cursor)
         | VarDecl -> Var (var_decl_desc_of_cxcursor cursor)
         | StructDecl -> record_decl_of_cxcursor Struct cursor
@@ -484,7 +484,7 @@ module Ast = struct
       RecordDecl { keyword; name; fields }
 
     and fields_of_children children =
-      children |> List.map decl_of_cxcursor
+      children |> List.map (decl_of_cxcursor ~in_record:true)
 
     and stmt_of_cxcursor cursor =
       let desc =
