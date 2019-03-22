@@ -305,6 +305,8 @@ module Ast = struct
                     modified_type = type_get_modified_type cxtype |> of_cxtype;
                     attribute_kind = ext_type_get_attribute_kind cxtype;
                   }
+	      | TemplateTypeParm ->
+		  TemplateTypeParm (get_type_spelling cxtype);
               | _ -> BuiltinType (get_type_kind cxtype)
             end in
       match desc with
@@ -322,7 +324,8 @@ module Ast = struct
     and decl_desc_of_cxcursor cursor =
       try
         match get_cursor_kind cursor with
-        | FunctionDecl -> function_decl_of_cxcursor cursor
+        | FunctionDecl
+	| FunctionTemplate -> function_decl_of_cxcursor cursor
 	| CXXMethod -> cxxmethod_decl_of_cxcursor cursor
         | VarDecl -> Var (var_decl_desc_of_cxcursor cursor)
         | StructDecl -> record_decl_of_cxcursor Struct cursor
@@ -384,16 +387,20 @@ module Ast = struct
         function_type_of_cxtype @@ fun i ->
           cursor_get_argument cursor i |> get_cursor_spelling in
       let name = get_cursor_spelling cursor in
+      let children = list_of_children cursor in
+      let rec extract_template_parameters accu children =
+	match children with
+	| hd :: tl when get_cursor_kind hd = TemplateTypeParameter ->
+	    extract_template_parameters (get_cursor_spelling hd :: accu) tl
+	| _ ->
+	    List.rev accu in
+      let template = extract_template_parameters [] children in
       let body : stmt option =
-        match list_of_children cursor with
-        | [] -> None
-        | children ->
-            let last = List.hd (List.rev children) in
-            if get_cursor_kind last = CompoundStmt then
-              Some (stmt_of_cxcursor last)
-            else
-              None in
-      Function { linkage; function_type; name; body }
+        match List.rev children with
+        | last :: _ when get_cursor_kind last = CompoundStmt ->
+            Some (stmt_of_cxcursor last)
+	| _ -> None in
+      Function { template; linkage; function_type; name; body }
 
     and cxxmethod_decl_of_cxcursor cursor =
       let function_type = cursor |> get_cursor_type |>
