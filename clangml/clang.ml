@@ -324,9 +324,11 @@ module Ast = struct
     and decl_desc_of_cxcursor cursor =
       try
         match get_cursor_kind cursor with
-        | FunctionDecl
-	| FunctionTemplate -> function_decl_of_cxcursor cursor
-	| CXXMethod -> cxxmethod_decl_of_cxcursor cursor
+        | FunctionDecl -> function_decl_of_cxcursor cursor (list_of_children cursor)
+	| FunctionTemplate ->
+	    cursor |> make_template @@ fun children ->
+	      cxxmethod_decl_of_cxcursor ~can_be_function:true cursor children
+	| CXXMethod -> cxxmethod_decl_of_cxcursor cursor (list_of_children cursor)
         | VarDecl -> Var (var_decl_desc_of_cxcursor cursor)
         | StructDecl -> record_decl_of_cxcursor Struct cursor
         | UnionDecl -> record_decl_of_cxcursor Union cursor
@@ -386,41 +388,43 @@ module Ast = struct
         | _ -> OtherDecl
       with Invalid_structure -> OtherDecl
 
-    and function_decl_of_cxcursor cursor =
+    and function_decl_of_cxcursor cursor children =
       let linkage = cursor |> get_cursor_linkage in
       let function_type = cursor |> get_cursor_type |>
         function_type_of_cxtype @@ fun i ->
           cursor_get_argument cursor i |> get_cursor_spelling in
       let name = get_cursor_spelling cursor in
-      cursor |> make_template @@ fun children ->
-	let body : stmt option =
-          match List.rev children with
-          | last :: _ when get_cursor_kind last = CompoundStmt ->
-              Some (stmt_of_cxcursor last)
-	  | _ -> None in
-	Clang__ast.Function { linkage; function_type; name; body }
+      let body : stmt option =
+        match List.rev children with
+        | last :: _ when get_cursor_kind last = CompoundStmt ->
+            Some (stmt_of_cxcursor last)
+	| _ -> None in
+      Clang__ast.Function { linkage; function_type; name; body }
 
-    and cxxmethod_decl_of_cxcursor cursor =
+    and cxxmethod_decl_of_cxcursor ?(can_be_function = false) cursor children =
       let function_type = cursor |> get_cursor_type |>
         function_type_of_cxtype @@ fun i ->
           cursor_get_argument cursor i |> get_cursor_spelling in
       let name = get_cursor_spelling cursor in
-      cursor |> make_template @@ fun children ->
-        let type_ref : qual_type option =
-        	match children with
-        	| type_ref :: _ when get_cursor_kind type_ref = TypeRef ->
-        	    Some (type_ref |> get_cursor_type |> of_cxtype)
-        	| _ -> None in
-        let body : stmt option =
-          match children with
-          | [] -> None
-          | _ ->
-              let last = List.hd (List.rev children) in
-              if get_cursor_kind last = CompoundStmt then
-                Some (stmt_of_cxcursor last)
-              else
-                None in
-        CXXMethod { type_ref; function_type; name; body }
+      let type_ref : qual_type option =
+        match children with
+        | type_ref :: _ when get_cursor_kind type_ref = TypeRef ->
+            Some (type_ref |> get_cursor_type |> of_cxtype)
+        | _ -> None in
+      let body : stmt option =
+        match children with
+        | [] -> None
+        | _ ->
+            let last = List.hd (List.rev children) in
+            if get_cursor_kind last = CompoundStmt then
+              Some (stmt_of_cxcursor last)
+            else
+              None in
+      if can_be_function && type_ref = None then
+	let linkage = cursor |> get_cursor_linkage in
+	Function { linkage; function_type; name; body }
+      else
+	CXXMethod { type_ref; function_type; name; body }
 
     and function_type_of_cxtype get_argument_name cxtype =
       let calling_conv = cxtype |> get_function_type_calling_conv in

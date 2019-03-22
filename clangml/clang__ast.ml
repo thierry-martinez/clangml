@@ -1957,6 +1957,45 @@ let () =
               name = "v";
               qual_type = { desc = BuiltinType Int }}}] }}}}] -> ()
   | _ -> assert false
+
+let example = {|
+  class C {
+    template <class X>
+    int f(X);
+  };
+
+  template <class X>
+  int C::f(X x)
+  {
+    return 0;
+  } |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match ast with
+  | [{ desc = RecordDecl {
+      keyword = Class;
+      name = "C";
+      fields = [
+        { desc = Template {
+            parameters = [{ name = "X"; kind = Class }];
+            decl = { desc = Function {
+              function_type = {
+                result = { desc = BuiltinType Int };
+                args = Some { non_variadic = [("", { desc = TemplateTypeParm "X" })] }};
+              name = "f";
+              body = None; }}}}] }};
+     { desc = Template {
+         parameters = [{ name = "X"; kind = Class }];
+         decl = { desc = CXXMethod {
+           type_ref = Some { desc = Record "C" };
+           function_type = {
+             result = { desc = BuiltinType Int };
+             args = Some { non_variadic = [("", { desc = TemplateTypeParm "X" })] }};
+           name = "f";
+           body = Some { desc = Compound [
+             { desc = Return (Some { desc = IntegerLiteral (Int 0)})}] }; }}}}] -> ()
+  | _ -> assert false
     ]}*)
   | Function of {
       linkage : cxlinkagekind;
