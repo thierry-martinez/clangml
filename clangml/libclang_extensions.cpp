@@ -667,6 +667,7 @@ extern "C" {
       CASE(Paren);
       CASE(Elaborated); /* For Clang <3.9.0 */
       CASE(Attributed); /* For Clang <8.0.0 */
+      CASE(TemplateTypeParm);
       default:
         return ETK_Unknown;
       }

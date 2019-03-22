@@ -202,6 +202,7 @@ enum clang_ext_TypeKind {
   ETK_Paren,
   ETK_Elaborated, /* for Clang <3.9.0 */
   ETK_Attributed, /* for Clang <8.0.0 */
+  ETK_TemplateTypeParm,
   ETK_Unknown
 };
 
