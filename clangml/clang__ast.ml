@@ -718,6 +718,7 @@ let () =
     ]}
 
 *)
+  | TemplateTypeParm of string
   | BuiltinType of builtin_type
 (** Built-in type.
     {[
@@ -1906,6 +1907,7 @@ and decl = (decl_desc, qual_type) open_node
 
 and decl_desc =
   | Function of {
+      template : string list;
       linkage : cxlinkagekind;
       function_type : function_type;
       name : string;
@@ -1921,6 +1923,7 @@ let example = {| int f(void) {} |}
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = Function {
+      template = [];
       linkage = External;
       function_type = {
         calling_conv = C;
@@ -1936,12 +1939,30 @@ let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = Function {
+      template = [];
       linkage = Internal;
       function_type = {
         calling_conv = C;
         result = { desc = BuiltinType Int};
         args = Some {
           non_variadic = [("x", { desc = BuiltinType Int})];
+          variadic = false }};
+      name = "f";
+      body = None }}] -> ()
+  | _ -> assert false
+
+let example = {| template <class X> int f(X); |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match ast with
+  | [{ desc = Function {
+      template = ["X"];
+      function_type = {
+        calling_conv = C;
+        result = { desc = BuiltinType Int};
+        args = Some {
+          non_variadic = [("", { desc = TemplateTypeParm "X"})];
           variadic = false }};
       name = "f";
       body = None }}] -> ()
