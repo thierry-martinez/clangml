@@ -389,18 +389,31 @@ module Ast = struct
       let name = get_cursor_spelling cursor in
       let children = list_of_children cursor in
       let rec extract_template_parameters accu children =
-	match children with
-	| hd :: tl when get_cursor_kind hd = TemplateTypeParameter ->
-	    extract_template_parameters (get_cursor_spelling hd :: accu) tl
-	| _ ->
-	    List.rev accu in
-      let template = extract_template_parameters [] children in
+	match
+	  match children with
+	  | [] -> (None : 'a option)
+	  | hd :: tl ->
+	      match
+		match get_cursor_kind hd with
+		| TemplateTypeParameter -> Some (Class : template_parameter_kind)
+		| NonTypeTemplateParameter ->
+		    Some (NonType (get_cursor_type hd |> of_cxtype))
+		| _ -> None
+	      with
+	      | None -> None
+	      | Some kind ->
+		  Some ({ name = get_cursor_spelling hd; kind}, tl)
+	with
+	| None -> List.rev accu
+	| Some (parameter, tl) ->
+	    extract_template_parameters (parameter :: accu) tl in
+      let template_parameters = extract_template_parameters [] children in
       let body : stmt option =
         match List.rev children with
         | last :: _ when get_cursor_kind last = CompoundStmt ->
             Some (stmt_of_cxcursor last)
 	| _ -> None in
-      Function { template; linkage; function_type; name; body }
+      Function { template_parameters; linkage; function_type; name; body }
 
     and cxxmethod_decl_of_cxcursor cursor =
       let function_type = cursor |> get_cursor_type |>

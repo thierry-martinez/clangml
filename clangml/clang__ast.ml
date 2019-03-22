@@ -1907,7 +1907,7 @@ and decl = (decl_desc, qual_type) open_node
 
 and decl_desc =
   | Function of {
-      template : string list;
+      template_parameters : template_parameter list;
       linkage : cxlinkagekind;
       function_type : function_type;
       name : string;
@@ -1923,7 +1923,7 @@ let example = {| int f(void) {} |}
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = Function {
-      template = [];
+      template_parameters = [];
       linkage = External;
       function_type = {
         calling_conv = C;
@@ -1939,7 +1939,7 @@ let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = Function {
-      template = [];
+      template_parameters = [];
       linkage = Internal;
       function_type = {
         calling_conv = C;
@@ -1951,13 +1951,15 @@ let () =
       body = None }}] -> ()
   | _ -> assert false
 
-let example = {| template <class X> int f(X); |}
+let example = {| template <class X, int i> int f(X); |}
 
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
   fun ast -> match ast with
   | [{ desc = Function {
-      template = ["X"];
+      template_parameters = [
+        { name = "X"; kind = Class };
+        { name = "i"; kind = NonType { desc = BuiltinType Int } };];
       function_type = {
         calling_conv = C;
         result = { desc = BuiltinType Int};
@@ -2408,8 +2410,17 @@ and var_decl_desc = {
     linkage : cxlinkagekind;
     name : string;
     qual_type : qual_type;
-    init : expr option
+    init : expr option;
   }
+
+and template_parameter = {
+    name : string;
+    kind : template_parameter_kind;
+  }
+
+and template_parameter_kind =
+  | Class
+  | NonType of qual_type
 
 (** {3 Translation units} *)
 
