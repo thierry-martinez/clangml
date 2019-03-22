@@ -331,6 +331,11 @@ module Ast = struct
         | StructDecl -> record_decl_of_cxcursor Struct cursor
         | UnionDecl -> record_decl_of_cxcursor Union cursor
         | ClassDecl -> record_decl_of_cxcursor Class cursor
+	| ClassTemplate ->
+	    make_template
+	      (record_decl_of_children
+		 (Class : clang_ext_elaboratedtypekeyword) cursor)
+	      cursor
         | EnumDecl -> enum_decl_of_cxcursor cursor
         | TypedefDecl ->
             let name = get_cursor_spelling cursor in
@@ -387,55 +392,35 @@ module Ast = struct
         function_type_of_cxtype @@ fun i ->
           cursor_get_argument cursor i |> get_cursor_spelling in
       let name = get_cursor_spelling cursor in
-      let children = list_of_children cursor in
-      let rec extract_template_parameters accu children =
-	match
-	  match children with
-	  | [] -> (None : 'a option)
-	  | hd :: tl ->
-	      match
-		match get_cursor_kind hd with
-		| TemplateTypeParameter -> Some (Class : template_parameter_kind)
-		| NonTypeTemplateParameter ->
-		    Some (NonType (get_cursor_type hd |> of_cxtype))
-		| _ -> None
-	      with
-	      | None -> None
-	      | Some kind ->
-		  Some ({ name = get_cursor_spelling hd; kind}, tl)
-	with
-	| None -> List.rev accu
-	| Some (parameter, tl) ->
-	    extract_template_parameters (parameter :: accu) tl in
-      let template_parameters = extract_template_parameters [] children in
-      let body : stmt option =
-        match List.rev children with
-        | last :: _ when get_cursor_kind last = CompoundStmt ->
-            Some (stmt_of_cxcursor last)
-	| _ -> None in
-      Function { template_parameters; linkage; function_type; name; body }
+      cursor |> make_template @@ fun children ->
+	let body : stmt option =
+          match List.rev children with
+          | last :: _ when get_cursor_kind last = CompoundStmt ->
+              Some (stmt_of_cxcursor last)
+	  | _ -> None in
+	Clang__ast.Function { linkage; function_type; name; body }
 
     and cxxmethod_decl_of_cxcursor cursor =
       let function_type = cursor |> get_cursor_type |>
         function_type_of_cxtype @@ fun i ->
           cursor_get_argument cursor i |> get_cursor_spelling in
       let name = get_cursor_spelling cursor in
-      let children = list_of_children cursor in
-      let type_ref : qual_type option =
-	match children with
-	| type_ref :: _ when get_cursor_kind type_ref = TypeRef ->
-	    Some (type_ref |> get_cursor_type |> of_cxtype)
-	| _ -> None in
-      let body : stmt option =
-        match children with
-        | [] -> None
-        | _ ->
-            let last = List.hd (List.rev children) in
-            if get_cursor_kind last = CompoundStmt then
-              Some (stmt_of_cxcursor last)
-            else
-              None in
-      CXXMethod { type_ref; function_type; name; body }
+      cursor |> make_template @@ fun children ->
+        let type_ref : qual_type option =
+        	match children with
+        	| type_ref :: _ when get_cursor_kind type_ref = TypeRef ->
+        	    Some (type_ref |> get_cursor_type |> of_cxtype)
+        	| _ -> None in
+        let body : stmt option =
+          match children with
+          | [] -> None
+          | _ ->
+              let last = List.hd (List.rev children) in
+              if get_cursor_kind last = CompoundStmt then
+                Some (stmt_of_cxcursor last)
+              else
+                None in
+        CXXMethod { type_ref; function_type; name; body }
 
     and function_type_of_cxtype get_argument_name cxtype =
       let calling_conv = cxtype |> get_function_type_calling_conv in
@@ -487,12 +472,15 @@ module Ast = struct
       node ~cursor { name; init }
 
     and record_decl_of_cxcursor keyword cursor =
+      record_decl_of_children keyword cursor (list_of_children cursor)
+
+    and record_decl_of_children keyword cursor children =
       let name = get_cursor_spelling cursor in
-      let fields = fields_of_cxcursor cursor in
+      let fields = fields_of_children children in
       RecordDecl { keyword; name; fields }
 
-    and fields_of_cxcursor cursor =
-      list_of_children cursor |> List.map decl_of_cxcursor
+    and fields_of_children children =
+      children |> List.map decl_of_cxcursor
 
     and stmt_of_cxcursor cursor =
       let desc =
@@ -812,6 +800,33 @@ module Ast = struct
             ArgumentType qual_type
         | _ -> raise Invalid_structure in
       UnaryExpr { kind; argument }
+
+    and make_template make_body cursor =
+      let rec extract_template_parameters accu children =
+	match
+	  match children with
+	  | [] -> (None : 'a option), []
+	  | hd :: tl ->
+	      match
+		match get_cursor_kind hd with
+		| TemplateTypeParameter -> Some (Class : template_parameter_kind)
+		| NonTypeTemplateParameter ->
+		    Some (NonType (get_cursor_type hd |> of_cxtype))
+		| _ -> None
+	      with
+	      | None -> None, children
+	      | Some kind ->
+		  Some { name = get_cursor_spelling hd; kind}, tl
+	with
+	| None, tl -> List.rev accu, tl
+	| Some parameter, tl ->
+	    extract_template_parameters (parameter :: accu) tl in
+      let parameters, others =
+	extract_template_parameters [] (list_of_children cursor) in
+      let decl = make_body others in
+      match parameters with
+      | [] -> decl
+      | _ -> Template { parameters; decl = node ~cursor decl }
 
     let translation_unit_of_cxcursor cursor =
       let filename = get_cursor_spelling cursor in

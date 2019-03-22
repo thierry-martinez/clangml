@@ -874,7 +874,9 @@ let () =
         function_type = { args = Some {
           non_variadic = ["i", { desc = BuiltinType Int }];
           variadic = true }}}}] -> ()
-    | _ -> assert false
+    | decls ->
+	List.iter (fun decl -> Format.eprintf "%a@." Clang.Ast.pp_decl decl) decls;
+	assert false
     ]}
  *)
 }
@@ -893,7 +895,9 @@ let parse_statement_list ?(return_type = "int") ?filename ?command_line_args ?op
     parse_declaration_list ?filename ?command_line_args ?options
   with
   | [{ desc = Function { body = Some { desc = Compound items }}}] -> items
-  | _ -> assert false
+  | decls ->
+      List.iter (fun decl -> Format.eprintf "%a@." Clang.Ast.pp_decl decl) decls;
+      assert false
     ]}*)
 
 and stmt = (stmt_desc, qual_type) open_node
@@ -1906,8 +1910,55 @@ and unary_expr_or_type_trait =
 and decl = (decl_desc, qual_type) open_node
 
 and decl_desc =
+  | Template of {
+      parameters : template_parameter list;
+      decl : decl;
+    }
+(** Template declaration.
+
+    {[
+let example = {| template <class X, int i> int f(X); |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match ast with
+  | [{ desc = Template {
+      parameters = [
+        { name = "X"; kind = Class };
+        { name = "i"; kind = NonType { desc = BuiltinType Int } };];
+      decl = { desc = Function {
+        function_type = {
+          calling_conv = C;
+          result = { desc = BuiltinType Int};
+          args = Some {
+            non_variadic = [("", { desc = TemplateTypeParm "X"})];
+            variadic = false }};
+        name = "f";
+        body = None }}}}] -> ()
+  | _ -> assert false
+
+let example = {| template <class X, int i> class C { X x; int v = i; }; |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match ast with
+  | [{ desc = Template {
+      parameters = [
+        { name = "X"; kind = Class };
+        { name = "i"; kind = NonType { desc = BuiltinType Int } };];
+      decl = { desc = RecordDecl {
+        keyword = Class;
+        name = "C";
+        fields = [
+          { desc = Field {
+              name = "x";
+              qual_type = { desc = TemplateTypeParm "X" }}};
+          { desc = Field {
+              name = "v";
+              qual_type = { desc = BuiltinType Int }}}] }}}}] -> ()
+  | _ -> assert false
+    ]}*)
   | Function of {
-      template_parameters : template_parameter list;
       linkage : cxlinkagekind;
       function_type : function_type;
       name : string;
@@ -1917,13 +1968,13 @@ and decl_desc =
     In case of function definition, we should have
     [body = Some { desc = Compound list; _ }] for some [list].
     In case of forward declaration, [body = None].
+
     {[
 let example = {| int f(void) {} |}
 
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast -> match ast with
   | [{ desc = Function {
-      template_parameters = [];
       linkage = External;
       function_type = {
         calling_conv = C;
@@ -1939,32 +1990,12 @@ let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = Function {
-      template_parameters = [];
       linkage = Internal;
       function_type = {
         calling_conv = C;
         result = { desc = BuiltinType Int};
         args = Some {
           non_variadic = [("x", { desc = BuiltinType Int})];
-          variadic = false }};
-      name = "f";
-      body = None }}] -> ()
-  | _ -> assert false
-
-let example = {| template <class X, int i> int f(X); |}
-
-let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
-  fun ast -> match ast with
-  | [{ desc = Function {
-      template_parameters = [
-        { name = "X"; kind = Class };
-        { name = "i"; kind = NonType { desc = BuiltinType Int } };];
-      function_type = {
-        calling_conv = C;
-        result = { desc = BuiltinType Int};
-        args = Some {
-          non_variadic = [("", { desc = TemplateTypeParm "X"})];
           variadic = false }};
       name = "f";
       body = None }}] -> ()
