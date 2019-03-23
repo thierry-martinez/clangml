@@ -1961,7 +1961,7 @@ let () =
 let example = {|
   class C {
     template <class X>
-    int f(X);
+    int f(X x);
   };
 
   template <class X>
@@ -1983,7 +1983,7 @@ let () =
               type_ref = None;
               function_type = {
                 result = { desc = BuiltinType Int };
-                args = Some { non_variadic = [("", { desc = TemplateTypeParm "X" })] }};
+                args = Some { non_variadic = [("x", { desc = TemplateTypeParm "X" })] }};
               name = "f";
               body = None; }}}}] }};
      { desc = Template {
@@ -1992,7 +1992,7 @@ let () =
            type_ref = Some { desc = Record "C" };
            function_type = {
              result = { desc = BuiltinType Int };
-             args = Some { non_variadic = [("", { desc = TemplateTypeParm "X" })] }};
+             args = Some { non_variadic = [("x", { desc = TemplateTypeParm "X" })] }};
            name = "f";
            body = Some { desc = Compound [
              { desc = Return (Some { desc = IntegerLiteral (Int 0)})}] }; }}}}] -> ()

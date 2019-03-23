@@ -388,11 +388,17 @@ module Ast = struct
         | _ -> OtherDecl
       with Invalid_structure -> OtherDecl
 
+    and function_type_of_decl cursor children =
+      let params = children |> List.filter @@ fun child ->
+	get_cursor_kind child = ParmDecl in
+      let params = Array.of_list params in
+      cursor |> get_cursor_type |>
+        function_type_of_cxtype @@ fun i ->
+          params.(i) |> get_cursor_spelling
+
     and function_decl_of_cxcursor cursor children =
       let linkage = cursor |> get_cursor_linkage in
-      let function_type = cursor |> get_cursor_type |>
-        function_type_of_cxtype @@ fun i ->
-          cursor_get_argument cursor i |> get_cursor_spelling in
+      let function_type = function_type_of_decl cursor children in
       let name = get_cursor_spelling cursor in
       let body : stmt option =
         match List.rev children with
@@ -402,9 +408,7 @@ module Ast = struct
       Clang__ast.Function { linkage; function_type; name; body }
 
     and cxxmethod_decl_of_cxcursor ?(can_be_function = false) cursor children =
-      let function_type = cursor |> get_cursor_type |>
-        function_type_of_cxtype @@ fun i ->
-          cursor_get_argument cursor i |> get_cursor_spelling in
+      let function_type = function_type_of_decl cursor children in
       let name = get_cursor_spelling cursor in
       let type_ref : qual_type option =
         match children with
