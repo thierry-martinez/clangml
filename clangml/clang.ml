@@ -428,7 +428,17 @@ module Ast = struct
 	let linkage = cursor |> get_cursor_linkage in
 	Function { linkage; function_type; name; body }
       else
-	CXXMethod { type_ref; function_type; name; body }
+	CXXMethod { type_ref; function_type; name; body;
+	  defaulted = cxxmethod_is_defaulted cursor;
+	  static = cxxmethod_is_static cursor;
+	  binding =
+	    if cxxmethod_is_pure_virtual cursor then
+	      PureVirtual
+	    else if cxxmethod_is_virtual cursor then
+	      Virtual
+	    else
+	      NonVirtual;
+	  const = cxxmethod_is_const cursor; }
 
     and function_type_of_cxtype get_argument_name cxtype =
       let calling_conv = cxtype |> get_function_type_calling_conv in
@@ -814,17 +824,17 @@ module Ast = struct
 	match
 	  match children with
 	  | [] -> (None : 'a option), []
-	  | hd :: tl ->
+	  | cursor :: tl ->
 	      match
-		match get_cursor_kind hd with
+		match get_cursor_kind cursor with
 		| TemplateTypeParameter -> Some (Class : template_parameter_kind)
 		| NonTypeTemplateParameter ->
-		    Some (NonType (get_cursor_type hd |> of_cxtype))
+		    Some (NonType (get_cursor_type cursor |> of_cxtype))
 		| _ -> None
 	      with
 	      | None -> None, children
 	      | Some kind ->
-		  Some { name = get_cursor_spelling hd; kind}, tl
+		  Some (node ~cursor { name = get_cursor_spelling cursor; kind}), tl
 	with
 	| None, tl -> List.rev accu, tl
 	| Some parameter, tl ->

@@ -2,36 +2,11 @@
 
 open Clang__bindings
 
-(** {2 Aliases} *)
+let pp_cxint fmt cxint =
+  Format.pp_print_string fmt (ext_int_to_string cxint 10 true)
 
-(** The following aliases provide more readable names for some types
-from libclang. *)
-
-type elaborated_type_keyword = clang_ext_elaboratedtypekeyword
-(** Keyword associated to an elaborated type: [struct], [union],
-    [enum], ... *)
-
-and character_kind = clang_ext_characterkind
-(** Character kind: ASCII, UTF8, UTF16, ... *)
-
-and unary_expr_kind = clang_ext_unaryexpr
-(** Kind of unary expression: [sizeof], [alignof], ... *)
-
-and unary_operator_kind = clang_ext_unaryoperatorkind
-(** Kind of unary operator: [_++], [++_], [-_], [&_], ... *)
-
-and binary_operator_kind = clang_ext_binaryoperatorkind
-(** Kind of binary operator: [_+_], [_=_], [_+=_], [_<<_], ... *)
-
-and attribute_kind = clang_ext_attrkind
-(** Kind of attribute: [FallThrough], [NonNull], ... *)
-
-and builtin_type = cxtypekind
-(** libclang's type kinds: [Int], [Void], [Bool], ... *)
-
-and cxx_access_specifier = cx_cxxaccessspecifier
-(** C++ access specifier: [public], [private], [protected] *)
-  [@@deriving eq, ord, show]
+let pp_cxfloat fmt cxfloat =
+  Format.pp_print_string fmt (ext_float_to_string cxfloat)
 
 (** {2 Abstractions from libclang's types} *)
 
@@ -60,247 +35,6 @@ type source_location =
   | Clang of cxsourcelocation
   | Concrete of concrete_location
 
-type integer_literal =
-  | Int of int
-  | CXInt of cxint
-  [@@deriving eq, ord]
-
-type floating_literal =
-  | Float of float
-  | CXFloat of cxfloat
-  [@@deriving eq, ord]
-
-(** {2 Nodes and decorations} *)
-
-(** AST nodes are of type ['a ]{!type:node} for some ['a] and
-    carry a {!type:decoration}.
-    If the node comes for a translation unit parsed by clang,
-    the decoration is of the form {!const:Cursor}[ cursor],
-    where [cursor] points to the corresponding node in clang
-    internal AST.
-    Decorations
-    can be of the form {!const:Custom}[ custom_decoration],
-    where the inlined record [custom_decoration] may optionnally
-    carry a location, or a type, or both.
-
-    To break type recursion between {!type:qual_type} and {!type:decoration},
-    open types ['qual_type ]{!type:open_decoration} and
-    [('a, 'qual_type) ]{!type:open_node} are defined first, and then
-    {!type:node} and {!type:decoration} are defined as aliases
-    with ['qual_type = ]{!type:qual_type}.
- *)
-
-type 'qual_type open_decoration =
-  | Cursor of cxcursor
-  | Custom of {
-      location : source_location option;
-      qual_type : 'qual_type option;
-    }
-
-type ('a, 'qual_type) open_node = {
-    decoration : 'qual_type open_decoration
-      [@equal fun _ _ -> true]
-      [@compare fun _ _ -> 0]
-      [@opaque];
-    desc : 'a;
-  }
-  [@@deriving eq, ord, show]
-
-(** {2 Visitors for nodes}
-
-    The following classes define base classes for deriving visitors
-    for AST nodes.
- *)
-
-class ['self] base_iter =
-  object (self)
-    method visit_open_node : 'env 'a 'qual_type . ('env -> 'a -> unit) -> ('env -> 'qual_type -> unit) -> 'env -> ('a, 'qual_type) open_node -> unit =
-      fun visit_desc _visit_qual_type env open_node -> visit_desc env open_node.desc
-
-    method visit_integer_literal : 'env . 'env -> integer_literal -> unit =
-      fun _env _ -> ()
-
-    method visit_floating_literal : 'env . 'env -> floating_literal -> unit =
-      fun _env _ -> ()
-
-    method visit_elaborated_type_keyword : 'env . 'env -> elaborated_type_keyword -> unit =
-      fun _env _ -> ()
-
-    method visit_builtin_type : 'env . 'env -> builtin_type -> unit =
-      fun _env _ -> ()
-
-    method visit_cxcallingconv : 'env . 'env -> cxcallingconv -> unit =
-      fun _env _ -> ()
-
-    method visit_cxlinkagekind : 'env . 'env -> cxlinkagekind -> unit =
-      fun _env _ -> ()
-
-    method visit_character_kind : 'env . 'env -> character_kind -> unit =
-      fun _env _ -> ()
-
-    method visit_unary_expr_kind : 'env . 'env -> unary_expr_kind -> unit =
-      fun _env _ -> ()
-
-    method visit_unary_operator_kind : 'env . 'env -> unary_operator_kind -> unit =
-      fun _env _ -> ()
-
-    method visit_binary_operator_kind : 'env . 'env -> binary_operator_kind -> unit =
-      fun _env _ -> ()
-
-    method visit_attribute_kind : 'env . 'env -> attribute_kind -> unit =
-      fun _env _ -> ()
-
-    method visit_cxx_access_specifier : 'env . 'env -> cxx_access_specifier -> unit =
-      fun _env _ -> ()
-  end
-
-class ['self] base_map =
-  object (self)
-    method visit_open_node : 'env 'a 'qual_type . ('env -> 'a -> 'a) -> ('env -> 'qual_type -> 'qual_type) -> 'env -> ('a, 'qual_type) open_node -> ('a, 'qual_type) open_node =
-      fun visit_desc visit_qual_type env { decoration; desc } ->
-        let decoration =
-          match decoration with
-          | Cursor cursor -> Cursor cursor
-          | Custom custom ->
-              Custom { custom with
-                qual_type = Option.map (visit_qual_type env) custom.qual_type } in
-        { decoration;
-          desc = visit_desc env desc }
-
-    method visit_integer_literal : 'env . 'env -> integer_literal -> integer_literal =
-      fun _env i -> i
-
-    method visit_floating_literal : 'env . 'env -> floating_literal -> floating_literal =
-      fun _env f -> f
-
-    method visit_elaborated_type_keyword : 'env . 'env -> elaborated_type_keyword -> elaborated_type_keyword =
-      fun _env k -> k
-
-    method visit_builtin_type : 'env . 'env -> builtin_type -> builtin_type =
-      fun _env t -> t
-
-    method visit_cxcallingconv : 'env . 'env -> cxcallingconv -> cxcallingconv =
-      fun _env c -> c
-
-    method visit_cxlinkagekind : 'env . 'env -> cxlinkagekind -> cxlinkagekind =
-      fun _env k -> k
-
-    method visit_character_kind : 'env . 'env -> character_kind -> character_kind =
-      fun _env k -> k
-
-    method visit_unary_expr_kind : 'env . 'env -> unary_expr_kind -> unary_expr_kind =
-      fun _env k -> k
-
-    method visit_unary_operator_kind : 'env . 'env -> unary_operator_kind -> unary_operator_kind =
-      fun _env k -> k
-
-    method visit_binary_operator_kind : 'env . 'env -> binary_operator_kind -> binary_operator_kind =
-      fun _env k -> k
-
-    method visit_attribute_kind : 'env . 'env -> attribute_kind -> attribute_kind =
-      fun _env k -> k
-
-    method visit_cxx_access_specifier : 'env . 'env -> cxx_access_specifier -> cxx_access_specifier =
-      fun _env k -> k
-  end
-
-class virtual ['self] base_reduce =
-  object (self : 'self)
-    inherit [_] VisitorsRuntime.reduce
-
-    method visit_open_node : 'env 'a 'qual_type . ('env -> 'a -> 'monoid) -> ('env -> 'qual_type -> 'monoid) -> 'env -> ('a, 'qual_type) open_node -> 'monoid =
-      fun visit_desc _visit_qual_type env open_node -> visit_desc env open_node.desc
-
-    method visit_integer_literal : 'env . 'env -> integer_literal -> 'monoid =
-      fun _env _ -> self#zero
-
-    method visit_floating_literal : 'env . 'env -> floating_literal -> 'monoid =
-      fun _env _ -> self#zero
-
-    method visit_elaborated_type_keyword : 'env . 'env -> elaborated_type_keyword -> 'monoid =
-      fun _env _ -> self#zero
-
-    method visit_builtin_type : 'env . 'env -> builtin_type -> 'monoid =
-      fun _env _ -> self#zero
-
-    method visit_cxcallingconv : 'env . 'env -> cxcallingconv -> 'monoid =
-      fun _env _ -> self#zero
-
-    method visit_cxlinkagekind : 'env . 'env -> cxlinkagekind -> 'monoid =
-      fun _env _ -> self#zero
-
-    method visit_character_kind : 'env . 'env -> character_kind -> 'monoid =
-      fun _env _ -> self#zero
-
-    method visit_unary_expr_kind : 'env . 'env -> unary_expr_kind -> 'monoid =
-      fun _env _ -> self#zero
-
-    method visit_unary_operator_kind : 'env . 'env -> unary_operator_kind -> 'monoid =
-      fun _env _ -> self#zero
-
-    method visit_binary_operator_kind : 'env . 'env -> binary_operator_kind -> 'monoid =
-      fun _env _ -> self#zero
-
-    method visit_attribute_kind : 'env . 'env -> attribute_kind -> 'monoid =
-      fun _env _ -> self#zero
-
-    method visit_cxx_access_specifier : 'env . 'env -> cxx_access_specifier -> 'monoid =
-      fun _env _ -> self#zero
-  end
-
-class virtual ['self] base_mapreduce =
-  object (self : 'self)
-    inherit [_] VisitorsRuntime.mapreduce
-
-    method visit_open_node : 'env 'a 'qual_type . ('env -> 'a -> 'a * 'monoid) -> ('env -> 'qual_type -> 'qual_type * 'monoid) -> 'env -> ('a, 'qual_type) open_node -> ('a, 'qual_type) open_node * 'monoid =
-      fun visit_desc visit_qual_type env { decoration; desc } ->
-        let decoration, decoration_value =
-          match decoration with
-          | Cursor cursor -> Cursor cursor, self#zero
-          | Custom custom ->
-              let qual_type, decoration_value =
-                self#visit_option visit_qual_type env custom.qual_type in
-              Custom { custom with qual_type }, decoration_value in
-        let desc, desc_value = visit_desc env desc in
-        { decoration; desc }, self#plus decoration_value desc_value
-
-    method visit_integer_literal : 'env . 'env -> integer_literal -> integer_literal * 'monoid =
-      fun _env i -> i, self#zero
-
-    method visit_floating_literal : 'env . 'env -> floating_literal -> floating_literal * 'monoid =
-      fun _env f -> f, self#zero
-
-    method visit_elaborated_type_keyword : 'env . 'env -> elaborated_type_keyword -> elaborated_type_keyword * 'monoid =
-      fun _env k -> k, self#zero
-
-    method visit_builtin_type : 'env . 'env -> builtin_type -> builtin_type * 'monoid =
-      fun _env t -> t, self#zero
-
-    method visit_cxcallingconv : 'env . 'env -> cxcallingconv -> cxcallingconv * 'monoid =
-      fun _env c -> c, self#zero
-
-    method visit_cxlinkagekind : 'env . 'env -> cxlinkagekind -> cxlinkagekind * 'monoid =
-      fun _env k -> k, self#zero
-
-    method visit_character_kind : 'env . 'env -> character_kind -> character_kind * 'monoid =
-      fun _env k -> k, self#zero
-
-    method visit_unary_expr_kind : 'env . 'env -> unary_expr_kind -> unary_expr_kind * 'monoid =
-      fun _env k -> k, self#zero
-
-    method visit_unary_operator_kind : 'env . 'env -> unary_operator_kind -> unary_operator_kind * 'monoid =
-      fun _env k -> k, self#zero
-
-    method visit_binary_operator_kind : 'env . 'env -> binary_operator_kind -> binary_operator_kind * 'monoid =
-      fun _env k -> k, self#zero
-
-    method visit_attribute_kind : 'env . 'env -> attribute_kind -> attribute_kind * 'monoid =
-      fun _env k -> k, self#zero
-
-    method visit_cxx_access_specifier : 'env . 'env -> cxx_access_specifier -> cxx_access_specifier * 'monoid =
-      fun _env k -> k, self#zero
-  end
-
 (*{[
 open Stdcompat
 
@@ -321,6 +55,84 @@ let check pp parser source checker =
       (Format.pp_print_list pp) ast;
     incr failure_count
 ]}*)
+
+(** {2 Nodes and decorations} *)
+
+(** AST nodes are of type ['a ]{!type:node} for some ['a] and
+    carry a {!type:decoration}.
+    If the node comes for a translation unit parsed by clang,
+    the decoration is of the form {!const:Cursor}[ cursor],
+    where [cursor] points to the corresponding node in clang
+    internal AST.
+    Decorations
+    can be of the form {!const:Custom}[ custom_decoration],
+    where the inlined record [custom_decoration] may optionnally
+    carry a location, or a type, or both.
+ *)
+
+type 'a node = {
+    decoration : decoration
+      [@equal fun _ _ -> true]
+      [@compare fun _ _ -> 0]
+      [@opaque];
+    desc : 'a;
+  }
+
+and decoration =
+  | Cursor of (cxcursor
+		 [@equal fun _ _ -> true]
+		 [@compare fun _ _ -> 0]
+		 [@opaque])
+  | Custom of {
+      location : (source_location
+		    [@equal fun _ _ -> true]
+		    [@compare fun _ _ -> 0]
+		    [@opaque]) option;
+      qual_type : qual_type option;
+    }
+
+(** {2 Aliases} *)
+
+(** The following aliases provide more readable names for some types
+from libclang. *)
+
+and elaborated_type_keyword = clang_ext_elaboratedtypekeyword [@visitors.opaque]
+(** Keyword associated to an elaborated type: [struct], [union],
+    [enum], ... *)
+
+and character_kind = clang_ext_characterkind [@visitors.opaque]
+(** Character kind: ASCII, UTF8, UTF16, ... *)
+
+and unary_expr_kind = clang_ext_unaryexpr [@visitors.opaque]
+(** Kind of unary expression: [sizeof], [alignof], ... *)
+
+and unary_operator_kind = clang_ext_unaryoperatorkind [@visitors.opaque]
+(** Kind of unary operator: [_++], [++_], [-_], [&_], ... *)
+
+and binary_operator_kind = clang_ext_binaryoperatorkind [@visitors.opaque]
+(** Kind of binary operator: [_+_], [_=_], [_+=_], [_<<_], ... *)
+
+and attribute_kind = clang_ext_attrkind [@visitors.opaque]
+(** Kind of attribute: [FallThrough], [NonNull], ... *)
+
+and builtin_type = cxtypekind [@visitors.opaque]
+(** libclang's type kinds: [Int], [Void], [Bool], ... *)
+
+and cxx_access_specifier = cx_cxxaccessspecifier [@visitors.opaque]
+(** C++ access specifier: [public], [private], [protected] *)
+
+and calling_conv = cxcallingconv [@visitors.opaque]
+(** Calling convention *)
+
+and linkage_kind = cxlinkagekind [@visitors.opaque]
+
+and integer_literal =
+  | Int of int
+  | CXInt of (cxint [@visitors.opaque])
+
+and floating_literal =
+  | Float of float
+  | CXFloat of (cxfloat [@visitors.opaque])
 
 (** {2 Types and nodes} *)
 
@@ -345,7 +157,7 @@ let parse_declaration_list ?filename ?command_line_args ?options ?clang_options
 
 (** {3 Qualified types } *)
 
-type qual_type = {
+and qual_type = {
     cxtype : cxtype
       [@equal fun _ _ -> true]
       [@compare fun _ _ -> 0]
@@ -734,7 +546,7 @@ let () =
 
 (** Function type. *)
 and function_type = {
-  calling_conv : cxcallingconv;
+  calling_conv : calling_conv;
 (** Calling convention.
     {[
 let example = "void f(void);"
@@ -900,7 +712,7 @@ let parse_statement_list ?(return_type = "int") ?filename ?command_line_args ?op
       assert false
     ]}*)
 
-and stmt = (stmt_desc, qual_type) open_node
+and stmt = stmt_desc node
 
 and stmt_desc =
   | Null
@@ -1369,7 +1181,7 @@ let () =
   | [{ desc = For { body = { desc = Break } }}] -> ()
   | _ -> assert false
    ]}*)
-  | GCCAsm of string * (string, qual_type) open_node list
+  | GCCAsm of string * string node list
 (** GCC assembler statement.
     {[
 let example = {|
@@ -1416,7 +1228,7 @@ let () =
 
 (** {3 Expressions} *)
 
-and expr = (expr_desc, qual_type) open_node
+and expr = expr_desc node
 
 and expr_desc =
   | IntegerLiteral of integer_literal
@@ -1680,7 +1492,7 @@ let () =
   | Member of {
       base : expr;
       arrow : bool;
-      field : (string, qual_type) open_node;
+      field : string node;
     }
 (** Member dot or arrow
     {[
@@ -1907,7 +1719,7 @@ and unary_expr_or_type_trait =
 
 (** {3 Declarations} *)
 
-and decl = (decl_desc, qual_type) open_node
+and decl = decl_desc node
 
 and decl_desc =
   | Template of {
@@ -1924,8 +1736,8 @@ let () =
   fun ast -> match ast with
   | [{ desc = Template {
       parameters = [
-        { name = "X"; kind = Class };
-        { name = "i"; kind = NonType { desc = BuiltinType Int } };];
+        { desc = { name = "X"; kind = Class }};
+        { desc = { name = "i"; kind = NonType { desc = BuiltinType Int }}};];
       decl = { desc = Function {
         function_type = {
           calling_conv = C;
@@ -1944,8 +1756,8 @@ let () =
   fun ast -> match ast with
   | [{ desc = Template {
       parameters = [
-        { name = "X"; kind = Class };
-        { name = "i"; kind = NonType { desc = BuiltinType Int } };];
+        { desc = { name = "X"; kind = Class }};
+        { desc = { name = "i"; kind = NonType { desc = BuiltinType Int }}};];
       decl = { desc = RecordDecl {
         keyword = Class;
         name = "C";
@@ -1978,7 +1790,7 @@ let () =
       name = "C";
       fields = [
         { desc = Template {
-            parameters = [{ name = "X"; kind = Class }];
+            parameters = [{ desc = { name = "X"; kind = Class }}];
             decl = { desc = CXXMethod {
               type_ref = None;
               function_type = {
@@ -1987,7 +1799,7 @@ let () =
               name = "f";
               body = None; }}}}] }};
      { desc = Template {
-         parameters = [{ name = "X"; kind = Class }];
+         parameters = [{ desc = { name = "X"; kind = Class }}];
          decl = { desc = CXXMethod {
            type_ref = Some { desc = Record "C" };
            function_type = {
@@ -1999,7 +1811,7 @@ let () =
   | _ -> assert false
     ]}*)
   | Function of {
-      linkage : cxlinkagekind;
+      linkage : linkage_kind;
       function_type : function_type;
       name : string;
       body : stmt option;
@@ -2046,6 +1858,10 @@ let () =
       function_type : function_type;
       name : string;
       body : stmt option;
+      defaulted : bool;
+      static : bool;
+      binding : cxx_method_binding_kind;
+      const : bool;
     }
 (** C++ method.
 
@@ -2053,6 +1869,13 @@ let () =
 let example = {|
     class X {
       int f(char);
+      void const_method() const {
+      }
+      virtual void virtual_method() {
+      }
+      virtual void pure_virtual_method() = 0;
+      static void static_method() {
+      }
     };
 
     int X::f(char x) {
@@ -2073,7 +1896,39 @@ let () =
           function_type = {
             result = { desc = BuiltinType Int };
             args = Some { non_variadic = [("", { desc = BuiltinType Char_S })] }};
-          body = None }}] }};
+          body = None; }};
+        { desc = CXXMethod {
+          type_ref = None;
+          name = "const_method";
+          function_type = {
+            result = { desc = BuiltinType Void };
+            args = Some { non_variadic = [] }};
+          body = Some { desc = Compound [] };
+          const = true; }};
+        { desc = CXXMethod {
+          type_ref = None;
+          name = "virtual_method";
+          function_type = {
+            result = { desc = BuiltinType Void };
+            args = Some { non_variadic = [] }};
+          body = Some { desc = Compound [] };
+          binding = Virtual; }};
+        { desc = CXXMethod {
+          type_ref = None;
+          name = "pure_virtual_method";
+          function_type = {
+            result = { desc = BuiltinType Void };
+            args = Some { non_variadic = [] }};
+          body = None;
+          binding = PureVirtual; }};
+        { desc = CXXMethod {
+          type_ref = None;
+          name = "static_method";
+          function_type = {
+            result = { desc = BuiltinType Void };
+            args = Some { non_variadic = [] }};
+          body = Some { desc = Compound [] };
+          static = true; }}; ] }};
       { desc = CXXMethod {
         type_ref = Some { desc = Record "X" };
         name = "f";
@@ -2468,23 +2323,29 @@ let () =
 
 and label_ref = string
 
-and enum_constant = (enum_constant_desc, qual_type) open_node
+and enum_constant = enum_constant_desc node
 
 and enum_constant_desc = {
     name : string;
     init : expr option;
   }
 
-and var_decl = (var_decl_desc, qual_type) open_node
+and var_decl = var_decl_desc node
 
 and var_decl_desc = {
-    linkage : cxlinkagekind;
+    linkage : linkage_kind;
     name : string;
     qual_type : qual_type;
     init : expr option;
   }
 
-and template_parameter = {
+and cxx_method_binding_kind = NonVirtual | Virtual | PureVirtual
+(** C++ method binding kind *)
+
+and template_parameter = template_parameter_desc node
+(** C++ template parameter *)
+
+and template_parameter_desc = {
     name : string;
     kind : template_parameter_kind;
   }
@@ -2495,20 +2356,16 @@ and template_parameter_kind =
 
 (** {3 Translation units} *)
 
-and translation_unit = (translation_unit_desc, qual_type) open_node
+and translation_unit = translation_unit_desc node
 
 and translation_unit_desc = {
     filename : string; items : decl list
   }
     [@@deriving show, eq, ord,
-      visitors { variety = "iter"; ancestors = ["base_iter"] },
-      visitors { variety = "map"; ancestors = ["base_map"] },
-      visitors { variety = "reduce"; ancestors = ["base_reduce"] },
-      visitors { variety = "mapreduce"; ancestors = ["base_mapreduce"] }]
-
-type decoration = qual_type open_decoration
-
-type 'a node = ('a, qual_type) open_node
+      visitors { variety = "iter"; polymorphic = true },
+      visitors { variety = "map"; polymorphic = true },
+      visitors { variety = "reduce"; polymorphic = true },
+      visitors { variety = "mapreduce"; polymorphic = true }]
 
 (*{[
 let () =
