@@ -318,16 +318,16 @@ module Ast = struct
             volatile = is_volatile_qualified_type cxtype;
             restrict = is_restrict_qualified_type cxtype; }
 
-    and decl_of_cxcursor cursor =
-      node ~cursor (decl_desc_of_cxcursor cursor)
+    and decl_of_cxcursor ?in_record cursor =
+      node ~cursor (decl_desc_of_cxcursor ?in_record cursor)
 
-    and decl_desc_of_cxcursor cursor =
+    and decl_desc_of_cxcursor ?(in_record = false) cursor =
       try
         match get_cursor_kind cursor with
         | FunctionDecl -> function_decl_of_cxcursor cursor (list_of_children cursor)
 	| FunctionTemplate ->
 	    cursor |> make_template @@ fun children ->
-	      cxxmethod_decl_of_cxcursor ~can_be_function:true cursor children
+	      cxxmethod_decl_of_cxcursor ~can_be_function:(not in_record) cursor children
 	| CXXMethod -> cxxmethod_decl_of_cxcursor cursor (list_of_children cursor)
         | VarDecl -> Var (var_decl_desc_of_cxcursor cursor)
         | StructDecl -> record_decl_of_cxcursor Struct cursor
@@ -388,11 +388,17 @@ module Ast = struct
         | _ -> OtherDecl
       with Invalid_structure -> OtherDecl
 
+    and function_type_of_decl cursor children =
+      let params = children |> List.filter @@ fun child ->
+	get_cursor_kind child = ParmDecl in
+      let params = Array.of_list params in
+      cursor |> get_cursor_type |>
+        function_type_of_cxtype @@ fun i ->
+          params.(i) |> get_cursor_spelling
+
     and function_decl_of_cxcursor cursor children =
       let linkage = cursor |> get_cursor_linkage in
-      let function_type = cursor |> get_cursor_type |>
-        function_type_of_cxtype @@ fun i ->
-          cursor_get_argument cursor i |> get_cursor_spelling in
+      let function_type = function_type_of_decl cursor children in
       let name = get_cursor_spelling cursor in
       let body : stmt option =
         match List.rev children with
@@ -402,9 +408,7 @@ module Ast = struct
       Clang__ast.Function { linkage; function_type; name; body }
 
     and cxxmethod_decl_of_cxcursor ?(can_be_function = false) cursor children =
-      let function_type = cursor |> get_cursor_type |>
-        function_type_of_cxtype @@ fun i ->
-          cursor_get_argument cursor i |> get_cursor_spelling in
+      let function_type = function_type_of_decl cursor children in
       let name = get_cursor_spelling cursor in
       let type_ref : qual_type option =
         match children with
@@ -424,7 +428,17 @@ module Ast = struct
 	let linkage = cursor |> get_cursor_linkage in
 	Function { linkage; function_type; name; body }
       else
-	CXXMethod { type_ref; function_type; name; body }
+	CXXMethod { type_ref; function_type; name; body;
+	  defaulted = ext_cxxmethod_is_defaulted cursor;
+	  static = cxxmethod_is_static cursor;
+	  binding =
+	    if cxxmethod_is_pure_virtual cursor then
+	      PureVirtual
+	    else if cxxmethod_is_virtual cursor then
+	      Virtual
+	    else
+	      NonVirtual;
+	  const = ext_cxxmethod_is_const cursor; }
 
     and function_type_of_cxtype get_argument_name cxtype =
       let calling_conv = cxtype |> get_function_type_calling_conv in
@@ -484,7 +498,7 @@ module Ast = struct
       RecordDecl { keyword; name; fields }
 
     and fields_of_children children =
-      children |> List.map decl_of_cxcursor
+      children |> List.map (decl_of_cxcursor ~in_record:true)
 
     and stmt_of_cxcursor cursor =
       let desc =
@@ -810,17 +824,17 @@ module Ast = struct
 	match
 	  match children with
 	  | [] -> (None : 'a option), []
-	  | hd :: tl ->
+	  | cursor :: tl ->
 	      match
-		match get_cursor_kind hd with
+		match get_cursor_kind cursor with
 		| TemplateTypeParameter -> Some (Class : template_parameter_kind)
 		| NonTypeTemplateParameter ->
-		    Some (NonType (get_cursor_type hd |> of_cxtype))
+		    Some (NonType (get_cursor_type cursor |> of_cxtype))
 		| _ -> None
 	      with
 	      | None -> None, children
 	      | Some kind ->
-		  Some { name = get_cursor_spelling hd; kind}, tl
+		  Some (node ~cursor { name = get_cursor_spelling cursor; kind}), tl
 	with
 	| None, tl -> List.rev accu, tl
 	| Some parameter, tl ->

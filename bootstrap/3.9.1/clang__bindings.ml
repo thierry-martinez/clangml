@@ -1949,3 +1949,7 @@ external ext_type_get_attribute_kind :
   cxtype -> clang_ext_attrkind = "clang_ext_Type_GetAttributeKind_wrapper"
 external ext_attr_kind_get_spelling :
   clang_ext_attrkind -> string = "clang_ext_AttrKind_GetSpelling_wrapper"
+external ext_cxxmethod_is_defaulted :
+  cxcursor -> bool = "clang_ext_CXXMethod_isDefaulted_wrapper"
+external ext_cxxmethod_is_const :
+  cxcursor -> bool = "clang_ext_CXXMethod_isConst_wrapper"

@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 #ifdef LLVM_VERSION_3_4_2
+#define LLVM_VERSION_BEFORE_3_5_0
 #define LLVM_VERSION_BEFORE_3_9_0
 #endif
 #ifdef LLVM_VERSION_3_5_2
@@ -260,3 +261,9 @@ clang_ext_Type_GetAttributeKind(CXType CT);
 
 CXString
 clang_ext_AttrKind_GetSpelling(enum clang_ext_AttrKind AttrKind);
+
+unsigned
+clang_ext_CXXMethod_isDefaulted(CXCursor C);
+
+unsigned
+clang_ext_CXXMethod_isConst(CXCursor C);
