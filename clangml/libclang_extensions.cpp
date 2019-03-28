@@ -2,6 +2,7 @@
 #include <clang/AST/Stmt.h>
 #include <clang/AST/Expr.h>
 #include <clang/AST/Type.h>
+#include <clang/AST/DeclCXX.h>
 #include "clang/Frontend/ASTUnit.h"
 #include "clang/Basic/SourceLocation.h"
 #include <llvm/Support/Casting.h>
@@ -209,6 +210,19 @@ MakeCXType(clang::QualType T, CXTranslationUnit TU)
     clang::SourceLocation::getFromRawEncoding(0), T, clang::VK_RValue);
   CXCursor C = { CXCursor_FirstExpr, 0, { NULL, &OV, TU }};
   return clang_getCursorType(C);
+}
+
+[[maybe_unused]]
+static const clang::CXXMethodDecl *
+getMethodDecl(CXCursor C)
+{
+  if (auto *D = getCursorDecl(C)) {
+    if (auto *Method =
+	llvm::dyn_cast_or_null<clang::CXXMethodDecl>(D->getAsFunction())) {
+      return Method;
+    }
+  }
+  return NULL;
 }
 
 extern "C" {
@@ -762,15 +776,15 @@ extern "C" {
   clang_ext_Type_getNamedType(CXType CT)
   {
     #ifdef LLVM_VERSION_BEFORE_3_9_0
-    clang::QualType T = GetQualType(CT);
-    const clang::Type *TP = T.getTypePtrOrNull();
-
-    if (TP && TP->getTypeClass() == clang::Type::Elaborated)
-      return MakeCXType(llvm::cast<clang::ElaboratedType>(TP)->getNamedType(), GetTU(CT));
-
-    return MakeCXTypeInvalid(GetTU(CT));
+      clang::QualType T = GetQualType(CT);
+      const clang::Type *TP = T.getTypePtrOrNull();
+      if (TP && TP->getTypeClass() == clang::Type::Elaborated) {
+        return MakeCXType(
+          llvm::cast<clang::ElaboratedType>(TP)->getNamedType(), GetTU(CT));
+      }
+      return MakeCXTypeInvalid(GetTU(CT));
     #else
-    return clang_Type_getNamedType(CT);
+      return clang_Type_getNamedType(CT);
     #endif
   }
 
@@ -799,15 +813,27 @@ extern "C" {
 
   unsigned
   clang_ext_CXXMethod_isDefaulted(CXCursor C) {
-#ifdef LLVM_VERSION_BEFORE_3_9_0
-    if (auto *D = getCursorDecl(C)) {
-      if (auto *Method = llvm::dyn_cast_or_null<CXXMethodDecl>(D->getAsFunction())) {
-	return Method->isDefaulted();
+    #ifdef LLVM_VERSION_BEFORE_3_9_0
+      if (auto *Method = getMethodDecl(C)) {
+	  return Method->isDefaulted();
+        }
       }
-    }
-    return 0;
-#else
-    return clang_CXXMethod_isDefaulted(C);
-#endif
+      return 0;
+    #else
+      return clang_CXXMethod_isDefaulted(C);
+    #endif
+  }
+
+  unsigned
+  clang_ext_CXXMethod_isConst(CXCursor C) {
+    #ifdef LLVM_VERSION_BEFORE_3_5_0
+      if (auto *Method = getMethodDecl(C)) {
+	  return Method->getTypeQualifiers().hasConst();
+        }
+      }
+      return 0;
+    #else
+      return clang_CXXMethod_isConst(C);
+    #endif
   }
 }

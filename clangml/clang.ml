@@ -438,7 +438,7 @@ module Ast = struct
 	      Virtual
 	    else
 	      NonVirtual;
-	  const = cxxmethod_is_const cursor; }
+	  const = ext_cxxmethod_is_const cursor; }
 
     and function_type_of_cxtype get_argument_name cxtype =
       let calling_conv = cxtype |> get_function_type_calling_conv in
