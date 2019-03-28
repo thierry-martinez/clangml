@@ -6224,3 +6224,31 @@ clang_ext_AttrKind_GetSpelling_wrapper(value AttrKind_ocaml)
   }
 }
 
+CAMLprim value
+clang_ext_CXXMethod_isDefaulted_wrapper(value C_ocaml)
+{
+  CAMLparam1(C_ocaml);
+  CXCursor C;
+  C = Cxcursor_val(Field(C_ocaml, 0));
+  unsigned int result = clang_ext_CXXMethod_isDefaulted(C);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CXXMethod_isConst_wrapper(value C_ocaml)
+{
+  CAMLparam1(C_ocaml);
+  CXCursor C;
+  C = Cxcursor_val(Field(C_ocaml, 0));
+  unsigned int result = clang_ext_CXXMethod_isConst(C);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
