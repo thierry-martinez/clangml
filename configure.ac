@@ -210,7 +210,7 @@ AC_SUBST([LLVM_CFLAGS], [["`echo $LLVM_CFLAGS \
 
 AC_SUBST([CFLAGS], [["$LLVM_CFLAGS -D$LLVM_VERSION_MACRO -I$srcdir/clangml"]])
 
-AS_IF([test "x$LLVM_VERSION" = "x3.5.2"],
+AS_IF([test "x$LLVM_VERSION" = "x3.5.2" -o "x$LLVM_VERSION" = "x3.4.2"],
   [AC_SUBST([CFLAGS], [["$CFLAGS -D_GLIBCXX_USE_CXX11_ABI=0"]])])
 
 AC_SUBST([CPPFLAGS], [["$CFLAGS"]])

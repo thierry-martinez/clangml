@@ -80,14 +80,14 @@ type 'a node = {
 
 and decoration =
   | Cursor of (cxcursor
-		 [@equal fun _ _ -> true]
-		 [@compare fun _ _ -> 0]
-		 [@opaque])
+                 [@equal fun _ _ -> true]
+                 [@compare fun _ _ -> 0]
+                 [@opaque])
   | Custom of {
       location : (source_location
-		    [@equal fun _ _ -> true]
-		    [@compare fun _ _ -> 0]
-		    [@opaque]) option;
+                    [@equal fun _ _ -> true]
+                    [@compare fun _ _ -> 0]
+                    [@opaque]) option;
       qual_type : qual_type option;
     }
 
@@ -498,7 +498,7 @@ let () =
          qual_type = { desc = Attributed {
            modified_type = { desc = Pointer { desc = BuiltinType Int }};
            attribute_kind }}}}] ->
-	     assert (attribute_kind = Clang.type_non_null)
+             assert (attribute_kind = Clang.type_non_null)
     | _ -> assert false
     ]} *)
   | ParenType of qual_type
@@ -687,8 +687,8 @@ let () =
           non_variadic = ["i", { desc = BuiltinType Int }];
           variadic = true }}}}] -> ()
     | decls ->
-	List.iter (fun decl -> Format.eprintf "%a@." Clang.Ast.pp_decl decl) decls;
-	assert false
+        List.iter (fun decl -> Format.eprintf "%a@." Clang.Ast.pp_decl decl) decls;
+        assert false
     ]}
  *)
 }

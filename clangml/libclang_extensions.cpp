@@ -3,6 +3,7 @@
 #include <clang/AST/Expr.h>
 #include <clang/AST/Type.h>
 #include <clang/AST/DeclCXX.h>
+#include <clang/AST/DeclTemplate.h>
 #include "clang/Frontend/ASTUnit.h"
 #include "clang/Basic/SourceLocation.h"
 #include <llvm/Support/Casting.h>
@@ -217,8 +218,21 @@ static const clang::CXXMethodDecl *
 getMethodDecl(CXCursor C)
 {
   if (auto *D = getCursorDecl(C)) {
-    if (auto *Method =
-	llvm::dyn_cast_or_null<clang::CXXMethodDecl>(D->getAsFunction())) {
+    const clang::FunctionDecl *FD;
+    #ifdef LLVM_VERSION_BEFORE_3_5_0
+      if (nullptr != (FD = llvm::dyn_cast_or_null<clang::FunctionDecl>(D))) {
+      }
+      else if (auto FTD =
+            llvm::dyn_cast_or_null<clang::FunctionTemplateDecl>(D)) {
+        FD = FTD->getTemplatedDecl();
+      }
+      else {
+        FD = nullptr;
+      }
+    #else
+      FD = D->getAsFunction();
+    #endif
+    if (auto *Method = llvm::dyn_cast_or_null<clang::CXXMethodDecl>(FD)) {
       return Method;
     }
   }
@@ -645,14 +659,14 @@ extern "C" {
     switch (c.kind) {
     case CXCursor_UnexposedDecl:
       {
-	const clang::Decl *d = getCursorDecl(c);
+        const clang::Decl *d = getCursorDecl(c);
         #define CASE(X) case clang::Decl::X: return ECK_##X##Decl
-	switch (d->getKind()) {
-	CASE(Empty);
-	default:
-	  return ECK_Unknown;
-	}
-	#undef CASE
+        switch (d->getKind()) {
+        CASE(Empty);
+        default:
+          return ECK_Unknown;
+        }
+        #undef CASE
       }
       return ECK_Unknown;
     default:
@@ -815,8 +829,7 @@ extern "C" {
   clang_ext_CXXMethod_isDefaulted(CXCursor C) {
     #ifdef LLVM_VERSION_BEFORE_3_9_0
       if (auto *Method = getMethodDecl(C)) {
-	  return Method->isDefaulted();
-        }
+        return Method->isDefaulted();
       }
       return 0;
     #else
@@ -828,8 +841,7 @@ extern "C" {
   clang_ext_CXXMethod_isConst(CXCursor C) {
     #ifdef LLVM_VERSION_BEFORE_3_5_0
       if (auto *Method = getMethodDecl(C)) {
-	  return Method->getTypeQualifiers().hasConst();
-        }
+        return Method->isConst();
       }
       return 0;
     #else
