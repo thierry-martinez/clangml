@@ -429,7 +429,7 @@ module Ast = struct
 	Function { linkage; function_type; name; body }
       else
 	CXXMethod { type_ref; function_type; name; body;
-	  defaulted = cxxmethod_is_defaulted cursor;
+	  defaulted = ext_cxxmethod_is_defaulted cursor;
 	  static = cxxmethod_is_static cursor;
 	  binding =
 	    if cxxmethod_is_pure_virtual cursor then

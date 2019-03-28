@@ -796,4 +796,18 @@ extern "C" {
       return cxstring_createRef("");
     }
   }
+
+  unsigned
+  clang_ext_CXXMethod_isDefaulted(CXCursor C) {
+#ifdef LLVM_VERSION_BEFORE_3_9_0
+    if (auto *D = getCursorDecl(C)) {
+      if (auto *Method = llvm::dyn_cast_or_null<CXXMethodDecl>(D->getAsFunction())) {
+	return Method->isDefaulted();
+      }
+    }
+    return 0;
+#else
+    return clang_CXXMethod_isDefaulted(C);
+#endif
+  }
 }

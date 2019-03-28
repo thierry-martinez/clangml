@@ -260,3 +260,6 @@ clang_ext_Type_GetAttributeKind(CXType CT);
 
 CXString
 clang_ext_AttrKind_GetSpelling(enum clang_ext_AttrKind AttrKind);
+
+unsigned
+clang_ext_CXXMethod_isDefaulted(CXCursor C);
