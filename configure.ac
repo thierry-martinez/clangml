@@ -210,9 +210,6 @@ AC_SUBST([LLVM_CFLAGS], [["`echo $LLVM_CFLAGS \
 
 AC_SUBST([CFLAGS], [["$LLVM_CFLAGS -D$LLVM_VERSION_MACRO -I$srcdir/clangml"]])
 
-AS_IF([test "x$LLVM_VERSION" = "x3.5.2"],
-  [AC_SUBST([CFLAGS], [["$CFLAGS -D_GLIBCXX_USE_CXX11_ABI=0"]])])
-
 AC_SUBST([CPPFLAGS], [["$CFLAGS"]])
 
 AC_CHECK_HEADERS([clang-c/Index.h], [],
@@ -238,6 +235,33 @@ AC_SUBST([LIBS],
 
 AC_CHECK_LIB([clang], [clang_createIndex], [],
   [AC_MSG_ERROR([[libclang not found]])])
+
+AC_LANG_CPLUSPLUS
+AC_TRY_LINK(
+  [#include <llvm/ADT/APInt.h>],
+  [
+    llvm::APInt i;
+    i.toString(10, false);
+  ],
+  [
+    AC_MSG_CHECKING([for disabling GLIBCXX_USE_CXX11_ABI])
+    AC_MSG_RESULT([not required])
+  ],
+  [
+    AC_MSG_CHECKING([for disabling GLIBCXX_USE_CXX11_ABI])
+    AC_SUBST([CPPFLAGS], [["$CPPFLAGS -D_GLIBCXX_USE_CXX11_ABI=0"]])
+    AC_TRY_LINK(
+      [#include <llvm/ADT/APInt.h>],
+      [
+        llvm::APInt i;
+        i.toString(10, false);
+      ],
+      [AC_MSG_RESULT([required])],
+      [
+        AC_MSG_RESULT([cannot compile test])
+        AC_MSG_ERROR([Cannot compile test for APInt::toString])
+      ])
+  ])
 
 AC_MSG_NOTICE(initialize build tree)
 
