@@ -1827,6 +1827,7 @@ let () =
       function_type : function_type;
       name : string;
       body : stmt option;
+      deleted : bool;
     }
 (** Function definition or forward declaration.
     In case of function definition, we should have
@@ -1874,6 +1875,7 @@ let () =
       static : bool;
       binding : cxx_method_binding_kind;
       const : bool;
+      deleted : bool;
     }
 (** C++ method.
 
@@ -1888,6 +1890,7 @@ let example = {|
       virtual void pure_virtual_method() = 0;
       static void static_method() {
       }
+      void deleted_method() =delete;
     };
 
     int X::f(char x) {
@@ -1940,7 +1943,15 @@ let () =
             result = { desc = BuiltinType Void };
             args = Some { non_variadic = [] }};
           body = Some { desc = Compound [] };
-          static = true; }}; ] }};
+          static = true; }};
+        { desc = CXXMethod {
+          type_ref = None;
+          name = "deleted_method";
+          function_type = {
+            result = { desc = BuiltinType Void };
+            args = Some { non_variadic = [] }};
+          body = None;
+          deleted = true; }}; ] }};
       { desc = CXXMethod {
         type_ref = Some { desc = Record "X" };
         name = "f";
@@ -2317,6 +2328,130 @@ let () =
   | _ -> assert false
     ]}
 *)
+  | Constructor of {
+      args : args;
+      initializer_list : (string * expr) list;
+      body : stmt option;
+      explicit : bool;
+      defaulted : bool;
+      deleted : bool;
+    }
+(**
+  C++ class constructor.
+
+    {[
+let example = {|
+    class C {
+      int i;
+      C() = delete;
+      explicit C(int v) : i(v) {
+      }
+    };
+    |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match ast with
+  | [{ desc = RecordDecl {
+         keyword = Class;
+         name = "C";
+         fields = [
+           { desc = Field { name = "i"; qual_type = { desc = BuiltinType Int }}};
+           { desc = Constructor {
+               args = {
+                 non_variadic = [];
+                 variadic = false;
+               };
+               initializer_list = [];
+               body = None;
+               explicit = false;
+               defaulted = false;
+               deleted = true; }};
+           { desc = Constructor {
+               args = {
+                 non_variadic = [("v", { desc = BuiltinType Int})];
+                 variadic = false;
+               };
+               initializer_list = ["i", { desc = DeclRef "v" }];
+               body = Some { desc = Compound [] };
+               explicit = true;
+               defaulted = false;
+               deleted = false; }}; ] }}] -> ()
+  | _ -> assert false
+
+let example = {|
+    class C {
+      C() =default;
+    };
+    |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match ast with
+  | [{ desc = RecordDecl {
+         keyword = Class;
+         name = "C";
+         fields = [
+           { desc = Constructor {
+               args = {
+                 non_variadic = [];
+                 variadic = false;
+               };
+               initializer_list = [];
+               body = None;
+               explicit = false;
+               defaulted = true;
+               deleted = false; }}] }}] -> ()
+  | _ -> assert false
+   ]}*)
+  | Destructor of {
+      body : stmt option;
+      defaulted : bool;
+      deleted : bool;
+    }
+(**
+  C++ class destructor.
+
+    {[
+let example = {|
+    class C {
+      ~C() {
+      }
+    };
+    |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match ast with
+  | [{ desc = RecordDecl {
+         keyword = Class;
+         name = "C";
+         fields = [
+           { desc = Destructor {
+               body = Some { desc = Compound [] };
+               defaulted = false;
+               deleted = false; }}] }}] -> ()
+  | _ -> assert false
+
+let example = {|
+    class C {
+      ~C() =default;
+    };
+    |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match ast with
+  | [{ desc = RecordDecl {
+         keyword = Class;
+         name = "C";
+         fields = [
+           { desc = Destructor {
+               body = None;
+               defaulted = true;
+               deleted = false; }}] }}] -> ()
+  | _ -> assert false
+   ]}*)
   | EmptyDecl
 (**
   Empty declaration.

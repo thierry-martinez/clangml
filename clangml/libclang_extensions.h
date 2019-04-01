@@ -267,3 +267,9 @@ clang_ext_CXXMethod_isDefaulted(CXCursor C);
 
 unsigned
 clang_ext_CXXMethod_isConst(CXCursor C);
+
+unsigned
+clang_ext_CXXConstructor_isExplicit(CXCursor C);
+
+unsigned
+clang_ext_FunctionDecl_isDeleted(CXCursor C);

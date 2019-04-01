@@ -195,8 +195,55 @@ module Ast = struct
 	      | EmptyDecl -> EmptyDecl
 	      | _ -> OtherDecl
 	    end
+	| Constructor ->
+	    let children = list_of_children cursor in
+	    let rec extract_initializer_list children =
+	      match children with
+	      | member :: unexposed :: children when
+		  get_cursor_kind member = MemberRef &&
+		  get_cursor_kind unexposed = UnexposedExpr ->
+		    let init_expr =
+		      match list_of_children unexposed with
+		      | [init_expr] -> expr_of_cxcursor init_expr
+		      | _ -> raise Invalid_structure in
+		    (get_cursor_spelling member, init_expr) ::
+		    extract_initializer_list children
+	      | _ :: tl -> extract_initializer_list tl
+	      | [] -> [] in
+	    let body =
+	      match List.rev children with
+	      | body :: _ when get_cursor_kind body = CompoundStmt ->
+		  Some (stmt_of_cxcursor body)
+	      | _ -> None in
+	    Constructor {
+	      args = args_of_decl cursor children;
+	      initializer_list = extract_initializer_list children;
+	      body;
+	      defaulted = ext_cxxmethod_is_defaulted cursor;
+	      deleted = ext_function_decl_is_deleted cursor;
+	      explicit = ext_cxxconstructor_is_explicit cursor;
+	    }
+	| Destructor ->
+	    let children = list_of_children cursor in
+	    let body =
+	      match List.rev children with
+	      | body :: _ when get_cursor_kind body = CompoundStmt ->
+		  Some (stmt_of_cxcursor body)
+	      | _ -> None in
+	    Destructor {
+	      body;
+	      defaulted = ext_cxxmethod_is_defaulted cursor;
+	      deleted = ext_function_decl_is_deleted cursor;
+	    }
         | _ -> OtherDecl
       with Invalid_structure -> OtherDecl
+
+    and args_of_decl cursor children =
+      let params = children |> List.filter @@ fun child ->
+	get_cursor_kind child = ParmDecl in
+      { non_variadic = params |> List.map (fun param ->
+	  (get_cursor_spelling param, get_cursor_type param |> of_cxtype));
+	variadic = is_function_type_variadic (get_cursor_type cursor) }
 
     and function_type_of_decl cursor children =
       let params = children |> List.filter @@ fun child ->
@@ -215,7 +262,8 @@ module Ast = struct
         | last :: _ when get_cursor_kind last = CompoundStmt ->
             Some (stmt_of_cxcursor last)
 	| _ -> None in
-      Clang__ast.Function { linkage; function_type; name; body }
+      let deleted = ext_function_decl_is_deleted cursor in
+      Clang__ast.Function { linkage; function_type; name; body; deleted }
 
     and cxxmethod_decl_of_cxcursor ?(can_be_function = false) cursor children =
       let function_type = function_type_of_decl cursor children in
@@ -234,9 +282,10 @@ module Ast = struct
               Some (stmt_of_cxcursor last)
             else
               None in
+      let deleted = ext_function_decl_is_deleted cursor in
       if can_be_function && type_ref = None then
 	let linkage = cursor |> get_cursor_linkage in
-	Function { linkage; function_type; name; body }
+	Function { linkage; function_type; name; body; deleted }
       else
 	CXXMethod { type_ref; function_type; name; body;
 	  defaulted = ext_cxxmethod_is_defaulted cursor;
@@ -248,7 +297,8 @@ module Ast = struct
 	      Virtual
 	    else
 	      NonVirtual;
-	  const = ext_cxxmethod_is_const cursor; }
+	  const = ext_cxxmethod_is_const cursor;
+	  deleted }
 
     and function_type_of_cxtype get_argument_name cxtype =
       let calling_conv = cxtype |> get_function_type_calling_conv in
