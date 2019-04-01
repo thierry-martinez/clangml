@@ -81,9 +81,13 @@ let check pp parser source checker =
 *)
 
 type 'qual_type open_decoration =
-  | Cursor of (cxcursor [@opaque])
+  | Cursor of (cxcursor [@opaque]
+      [@equal fun _ _ -> true]
+      [@compare fun _ _ -> 0])
   | Custom of {
-      location : (source_location option [@opaque]);
+      location : (source_location option [@opaque]
+        [@equal fun _ _ -> true]
+	[@compare fun _ _ -> 0]);
       qual_type : 'qual_type option;
     }
 
