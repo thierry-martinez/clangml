@@ -2317,6 +2317,72 @@ let () =
   | _ -> assert false
     ]}
 *)
+  | Constructor of {
+      args : args;
+      initializer_list : (string * expr) list;
+      body : stmt option;
+      explicit : bool;
+      defaulted : bool;
+      deleted : bool;
+    }
+(**
+  C++ class constructor.
+
+    {[
+let example = {|
+    class C {
+      int i;
+      C(int v) : i(v) {
+      }
+    }
+    |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match ast with
+  | [{ desc = RecordDecl {
+         keyword = Class;
+         name = "C";
+         fields = [
+           { desc = Field { name = "i"; qual_type = { desc = BuiltinType Int }}};
+           { desc = Constructor {
+               args = {
+                 non_variadic = [("v", { desc = BuiltinType Int})];
+                 variadic = false;
+               };
+               initializer_list = ["i", { desc = DeclRef "v" }];
+               body = Some { desc = Compound [] };
+               explicit = false;
+               defaulted = false;
+               deleted = false; }}] }}] -> ()
+  | _ -> assert false
+
+let example = {|
+    class C {
+      C() =default;
+    }
+    |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match ast with
+  | [{ desc = RecordDecl {
+         keyword = Class;
+         name = "C";
+         fields = [
+           { desc = Constructor {
+               args = {
+                 non_variadic = [];
+                 variadic = false;
+               };
+               initializer_list = [];
+               body = None;
+               explicit = false;
+               defaulted = true;
+               deleted = false; }}] }}] -> ()
+  | _ -> assert false
+   ]}*)
+
   | EmptyDecl
 (**
   Empty declaration.

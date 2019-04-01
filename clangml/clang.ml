@@ -195,8 +195,43 @@ module Ast = struct
 	      | EmptyDecl -> EmptyDecl
 	      | _ -> OtherDecl
 	    end
+	| Constructor ->
+	    let children = list_of_children cursor in
+	    let rec extract_initializer_list children =
+	      match children with
+	      | member :: unexposed :: children when
+		  get_cursor_kind member = MemberRef &&
+		  get_cursor_kind unexposed = UnexposedExpr ->
+		    let init_expr =
+		      match list_of_children unexposed with
+		      | [init_expr] -> expr_of_cxcursor init_expr
+		      | _ -> raise Invalid_structure in
+		    (get_cursor_spelling member, init_expr) ::
+		    extract_initializer_list children
+	      | _ :: tl -> extract_initializer_list tl
+	      | [] -> [] in
+	    let body =
+	      match List.rev children with
+	      | body :: _ when get_cursor_kind body = CompoundStmt ->
+		  Some (stmt_of_cxcursor body)
+	      | _ -> None in
+	    Constructor {
+	      args = args_of_decl cursor children;
+	      initializer_list = extract_initializer_list children;
+	      body;
+	      defaulted = ext_cxxmethod_is_defaulted cursor;
+	      deleted = false;
+	      explicit = false;
+	    }
         | _ -> OtherDecl
       with Invalid_structure -> OtherDecl
+
+    and args_of_decl cursor children =
+      let params = children |> List.filter @@ fun child ->
+	get_cursor_kind child = ParmDecl in
+      { non_variadic = params |> List.map (fun param ->
+	  (get_cursor_spelling param, get_cursor_type param |> of_cxtype));
+	variadic = is_function_type_variadic (get_cursor_type cursor) }
 
     and function_type_of_decl cursor children =
       let params = children |> List.filter @@ fun child ->
