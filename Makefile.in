@@ -694,7 +694,9 @@ stubgen : $(STUBGEN_EXE)
 
 $(CLANGML_CMXA) : \
 		clangml/clang.ml clangml/clang.mli \
-		clangml/clang__bindings.ml clangml/clang__ast.ml
+		clangml/clang__bindings.ml clangml/clang__ast.ml \
+                clangml/clang__utils.ml clangml/clang__ast_utils.ml \
+                clangml/clang__printer.ml
 	$(DUNE) build clangml/clangml.cmxa
 
 $(LIBCLANGML_STUBS_A) : \

@@ -5698,7 +5698,17 @@ if test -d clangml; then :
   true
 else
   if mkdir clangml; then :
-  if cp $srcdir/clangml/clang.ml clangml/; then :
+  if cp $srcdir/dune-project .; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/clangml.opam .; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/clangml/clang.ml clangml/; then :
   true
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5
@@ -5709,6 +5719,21 @@ else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
      if cp $srcdir/clangml/clang__ast.ml clangml/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/clangml/clang__utils.ml clangml/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/clangml/clang__ast_utils.ml clangml/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/clangml/clang__printer.ml clangml/; then :
   true
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5
@@ -5733,14 +5758,15 @@ fi
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
+     if cp $srcdir/clangml/clangml_OperationKinds.def clangml/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
 else
   as_fn_error $? "cannot create directory clangml/" "$LINENO" 5
 fi
 fi
-
-cp $srcdir/dune-project .
-cp $srcdir/clangml.opam .
-cp $srcdir/clangml/clangml_OperationKinds.def clangml/
 
 if cp $srcdir/bootstrap/$LLVM_VERSION/clang__bindings.ml clangml/clang__bindings.ml; then :
   true

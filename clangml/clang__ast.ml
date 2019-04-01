@@ -68,35 +68,47 @@ let check pp parser source checker =
     can be of the form {!const:Custom}[ custom_decoration],
     where the inlined record [custom_decoration] may optionnally
     carry a location, or a type, or both.
- *)
 
-type 'a node = {
-    decoration : decoration
+    To break type recursion between {!type:qual_type} and {!type:decoration},
+    open types ['qual_type ]{!type:open_decoration} and
+    [('a, 'qual_type) ]{!type:open_node} are defined first, and then
+    {!type:node} and {!type:decoration} are defined as aliases
+    with ['qual_type = ]{!type:qual_type}.
+
+    Breaking recursion allows [visitors] to derive polymorphic
+    visitors for [open_node] while deriving monomorphic visitors
+    for the concrete AST nodes themselves (because 
+*)
+
+type 'qual_type open_decoration =
+  | Cursor of (cxcursor [@opaque]
       [@equal fun _ _ -> true]
-      [@compare fun _ _ -> 0]
-      [@opaque];
+      [@compare fun _ _ -> 0])
+  | Custom of {
+      location : (source_location option [@opaque]
+        [@equal fun _ _ -> true]
+	[@compare fun _ _ -> 0]);
+      qual_type : 'qual_type option;
+    }
+
+and ('a, 'qual_type) open_node = {
+    decoration : 'qual_type open_decoration
+      [@equal fun _ _ -> true]
+      [@compare fun _ _ -> 0];
     desc : 'a;
   }
-
-and decoration =
-  | Cursor of (cxcursor
-                 [@equal fun _ _ -> true]
-                 [@compare fun _ _ -> 0]
-                 [@opaque])
-  | Custom of {
-      location : (source_location
-                    [@equal fun _ _ -> true]
-                    [@compare fun _ _ -> 0]
-                    [@opaque]) option;
-      qual_type : qual_type option;
-    }
+    [@@deriving show, eq, ord,
+      visitors { variety = "iter"; name = "base_iter"; polymorphic = true },
+      visitors { variety = "map"; name = "base_map"; polymorphic = true },
+      visitors { variety = "reduce"; name = "base_reduce"; polymorphic = true },
+      visitors { variety = "mapreduce"; name = "base_mapreduce"; polymorphic = true }]
 
 (** {2 Aliases} *)
 
 (** The following aliases provide more readable names for some types
 from libclang. *)
 
-and elaborated_type_keyword = clang_ext_elaboratedtypekeyword [@visitors.opaque]
+type elaborated_type_keyword = clang_ext_elaboratedtypekeyword [@visitors.opaque]
 (** Keyword associated to an elaborated type: [struct], [union],
     [enum], ... *)
 
@@ -128,11 +140,11 @@ and linkage_kind = cxlinkagekind [@visitors.opaque]
 
 and integer_literal =
   | Int of int
-  | CXInt of (cxint [@visitors.opaque])
+  | CXInt of (cxint [@visitors.opaque] [@quote.opaque])
 
 and floating_literal =
   | Float of float
-  | CXFloat of (cxfloat [@visitors.opaque])
+  | CXFloat of (cxfloat [@visitors.opaque] [@quote.opaque])
 
 (** {2 Types and nodes} *)
 
@@ -158,7 +170,7 @@ let parse_declaration_list ?filename ?command_line_args ?options ?clang_options
 (** {3 Qualified types } *)
 
 and qual_type = {
-    cxtype : cxtype
+    cxtype : (cxtype [@quote.opaque])
       [@equal fun _ _ -> true]
       [@compare fun _ _ -> 0]
       [@opaque];
@@ -712,7 +724,7 @@ let parse_statement_list ?(return_type = "int") ?filename ?command_line_args ?op
       assert false
     ]}*)
 
-and stmt = stmt_desc node
+and stmt = (stmt_desc, qual_type) open_node
 
 and stmt_desc =
   | Null
@@ -1181,7 +1193,7 @@ let () =
   | [{ desc = For { body = { desc = Break } }}] -> ()
   | _ -> assert false
    ]}*)
-  | GCCAsm of string * string node list
+  | GCCAsm of string * (string, qual_type) open_node list
 (** GCC assembler statement.
     {[
 let example = {|
@@ -1228,7 +1240,7 @@ let () =
 
 (** {3 Expressions} *)
 
-and expr = expr_desc node
+and expr = (expr_desc, qual_type) open_node
 
 and expr_desc =
   | IntegerLiteral of integer_literal
@@ -1492,7 +1504,7 @@ let () =
   | Member of {
       base : expr;
       arrow : bool;
-      field : string node;
+      field : (string, qual_type) open_node;
     }
 (** Member dot or arrow
     {[
@@ -1719,7 +1731,7 @@ and unary_expr_or_type_trait =
 
 (** {3 Declarations} *)
 
-and decl = decl_desc node
+and decl = (decl_desc, qual_type) open_node
 
 and decl_desc =
   | Template of {
@@ -2323,14 +2335,14 @@ let () =
 
 and label_ref = string
 
-and enum_constant = enum_constant_desc node
+and enum_constant = (enum_constant_desc, qual_type) open_node
 
 and enum_constant_desc = {
     name : string;
     init : expr option;
   }
 
-and var_decl = var_decl_desc node
+and var_decl = (var_decl_desc, qual_type) open_node
 
 and var_decl_desc = {
     linkage : linkage_kind;
@@ -2342,7 +2354,7 @@ and var_decl_desc = {
 and cxx_method_binding_kind = NonVirtual | Virtual | PureVirtual
 (** C++ method binding kind *)
 
-and template_parameter = template_parameter_desc node
+and template_parameter = (template_parameter_desc, qual_type) open_node
 (** C++ template parameter *)
 
 and template_parameter_desc = {
@@ -2356,16 +2368,20 @@ and template_parameter_kind =
 
 (** {3 Translation units} *)
 
-and translation_unit = translation_unit_desc node
+and translation_unit = (translation_unit_desc, qual_type) open_node
 
 and translation_unit_desc = {
     filename : string; items : decl list
   }
     [@@deriving show, eq, ord,
-      visitors { variety = "iter"; polymorphic = true },
-      visitors { variety = "map"; polymorphic = true },
-      visitors { variety = "reduce"; polymorphic = true },
-      visitors { variety = "mapreduce"; polymorphic = true }]
+      visitors { variety = "iter"; ancestors = ["base_iter"] },
+      visitors { variety = "map"; ancestors = ["base_map"] },
+      visitors { variety = "reduce"; ancestors = ["base_reduce"] },
+      visitors { variety = "mapreduce"; ancestors = ["base_mapreduce"] }]
+
+type 'a node = ('a, qual_type) open_node
+
+type decoration = qual_type open_decoration
 
 (*{[
 let () =
