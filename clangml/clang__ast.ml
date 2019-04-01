@@ -93,7 +93,7 @@ and ('a, 'qual_type) open_node = {
       [@compare fun _ _ -> 0];
     desc : 'a;
   }
-    [@@deriving show, eq, ord, quote,
+    [@@deriving show, eq, ord,
       visitors { variety = "iter"; name = "base_iter"; polymorphic = true },
       visitors { variety = "map"; name = "base_map"; polymorphic = true },
       visitors { variety = "reduce"; name = "base_reduce"; polymorphic = true },
@@ -2369,7 +2369,7 @@ and translation_unit = (translation_unit_desc, qual_type) open_node
 and translation_unit_desc = {
     filename : string; items : decl list
   }
-    [@@deriving show, eq, ord, quote,
+    [@@deriving show, eq, ord,
       visitors { variety = "iter"; ancestors = ["base_iter"] },
       visitors { variety = "map"; ancestors = ["base_map"] },
       visitors { variety = "reduce"; ancestors = ["base_reduce"] },
