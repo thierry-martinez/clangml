@@ -280,18 +280,20 @@ AS_IF([test -d stubgen],
 AS_IF([test -d clangml],
   [true],
   [AS_IF([mkdir clangml],
-    [AC_CP([$srcdir/clangml/clang.ml], [clangml/])
+    [AC_CP([$srcdir/dune-project], [.])
+     AC_CP([$srcdir/clangml.opam], [.])
+     AC_CP([$srcdir/clangml/clang.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang.mli], [clangml/])
      AC_CP([$srcdir/clangml/clang__ast.ml], [clangml/])
+     AC_CP([$srcdir/clangml/clang__utils.ml], [clangml/])
+     AC_CP([$srcdir/clangml/clang__ast_utils.ml], [clangml/])
+     AC_CP([$srcdir/clangml/clang__printer.ml], [clangml/])
      AC_CP([$srcdir/clangml/dune], [clangml/])
      AC_CP([$srcdir/clangml/stubgen.h], [clangml/])
      AC_CP([$srcdir/clangml/libclang_extensions.cpp], [clangml/])
-     AC_CP([$srcdir/clangml/libclang_extensions.h], [clangml/])],
+     AC_CP([$srcdir/clangml/libclang_extensions.h], [clangml/])
+     AC_CP([$srcdir/clangml/clangml_OperationKinds.def], [clangml/])],
     [AC_MSG_ERROR([[cannot create directory clangml/]])])])
-
-cp $srcdir/dune-project .
-cp $srcdir/clangml.opam .
-cp $srcdir/clangml/clangml_OperationKinds.def clangml/
 
 AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang__bindings.ml], [clangml/clang__bindings.ml])
 
