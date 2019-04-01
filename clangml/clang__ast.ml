@@ -261,6 +261,7 @@ let () =
       Pointer { desc = BuiltinType Char_S }}}}] -> ()
   | _ -> assert false
     ]}*)
+  | LValueReference of qual_type
   | ConstantArray of {
       element : qual_type;
       size : int;
@@ -1881,7 +1882,7 @@ let () =
 
     {[
 let example = {|
-    class X {
+    class C {
       int f(char);
       void const_method() const {
       }
@@ -1891,9 +1892,11 @@ let example = {|
       static void static_method() {
       }
       void deleted_method() =delete;
+      C &operator+(C &rhs) {
+      }
     };
 
-    int X::f(char x) {
+    int C::f(char c) {
       return 0;
     }
  |}
@@ -1903,7 +1906,7 @@ let () =
   fun ast -> match ast with
   | [{ desc = RecordDecl {
       keyword = Class;
-      name = "X";
+      name = "C";
       fields = [
         { desc = CXXMethod {
           type_ref = None;
@@ -1951,13 +1954,22 @@ let () =
             result = { desc = BuiltinType Void };
             args = Some { non_variadic = [] }};
           body = None;
-          deleted = true; }}; ] }};
+          deleted = true; }};
+        { desc = CXXMethod {
+          type_ref = Some { desc = Record "C" };
+          name = "operator+";
+          function_type = {
+            result = { desc = LValueReference { desc = Record "C" }};
+            args = Some {
+              non_variadic = [
+                ("rhs", { desc = LValueReference { desc = Record "C" }})] }};
+          body = Some { desc = Compound [] }; }}; ] }};
       { desc = CXXMethod {
-        type_ref = Some { desc = Record "X" };
+        type_ref = Some { desc = Record "C" };
         name = "f";
         function_type = {
           result = { desc = BuiltinType Int };
-          args = Some { non_variadic = [("x", { desc = BuiltinType Char_S })] }};
+          args = Some { non_variadic = [("c", { desc = BuiltinType Char_S })] }};
         body = Some { desc = Compound [
           { desc = Return (Some { desc = IntegerLiteral (Int 0) })}] }}}] -> ()
   | _ -> assert false

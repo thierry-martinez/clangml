@@ -187,13 +187,26 @@ MakeCXCursor(clang::Expr *E, CXTranslationUnit TU)
    default statement with S as substatement. Visiting the (single) child of
    this cursor calls libclang's MakeCXCursor on S.
 */
-static CXCursor __attribute__((unused))
+static CXCursor
 MakeCXCursor(const clang::Stmt *S, CXTranslationUnit TU)
 {
   clang::DefaultStmt CS(
     clang::SourceLocation::getFromRawEncoding(0),
     clang::SourceLocation::getFromRawEncoding(0), (clang::Stmt *) S);
   CXCursor C = { CXCursor_CompoundStmt, 0, { NULL, &CS, TU }};
+  CXCursor Result;
+  clang_visitChildren(C, MakeCXCursor_visitor, &Result);
+  return Result;
+}
+
+static CXCursor
+MakeCXCursor(const clang::Decl *T, CXTranslationUnit TU)
+{
+  clang::DeclGroupRef DGR((clang::Decl *) T);
+  clang::DeclStmt DS(DGR,
+    clang::SourceLocation::getFromRawEncoding(0),
+    clang::SourceLocation::getFromRawEncoding(0));
+  CXCursor C = { CXCursor_DeclStmt, 0, { NULL, &DS, TU }};
   CXCursor Result;
   clang_visitChildren(C, MakeCXCursor_visitor, &Result);
   return Result;
@@ -885,5 +898,23 @@ extern "C" {
       return Function->isDeleted();
     }
     return false;
+  }
+
+  unsigned
+  clang_ext_FunctionDecl_getNumParams(CXCursor C)
+  {
+    if (auto *Function = getFunctionDecl(C)) {
+      return Function->getNumParams();
+    }
+    return 0;
+  }
+
+  CXCursor
+  clang_ext_FunctionDecl_getParamDecl(CXCursor C, unsigned i)
+  {
+    if (auto *Function = getFunctionDecl(C)) {
+      return MakeCXCursor(Function->getParamDecl(i), getCursorTU(C));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(C));
   }
 }

@@ -84,6 +84,9 @@ module Ast = struct
         | Pointer ->
             let pointee = cxtype |> get_pointee_type |> of_cxtype in
             Pointer pointee
+        | LValueReference ->
+            let pointee = cxtype |> get_pointee_type |> of_cxtype in
+            LValueReference pointee
         | Enum ->
             let name = cxtype |> get_type_declaration |> get_cursor_spelling in
             Enum name
@@ -96,7 +99,7 @@ module Ast = struct
         | FunctionProto
         | FunctionNoProto ->
             let function_type =
-              cxtype |> function_type_of_cxtype (fun _ -> "") in
+              cxtype |> function_type_of_cxtype (args_of_cxtype cxtype) in
             FunctionType function_type
         | Complex ->
             let element_type = cxtype |> get_element_type |> of_cxtype in 
@@ -216,7 +219,7 @@ module Ast = struct
 		  Some (stmt_of_cxcursor body)
 	      | _ -> None in
 	    Constructor {
-	      args = args_of_decl cursor children;
+	      args = args_of_function_decl cursor;
 	      initializer_list = extract_initializer_list children;
 	      body;
 	      defaulted = ext_cxxmethod_is_defaulted cursor;
@@ -238,24 +241,26 @@ module Ast = struct
         | _ -> OtherDecl
       with Invalid_structure -> OtherDecl
 
-    and args_of_decl cursor children =
-      let params = children |> List.filter @@ fun child ->
-	get_cursor_kind child = ParmDecl in
-      { non_variadic = params |> List.map (fun param ->
-	  (get_cursor_spelling param, get_cursor_type param |> of_cxtype));
-	variadic = is_function_type_variadic (get_cursor_type cursor) }
+    and args_of_function_decl cursor =
+      { non_variadic =
+	  List.init (ext_function_decl_get_num_params cursor) (fun i ->
+	    let param = ext_function_decl_get_param_decl cursor i in
+	    (get_cursor_spelling param, get_cursor_type param |> of_cxtype));
+  	variadic = is_function_type_variadic (get_cursor_type cursor) }
 
-    and function_type_of_decl cursor children =
-      let params = children |> List.filter @@ fun child ->
-	get_cursor_kind child = ParmDecl in
-      let params = Array.of_list params in
+    and args_of_function_decl_or_proto cursor =
+      if cursor |> get_cursor_type |> get_type_kind = FunctionProto then
+	Some (args_of_function_decl cursor)
+      else
+	None
+
+    and function_type_of_decl cursor =
       cursor |> get_cursor_type |>
-        function_type_of_cxtype @@ fun i ->
-          params.(i) |> get_cursor_spelling
+        function_type_of_cxtype (args_of_function_decl_or_proto cursor)
 
     and function_decl_of_cxcursor cursor children =
       let linkage = cursor |> get_cursor_linkage in
-      let function_type = function_type_of_decl cursor children in
+      let function_type = function_type_of_decl cursor in
       let name = get_cursor_spelling cursor in
       let body : stmt option =
         match List.rev children with
@@ -266,7 +271,7 @@ module Ast = struct
       Clang__ast.Function { linkage; function_type; name; body; deleted }
 
     and cxxmethod_decl_of_cxcursor ?(can_be_function = false) cursor children =
-      let function_type = function_type_of_decl cursor children in
+      let function_type = function_type_of_decl cursor in
       let name = get_cursor_spelling cursor in
       let type_ref : qual_type option =
         match children with
@@ -300,18 +305,19 @@ module Ast = struct
 	  const = ext_cxxmethod_is_const cursor;
 	  deleted }
 
-    and function_type_of_cxtype get_argument_name cxtype =
+    and args_of_cxtype cxtype =
+      if cxtype |> get_type_kind = FunctionProto then
+        let non_variadic =
+          List.init (get_num_arg_types cxtype) @@ fun i ->
+            "", of_cxtype (get_arg_type cxtype i) in
+        let variadic = is_function_type_variadic cxtype in
+        Some { non_variadic; variadic }
+      else
+        None
+
+    and function_type_of_cxtype args cxtype =
       let calling_conv = cxtype |> get_function_type_calling_conv in
       let result = cxtype |> get_result_type |> of_cxtype in
-      let args =
-        if cxtype |> get_type_kind = FunctionProto then
-          let non_variadic =
-            List.init (get_num_arg_types cxtype) @@ fun i ->
-              get_argument_name i, of_cxtype (get_arg_type cxtype i) in
-          let variadic = is_function_type_variadic cxtype in
-          Some { non_variadic; variadic }
-        else
-          None in
       { calling_conv; result; args }
 
     and var_decl_of_cxcursor cursor =
