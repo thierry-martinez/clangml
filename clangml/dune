@@ -11,5 +11,5 @@
   (library_flags -linkall)
   (flags -open Stdcompat)
   (libraries compiler-libs.common unix stdcompat visitors.runtime)
-  (preprocess (pps ppx_deriving.std visitors.ppx value_quoter))
+  (preprocess (pps ppx_deriving.std visitors.ppx))
   (inline_tests (backend ocamlcodoc)))
