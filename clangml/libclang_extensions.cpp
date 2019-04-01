@@ -213,9 +213,8 @@ MakeCXType(clang::QualType T, CXTranslationUnit TU)
   return clang_getCursorType(C);
 }
 
-[[maybe_unused]]
-static const clang::CXXMethodDecl *
-getMethodDecl(CXCursor C)
+static const clang::FunctionDecl *
+getFunctionDecl(CXCursor C)
 {
   if (auto *D = getCursorDecl(C)) {
     const clang::FunctionDecl *FD;
@@ -232,11 +231,32 @@ getMethodDecl(CXCursor C)
     #else
       FD = D->getAsFunction();
     #endif
+    return FD;
+  }
+  return nullptr;
+}
+
+[[maybe_unused]]
+static const clang::CXXMethodDecl *
+getMethodDecl(CXCursor C)
+{
+  if (auto *FD = getFunctionDecl(C)) {
     if (auto *Method = llvm::dyn_cast_or_null<clang::CXXMethodDecl>(FD)) {
       return Method;
     }
   }
-  return NULL;
+  return nullptr;
+}
+
+static const clang::CXXConstructorDecl *
+getConstructorDecl(CXCursor C)
+{
+  if (auto *FD = getFunctionDecl(C)) {
+    const clang::CXXConstructorDecl *Constructor =
+      llvm::dyn_cast_or_null<clang::CXXConstructorDecl>(FD);
+    return Constructor;
+  }
+  return nullptr;
 }
 
 extern "C" {
@@ -847,5 +867,23 @@ extern "C" {
     #else
       return clang_CXXMethod_isConst(C);
     #endif
+  }
+
+  unsigned
+  clang_ext_CXXConstructor_isExplicit(CXCursor C)
+  {
+    if (auto *Constructor = getConstructorDecl(C)) {
+      return Constructor->isExplicit();
+    }
+    return false;
+  }
+
+  unsigned
+  clang_ext_FunctionDecl_isDeleted(CXCursor C)
+  {
+    if (auto *Function = getFunctionDecl(C)) {
+      return Function->isDeleted();
+    }
+    return false;
   }
 }

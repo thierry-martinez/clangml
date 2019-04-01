@@ -220,8 +220,8 @@ module Ast = struct
 	      initializer_list = extract_initializer_list children;
 	      body;
 	      defaulted = ext_cxxmethod_is_defaulted cursor;
-	      deleted = false;
-	      explicit = false;
+	      deleted = ext_function_decl_is_deleted cursor;
+	      explicit = ext_cxxconstructor_is_explicit cursor;
 	    }
 	| Destructor ->
 	    let children = list_of_children cursor in
@@ -231,10 +231,9 @@ module Ast = struct
 		  Some (stmt_of_cxcursor body)
 	      | _ -> None in
 	    Destructor {
-	      args = args_of_decl cursor children;
 	      body;
 	      defaulted = ext_cxxmethod_is_defaulted cursor;
-	      deleted = false;
+	      deleted = ext_function_decl_is_deleted cursor;
 	    }
         | _ -> OtherDecl
       with Invalid_structure -> OtherDecl
@@ -263,7 +262,8 @@ module Ast = struct
         | last :: _ when get_cursor_kind last = CompoundStmt ->
             Some (stmt_of_cxcursor last)
 	| _ -> None in
-      Clang__ast.Function { linkage; function_type; name; body }
+      let deleted = ext_function_decl_is_deleted cursor in
+      Clang__ast.Function { linkage; function_type; name; body; deleted }
 
     and cxxmethod_decl_of_cxcursor ?(can_be_function = false) cursor children =
       let function_type = function_type_of_decl cursor children in
@@ -282,9 +282,10 @@ module Ast = struct
               Some (stmt_of_cxcursor last)
             else
               None in
+      let deleted = ext_function_decl_is_deleted cursor in
       if can_be_function && type_ref = None then
 	let linkage = cursor |> get_cursor_linkage in
-	Function { linkage; function_type; name; body }
+	Function { linkage; function_type; name; body; deleted }
       else
 	CXXMethod { type_ref; function_type; name; body;
 	  defaulted = ext_cxxmethod_is_defaulted cursor;
@@ -296,7 +297,8 @@ module Ast = struct
 	      Virtual
 	    else
 	      NonVirtual;
-	  const = ext_cxxmethod_is_const cursor; }
+	  const = ext_cxxmethod_is_const cursor;
+	  deleted }
 
     and function_type_of_cxtype get_argument_name cxtype =
       let calling_conv = cxtype |> get_function_type_calling_conv in
