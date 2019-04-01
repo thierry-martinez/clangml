@@ -2281,3 +2281,7 @@ external ext_cxxmethod_is_defaulted :
   cxcursor -> bool = "clang_ext_CXXMethod_isDefaulted_wrapper"
 external ext_cxxmethod_is_const :
   cxcursor -> bool = "clang_ext_CXXMethod_isConst_wrapper"
+external ext_cxxconstructor_is_explicit :
+  cxcursor -> bool = "clang_ext_CXXConstructor_isExplicit_wrapper"
+external ext_function_decl_is_deleted :
+  cxcursor -> bool = "clang_ext_FunctionDecl_isDeleted_wrapper"
