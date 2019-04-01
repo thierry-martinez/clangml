@@ -223,6 +223,19 @@ module Ast = struct
 	      deleted = false;
 	      explicit = false;
 	    }
+	| Destructor ->
+	    let children = list_of_children cursor in
+	    let body =
+	      match List.rev children with
+	      | body :: _ when get_cursor_kind body = CompoundStmt ->
+		  Some (stmt_of_cxcursor body)
+	      | _ -> None in
+	    Destructor {
+	      args = args_of_decl cursor children;
+	      body;
+	      defaulted = ext_cxxmethod_is_defaulted cursor;
+	      deleted = false;
+	    }
         | _ -> OtherDecl
       with Invalid_structure -> OtherDecl
 

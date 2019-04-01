@@ -2334,7 +2334,7 @@ let example = {|
       int i;
       C(int v) : i(v) {
       }
-    }
+    };
     |}
 
 let () =
@@ -2360,7 +2360,7 @@ let () =
 let example = {|
     class C {
       C() =default;
-    }
+    };
     |}
 
 let () =
@@ -2382,7 +2382,40 @@ let () =
                deleted = false; }}] }}] -> ()
   | _ -> assert false
    ]}*)
+  | Destructor of {
+      args : args;
+      body : stmt option;
+      defaulted : bool;
+      deleted : bool;
+    }
+(**
+  C++ class destructor.
 
+    {[
+let example = {|
+    class C {
+      ~C() {
+      }
+    };
+    |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match ast with
+  | [{ desc = RecordDecl {
+         keyword = Class;
+         name = "C";
+         fields = [
+           { desc = Destructor {
+               args = {
+                 non_variadic = [];
+                 variadic = false;
+               };
+               body = Some { desc = Compound [] };
+               defaulted = false;
+               deleted = false; }}] }}] -> ()
+  | _ -> assert false
+   ]}*)
   | EmptyDecl
 (**
   Empty declaration.
