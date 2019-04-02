@@ -273,3 +273,9 @@ clang_ext_CXXConstructor_isExplicit(CXCursor C);
 
 unsigned
 clang_ext_FunctionDecl_isDeleted(CXCursor C);
+
+unsigned
+clang_ext_FunctionDecl_getNumParams(CXCursor C);
+
+CXCursor
+clang_ext_FunctionDecl_getParamDecl(CXCursor C, unsigned i);

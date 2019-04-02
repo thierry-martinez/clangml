@@ -2175,3 +2175,7 @@ external ext_cxxconstructor_is_explicit :
   cxcursor -> bool = "clang_ext_CXXConstructor_isExplicit_wrapper"
 external ext_function_decl_is_deleted :
   cxcursor -> bool = "clang_ext_FunctionDecl_isDeleted_wrapper"
+external ext_function_decl_get_num_params :
+  cxcursor -> int = "clang_ext_FunctionDecl_getNumParams_wrapper"
+external ext_function_decl_get_param_decl :
+  cxcursor -> int -> cxcursor = "clang_ext_FunctionDecl_getParamDecl_wrapper"

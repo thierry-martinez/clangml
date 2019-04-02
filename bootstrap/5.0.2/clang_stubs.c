@@ -6877,3 +6877,35 @@ clang_ext_FunctionDecl_isDeleted_wrapper(value C_ocaml)
   }
 }
 
+CAMLprim value
+clang_ext_FunctionDecl_getNumParams_wrapper(value C_ocaml)
+{
+  CAMLparam1(C_ocaml);
+  CXCursor C;
+  C = Cxcursor_val(Field(C_ocaml, 0));
+  unsigned int result = clang_ext_FunctionDecl_getNumParams(C);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_FunctionDecl_getParamDecl_wrapper(value C_ocaml, value i_ocaml)
+{
+  CAMLparam2(C_ocaml, i_ocaml);
+  CXCursor C;
+  C = Cxcursor_val(Field(C_ocaml, 0));
+  unsigned int i;
+  i = Int_val(i_ocaml);
+  CXCursor result = clang_ext_FunctionDecl_getParamDecl(C, i);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(C_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
