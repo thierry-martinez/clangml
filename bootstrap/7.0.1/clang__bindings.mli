@@ -61,6 +61,7 @@ sig
   val (-) : t -> t -> t
   external (&) : t -> t -> t = "%andint"
   external ( * ) : t -> t -> t = "%xorint"
+  val subset : t -> t -> bool
   val none : t
   val thread_background_priority_for_indexing : t
   val thread_background_priority_for_editing : t
@@ -223,6 +224,8 @@ sig
   val (-) : t -> t -> t
   external (&) : t -> t -> t = "%andint"
   external ( * ) : t -> t -> t = "%xorint"
+  val subset : t -> t -> bool
+  val zero : t
   val display_source_location : t
   val display_column : t
   val display_source_ranges : t
@@ -318,6 +321,7 @@ sig
   val (-) : t -> t -> t
   external (&) : t -> t -> t = "%andint"
   external ( * ) : t -> t -> t = "%xorint"
+  val subset : t -> t -> bool
   val none : t
   val detailed_preprocessing_record : t
   val incomplete : t
@@ -384,6 +388,7 @@ sig
   val (-) : t -> t -> t
   external (&) : t -> t -> t = "%andint"
   external ( * ) : t -> t -> t = "%xorint"
+  val subset : t -> t -> bool
   val none : t
 end
 external save_translation_unit :
@@ -401,6 +406,7 @@ sig
   val (-) : t -> t -> t
   external (&) : t -> t -> t = "%andint"
   external ( * ) : t -> t -> t = "%xorint"
+  val subset : t -> t -> bool
   val none : t
 end
 external default_reparse_options :
@@ -1995,6 +2001,7 @@ type clang_ext_cursorkind =
   | BinaryConditionalOperator 
   | UnaryExprOrTypeTraitExpr 
   | EmptyDecl 
+  | LinkageSpecDecl 
   | Unknown 
 external ext_get_cursor_kind :
   cxcursor -> clang_ext_cursorkind = "clang_ext_GetCursorKind_wrapper"
@@ -2289,3 +2296,18 @@ external ext_function_decl_get_num_params :
   cxcursor -> int = "clang_ext_FunctionDecl_getNumParams_wrapper"
 external ext_function_decl_get_param_decl :
   cxcursor -> int -> cxcursor = "clang_ext_FunctionDecl_getParamDecl_wrapper"
+module Clang_ext_languageids :
+sig
+  type t
+  external (+) : t -> t -> t = "%orint"
+  val (-) : t -> t -> t
+  external (&) : t -> t -> t = "%andint"
+  external ( * ) : t -> t -> t = "%xorint"
+  val subset : t -> t -> bool
+  val zero : t
+  val c : t
+  val cxx : t
+end
+external ext_linkage_spec_decl_get_language_ids :
+  cxcursor -> Clang_ext_languageids.t =
+    "clang_ext_LinkageSpecDecl_getLanguageIDs_wrapper"

@@ -192,7 +192,7 @@ MakeCXCursor(const clang::Stmt *S, CXTranslationUnit TU)
 {
   clang::DefaultStmt CS(
     clang::SourceLocation::getFromRawEncoding(0),
-    clang::SourceLocation::getFromRawEncoding(0), (clang::Stmt *) S);
+    clang::SourceLocation::getFromRawEncoding(0), const_cast<clang::Stmt *>(S));
   CXCursor C = { CXCursor_CompoundStmt, 0, { NULL, &CS, TU }};
   CXCursor Result;
   clang_visitChildren(C, MakeCXCursor_visitor, &Result);
@@ -202,7 +202,7 @@ MakeCXCursor(const clang::Stmt *S, CXTranslationUnit TU)
 static CXCursor
 MakeCXCursor(const clang::Decl *T, CXTranslationUnit TU)
 {
-  clang::DeclGroupRef DGR((clang::Decl *) T);
+  clang::DeclGroupRef DGR(const_cast<clang::Decl *>(T));
   clang::DeclStmt DS(DGR,
     clang::SourceLocation::getFromRawEncoding(0),
     clang::SourceLocation::getFromRawEncoding(0));
@@ -696,6 +696,7 @@ extern "C" {
         #define CASE(X) case clang::Decl::X: return ECK_##X##Decl
         switch (d->getKind()) {
         CASE(Empty);
+        CASE(LinkageSpec);
         default:
           return ECK_Unknown;
         }
@@ -916,5 +917,16 @@ extern "C" {
       return MakeCXCursor(Function->getParamDecl(i), getCursorTU(C));
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(C));
+  }
+
+  unsigned
+  clang_ext_LinkageSpecDecl_getLanguageIDs(CXCursor C)
+  {
+    if (auto *D = getCursorDecl(C)) {
+      if (auto *LS = llvm::dyn_cast_or_null<clang::LinkageSpecDecl>(D)) {
+        return LS->getLanguage();
+      }
+    }
+    return 0;
   }
 }

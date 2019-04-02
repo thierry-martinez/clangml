@@ -61,6 +61,7 @@ module Cxglobaloptflags =
     let (-) x y = x land (lnot y)
     external (&) : t -> t -> t = "%andint"
     external ( * ) : t -> t -> t = "%xorint"
+    let subset x y = (y - x) = 0
     let none = 0
     let thread_background_priority_for_indexing = 1
     let thread_background_priority_for_editing = 2
@@ -208,6 +209,8 @@ module Cxdiagnosticdisplayoptions =
     let (-) x y = x land (lnot y)
     external (&) : t -> t -> t = "%andint"
     external ( * ) : t -> t -> t = "%xorint"
+    let subset x y = (y - x) = 0
+    let zero = 0
     let display_source_location = 1
     let display_column = 2
     let display_source_ranges = 4
@@ -303,6 +306,7 @@ module Cxtranslationunit_flags =
     let (-) x y = x land (lnot y)
     external (&) : t -> t -> t = "%andint"
     external ( * ) : t -> t -> t = "%xorint"
+    let subset x y = (y - x) = 0
     let none = 0
     let detailed_preprocessing_record = 1
     let incomplete = 2
@@ -366,6 +370,7 @@ module Cxsavetranslationunit_flags =
     let (-) x y = x land (lnot y)
     external (&) : t -> t -> t = "%andint"
     external ( * ) : t -> t -> t = "%xorint"
+    let subset x y = (y - x) = 0
     let none = 0
   end
 external save_translation_unit :
@@ -380,6 +385,7 @@ module Cxreparse_flags =
     let (-) x y = x land (lnot y)
     external (&) : t -> t -> t = "%andint"
     external ( * ) : t -> t -> t = "%xorint"
+    let subset x y = (y - x) = 0
     let none = 0
   end
 external default_reparse_options :
@@ -1620,6 +1626,7 @@ type clang_ext_cursorkind =
   | BinaryConditionalOperator 
   | UnaryExprOrTypeTraitExpr 
   | EmptyDecl 
+  | LinkageSpecDecl 
   | Unknown 
 external ext_get_cursor_kind :
   cxcursor -> clang_ext_cursorkind = "clang_ext_GetCursorKind_wrapper"
@@ -1857,3 +1864,18 @@ external ext_function_decl_get_num_params :
   cxcursor -> int = "clang_ext_FunctionDecl_getNumParams_wrapper"
 external ext_function_decl_get_param_decl :
   cxcursor -> int -> cxcursor = "clang_ext_FunctionDecl_getParamDecl_wrapper"
+module Clang_ext_languageids =
+  struct
+    type t = int
+    external (+) : t -> t -> t = "%orint"
+    let (-) x y = x land (lnot y)
+    external (&) : t -> t -> t = "%andint"
+    external ( * ) : t -> t -> t = "%xorint"
+    let subset x y = (y - x) = 0
+    let zero = 0
+    let c = 2
+    let cxx = 4
+  end
+external ext_linkage_spec_decl_get_language_ids :
+  cxcursor -> Clang_ext_languageids.t =
+    "clang_ext_LinkageSpecDecl_getLanguageIDs_wrapper"

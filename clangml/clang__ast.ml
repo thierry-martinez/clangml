@@ -87,7 +87,7 @@ type 'qual_type open_decoration =
   | Custom of {
       location : (source_location option [@opaque]
         [@equal fun _ _ -> true]
-	[@compare fun _ _ -> 0]);
+        [@compare fun _ _ -> 0]);
       qual_type : 'qual_type option;
     }
 
@@ -145,6 +145,11 @@ and integer_literal =
 and floating_literal =
   | Float of float
   | CXFloat of (cxfloat [@visitors.opaque] [@quote.opaque])
+
+and languages = {
+    c : bool;
+    cxx : bool;
+  }
 
 (** {2 Types and nodes} *)
 
@@ -2462,6 +2467,66 @@ let () =
                body = None;
                defaulted = true;
                deleted = false; }}] }}] -> ()
+  | _ -> assert false
+   ]}*)
+  | LinkageSpec of {
+      languages : languages;
+      decls : decl list;
+    }
+(**
+  C++ language linkage.
+
+    {[
+let example = {|
+    extern "C" {
+      int i;
+
+      void f() {
+      }
+    }
+   |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match ast with
+  | [{ desc = LinkageSpec {
+         languages = { c = true; cxx = false };
+         decls = [
+           { desc = Var {
+               qual_type = { desc = BuiltinType Int };
+               name = "i"; }};
+           { desc = Function {
+               function_type = {
+                 result = { desc = BuiltinType Void };
+                 args = Some { non_variadic = []; variadic = false }};
+               name = "f";
+               body = Some { desc = Compound [] }}}] }}] -> ()
+  | _ -> assert false
+
+let example = {|
+    extern "C++" {
+      int i;
+
+      void f() {
+      }
+    }
+   |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~filename:"<string>.cpp") example @@
+  fun ast -> match ast with
+  | [{ desc = LinkageSpec {
+         languages = { c = false; cxx = true };
+         decls = [
+           { desc = Var {
+               qual_type = { desc = BuiltinType Int };
+               name = "i"; }};
+           { desc = Function {
+               function_type = {
+                 result = { desc = BuiltinType Void };
+                 args = Some { non_variadic = []; variadic = false }};
+               name = "f";
+               body = Some { desc = Compound [] }}}] }}] -> ()
   | _ -> assert false
    ]}*)
   | EmptyDecl

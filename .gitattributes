@@ -5,3 +5,4 @@ Makefile* whitespace=blank-at-eol
 *.h whitespace=blank-at-eol,tab-in-indent
 *.cpp whitespace=blank-at-eol,tab-in-indent
 *.ml whitespace=blank-at-eol,tab-in-indent
+*.mli whitespace=blank-at-eol,tab-in-indent

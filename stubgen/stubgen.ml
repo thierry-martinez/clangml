@@ -651,20 +651,30 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
                       | _ -> assert false
                     with Not_found -> failwith ("not found " ^ enum) in
                   let t = ptyp_constr (loc (Longident.Lident "t")) in
-                  let s = psig_type [type_declaration (loc "t")] ::
-                    psig_value (value_description (loc "+") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%orint"]) ::
-                    psig_value (value_description (loc "-") (ptyp_arrow t (ptyp_arrow t t))) ::
-                    psig_value (value_description (loc "&") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%andint"]) ::
-                    psig_value (value_description (loc "*") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%xorint"]) ::
-                    (enum_info.constructors |> List.map @@ fun (_, ocaml_name, _) ->
-                      psig_value (value_description (loc (uncamelcase ocaml_name)) t)) in
-                  let m = pstr_type [type_declaration (loc "t") ~ptype_manifest:int_info.ocamltype] ::
-                    pstr_primitive (value_description (loc "+") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%orint"]) ::
-                    pstr_value [value_binding (ppat_var (loc "-")) (pexp_fun (ppat_var (loc "x")) (pexp_fun (ppat_var (loc "y")) (pexp_apply (pexp_ident (loc (Longident.Lident "land"))) [Nolabel, pexp_ident (loc (Longident.Lident "x")); Nolabel, pexp_apply (pexp_ident (loc (Longident.Lident "lnot"))) [Nolabel, pexp_ident (loc (Longident.Lident "y"))]])))] ::
-                    pstr_primitive (value_description (loc "&") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%andint"]) ::
-                    pstr_primitive (value_description (loc "*") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%xorint"]) ::
+                  let bind_value name value =
+                    (pstr_value [value_binding (ppat_var (loc (uncamelcase name))) (pexp_constant (pconst_of_int value))],
+                     psig_value (value_description (loc (uncamelcase name)) t)) in
+                  let has_zero = enum_info.constructors |> List.exists @@ fun (_, _, value) -> value = 0 in
+                  let zero_value =
+                    if has_zero then []
+                    else [bind_value "zero" 0] in
+                  let items =
+                    (pstr_type [type_declaration (loc "t") ~ptype_manifest:int_info.ocamltype],
+                     psig_type [type_declaration (loc "t")]) ::
+                    (pstr_primitive (value_description (loc "+") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%orint"]),
+                     psig_value (value_description (loc "+") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%orint"])) ::
+                    (pstr_value [value_binding (ppat_var (loc "-")) (pexp_fun (ppat_var (loc "x")) (pexp_fun (ppat_var (loc "y")) (pexp_apply (pexp_ident (loc (Longident.Lident "land"))) [Nolabel, pexp_ident (loc (Longident.Lident "x")); Nolabel, pexp_apply (pexp_ident (loc (Longident.Lident "lnot"))) [Nolabel, pexp_ident (loc (Longident.Lident "y"))]])))],
+                     psig_value (value_description (loc "-") (ptyp_arrow t (ptyp_arrow t t)))) ::
+                    (pstr_primitive (value_description (loc "&") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%andint"]),
+                     psig_value (value_description (loc "&") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%andint"])) ::
+                    (pstr_primitive (value_description (loc "*") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%xorint"]),
+                     psig_value (value_description (loc "*") (ptyp_arrow t (ptyp_arrow t t)) ~pval_prim:["%xorint"])) ::
+                    (pstr_value [value_binding (ppat_var (loc "subset")) (pexp_fun (ppat_var (loc "x")) (pexp_fun (ppat_var (loc "y")) (pexp_apply (pexp_ident (loc (Longident.Lident "="))) [Nolabel, pexp_apply (pexp_ident (loc (Longident.Lident "-"))) [Nolabel, pexp_ident (loc (Longident.Lident "y")); Nolabel, pexp_ident (loc (Longident.Lident "x"))]; Nolabel, pexp_constant (pconst_integer "0")])))],
+                     psig_value (value_description (loc "subset") (ptyp_arrow t (ptyp_arrow t bool_info.ocamltype)))) ::
+                    zero_value @
                     (enum_info.constructors |> List.map @@ fun (_, ocaml_name, value) ->
-                      pstr_value [value_binding (ppat_var (loc (uncamelcase ocaml_name))) (pexp_constant (pconst_of_int value))]) in
+                      bind_value ocaml_name value) in
+                  let m, s = List.split items  in
                   context.sig_accu <- psig_module (module_declaration (loc mod_name) (pmty_signature s)) :: context.sig_accu;
                   context.struct_accu <- pstr_module (module_binding (loc mod_name) (pmod_structure m)) :: context.struct_accu
                 end in
@@ -2221,7 +2231,11 @@ let main cflags llvm_config prefix =
                 c_of_ocaml = (fun _ -> assert false);
                 ocaml_of_c = (fun fmt ~src ~params ~references ~tgt ->
                   Printf.fprintf fmt "%s = Val_string_option(clang_getCString(%s));
-                    clang_disposeString(%s);" tgt src src) }, Regular)))) in
+                    clang_disposeString(%s);" tgt src src) }, Regular)))) |>
+   add_function (Pcre.regexp "^clang_ext_LinkageSpecDecl_getLanguageIDs$")
+     (empty_function_interface |>
+       add_result (empty_type_interface |>
+         reinterpret_as (Set_of "clang_ext_LanguageIDs"))) in
   let idx = Clang.create_index true true in
   Format.printf "%a@." (Format.pp_print_list
     ~pp_sep:(fun fmt () -> Format.pp_print_string fmt " ")
