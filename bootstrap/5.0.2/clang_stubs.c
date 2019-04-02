@@ -6077,7 +6077,8 @@ Clang_ext_cursorkind_val(value ocaml)
   case 1: return ECK_BinaryConditionalOperator;
   case 2: return ECK_UnaryExprOrTypeTraitExpr;
   case 3: return ECK_EmptyDecl;
-  case 4: return ECK_Unknown;
+  case 4: return ECK_LinkageSpecDecl;
+  case 5: return ECK_Unknown;
   }
   failwith_fmt("invalid value for Clang_ext_cursorkind_val: %d", Int_val(ocaml));
   return ECK_ImplicitCastExpr;
@@ -6091,7 +6092,8 @@ Val_clang_ext_cursorkind(enum clang_ext_CursorKind v)
   case ECK_BinaryConditionalOperator: return Val_int(1);
   case ECK_UnaryExprOrTypeTraitExpr: return Val_int(2);
   case ECK_EmptyDecl: return Val_int(3);
-  case ECK_Unknown: return Val_int(4);
+  case ECK_LinkageSpecDecl: return Val_int(4);
+  case ECK_Unknown: return Val_int(5);
   }
   failwith_fmt("invalid value for Val_clang_ext_cursorkind: %d", v);
   return Val_int(0);
@@ -6905,6 +6907,20 @@ clang_ext_FunctionDecl_getParamDecl_wrapper(value C_ocaml, value i_ocaml)
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
   Store_field(data, 1, safe_field(C_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_LinkageSpecDecl_getLanguageIDs_wrapper(value C_ocaml)
+{
+  CAMLparam1(C_ocaml);
+  CXCursor C;
+  C = Cxcursor_val(Field(C_ocaml, 0));
+  unsigned int result = clang_ext_LinkageSpecDecl_getLanguageIDs(C);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
     CAMLreturn(data);
   }
 }
