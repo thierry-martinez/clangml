@@ -92,24 +92,26 @@ and print_linkage fmt linkage =
   | NoLinkage -> ()
   | _ -> failwith (Format.asprintf "Not implemented linkage: %a" pp_linkage_kind linkage)
 
-and print_function_args fmt args =
-  match args with
+and print_function_parameters fmt parameters =
+  match parameters with
   | None -> ()
-  | Some args ->
-      let all_args = List.map Option.some args.non_variadic in
-      let all_args = if args.variadic then all_args @ [None] else all_args in
-      let print_arg fmt arg =
-	match arg with
+  | Some parameters ->
+      let all_parameters = List.map Option.some parameters.non_variadic in
+      let all_parameters =
+        if parameters.variadic then all_parameters @ [None] else all_parameters in
+      let print_parameter fmt (parameter : parameter option) =
+	match parameter with
 	| None -> Format.pp_print_string fmt "..."
-	| Some ("", ty) -> qual_type fmt ty
-	| Some (name, ty) -> Format.fprintf fmt "%a@ %s" qual_type ty name in
+	| Some { desc = { name = ""; qual_type = ty; _ }} -> qual_type fmt ty
+	| Some { desc = { name; qual_type = ty; _ }} ->
+            Format.fprintf fmt "%a@ %s" qual_type ty name in
       Format.pp_print_list
 	~pp_sep:(fun fmt () -> Format.pp_print_string fmt ",@ ")
-	print_arg fmt all_args
+	print_parameter fmt all_parameters
 
 and print_function_type fmt function_type name =
   Format.fprintf fmt "@[%a@ %s(%a)@]" qual_type function_type.result name
-    print_function_args function_type.args
+    print_function_parameters function_type.parameters
 
 and print_function_body fmt body =
   match body with
