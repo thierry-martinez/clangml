@@ -1602,6 +1602,7 @@ type cx_cxxaccessspecifier =
   | CXXProtected 
   | CXXPrivate [@@ocaml.doc
                  "Represents the C++ access control level to a base class for a cursor with kind CX_CXXBaseSpecifier."]
+[@@deriving (eq, ord, show)]
 external get_cxxaccess_specifier :
   cxcursor -> cx_cxxaccessspecifier = "clang_getCXXAccessSpecifier_wrapper"
 [@@ocaml.doc "Returns the access control level for the referenced object."]
@@ -2132,6 +2133,7 @@ type clang_ext_cursorkind =
   | ImplicitCastExpr 
   | BinaryConditionalOperator 
   | UnaryExprOrTypeTraitExpr 
+  | EmptyDecl 
   | Unknown 
 external ext_get_cursor_kind :
   cxcursor -> clang_ext_cursorkind = "clang_ext_GetCursorKind_wrapper"
@@ -2140,6 +2142,7 @@ type clang_ext_typekind =
   | Paren 
   | Elaborated 
   | Attributed 
+  | TemplateTypeParm 
   | Unknown 
 external ext_get_type_kind :
   cxtype -> clang_ext_typekind = "clang_ext_GetTypeKind_wrapper"
@@ -2449,3 +2452,15 @@ external ext_type_get_attribute_kind :
   cxtype -> clang_ext_attrkind = "clang_ext_Type_GetAttributeKind_wrapper"
 external ext_attr_kind_get_spelling :
   clang_ext_attrkind -> string = "clang_ext_AttrKind_GetSpelling_wrapper"
+external ext_cxxmethod_is_defaulted :
+  cxcursor -> bool = "clang_ext_CXXMethod_isDefaulted_wrapper"
+external ext_cxxmethod_is_const :
+  cxcursor -> bool = "clang_ext_CXXMethod_isConst_wrapper"
+external ext_cxxconstructor_is_explicit :
+  cxcursor -> bool = "clang_ext_CXXConstructor_isExplicit_wrapper"
+external ext_function_decl_is_deleted :
+  cxcursor -> bool = "clang_ext_FunctionDecl_isDeleted_wrapper"
+external ext_function_decl_get_num_params :
+  cxcursor -> int = "clang_ext_FunctionDecl_getNumParams_wrapper"
+external ext_function_decl_get_param_decl :
+  cxcursor -> int -> cxcursor = "clang_ext_FunctionDecl_getParamDecl_wrapper"
