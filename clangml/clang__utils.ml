@@ -121,31 +121,50 @@ let string_of_cxerrorcode cxerrorcode =
   | InvalidArguments -> "the arguments violate the function contract"
   | ASTReadError -> "an AST deserialization error has occurred"
 
+type language = C | Cxx
+
+let string_of_language language =
+  match language with
+  | C -> "c"
+  | Cxx -> "c++"
+
+let language_of_string s =
+  match s with
+  | "c" -> C
+  | "c++" -> Cxx
+  | _ -> invalid_arg "language_of_string"
+
 let parse_file_res ?(index = create_index true true)
-    ?(command_line_args = []) ?(unsaved_files = [])
+    ?(command_line_args = []) ?language ?(unsaved_files = [])
     ?(options = default_editing_translation_unit_options ()) filename =
+  let command_line_args =
+    match language with
+    | None -> command_line_args
+    | Some language -> "-x" :: string_of_language language :: command_line_args in
   parse_translation_unit2 index filename (Array.of_list command_line_args)
     (Array.of_list unsaved_files) options
 
-let parse_file ?index ?command_line_args ?unsaved_files ?options filename =
+let parse_file ?index ?command_line_args ?language ?unsaved_files ?options
+    filename =
   match
-    parse_file_res ?index ?command_line_args ?unsaved_files ?options filename
+    parse_file_res ?index ?command_line_args ?language ?unsaved_files ?options
+      filename
   with
   | Ok cxtranslationunit -> cxtranslationunit
   | Error cxerrorcode -> failwith (string_of_cxerrorcode cxerrorcode)
 
 let parse_string_res ?index ?(filename = "<string>.c")
-    ?command_line_args ?(unsaved_files = [])
+    ?command_line_args ?language ?(unsaved_files = [])
     ?options contents =
-  parse_file_res ?index ?command_line_args
+  parse_file_res ?index ?command_line_args ?language
     ~unsaved_files:({ filename; contents } :: unsaved_files)
     ?options filename
 
-let parse_string ?index ?filename ?command_line_args ?unsaved_files ?options
-    contents =
+let parse_string ?index ?filename ?command_line_args ?language ?unsaved_files
+    ?options contents =
   match
-    parse_string_res ?index ?filename ?command_line_args ?unsaved_files ?options
-      contents
+    parse_string_res ?index ?filename ?language ?command_line_args
+      ?unsaved_files ?options contents
   with
   | Ok cxtranslationunit -> cxtranslationunit
   | Error cxerrorcode -> failwith (string_of_cxerrorcode cxerrorcode)

@@ -2,10 +2,16 @@ open Clang__bindings
 
 open Clang__compat
 
+type language = C | Cxx
+
+val string_of_language : language -> string
+
+val language_of_string : string -> language
+
 (** {2 Parsing files and strings } *)
 
 val parse_file : ?index:cxindex ->
-  ?command_line_args:string list ->
+  ?command_line_args:string list -> ?language:language ->
     ?unsaved_files:cxunsavedfile list ->
       ?options:Cxtranslationunit_flags.t ->
         string -> cxtranslationunit
@@ -21,7 +27,7 @@ val parse_file : ?index:cxindex ->
     representation of the AST. *)
 
 val parse_file_res : ?index:cxindex ->
-  ?command_line_args:string list ->
+  ?command_line_args:string list -> ?language:language ->
     ?unsaved_files:cxunsavedfile list ->
       ?options:Cxtranslationunit_flags.t ->
         string -> (cxtranslationunit, cxerrorcode) result
@@ -29,7 +35,7 @@ val parse_file_res : ?index:cxindex ->
     raising [Failure _] if parsing fails. *)
 
 val parse_string : ?index:cxindex -> ?filename:string ->
-  ?command_line_args:string list ->
+  ?command_line_args:string list -> ?language:language ->
     ?unsaved_files:cxunsavedfile list ->
       ?options:Cxtranslationunit_flags.t ->
         string -> cxtranslationunit
@@ -44,7 +50,7 @@ val parse_string : ?index:cxindex -> ?filename:string ->
     representation of the AST. *)
 
 val parse_string_res : ?index:cxindex -> ?filename:string ->
-  ?command_line_args:string list ->
+  ?command_line_args:string list -> ?language:language ->
     ?unsaved_files:cxunsavedfile list ->
       ?options:Cxtranslationunit_flags.t ->
         string -> (cxtranslationunit, cxerrorcode) result
