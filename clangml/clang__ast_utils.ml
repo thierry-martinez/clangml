@@ -81,3 +81,12 @@ let pp_print_floating_literal fmt f =
   match f with
   | Float f -> Format.pp_print_float fmt f
   | CXFloat f -> Format.pp_print_string fmt (string_of_cxfloat f)
+
+let languages_of_ids e =
+  { c = Clang_ext_languageids.(subset c e);
+    cxx = Clang_ext_languageids.(subset cxx e) }
+
+let ids_of_languages li =
+  Clang_ext_languageids.
+    ((if li.c then c else zero) +
+     (if li.cxx then cxx else zero))

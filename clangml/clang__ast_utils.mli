@@ -61,3 +61,7 @@ val print_floating_literal : floating_literal -> unit
 val output_floating_literal : out_channel -> floating_literal -> unit
 
 val pp_print_floating_literal : Format.formatter -> floating_literal -> unit
+
+val languages_of_ids : Clang_ext_languageids.t -> languages
+
+val ids_of_languages : languages -> Clang_ext_languageids.t

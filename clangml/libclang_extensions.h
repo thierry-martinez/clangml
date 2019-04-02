@@ -192,6 +192,7 @@ enum clang_ext_CursorKind {
   ECK_BinaryConditionalOperator,
   ECK_UnaryExprOrTypeTraitExpr, /* for Clang <3.9.0 */
   ECK_EmptyDecl,
+  ECK_LinkageSpecDecl,
   ECK_Unknown
 };
 
@@ -279,3 +280,12 @@ clang_ext_FunctionDecl_getNumParams(CXCursor C);
 
 CXCursor
 clang_ext_FunctionDecl_getParamDecl(CXCursor C, unsigned i);
+
+/* Adapted from DeclCXX.h:LinkageSpecDecl:LanguageIDs */
+enum clang_ext_LanguageIDs {
+  CLANG_EXT_LANG_C = 0x0002,
+  CLANG_EXT_LANG_CXX = 0x0004
+};
+
+unsigned
+clang_ext_LinkageSpecDecl_getLanguageIDs(CXCursor C);
