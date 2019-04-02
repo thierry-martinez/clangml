@@ -237,6 +237,7 @@ AC_CHECK_LIB([clang], [clang_createIndex], [],
   [AC_MSG_ERROR([[libclang not found]])])
 
 AC_LANG_CPLUSPLUS
+
 AC_TRY_LINK(
   [#include <llvm/ADT/APInt.h>],
   [
@@ -262,6 +263,8 @@ AC_TRY_LINK(
         AC_MSG_ERROR([Cannot compile test for APInt::toString])
       ])
   ])
+
+AC_SUBST([CPPFLAGS], [["-fPIC $CPPFLAGS"]])
 
 AC_MSG_NOTICE(initialize build tree)
 
