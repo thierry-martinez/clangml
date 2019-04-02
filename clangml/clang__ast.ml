@@ -87,7 +87,7 @@ type 'qual_type open_decoration =
   | Custom of {
       location : (source_location option [@opaque]
         [@equal fun _ _ -> true]
-	[@compare fun _ _ -> 0]);
+        [@compare fun _ _ -> 0]);
       qual_type : 'qual_type option;
     }
 
