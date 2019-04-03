@@ -929,4 +929,17 @@ extern "C" {
     }
     return 0;
   }
+
+  CXType
+  clang_ext_TemplateTypeParmDecl_getDefaultArgument(CXCursor C)
+  {
+    if (auto *D = getCursorDecl(C)) {
+      if (auto TTPD = llvm::dyn_cast_or_null<clang::TemplateTypeParmDecl>(D)) {
+        if (TTPD->hasDefaultArgument()) {
+          return MakeCXType(TTPD->getDefaultArgument(), getCursorTU(C));
+        }
+      }
+    }
+    return MakeCXTypeInvalid(getCursorTU(C));
+  }
 }

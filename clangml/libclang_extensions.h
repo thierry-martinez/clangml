@@ -289,3 +289,6 @@ enum clang_ext_LanguageIDs {
 
 unsigned
 clang_ext_LinkageSpecDecl_getLanguageIDs(CXCursor C);
+
+CXType
+clang_ext_TemplateTypeParmDecl_getDefaultArgument(CXCursor C);
