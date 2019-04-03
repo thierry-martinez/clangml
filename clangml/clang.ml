@@ -710,24 +710,37 @@ module Ast = struct
 
     and make_template make_body cursor =
       let rec extract_template_parameters accu children =
-    match
-      match children with
-      | [] -> (None : 'a option), []
-      | cursor :: tl ->
-          match
-        match get_cursor_kind cursor with
-        | TemplateTypeParameter -> Some (Class : template_parameter_kind)
-        | NonTypeTemplateParameter ->
-            Some (NonType (get_cursor_type cursor |> of_cxtype))
-        | _ -> None
-          with
-          | None -> None, children
-          | Some kind ->
-          Some (node ~cursor { name = get_cursor_spelling cursor; kind}), tl
-    with
-    | None, tl -> List.rev accu, tl
-    | Some parameter, tl ->
-        extract_template_parameters (parameter :: accu) tl in
+        match
+          match children with
+          | [] -> (None : 'a option), []
+          | cursor :: tl ->
+              match
+                match get_cursor_kind cursor with
+                | TemplateTypeParameter ->
+                    let default =
+                      ext_template_type_parm_decl_get_default_argument cursor in
+                    let default : qual_type option =
+                      match get_type_kind default with
+                      | Invalid -> None
+                      | _ -> Some (default |> of_cxtype) in
+                    Some (Class { default } : template_parameter_kind)
+                | NonTypeTemplateParameter ->
+                    let qual_type = get_cursor_type cursor |> of_cxtype in
+                    let default : expr option =
+                      match list_of_children cursor with
+                      | [] -> None
+                      | [default] -> Some (default |> expr_of_cxcursor)
+                      | _ -> raise Invalid_structure in
+                    Some (NonType { qual_type; default })
+                | _ -> None
+              with
+              | None -> None, children
+              | Some kind ->
+              Some (node ~cursor { name = get_cursor_spelling cursor; kind}), tl
+        with
+        | None, tl -> List.rev accu, tl
+        | Some parameter, tl ->
+            extract_template_parameters (parameter :: accu) tl in
       let parameters, others =
         extract_template_parameters [] (list_of_children cursor) in
       let decl = make_body others in

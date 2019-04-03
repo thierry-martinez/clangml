@@ -1789,8 +1789,10 @@ let () =
   fun ast -> match ast with
   | [{ desc = Template {
       parameters = [
-        { desc = { name = "X"; kind = Class }};
-        { desc = { name = "i"; kind = NonType { desc = BuiltinType Int }}};];
+        { desc = { name = "X"; kind = Class { default = None }}};
+        { desc = { name = "i"; kind = NonType {
+            qual_type = { desc = BuiltinType Int };
+            default = None }}}];
       decl = { desc = Function {
         function_type = {
           calling_conv = C;
@@ -1803,15 +1805,22 @@ let () =
         body = None }}}}] -> ()
   | _ -> assert false
 
-let example = {| template <class X, int i> class C { X x; int v = i; }; |}
+let example = {|
+  template <class X = bool, int i = 4>
+  class C { X x; int v = i; };
+|}
 
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
   fun ast -> match ast with
   | [{ desc = Template {
       parameters = [
-        { desc = { name = "X"; kind = Class }};
-        { desc = { name = "i"; kind = NonType { desc = BuiltinType Int }}};];
+        { desc = {
+            name = "X";
+            kind = Class { default = Some { desc = BuiltinType Bool }}}};
+        { desc = { name = "i"; kind = NonType {
+            qual_type = { desc = BuiltinType Int };
+            default = Some { desc = IntegerLiteral (Int 4)}}}}];
       decl = { desc = RecordDecl {
         keyword = Class;
         name = "C";
@@ -1844,7 +1853,8 @@ let () =
       name = "C";
       fields = [
         { desc = Template {
-            parameters = [{ desc = { name = "X"; kind = Class }}];
+            parameters = [
+              { desc = { name = "X"; kind = Class { default = None }}}];
             decl = { desc = CXXMethod {
               type_ref = None;
               function_type = {
@@ -1854,7 +1864,7 @@ let () =
               name = "f";
               body = None; }}}}] }};
      { desc = Template {
-         parameters = [{ desc = { name = "X"; kind = Class }}];
+         parameters = [{ desc = { name = "X"; kind = Class { default = None }}}];
          decl = { desc = CXXMethod {
            type_ref = Some { desc = Record "C" };
            function_type = {
@@ -2620,8 +2630,8 @@ and template_parameter_desc = {
   }
 
 and template_parameter_kind =
-  | Class
-  | NonType of qual_type
+  | Class of { default : qual_type option }
+  | NonType of { qual_type : qual_type; default : expr option }
 
 (** {3 Translation units} *)
 
