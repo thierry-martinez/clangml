@@ -7051,3 +7051,19 @@ clang_ext_LinkageSpecDecl_getLanguageIDs_wrapper(value C_ocaml)
   }
 }
 
+CAMLprim value
+clang_ext_TemplateTypeParmDecl_getDefaultArgument_wrapper(value C_ocaml)
+{
+  CAMLparam1(C_ocaml);
+  CXCursor C;
+  C = Cxcursor_val(Field(C_ocaml, 0));
+  CXType result = clang_ext_TemplateTypeParmDecl_getDefaultArgument(C);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxtype(result));
+  Store_field(data, 1, safe_field(C_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+

@@ -1825,3 +1825,6 @@ end
 external ext_linkage_spec_decl_get_language_ids :
   cxcursor -> Clang_ext_languageids.t =
     "clang_ext_LinkageSpecDecl_getLanguageIDs_wrapper"
+external ext_template_type_parm_decl_get_default_argument :
+  cxcursor -> cxtype =
+    "clang_ext_TemplateTypeParmDecl_getDefaultArgument_wrapper"
