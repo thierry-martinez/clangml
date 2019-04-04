@@ -2108,7 +2108,7 @@ let main cflags llvm_config prefix =
     add_function (Pcre.regexp "^clang_compare_")
       (empty_function_interface |>
         dont_label_unique) |>
-    add_enum (Pcre.regexp "^CXLinkageKind$|^CXTypeKind$|^CXCallingConv$|^CX_CXXAccessSpecifier$|^clang_ext_UnaryOperatorKind$|^clang_ext_BinaryOperatorKind$|^clang_ext_ElaboratedTypeKeyword$|^clang_ext_CharacterKind$|^clang_ext_UnaryExpr$|^clang_ext_AttrKind$")
+    add_enum (Pcre.regexp "^CXLinkageKind$|^CXTypeKind$|^CXCallingConv$|^CX_CXXAccessSpecifier$|^CXTemplateArgumentKind$|^clang_ext_UnaryOperatorKind$|^clang_ext_BinaryOperatorKind$|^clang_ext_ElaboratedTypeKeyword$|^clang_ext_CharacterKind$|^clang_ext_UnaryExpr$|^clang_ext_AttrKind$|^clang_ext_TypeKind$")
       (empty_enum_interface |>
         add_attributes [(loc "deriving", PStr [pstr_eval (pexp_tuple (["eq"; "ord"; "show"] |> List.map @@ fun plugin -> pexp_ident (loc (Longident.Lident plugin))))])]) |>
     add_enum (Pcre.regexp "^CXErrorCode$")

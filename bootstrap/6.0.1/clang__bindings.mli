@@ -1288,6 +1288,7 @@ type cxtemplateargumentkind =
   | Expression 
   | Pack 
   | Invalid [@@ocaml.doc "Describes the kind of a template argument."]
+[@@deriving (eq, ord, show)]
 external cursor_get_template_argument_kind :
   cxcursor -> int -> cxtemplateargumentkind =
     "clang_Cursor_getTemplateArgumentKind_wrapper"[@@ocaml.doc
@@ -1938,11 +1939,53 @@ external ext_get_cursor_kind :
   cxcursor -> clang_ext_cursorkind = "clang_ext_GetCursorKind_wrapper"
 type clang_ext_typekind =
   | Invalid 
+  | Builtin 
+  | Complex 
+  | Pointer 
+  | BlockPointer 
+  | LValueReference 
+  | RValueReference 
+  | MemberPointer 
+  | ConstantArray 
+  | IncompleteArray 
+  | VariableArray 
+  | DependentSizedArray 
+  | DependentSizedExtVector 
+  | DependentAddressSpace 
+  | Vector 
+  | ExtVector 
+  | FunctionProto 
+  | FunctionNoProto 
+  | UnresolvedUsing 
   | Paren 
+  | Typedef 
+  | Adjusted 
+  | Decayed 
+  | TypeOfExpr 
+  | TypeOf 
+  | Decltype 
+  | UnaryTransform 
+  | Record 
+  | Enum 
   | Elaborated 
   | Attributed 
   | TemplateTypeParm 
-  | Unknown 
+  | SubstTemplateTypeParm 
+  | SubstTemplateTypeParmPack 
+  | TemplateSpecialization 
+  | Auto 
+  | DeducedTemplateSpecialization 
+  | InjectedClassName 
+  | DependentName 
+  | DependentTemplateSpecialization 
+  | PackExpansion 
+  | ObjCTypeParam 
+  | ObjCObject 
+  | ObjCInterface 
+  | ObjCObjectPointer 
+  | Pipe 
+  | Atomic 
+  | Unknown [@@deriving (eq, ord, show)]
 external ext_get_type_kind :
   cxtype -> clang_ext_typekind = "clang_ext_GetTypeKind_wrapper"
 external ext_get_inner_type :
