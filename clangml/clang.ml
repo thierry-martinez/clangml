@@ -64,6 +64,7 @@ module Ast = struct
     let rec of_cxtype cxtype =
       let desc =
         match get_type_kind cxtype with
+        | Invalid -> InvalidType
         | ConstantArray ->
             let element = cxtype |> get_array_element_type |> of_cxtype in
             let size = cxtype |> get_array_size in
@@ -120,7 +121,8 @@ module Ast = struct
                   }
               | TemplateTypeParm ->
                   TemplateTypeParm (get_type_spelling cxtype);
-              | _ -> BuiltinType (get_type_kind cxtype)
+              | Builtin -> BuiltinType (get_type_kind cxtype)
+              | kind -> UnexposedType kind
             end in
       match desc with
       | ParenType inner when Options.options.ignore_paren_in_types ->

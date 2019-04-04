@@ -561,6 +561,8 @@ let () =
       qual_type = { desc = BuiltinType Bool}}} -> ()
   | _ -> assert false
     ]}*)
+  | UnexposedType of (clang_ext_typekind [@visitors.opaque])
+  | InvalidType
 
 (** Function type. *)
 and function_type = {
