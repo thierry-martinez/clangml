@@ -5180,27 +5180,101 @@ enum clang_ext_TypeKind
 Clang_ext_typekind_val(value ocaml)
 {
   switch (Int_val(ocaml)) {
-  case 0: return ETK_Invalid;
-  case 1: return ETK_Paren;
-  case 2: return ETK_Elaborated;
-  case 3: return ETK_Attributed;
-  case 4: return ETK_TemplateTypeParm;
-  case 5: return ETK_Unknown;
+  case 0: return CLANG_EXT_TYPE_Invalid;
+  case 1: return CLANG_EXT_TYPE_Builtin;
+  case 2: return CLANG_EXT_TYPE_Complex;
+  case 3: return CLANG_EXT_TYPE_Pointer;
+  case 4: return CLANG_EXT_TYPE_BlockPointer;
+  case 5: return CLANG_EXT_TYPE_LValueReference;
+  case 6: return CLANG_EXT_TYPE_RValueReference;
+  case 7: return CLANG_EXT_TYPE_MemberPointer;
+  case 8: return CLANG_EXT_TYPE_ConstantArray;
+  case 9: return CLANG_EXT_TYPE_IncompleteArray;
+  case 10: return CLANG_EXT_TYPE_VariableArray;
+  case 11: return CLANG_EXT_TYPE_DependentSizedArray;
+  case 12: return CLANG_EXT_TYPE_DependentSizedExtVector;
+  case 13: return CLANG_EXT_TYPE_Vector;
+  case 14: return CLANG_EXT_TYPE_ExtVector;
+  case 15: return CLANG_EXT_TYPE_FunctionProto;
+  case 16: return CLANG_EXT_TYPE_FunctionNoProto;
+  case 17: return CLANG_EXT_TYPE_UnresolvedUsing;
+  case 18: return CLANG_EXT_TYPE_Paren;
+  case 19: return CLANG_EXT_TYPE_Typedef;
+  case 20: return CLANG_EXT_TYPE_Decayed;
+  case 21: return CLANG_EXT_TYPE_TypeOfExpr;
+  case 22: return CLANG_EXT_TYPE_TypeOf;
+  case 23: return CLANG_EXT_TYPE_Decltype;
+  case 24: return CLANG_EXT_TYPE_UnaryTransform;
+  case 25: return CLANG_EXT_TYPE_Record;
+  case 26: return CLANG_EXT_TYPE_Enum;
+  case 27: return CLANG_EXT_TYPE_Elaborated;
+  case 28: return CLANG_EXT_TYPE_Attributed;
+  case 29: return CLANG_EXT_TYPE_TemplateTypeParm;
+  case 30: return CLANG_EXT_TYPE_SubstTemplateTypeParm;
+  case 31: return CLANG_EXT_TYPE_SubstTemplateTypeParmPack;
+  case 32: return CLANG_EXT_TYPE_TemplateSpecialization;
+  case 33: return CLANG_EXT_TYPE_Auto;
+  case 34: return CLANG_EXT_TYPE_InjectedClassName;
+  case 35: return CLANG_EXT_TYPE_DependentName;
+  case 36: return CLANG_EXT_TYPE_DependentTemplateSpecialization;
+  case 37: return CLANG_EXT_TYPE_PackExpansion;
+  case 38: return CLANG_EXT_TYPE_ObjCObject;
+  case 39: return CLANG_EXT_TYPE_ObjCInterface;
+  case 40: return CLANG_EXT_TYPE_ObjCObjectPointer;
+  case 41: return CLANG_EXT_TYPE_Atomic;
+  case 42: return CLANG_EXT_TYPE_Unknown;
   }
   failwith_fmt("invalid value for Clang_ext_typekind_val: %d", Int_val(ocaml));
-  return ETK_Invalid;
+  return CLANG_EXT_TYPE_Invalid;
 }
 
 value
 Val_clang_ext_typekind(enum clang_ext_TypeKind v)
 {
   switch (v) {
-  case ETK_Invalid: return Val_int(0);
-  case ETK_Paren: return Val_int(1);
-  case ETK_Elaborated: return Val_int(2);
-  case ETK_Attributed: return Val_int(3);
-  case ETK_TemplateTypeParm: return Val_int(4);
-  case ETK_Unknown: return Val_int(5);
+  case CLANG_EXT_TYPE_Invalid: return Val_int(0);
+  case CLANG_EXT_TYPE_Builtin: return Val_int(1);
+  case CLANG_EXT_TYPE_Complex: return Val_int(2);
+  case CLANG_EXT_TYPE_Pointer: return Val_int(3);
+  case CLANG_EXT_TYPE_BlockPointer: return Val_int(4);
+  case CLANG_EXT_TYPE_LValueReference: return Val_int(5);
+  case CLANG_EXT_TYPE_RValueReference: return Val_int(6);
+  case CLANG_EXT_TYPE_MemberPointer: return Val_int(7);
+  case CLANG_EXT_TYPE_ConstantArray: return Val_int(8);
+  case CLANG_EXT_TYPE_IncompleteArray: return Val_int(9);
+  case CLANG_EXT_TYPE_VariableArray: return Val_int(10);
+  case CLANG_EXT_TYPE_DependentSizedArray: return Val_int(11);
+  case CLANG_EXT_TYPE_DependentSizedExtVector: return Val_int(12);
+  case CLANG_EXT_TYPE_Vector: return Val_int(13);
+  case CLANG_EXT_TYPE_ExtVector: return Val_int(14);
+  case CLANG_EXT_TYPE_FunctionProto: return Val_int(15);
+  case CLANG_EXT_TYPE_FunctionNoProto: return Val_int(16);
+  case CLANG_EXT_TYPE_UnresolvedUsing: return Val_int(17);
+  case CLANG_EXT_TYPE_Paren: return Val_int(18);
+  case CLANG_EXT_TYPE_Typedef: return Val_int(19);
+  case CLANG_EXT_TYPE_Decayed: return Val_int(20);
+  case CLANG_EXT_TYPE_TypeOfExpr: return Val_int(21);
+  case CLANG_EXT_TYPE_TypeOf: return Val_int(22);
+  case CLANG_EXT_TYPE_Decltype: return Val_int(23);
+  case CLANG_EXT_TYPE_UnaryTransform: return Val_int(24);
+  case CLANG_EXT_TYPE_Record: return Val_int(25);
+  case CLANG_EXT_TYPE_Enum: return Val_int(26);
+  case CLANG_EXT_TYPE_Elaborated: return Val_int(27);
+  case CLANG_EXT_TYPE_Attributed: return Val_int(28);
+  case CLANG_EXT_TYPE_TemplateTypeParm: return Val_int(29);
+  case CLANG_EXT_TYPE_SubstTemplateTypeParm: return Val_int(30);
+  case CLANG_EXT_TYPE_SubstTemplateTypeParmPack: return Val_int(31);
+  case CLANG_EXT_TYPE_TemplateSpecialization: return Val_int(32);
+  case CLANG_EXT_TYPE_Auto: return Val_int(33);
+  case CLANG_EXT_TYPE_InjectedClassName: return Val_int(34);
+  case CLANG_EXT_TYPE_DependentName: return Val_int(35);
+  case CLANG_EXT_TYPE_DependentTemplateSpecialization: return Val_int(36);
+  case CLANG_EXT_TYPE_PackExpansion: return Val_int(37);
+  case CLANG_EXT_TYPE_ObjCObject: return Val_int(38);
+  case CLANG_EXT_TYPE_ObjCInterface: return Val_int(39);
+  case CLANG_EXT_TYPE_ObjCObjectPointer: return Val_int(40);
+  case CLANG_EXT_TYPE_Atomic: return Val_int(41);
+  case CLANG_EXT_TYPE_Unknown: return Val_int(42);
   }
   failwith_fmt("invalid value for Val_clang_ext_typekind: %d", v);
   return Val_int(0);

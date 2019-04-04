@@ -1551,11 +1551,48 @@ external ext_get_cursor_kind :
   cxcursor -> clang_ext_cursorkind = "clang_ext_GetCursorKind_wrapper"
 type clang_ext_typekind =
   | Invalid 
+  | Builtin 
+  | Complex 
+  | Pointer 
+  | BlockPointer 
+  | LValueReference 
+  | RValueReference 
+  | MemberPointer 
+  | ConstantArray 
+  | IncompleteArray 
+  | VariableArray 
+  | DependentSizedArray 
+  | DependentSizedExtVector 
+  | Vector 
+  | ExtVector 
+  | FunctionProto 
+  | FunctionNoProto 
+  | UnresolvedUsing 
   | Paren 
+  | Typedef 
+  | Decayed 
+  | TypeOfExpr 
+  | TypeOf 
+  | Decltype 
+  | UnaryTransform 
+  | Record 
+  | Enum 
   | Elaborated 
   | Attributed 
   | TemplateTypeParm 
-  | Unknown 
+  | SubstTemplateTypeParm 
+  | SubstTemplateTypeParmPack 
+  | TemplateSpecialization 
+  | Auto 
+  | InjectedClassName 
+  | DependentName 
+  | DependentTemplateSpecialization 
+  | PackExpansion 
+  | ObjCObject 
+  | ObjCInterface 
+  | ObjCObjectPointer 
+  | Atomic 
+  | Unknown [@@deriving (eq, ord, show)]
 external ext_get_type_kind :
   cxtype -> clang_ext_typekind = "clang_ext_GetTypeKind_wrapper"
 external ext_get_inner_type :
