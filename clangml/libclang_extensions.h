@@ -200,12 +200,11 @@ enum clang_ext_CursorKind
 clang_ext_GetCursorKind(CXCursor c);
 
 enum clang_ext_TypeKind {
-  ETK_Invalid,
-  ETK_Paren,
-  ETK_Elaborated, /* for Clang <3.9.0 */
-  ETK_Attributed, /* for Clang <8.0.0 */
-  ETK_TemplateTypeParm,
-  ETK_Unknown
+  CLANG_EXT_TYPE_Invalid,
+  #define TYPE(Class, Base) CLANG_EXT_TYPE_##Class,
+  #define ABSTRACT_TYPE(Class, Base)
+  #include <clang/AST/TypeNodes.def>
+  CLANG_EXT_TYPE_Unknown
 };
 
 enum clang_ext_TypeKind

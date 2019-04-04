@@ -724,18 +724,16 @@ extern "C" {
   {
     clang::QualType T = GetQualType(c);
     if (auto TP = T.getTypePtrOrNull()) {
-      #define CASE(X) case clang::Type::X: return ETK_##X
       switch (TP->getTypeClass()) {
-      CASE(Paren);
-      CASE(Elaborated); /* For Clang <3.9.0 */
-      CASE(Attributed); /* For Clang <8.0.0 */
-      CASE(TemplateTypeParm);
+      #define TYPE(Class, Base) case clang::Type::Class: return CLANG_EXT_TYPE_##Class;
+      #define ABSTRACT_TYPE(Class, Base)
+      #include <clang/AST/TypeNodes.def>
       default:
-        return ETK_Unknown;
+        return CLANG_EXT_TYPE_Unknown;
       }
       #undef CASE
     }
-    return ETK_Invalid;
+    return CLANG_EXT_TYPE_Invalid;
   }
 
   CXType
