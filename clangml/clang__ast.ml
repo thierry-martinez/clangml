@@ -138,6 +138,8 @@ and calling_conv = cxcallingconv [@visitors.opaque]
 
 and linkage_kind = cxlinkagekind [@visitors.opaque]
 
+and template_argument_kind = cxtemplateargumentkind [@visitors.opaque]
+
 and integer_literal =
   | Int of int
   | CXInt of (cxint [@visitors.opaque] [@quote.opaque])
@@ -549,6 +551,10 @@ let () =
 
 *)
   | TemplateTypeParm of string
+  | TemplateSpecialization of {
+      name : template_name;
+      arguments : template_argument list;
+    }
   | BuiltinType of builtin_type
 (** Built-in type.
     {[
@@ -563,6 +569,25 @@ let () =
     ]}*)
   | UnexposedType of (clang_ext_typekind [@visitors.opaque])
   | InvalidType
+
+and template_name =
+  | NameTemplate of decl
+  | OverloadedTemplate
+  | QualifiedTemplate
+  | DependentTemplate
+  | SubstTemplateTemplateParm
+  | SubstTemplateTemplateParmPack
+  | InvalidNameKind
+
+and template_argument =
+  | Type of qual_type
+  | ArgumentDecl of decl
+  | NullPtr of qual_type
+  | TemplateTemplateArgument of template_name
+  | TemplateExpansion of template_name
+  | Integral of { value : integer_literal; qual_type : qual_type }
+  | NonTypeTemplateArgument of qual_type
+  | ExprTemplateArgument of expr
 
 (** Function type. *)
 and function_type = {
@@ -1777,7 +1802,7 @@ and unary_expr_or_type_trait =
 and decl = (decl_desc, qual_type) open_node
 
 and decl_desc =
-  | Template of {
+  | TemplateDecl of {
       parameters : template_parameter list;
       decl : decl;
     }
@@ -1789,7 +1814,7 @@ let example = {| template <class X, int i> int f(X); |}
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
   fun ast -> match ast with
-  | [{ desc = Template {
+  | [{ desc = TemplateDecl {
       parameters = [
         { desc = { name = "X"; kind = Class { default = None }}};
         { desc = { name = "i"; kind = NonType {
@@ -1815,7 +1840,7 @@ let example = {|
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
   fun ast -> match ast with
-  | [{ desc = Template {
+  | [{ desc = TemplateDecl {
       parameters = [
         { desc = {
             name = "X";
@@ -1854,7 +1879,7 @@ let () =
       keyword = Class;
       name = "C";
       fields = [
-        { desc = Template {
+        { desc = TemplateDecl {
             parameters = [
               { desc = { name = "X"; kind = Class { default = None }}}];
             decl = { desc = CXXMethod {
@@ -1865,7 +1890,7 @@ let () =
                   { desc = { name = "x"; qual_type = { desc = TemplateTypeParm "X" }}}] }};
               name = "f";
               body = None; }}}}] }};
-     { desc = Template {
+     { desc = TemplateDecl {
          parameters = [{ desc = { name = "X"; kind = Class { default = None }}}];
          decl = { desc = CXXMethod {
            type_ref = Some { desc = Record "C" };
@@ -2586,6 +2611,7 @@ let () =
                body = Some { desc = Compound [] }}}] }}] -> ()
   | _ -> assert false
    ]}*)
+  | TemplateTemplateParameter of string
   | EmptyDecl
 (**
   Empty declaration.
@@ -2600,7 +2626,7 @@ let () =
   | _ -> assert false
     ]}
 *)
-  | OtherDecl
+  | UnknownDecl of (cxcursorkind [@visitors.opaque]) * (clang_ext_declkind [@visitors.opaque])
 
 and label_ref = string
 
@@ -2632,8 +2658,115 @@ and template_parameter_desc = {
   }
 
 and template_parameter_kind =
-  | Class of { default : qual_type option }
-  | NonType of { qual_type : qual_type; default : expr option }
+  | Class of {
+      default : qual_type option;
+    }
+(** Class (or typename) template parameter.
+
+    {[
+let example = {|
+  template <class X, typename Y = bool>
+  class C { X x; Y y; };
+|}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  fun ast -> match ast with
+  | [{ desc = TemplateDecl {
+      parameters = [
+        { desc = {
+            name = "X";
+            kind = Class { default = None }}};
+        { desc = {
+            name = "Y";
+            kind = Class { default = Some { desc = BuiltinType Bool }}}}];
+      decl = { desc = RecordDecl {
+        keyword = Class;
+        name = "C";
+        fields = [
+          { desc = Field {
+              name = "x";
+              qual_type = { desc = TemplateTypeParm "X" }}};
+          { desc = Field {
+              name = "y";
+              qual_type = { desc = TemplateTypeParm "Y" }}}] }}}}] -> ()
+  | _ -> assert false
+    ]}*)
+  | NonType of {
+      qual_type : qual_type;
+      default : expr option;
+    }
+(** Non type template parameter.
+
+    {[
+let example = {|
+  template <int i = 4>
+  class C { int v = i; };
+|}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  fun ast -> match ast with
+  | [{ desc = TemplateDecl {
+      parameters = [
+        { desc = { name = "i"; kind = NonType {
+            qual_type = { desc = BuiltinType Int };
+            default = Some { desc = IntegerLiteral (Int 4)}}}}];
+      decl = { desc = RecordDecl {
+        keyword = Class;
+        name = "C";
+        fields = [
+          { desc = Field {
+              name = "v";
+              qual_type = { desc = BuiltinType Int }}}] }}}}] -> ()
+  | _ -> assert false
+    ]}*)
+  | Template of { 
+      parameters : template_parameter list;
+      default : string option;
+    }
+(** Template template parameter.
+
+    {[
+let example = {|
+  template<typename T> class Default {};
+
+  template <template<typename> class T = Default>
+  class C {
+    T<bool> x;
+    T<int> y;
+  };
+|}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  fun ast -> match ast with
+  | [{ desc = TemplateDecl {
+       parameters = [{ desc = { name = "T"; kind = Class { default = None }}}];
+       decl = { desc = RecordDecl {
+         keyword = Class;
+         name = "Default";
+         fields = [] }}}};
+     { desc = TemplateDecl {
+       parameters = [{ desc = { name = "T"; kind = Template {
+         parameters = [{ desc = { name = ""; kind = Class { default = None }}}];
+         default = Some "Default" }}}];
+       decl = { desc = RecordDecl {
+         keyword = Class;
+         name = "C";
+         fields = [
+           { desc = Field {
+               name = "x";
+               qual_type = { desc = TemplateSpecialization {
+                 name = NameTemplate { desc = TemplateTemplateParameter "T" };
+                 arguments = [Type { desc = BuiltinType Bool }] }}}};
+           { desc = Field {
+               name = "y";
+               qual_type = { desc = TemplateSpecialization {
+                 name = NameTemplate { desc = TemplateTemplateParameter "T" };
+                 arguments = [Type { desc = BuiltinType Int }] }}}}] }}}}] -> ()
+  | _ -> assert false
+    ]}*)
 
 (** {3 Translation units} *)
 

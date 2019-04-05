@@ -61,7 +61,63 @@ module Ast = struct
         | UnexposedAttr -> false
         | _ -> true
 
-    let rec of_cxtype cxtype =
+    let make_integer_literal i =
+      if Options.options.convert_integer_literals then
+        match int_of_cxint_opt i with
+        | None -> CXInt i
+        | Some i -> Int i
+      else
+        CXInt i
+
+    let rec make_template_name name =
+      match ext_template_name_get_kind name with
+      | Template ->
+          NameTemplate (
+            decl_of_cxcursor (ext_template_name_get_as_template_decl name))
+      | OverloadedTemplate -> OverloadedTemplate
+      | QualifiedTemplate -> QualifiedTemplate
+      | DependentTemplate -> DependentTemplate
+      | SubstTemplateTemplateParm -> SubstTemplateTemplateParm
+      | SubstTemplateTemplateParmPack -> SubstTemplateTemplateParmPack
+      | InvalidNameKind -> InvalidNameKind
+
+    and make_template_argument argument =
+      match ext_template_argument_get_kind argument with
+      | Type ->
+          Type (
+            ext_template_argument_get_as_type argument |>
+            of_cxtype)
+      | Declaration ->
+          ArgumentDecl (
+            decl_of_cxcursor
+              (ext_template_argument_get_as_decl argument))
+      | NullPtr ->
+          NullPtr (
+            ext_template_argument_get_null_ptr_type argument |>
+            of_cxtype)
+      | Integral ->
+          Integral {
+            value =
+              ext_template_argument_get_as_integral argument |>
+              make_integer_literal;
+            qual_type =
+              ext_template_argument_get_integral_type argument |>
+              of_cxtype }
+      | Template ->
+          TemplateTemplateArgument (
+            ext_template_argument_get_as_template_or_template_pattern argument |>
+            make_template_name)
+      | TemplateExpansion ->
+          TemplateExpansion (
+            ext_template_argument_get_as_template_or_template_pattern argument |>
+            make_template_name)
+      | Expression ->
+          ExprTemplateArgument (
+            ext_template_argument_get_as_expr argument |>
+            expr_of_cxcursor)
+      | _ -> raise Invalid_structure
+
+    and of_cxtype cxtype =
       let desc =
         match get_type_kind cxtype with
         | Invalid -> InvalidType
@@ -121,6 +177,18 @@ module Ast = struct
                   }
               | TemplateTypeParm ->
                   TemplateTypeParm (get_type_spelling cxtype);
+              | TemplateSpecialization ->
+                  let name =
+                    cxtype |>
+                    ext_template_specialization_type_get_template_name |>
+                    make_template_name in
+                  let arguments =
+                    List.init
+                      (ext_template_specialization_type_get_num_args cxtype)
+                    @@ fun i ->
+                      ext_template_specialization_type_get_argument cxtype i |>
+                      make_template_argument in
+                  TemplateSpecialization { name; arguments }
               | Builtin -> BuiltinType (get_type_kind cxtype)
               | kind -> UnexposedType kind
             end in
@@ -200,16 +268,16 @@ module Ast = struct
               end
           | UnexposedDecl ->
               begin
-                match ext_get_cursor_kind cursor with
-                | EmptyDecl -> EmptyDecl
-                | LinkageSpecDecl ->
+                match ext_decl_get_kind cursor with
+                | Empty -> EmptyDecl
+                | LinkageSpec ->
                     let languages =
                       languages_of_ids
                         (ext_linkage_spec_decl_get_language_ids cursor) in
                   let decls =
                     list_of_children cursor |> List.map decl_of_cxcursor in
                   LinkageSpec { languages; decls }
-                | _ -> OtherDecl
+                | kind -> UnknownDecl (UnexposedDecl, kind)
               end
           | Constructor ->
               let children = list_of_children cursor in
@@ -251,8 +319,11 @@ module Ast = struct
                 defaulted = ext_cxxmethod_is_defaulted cursor;
                 deleted = ext_function_decl_is_deleted cursor;
             }
-          | _ -> OtherDecl
-      with Invalid_structure -> OtherDecl
+          | TemplateTemplateParameter ->
+              TemplateTemplateParameter (get_cursor_spelling cursor)
+          | kind -> UnknownDecl (kind, ext_decl_get_kind cursor)
+      with Invalid_structure ->
+        UnknownDecl (get_cursor_kind cursor, ext_decl_get_kind cursor)
 
     and parameters_of_function_decl cursor =
       { non_variadic =
@@ -551,7 +622,7 @@ module Ast = struct
           | _ -> Decl [node ~cursor (decl_desc_of_cxcursor cursor)]
         with Invalid_structure -> OtherStmt in
       match desc with
-      | Decl [{ desc = OtherDecl }] ->
+      | Decl [{ desc = UnknownDecl _ }] ->
           let expr = expr_of_cxcursor cursor in
           node ~decoration:expr.decoration (Expr expr)
       | _ -> node ~cursor desc
@@ -570,12 +641,7 @@ module Ast = struct
         match get_cursor_kind cursor with
         | IntegerLiteral ->
             let i = ext_integer_literal_get_value cursor in
-            let literal =
-              if Options.options.convert_integer_literals then
-                match int_of_cxint_opt i with
-                | None -> CXInt i
-                | Some i -> Int i
-              else CXInt i in
+            let literal = make_integer_literal i in
             IntegerLiteral literal
         | FloatingLiteral ->
             let f = ext_floating_literal_get_value cursor in
@@ -714,7 +780,7 @@ module Ast = struct
       let rec extract_template_parameters accu children =
         match
           match children with
-          | [] -> (None : 'a option), []
+          | [] -> (None : template_parameter option), []
           | cursor :: tl ->
               match
                 match get_cursor_kind cursor with
@@ -734,11 +800,22 @@ module Ast = struct
                       | [default] -> Some (default |> expr_of_cxcursor)
                       | _ -> raise Invalid_structure in
                     Some (NonType { qual_type; default })
+                | TemplateTemplateParameter ->
+                    let parameters, others =
+                      extract_template_parameters []
+                        (list_of_children cursor) in
+                    let default : 'a option =
+                      match others with
+                      | [] -> None
+                      | [default] -> Some (get_cursor_spelling default)
+                      | _ -> raise Invalid_structure in
+                    Some (Template { parameters; default })
                 | _ -> None
               with
               | None -> None, children
               | Some kind ->
-              Some (node ~cursor { name = get_cursor_spelling cursor; kind}), tl
+                  Some (
+                    node ~cursor { name = get_cursor_spelling cursor; kind}), tl
         with
         | None, tl -> List.rev accu, tl
         | Some parameter, tl ->
@@ -748,7 +825,7 @@ module Ast = struct
       let decl = make_body others in
       match parameters with
       | [] -> decl
-      | _ -> Template { parameters; decl = node ~cursor decl }
+      | _ -> TemplateDecl { parameters; decl = node ~cursor decl }
 
     let translation_unit_of_cxcursor cursor =
       let filename = get_cursor_spelling cursor in

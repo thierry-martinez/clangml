@@ -803,6 +803,7 @@ type cxcursorkind =
   | FriendDecl [@ocaml.doc "a friend declaration."]
   | OverloadCandidate [@ocaml.doc "A code completion overload candidate."]
 [@@ocaml.doc "Describes the kind of entity that a cursor refers to."]
+[@@deriving (eq, ord, show)]
 type cxcursor[@@ocaml.doc
                "A cursor representing some element in the abstract syntax tree for a translation unit."]
 external get_null_cursor : unit -> cxcursor = "clang_getNullCursor_wrapper"
@@ -1911,6 +1912,84 @@ type clang_ext_cursorkind =
   | Unknown 
 external ext_get_cursor_kind :
   cxcursor -> clang_ext_cursorkind = "clang_ext_GetCursorKind_wrapper"
+type clang_ext_declkind =
+  | Invalid 
+  | AccessSpec 
+  | Block 
+  | Captured 
+  | ClassScopeFunctionSpecialization 
+  | Empty 
+  | Export 
+  | ExternCContext 
+  | FileScopeAsm 
+  | Friend 
+  | FriendTemplate 
+  | Import 
+  | LinkageSpec 
+  | Label 
+  | Namespace 
+  | NamespaceAlias 
+  | ObjCCompatibleAlias 
+  | ObjCCategory 
+  | ObjCCategoryImpl 
+  | ObjCImplementation 
+  | ObjCInterface 
+  | ObjCProtocol 
+  | ObjCMethod 
+  | ObjCProperty 
+  | BuiltinTemplate 
+  | ClassTemplate 
+  | FunctionTemplate 
+  | TypeAliasTemplate 
+  | VarTemplate 
+  | TemplateTemplateParm 
+  | Enum 
+  | Record 
+  | CXXRecord 
+  | ClassTemplateSpecialization 
+  | ClassTemplatePartialSpecialization 
+  | TemplateTypeParm 
+  | ObjCTypeParam 
+  | TypeAlias 
+  | Typedef 
+  | UnresolvedUsingTypename 
+  | Using 
+  | UsingDirective 
+  | UsingPack 
+  | UsingShadow 
+  | ConstructorUsingShadow 
+  | Binding 
+  | Field 
+  | ObjCAtDefsField 
+  | ObjCIvar 
+  | Function 
+  | CXXDeductionGuide 
+  | CXXMethod 
+  | CXXConstructor 
+  | CXXConversion 
+  | CXXDestructor 
+  | MSProperty 
+  | NonTypeTemplateParm 
+  | Var 
+  | Decomposition 
+  | ImplicitParam 
+  | OMPCapturedExpr 
+  | ParmVar 
+  | VarTemplateSpecialization 
+  | VarTemplatePartialSpecialization 
+  | EnumConstant 
+  | IndirectField 
+  | OMPDeclareReduction 
+  | UnresolvedUsingValue 
+  | OMPThreadPrivate 
+  | ObjCPropertyImpl 
+  | PragmaComment 
+  | PragmaDetectMismatch 
+  | StaticAssert 
+  | TranslationUnit 
+  | Unknown [@@deriving (eq, ord, show)]
+external ext_decl_get_kind :
+  cxcursor -> clang_ext_declkind = "clang_ext_Decl_GetKind_wrapper"
 type clang_ext_typekind =
   | Invalid 
   | Builtin 
@@ -2246,3 +2325,51 @@ external ext_linkage_spec_decl_get_language_ids :
 external ext_template_type_parm_decl_get_default_argument :
   cxcursor -> cxtype =
     "clang_ext_TemplateTypeParmDecl_getDefaultArgument_wrapper"
+type clang_ext_templatename_namekind =
+  | Template 
+  | OverloadedTemplate 
+  | QualifiedTemplate 
+  | DependentTemplate 
+  | SubstTemplateTemplateParm 
+  | SubstTemplateTemplateParmPack 
+  | InvalidNameKind 
+type clang_ext_templatename
+external ext_template_name_get_kind :
+  clang_ext_templatename -> clang_ext_templatename_namekind =
+    "clang_ext_TemplateName_getKind_wrapper"
+external ext_template_name_get_as_template_decl :
+  clang_ext_templatename -> cxcursor =
+    "clang_ext_TemplateName_getAsTemplateDecl_wrapper"
+type clang_ext_templateargument
+external ext_template_argument_get_kind :
+  clang_ext_templateargument -> cxtemplateargumentkind =
+    "clang_ext_TemplateArgument_getKind_wrapper"
+external ext_template_argument_get_as_type :
+  clang_ext_templateargument -> cxtype =
+    "clang_ext_TemplateArgument_getAsType_wrapper"
+external ext_template_argument_get_as_decl :
+  clang_ext_templateargument -> cxcursor =
+    "clang_ext_TemplateArgument_getAsDecl_wrapper"
+external ext_template_argument_get_null_ptr_type :
+  clang_ext_templateargument -> cxtype =
+    "clang_ext_TemplateArgument_getNullPtrType_wrapper"
+external ext_template_argument_get_as_template_or_template_pattern :
+  clang_ext_templateargument -> clang_ext_templatename =
+    "clang_ext_TemplateArgument_getAsTemplateOrTemplatePattern_wrapper"
+external ext_template_argument_get_as_integral :
+  clang_ext_templateargument -> cxint =
+    "clang_ext_TemplateArgument_getAsIntegral_wrapper"
+external ext_template_argument_get_integral_type :
+  clang_ext_templateargument -> cxtype =
+    "clang_ext_TemplateArgument_getIntegralType_wrapper"
+external ext_template_argument_get_as_expr :
+  clang_ext_templateargument -> cxcursor =
+    "clang_ext_TemplateArgument_getAsExpr_wrapper"
+external ext_template_specialization_type_get_template_name :
+  cxtype -> clang_ext_templatename =
+    "clang_ext_TemplateSpecializationType_getTemplateName_wrapper"
+external ext_template_specialization_type_get_num_args :
+  cxtype -> int = "clang_ext_TemplateSpecializationType_getNumArgs_wrapper"
+external ext_template_specialization_type_get_argument :
+  cxtype -> int -> clang_ext_templateargument =
+    "clang_ext_TemplateSpecializationType_getArgument_wrapper"
