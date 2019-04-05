@@ -5845,6 +5845,186 @@ clang_ext_GetCursorKind_wrapper(value c_ocaml)
   }
 }
 
+enum clang_ext_DeclKind
+Clang_ext_declkind_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CLANG_EXT_DECL_Invalid;
+  case 1: return CLANG_EXT_DECL_AccessSpec;
+  case 2: return CLANG_EXT_DECL_Block;
+  case 3: return CLANG_EXT_DECL_Captured;
+  case 4: return CLANG_EXT_DECL_ClassScopeFunctionSpecialization;
+  case 5: return CLANG_EXT_DECL_Empty;
+  case 6: return CLANG_EXT_DECL_Export;
+  case 7: return CLANG_EXT_DECL_ExternCContext;
+  case 8: return CLANG_EXT_DECL_FileScopeAsm;
+  case 9: return CLANG_EXT_DECL_Friend;
+  case 10: return CLANG_EXT_DECL_FriendTemplate;
+  case 11: return CLANG_EXT_DECL_Import;
+  case 12: return CLANG_EXT_DECL_LinkageSpec;
+  case 13: return CLANG_EXT_DECL_Label;
+  case 14: return CLANG_EXT_DECL_Namespace;
+  case 15: return CLANG_EXT_DECL_NamespaceAlias;
+  case 16: return CLANG_EXT_DECL_ObjCCompatibleAlias;
+  case 17: return CLANG_EXT_DECL_ObjCCategory;
+  case 18: return CLANG_EXT_DECL_ObjCCategoryImpl;
+  case 19: return CLANG_EXT_DECL_ObjCImplementation;
+  case 20: return CLANG_EXT_DECL_ObjCInterface;
+  case 21: return CLANG_EXT_DECL_ObjCProtocol;
+  case 22: return CLANG_EXT_DECL_ObjCMethod;
+  case 23: return CLANG_EXT_DECL_ObjCProperty;
+  case 24: return CLANG_EXT_DECL_BuiltinTemplate;
+  case 25: return CLANG_EXT_DECL_ClassTemplate;
+  case 26: return CLANG_EXT_DECL_FunctionTemplate;
+  case 27: return CLANG_EXT_DECL_TypeAliasTemplate;
+  case 28: return CLANG_EXT_DECL_VarTemplate;
+  case 29: return CLANG_EXT_DECL_TemplateTemplateParm;
+  case 30: return CLANG_EXT_DECL_Enum;
+  case 31: return CLANG_EXT_DECL_Record;
+  case 32: return CLANG_EXT_DECL_CXXRecord;
+  case 33: return CLANG_EXT_DECL_ClassTemplateSpecialization;
+  case 34: return CLANG_EXT_DECL_ClassTemplatePartialSpecialization;
+  case 35: return CLANG_EXT_DECL_TemplateTypeParm;
+  case 36: return CLANG_EXT_DECL_ObjCTypeParam;
+  case 37: return CLANG_EXT_DECL_TypeAlias;
+  case 38: return CLANG_EXT_DECL_Typedef;
+  case 39: return CLANG_EXT_DECL_UnresolvedUsingTypename;
+  case 40: return CLANG_EXT_DECL_Using;
+  case 41: return CLANG_EXT_DECL_UsingDirective;
+  case 42: return CLANG_EXT_DECL_UsingPack;
+  case 43: return CLANG_EXT_DECL_UsingShadow;
+  case 44: return CLANG_EXT_DECL_ConstructorUsingShadow;
+  case 45: return CLANG_EXT_DECL_Binding;
+  case 46: return CLANG_EXT_DECL_Field;
+  case 47: return CLANG_EXT_DECL_ObjCAtDefsField;
+  case 48: return CLANG_EXT_DECL_ObjCIvar;
+  case 49: return CLANG_EXT_DECL_Function;
+  case 50: return CLANG_EXT_DECL_CXXMethod;
+  case 51: return CLANG_EXT_DECL_CXXConstructor;
+  case 52: return CLANG_EXT_DECL_CXXConversion;
+  case 53: return CLANG_EXT_DECL_CXXDestructor;
+  case 54: return CLANG_EXT_DECL_MSProperty;
+  case 55: return CLANG_EXT_DECL_NonTypeTemplateParm;
+  case 56: return CLANG_EXT_DECL_Var;
+  case 57: return CLANG_EXT_DECL_Decomposition;
+  case 58: return CLANG_EXT_DECL_ImplicitParam;
+  case 59: return CLANG_EXT_DECL_OMPCapturedExpr;
+  case 60: return CLANG_EXT_DECL_ParmVar;
+  case 61: return CLANG_EXT_DECL_VarTemplateSpecialization;
+  case 62: return CLANG_EXT_DECL_VarTemplatePartialSpecialization;
+  case 63: return CLANG_EXT_DECL_EnumConstant;
+  case 64: return CLANG_EXT_DECL_IndirectField;
+  case 65: return CLANG_EXT_DECL_OMPDeclareReduction;
+  case 66: return CLANG_EXT_DECL_UnresolvedUsingValue;
+  case 67: return CLANG_EXT_DECL_OMPThreadPrivate;
+  case 68: return CLANG_EXT_DECL_ObjCPropertyImpl;
+  case 69: return CLANG_EXT_DECL_PragmaComment;
+  case 70: return CLANG_EXT_DECL_PragmaDetectMismatch;
+  case 71: return CLANG_EXT_DECL_StaticAssert;
+  case 72: return CLANG_EXT_DECL_TranslationUnit;
+  case 73: return CLANG_EXT_DECL_Unknown;
+  }
+  failwith_fmt("invalid value for Clang_ext_declkind_val: %d", Int_val(ocaml));
+  return CLANG_EXT_DECL_Invalid;
+}
+
+value
+Val_clang_ext_declkind(enum clang_ext_DeclKind v)
+{
+  switch (v) {
+  case CLANG_EXT_DECL_Invalid: return Val_int(0);
+  case CLANG_EXT_DECL_AccessSpec: return Val_int(1);
+  case CLANG_EXT_DECL_Block: return Val_int(2);
+  case CLANG_EXT_DECL_Captured: return Val_int(3);
+  case CLANG_EXT_DECL_ClassScopeFunctionSpecialization: return Val_int(4);
+  case CLANG_EXT_DECL_Empty: return Val_int(5);
+  case CLANG_EXT_DECL_Export: return Val_int(6);
+  case CLANG_EXT_DECL_ExternCContext: return Val_int(7);
+  case CLANG_EXT_DECL_FileScopeAsm: return Val_int(8);
+  case CLANG_EXT_DECL_Friend: return Val_int(9);
+  case CLANG_EXT_DECL_FriendTemplate: return Val_int(10);
+  case CLANG_EXT_DECL_Import: return Val_int(11);
+  case CLANG_EXT_DECL_LinkageSpec: return Val_int(12);
+  case CLANG_EXT_DECL_Label: return Val_int(13);
+  case CLANG_EXT_DECL_Namespace: return Val_int(14);
+  case CLANG_EXT_DECL_NamespaceAlias: return Val_int(15);
+  case CLANG_EXT_DECL_ObjCCompatibleAlias: return Val_int(16);
+  case CLANG_EXT_DECL_ObjCCategory: return Val_int(17);
+  case CLANG_EXT_DECL_ObjCCategoryImpl: return Val_int(18);
+  case CLANG_EXT_DECL_ObjCImplementation: return Val_int(19);
+  case CLANG_EXT_DECL_ObjCInterface: return Val_int(20);
+  case CLANG_EXT_DECL_ObjCProtocol: return Val_int(21);
+  case CLANG_EXT_DECL_ObjCMethod: return Val_int(22);
+  case CLANG_EXT_DECL_ObjCProperty: return Val_int(23);
+  case CLANG_EXT_DECL_BuiltinTemplate: return Val_int(24);
+  case CLANG_EXT_DECL_ClassTemplate: return Val_int(25);
+  case CLANG_EXT_DECL_FunctionTemplate: return Val_int(26);
+  case CLANG_EXT_DECL_TypeAliasTemplate: return Val_int(27);
+  case CLANG_EXT_DECL_VarTemplate: return Val_int(28);
+  case CLANG_EXT_DECL_TemplateTemplateParm: return Val_int(29);
+  case CLANG_EXT_DECL_Enum: return Val_int(30);
+  case CLANG_EXT_DECL_Record: return Val_int(31);
+  case CLANG_EXT_DECL_CXXRecord: return Val_int(32);
+  case CLANG_EXT_DECL_ClassTemplateSpecialization: return Val_int(33);
+  case CLANG_EXT_DECL_ClassTemplatePartialSpecialization: return Val_int(34);
+  case CLANG_EXT_DECL_TemplateTypeParm: return Val_int(35);
+  case CLANG_EXT_DECL_ObjCTypeParam: return Val_int(36);
+  case CLANG_EXT_DECL_TypeAlias: return Val_int(37);
+  case CLANG_EXT_DECL_Typedef: return Val_int(38);
+  case CLANG_EXT_DECL_UnresolvedUsingTypename: return Val_int(39);
+  case CLANG_EXT_DECL_Using: return Val_int(40);
+  case CLANG_EXT_DECL_UsingDirective: return Val_int(41);
+  case CLANG_EXT_DECL_UsingPack: return Val_int(42);
+  case CLANG_EXT_DECL_UsingShadow: return Val_int(43);
+  case CLANG_EXT_DECL_ConstructorUsingShadow: return Val_int(44);
+  case CLANG_EXT_DECL_Binding: return Val_int(45);
+  case CLANG_EXT_DECL_Field: return Val_int(46);
+  case CLANG_EXT_DECL_ObjCAtDefsField: return Val_int(47);
+  case CLANG_EXT_DECL_ObjCIvar: return Val_int(48);
+  case CLANG_EXT_DECL_Function: return Val_int(49);
+  case CLANG_EXT_DECL_CXXMethod: return Val_int(50);
+  case CLANG_EXT_DECL_CXXConstructor: return Val_int(51);
+  case CLANG_EXT_DECL_CXXConversion: return Val_int(52);
+  case CLANG_EXT_DECL_CXXDestructor: return Val_int(53);
+  case CLANG_EXT_DECL_MSProperty: return Val_int(54);
+  case CLANG_EXT_DECL_NonTypeTemplateParm: return Val_int(55);
+  case CLANG_EXT_DECL_Var: return Val_int(56);
+  case CLANG_EXT_DECL_Decomposition: return Val_int(57);
+  case CLANG_EXT_DECL_ImplicitParam: return Val_int(58);
+  case CLANG_EXT_DECL_OMPCapturedExpr: return Val_int(59);
+  case CLANG_EXT_DECL_ParmVar: return Val_int(60);
+  case CLANG_EXT_DECL_VarTemplateSpecialization: return Val_int(61);
+  case CLANG_EXT_DECL_VarTemplatePartialSpecialization: return Val_int(62);
+  case CLANG_EXT_DECL_EnumConstant: return Val_int(63);
+  case CLANG_EXT_DECL_IndirectField: return Val_int(64);
+  case CLANG_EXT_DECL_OMPDeclareReduction: return Val_int(65);
+  case CLANG_EXT_DECL_UnresolvedUsingValue: return Val_int(66);
+  case CLANG_EXT_DECL_OMPThreadPrivate: return Val_int(67);
+  case CLANG_EXT_DECL_ObjCPropertyImpl: return Val_int(68);
+  case CLANG_EXT_DECL_PragmaComment: return Val_int(69);
+  case CLANG_EXT_DECL_PragmaDetectMismatch: return Val_int(70);
+  case CLANG_EXT_DECL_StaticAssert: return Val_int(71);
+  case CLANG_EXT_DECL_TranslationUnit: return Val_int(72);
+  case CLANG_EXT_DECL_Unknown: return Val_int(73);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_declkind: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Decl_GetKind_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  enum clang_ext_DeclKind result = clang_ext_Decl_GetKind(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_declkind(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_TypeKind
 Clang_ext_typekind_val(value ocaml)
 {
@@ -6719,6 +6899,250 @@ clang_ext_TemplateTypeParmDecl_getDefaultArgument_wrapper(value C_ocaml)
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
   Store_field(data, 1, safe_field(C_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_TemplateName_NameKind
+Clang_ext_templatename_namekind_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CLANG_EXT_Template;
+  case 1: return CLANG_EXT_OverloadedTemplate;
+  case 2: return CLANG_EXT_QualifiedTemplate;
+  case 3: return CLANG_EXT_DependentTemplate;
+  case 4: return CLANG_EXT_SubstTemplateTemplateParm;
+  case 5: return CLANG_EXT_SubstTemplateTemplateParmPack;
+  case 6: return CLANG_EXT_InvalidNameKind;
+  }
+  failwith_fmt("invalid value for Clang_ext_templatename_namekind_val: %d", Int_val(ocaml));
+  return CLANG_EXT_Template;
+}
+
+value
+Val_clang_ext_templatename_namekind(enum clang_ext_TemplateName_NameKind v)
+{
+  switch (v) {
+  case CLANG_EXT_Template: return Val_int(0);
+  case CLANG_EXT_OverloadedTemplate: return Val_int(1);
+  case CLANG_EXT_QualifiedTemplate: return Val_int(2);
+  case CLANG_EXT_DependentTemplate: return Val_int(3);
+  case CLANG_EXT_SubstTemplateTemplateParm: return Val_int(4);
+  case CLANG_EXT_SubstTemplateTemplateParmPack: return Val_int(5);
+  case CLANG_EXT_InvalidNameKind: return Val_int(6);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_templatename_namekind: %d", v);
+  return Val_int(0);
+}
+
+static void finalize_clang_ext_templatename(value v) {
+  clang_ext_TemplateName_dispose(*((struct clang_ext_TemplateName *) Data_custom_val(v)));;
+}
+DECLARE_OPAQUE(struct clang_ext_TemplateName, clang_ext_templatename, Clang_ext_templatename_val, Val_clang_ext_templatename, finalize_clang_ext_templatename)
+
+CAMLprim value
+clang_ext_TemplateName_getKind_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TemplateName arg;
+  arg = Clang_ext_templatename_val(Field(arg_ocaml, 0));
+  enum clang_ext_TemplateName_NameKind result = clang_ext_TemplateName_getKind(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_templatename_namekind(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TemplateName_getAsTemplateDecl_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TemplateName arg;
+  arg = Clang_ext_templatename_val(Field(arg_ocaml, 0));
+  CXCursor result = clang_ext_TemplateName_getAsTemplateDecl(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+static void finalize_clang_ext_templateargument(value v) {
+  clang_ext_TemplateArgument_dispose(*((struct clang_ext_TemplateArgument *) Data_custom_val(v)));;
+}
+DECLARE_OPAQUE(struct clang_ext_TemplateArgument, clang_ext_templateargument, Clang_ext_templateargument_val, Val_clang_ext_templateargument, finalize_clang_ext_templateargument)
+
+CAMLprim value
+clang_ext_TemplateArgument_getKind_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TemplateArgument arg;
+  arg = Clang_ext_templateargument_val(Field(arg_ocaml, 0));
+  enum CXTemplateArgumentKind result = clang_ext_TemplateArgument_getKind(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_cxtemplateargumentkind(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TemplateArgument_getAsType_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TemplateArgument arg;
+  arg = Clang_ext_templateargument_val(Field(arg_ocaml, 0));
+  CXType result = clang_ext_TemplateArgument_getAsType(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxtype(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TemplateArgument_getAsDecl_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TemplateArgument arg;
+  arg = Clang_ext_templateargument_val(Field(arg_ocaml, 0));
+  CXCursor result = clang_ext_TemplateArgument_getAsDecl(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TemplateArgument_getNullPtrType_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TemplateArgument arg;
+  arg = Clang_ext_templateargument_val(Field(arg_ocaml, 0));
+  CXType result = clang_ext_TemplateArgument_getNullPtrType(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxtype(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TemplateArgument_getAsTemplateOrTemplatePattern_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TemplateArgument arg;
+  arg = Clang_ext_templateargument_val(Field(arg_ocaml, 0));
+  struct clang_ext_TemplateName result = clang_ext_TemplateArgument_getAsTemplateOrTemplatePattern(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_templatename(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TemplateArgument_getAsIntegral_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TemplateArgument arg;
+  arg = Clang_ext_templateargument_val(Field(arg_ocaml, 0));
+  CXInt result = clang_ext_TemplateArgument_getAsIntegral(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_cxint(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TemplateArgument_getIntegralType_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TemplateArgument arg;
+  arg = Clang_ext_templateargument_val(Field(arg_ocaml, 0));
+  CXType result = clang_ext_TemplateArgument_getIntegralType(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxtype(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TemplateArgument_getAsExpr_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TemplateArgument arg;
+  arg = Clang_ext_templateargument_val(Field(arg_ocaml, 0));
+  CXCursor result = clang_ext_TemplateArgument_getAsExpr(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TemplateSpecializationType_getTemplateName_wrapper(value CT_ocaml)
+{
+  CAMLparam1(CT_ocaml);
+  CXType CT;
+  CT = Cxtype_val(Field(CT_ocaml, 0));
+  struct clang_ext_TemplateName result = clang_ext_TemplateSpecializationType_getTemplateName(CT);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_templatename(result));
+  Store_field(data, 1, safe_field(CT_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TemplateSpecializationType_getNumArgs_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXType arg;
+  arg = Cxtype_val(Field(arg_ocaml, 0));
+  unsigned int result = clang_ext_TemplateSpecializationType_getNumArgs(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TemplateSpecializationType_getArgument_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  CXType arg;
+  arg = Cxtype_val(Field(arg_ocaml, 0));
+  unsigned int arg2;
+  arg2 = Int_val(arg2_ocaml);
+  struct clang_ext_TemplateArgument result = clang_ext_TemplateSpecializationType_getArgument(arg, arg2);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_templateargument(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
     CAMLreturn(data);
   }
 }
