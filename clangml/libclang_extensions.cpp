@@ -42,7 +42,7 @@ cxstring_createDup(llvm::StringRef String)
 {
   CXString Result;
   char *Spelling = static_cast<char *>(malloc(String.size() + 1));
-  if (Spelling == NULL) {
+  if (Spelling == nullptr) {
     return cxstring_createRef("");
   }
   memmove(Spelling, String.data(), String.size());
@@ -66,14 +66,14 @@ static CXString cxstring_createDupFromString(std::string &s) {
 
 // Copied from clang source tree: tools/libclang/CXCursor.cpp
 static const clang::Decl *
-getCursorDecl(CXCursor Cursor)
+GetCursorDecl(CXCursor Cursor)
 {
   return static_cast<const clang::Decl *>(Cursor.data[0]);
 }
 
 // Copied from clang source tree: tools/libclang/CXCursor.cpp
 static const clang::Stmt *
-getCursorStmt(CXCursor Cursor)
+GetCursorStmt(CXCursor Cursor)
 {
   if (Cursor.kind == CXCursor_ObjCSuperClassRef ||
       Cursor.kind == CXCursor_ObjCProtocolRef ||
@@ -85,9 +85,9 @@ getCursorStmt(CXCursor Cursor)
 
 // Copied from clang source tree: tools/libclang/CXCursor.cpp
 static const clang::Expr *
-getCursorExpr(CXCursor Cursor)
+GetCursorExpr(CXCursor Cursor)
 {
-  return llvm::dyn_cast_or_null<clang::Expr>(getCursorStmt(Cursor));
+  return llvm::dyn_cast_or_null<clang::Expr>(GetCursorStmt(Cursor));
 }
 
 // From clang source tree: tools/libclang/CXType.cpp
@@ -123,23 +123,21 @@ struct CXTranslationUnitImpl {
   std::vector<std::string> Arguments;
 };
 
-CXInt Invalid_CXInt = { NULL };
+CXInt Invalid_CXInt = { nullptr };
 
 static inline CXInt
 MakeCXInt(const llvm::APInt &value)
 {
-  CXInt result;
-  result.data = new llvm::APInt(value);
+  CXInt result = { new llvm::APInt(value) };
   return result;
 }
 
-CXFloat Invalid_CXFloat = { NULL };
+CXFloat Invalid_CXFloat = { nullptr };
 
 static inline CXFloat
 MakeCXFloat(const llvm::APFloat &value)
 {
-  CXFloat result;
-  result.data = new llvm::APFloat(value);
+  CXFloat result = { new llvm::APFloat(value) };
   return result;
 }
 
@@ -177,7 +175,7 @@ MakeCXCursor(clang::Expr *E, CXTranslationUnit TU)
   clang::OpaqueValueExpr OV(
     clang::SourceLocation::getFromRawEncoding(0), E->getType(),
     clang::VK_RValue, clang::OK_Ordinary, E);
-  CXCursor C = { CXCursor_FirstExpr, 0, { NULL, &OV, TU }};
+  CXCursor C = { CXCursor_FirstExpr, 0, { nullptr, &OV, TU }};
   CXCursor Result;
   clang_visitChildren(C, MakeCXCursor_visitor, &Result);
   return Result;
@@ -193,7 +191,7 @@ MakeCXCursor(const clang::Stmt *S, CXTranslationUnit TU)
   clang::DefaultStmt CS(
     clang::SourceLocation::getFromRawEncoding(0),
     clang::SourceLocation::getFromRawEncoding(0), const_cast<clang::Stmt *>(S));
-  CXCursor C = { CXCursor_CompoundStmt, 0, { NULL, &CS, TU }};
+  CXCursor C = { CXCursor_CompoundStmt, 0, { nullptr, &CS, TU }};
   CXCursor Result;
   clang_visitChildren(C, MakeCXCursor_visitor, &Result);
   return Result;
@@ -206,7 +204,7 @@ MakeCXCursor(const clang::Decl *T, CXTranslationUnit TU)
   clang::DeclStmt DS(DGR,
     clang::SourceLocation::getFromRawEncoding(0),
     clang::SourceLocation::getFromRawEncoding(0));
-  CXCursor C = { CXCursor_DeclStmt, 0, { NULL, &DS, TU }};
+  CXCursor C = { CXCursor_DeclStmt, 0, { nullptr, &DS, TU }};
   CXCursor Result;
   clang_visitChildren(C, MakeCXCursor_visitor, &Result);
   return Result;
@@ -222,14 +220,14 @@ MakeCXType(clang::QualType T, CXTranslationUnit TU)
 {
   clang::OpaqueValueExpr OV(
     clang::SourceLocation::getFromRawEncoding(0), T, clang::VK_RValue);
-  CXCursor C = { CXCursor_FirstExpr, 0, { NULL, &OV, TU }};
+  CXCursor C = { CXCursor_FirstExpr, 0, { nullptr, &OV, TU }};
   return clang_getCursorType(C);
 }
 
 static const clang::FunctionDecl *
 getFunctionDecl(CXCursor C)
 {
-  if (auto *D = getCursorDecl(C)) {
+  if (auto *D = GetCursorDecl(C)) {
     const clang::FunctionDecl *FD;
     #ifdef LLVM_VERSION_BEFORE_3_5_0
       if (nullptr != (FD = llvm::dyn_cast_or_null<clang::FunctionDecl>(D))) {
@@ -272,6 +270,48 @@ getConstructorDecl(CXCursor C)
   return nullptr;
 }
 
+static struct clang_ext_TemplateName
+MakeTemplateName(const clang::TemplateName &name, CXTranslationUnit TU)
+{
+  struct clang_ext_TemplateName TN = {
+    new clang::TemplateName(name), TU };
+  return TN;
+}
+
+static struct clang_ext_TemplateName
+MakeTemplateNameInvalid(CXTranslationUnit TU)
+{
+  struct clang_ext_TemplateName TN = { nullptr, TU };
+  return TN;
+}
+
+static const clang::TemplateName *
+GetTemplateName(struct clang_ext_TemplateName CTN)
+{
+  return static_cast<const clang::TemplateName *>(CTN.data);
+}
+
+static struct clang_ext_TemplateArgument
+MakeTemplateArgument(const clang::TemplateArgument &argument, CXTranslationUnit TU)
+{
+  struct clang_ext_TemplateArgument TA = {
+    new clang::TemplateArgument(argument), TU };
+  return TA;
+}
+
+static struct clang_ext_TemplateArgument
+MakeTemplateArgumentInvalid(CXTranslationUnit TU)
+{
+  struct clang_ext_TemplateArgument TA = { nullptr, TU };
+  return TA;
+}
+
+static const clang::TemplateArgument *
+GetTemplateArgument(struct clang_ext_TemplateArgument CTA)
+{
+  return static_cast<const clang::TemplateArgument *>(CTA.data);
+}
+
 extern "C" {
   bool
   clang_equal_cxint(CXInt a, CXInt b)
@@ -307,7 +347,7 @@ extern "C" {
   clang_ext_IntegerLiteral_getValue(CXCursor c)
   {
     if (auto e =
-      llvm::dyn_cast_or_null<clang::IntegerLiteral>(getCursorStmt(c))) {
+      llvm::dyn_cast_or_null<clang::IntegerLiteral>(GetCursorStmt(c))) {
       return MakeCXInt(e->getValue());
     }
     return Invalid_CXInt;
@@ -317,13 +357,13 @@ extern "C" {
   clang_ext_Int_dispose(CXInt c)
   {
     delete(static_cast<llvm::APInt *>(c.data));
-    c.data = NULL;
+    c.data = nullptr;
   }
 
   bool
   clang_ext_Int_isValid(CXInt c)
   {
-    return c.data != NULL;
+    return c.data != nullptr;
   }
 
   CXString
@@ -412,7 +452,7 @@ extern "C" {
   clang_ext_FloatingLiteral_getValue(CXCursor c)
   {
     if (auto e =
-      llvm::dyn_cast_or_null<clang::FloatingLiteral>(getCursorStmt(c))) {
+      llvm::dyn_cast_or_null<clang::FloatingLiteral>(GetCursorStmt(c))) {
       return MakeCXFloat(e->getValue());
     }
     return Invalid_CXFloat;
@@ -449,13 +489,13 @@ extern "C" {
   clang_ext_Float_dispose(CXFloat c)
   {
     delete(static_cast<llvm::APFloat *>(c.data));
-    c.data = NULL;
+    c.data = nullptr;
   }
 
   bool
   clang_ext_Float_isValid(CXFloat c)
   {
-    return c.data != NULL;
+    return c.data != nullptr;
   }
 
   CXString
@@ -481,7 +521,7 @@ extern "C" {
   CXString
   clang_ext_StringLiteral_GetString(CXCursor c)
   {
-    const clang::Expr *e = getCursorExpr(c);
+    const clang::Expr *e = GetCursorExpr(c);
     if (auto m = llvm::dyn_cast_or_null<clang::StringLiteral>(e)) {
       return cxstring_createDup(m->getString());
     }
@@ -492,7 +532,7 @@ extern "C" {
   clang_ext_UnaryOperator_getOpcode(CXCursor c)
   {
     if (auto Op =
-        llvm::dyn_cast_or_null<clang::UnaryOperator>(getCursorStmt(c))) {
+        llvm::dyn_cast_or_null<clang::UnaryOperator>(GetCursorStmt(c))) {
       return static_cast<clang_ext_UnaryOperatorKind>(Op->getOpcode());
     }
     return static_cast<clang_ext_UnaryOperatorKind>(0);
@@ -516,7 +556,7 @@ extern "C" {
   clang_ext_BinaryOperator_getOpcode(CXCursor c)
   {
     if (auto Op =
-        llvm::dyn_cast_or_null<clang::BinaryOperator>(getCursorStmt(c))) {
+        llvm::dyn_cast_or_null<clang::BinaryOperator>(GetCursorStmt(c))) {
       return static_cast<clang_ext_BinaryOperatorKind>(Op->getOpcode());
     }
     return static_cast<clang_ext_BinaryOperatorKind>(0);
@@ -539,7 +579,7 @@ extern "C" {
   unsigned
   clang_ext_ForStmt_getChildrenSet(CXCursor c)
   {
-    if (auto S = llvm::dyn_cast_or_null<clang::ForStmt>(getCursorStmt(c))) {
+    if (auto S = llvm::dyn_cast_or_null<clang::ForStmt>(GetCursorStmt(c))) {
       unsigned Result = 0;
       if (S->getInit()) {
         Result |= CLANG_EXT_FOR_STMT_INIT;
@@ -561,7 +601,7 @@ extern "C" {
   unsigned
   clang_ext_IfStmt_getChildrenSet(CXCursor c)
   {
-    if (auto S = llvm::dyn_cast_or_null<clang::IfStmt>(getCursorStmt(c))) {
+    if (auto S = llvm::dyn_cast_or_null<clang::IfStmt>(GetCursorStmt(c))) {
       unsigned Result = 0;
       #ifndef LLVM_VERSION_BEFORE_3_9_0
       if (S->getInit()) {
@@ -583,7 +623,7 @@ extern "C" {
   clang_ext_IfStmt_getInit(CXCursor c)
   {
     #ifndef LLVM_VERSION_BEFORE_3_9_0
-    if (auto S = llvm::dyn_cast_or_null<clang::IfStmt>(getCursorStmt(c))) {
+    if (auto S = llvm::dyn_cast_or_null<clang::IfStmt>(GetCursorStmt(c))) {
       return MakeCXCursor(S->getInit(), getCursorTU(c));
     }
     #endif
@@ -593,7 +633,7 @@ extern "C" {
   unsigned
   clang_ext_SwitchStmt_getChildrenSet(CXCursor c)
   {
-    if (auto S = llvm::dyn_cast_or_null<clang::SwitchStmt>(getCursorStmt(c))) {
+    if (auto S = llvm::dyn_cast_or_null<clang::SwitchStmt>(GetCursorStmt(c))) {
       unsigned Result = 0;
       #ifndef LLVM_VERSION_BEFORE_3_9_0
       if (S->getInit()) {
@@ -612,7 +652,7 @@ extern "C" {
   clang_ext_SwitchStmt_getInit(CXCursor c)
   {
     #ifndef LLVM_VERSION_BEFORE_3_9_0
-    if (auto S = llvm::dyn_cast_or_null<clang::SwitchStmt>(getCursorStmt(c))) {
+    if (auto S = llvm::dyn_cast_or_null<clang::SwitchStmt>(GetCursorStmt(c))) {
       return MakeCXCursor(S->getInit(), getCursorTU(c));
     }
     #endif
@@ -622,7 +662,7 @@ extern "C" {
   unsigned
   clang_ext_WhileStmt_getChildrenSet(CXCursor c)
   {
-    if (auto S = llvm::dyn_cast_or_null<clang::WhileStmt>(getCursorStmt(c))) {
+    if (auto S = llvm::dyn_cast_or_null<clang::WhileStmt>(GetCursorStmt(c))) {
       unsigned Result = 0;
       if (S->getConditionVariable()) {
         Result |= CLANG_EXT_WHILE_STMT_CONDITION_VARIABLE;
@@ -656,8 +696,8 @@ extern "C" {
   bool
   clang_ext_VarDecl_hasInit(CXCursor c)
   {
-    if (auto D = llvm::dyn_cast_or_null<clang::VarDecl>(getCursorDecl(c))) {
-      return D->getInit() != NULL;
+    if (auto D = llvm::dyn_cast_or_null<clang::VarDecl>(GetCursorDecl(c))) {
+      return D->getInit() != nullptr;
     }
     return false;
   }
@@ -665,7 +705,7 @@ extern "C" {
   bool
   clang_ext_MemberRefExpr_isArrow(CXCursor c)
   {
-    const clang::Expr *e = getCursorExpr(c);
+    const clang::Expr *e = GetCursorExpr(c);
     if (auto m = llvm::dyn_cast_or_null<clang::MemberExpr>(e)) {
       return m->isArrow();
     }
@@ -675,14 +715,14 @@ extern "C" {
   CXString
   clang_ext_Stmt_GetClassName(CXCursor c)
   {
-    const clang::Stmt *s = getCursorStmt(c);
+    const clang::Stmt *s = GetCursorStmt(c);
     return cxstring_createRef(s->getStmtClassName());
   }
 
   int
   clang_ext_Stmt_GetClassKind(CXCursor c)
   {
-    const clang::Stmt *s = getCursorStmt(c);
+    const clang::Stmt *s = GetCursorStmt(c);
     return s->getStmtClass();
   }
 
@@ -692,7 +732,7 @@ extern "C" {
     switch (c.kind) {
     case CXCursor_UnexposedDecl:
       {
-        const clang::Decl *d = getCursorDecl(c);
+        const clang::Decl *d = GetCursorDecl(c);
         #define CASE(X) case clang::Decl::X: return ECK_##X##Decl
         switch (d->getKind()) {
         CASE(Empty);
@@ -704,7 +744,7 @@ extern "C" {
       }
       return ECK_Unknown;
     default:
-      if (const clang::Stmt *s = getCursorStmt(c)) {
+      if (const clang::Stmt *s = GetCursorStmt(c)) {
         #define CASE(X) case clang::Stmt::X##Class: return ECK_##X
         switch (s->getStmtClass()) {
         CASE(ImplicitCastExpr);
@@ -719,6 +759,22 @@ extern "C" {
     }
   }
 
+  enum clang_ext_DeclKind
+  clang_ext_Decl_GetKind(CXCursor c)
+  {
+    if (auto *d = GetCursorDecl(c)) {
+      switch (d->getKind()) {
+      #define DECL(Derived, Base) \
+        case clang::Decl::Derived: return CLANG_EXT_DECL_##Derived;
+      #define ABSTRACT_DECL(Decl)
+      #include <clang/AST/DeclNodes.inc>
+      default:
+        return CLANG_EXT_DECL_Unknown;
+      }
+    }
+    return CLANG_EXT_DECL_Invalid;
+  }
+
   enum clang_ext_TypeKind
   clang_ext_GetTypeKind(CXType c)
   {
@@ -731,7 +787,6 @@ extern "C" {
       default:
         return CLANG_EXT_TYPE_Unknown;
       }
-      #undef CASE
     }
     return CLANG_EXT_TYPE_Invalid;
   }
@@ -765,7 +820,7 @@ extern "C" {
   CXString
   clang_ext_AsmStmt_GetAsmString(CXCursor c)
   {
-    const clang::Stmt *s = getCursorStmt(c);
+    const clang::Stmt *s = GetCursorStmt(c);
     switch (s->getStmtClass()) {
     case clang::Stmt::GCCAsmStmtClass:;
       return cxstring_createDup(
@@ -782,7 +837,7 @@ extern "C" {
   clang_ext_CharacterLiteral_GetCharacterKind(CXCursor c)
   {
     if (auto e =
-      llvm::dyn_cast_or_null<clang::CharacterLiteral>(getCursorStmt(c))) {
+      llvm::dyn_cast_or_null<clang::CharacterLiteral>(GetCursorStmt(c))) {
       return static_cast<enum clang_ext_CharacterKind>(e->getKind());
     }
     return ECK_Ascii;
@@ -792,7 +847,7 @@ extern "C" {
   clang_ext_CharacterLiteral_GetValue(CXCursor c)
   {
     if (auto e =
-      llvm::dyn_cast_or_null<clang::CharacterLiteral>(getCursorStmt(c))) {
+      llvm::dyn_cast_or_null<clang::CharacterLiteral>(GetCursorStmt(c))) {
       return e->getValue();
     }
     return 0;
@@ -802,7 +857,7 @@ extern "C" {
   clang_ext_UnaryExpr_GetKind(CXCursor c)
   {
     if (auto e =
-      llvm::dyn_cast_or_null<clang::UnaryExprOrTypeTraitExpr>(getCursorStmt(c))) {
+      llvm::dyn_cast_or_null<clang::UnaryExprOrTypeTraitExpr>(GetCursorStmt(c))) {
       return static_cast<enum clang_ext_UnaryExpr>(e->getKind());
     }
     return UETT_SizeOf;
@@ -812,7 +867,7 @@ extern "C" {
   clang_ext_UnaryExpr_GetArgumentType(CXCursor c)
   {
     if (auto e =
-      llvm::dyn_cast_or_null<clang::UnaryExprOrTypeTraitExpr>(getCursorStmt(c))) {
+      llvm::dyn_cast_or_null<clang::UnaryExprOrTypeTraitExpr>(GetCursorStmt(c))) {
       return MakeCXType(e->getArgumentType(), getCursorTU(c));
     }
     return MakeCXTypeInvalid(getCursorTU(c));
@@ -920,7 +975,7 @@ extern "C" {
   unsigned
   clang_ext_LinkageSpecDecl_getLanguageIDs(CXCursor C)
   {
-    if (auto *D = getCursorDecl(C)) {
+    if (auto *D = GetCursorDecl(C)) {
       if (auto *LS = llvm::dyn_cast_or_null<clang::LinkageSpecDecl>(D)) {
         return LS->getLanguage();
       }
@@ -931,7 +986,7 @@ extern "C" {
   CXType
   clang_ext_TemplateTypeParmDecl_getDefaultArgument(CXCursor C)
   {
-    if (auto *D = getCursorDecl(C)) {
+    if (auto *D = GetCursorDecl(C)) {
       if (auto TTPD = llvm::dyn_cast_or_null<clang::TemplateTypeParmDecl>(D)) {
         if (TTPD->hasDefaultArgument()) {
           return MakeCXType(TTPD->getDefaultArgument(), getCursorTU(C));
@@ -939,5 +994,156 @@ extern "C" {
       }
     }
     return MakeCXTypeInvalid(getCursorTU(C));
+  }
+
+  void
+  clang_ext_TemplateName_dispose(struct clang_ext_TemplateName CTN)
+  {
+    if (auto *TN = GetTemplateName(CTN)) {
+      delete TN;
+    }
+  }
+
+  enum clang_ext_TemplateName_NameKind
+  clang_ext_TemplateName_getKind(struct clang_ext_TemplateName CTN)
+  {
+    if (auto *TN = GetTemplateName(CTN)) {
+      return static_cast<enum clang_ext_TemplateName_NameKind>(TN->getKind());
+    }
+    return CLANG_EXT_InvalidNameKind;
+  }
+
+  CXCursor
+  clang_ext_TemplateName_getAsTemplateDecl(struct clang_ext_TemplateName CTN)
+  {
+    if (auto *TN = GetTemplateName(CTN)) {
+      return MakeCXCursor(TN->getAsTemplateDecl(), CTN.TU);
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, CTN.TU);
+  }
+
+  enum CXTemplateArgumentKind
+  clang_ext_TemplateArgument_getKind(struct clang_ext_TemplateArgument CTA)
+  {
+    if (auto *TA = GetTemplateArgument(CTA)) {
+      return static_cast<enum CXTemplateArgumentKind>(TA->getKind());
+    }
+    return CXTemplateArgumentKind_Invalid;
+  }
+
+  CXType
+  clang_ext_TemplateArgument_getAsType(struct clang_ext_TemplateArgument CTA)
+  {
+    if (auto *TA = GetTemplateArgument(CTA)) {
+      return MakeCXType(TA->getAsType(), CTA.TU);
+    }
+    return MakeCXTypeInvalid(CTA.TU);
+  }
+
+  CXCursor
+  clang_ext_TemplateArgument_getAsDecl(struct clang_ext_TemplateArgument CTA)
+  {
+    if (auto *TA = GetTemplateArgument(CTA)) {
+      return MakeCXCursor(TA->getAsDecl(), CTA.TU);
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, CTA.TU);
+  }
+
+  CXType
+  clang_ext_TemplateArgument_getNullPtrType(
+    struct clang_ext_TemplateArgument CTA)
+  {
+    if (auto *TA = GetTemplateArgument(CTA)) {
+      return MakeCXType(TA->getNullPtrType(), CTA.TU);
+    }
+    return MakeCXTypeInvalid(CTA.TU);
+  }
+
+  struct clang_ext_TemplateName
+  clang_ext_TemplateArgument_getAsTemplateOrTemplatePattern(
+    struct clang_ext_TemplateArgument CTA)
+  {
+    if (auto *TA = GetTemplateArgument(CTA)) {
+      return MakeTemplateName(TA->getAsTemplate(), CTA.TU);
+    }
+    return MakeTemplateNameInvalid(CTA.TU);
+  }
+
+  CXInt
+  clang_ext_TemplateArgument_getAsIntegral(
+    struct clang_ext_TemplateArgument CTA)
+  {
+    if (auto *TA = GetTemplateArgument(CTA)) {
+      return MakeCXInt(TA->getAsIntegral());
+    }
+    return Invalid_CXInt;
+  }
+
+  CXType
+  clang_ext_TemplateArgument_getIntegralType(
+    struct clang_ext_TemplateArgument CTA)
+  {
+    if (auto *TA = GetTemplateArgument(CTA)) {
+      return MakeCXType(TA->getIntegralType(), CTA.TU);
+    }
+    return MakeCXTypeInvalid(CTA.TU);
+  }
+
+  CXType
+  clang_ext_TemplateArgument_getNonTypeTemplateArgumentType(
+    struct clang_ext_TemplateArgument CTA)
+  {
+    if (auto *TA = GetTemplateArgument(CTA)) {
+      return MakeCXType(TA->getNonTypeTemplateArgumentType(), CTA.TU);
+    }
+    return MakeCXTypeInvalid(CTA.TU);
+  }
+
+  CXCursor
+  clang_ext_TemplateArgument_getAsExpr(
+    struct clang_ext_TemplateArgument CTA)
+  {
+    if (auto *TA = GetTemplateArgument(CTA)) {
+      return MakeCXCursor(TA->getAsExpr(), CTA.TU);
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, CTA.TU);
+  }
+
+  void
+  clang_ext_TemplateArgument_dispose(struct clang_ext_TemplateArgument CTA)
+  {
+    if (auto *TA = GetTemplateArgument(CTA)) {
+      delete TA;
+    }
+  }
+
+  struct clang_ext_TemplateName
+  clang_ext_TemplateSpecializationType_getTemplateName(CXType CT)
+  {
+    clang::QualType T = GetQualType(CT);
+    if (auto *TST = T->getAs<clang::TemplateSpecializationType>()) {
+      return MakeTemplateName(TST->getTemplateName(), GetTU(CT));
+    }
+    return MakeTemplateNameInvalid(GetTU(CT));
+  }
+
+  unsigned
+  clang_ext_TemplateSpecializationType_getNumArgs(CXType CT)
+  {
+    clang::QualType T = GetQualType(CT);
+    if (auto *TST = T->getAs<clang::TemplateSpecializationType>()) {
+      return TST->getNumArgs();
+    }
+    return 0;
+  }
+
+  struct clang_ext_TemplateArgument
+  clang_ext_TemplateSpecializationType_getArgument(CXType CT, unsigned i)
+  {
+    clang::QualType T = GetQualType(CT);
+    if (auto *TST = T->getAs<clang::TemplateSpecializationType>()) {
+      return MakeTemplateArgument(TST->getArg(i), GetTU(CT));
+    }
+    return MakeTemplateArgumentInvalid(GetTU(CT));
   }
 }

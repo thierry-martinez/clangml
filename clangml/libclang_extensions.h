@@ -199,6 +199,17 @@ enum clang_ext_CursorKind {
 enum clang_ext_CursorKind
 clang_ext_GetCursorKind(CXCursor c);
 
+enum clang_ext_DeclKind {
+  CLANG_EXT_DECL_Invalid,
+  #define DECL(Derived, Base) CLANG_EXT_DECL_##Derived,
+  #define ABSTRACT_DECL(Decl)
+  #include <clang/AST/DeclNodes.inc>
+  CLANG_EXT_DECL_Unknown
+};
+
+enum clang_ext_DeclKind
+clang_ext_Decl_GetKind(CXCursor);
+
 enum clang_ext_TypeKind {
   CLANG_EXT_TYPE_Invalid,
   #define TYPE(Class, Base) CLANG_EXT_TYPE_##Class,
@@ -291,3 +302,73 @@ clang_ext_LinkageSpecDecl_getLanguageIDs(CXCursor C);
 
 CXType
 clang_ext_TemplateTypeParmDecl_getDefaultArgument(CXCursor C);
+
+struct clang_ext_TemplateName {
+  const void *data;
+  CXTranslationUnit TU;
+};
+
+void
+clang_ext_TemplateName_dispose(struct clang_ext_TemplateName);
+
+enum clang_ext_TemplateName_NameKind {
+  CLANG_EXT_Template,
+  CLANG_EXT_OverloadedTemplate,
+  CLANG_EXT_QualifiedTemplate,
+  CLANG_EXT_DependentTemplate,
+  CLANG_EXT_SubstTemplateTemplateParm,
+  CLANG_EXT_SubstTemplateTemplateParmPack,
+  CLANG_EXT_InvalidNameKind
+};
+
+enum clang_ext_TemplateName_NameKind
+clang_ext_TemplateName_getKind(struct clang_ext_TemplateName);
+
+CXCursor
+clang_ext_TemplateName_getAsTemplateDecl(struct clang_ext_TemplateName);
+
+struct clang_ext_TemplateArgument {
+  const void *data;
+  CXTranslationUnit TU;
+};
+
+void
+clang_ext_TemplateArgument_dispose(struct clang_ext_TemplateArgument);
+
+enum CXTemplateArgumentKind
+clang_ext_TemplateArgument_getKind(struct clang_ext_TemplateArgument);
+
+CXType
+clang_ext_TemplateArgument_getAsType(struct clang_ext_TemplateArgument);
+
+CXCursor
+clang_ext_TemplateArgument_getAsDecl(struct clang_ext_TemplateArgument);
+
+CXType
+clang_ext_TemplateArgument_getNullPtrType(struct clang_ext_TemplateArgument);
+
+struct clang_ext_TemplateName
+clang_ext_TemplateArgument_getAsTemplateOrTemplatePattern(
+  struct clang_ext_TemplateArgument);
+
+CXInt
+clang_ext_TemplateArgument_getAsIntegral(struct clang_ext_TemplateArgument);
+
+CXType
+clang_ext_TemplateArgument_getIntegralType(struct clang_ext_TemplateArgument);
+
+CXType
+clang_ext_TemplateArgument_getNonTypeTemplateArgumentType(
+  struct clang_ext_TemplateArgument);
+
+CXCursor
+clang_ext_TemplateArgument_getAsExpr(struct clang_ext_TemplateArgument);
+
+struct clang_ext_TemplateName
+clang_ext_TemplateSpecializationType_getTemplateName(CXType CT);
+
+unsigned
+clang_ext_TemplateSpecializationType_getNumArgs(CXType);
+
+struct clang_ext_TemplateArgument
+clang_ext_TemplateSpecializationType_getArgument(CXType, unsigned);

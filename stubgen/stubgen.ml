@@ -375,7 +375,18 @@ let get_interface empty union list name =
       accu in
   List.fold_left add_rule empty list
 
+let has_prefix prefix s =
+  String.length s >= String.length prefix &&
+  prefix = String.sub s 0 (String.length prefix)
+
+let remove_prefix prefix s =
+  if has_prefix prefix s then
+    String.sub s (String.length prefix) (String.length s - String.length prefix)
+  else
+    s
+
 let get_type type_name module_interface =
+  let type_name = remove_prefix "struct " type_name in
   get_interface empty_type_interface union_type_interfaces
     module_interface.types type_name
 
@@ -1992,15 +2003,20 @@ let main cflags llvm_config prefix =
     add_type (Pcre.regexp "^CXFloat$")
       (empty_type_interface |>
        make_destructor "clang_ext_Float_dispose") |>
+    add_type (Pcre.regexp "^clang_ext_TemplateName$")
+      (empty_type_interface |>
+       make_destructor "clang_ext_TemplateName_dispose") |>
+    add_type (Pcre.regexp "^clang_ext_TemplateArgument$")
+      (empty_type_interface |>
+       make_destructor "clang_ext_TemplateArgument_dispose") |>
     add_type (Pcre.regexp "^CXIndex$")
       (empty_type_interface |>
        make_destructor "clang_disposeIndex") |>
     add_type (Pcre.regexp "^CXTranslationUnit$")
       (empty_type_interface |>
-       make_destructor "clang_disposeTranslationUnit") |>
-    add_type (Pcre.regexp "^CXTranslationUnit$")
-      (empty_type_interface |> carry_reference "CXIndex") |>
-    add_type (Pcre.regexp "^CXCursor$|^CXType$|^CXFile$|^CXModule$|^CXSourceRange$|^CXSourceLocation$|^CXComment$")
+       make_destructor "clang_disposeTranslationUnit" |>
+       carry_reference "CXIndex") |>
+    add_type (Pcre.regexp "^CXCursor$|^CXType$|^CXFile$|^CXModule$|^CXSourceRange$|^CXSourceLocation$|^CXComment$|^clang_ext_TemplateName$|^clang_ext_TemplateArgument$")
       (empty_type_interface |> carry_reference "CXTranslationUnit") |>
     add_type (Pcre.regexp "^CXVirtualFileOverlay$")
       (empty_type_interface |>
@@ -2108,7 +2124,7 @@ let main cflags llvm_config prefix =
     add_function (Pcre.regexp "^clang_compare_")
       (empty_function_interface |>
         dont_label_unique) |>
-    add_enum (Pcre.regexp "^CXLinkageKind$|^CXTypeKind$|^CXCallingConv$|^CX_CXXAccessSpecifier$|^CXTemplateArgumentKind$|^clang_ext_UnaryOperatorKind$|^clang_ext_BinaryOperatorKind$|^clang_ext_ElaboratedTypeKeyword$|^clang_ext_CharacterKind$|^clang_ext_UnaryExpr$|^clang_ext_AttrKind$|^clang_ext_TypeKind$")
+    add_enum (Pcre.regexp "^CXLinkageKind$|^CXTypeKind$|^CXCallingConv$|^CX_CXXAccessSpecifier$|^CXTemplateArgumentKind$|^clang_ext_UnaryOperatorKind$|^clang_ext_BinaryOperatorKind$|^clang_ext_ElaboratedTypeKeyword$|^clang_ext_CharacterKind$|^clang_ext_UnaryExpr$|^clang_ext_AttrKind$|^clang_ext_TypeKind$|^clang_ext_DeclKind$|^CXCursorKind$")
       (empty_enum_interface |>
         add_attributes [(loc "deriving", PStr [pstr_eval (pexp_tuple (["eq"; "ord"; "show"] |> List.map @@ fun plugin -> pexp_ident (loc (Longident.Lident plugin))))])]) |>
     add_enum (Pcre.regexp "^CXErrorCode$")
