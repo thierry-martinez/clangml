@@ -1376,6 +1376,10 @@ let translate_enum_decl context cur =
       constructors in
   let common_info = make_common_type_info ~type_interface ocaml_type_name in
   let enum_info = { result; constructors = List.map (fun (a, b, (c, _)) -> (a, b, c)) constructors } in
+  let first_constructor =
+    match constructors with
+    | [] -> failwith ("Empty enum: " ^ name)
+    | hd :: _ -> hd in
   let make_decl () =
     let type_name =
       if typedef then name
@@ -1391,7 +1395,7 @@ let translate_enum_decl context cur =
   failwith_fmt(\"invalid value for %s: %%d\", Int_val(ocaml));
   return %s;
 }\n\n"
-      (name_of_c_of_ocaml ocaml_type_name) (match List.hd constructors with (name, _, _) -> name);
+      (name_of_c_of_ocaml ocaml_type_name) (match first_constructor with (name, _, _) -> name);
     Printf.fprintf context.chan_stubs
       "value\n%s(%s v)\n{\n  switch (v) {\n"
       (name_of_ocaml_of_c ocaml_type_name) type_name;

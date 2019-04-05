@@ -3,9 +3,12 @@
 
 #ifdef LLVM_VERSION_3_4_2
 #define LLVM_VERSION_BEFORE_3_5_0
-#define LLVM_VERSION_BEFORE_3_9_0
+#define LLVM_VERSION_BEFORE_3_6_0
 #endif
 #ifdef LLVM_VERSION_3_5_2
+#define LLVM_VERSION_BEFORE_3_6_0
+#endif
+#ifdef LLVM_VERSION_BEFORE_3_6_0
 #define LLVM_VERSION_BEFORE_3_9_0
 #endif
 #ifdef LLVM_VERSION_3_6_2
@@ -334,6 +337,21 @@ struct clang_ext_TemplateArgument {
 
 void
 clang_ext_TemplateArgument_dispose(struct clang_ext_TemplateArgument);
+
+#ifdef LLVM_VERSION_BEFORE_3_6_0
+enum CXTemplateArgumentKind {
+  CXTemplateArgumentKind_Null,
+  CXTemplateArgumentKind_Type,
+  CXTemplateArgumentKind_Declaration,
+  CXTemplateArgumentKind_NullPtr,
+  CXTemplateArgumentKind_Integral,
+  CXTemplateArgumentKind_Template,
+  CXTemplateArgumentKind_TemplateExpansion,
+  CXTemplateArgumentKind_Expression,
+  CXTemplateArgumentKind_Pack,
+  CXTemplateArgumentKind_Invalid
+};
+#endif
 
 enum CXTemplateArgumentKind
 clang_ext_TemplateArgument_getKind(struct clang_ext_TemplateArgument);
