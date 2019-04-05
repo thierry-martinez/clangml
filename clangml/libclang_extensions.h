@@ -357,10 +357,6 @@ clang_ext_TemplateArgument_getAsIntegral(struct clang_ext_TemplateArgument);
 CXType
 clang_ext_TemplateArgument_getIntegralType(struct clang_ext_TemplateArgument);
 
-CXType
-clang_ext_TemplateArgument_getNonTypeTemplateArgumentType(
-  struct clang_ext_TemplateArgument);
-
 CXCursor
 clang_ext_TemplateArgument_getAsExpr(struct clang_ext_TemplateArgument);
 

@@ -1089,16 +1089,6 @@ extern "C" {
     return MakeCXTypeInvalid(CTA.TU);
   }
 
-  CXType
-  clang_ext_TemplateArgument_getNonTypeTemplateArgumentType(
-    struct clang_ext_TemplateArgument CTA)
-  {
-    if (auto *TA = GetTemplateArgument(CTA)) {
-      return MakeCXType(TA->getNonTypeTemplateArgumentType(), CTA.TU);
-    }
-    return MakeCXTypeInvalid(CTA.TU);
-  }
-
   CXCursor
   clang_ext_TemplateArgument_getAsExpr(
     struct clang_ext_TemplateArgument CTA)
