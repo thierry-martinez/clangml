@@ -2612,6 +2612,32 @@ let () =
   | _ -> assert false
    ]}*)
   | TemplateTemplateParameter of string
+  | Friend of decl
+(**
+  C++ friend declaration.
+
+   {[
+let example = {|
+     class C {
+       friend void f();
+     };
+   |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  fun ast -> match ast with
+  | [{ desc = RecordDecl {
+         keyword = Class;
+         name = "C";
+         fields = [
+           { desc = Friend { desc = Function {
+               function_type = {
+                 result = { desc = BuiltinType Void };
+                 parameters = Some { non_variadic = []; variadic = false }};
+               name = "f";
+               body = None }}}] }}] -> ()
+  | _ -> assert false
+   ]}*)   
   | EmptyDecl
 (**
   Empty declaration.

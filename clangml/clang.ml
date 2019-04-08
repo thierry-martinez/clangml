@@ -213,115 +213,121 @@ module Ast = struct
             cursor |> make_template @@ fun children ->
               cxxmethod_decl_of_cxcursor ~can_be_function:(not in_record)
                 cursor children
-          | CXXMethod ->
-              cxxmethod_decl_of_cxcursor cursor (list_of_children cursor)
-          | VarDecl -> Var (var_decl_desc_of_cxcursor cursor)
-          | StructDecl -> record_decl_of_cxcursor Struct cursor
-          | UnionDecl -> record_decl_of_cxcursor Union cursor
-          | ClassDecl -> record_decl_of_cxcursor Class cursor
-          | ClassTemplate ->
-              make_template
-                (record_decl_of_children
-                   (Class : clang_ext_elaboratedtypekeyword) cursor)
-                cursor
-          | EnumDecl -> enum_decl_of_cxcursor cursor
-          | TypedefDecl ->
-              let name = get_cursor_spelling cursor in
-              let underlying_type = cursor |>
-              get_typedef_decl_underlying_type |> of_cxtype in
-              TypedefDecl { name; underlying_type }
-          | FieldDecl ->
-              let name = get_cursor_spelling cursor in
-              let qual_type = get_cursor_type cursor |> of_cxtype in
-              let bitwidth =
-                if cursor_is_bit_field cursor then
-                  match list_of_children cursor with
-                  | [bitwidth] -> Some (expr_of_cxcursor bitwidth)
-                  | _ -> raise Invalid_structure
-                else
-                  None in
-              Field { name; qual_type; bitwidth }
-          | CXXAccessSpecifier ->
-              CXXAccessSpecifier (cursor |> get_cxxaccess_specifier)
-          | Namespace ->
-              let name = get_cursor_spelling cursor in
-              let declarations =
-                list_of_children cursor |> List.map decl_of_cxcursor in
-              Namespace { name; declarations }
-          | UsingDirective ->
-              let namespace =
+        | CXXMethod ->
+            cxxmethod_decl_of_cxcursor cursor (list_of_children cursor)
+        | VarDecl -> Var (var_decl_desc_of_cxcursor cursor)
+        | StructDecl -> record_decl_of_cxcursor Struct cursor
+        | UnionDecl -> record_decl_of_cxcursor Union cursor
+        | ClassDecl -> record_decl_of_cxcursor Class cursor
+        | ClassTemplate ->
+            make_template
+              (record_decl_of_children
+                 (Class : clang_ext_elaboratedtypekeyword) cursor)
+              cursor
+        | EnumDecl -> enum_decl_of_cxcursor cursor
+        | TypedefDecl ->
+            let name = get_cursor_spelling cursor in
+            let underlying_type = cursor |>
+            get_typedef_decl_underlying_type |> of_cxtype in
+            TypedefDecl { name; underlying_type }
+        | FieldDecl ->
+            let name = get_cursor_spelling cursor in
+            let qual_type = get_cursor_type cursor |> of_cxtype in
+            let bitwidth =
+              if cursor_is_bit_field cursor then
                 match list_of_children cursor with
-                | [namespace] -> namespace
-                | _ -> raise Invalid_structure in
-              let namespace = get_cursor_spelling namespace in
-              Using { namespace; decl = None }
-          | UsingDeclaration ->
-              begin
-                match list_of_children cursor with
-                | [namespace_ref; decl_ref] when
-                    get_cursor_kind namespace_ref = NamespaceRef &&
-                    get_cursor_kind decl_ref = OverloadedDeclRef ->
-                      Using {
-                      namespace = get_cursor_spelling namespace_ref;
-                      decl = Some (get_cursor_spelling decl_ref) }
+                | [bitwidth] -> Some (expr_of_cxcursor bitwidth)
                 | _ -> raise Invalid_structure
-              end
-          | UnexposedDecl ->
-              begin
-                match ext_decl_get_kind cursor with
-                | Empty -> EmptyDecl
-                | LinkageSpec ->
-                    let languages =
-                      languages_of_ids
-                        (ext_linkage_spec_decl_get_language_ids cursor) in
-                  let decls =
-                    list_of_children cursor |> List.map decl_of_cxcursor in
-                  LinkageSpec { languages; decls }
-                | kind -> UnknownDecl (UnexposedDecl, kind)
-              end
-          | Constructor ->
-              let children = list_of_children cursor in
-              let rec extract_initializer_list children =
-                match children with
-                | member :: unexposed :: children when
-                    get_cursor_kind member = MemberRef &&
-                    get_cursor_kind unexposed = UnexposedExpr ->
-                      let init_expr =
-                        match list_of_children unexposed with
-                        | [init_expr] -> expr_of_cxcursor init_expr
-                        | _ -> raise Invalid_structure in
-                      (get_cursor_spelling member, init_expr) ::
-                      extract_initializer_list children
-                | _ :: tl -> extract_initializer_list tl
-                | [] -> [] in
-              let body =
-                match List.rev children with
-                | body :: _ when get_cursor_kind body = CompoundStmt ->
-                    Some (stmt_of_cxcursor body)
-                | _ -> None in
-              Constructor {
-                parameters = parameters_of_function_decl cursor;
-                initializer_list = extract_initializer_list children;
-                body;
-                defaulted = ext_cxxmethod_is_defaulted cursor;
-                deleted = ext_function_decl_is_deleted cursor;
-                explicit = ext_cxxconstructor_is_explicit cursor;
-              }
-          | Destructor ->
-              let children = list_of_children cursor in
-              let body =
-                match List.rev children with
-                | body :: _ when get_cursor_kind body = CompoundStmt ->
-                    Some (stmt_of_cxcursor body)
-                | _ -> None in
-              Destructor {
-                body;
-                defaulted = ext_cxxmethod_is_defaulted cursor;
-                deleted = ext_function_decl_is_deleted cursor;
+              else
+                None in
+            Field { name; qual_type; bitwidth }
+        | CXXAccessSpecifier ->
+            CXXAccessSpecifier (cursor |> get_cxxaccess_specifier)
+        | Namespace ->
+            let name = get_cursor_spelling cursor in
+            let declarations =
+              list_of_children cursor |> List.map decl_of_cxcursor in
+            Namespace { name; declarations }
+        | UsingDirective ->
+            let namespace =
+              match list_of_children cursor with
+              | [namespace] -> namespace
+              | _ -> raise Invalid_structure in
+            let namespace = get_cursor_spelling namespace in
+            Using { namespace; decl = None }
+        | UsingDeclaration ->
+            begin
+              match list_of_children cursor with
+              | [namespace_ref; decl_ref] when
+                  get_cursor_kind namespace_ref = NamespaceRef &&
+                  get_cursor_kind decl_ref = OverloadedDeclRef ->
+                    Using {
+                    namespace = get_cursor_spelling namespace_ref;
+                    decl = Some (get_cursor_spelling decl_ref) }
+              | _ -> raise Invalid_structure
+            end
+        | UnexposedDecl ->
+            begin
+              match ext_decl_get_kind cursor with
+              | Empty -> EmptyDecl
+              | LinkageSpec ->
+                  let languages =
+                    languages_of_ids
+                      (ext_linkage_spec_decl_get_language_ids cursor) in
+                let decls =
+                  list_of_children cursor |> List.map decl_of_cxcursor in
+                LinkageSpec { languages; decls }
+              | kind -> UnknownDecl (UnexposedDecl, kind)
+            end
+        | Constructor ->
+            let children = list_of_children cursor in
+            let rec extract_initializer_list children =
+              match children with
+              | member :: unexposed :: children when
+                  get_cursor_kind member = MemberRef &&
+                  get_cursor_kind unexposed = UnexposedExpr ->
+                    let init_expr =
+                      match list_of_children unexposed with
+                      | [init_expr] -> expr_of_cxcursor init_expr
+                      | _ -> raise Invalid_structure in
+                    (get_cursor_spelling member, init_expr) ::
+                    extract_initializer_list children
+              | _ :: tl -> extract_initializer_list tl
+              | [] -> [] in
+            let body =
+              match List.rev children with
+              | body :: _ when get_cursor_kind body = CompoundStmt ->
+                  Some (stmt_of_cxcursor body)
+              | _ -> None in
+            Constructor {
+              parameters = parameters_of_function_decl cursor;
+              initializer_list = extract_initializer_list children;
+              body;
+              defaulted = ext_cxxmethod_is_defaulted cursor;
+              deleted = ext_function_decl_is_deleted cursor;
+              explicit = ext_cxxconstructor_is_explicit cursor;
             }
-          | TemplateTemplateParameter ->
-              TemplateTemplateParameter (get_cursor_spelling cursor)
-          | kind -> UnknownDecl (kind, ext_decl_get_kind cursor)
+        | Destructor ->
+            let children = list_of_children cursor in
+            let body =
+              match List.rev children with
+              | body :: _ when get_cursor_kind body = CompoundStmt ->
+                  Some (stmt_of_cxcursor body)
+              | _ -> None in
+            Destructor {
+              body;
+              defaulted = ext_cxxmethod_is_defaulted cursor;
+              deleted = ext_function_decl_is_deleted cursor;
+          }
+        | TemplateTemplateParameter ->
+            TemplateTemplateParameter (get_cursor_spelling cursor)
+        | FriendDecl ->
+            let body =
+              match list_of_children cursor with
+              | [body] -> decl_of_cxcursor body
+              | _ -> raise Invalid_structure in
+            Friend body
+        | kind -> UnknownDecl (kind, ext_decl_get_kind cursor)
       with Invalid_structure ->
         UnknownDecl (get_cursor_kind cursor, ext_decl_get_kind cursor)
 
