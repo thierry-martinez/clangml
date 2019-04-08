@@ -124,5 +124,5 @@ and qual_type fmt t =
       Format.pp_print_string fmt "int"
   | _ -> failwith (Format.asprintf "Not implemented qual type: %a" pp_qual_type t)
 
-let translation_unit fmt tu =
-  List.iter (decl fmt) tu.items
+let translation_unit fmt (tu : translation_unit) =
+  List.iter (decl fmt) tu.desc.items
