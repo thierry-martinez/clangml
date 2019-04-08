@@ -2148,3 +2148,7 @@ external ext_template_specialization_type_get_num_args :
 external ext_template_specialization_type_get_argument :
   cxtype -> int -> clang_ext_templateargument =
     "clang_ext_TemplateSpecializationType_getArgument_wrapper"
+external ext_friend_decl_get_friend_decl :
+  cxcursor -> cxcursor = "clang_ext_FriendDecl_getFriendDecl_wrapper"
+external ext_friend_decl_get_friend_type :
+  cxcursor -> cxtype = "clang_ext_FriendDecl_getFriendType_wrapper"
