@@ -319,11 +319,12 @@ module Ast = struct
                   list_of_children cursor |> List.map decl_of_cxcursor in
                 LinkageSpec { languages; decls }
             | Friend -> (* No FriendDecl : cxcursortype in Clang <4.0.0 *)
-                let body =
-                  match list_of_children cursor with
-                  | [body] -> decl_of_cxcursor body
-                  | _ -> raise Invalid_structure in
-                Friend body
+                let friend_type = ext_friend_decl_get_friend_type cursor in
+                if get_type_kind friend_type = Invalid then
+                  let decl = ext_friend_decl_get_friend_decl cursor in
+                  Friend (FriendDecl (decl_of_cxcursor decl))
+                else
+                  Friend (FriendType (of_cxtype friend_type))
             | ext_kind -> UnknownDecl (kind, ext_kind)
       with Invalid_structure ->
         UnknownDecl (get_cursor_kind cursor, ext_decl_get_kind cursor)

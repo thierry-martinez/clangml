@@ -2712,7 +2712,7 @@ let () =
   | _ -> assert false
    ]}*)
   | TemplateTemplateParameter of string
-  | Friend of decl
+  | Friend of friend_decl
 (**
   C++ friend declaration.
 
@@ -2720,6 +2720,7 @@ let () =
 let example = {|
      class C {
        friend void f();
+       friend class B;
      };
    |}
 
@@ -2730,12 +2731,58 @@ let () =
          keyword = Class;
          name = "C";
          fields = [
-           { desc = Friend { desc = Function {
+           { desc = Friend (FriendDecl { desc = Function {
                function_type = {
                  result = { desc = BuiltinType Void };
                  parameters = Some { non_variadic = []; variadic = false }};
                name = "f";
-               body = None }}}] }}] -> ()
+               body = None }})};
+           { desc = Friend (FriendType { desc = Elaborated {
+               keyword = Class;
+               named_type = { desc = Record "B" }}})}] }}] -> ()
+  | _ -> assert false
+   ]}
+
+   {[
+let example = {|
+     template <typename T> class C {
+       friend T; // only in C++0x
+     };
+   |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  fun ast -> match ast with
+  | [{ desc = TemplateDecl {
+         parameters = [{ desc = { name = "T"; kind = Class _ }}];
+         decl = { desc = RecordDecl {
+           keyword = Class;
+           name = "C";
+           fields = [
+             { desc = Friend (FriendType { desc =
+                 TemplateTypeParm "T" })}] }}}}] -> ()
+  | _ -> assert false
+   ]}
+
+   {[
+let example = {|
+     class C {
+       template <typename T> friend class B;
+     };
+   |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  fun ast -> match ast with
+  | [{ desc = RecordDecl {
+         keyword = Class;
+         name = "C";
+         fields = [{ desc = Friend (FriendDecl { desc = TemplateDecl {
+           parameters = [{ desc = { name = "T"; kind = Class _ }}];
+           decl = { desc = RecordDecl {
+             keyword = Class;
+             name = "B";
+             fields = [] }}}})}] }}] -> ()
   | _ -> assert false
    ]}*)
   | EmptyDecl
@@ -2755,6 +2802,10 @@ let () =
   | UnknownDecl of
       (cxcursorkind [@visitors.opaque]) *
       (clang_ext_declkind [@visitors.opaque])
+
+and friend_decl =
+  | FriendDecl of decl
+  | FriendType of qual_type
 
 and label_ref = string
 

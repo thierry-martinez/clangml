@@ -386,3 +386,9 @@ clang_ext_TemplateSpecializationType_getNumArgs(CXType);
 
 struct clang_ext_TemplateArgument
 clang_ext_TemplateSpecializationType_getArgument(CXType, unsigned);
+
+CXCursor
+clang_ext_FriendDecl_getFriendDecl(CXCursor c);
+
+CXType
+clang_ext_FriendDecl_getFriendType(CXCursor c);

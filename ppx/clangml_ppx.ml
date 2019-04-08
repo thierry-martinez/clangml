@@ -142,6 +142,7 @@ and var_decl = [%import: Clang.Ast.var_decl]
 and builtin_type = [%import: Clang.Ast.builtin_type]
 and attribute_kind = [%import: Clang.Ast.attribute_kind]
 and calling_conv = [%import: Clang.Ast.calling_conv]
+and friend_decl = [%import: Clang.Ast.friend_decl]
       [@@deriving quote]
 
 let () =

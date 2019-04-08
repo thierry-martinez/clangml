@@ -4,6 +4,7 @@
 #include <clang/AST/Type.h>
 #include <clang/AST/DeclCXX.h>
 #include <clang/AST/DeclTemplate.h>
+#include <clang/AST/DeclFriend.h>
 #include "clang/Frontend/ASTUnit.h"
 #include "clang/Basic/SourceLocation.h"
 #include <llvm/Support/Casting.h>
@@ -1135,5 +1136,29 @@ extern "C" {
       return MakeTemplateArgument(TST->getArg(i), GetTU(CT));
     }
     return MakeTemplateArgumentInvalid(GetTU(CT));
+  }
+
+  CXCursor
+  clang_ext_FriendDecl_getFriendDecl(CXCursor c)
+  {
+    if (auto *d = GetCursorDecl(c)) {
+      if (auto *fd = llvm::dyn_cast_or_null<clang::FriendDecl>(d)) {
+        return MakeCXCursor(fd->getFriendDecl(), getCursorTU(c));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  CXType
+  clang_ext_FriendDecl_getFriendType(CXCursor c)
+  {
+    if (auto *d = GetCursorDecl(c)) {
+      if (auto *fd = llvm::dyn_cast_or_null<clang::FriendDecl>(d)) {
+        if (auto *type = fd->getFriendType()) {
+          return MakeCXType(type->getType(), getCursorTU(c));
+        }
+      }
+    }
+    return MakeCXTypeInvalid(getCursorTU(c));
   }
 }

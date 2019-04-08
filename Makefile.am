@@ -61,7 +61,8 @@ $(DUNE_PREFIX)/$(STUBGEN_EXE) : \
 		$(DUNE_PREFIX)/$(CLANGML_CMXA) stubgen/stubgen.ml
 	$(DUNE) build $(STUBGEN_EXE)
 
-current/clang__bindings.ml : $(STUBGEN_EXE) clangml/libclang_extensions.h
+current/clang__bindings.ml : $(DUNE_PREFIX)/$(STUBGEN_EXE) \
+		clangml/libclang_extensions.h
 	$(DUNE_PREFIX)/$(STUBGEN_EXE) --llvm-config $(LLVM_CONFIG) current/
 
 current/clang__bindings.mli : current/clang__bindings.ml
@@ -74,13 +75,14 @@ clean-local : clean-local-dune
 clean-local-dune :
 	dune clean
 
-$(DUNE_PREFIX)/clangml.install : \
+$(DUNE_PREFIX)/clangml.install, \
+$(DUNE_PREFIX)/clangml_ppx.install : \
 		$(DUNE_PREFIX)/$(CLANGML_CMXA) \
 		$(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A) \
-		clangml.opam
+		clangml.opam clangml_ppx.opam
 	dune build @install
 
-install : $(DUNE_PREFIX)/clangml.install
+install : $(DUNE_PREFIX)/clangml.install $(DUNE_PREFIX)/clangml_ppx.install
 	- test -z $(INSTALL_NAME_TOOL) || \
 		$(INSTALL_NAME_TOOL) -add_rpath $(LLVM_LIBDIR) \
 			_build/install/default/lib/stublibs/dllclangml_stubs.so
