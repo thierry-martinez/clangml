@@ -6,8 +6,6 @@ DUNE_PREFIX = _build/default
 
 CLANGML_CMXA = clangml/clangml.cmxa
 
-CLANGML_PPX_CMXA = ppx/clangml_ppx.cmxa
-
 LIBCLANGML_STUBS_A = clangml/libclangml_stubs.a
 
 STUBGEN_EXE = stubgen/stubgen.exe
@@ -22,9 +20,6 @@ clangml : $(DUNE_PREFIX)/$(CLANGML_CMXA) $(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A)
 .PHONY : stubgen
 stubgen : $(DUNE_PREFIX)/$(STUBGEN_EXE)
 
-.PHONY : ppx
-ppx : $(DUNE_PREFIX)/$(CLANGML_PPX_CMXA)
-
 .PHONY : tests
 tests :
 	dune runtest
@@ -33,24 +28,12 @@ tests :
 doc :
 	dune build @doc
 
-.PHONY : tests_ppx
-tests_ppx : $(DUNE_PREFIX)/tests_ppx/tests_ppx.exe
-	$(DUNE_PREFIX)/tests_ppx/tests_ppx.exe
-
-$(DUNE_PREFIX)/tests_ppx/tests_ppx.exe :
-	$(DUNE) build tests_ppx/tests_ppx.exe
-
 $(DUNE_PREFIX)/$(CLANGML_CMXA) : \
 		clangml/clang.ml clangml/clang.mli \
 		clangml/clang__bindings.ml clangml/clang__ast.ml \
 		clangml/clang__utils.ml clangml/clang__ast_utils.ml \
 	clangml/clang__printer.ml
 	$(DUNE) build $(CLANGML_CMXA)
-
-$(DUNE_PREFIX)/$(CLANGML_PPX_CMXA) : \
-		$(DUNE_PREFIX)/$(CLANGML_CMXA) \
-		ppx/clangml_ppx.ml
-	$(DUNE) build $(CLANGML_PPX_CMXA)
 
 $(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A) : \
 		clangml/clang_stubs.c clangml/libclang_extensions.cpp \
@@ -75,14 +58,13 @@ clean-local : clean-local-dune
 clean-local-dune :
 	dune clean
 
-$(DUNE_PREFIX)/clangml.install, \
-$(DUNE_PREFIX)/clangml_ppx.install : \
+$(DUNE_PREFIX)/clangml.install : \
 		$(DUNE_PREFIX)/$(CLANGML_CMXA) \
 		$(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A) \
-		clangml.opam clangml_ppx.opam
+		clangml.opam
 	dune build @install
 
-install : $(DUNE_PREFIX)/clangml.install $(DUNE_PREFIX)/clangml_ppx.install
+install : $(DUNE_PREFIX)/clangml.install
 	- test -z $(INSTALL_NAME_TOOL) || \
 		$(INSTALL_NAME_TOOL) -add_rpath $(LLVM_LIBDIR) \
 			_build/install/default/lib/stublibs/dllclangml_stubs.so
