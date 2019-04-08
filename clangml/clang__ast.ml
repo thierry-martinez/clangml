@@ -140,8 +140,6 @@ and calling_conv = cxcallingconv [@visitors.opaque]
 
 and linkage_kind = cxlinkagekind [@visitors.opaque]
 
-and template_argument_kind = cxtemplateargumentkind [@visitors.opaque]
-
 and integer_literal =
   | Int of int
   | CXInt of (cxint [@visitors.opaque] [@quote.opaque])

@@ -266,19 +266,6 @@ module Ast = struct
                     decl = Some (get_cursor_spelling decl_ref) }
               | _ -> raise Invalid_structure
             end
-        | UnexposedDecl ->
-            begin
-              match ext_decl_get_kind cursor with
-              | Empty -> EmptyDecl
-              | LinkageSpec ->
-                  let languages =
-                    languages_of_ids
-                      (ext_linkage_spec_decl_get_language_ids cursor) in
-                let decls =
-                  list_of_children cursor |> List.map decl_of_cxcursor in
-                LinkageSpec { languages; decls }
-              | kind -> UnknownDecl (UnexposedDecl, kind)
-            end
         | Constructor ->
             let children = list_of_children cursor in
             let rec extract_initializer_list children =
@@ -321,13 +308,23 @@ module Ast = struct
           }
         | TemplateTemplateParameter ->
             TemplateTemplateParameter (get_cursor_spelling cursor)
-        | FriendDecl ->
-            let body =
-              match list_of_children cursor with
-              | [body] -> decl_of_cxcursor body
-              | _ -> raise Invalid_structure in
-            Friend body
-        | kind -> UnknownDecl (kind, ext_decl_get_kind cursor)
+        | kind ->
+            match ext_decl_get_kind cursor with
+            | Empty -> EmptyDecl
+            | LinkageSpec ->
+                let languages =
+                  languages_of_ids
+                    (ext_linkage_spec_decl_get_language_ids cursor) in
+                let decls =
+                  list_of_children cursor |> List.map decl_of_cxcursor in
+                LinkageSpec { languages; decls }
+            | Friend -> (* No FriendDecl : cxcursortype in Clang <4.0.0 *)
+                let body =
+                  match list_of_children cursor with
+                  | [body] -> decl_of_cxcursor body
+                  | _ -> raise Invalid_structure in
+                Friend body
+            | ext_kind -> UnknownDecl (kind, ext_kind)
       with Invalid_structure ->
         UnknownDecl (get_cursor_kind cursor, ext_decl_get_kind cursor)
 
