@@ -1,0 +1,7 @@
+(library
+  (name clangml_ppx)
+  (public_name clangml_ppx)
+  (preprocess (staged_pps ppx_import ppxlib.metaquot ppx_deriving.std value_quoter))
+  (preprocessor_deps (package clangml))
+  (library_flags (-linkall))
+  (libraries compiler-libs ppx_tools.metaquot ocaml-migrate-parsetree clangml))
