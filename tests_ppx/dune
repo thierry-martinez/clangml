@@ -1,4 +1,0 @@
-(executable
-   (name tests_ppx)
-   (preprocess (pps clangml_ppx))
-   (libraries ppx_deriving.runtime clangml))
