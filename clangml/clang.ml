@@ -2,6 +2,8 @@ include Clang__bindings
 
 include Clang__compat
 
+include Clang__types
+
 include Clang__utils
 
 module Ast = struct

@@ -2,6 +2,8 @@ open Clang__bindings
 
 open Clang__compat
 
+open Clang__types
+
 let iter_children f c =
   let exn_ref = ref (None : exn option) in
   if
@@ -121,17 +123,29 @@ let string_of_cxerrorcode cxerrorcode =
   | InvalidArguments -> "the arguments violate the function contract"
   | ASTReadError -> "an AST deserialization error has occurred"
 
-type language = C | Cxx
+(* From CompilerInvocation.cpp:ParseFrontendArgs *)
 
 let string_of_language language =
   match language with
   | C -> "c"
-  | Cxx -> "c++"
+  | OpenCL -> "cl"
+  | CUDA -> "cuda"
+  | HIP -> "hip"
+  | CXX -> "c++"
+  | ObjC -> "objective-c"
+  | ObjCXX -> "objective-c++"
+  | RenderScript -> "renderscript"
 
 let language_of_string s =
   match s with
   | "c" -> C
-  | "c++" -> Cxx
+  | "cl" -> OpenCL
+  | "cuda" -> CUDA
+  | "hip" -> HIP
+  | "c++" -> CXX
+  | "objective-c" | "objc" -> ObjC
+  | "objective-c++" | "objc++" -> ObjCXX
+  | "renderscript" -> RenderScript
   | _ -> invalid_arg "language_of_string"
 
 let parse_file_res ?(index = create_index true true)

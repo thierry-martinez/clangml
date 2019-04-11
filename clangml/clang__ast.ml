@@ -754,7 +754,7 @@ let () =
 let example = {| void f(int i = 1) {} |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = Function {
       name = "f";
@@ -924,7 +924,7 @@ let example = "for (int i = 0; int j = i - 1; i--) { j; }"
 
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list
-    ~language:Cxx) example @@ fun ast -> match ast with
+    ~language:CXX) example @@ fun ast -> match ast with
   | [{ desc = For {
       init = Some { desc = Decl [{ desc = Var {
         name = "i";
@@ -987,7 +987,7 @@ let example = "if (int i = 1) { i; }"
 
 let () =
   check Clang.Ast.pp_stmt
-    (parse_statement_list ~language:Cxx) example @@
+    (parse_statement_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = If {
        init = None;
@@ -1010,7 +1010,7 @@ let example = "if (int i = 1; i) { i; }"
 
 let () =
   if Clang.get_clang_version () >= "clang version 3.9.0" then
-    check Clang.Ast.pp_stmt (parse_statement_list ~language:Cxx) example
+    check Clang.Ast.pp_stmt (parse_statement_list ~language:CXX) example
     @@ fun ast -> match ast with
     | [{ desc = If {
          init = Some { desc = Decl [{ desc = Var {
@@ -1057,7 +1057,7 @@ let example =
   "switch (int i = 1) { case 1: f(); break; case 2: break; default:;}"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list ~language:Cxx) example
+  check Clang.Ast.pp_stmt (parse_statement_list ~language:CXX) example
   @@ fun ast -> match ast with
   | [{ desc = Switch {
       init = None;
@@ -1090,7 +1090,7 @@ let example =
 let () =
   if Clang.get_clang_version () >= "clang version 3.9.0" then
     check Clang.Ast.pp_stmt
-    (parse_statement_list ~language:Cxx) example @@
+    (parse_statement_list ~language:CXX) example @@
     fun ast -> match ast with
     | [{ desc = Switch {
         init = Some { desc = Decl [{ desc = Var {
@@ -1197,7 +1197,7 @@ let example = "while (int i = 1) { i; }"
 
 let () =
   check Clang.Ast.pp_stmt
-    (parse_statement_list ~language:Cxx) example @@
+    (parse_statement_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = While {
       condition_variable = Some ({ desc = {
@@ -1468,7 +1468,7 @@ let example = "u8'a';"
 
 let () =
   if Clang.get_clang_version () >= "clang version 3.6" then
-    check Clang.Ast.pp_stmt (parse_statement_list ~language:Cxx
+    check Clang.Ast.pp_stmt (parse_statement_list ~language:CXX
         ~command_line_args:["-std=c++1z"]) example @@
     fun ast -> match ast with
     | [{ desc = Expr { desc = CharacterLiteral { kind = UTF8; value = 0x61 } }}]
@@ -1835,7 +1835,7 @@ let example = {| alignof(int); |}
 
 let () =
   check Clang.Ast.pp_stmt
-    (parse_statement_list ~language:Cxx
+    (parse_statement_list ~language:CXX
       ~command_line_args:["-std=c++11"])
     example @@
   fun ast -> match ast with
@@ -1850,7 +1850,7 @@ let () =
     {[
 let () =
   if Clang.get_clang_version () >= "clang version 6.0.0" then
-    check Clang.Ast.pp_stmt (parse_statement_list ~language:Cxx)
+    check Clang.Ast.pp_stmt (parse_statement_list ~language:CXX)
     example @@ fun ast -> match ast with
     | [ { desc = Expr { desc = UnaryExpr {
             kind = AlignOf;
@@ -1886,7 +1886,7 @@ and decl_desc =
 let example = {| template <class X, int i> int f(X); |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
       parameters = [
@@ -1914,7 +1914,7 @@ let example = {|
 |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
       parameters = [
@@ -1949,7 +1949,7 @@ let example = {|
   } |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
       keyword = Class;
@@ -2067,7 +2067,7 @@ let example = {|
  |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
       keyword = Class;
@@ -2446,7 +2446,7 @@ let example = {|
     |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
       keyword = Class;
@@ -2478,7 +2478,7 @@ let example = {|
     |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = Namespace {
       name = "example";
@@ -2500,7 +2500,7 @@ let example = {|
     |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = Using {
       namespace = "std";
@@ -2515,7 +2515,7 @@ let example = {|
     |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match List.hd (List.rev ast) with
   | { desc = Using {
       namespace = "std";
@@ -2545,7 +2545,7 @@ let example = {|
     |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
          keyword = Class;
@@ -2585,7 +2585,7 @@ let example = {|
     |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
          keyword = Class;
@@ -2620,7 +2620,7 @@ let example = {|
     |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
          keyword = Class;
@@ -2639,7 +2639,7 @@ let example = {|
     |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
          keyword = Class;
@@ -2669,7 +2669,7 @@ let example = {|
    |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = LinkageSpec {
          languages = { c = true; cxx = false };
@@ -2695,7 +2695,7 @@ let example = {|
    |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = LinkageSpec {
          languages = { c = false; cxx = true };
@@ -2725,7 +2725,7 @@ let example = {|
    |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
          keyword = Class;
@@ -2751,7 +2751,7 @@ let example = {|
    |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
          parameters = [{ desc = { name = "T"; kind = Class _ }}];
@@ -2772,7 +2772,7 @@ let example = {|
    |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
          keyword = Class;
@@ -2849,7 +2849,7 @@ let example = {|
 |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
       parameters = [
@@ -2884,7 +2884,7 @@ let example = {|
 |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
       parameters = [
@@ -2918,7 +2918,7 @@ let example = {|
 |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
        parameters = [{ desc = { name = "T"; kind = Class { default = None }}}];

@@ -2,7 +2,7 @@ open Clang__bindings
 
 open Clang__compat
 
-type language = C | Cxx
+open Clang__types
 
 val string_of_language : language -> string
 
