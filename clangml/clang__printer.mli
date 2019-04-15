@@ -1,5 +1,7 @@
 val qual_type : Format.formatter -> Clang__ast.qual_type -> unit
 
+val typed_value : (Format.formatter -> unit) -> Format.formatter -> Clang__ast.qual_type -> unit
+
 val expr : Format.formatter -> Clang__ast.expr -> unit
 
 val decl : Format.formatter -> Clang__ast.decl -> unit

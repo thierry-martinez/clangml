@@ -142,11 +142,17 @@ let language_of_string s =
   | "cl" -> OpenCL
   | "cuda" -> CUDA
   | "hip" -> HIP
-  | "c++" -> CXX
+  | "c++" | "cpp" -> CXX
   | "objective-c" | "objc" -> ObjC
-  | "objective-c++" | "objc++" -> ObjCXX
+  | "objective-c++" | "objc++" | "objcpp" -> ObjCXX
   | "renderscript" -> RenderScript
   | _ -> invalid_arg "language_of_string"
+
+let language_of_string_opt s =
+  try
+    Some (language_of_string s)
+  with Invalid_argument _ ->
+    None
 
 let parse_file_res ?(index = create_index true true)
     ?(command_line_args = []) ?language ?(unsaved_files = [])
@@ -182,3 +188,11 @@ let parse_string ?index ?filename ?command_line_args ?language ?unsaved_files
   with
   | Ok cxtranslationunit -> cxtranslationunit
   | Error cxerrorcode -> failwith (string_of_cxerrorcode cxerrorcode)
+
+let string_of_cxx_access_specifier specifier =
+  match specifier with
+  | CXXInvalidAccessSpecifier ->
+      invalid_arg "string_of_cxx_access_specifier"
+  | CXXPublic -> "public"
+  | CXXProtected -> "protected"
+  | CXXPrivate -> "private"

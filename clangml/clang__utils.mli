@@ -8,6 +8,10 @@ val string_of_language : language -> string
 
 val language_of_string : string -> language
 
+val language_of_string_opt : string -> language option
+
+val string_of_cxx_access_specifier : cx_cxxaccessspecifier -> string
+
 (** {2 Parsing files and strings } *)
 
 val parse_file : ?index:cxindex ->
