@@ -305,7 +305,7 @@ let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match List.rev ast with
   | { desc = Var { name = "v"; qual_type = { desc = Vector {
-      element = { desc = Typedef "int32_t" };
+      element = { desc = Typedef (Ident "int32_t") };
       size = 4 }}}} :: _ -> ()
   | _ -> assert false
     ]}*)
@@ -341,7 +341,7 @@ let () =
             { desc = { name = "i"; qual_type = { desc = BuiltinType Int }}};
             { desc = { name = "array"; qual_type = { desc = VariableArray {
                element = { desc = BuiltinType Char_S };
-               size = { desc = DeclRef "i" }}}}}];
+               size = { desc = DeclRef (Ident "i") }}}}}];
           variadic = false }}}}] -> ()
   | _ -> assert false
     ]}*)
@@ -359,10 +359,10 @@ let () =
   | [{ desc = EnumDecl _ };
      { desc = Var { name = "e"; qual_type = { desc = Elaborated {
       keyword = Enum;
-      named_type = { desc = Enum "example" }}}}}] -> ()
+      named_type = { desc = Enum (Ident "example") }}}}}] -> ()
   | _ -> assert false
     ]}*)
-  | Enum of string
+  | Enum of ident_ref
 (** Enum type.
     {[
 let example = "enum { A, B, C } e;"
@@ -373,7 +373,7 @@ let () =
   | [{ desc = EnumDecl _ };
      { desc = Var { name = "e"; qual_type = { desc = Elaborated {
       keyword = Enum;
-      named_type = { desc = Enum "" } as named_type }}}}] ->
+      named_type = { desc = Enum (Ident "") } as named_type }}}}] ->
         let values =
           match Clang.Type.get_declaration named_type with
           | { desc = EnumDecl { constants }} ->
@@ -399,7 +399,7 @@ let () =
         parameters = Some { non_variadic = []; variadic = false}}}}}}] -> ()
   | _ -> assert false
     ]}*)
-  | Record of string
+  | Record of ident_ref
 (** Record type (either struct or union).
 
     The argument is the name and is the empty string for anonymous struct or
@@ -413,7 +413,7 @@ let () =
   | [{ desc = RecordDecl { keyword = Struct }};
      { desc = Var { name = "s"; qual_type = { desc = Elaborated {
       keyword = Struct;
-      named_type = { desc = Record "" } as named_type }}}}] ->
+      named_type = { desc = Record (Ident "") } as named_type }}}}] ->
         let fields = named_type |> Clang.Type.list_of_fields in
         begin
           match fields with
@@ -439,7 +439,7 @@ let () =
   | [{ desc = RecordDecl { keyword = Union }};
      { desc = Var { name = "u"; qual_type = { desc = Elaborated {
       keyword = Union;
-      named_type = { desc = Record "" } as named_type }}}}] ->
+      named_type = { desc = Record (Ident "") } as named_type }}}}] ->
         let fields = named_type |> Clang.Type.list_of_fields in
         begin
           match fields with
@@ -457,7 +457,7 @@ let () =
         end
   | _ -> assert false
     ]}*)
-  | Typedef of string
+  | Typedef of ident_ref
 (** Typedef type.
     {[
 let example = "typedef struct { int i; float f; } struct_t; struct_t s;"
@@ -467,7 +467,7 @@ let () =
   fun ast -> match ast with
   | [{ desc = RecordDecl { keyword = Struct }}; { desc = TypedefDecl _ };
      { desc = Var { name = "s";
-       qual_type = { desc = Typedef "struct_t" } as qual_type }}] ->
+       qual_type = { desc = Typedef (Ident "struct_t") } as qual_type }}] ->
         let fields = qual_type |>
           Clang.Type.get_typedef_underlying_type |>
           Clang.Type.list_of_fields in
@@ -754,7 +754,7 @@ let () =
 let example = {| void f(int i = 1) {} |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = Function {
       name = "f";
@@ -883,19 +883,19 @@ let () =
   fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = For {
       init = Some { desc = Expr { desc = BinaryOperator {
-        lhs = { desc = DeclRef "i"};
+        lhs = { desc = DeclRef (Ident "i")};
         kind = Assign;
         rhs = { desc = IntegerLiteral (Int 0)}}}};
       condition_variable = None;
       cond = Some { desc = BinaryOperator {
-        lhs = { desc = DeclRef "i"};
+        lhs = { desc = DeclRef (Ident "i")};
         kind = LT;
         rhs = { desc = IntegerLiteral (Int 4)}}};
       inc = Some { desc = Expr { desc = UnaryOperator {
         kind = PostInc;
-        operand = { desc = DeclRef "i"}}}};
+        operand = { desc = DeclRef (Ident "i")}}}};
       body = { desc = Compound [{ desc =
-        Expr { desc = DeclRef "i" }}] }}}] -> ()
+        Expr { desc = DeclRef (Ident "i") }}] }}}] -> ()
   | _ -> assert false
 
 let example = "for (int i = 0; i < 4; i++) { i; }"
@@ -910,21 +910,21 @@ let () =
         init = Some { desc = IntegerLiteral (Int 0)}}}] };
       condition_variable = None;
       cond = Some { desc = BinaryOperator {
-        lhs = { desc = DeclRef "i"};
+        lhs = { desc = DeclRef (Ident "i")};
         kind = LT;
         rhs = { desc = IntegerLiteral (Int 4)}}};
       inc = Some { desc = Expr { desc = UnaryOperator {
         kind = PostInc;
-        operand = { desc = DeclRef "i"}}}};
+        operand = { desc = DeclRef (Ident "i")}}}};
       body = { desc = Compound [{ desc =
-        Expr { desc = DeclRef "i" }}] }}}] -> ()
+        Expr { desc = DeclRef (Ident "i") }}] }}}] -> ()
   | _ -> assert false
 
 let example = "for (int i = 0; int j = i - 1; i--) { j; }"
 
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list
-    ~language:Cxx) example @@ fun ast -> match ast with
+    ~language:CXX) example @@ fun ast -> match ast with
   | [{ desc = For {
       init = Some { desc = Decl [{ desc = Var {
         name = "i";
@@ -934,15 +934,15 @@ let () =
         name = "j";
         qual_type = { desc = BuiltinType Int};
         init = Some { desc = BinaryOperator {
-          lhs = { desc = DeclRef "i"};
+          lhs = { desc = DeclRef (Ident "i")};
           kind = Sub;
           rhs = { desc = IntegerLiteral (Int 1)}}}}};
-      cond = Some { desc = DeclRef "j" };
+      cond = Some { desc = DeclRef (Ident "j") };
       inc = Some { desc = Expr { desc = UnaryOperator {
         kind = PostDec;
-        operand = { desc = DeclRef "i"}}}};
+        operand = { desc = DeclRef (Ident "i")}}}};
       body = { desc = Compound [{ desc =
-        Expr { desc = DeclRef "j" }}] }}}] -> ()
+        Expr { desc = DeclRef (Ident "j") }}] }}}] -> ()
   | _ -> assert false
     ]}*)
   | If of {
@@ -987,7 +987,7 @@ let example = "if (int i = 1) { i; }"
 
 let () =
   check Clang.Ast.pp_stmt
-    (parse_statement_list ~language:Cxx) example @@
+    (parse_statement_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = If {
        init = None;
@@ -995,9 +995,9 @@ let () =
          qual_type = { desc = BuiltinType Int};
          name = "i";
          init = Some { desc = IntegerLiteral (Int 1) }}});
-       cond = { desc = DeclRef "i"};
+       cond = { desc = DeclRef (Ident "i")};
        then_branch = { desc = Compound [{
-         desc = Expr { desc = DeclRef "i" }}] };
+         desc = Expr { desc = DeclRef (Ident "i") }}] };
        else_branch = None }}] -> ()
   | _ -> assert false
 
@@ -1010,7 +1010,7 @@ let example = "if (int i = 1; i) { i; }"
 
 let () =
   if Clang.get_clang_version () >= "clang version 3.9.0" then
-    check Clang.Ast.pp_stmt (parse_statement_list ~language:Cxx) example
+    check Clang.Ast.pp_stmt (parse_statement_list ~language:CXX) example
     @@ fun ast -> match ast with
     | [{ desc = If {
          init = Some { desc = Decl [{ desc = Var {
@@ -1019,7 +1019,7 @@ let () =
            init = Some { desc = IntegerLiteral (Int 1) }}}] };
          condition_variable = None;
          then_branch = { desc = Compound [{
-           desc = Expr { desc = DeclRef "i" }}] };
+           desc = Expr { desc = DeclRef (Ident "i") }}] };
          else_branch = None }}] -> ()
     | _ -> assert false
    ]}*)
@@ -1045,7 +1045,7 @@ let () =
           lhs = { desc = IntegerLiteral (Int 1)};
           body = { desc =
             Expr { desc =
-              Call { callee = { desc = DeclRef "f" }; args = [] }}}}};
+              Call { callee = { desc = DeclRef (Ident "f") }; args = [] }}}}};
         { desc = Break };
         { desc = Case {
           lhs = { desc = IntegerLiteral (Int 2)};
@@ -1057,7 +1057,7 @@ let example =
   "switch (int i = 1) { case 1: f(); break; case 2: break; default:;}"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list ~language:Cxx) example
+  check Clang.Ast.pp_stmt (parse_statement_list ~language:CXX) example
   @@ fun ast -> match ast with
   | [{ desc = Switch {
       init = None;
@@ -1065,13 +1065,13 @@ let () =
          qual_type = { desc = BuiltinType Int};
          name = "i";
          init = Some { desc = IntegerLiteral (Int 1)}}});
-      cond = { desc = DeclRef "i" };
+      cond = { desc = DeclRef (Ident "i") };
       body = { desc = Compound [
         { desc = Case {
           lhs = { desc = IntegerLiteral (Int 1)};
           body = { desc =
             Expr { desc =
-              Call { callee = { desc = DeclRef "f" }; args = [] }}}}};
+              Call { callee = { desc = DeclRef (Ident "f") }; args = [] }}}}};
         { desc = Break };
         { desc = Case {
           lhs = { desc = IntegerLiteral (Int 2)};
@@ -1090,7 +1090,7 @@ let example =
 let () =
   if Clang.get_clang_version () >= "clang version 3.9.0" then
     check Clang.Ast.pp_stmt
-    (parse_statement_list ~language:Cxx) example @@
+    (parse_statement_list ~language:CXX) example @@
     fun ast -> match ast with
     | [{ desc = Switch {
         init = Some { desc = Decl [{ desc = Var {
@@ -1098,13 +1098,13 @@ let () =
            qual_type = { desc = BuiltinType Int };
            init = Some { desc = IntegerLiteral (Int 1)}}}] };
         condition_variable = None;
-        cond = { desc = DeclRef "i" };
+        cond = { desc = DeclRef (Ident "i") };
         body = { desc = Compound [
           { desc = Case {
             lhs = { desc = IntegerLiteral (Int 1)};
             body = { desc =
               Expr { desc = Call {
-                callee = { desc = DeclRef "f" }; args = [] }}}}};
+                callee = { desc = DeclRef (Ident "f") }; args = [] }}}}};
           { desc = Break };
           { desc = Case {
             lhs = { desc = IntegerLiteral (Int 2)};
@@ -1137,7 +1137,7 @@ let () =
           rhs = None;
           body = { desc =
             Expr { desc = Call {
-              callee = { desc = DeclRef "f" }; args = [] }}}}};
+              callee = { desc = DeclRef (Ident "f") }; args = [] }}}}};
         { desc = Break };
         { desc = Case {
           lhs = { desc = IntegerLiteral (Int 2)};
@@ -1197,16 +1197,16 @@ let example = "while (int i = 1) { i; }"
 
 let () =
   check Clang.Ast.pp_stmt
-    (parse_statement_list ~language:Cxx) example @@
+    (parse_statement_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = While {
       condition_variable = Some ({ desc = {
          qual_type = { desc = BuiltinType Int};
          name = "i";
          init = Some { desc = IntegerLiteral (Int 1)}}});
-      cond = { desc = DeclRef "i" };
+      cond = { desc = DeclRef (Ident "i") };
       body = { desc = Compound [{ desc =
-        Expr { desc = DeclRef "i" }}] }}}] -> ()
+        Expr { desc = DeclRef (Ident "i") }}] }}}] -> ()
   | _ -> assert false
     ]}*)
   | Do of {
@@ -1232,7 +1232,7 @@ let () =
   @@ fun ast -> match ast with
   | [{ desc = Do {
       body = { desc = Compound [{ desc =
-        Expr { desc = Call { callee = { desc = DeclRef "f" }; args = [] }}}] };
+        Expr { desc = Call { callee = { desc = DeclRef (Ident "f") }; args = [] }}}] };
       cond = { desc = IntegerLiteral (Int 1)}}}] -> ()
   | _ -> assert false
     ]}*)
@@ -1282,7 +1282,7 @@ let () =
         name = "ptr";
         qual_type = { desc = Pointer { desc = BuiltinType Void }};
         init = Some { desc = AddrLabel "label" }}}] };
-      { desc = IndirectGoto { desc = DeclRef "ptr"}}] -> ()
+      { desc = IndirectGoto { desc = DeclRef (Ident "ptr")}}] -> ()
   | _ -> assert false
     ]}*)
   | Continue
@@ -1468,7 +1468,7 @@ let example = "u8'a';"
 
 let () =
   if Clang.get_clang_version () >= "clang version 3.6" then
-    check Clang.Ast.pp_stmt (parse_statement_list ~language:Cxx
+    check Clang.Ast.pp_stmt (parse_statement_list ~language:CXX
         ~command_line_args:["-std=c++1z"]) example @@
     fun ast -> match ast with
     | [{ desc = Expr { desc = CharacterLiteral { kind = UTF8; value = 0x61 } }}]
@@ -1535,7 +1535,7 @@ let () =
   @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = UnaryOperator {
       kind = AddrOf;
-      operand = { desc = DeclRef "x" }} }}] -> ()
+      operand = { desc = DeclRef (Ident "x") }} }}] -> ()
   | _ -> assert false
     ]}*)
   | BinaryOperator of {
@@ -1562,12 +1562,12 @@ let () =
   check Clang.Ast.pp_stmt parse_statement_list example
   @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = BinaryOperator {
-      lhs = { desc = DeclRef "i"};
+      lhs = { desc = DeclRef (Ident "i")};
       kind = MulAssign;
       rhs = { desc = IntegerLiteral (Int 3)}}}}] -> ()
   | _ -> assert false
     ]} *)
-  | DeclRef of string
+  | DeclRef of ident_ref
 (** Declaration reference.
     {[
 let example = "int i; i;"
@@ -1575,7 +1575,7 @@ let example = "int i; i;"
 let () =
   check Clang.Ast.pp_stmt parse_statement_list example
   @@ fun ast -> match ast with
-  | [{ desc = Decl _ }; { desc = Expr { desc = DeclRef "i" }}] -> ()
+  | [{ desc = Decl _ }; { desc = Expr { desc = DeclRef (Ident "i") }}] -> ()
   | _ -> assert false
     ]} *)
   | Call of {
@@ -1590,7 +1590,7 @@ let () =
   check Clang.Ast.pp_stmt parse_statement_list example
   @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = Call {
-      callee = { desc = DeclRef "g" };
+      callee = { desc = DeclRef (Ident "g") };
       args = [{ desc = IntegerLiteral (Int 1)}] }}}] -> ()
   | _ -> assert false
     ]} *)
@@ -1628,7 +1628,7 @@ let () =
   | [{ desc = Decl _ }; { desc = Expr { desc = Cast {
       kind = Implicit;
       qual_type = { desc = BuiltinType Int };
-      operand = { desc = DeclRef "i" }} }}] -> ()
+      operand = { desc = DeclRef (Ident "i") }} }}] -> ()
   | _ -> assert false
     ]}
 *)
@@ -1646,7 +1646,7 @@ let () =
   @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = BinaryOperator {
       lhs = { desc = Member {
-        base = { desc = DeclRef "s" };
+        base = { desc = DeclRef (Ident "s") };
         arrow = false;
         field = { desc = "i" }}};
       kind = Assign;
@@ -1660,13 +1660,14 @@ let () =
   @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = BinaryOperator {
       lhs = { desc = Member {
-        base = { desc = DeclRef "p" };
+        base = { desc = DeclRef (Ident "p") };
         arrow = true;
         field = { desc = "i" }}};
       kind = Assign;
       rhs = { desc = IntegerLiteral (Int 0)}}}}] -> ()
   | _ -> assert false
     ]}*)
+  | MemberRef of string
   | ArraySubscript of {
       base : expr;
       index : expr;
@@ -1680,7 +1681,7 @@ let () =
   @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = BinaryOperator {
       lhs = { desc = ArraySubscript {
-        base = { desc = DeclRef "a" };
+        base = { desc = DeclRef (Ident "a") };
         index = { desc = IntegerLiteral (Int 0)}}};
       kind = Assign;
       rhs = { desc = IntegerLiteral (Int 1)}}}}] -> ()
@@ -1748,7 +1749,7 @@ let () =
   | [ { desc = Decl _ };
       { desc = Expr { desc = UnaryExpr {
           kind = SizeOf;
-          argument = ArgumentExpr { desc = Paren { desc = DeclRef "i" }}} }}] ->
+          argument = ArgumentExpr { desc = Paren { desc = DeclRef (Ident "i") }}} }}] ->
       ()
   | _ -> assert false
     ]}*)
@@ -1818,7 +1819,7 @@ let () =
   | [ { desc = Decl _ };
       { desc = Expr { desc = UnaryExpr {
           kind = SizeOf;
-          argument = ArgumentExpr { desc = DeclRef "i" }} }}] -> ()
+          argument = ArgumentExpr { desc = DeclRef (Ident "i") }} }}] -> ()
   | _ -> assert false
 
 let example = {| sizeof(int); |}
@@ -1835,7 +1836,7 @@ let example = {| alignof(int); |}
 
 let () =
   check Clang.Ast.pp_stmt
-    (parse_statement_list ~language:Cxx
+    (parse_statement_list ~language:CXX
       ~command_line_args:["-std=c++11"])
     example @@
   fun ast -> match ast with
@@ -1850,7 +1851,7 @@ let () =
     {[
 let () =
   if Clang.get_clang_version () >= "clang version 6.0.0" then
-    check Clang.Ast.pp_stmt (parse_statement_list ~language:Cxx)
+    check Clang.Ast.pp_stmt (parse_statement_list ~language:CXX)
     example @@ fun ast -> match ast with
     | [ { desc = Expr { desc = UnaryExpr {
             kind = AlignOf;
@@ -1886,7 +1887,7 @@ and decl_desc =
 let example = {| template <class X, int i> int f(X); |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
       parameters = [
@@ -1914,7 +1915,7 @@ let example = {|
 |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
       parameters = [
@@ -1949,7 +1950,7 @@ let example = {|
   } |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
       keyword = Class;
@@ -1973,7 +1974,7 @@ let () =
            name = "X";
            kind = Class { default = None }}}];
          decl = { desc = CXXMethod {
-           type_ref = Some { desc = Record "C" };
+           type_ref = Some { desc = Record (Ident "C") };
            function_type = {
              result = { desc = BuiltinType Int };
              parameters = Some { non_variadic = [
@@ -2067,7 +2068,7 @@ let example = {|
  |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
       keyword = Class;
@@ -2124,18 +2125,18 @@ let () =
           body = None;
           deleted = true; }};
         { desc = CXXMethod {
-          type_ref = Some { desc = Record "C" };
+          type_ref = Some { desc = Record (Ident "C") };
           name = "operator+";
           function_type = {
-            result = { desc = LValueReference { desc = Record "C" }};
+            result = { desc = LValueReference { desc = Record (Ident "C") }};
             parameters = Some {
               non_variadic = [{ desc = {
                 name = "rhs";
                 qual_type = { desc =
-                  LValueReference { desc = Record "C" }}}}] }};
+                  LValueReference { desc = Record (Ident "C") }}}}] }};
           body = Some { desc = Compound [] }; }}; ] }};
       { desc = CXXMethod {
-        type_ref = Some { desc = Record "C" };
+        type_ref = Some { desc = Record (Ident "C") };
         name = "f";
         function_type = {
           result = { desc = BuiltinType Int };
@@ -2362,7 +2363,7 @@ let () =
         name = "u_t";
         underlying_type = { desc = Elaborated {
           keyword = Union;
-          named_type = { desc = Record "u" }}}}}] -> ()
+          named_type = { desc = Record (Ident "u") }}}}}] -> ()
   | _ -> assert false
 
 let example = {| typedef union { int i; float f } u_t; |}
@@ -2384,7 +2385,7 @@ let () =
         name = "u_t";
         underlying_type = { desc = Elaborated {
           keyword = Union;
-          named_type = { desc = Record "" }}} as underlying_type }}] ->
+          named_type = { desc = Record (Ident "") }}} as underlying_type }}] ->
         let fields = underlying_type |> Clang.Type.list_of_fields in
         begin
           match fields with
@@ -2429,7 +2430,7 @@ let () =
         { desc = Field { name = "data";
           qual_type = { desc = Elaborated {
             keyword = Union;
-            named_type = { desc = Record "u" }}}}}] }}] -> ()
+            named_type = { desc = Record (Ident "u") }}}}}] }}] -> ()
   | _ -> assert false
     ]}
 *)
@@ -2446,7 +2447,7 @@ let example = {|
     |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
       keyword = Class;
@@ -2478,7 +2479,7 @@ let example = {|
     |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = Namespace {
       name = "example";
@@ -2500,7 +2501,7 @@ let example = {|
     |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = Using {
       namespace = "std";
@@ -2515,7 +2516,7 @@ let example = {|
     |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match List.hd (List.rev ast) with
   | { desc = Using {
       namespace = "std";
@@ -2524,6 +2525,7 @@ let () =
     ]}
 *)
   | Constructor of {
+      class_name : string;
       parameters : parameters;
       initializer_list : (string * expr) list;
       body : stmt option;
@@ -2545,7 +2547,7 @@ let example = {|
     |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
          keyword = Class;
@@ -2555,6 +2557,7 @@ let () =
                name = "i";
                qual_type = { desc = BuiltinType Int }}};
            { desc = Constructor {
+               class_name = "C";
                parameters = {
                  non_variadic = [];
                  variadic = false;
@@ -2571,7 +2574,7 @@ let () =
                    qual_type = { desc = BuiltinType Int}}}];
                  variadic = false;
                };
-               initializer_list = ["i", { desc = DeclRef "v" }];
+               initializer_list = ["i", { desc = DeclRef (Ident "v") }];
                body = Some { desc = Compound [] };
                explicit = true;
                defaulted = false;
@@ -2585,13 +2588,14 @@ let example = {|
     |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
          keyword = Class;
          name = "C";
          fields = [
            { desc = Constructor {
+               class_name = "C";
                parameters = {
                  non_variadic = [];
                  variadic = false;
@@ -2604,6 +2608,7 @@ let () =
   | _ -> assert false
    ]}*)
   | Destructor of {
+      class_name : string;
       body : stmt option;
       defaulted : bool;
       deleted : bool;
@@ -2620,13 +2625,14 @@ let example = {|
     |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
          keyword = Class;
          name = "C";
          fields = [
            { desc = Destructor {
+               class_name = "C";
                body = Some { desc = Compound [] };
                defaulted = false;
                deleted = false; }}] }}] -> ()
@@ -2639,13 +2645,14 @@ let example = {|
     |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
          keyword = Class;
          name = "C";
          fields = [
            { desc = Destructor {
+               class_name = "C";
                body = None;
                defaulted = true;
                deleted = false; }}] }}] -> ()
@@ -2669,7 +2676,7 @@ let example = {|
    |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = LinkageSpec {
          languages = { c = true; cxx = false };
@@ -2695,7 +2702,7 @@ let example = {|
    |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = LinkageSpec {
          languages = { c = false; cxx = true };
@@ -2725,7 +2732,7 @@ let example = {|
    |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
          keyword = Class;
@@ -2739,7 +2746,7 @@ let () =
                body = None }})};
            { desc = Friend (FriendType { desc = Elaborated {
                keyword = Class;
-               named_type = { desc = Record "B" }}})}] }}] -> ()
+               named_type = { desc = Record (Ident "B") }}})}] }}] -> ()
   | _ -> assert false
    ]}
 
@@ -2751,7 +2758,7 @@ let example = {|
    |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
          parameters = [{ desc = { name = "T"; kind = Class _ }}];
@@ -2772,7 +2779,7 @@ let example = {|
    |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl {
          keyword = Class;
@@ -2802,6 +2809,96 @@ let () =
   | UnknownDecl of
       (cxcursorkind [@visitors.opaque]) *
       (clang_ext_declkind [@visitors.opaque])
+
+and ident_ref =
+  | Ident of string
+  | NamespaceRef of {
+      namespace_ref : ident_ref;
+      ident : string;
+    }
+(**
+  Identifier qualified by a namespace reference (C++).
+
+    {[
+let example = {|
+  namespace ns1 {
+    namespace ns2 {
+      int f() {
+        return 0;
+      }
+    }
+  }
+
+  int g() {
+    return ns1::ns2::f();
+  }
+|}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
+  fun ast -> match ast with
+  | [_; { desc =
+      Function {
+        name = "g";
+        body = Some { desc = Compound [
+          { desc = Return (Some { desc = Call {
+              callee = { desc = DeclRef (
+                NamespaceRef {
+                  namespace_ref = NamespaceRef {
+                    namespace_ref = Ident "ns1";
+                    ident = "ns2";
+                  };
+                  ident = "f";
+                })};
+              args = []; }})}] }}}] -> ()
+  | _ -> assert false
+    ]}
+*)
+  | TypeRef of {
+      type_ref : ident_ref;
+      qual_type : qual_type;
+      ident : string;
+    }
+(**
+  Identifier qualified by a type reference (C++).
+
+  E.g., enumeration in a nested name specifier (C++11 extension).
+
+    {[
+let example = {|
+  class C {
+  public:
+    enum E {
+      A, B
+    };
+  };
+
+  C::E g() {
+    return C::E::A;
+  }
+|}
+
+let () =
+  if Clang.get_clang_version () >= "clang version 3.7.0" then
+    check Clang.Ast.pp_decl
+      (parse_declaration_list ~command_line_args:["-std=c++11"]) example @@
+    fun ast -> match ast with
+    | [_; { desc =
+        Function {
+          name = "g";
+          body = Some { desc = Compound [
+            { desc = Return (Some { desc = DeclRef (
+                TypeRef {
+                  type_ref = TypeRef {
+                    type_ref = Ident "C";
+                    qual_type = { desc = Record (Ident "C") };
+                    ident = "E";
+                  };
+                  qual_type = { desc = Enum (Ident "E") };
+                  ident = "A" })})}] }}}] -> ()
+    | _ -> assert false
+    ]}
+*)
 
 and friend_decl =
   | FriendDecl of decl
@@ -2849,7 +2946,7 @@ let example = {|
 |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
       parameters = [
@@ -2884,7 +2981,7 @@ let example = {|
 |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
       parameters = [
@@ -2918,7 +3015,7 @@ let example = {|
 |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:Cxx) example @@
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
        parameters = [{ desc = { name = "T"; kind = Class { default = None }}}];

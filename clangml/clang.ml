@@ -2,6 +2,8 @@ include Clang__bindings
 
 include Clang__compat
 
+include Clang__types
+
 include Clang__utils
 
 module Ast = struct
@@ -145,14 +147,11 @@ module Ast = struct
             let pointee = cxtype |> get_pointee_type |> of_cxtype in
             LValueReference pointee
         | Enum ->
-            let name = cxtype |> get_type_declaration |> get_cursor_spelling in
-            Enum name
+            Enum (cxtype |> get_type_declaration |> ident_ref_of_cxcursor)
         | Record ->
-            let name = cxtype |> get_type_declaration |> get_cursor_spelling in
-            Record name
+            Record (cxtype |> get_type_declaration |> ident_ref_of_cxcursor)
         | Typedef ->
-            let name = cxtype |> get_type_declaration |> get_cursor_spelling in
-            Typedef name
+            Typedef (Ident (cxtype |> get_type_declaration |> get_cursor_spelling))
         | FunctionProto
         | FunctionNoProto ->
             let function_type =
@@ -287,6 +286,7 @@ module Ast = struct
                   Some (stmt_of_cxcursor body)
               | _ -> None in
             Constructor {
+              class_name = get_cursor_spelling cursor;
               parameters = parameters_of_function_decl cursor;
               initializer_list = extract_initializer_list children;
               body;
@@ -301,7 +301,10 @@ module Ast = struct
               | body :: _ when get_cursor_kind body = CompoundStmt ->
                   Some (stmt_of_cxcursor body)
               | _ -> None in
+            let destructor_name = get_cursor_spelling cursor in
             Destructor {
+              class_name = String.sub destructor_name 1
+                (String.length destructor_name - 1);
               body;
               defaulted = ext_cxxmethod_is_defaulted cursor;
               deleted = ext_function_decl_is_deleted cursor;
@@ -680,7 +683,7 @@ module Ast = struct
               | _ -> raise Invalid_structure in
             let kind = ext_binary_operator_get_opcode cursor in
             BinaryOperator { lhs; kind; rhs }
-        | DeclRefExpr -> DeclRef (get_cursor_spelling cursor)
+        | DeclRefExpr -> DeclRef (ident_ref_of_cxcursor cursor)
         | CallExpr ->
             let callee, args =
               match list_of_children cursor with
@@ -698,14 +701,16 @@ module Ast = struct
               | _ -> raise Invalid_structure in
             Cast { kind = CStyle; qual_type; operand }
         | MemberRefExpr ->
-            let base =
-              match list_of_children cursor with
-              | [lhs] -> expr_of_cxcursor lhs
-              | _ -> raise Invalid_structure in
-            let field = get_cursor_referenced cursor in
-            let field = node ~cursor:field (get_cursor_spelling field) in
-            let arrow = ext_member_ref_expr_is_arrow cursor in
-            Member { base; arrow; field };
+            begin match list_of_children cursor with
+            | [] -> MemberRef (get_cursor_spelling cursor)
+            | [lhs] ->
+                let base = expr_of_cxcursor lhs in
+                let field = get_cursor_referenced cursor in
+                let field = node ~cursor:field (get_cursor_spelling field) in
+                let arrow = ext_member_ref_expr_is_arrow cursor in
+                Member { base; arrow; field }
+            | _ -> raise Invalid_structure
+            end
         | ArraySubscriptExpr ->
             let base, index =
               match list_of_children cursor with
@@ -830,6 +835,26 @@ module Ast = struct
       match parameters with
       | [] -> decl
       | _ -> TemplateDecl { parameters; decl = node ~cursor decl }
+
+    and ident_ref_of_cxcursor cursor =
+      let ident = get_cursor_spelling cursor in
+      let rec pop_ref list ident =
+        match
+          match list with
+          | hd :: tl -> Some (get_cursor_kind hd, hd, tl)
+          | [] -> None
+        with
+        | Some (TypeRef, hd, tl) ->
+            let ty = get_cursor_type hd in
+            let decl = get_type_declaration ty in
+            let type_ref = pop_ref tl (get_cursor_spelling decl) in
+            let qual_type = of_cxtype ty in
+            TypeRef { type_ref; qual_type; ident }
+        | Some (NamespaceRef, hd, tl) ->
+            let namespace_ref = pop_ref tl (get_cursor_spelling hd) in
+            NamespaceRef { namespace_ref; ident }
+        | _ -> Ident ident in
+      pop_ref (List.rev (list_of_children cursor)) ident
 
     let translation_unit_of_cxcursor cursor =
       let filename = get_cursor_spelling cursor in

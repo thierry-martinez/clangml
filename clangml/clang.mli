@@ -15,6 +15,10 @@ include module type of struct
 end
 
 include module type of struct
+  include Clang__types
+end
+
+include module type of struct
   include Clang__utils
 end
 
