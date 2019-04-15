@@ -2862,6 +2862,8 @@ let () =
 (**
   Identifier qualified by a type reference (C++).
 
+  E.g., enumeration in a nested name specifier (C++11 extension).
+
     {[
 let example = {|
   class C {
@@ -2877,22 +2879,24 @@ let example = {|
 |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
-  fun ast -> match ast with
-  | [_; { desc =
-      Function {
-        name = "g";
-        body = Some { desc = Compound [
-          { desc = Return (Some { desc = DeclRef (
-              TypeRef {
-                type_ref = TypeRef {
-                  type_ref = Ident "C";
-                  qual_type = { desc = Record (Ident "C") };
-                  ident = "E";
-                };
-                qual_type = { desc = Enum (Ident "E") };
-                ident = "A" })})}] }}}] -> ()
-  | _ -> assert false
+  if Clang.get_clang_version () >= "clang version 3.7.0" then
+    check Clang.Ast.pp_decl
+      (parse_declaration_list ~command_line_args:["-std=c++11"]) example @@
+    fun ast -> match ast with
+    | [_; { desc =
+        Function {
+          name = "g";
+          body = Some { desc = Compound [
+            { desc = Return (Some { desc = DeclRef (
+                TypeRef {
+                  type_ref = TypeRef {
+                    type_ref = Ident "C";
+                    qual_type = { desc = Record (Ident "C") };
+                    ident = "E";
+                  };
+                  qual_type = { desc = Enum (Ident "E") };
+                  ident = "A" })})}] }}}] -> ()
+    | _ -> assert false
     ]}
 *)
 
