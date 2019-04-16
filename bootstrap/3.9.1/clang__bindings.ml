@@ -2152,3 +2152,5 @@ external ext_friend_decl_get_friend_decl :
   cxcursor -> cxcursor = "clang_ext_FriendDecl_getFriendDecl_wrapper"
 external ext_friend_decl_get_friend_type :
   cxcursor -> cxtype = "clang_ext_FriendDecl_getFriendType_wrapper"
+external ext_field_decl_get_in_class_initializer :
+  cxcursor -> cxcursor = "clang_ext_FieldDecl_getInClassInitializer_wrapper"
