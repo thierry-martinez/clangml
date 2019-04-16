@@ -395,3 +395,6 @@ clang_ext_FriendDecl_getFriendType(CXCursor c);
 
 CXCursor
 clang_ext_FieldDecl_getInClassInitializer(CXCursor c);
+
+CXType
+clang_ext_GenericSelectionExpr_getAssocType(CXCursor c, unsigned i);

@@ -752,6 +752,24 @@ module Ast = struct
             CompoundLiteral { qual_type; init }
         | UnaryExpr ->
             unary_expr_of_cxcursor cursor
+        | GenericSelectionExpr ->
+            begin
+              let controlling_expr, assocs =
+                match list_of_children cursor with
+                | [] -> raise Invalid_structure
+                | controlling_expr :: assocs ->
+                    controlling_expr |> expr_of_cxcursor,
+                    assocs |> List.mapi @@ fun i sub_cursor ->
+                      let ty =
+                        ext_generic_selection_expr_get_assoc_type cursor i in
+                      let ty : qual_type option =
+                        if get_type_kind ty = Invalid then
+                          None
+                        else
+                          Some (ty |> of_cxtype) in
+                      (ty, sub_cursor |> expr_of_cxcursor) in
+              GenericSelection { controlling_expr; assocs }
+            end
         | UnexposedExpr ->
             begin
               match ext_get_cursor_kind cursor with
@@ -818,7 +836,7 @@ module Ast = struct
                     let parameters, others =
                       extract_template_parameters []
                         (list_of_children cursor) in
-                    let default : 'a option =
+                    let default : string option =
                       match others with
                       | [] -> None
                       | [default] -> Some (get_cursor_spelling default)

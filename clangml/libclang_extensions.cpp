@@ -1158,4 +1158,17 @@ extern "C" {
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
   }
+
+  CXType
+  clang_ext_GenericSelectionExpr_getAssocType(CXCursor c, unsigned i)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::GenericSelectionExpr>(GetCursorStmt(c))) {
+      auto ty = e->getAssocType(i);
+      if (ty.getTypePtrOrNull()) {
+        return MakeCXType(ty, getCursorTU(c));
+      }
+    }
+    return MakeCXTypeInvalid(getCursorTU(c));
+  }
 }

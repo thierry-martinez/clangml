@@ -1859,6 +1859,33 @@ let () =
     | _ -> assert false
     ]}
 *)
+  | GenericSelection of {
+      controlling_expr : expr;
+      assocs : (qual_type option * expr) list;
+    }
+(**
+   Generic selection (C11).
+
+   {[
+let example = {|
+   _Generic("expr", double: 1, float: 2, default: 3);
+   |}
+
+let () =
+  check Clang.Ast.pp_stmt parse_statement_list example
+  @@ fun ast -> match ast with
+  | [ { desc = Expr { desc = GenericSelection {
+          controlling_expr = { desc = StringLiteral "expr" };
+          assocs = [
+            (Some { desc = BuiltinType Double}, { desc = IntegerLiteral (Int 1)});
+            (Some { desc = BuiltinType Float}, { desc = IntegerLiteral (Int 2)});
+            (None, { desc = IntegerLiteral (Int 3)})] }}}] -> ()
+  | _ -> assert false
+
+let example = {| alignof(int); |}
+   
+   ]}
+ *)
   | UnexposedExpr of {
       s : string;
     }
