@@ -2458,26 +2458,28 @@ let () =
   | _ -> assert false
     ]}
 
-    Default member initializer for bit-field is a C++2a extension.
+    Default member initializer for bit-field is a C++2a extension
+    (supported from Clang >6.0.0).
 
     {[
 
 let example = {| class C { int i : 3 = 2; }; |}
 
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX
-    ~command_line_args:["-std=c++2a"]) example
-  @@ fun ast -> match ast with
-  | [{ desc = RecordDecl {
-      keyword = Class;
-      name = "C";
-      fields = [
-        { desc = Field { name = "i";
-          qual_type = { desc = BuiltinType Int};
-          bitwidth = Some { desc = IntegerLiteral (Int 3)};
-          init = Some { desc = IntegerLiteral (Int 2)}}}] }}] -> ()
-  | _ -> assert false
-    ]}
+  if Clang.get_clang_version () >= "clang version 6.0.0" then
+    check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX
+      ~command_line_args:["-std=c++2a"]) example
+    @@ fun ast -> match ast with
+    | [{ desc = RecordDecl {
+        keyword = Class;
+        name = "C";
+        fields = [
+          { desc = Field { name = "i";
+            qual_type = { desc = BuiltinType Int};
+            bitwidth = Some { desc = IntegerLiteral (Int 3)};
+            init = Some { desc = IntegerLiteral (Int 2)}}}] }}] -> ()
+    | _ -> assert false
+      ]}
 *)
   | CXXAccessSpecifier of cxx_access_specifier
 (** C++ access specifier.
