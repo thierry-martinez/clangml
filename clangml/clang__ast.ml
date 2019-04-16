@@ -1862,7 +1862,7 @@ let () =
   | UnexposedExpr of {
       s : string;
     }
-  | OtherExpr
+  | UnknownExpr of (cxcursorkind [@visitors.opaque])
 
 and cast_kind =
   | CStyle
@@ -2407,11 +2407,12 @@ let () =
       name : string;
       qual_type : qual_type;
       bitwidth : expr option;
+      init : expr option; (* C++11 *)
     }
 (** Record (struct, union or class) field.
 
     {[
-let example = {| struct s { int label; union u { int i; float f; } data;}; |}
+let example = {| struct s { int label : 1; union u { int i; float f; } data;}; |}
 
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example
@@ -2421,16 +2422,60 @@ let () =
       name = "s";
       fields = [
         { desc = Field { name = "label";
-          qual_type = { desc = BuiltinType Int}}};
+          qual_type = { desc = BuiltinType Int};
+          bitwidth = Some { desc = IntegerLiteral (Int 1)};
+          init = None; }};
         { desc = RecordDecl { keyword = Union; name = "u"; fields = [
           { desc = Field { name = "i";
-            qual_type = { desc = BuiltinType Int}}};
+            qual_type = { desc = BuiltinType Int};
+            bitwidth = None;
+            init = None; }};
           { desc = Field { name = "f";
-            qual_type = { desc = BuiltinType Float}}}] }};
+            qual_type = { desc = BuiltinType Float};
+            bitwidth = None;
+            init = None; }}] }};
         { desc = Field { name = "data";
           qual_type = { desc = Elaborated {
             keyword = Union;
-            named_type = { desc = Record (Ident "u") }}}}}] }}] -> ()
+            named_type = { desc = Record (Ident "u") }}};
+          bitwidth = None;
+          init = None; }}] }}] -> ()
+  | _ -> assert false
+
+let example = {| class C { int i = 1; }; |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example
+  @@ fun ast -> match ast with
+  | [{ desc = RecordDecl {
+      keyword = Class;
+      name = "C";
+      fields = [
+        { desc = Field { name = "i";
+          qual_type = { desc = BuiltinType Int};
+          bitwidth = None;
+          init = Some { desc = IntegerLiteral (Int 1)}}}] }}] -> ()
+  | _ -> assert false
+    ]}
+
+    Default member initializer for bit-field is a C++2a extension.
+
+    {[
+
+let example = {| class C { int i : 3 = 2; }; |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX
+    ~command_line_args:["-std=c++2a"]) example
+  @@ fun ast -> match ast with
+  | [{ desc = RecordDecl {
+      keyword = Class;
+      name = "C";
+      fields = [
+        { desc = Field { name = "i";
+          qual_type = { desc = BuiltinType Int};
+          bitwidth = Some { desc = IntegerLiteral (Int 3)};
+          init = Some { desc = IntegerLiteral (Int 2)}}}] }}] -> ()
   | _ -> assert false
     ]}
 *)

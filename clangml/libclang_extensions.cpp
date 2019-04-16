@@ -159,9 +159,9 @@ MakeCXTypeInvalid(CXTranslationUnit TU)
 }
 
 /* MakeCXCursor is not exported in libclang.
-   The following implementation makes a (not well-formed) cursor on an
-   OpaqueValueExpr with E as source expression. Visiting the (single) child of
-   this cursor calls libclang's MakeCXCursor on E.
+   The following implementation makes a (not well-formed) cursor on a
+   default statement with S as substatement. Visiting the (single) child of
+   this cursor calls libclang's MakeCXCursor on S.
 */
 enum CXChildVisitResult
 MakeCXCursor_visitor(CXCursor cursor, CXCursor parent, CXClientData client_data)
@@ -170,22 +170,6 @@ MakeCXCursor_visitor(CXCursor cursor, CXCursor parent, CXClientData client_data)
   return CXChildVisit_Break;
 }
 
-static CXCursor
-MakeCXCursor(clang::Expr *E, CXTranslationUnit TU)
-{
-  clang::OpaqueValueExpr OV(
-    clang::SourceLocation::getFromRawEncoding(0), E->getType(),
-    clang::VK_RValue, clang::OK_Ordinary, E);
-  CXCursor C = { CXCursor_FirstExpr, 0, { nullptr, &OV, TU }};
-  CXCursor Result;
-  clang_visitChildren(C, MakeCXCursor_visitor, &Result);
-  return Result;
-}
-
-/* The following implementation makes a (not well-formed) cursor on a
-   default statement with S as substatement. Visiting the (single) child of
-   this cursor calls libclang's MakeCXCursor on S.
-*/
 static CXCursor
 MakeCXCursor(const clang::Stmt *S, CXTranslationUnit TU)
 {
@@ -1160,5 +1144,18 @@ extern "C" {
       }
     }
     return MakeCXTypeInvalid(getCursorTU(c));
+  }
+
+  CXCursor
+  clang_ext_FieldDecl_getInClassInitializer(CXCursor c)
+  {
+    if (auto *d = GetCursorDecl(c)) {
+      if (auto *fd = llvm::dyn_cast_or_null<clang::FieldDecl>(d)) {
+        if (clang::Expr *e = fd->getInClassInitializer()) {
+          return MakeCXCursor(e, getCursorTU(c));
+        }
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
   }
 }

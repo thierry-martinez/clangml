@@ -392,3 +392,6 @@ clang_ext_FriendDecl_getFriendDecl(CXCursor c);
 
 CXType
 clang_ext_FriendDecl_getFriendType(CXCursor c);
+
+CXCursor
+clang_ext_FieldDecl_getInClassInitializer(CXCursor c);
