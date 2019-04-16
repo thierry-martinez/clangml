@@ -2135,3 +2135,6 @@ external ext_friend_decl_get_friend_type :
   cxcursor -> cxtype = "clang_ext_FriendDecl_getFriendType_wrapper"
 external ext_field_decl_get_in_class_initializer :
   cxcursor -> cxcursor = "clang_ext_FieldDecl_getInClassInitializer_wrapper"
+external ext_generic_selection_expr_get_assoc_type :
+  cxcursor -> int -> cxtype =
+    "clang_ext_GenericSelectionExpr_getAssocType_wrapper"
