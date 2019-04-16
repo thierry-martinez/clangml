@@ -6430,3 +6430,21 @@ clang_ext_FieldDecl_getInClassInitializer_wrapper(value c_ocaml)
   }
 }
 
+CAMLprim value
+clang_ext_GenericSelectionExpr_getAssocType_wrapper(value c_ocaml, value i_ocaml)
+{
+  CAMLparam2(c_ocaml, i_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  unsigned int i;
+  i = Int_val(i_ocaml);
+  CXType result = clang_ext_GenericSelectionExpr_getAssocType(c, i);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxtype(result));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
