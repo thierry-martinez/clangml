@@ -239,7 +239,11 @@ module Ast = struct
                 | _ -> raise Invalid_structure
               else
                 None in
-            Field { name; qual_type; bitwidth }
+            let init = ext_field_decl_get_in_class_initializer cursor in
+            let init : expr option =
+              if get_cursor_kind init = InvalidCode then None
+              else Some (init |> expr_of_cxcursor) in
+            Field { name; qual_type; bitwidth; init }
         | CXXAccessSpecifier ->
             CXXAccessSpecifier (cursor |> get_cxxaccess_specifier)
         | Namespace ->
@@ -644,8 +648,9 @@ module Ast = struct
       | desc -> node ~cursor desc
 
     and expr_desc_of_cxcursor cursor =
+      let kind = get_cursor_kind cursor in
       try
-        match get_cursor_kind cursor with
+        match kind with
         | IntegerLiteral ->
             let i = ext_integer_literal_get_value cursor in
             let literal = make_integer_literal i in
@@ -770,8 +775,8 @@ module Ast = struct
                   unary_expr_of_cxcursor cursor
               | _ -> UnexposedExpr { s = get_cursor_spelling cursor }
             end
-        | _ -> OtherExpr
-      with Invalid_structure -> OtherExpr
+        | _ -> UnknownExpr kind
+      with Invalid_structure -> UnknownExpr kind
 
     and unary_expr_of_cxcursor cursor =
       let kind = cursor |> ext_unary_expr_get_kind in
