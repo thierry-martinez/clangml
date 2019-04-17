@@ -2494,3 +2494,8 @@ external ext_field_decl_get_in_class_initializer :
 external ext_generic_selection_expr_get_assoc_type :
   cxcursor -> int -> cxtype =
     "clang_ext_GenericSelectionExpr_getAssocType_wrapper"
+external ext_template_parm_is_parameter_pack :
+  cxcursor -> bool = "clang_ext_TemplateParm_isParameterPack_wrapper"
+external ext_class_template_decl_get_templated_decl :
+  cxcursor -> cxcursor =
+    "clang_ext_ClassTemplateDecl_getTemplatedDecl_wrapper"
