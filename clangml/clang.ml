@@ -219,9 +219,16 @@ module Ast = struct
         | UnionDecl -> record_decl_of_cxcursor Union cursor
         | ClassDecl -> record_decl_of_cxcursor Class cursor
         | ClassTemplate ->
+            let decl_cursor =
+              ext_class_template_decl_get_templated_decl cursor in
+            let keyword =
+              match get_cursor_kind decl_cursor with
+              | StructDecl -> Struct
+              | UnionDecl -> Union
+              | ClassDecl -> Class
+              | kind -> raise Invalid_structure in
             make_template
-              (record_decl_of_children
-                 (Class : clang_ext_elaboratedtypekeyword) cursor)
+              (record_decl_of_children keyword cursor)
               cursor
         | EnumDecl -> enum_decl_of_cxcursor cursor
         | TypedefDecl ->
@@ -846,8 +853,10 @@ module Ast = struct
               with
               | None -> None, children
               | Some kind ->
-                  Some (
-                    node ~cursor { name = get_cursor_spelling cursor; kind}), tl
+                  let name = get_cursor_spelling cursor in
+                  let parameter_pack =
+                    ext_template_parm_is_parameter_pack cursor in
+                  Some (node ~cursor { name; kind; parameter_pack}), tl
         with
         | None, tl -> List.rev accu, tl
         | Some parameter, tl ->
