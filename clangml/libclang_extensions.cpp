@@ -1171,4 +1171,36 @@ extern "C" {
     }
     return MakeCXTypeInvalid(getCursorTU(c));
   }
+
+  bool
+  clang_ext_TemplateParm_isParameterPack(CXCursor c)
+  {
+    if (auto *d = GetCursorDecl(c)) {
+      switch (d->getKind()) {
+      case clang::Decl::TemplateTypeParm:
+        if (auto *ttpd = llvm::dyn_cast_or_null<clang::TemplateTypeParmDecl>(d)) {
+          return ttpd->isParameterPack();
+        }
+        break;
+      case clang::Decl::NonTypeTemplateParm:
+        if (auto *nttpd = llvm::dyn_cast_or_null<clang::NonTypeTemplateParmDecl>(d)) {
+          return nttpd->isParameterPack();
+        }
+        break;
+      default:;
+      }
+    }
+    return false;
+  }
+
+  CXCursor
+  clang_ext_ClassTemplateDecl_getTemplatedDecl(CXCursor c)
+  {
+    if (auto *d = GetCursorDecl(c)) {
+      if (auto *ctd = llvm::dyn_cast_or_null<clang::ClassTemplateDecl>(d)) {
+        return MakeCXCursor(ctd->getTemplatedDecl(), getCursorTU(c));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
 }

@@ -1985,7 +1985,9 @@ let () =
       fields = [
         { desc = TemplateDecl {
             parameters = [
-              { desc = { name = "X"; kind = Class { default = None }}}];
+              { desc = { name = "X";
+                kind = Class { default = None };
+                parameter_pack = false; }}];
             decl = { desc = CXXMethod {
               type_ref = None;
               function_type = {
@@ -1999,7 +2001,8 @@ let () =
      { desc = TemplateDecl {
          parameters = [{ desc = {
            name = "X";
-           kind = Class { default = None }}}];
+           kind = Class { default = None };
+           parameter_pack = false; }}];
          decl = { desc = CXXMethod {
            type_ref = Some { desc = Record (Ident "C") };
            function_type = {
@@ -2012,6 +2015,22 @@ let () =
            body = Some { desc = Compound [
              { desc =
                  Return (Some { desc = IntegerLiteral (Int 0)})}] }; }}}}] -> ()
+  | _ -> assert false
+
+let example = {| template<class ... Types> struct Tuple {}; |}
+
+let () =
+  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
+  fun ast -> match ast with
+  | [{ desc = TemplateDecl {
+        parameters = [
+          { desc = {
+            name = "Types";
+            kind = Class { default = None };
+            parameter_pack = true; }}];
+        decl = { desc = RecordDecl {
+          keyword = Struct;
+          name = "Tuple"; }}}}] -> ()
   | _ -> assert false
     ]}*)
   | Function of {
@@ -3005,6 +3024,7 @@ and template_parameter = (template_parameter_desc, qual_type) open_node
 and template_parameter_desc = {
     name : string;
     kind : template_parameter_kind;
+    parameter_pack : bool; (** C++11 *)
   }
 
 and template_parameter_kind =
