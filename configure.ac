@@ -116,7 +116,9 @@ AC_ARG_WITH([llvm-config],
     [AC_CHECK_LLVM_VERSION([$with_llvm])
      AS_IF([test "x$LLVM_CONFIG" = "x"],
        [AC_SUBST([LLVM_CONFIG], [[`which llvm-config`]])])],
-    [AC_CHECK_LLVM_VERSION([8])
+    [AC_SUBST([LLVM_CONFIG], [[`which llvm-config`]])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([8])
      AS_IF([test "x$LLVM_CONFIG" = "x"],
        [AC_CHECK_LLVM_VERSION([7])
      AS_IF([test "x$LLVM_CONFIG" = "x"],
@@ -126,7 +128,17 @@ AC_ARG_WITH([llvm-config],
      AS_IF([test "x$LLVM_CONFIG" = "x"],
        [AC_CHECK_LLVM_VERSION([4])
      AS_IF([test "x$LLVM_CONFIG" = "x"],
-       [AC_CHECK_LLVM_VERSION([3])])])])])])])])
+       [AC_CHECK_LLVM_VERSION([3.9])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([3.8])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([3.7])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([3.6])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([3.5])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([3.4])])])])])])])])])])])])])])
 
 AS_IF([test "x$LLVM_CONFIG" = "x"],
   [AC_MSG_RESULT([[not found in PATH]])
