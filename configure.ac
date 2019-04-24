@@ -81,47 +81,81 @@ AC_CHECK_TOOL([OCAMLCODOC], [ocamlcodoc], [])
 
 AC_CHECK_TOOL([INSTALL_NAME_TOOL], [install_name_tool], [])
 
+AC_CHECK_TOOL([BREW], [brew], [])
+
+AC_DEFUN([AC_CHECK_LLVM_VERSION],
+  [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-"$1"`]])
+   AS_IF([test "x$LLVM_CONFIG" = "x"],
+     [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-"$1".0`]])
+      AS_IF([test "x$LLVM_CONFIG" = "x"],
+        [AC_SUBST([LLVM_CONFIG], [[`which llvm-config"$1"0`]])
+         AS_IF([test "x$LLVM_CONFIG" = "x"],
+           [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-mp-"$1"`]])
+            AS_IF([test "x$LLVM_CONFIG" = "x"],
+              [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-mp-"$1".0`]])
+               AS_IF([test "x$LLVM_CONFIG" = "x"],
+                 [AC_SUBST([GENTOO_LLVM_CONFIG], [[/usr/lib64/llvm/$1/bin/llvm-config]])
+                  AS_IF([$GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null],
+                    [AC_SUBST([LLVM_CONFIG], [[$GENTOO_LLVM_CONFIG]])],
+                    [AS_IF([test "x$BREW" != "x"],
+                       AC_SUBST([BREW_CELLAR], [[`$BREW --cellar`]])
+                       AC_SUBST([BREW_LLVM_CONFIG], [$BREW_CELLAR/llvm*/$1*/bin/llvm-config])
+                       AS_IF([test "x$BREW_LLVM_CONFIG" != "x"],
+                         AC_SUBST([LLVM_CONFIG], [[$BREW_LLVM_CONFIG]])))])])])])])])])
+
+AC_ARG_WITH([llvm],
+  AS_HELP_STRING([--with-llvm[=VERSION]],
+   [Set the version of LLVM to look for (subsumed by --with-llvm-config).]))
+
 AC_MSG_CHECKING([for llvm-config])
 AC_ARG_WITH([llvm-config],
   AS_HELP_STRING([--with-llvm-config[=PATH]],
     [Set the path to the llvm-config tool.]),
-  [AC_SUBST([LLVM_CONFIG], [$with_llvm_config])
-   AC_MSG_RESULT([[$LLVM_CONFIG (--with-llvm-config=)]])],
-  [AC_SUBST([LLVM_CONFIG], [[`which llvm-config`]])
-   AS_IF([test "x$LLVM_CONFIG" = "x"],
-     [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-7`]])
-      AS_IF([test "x$LLVM_CONFIG" = "x"],
-     [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-7.0`]])
-      AS_IF([test "x$LLVM_CONFIG" = "x"],
-        [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-6`]])
-         AS_IF([test "x$LLVM_CONFIG" = "x"],
-        [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-6.0`]])
-         AS_IF([test "x$LLVM_CONFIG" = "x"],
-           [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-5`]])
-            AS_IF([test "x$LLVM_CONFIG" = "x"],
-           [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-5.0`]])
-            AS_IF([test "x$LLVM_CONFIG" = "x"],
-              [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-4`]])
-               AS_IF([test "x$LLVM_CONFIG" = "x"],
-              [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-4.0`]])
-               AS_IF([test "x$LLVM_CONFIG" = "x"],
-                 [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-3`]])
-                  AS_IF([test "x$LLVM_CONFIG" = "x"],
-                    [AC_SUBST([LLVM_CONFIG], [[`which llvm-config-3.0`]])])])])])])])])])])])
-   AS_IF([test "x$LLVM_CONFIG" = "x"],
-     [AS_IF([test -f /usr/local/opt/llvm/bin/llvm-config],
-       [AC_SUBST([LLVM_CONFIG], [[/usr/local/opt/llvm/bin/llvm-config]])
-        AC_MSG_RESULT([[$LLVM_CONFIG (homebrew)]])],
-       [AC_MSG_RESULT([[not found in PATH]])
-        AC_MSG_ERROR(
-          [[llvm-config not available (you may use --with-llvm-config=)]])])],
-     [AC_MSG_RESULT([[$LLVM_CONFIG (found in PATH)]])])])
+  [AC_SUBST([LLVM_CONFIG], [$with_llvm_config])],
+  [AS_IF([test "x$with_llvm" != "x"],
+    [AC_CHECK_LLVM_VERSION([$with_llvm])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_SUBST([LLVM_CONFIG], [[`which llvm-config`]])])],
+    [AC_SUBST([LLVM_CONFIG], [[`which llvm-config`]])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([8])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([7])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([6])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([5])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([4])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([3.9])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([3.8])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([3.7])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([3.6])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([3.5])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([3.4])])])])])])])])])])])])])])
+
+AS_IF([test "x$LLVM_CONFIG" = "x"],
+  [AC_MSG_RESULT([[not found in PATH]])
+   AC_MSG_ERROR(
+     [[llvm-config not available (you may use --with-llvm-config=)]])],
+  [AC_MSG_RESULT([[$LLVM_CONFIG]])])
 
 AC_MSG_CHECKING([llvm-config version])
 AC_SUBST([LLVM_VERSION], [[`$LLVM_CONFIG --version`]])
 AS_IF([test "x$LLVM_VERSION" = "x"],
   [AC_MSG_ERROR([[unable to run $LLVM_CONFIG --version]])])
 AC_MSG_RESULT([[$LLVM_VERSION]])
+
+AS_IF([test "x$with_llvm" != "x"],
+  AS_IF([echo $LLVM_VERSION | grep "^$with_llvm" >/dev/null],
+    [true],
+    [AC_MSG_ERROR([[LLVM version $LLVM_VERSION found but $with_llvm expected]])]))
 
 AC_SUBST([LLVM_VERSION],
   [[`echo $LLVM_VERSION | sed 's/svn$//'`]])

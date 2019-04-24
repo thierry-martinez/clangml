@@ -669,7 +669,11 @@ IF_CLANG_BEFORE_3_7
 ENDIF_CLANG_BEFORE_3_5
 IF_CLANG_BEFORE_3_5
 LLVM_VERSION
+BREW_LLVM_CONFIG
+BREW_CELLAR
+GENTOO_LLVM_CONFIG
 LLVM_CONFIG
+BREW
 INSTALL_NAME_TOOL
 OCAMLCODOC
 DUNE
@@ -760,6 +764,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_silent_rules
+with_llvm
 with_llvm_config
 with_llvm_version
 enable_dependency_tracking
@@ -1415,6 +1420,8 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-llvm=VERSION     Set the version of LLVM to look for (subsumed by
+                          --with-llvm-config).
   --with-llvm-config=PATH Set the path to the llvm-config tool.
   --with-llvm-version=VERSION
                           Sets the LLVM version.
@@ -3372,6 +3379,108 @@ else
 fi
 
 
+if test -n "$ac_tool_prefix"; then
+  # Extract the first word of "${ac_tool_prefix}brew", so it can be a program name with args.
+set dummy ${ac_tool_prefix}brew; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_BREW+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$BREW"; then
+  ac_cv_prog_BREW="$BREW" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_BREW="${ac_tool_prefix}brew"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+BREW=$ac_cv_prog_BREW
+if test -n "$BREW"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $BREW" >&5
+$as_echo "$BREW" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+fi
+if test -z "$ac_cv_prog_BREW"; then
+  ac_ct_BREW=$BREW
+  # Extract the first word of "brew", so it can be a program name with args.
+set dummy brew; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_ac_ct_BREW+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$ac_ct_BREW"; then
+  ac_cv_prog_ac_ct_BREW="$ac_ct_BREW" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_ac_ct_BREW="brew"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+ac_ct_BREW=$ac_cv_prog_ac_ct_BREW
+if test -n "$ac_ct_BREW"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_ct_BREW" >&5
+$as_echo "$ac_ct_BREW" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+  if test "x$ac_ct_BREW" = x; then
+    BREW=""
+  else
+    case $cross_compiling:$ac_tool_warned in
+yes:)
+{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: using cross tools not prefixed with host triplet" >&5
+$as_echo "$as_me: WARNING: using cross tools not prefixed with host triplet" >&2;}
+ac_tool_warned=yes ;;
+esac
+    BREW=$ac_ct_BREW
+  fi
+else
+  BREW="$ac_cv_prog_BREW"
+fi
+
+
+
+
+
+# Check whether --with-llvm was given.
+if test "${with_llvm+set}" = set; then :
+  withval=$with_llvm;
+fi
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for llvm-config" >&5
 $as_echo_n "checking for llvm-config... " >&6; }
 
@@ -3379,68 +3488,493 @@ $as_echo_n "checking for llvm-config... " >&6; }
 if test "${with_llvm_config+set}" = set; then :
   withval=$with_llvm_config; LLVM_CONFIG=$with_llvm_config
 
-   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $LLVM_CONFIG (--with-llvm-config=)" >&5
-$as_echo "$LLVM_CONFIG (--with-llvm-config=)" >&6; }
+else
+  if test "x$with_llvm" != "x"; then :
+  LLVM_CONFIG=`which llvm-config-"$with_llvm"`
+
+   if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"$with_llvm".0`
+
+      if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config"$with_llvm"0`
+
+         if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"$with_llvm"`
+
+            if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"$with_llvm".0`
+
+               if test "x$LLVM_CONFIG" = "x"; then :
+  GENTOO_LLVM_CONFIG=/usr/lib64/llvm/$with_llvm/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  LLVM_CONFIG=$GENTOO_LLVM_CONFIG
+
+else
+  if test "x$BREW" != "x"; then :
+  BREW_CELLAR=`$BREW --cellar`
+
+                       BREW_LLVM_CONFIG=$BREW_CELLAR/llvm*/$with_llvm*/bin/llvm-config
+
+                       if test "x$BREW_LLVM_CONFIG" != "x"; then :
+  LLVM_CONFIG=$BREW_LLVM_CONFIG
+
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+     if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config`
+
+fi
 else
   LLVM_CONFIG=`which llvm-config`
 
+     if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"8"`
+
    if test "x$LLVM_CONFIG" = "x"; then :
-  LLVM_CONFIG=`which llvm-config-7`
+  LLVM_CONFIG=`which llvm-config-"8".0`
 
       if test "x$LLVM_CONFIG" = "x"; then :
-  LLVM_CONFIG=`which llvm-config-7.0`
-
-      if test "x$LLVM_CONFIG" = "x"; then :
-  LLVM_CONFIG=`which llvm-config-6`
+  LLVM_CONFIG=`which llvm-config"8"0`
 
          if test "x$LLVM_CONFIG" = "x"; then :
-  LLVM_CONFIG=`which llvm-config-6.0`
-
-         if test "x$LLVM_CONFIG" = "x"; then :
-  LLVM_CONFIG=`which llvm-config-5`
+  LLVM_CONFIG=`which llvm-config-mp-"8"`
 
             if test "x$LLVM_CONFIG" = "x"; then :
-  LLVM_CONFIG=`which llvm-config-5.0`
-
-            if test "x$LLVM_CONFIG" = "x"; then :
-  LLVM_CONFIG=`which llvm-config-4`
+  LLVM_CONFIG=`which llvm-config-mp-"8".0`
 
                if test "x$LLVM_CONFIG" = "x"; then :
-  LLVM_CONFIG=`which llvm-config-4.0`
+  GENTOO_LLVM_CONFIG=/usr/lib64/llvm/8/bin/llvm-config
 
-               if test "x$LLVM_CONFIG" = "x"; then :
-  LLVM_CONFIG=`which llvm-config-3`
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  LLVM_CONFIG=$GENTOO_LLVM_CONFIG
 
-                  if test "x$LLVM_CONFIG" = "x"; then :
-  LLVM_CONFIG=`which llvm-config-3.0`
-
-fi
-fi
-fi
-fi
-fi
-fi
-fi
-fi
-fi
-fi
-   if test "x$LLVM_CONFIG" = "x"; then :
-  if test -f /usr/local/opt/llvm/bin/llvm-config; then :
-  LLVM_CONFIG=/usr/local/opt/llvm/bin/llvm-config
-
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $LLVM_CONFIG (homebrew)" >&5
-$as_echo "$LLVM_CONFIG (homebrew)" >&6; }
 else
+  if test "x$BREW" != "x"; then :
+  BREW_CELLAR=`$BREW --cellar`
+
+                       BREW_LLVM_CONFIG=$BREW_CELLAR/llvm*/8*/bin/llvm-config
+
+                       if test "x$BREW_LLVM_CONFIG" != "x"; then :
+  LLVM_CONFIG=$BREW_LLVM_CONFIG
+
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+     if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"7"`
+
+   if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"7".0`
+
+      if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config"7"0`
+
+         if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"7"`
+
+            if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"7".0`
+
+               if test "x$LLVM_CONFIG" = "x"; then :
+  GENTOO_LLVM_CONFIG=/usr/lib64/llvm/7/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  LLVM_CONFIG=$GENTOO_LLVM_CONFIG
+
+else
+  if test "x$BREW" != "x"; then :
+  BREW_CELLAR=`$BREW --cellar`
+
+                       BREW_LLVM_CONFIG=$BREW_CELLAR/llvm*/7*/bin/llvm-config
+
+                       if test "x$BREW_LLVM_CONFIG" != "x"; then :
+  LLVM_CONFIG=$BREW_LLVM_CONFIG
+
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+     if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"6"`
+
+   if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"6".0`
+
+      if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config"6"0`
+
+         if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"6"`
+
+            if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"6".0`
+
+               if test "x$LLVM_CONFIG" = "x"; then :
+  GENTOO_LLVM_CONFIG=/usr/lib64/llvm/6/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  LLVM_CONFIG=$GENTOO_LLVM_CONFIG
+
+else
+  if test "x$BREW" != "x"; then :
+  BREW_CELLAR=`$BREW --cellar`
+
+                       BREW_LLVM_CONFIG=$BREW_CELLAR/llvm*/6*/bin/llvm-config
+
+                       if test "x$BREW_LLVM_CONFIG" != "x"; then :
+  LLVM_CONFIG=$BREW_LLVM_CONFIG
+
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+     if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"5"`
+
+   if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"5".0`
+
+      if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config"5"0`
+
+         if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"5"`
+
+            if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"5".0`
+
+               if test "x$LLVM_CONFIG" = "x"; then :
+  GENTOO_LLVM_CONFIG=/usr/lib64/llvm/5/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  LLVM_CONFIG=$GENTOO_LLVM_CONFIG
+
+else
+  if test "x$BREW" != "x"; then :
+  BREW_CELLAR=`$BREW --cellar`
+
+                       BREW_LLVM_CONFIG=$BREW_CELLAR/llvm*/5*/bin/llvm-config
+
+                       if test "x$BREW_LLVM_CONFIG" != "x"; then :
+  LLVM_CONFIG=$BREW_LLVM_CONFIG
+
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+     if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"4"`
+
+   if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"4".0`
+
+      if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config"4"0`
+
+         if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"4"`
+
+            if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"4".0`
+
+               if test "x$LLVM_CONFIG" = "x"; then :
+  GENTOO_LLVM_CONFIG=/usr/lib64/llvm/4/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  LLVM_CONFIG=$GENTOO_LLVM_CONFIG
+
+else
+  if test "x$BREW" != "x"; then :
+  BREW_CELLAR=`$BREW --cellar`
+
+                       BREW_LLVM_CONFIG=$BREW_CELLAR/llvm*/4*/bin/llvm-config
+
+                       if test "x$BREW_LLVM_CONFIG" != "x"; then :
+  LLVM_CONFIG=$BREW_LLVM_CONFIG
+
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+     if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"3.9"`
+
+   if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"3.9".0`
+
+      if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config"3.9"0`
+
+         if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"3.9"`
+
+            if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"3.9".0`
+
+               if test "x$LLVM_CONFIG" = "x"; then :
+  GENTOO_LLVM_CONFIG=/usr/lib64/llvm/3.9/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  LLVM_CONFIG=$GENTOO_LLVM_CONFIG
+
+else
+  if test "x$BREW" != "x"; then :
+  BREW_CELLAR=`$BREW --cellar`
+
+                       BREW_LLVM_CONFIG=$BREW_CELLAR/llvm*/3.9*/bin/llvm-config
+
+                       if test "x$BREW_LLVM_CONFIG" != "x"; then :
+  LLVM_CONFIG=$BREW_LLVM_CONFIG
+
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+     if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"3.8"`
+
+   if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"3.8".0`
+
+      if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config"3.8"0`
+
+         if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"3.8"`
+
+            if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"3.8".0`
+
+               if test "x$LLVM_CONFIG" = "x"; then :
+  GENTOO_LLVM_CONFIG=/usr/lib64/llvm/3.8/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  LLVM_CONFIG=$GENTOO_LLVM_CONFIG
+
+else
+  if test "x$BREW" != "x"; then :
+  BREW_CELLAR=`$BREW --cellar`
+
+                       BREW_LLVM_CONFIG=$BREW_CELLAR/llvm*/3.8*/bin/llvm-config
+
+                       if test "x$BREW_LLVM_CONFIG" != "x"; then :
+  LLVM_CONFIG=$BREW_LLVM_CONFIG
+
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+     if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"3.7"`
+
+   if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"3.7".0`
+
+      if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config"3.7"0`
+
+         if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"3.7"`
+
+            if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"3.7".0`
+
+               if test "x$LLVM_CONFIG" = "x"; then :
+  GENTOO_LLVM_CONFIG=/usr/lib64/llvm/3.7/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  LLVM_CONFIG=$GENTOO_LLVM_CONFIG
+
+else
+  if test "x$BREW" != "x"; then :
+  BREW_CELLAR=`$BREW --cellar`
+
+                       BREW_LLVM_CONFIG=$BREW_CELLAR/llvm*/3.7*/bin/llvm-config
+
+                       if test "x$BREW_LLVM_CONFIG" != "x"; then :
+  LLVM_CONFIG=$BREW_LLVM_CONFIG
+
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+     if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"3.6"`
+
+   if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"3.6".0`
+
+      if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config"3.6"0`
+
+         if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"3.6"`
+
+            if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"3.6".0`
+
+               if test "x$LLVM_CONFIG" = "x"; then :
+  GENTOO_LLVM_CONFIG=/usr/lib64/llvm/3.6/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  LLVM_CONFIG=$GENTOO_LLVM_CONFIG
+
+else
+  if test "x$BREW" != "x"; then :
+  BREW_CELLAR=`$BREW --cellar`
+
+                       BREW_LLVM_CONFIG=$BREW_CELLAR/llvm*/3.6*/bin/llvm-config
+
+                       if test "x$BREW_LLVM_CONFIG" != "x"; then :
+  LLVM_CONFIG=$BREW_LLVM_CONFIG
+
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+     if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"3.5"`
+
+   if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"3.5".0`
+
+      if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config"3.5"0`
+
+         if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"3.5"`
+
+            if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"3.5".0`
+
+               if test "x$LLVM_CONFIG" = "x"; then :
+  GENTOO_LLVM_CONFIG=/usr/lib64/llvm/3.5/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  LLVM_CONFIG=$GENTOO_LLVM_CONFIG
+
+else
+  if test "x$BREW" != "x"; then :
+  BREW_CELLAR=`$BREW --cellar`
+
+                       BREW_LLVM_CONFIG=$BREW_CELLAR/llvm*/3.5*/bin/llvm-config
+
+                       if test "x$BREW_LLVM_CONFIG" != "x"; then :
+  LLVM_CONFIG=$BREW_LLVM_CONFIG
+
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+     if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"3.4"`
+
+   if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"3.4".0`
+
+      if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config"3.4"0`
+
+         if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"3.4"`
+
+            if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"3.4".0`
+
+               if test "x$LLVM_CONFIG" = "x"; then :
+  GENTOO_LLVM_CONFIG=/usr/lib64/llvm/3.4/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  LLVM_CONFIG=$GENTOO_LLVM_CONFIG
+
+else
+  if test "x$BREW" != "x"; then :
+  BREW_CELLAR=`$BREW --cellar`
+
+                       BREW_LLVM_CONFIG=$BREW_CELLAR/llvm*/3.4*/bin/llvm-config
+
+                       if test "x$BREW_LLVM_CONFIG" != "x"; then :
+  LLVM_CONFIG=$BREW_LLVM_CONFIG
+
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+
+
+if test "x$LLVM_CONFIG" = "x"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found in PATH" >&5
 $as_echo "not found in PATH" >&6; }
-        as_fn_error $? "llvm-config not available (you may use --with-llvm-config=)" "$LINENO" 5
-fi
+   as_fn_error $? "llvm-config not available (you may use --with-llvm-config=)" "$LINENO" 5
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $LLVM_CONFIG (found in PATH)" >&5
-$as_echo "$LLVM_CONFIG (found in PATH)" >&6; }
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $LLVM_CONFIG" >&5
+$as_echo "$LLVM_CONFIG" >&6; }
 fi
-fi
-
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking llvm-config version" >&5
 $as_echo_n "checking llvm-config version... " >&6; }
@@ -3451,6 +3985,14 @@ if test "x$LLVM_VERSION" = "x"; then :
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $LLVM_VERSION" >&5
 $as_echo "$LLVM_VERSION" >&6; }
+
+if test "x$with_llvm" != "x"; then :
+  if echo $LLVM_VERSION | grep "^$with_llvm" >/dev/null; then :
+  true
+else
+  as_fn_error $? "LLVM version $LLVM_VERSION found but $with_llvm expected" "$LINENO" 5
+fi
+fi
 
 LLVM_VERSION=`echo $LLVM_VERSION | sed 's/svn$//'`
 
