@@ -3152,7 +3152,7 @@ let example = {|
       T<1, 2, 3> x;
     };
 |}
-
+(*
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
@@ -3182,6 +3182,7 @@ let () =
                    ExprTemplateArgument { desc = IntegerLiteral (Int 3) }]
             }}}}] }}}}] -> ()
   | _ -> assert false
+*)
     ]}*)
 
 (** {3 Translation units} *)
