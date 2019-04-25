@@ -10,6 +10,8 @@ LIBCLANGML_STUBS_A = clangml/libclangml_stubs.a
 
 STUBGEN_EXE = stubgen/stubgen.exe
 
+TESTS_EXE = tests/tests.exe
+
 mypkg_SCRIPTS = \
 	$(DUNE_PREFIX)/$(CLANGML_CMXA) \
 	$(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A)
@@ -21,8 +23,9 @@ clangml : $(DUNE_PREFIX)/$(CLANGML_CMXA) $(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A)
 stubgen : $(DUNE_PREFIX)/$(STUBGEN_EXE)
 
 .PHONY : tests
-tests :
-	dune runtest
+tests : $(DUNE_PREFIX)/$(TESTS_EXE)
+	$(DUNE_PREFIX)/$(TESTS_EXE)
+#	dune runtest
 
 .PHONY : doc
 doc :
@@ -72,3 +75,6 @@ install : $(DUNE_PREFIX)/clangml.install
 
 .mli.doc.ml :
 	$(OCAMLCODOC) $<
+
+$(DUNE_PREFIX)/$(TESTS_EXE): clangml/clang__ast.ml
+	dune build $(TESTS_EXE)

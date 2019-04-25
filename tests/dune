@@ -1,0 +1,10 @@
+(executable
+  (name tests)
+  (preprocess (staged_pps ppx_import_module ppx_deriving.std value_quoter value_quoter.parsetree pattern.ppx))
+  (link_flags -linkall)
+  (libraries compiler-libs clangml pattern.runtime))
+
+(rule
+  (targets tests.ml)
+  (deps ../clangml/clang__ast.ml)
+  (action (run ocamlcodoc %{deps} -o %{targets})))
