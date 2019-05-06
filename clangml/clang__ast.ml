@@ -58,35 +58,9 @@ let check pp parser source checker =
       (Format.pp_print_list pp) ast;
     incr failure_count
 
-[%%import_module Clang__bindings]
-  [@@remove attribute [@@deriving]]
-  [@@exclude abstract types [@@deriving quote]]
-  [@@on type cxint [@@quote fun ?loc _ -> failwith "Cannot quote cxint" ]
-    [@@deriving quote]]
-  [@@on type cxfloat [@@quote fun ?loc _ -> failwith "Cannot quote cxfloat" ]
-    [@@deriving quote]]
-  [@@on type cxtype [@@quote fun ?loc _ -> failwith "Cannot quote cxtype" ]
-    [@@deriving quote]]
+let lift_expr = new Clangml_lift.lift_expr Location.none
 
-[%%import_module Clang__ast]
-  [@@remove attribute [@@deriving]]
-  [@@exclude abstract types
-    [@@exclude type concrete_location and source_location
-      [@@annot_deriving quote]]]
-  [@@on type ('a, 'qual_type) open_node [@@quote fun ?loc node ->
-    [%parsetree.expr {
-      decoration = Custom { location = None; qual_type = None };
-      desc = [%e poly_a ?loc node.desc] }]]]
-  [@@on type 'qual_type open_decoration [@@quote fun ?loc _ ->
-    failwith "Cannot quote decoration"]]
-  [@@on type qual_type [@@quote fun ?loc (qual_type : qual_type) ->
-    let const = [%derive.quote: bool] ?loc qual_type.const in
-    let volatile = [%derive.quote: bool] ?loc qual_type.volatile in
-    let restrict = [%derive.quote: bool] ?loc qual_type.restrict in
-    [%parsetree.expr {
-      cx_type = get_cursor_type (get_null_cursor ()); const = [%e const];
-      volatile = [%e volatile]; restrict = [%e restrict];
-      desc = [%e quote_type_desc ?loc qual_type.desc ] }]]]
+let quote_decl_list l = lift_expr#list lift_expr#decl l
 
 let check_pattern quoter parser source pattern =
   prerr_endline source;
@@ -97,9 +71,6 @@ let check_pattern quoter parser source pattern =
   | Error failure ->
     Format.printf "@[failed:@ %a@]@." Pattern_runtime.format_failure failure;
     incr failure_count
-
-let quote_decl_list =
-  let loc = Location.none in [%derive.quote: Clang__ast.decl list]
 ]}*)
 
 (** {2 Nodes and decorations} *)
