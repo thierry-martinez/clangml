@@ -187,6 +187,8 @@ AS_IF([test "x$LLVM_VERSION" = "x6.0.0"],
   [AC_SUBST([LLVM_VERSION], [[6.0.1]])])
 AS_IF([test "x$LLVM_VERSION" = "x7.0.0"],
   [AC_SUBST([LLVM_VERSION], [[7.0.1]])])
+AS_IF([test "x$LLVM_VERSION" = "x7.1.0"],
+  [AC_SUBST([LLVM_VERSION], [[7.0.1]])])
 
 AC_ARG_WITH([llvm-version],
   AS_HELP_STRING([--with-llvm-version=VERSION],
