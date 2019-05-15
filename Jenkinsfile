@@ -120,7 +120,7 @@ pipeline {
             steps {
                 sh '''
                     docker run --rm -v $PWD/src:/clangml ocaml/opam2:4.07 \
-                        /clangml/ci-scripts/opam-pin-and-install.sh \
+                        /clangml/ci-scripts/opam-pin_and_install.sh \
                         file:///clangml/
                    '''
             }
@@ -135,7 +135,7 @@ pipeline {
             steps {
                 sh '''
                     docker run --rm -v $PWD/src:/clangml ocaml/opam2:4.07 \
-                        /clangml/ci-scripts/opam-pin-and-install.sh \
+                        /clangml/ci-scripts/opam-pin_and_install.sh \
 https://gitlab.inria.fr/tmartine/clangml/-/archive/snapshot/clangml-snapshot.tar.gz
                    '''
             }
