@@ -126,12 +126,7 @@ and ('a, 'qual_type) open_node = {
       [@compare fun _ _ -> 0];
     desc : 'a;
   }
-    [@@deriving show, eq, ord,
-      visitors { variety = "iter"; name = "base_iter"; polymorphic = true },
-      visitors { variety = "map"; name = "base_map"; polymorphic = true },
-      visitors { variety = "reduce"; name = "base_reduce"; polymorphic = true },
-      visitors { variety = "mapreduce"; name = "base_mapreduce";
-        polymorphic = true }]
+    [@@deriving show, eq, ord]
 
 (** {2 Aliases} *)
 
@@ -139,43 +134,42 @@ and ('a, 'qual_type) open_node = {
 from libclang. *)
 
 type elaborated_type_keyword = clang_ext_elaboratedtypekeyword
-      [@visitors.opaque]
 (** Keyword associated to an elaborated type: [struct], [union],
     [enum], ... *)
 
-and character_kind = clang_ext_characterkind [@visitors.opaque]
+and character_kind = clang_ext_characterkind
 (** Character kind: ASCII, UTF8, UTF16, ... *)
 
-and unary_expr_kind = clang_ext_unaryexpr [@visitors.opaque]
+and unary_expr_kind = clang_ext_unaryexpr
 (** Kind of unary expression: [sizeof], [alignof], ... *)
 
-and unary_operator_kind = clang_ext_unaryoperatorkind [@visitors.opaque]
+and unary_operator_kind = clang_ext_unaryoperatorkind
 (** Kind of unary operator: [_++], [++_], [-_], [&_], ... *)
 
-and binary_operator_kind = clang_ext_binaryoperatorkind [@visitors.opaque]
+and binary_operator_kind = clang_ext_binaryoperatorkind
 (** Kind of binary operator: [_+_], [_=_], [_+=_], [_<<_], ... *)
 
-and attribute_kind = clang_ext_attrkind [@visitors.opaque]
+and attribute_kind = clang_ext_attrkind
 (** Kind of attribute: [FallThrough], [NonNull], ... *)
 
-and builtin_type = cxtypekind [@visitors.opaque]
+and builtin_type = cxtypekind
 (** libclang's type kinds: [Int], [Void], [Bool], ... *)
 
-and cxx_access_specifier = cx_cxxaccessspecifier [@visitors.opaque]
+and cxx_access_specifier = cx_cxxaccessspecifier
 (** C++ access specifier: [public], [private], [protected] *)
 
-and calling_conv = cxcallingconv [@visitors.opaque]
+and calling_conv = cxcallingconv
 (** Calling convention *)
 
-and linkage_kind = cxlinkagekind [@visitors.opaque]
+and linkage_kind = cxlinkagekind
 
 and integer_literal =
   | Int of int
-  | CXInt of (cxint [@visitors.opaque] [@quote.opaque])
+  | CXInt of cxint
 
 and floating_literal =
   | Float of float
-  | CXFloat of (cxfloat [@visitors.opaque] [@quote.opaque])
+  | CXFloat of cxfloat
 
 and languages = {
     c : bool;
@@ -612,7 +606,7 @@ let () =
       qual_type = { desc = BuiltinType Bool}}} -> ()
   | _ -> assert false
     ]}*)
-  | UnexposedType of (clang_ext_typekind [@visitors.opaque])
+  | UnexposedType of clang_ext_typekind
   | InvalidType
 
 and template_name =
@@ -1915,7 +1909,7 @@ let () =
   | UnexposedExpr of {
       s : string;
     }
-  | UnknownExpr of (cxcursorkind [@visitors.opaque])
+  | UnknownExpr of cxcursorkind
 
 and cast_kind =
   | CStyle
@@ -2925,9 +2919,7 @@ let () =
   | _ -> assert false
     ]}
 *)
-  | UnknownDecl of
-      (cxcursorkind [@visitors.opaque]) *
-      (clang_ext_declkind [@visitors.opaque])
+  | UnknownDecl of cxcursorkind * clang_ext_declkind
 
 and ident_ref =
   | Ident of string
@@ -3216,11 +3208,7 @@ and translation_unit = (translation_unit_desc, qual_type) open_node
 and translation_unit_desc = {
     filename : string; items : decl list
   }
-    [@@deriving show, eq, ord,
-      visitors { variety = "iter"; ancestors = ["base_iter"] },
-      visitors { variety = "map"; ancestors = ["base_map"] },
-      visitors { variety = "reduce"; ancestors = ["base_reduce"] },
-      visitors { variety = "mapreduce"; ancestors = ["base_mapreduce"] }]
+    [@@deriving show, eq, ord]
 
 type 'a node = ('a, qual_type) open_node
 
