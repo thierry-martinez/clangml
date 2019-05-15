@@ -44,6 +44,7 @@ AC_SUBST([OCAMLMKLIB], [["$OCAMLFIND ocamlmklib"]])
 AC_CHECK_OCAMLFIND_PKG([stdcompat])
 AC_CHECK_OCAMLFIND_PKG([ppx_deriving])
 AC_CHECK_OCAMLFIND_PKG([visitors])
+AC_CHECK_OCAMLFIND_PKG([ppxlib])
 
 AS_IF([test "x$has_missing_packages" = "xsingle"],
   [AC_MSG_ERROR([Package$missing_packages not found. Hint: opam install$missing_packages.])],
