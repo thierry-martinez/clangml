@@ -5,6 +5,7 @@ if [ "$#" -ne 1 ]; then
 fi
 set -ex
 URL="$1"
+cd ~/opam-repository
 git pull
 opam update
 opam pin add https://gitlab.inria.fr/tmartine/override.git
