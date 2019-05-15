@@ -341,8 +341,8 @@ AS_IF([test -d clangml],
 AS_IF([test -d tests],
   [true],
   [AS_IF([mkdir tests],
-    [AS_IF([mkdir tests/clang__ast],
-      [AC_CP([$srcdir/tests/clang__ast/dune], [tests/clang__ast/])])])])
+    [AS_IF([mkdir tests/clangml__ast],
+      [AC_CP([$srcdir/tests/clangml__ast/dune], [tests/clangml__ast/])])])])
 
 AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang__bindings.ml], [clangml/clang__bindings.ml])
 
