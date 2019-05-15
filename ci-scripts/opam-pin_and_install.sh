@@ -8,7 +8,7 @@ URL="$1"
 cd ~/opam-repository
 git pull
 opam update
-opam pin add https://gitlab.inria.fr/tmartine/override.git
-opam pin add https://gitlab.inria.fr/tmartine/pattern.git
-opam pin add -yn "$URL"
-opam depext -yi clangml
+opam pin add --yes --no-action https://gitlab.inria.fr/tmartine/override.git
+opam pin add --yes --no-action https://gitlab.inria.fr/tmartine/pattern.git
+opam pin add --yes --no-action "$URL"
+opam depext --yes --install clangml
