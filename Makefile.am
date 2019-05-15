@@ -10,9 +10,19 @@ LIBCLANGML_STUBS_A = clangml/libclangml_stubs.a
 
 STUBGEN_EXE = stubgen/stubgen.exe
 
+TESTS_EXE = tests/clangml__ast/tests.exe
+
 mypkg_SCRIPTS = \
 	$(DUNE_PREFIX)/$(CLANGML_CMXA) \
 	$(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A)
+
+dune_files = \
+	$(CLANGML_CMXA) \
+	$(LIBCLANGML_STUBS_A) \
+	$(STUBGEN_EXE) \
+	$(TESTS_EXE)
+
+# Entry targets: clangml, stubgen, doc, tests, install and clean.
 
 .PHONY : clangml
 clangml : $(DUNE_PREFIX)/$(CLANGML_CMXA) $(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A)
@@ -20,37 +30,22 @@ clangml : $(DUNE_PREFIX)/$(CLANGML_CMXA) $(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A)
 .PHONY : stubgen
 stubgen : $(DUNE_PREFIX)/$(STUBGEN_EXE)
 
-.PHONY : tests
-tests :
-	dune runtest
-
 .PHONY : doc
 doc :
 	dune build @doc
 
-$(DUNE_PREFIX)/$(CLANGML_CMXA) : \
-		clangml/clang.ml clangml/clang.mli \
-		clangml/clang__bindings.ml clangml/clang__ast.ml \
-		clangml/clang__utils.ml clangml/clang__ast_utils.ml \
-	clangml/clang__printer.ml
-	$(DUNE) build $(CLANGML_CMXA)
+.PHONY : tests
+tests : $(DUNE_PREFIX)/$(TESTS_EXE)
+	$(DUNE_PREFIX)/$(TESTS_EXE)
+#	dune runtest
 
-$(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A) : \
-		clangml/clang_stubs.c clangml/libclang_extensions.cpp \
-		clangml/libclang_extensions.h clangml/stubgen.h
-	$(DUNE) build $(LIBCLANGML_STUBS_A)
-
-$(DUNE_PREFIX)/$(STUBGEN_EXE) : \
-		$(DUNE_PREFIX)/$(CLANGML_CMXA) stubgen/stubgen.ml
-	$(DUNE) build $(STUBGEN_EXE)
-
-current/clang__bindings.ml : $(DUNE_PREFIX)/$(STUBGEN_EXE) \
-		clangml/libclang_extensions.h
-	$(DUNE_PREFIX)/$(STUBGEN_EXE) --llvm-config $(LLVM_CONFIG) current/
-
-current/clang__bindings.mli : current/clang__bindings.ml
-
-current/clang_stubs.c : current/clang__bindings.ml
+.PHONY : install
+install :
+	dune build @install
+	- test -z $(INSTALL_NAME_TOOL) || \
+		$(INSTALL_NAME_TOOL) -add_rpath $(LLVM_LIBDIR) \
+			_build/install/default/lib/stublibs/dllclangml_stubs.so
+	dune install
 
 clean-local : clean-local-dune
 
@@ -58,17 +53,22 @@ clean-local : clean-local-dune
 clean-local-dune :
 	dune clean
 
-$(DUNE_PREFIX)/clangml.install : \
-		$(DUNE_PREFIX)/$(CLANGML_CMXA) \
-		$(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A) \
-		clangml.opam
-	dune build @install
+# Delegate to dune the building of $(DUNE_PREFIX)/* files
+# They are all phony targets since we want to rely on dune for dependency
+# management.
 
-install : $(DUNE_PREFIX)/clangml.install
-	- test -z $(INSTALL_NAME_TOOL) || \
-		$(INSTALL_NAME_TOOL) -add_rpath $(LLVM_LIBDIR) \
-			_build/install/default/lib/stublibs/dllclangml_stubs.so
-	dune install
+define foreach_dune_file
+.PHONY : $(DUNE_PREFIX)/$(dune_file)
+$(DUNE_PREFIX)/$(dune_file) :
+	$(DUNE) build $(dune_file)
+endef
+$(foreach dune_file,$(dune_files),$(eval $(foreach_dune_file)))
 
-.mli.doc.ml :
-	$(OCAMLCODOC) $<
+# Targets for bootstrapping bindings
+
+current/clang__bindings.ml : stubgen
+	$(DUNE_PREFIX)/$(STUBGEN_EXE) --llvm-config $(LLVM_CONFIG) current/
+
+current/clang__bindings.mli : current/clang__bindings.ml
+
+current/clang_stubs.c : current/clang__bindings.ml

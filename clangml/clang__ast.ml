@@ -36,6 +36,9 @@ type source_location =
   | Concrete of concrete_location
 
 (*{[
+[@@@ocaml.warning "-30"]
+[@@@ocaml.warning "-9"]
+
 open Stdcompat
 
 let () =
@@ -53,6 +56,32 @@ let check pp parser source checker =
     Printf.eprintf "failed with: %s\n" (Printexc.to_string e);
     Format.eprintf "@[parsed@ as:@ @[%a@]@]@."
       (Format.pp_print_list pp) ast;
+    incr failure_count
+
+let lift_expr = new Clangml_lift.lift_expr Location.none
+
+let quote_decl_list l = lift_expr#list lift_expr#decl l
+
+let check_pattern ?(result = fun _ -> ()) quoter parser source pattern =
+  prerr_endline source;
+  let ast = parser source in
+  if
+    match pattern ?quoted:(Some (quoter ast)) ast with
+    | Ok bindings ->
+        begin try
+          result bindings;
+          true
+        with e ->
+          Printf.eprintf "failed with: %s\n" (Printexc.to_string e);
+          false
+        end
+    | Error failure ->
+        Format.printf "@[failed:@ %a@]@." Pattern_runtime.format_failure
+          failure;
+        false
+  then
+    incr success_count
+  else
     incr failure_count
 ]}*)
 
@@ -97,12 +126,7 @@ and ('a, 'qual_type) open_node = {
       [@compare fun _ _ -> 0];
     desc : 'a;
   }
-    [@@deriving show, eq, ord,
-      visitors { variety = "iter"; name = "base_iter"; polymorphic = true },
-      visitors { variety = "map"; name = "base_map"; polymorphic = true },
-      visitors { variety = "reduce"; name = "base_reduce"; polymorphic = true },
-      visitors { variety = "mapreduce"; name = "base_mapreduce";
-        polymorphic = true }]
+    [@@deriving show, eq, ord]
 
 (** {2 Aliases} *)
 
@@ -110,43 +134,42 @@ and ('a, 'qual_type) open_node = {
 from libclang. *)
 
 type elaborated_type_keyword = clang_ext_elaboratedtypekeyword
-      [@visitors.opaque]
 (** Keyword associated to an elaborated type: [struct], [union],
     [enum], ... *)
 
-and character_kind = clang_ext_characterkind [@visitors.opaque]
+and character_kind = clang_ext_characterkind
 (** Character kind: ASCII, UTF8, UTF16, ... *)
 
-and unary_expr_kind = clang_ext_unaryexpr [@visitors.opaque]
+and unary_expr_kind = clang_ext_unaryexpr
 (** Kind of unary expression: [sizeof], [alignof], ... *)
 
-and unary_operator_kind = clang_ext_unaryoperatorkind [@visitors.opaque]
+and unary_operator_kind = clang_ext_unaryoperatorkind
 (** Kind of unary operator: [_++], [++_], [-_], [&_], ... *)
 
-and binary_operator_kind = clang_ext_binaryoperatorkind [@visitors.opaque]
+and binary_operator_kind = clang_ext_binaryoperatorkind
 (** Kind of binary operator: [_+_], [_=_], [_+=_], [_<<_], ... *)
 
-and attribute_kind = clang_ext_attrkind [@visitors.opaque]
+and attribute_kind = clang_ext_attrkind
 (** Kind of attribute: [FallThrough], [NonNull], ... *)
 
-and builtin_type = cxtypekind [@visitors.opaque]
+and builtin_type = cxtypekind
 (** libclang's type kinds: [Int], [Void], [Bool], ... *)
 
-and cxx_access_specifier = cx_cxxaccessspecifier [@visitors.opaque]
+and cxx_access_specifier = cx_cxxaccessspecifier
 (** C++ access specifier: [public], [private], [protected] *)
 
-and calling_conv = cxcallingconv [@visitors.opaque]
+and calling_conv = cxcallingconv
 (** Calling convention *)
 
-and linkage_kind = cxlinkagekind [@visitors.opaque]
+and linkage_kind = cxlinkagekind
 
 and integer_literal =
   | Int of int
-  | CXInt of (cxint [@visitors.opaque] [@quote.opaque])
+  | CXInt of cxint
 
 and floating_literal =
   | Float of float
-  | CXFloat of (cxfloat [@visitors.opaque] [@quote.opaque])
+  | CXFloat of cxfloat
 
 and languages = {
     c : bool;
@@ -583,7 +606,7 @@ let () =
       qual_type = { desc = BuiltinType Bool}}} -> ()
   | _ -> assert false
     ]}*)
-  | UnexposedType of (clang_ext_typekind [@visitors.opaque])
+  | UnexposedType of clang_ext_typekind
   | InvalidType
 
 and template_name =
@@ -1881,15 +1904,12 @@ let () =
             (Some { desc = BuiltinType Float}, { desc = IntegerLiteral (Int 2)});
             (None, { desc = IntegerLiteral (Int 3)})] }}}] -> ()
   | _ -> assert false
-
-let example = {| alignof(int); |}
-   
    ]}
  *)
   | UnexposedExpr of {
       s : string;
     }
-  | UnknownExpr of (cxcursorkind [@visitors.opaque])
+  | UnknownExpr of cxcursorkind
 
 and cast_kind =
   | CStyle
@@ -2242,20 +2262,20 @@ let () =
 let example = {| enum e { A, B = 2, C }; |}
 
 let () =
-  check Clang.Ast.pp_decl parse_declaration_list example
-  @@ fun ast -> match ast with
-  | [{ desc = EnumDecl {
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = EnumDecl {
       name = "e";
       constants = [
         { desc = { name = "A"; init = None }} as a;
         { desc = {
           name = "B";
           init = Some { desc = IntegerLiteral (Int 2)}}} as b;
-        { desc = { name = "C"; init = None }} as c] }}] ->
-        assert (Clang.Enum_constant.get_value a = 0);
-        assert (Clang.Enum_constant.get_value b = 2);
-        assert (Clang.Enum_constant.get_value c = 3)
-  | _ -> assert false
+        { desc = { name = "C"; init = None }} as c] }}]]
+  ~result:(fun bindings ->
+    assert (Clang.Enum_constant.get_value bindings#a = 0);
+    assert (Clang.Enum_constant.get_value bindings#b = 2);
+    assert (Clang.Enum_constant.get_value bindings#c = 3))
     ]}*)
   | RecordDecl of {
       keyword : elaborated_type_keyword;
@@ -2899,9 +2919,7 @@ let () =
   | _ -> assert false
     ]}
 *)
-  | UnknownDecl of
-      (cxcursorkind [@visitors.opaque]) *
-      (clang_ext_declkind [@visitors.opaque])
+  | UnknownDecl of cxcursorkind * clang_ext_declkind
 
 and ident_ref =
   | Ident of string
@@ -3152,10 +3170,10 @@ let example = {|
       T<1, 2, 3> x;
     };
 |}
-(*
+
 let () =
-  check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
-  fun ast -> match ast with
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
      [{ desc = TemplateDecl {
        parameters = [{ desc = {
          name = "T";
@@ -3166,7 +3184,7 @@ let () =
                qual_type = { desc = BuiltinType Int };
                default = None };
              parameter_pack = true }}];
-           default = Some "Default" };
+           default = None };
          parameter_pack = false }}];
        decl = { desc = RecordDecl {
          keyword = Class;
@@ -3180,9 +3198,7 @@ let () =
                    ExprTemplateArgument { desc = IntegerLiteral (Int 1) };
                    ExprTemplateArgument { desc = IntegerLiteral (Int 2) };
                    ExprTemplateArgument { desc = IntegerLiteral (Int 3) }]
-            }}}}] }}}}] -> ()
-  | _ -> assert false
-*)
+            }}}}] }}}}]]
     ]}*)
 
 (** {3 Translation units} *)
@@ -3192,11 +3208,7 @@ and translation_unit = (translation_unit_desc, qual_type) open_node
 and translation_unit_desc = {
     filename : string; items : decl list
   }
-    [@@deriving show, eq, ord,
-      visitors { variety = "iter"; ancestors = ["base_iter"] },
-      visitors { variety = "map"; ancestors = ["base_map"] },
-      visitors { variety = "reduce"; ancestors = ["base_reduce"] },
-      visitors { variety = "mapreduce"; ancestors = ["base_mapreduce"] }]
+    [@@deriving show, eq, ord]
 
 type 'a node = ('a, qual_type) open_node
 

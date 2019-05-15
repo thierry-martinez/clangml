@@ -3038,6 +3038,60 @@ else
 
 fi
 fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ocamlfind package ppxlib" >&5
+$as_echo_n "checking for ocamlfind package ppxlib... " >&6; }
+   if $OCAMLFIND query ppxlib >/dev/null 2>&1; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      missing_packages="$missing_packages ppxlib"
+
+      if test "x$has_missing_packages" = "xno"; then :
+  has_missing_packages=single
+
+else
+  has_missing_packages=multiple
+
+fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ocamlfind package override" >&5
+$as_echo_n "checking for ocamlfind package override... " >&6; }
+   if $OCAMLFIND query override >/dev/null 2>&1; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      missing_packages="$missing_packages override"
+
+      if test "x$has_missing_packages" = "xno"; then :
+  has_missing_packages=single
+
+else
+  has_missing_packages=multiple
+
+fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ocamlfind package pattern" >&5
+$as_echo_n "checking for ocamlfind package pattern... " >&6; }
+   if $OCAMLFIND query pattern >/dev/null 2>&1; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      missing_packages="$missing_packages pattern"
+
+      if test "x$has_missing_packages" = "xno"; then :
+  has_missing_packages=single
+
+else
+  has_missing_packages=multiple
+
+fi
+fi
 
 if test "x$has_missing_packages" = "xsingle"; then :
   as_fn_error $? "Package$missing_packages not found. Hint: opam install$missing_packages." "$LINENO" 5
@@ -4047,6 +4101,10 @@ if test "x$LLVM_VERSION" = "x6.0.0"; then :
 
 fi
 if test "x$LLVM_VERSION" = "x7.0.0"; then :
+  LLVM_VERSION=7.0.1
+
+fi
+if test "x$LLVM_VERSION" = "x7.1.0"; then :
   LLVM_VERSION=7.0.1
 
 fi
@@ -6316,6 +6374,37 @@ else
 fi
 else
   as_fn_error $? "cannot create directory clangml/" "$LINENO" 5
+fi
+fi
+
+if test -d lift; then :
+  true
+else
+  if mkdir lift; then :
+  if cp $srcdir/lift/clangml_lift.ml lift/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/lift/dune lift/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+fi
+fi
+
+if test -d tests; then :
+  true
+else
+  if mkdir tests; then :
+  if mkdir tests/clangml__ast; then :
+  if cp $srcdir/tests/clangml__ast/dune tests/clangml__ast/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+fi
 fi
 fi
 
