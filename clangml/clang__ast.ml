@@ -62,14 +62,26 @@ let lift_expr = new Clangml_lift.lift_expr Location.none
 
 let quote_decl_list l = lift_expr#list lift_expr#decl l
 
-let check_pattern quoter parser source pattern =
+let check_pattern ?(result = fun _ -> ()) quoter parser source pattern =
   prerr_endline source;
   let ast = parser source in
-  match pattern ?quoted:(Some (quoter ast)) ast with
-  | Ok () ->
+  if
+    match pattern ?quoted:(Some (quoter ast)) ast with
+    | Ok bindings ->
+        begin try
+          result bindings;
+          true
+        with e ->
+          Printf.eprintf "failed with: %s\n" (Printexc.to_string e);
+          false
+        end
+    | Error failure ->
+        Format.printf "@[failed:@ %a@]@." Pattern_runtime.format_failure
+          failure;
+        false
+  then
     incr success_count
-  | Error failure ->
-    Format.printf "@[failed:@ %a@]@." Pattern_runtime.format_failure failure;
+  else
     incr failure_count
 ]}*)
 
@@ -2256,20 +2268,20 @@ let () =
 let example = {| enum e { A, B = 2, C }; |}
 
 let () =
-  check Clang.Ast.pp_decl parse_declaration_list example
-  @@ fun ast -> match ast with
-  | [{ desc = EnumDecl {
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = EnumDecl {
       name = "e";
       constants = [
         { desc = { name = "A"; init = None }} as a;
         { desc = {
           name = "B";
           init = Some { desc = IntegerLiteral (Int 2)}}} as b;
-        { desc = { name = "C"; init = None }} as c] }}] ->
-        assert (Clang.Enum_constant.get_value a = 0);
-        assert (Clang.Enum_constant.get_value b = 2);
-        assert (Clang.Enum_constant.get_value c = 3)
-  | _ -> assert false
+        { desc = { name = "C"; init = None }} as c] }}]]
+  ~result:(fun bindings ->
+    assert (Clang.Enum_constant.get_value bindings#a = 0);
+    assert (Clang.Enum_constant.get_value bindings#b = 2);
+    assert (Clang.Enum_constant.get_value bindings#c = 3))
     ]}*)
   | RecordDecl of {
       keyword : elaborated_type_keyword;
@@ -3170,7 +3182,7 @@ let example = {|
 let () =
   check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
   [%pattern?
-     [({ desc = TemplateDecl {
+     [{ desc = TemplateDecl {
        parameters = [{ desc = {
          name = "T";
          kind = Template {
@@ -3194,7 +3206,7 @@ let () =
                    ExprTemplateArgument { desc = IntegerLiteral (Int 1) };
                    ExprTemplateArgument { desc = IntegerLiteral (Int 2) };
                    ExprTemplateArgument { desc = IntegerLiteral (Int 3) }]
-            }}}}] }}}} : Clang.Ast.decl)]]
+            }}}}] }}}}]]
     ]}*)
 
 (** {3 Translation units} *)
