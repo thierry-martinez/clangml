@@ -338,6 +338,12 @@ AS_IF([test -d clangml],
      AC_CP([$srcdir/clangml/clangml_OperationKinds.def], [clangml/])],
     [AC_MSG_ERROR([[cannot create directory clangml/]])])])
 
+AS_IF([test -d tests],
+  [true],
+  [AS_IF([mkdir tests],
+    [AS_IF([mkdir tests/clang__ast],
+      [AC_CP([$srcdir/tests/clang__ast/dune], [tests/clang__ast/])])])])
+
 AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang__bindings.ml], [clangml/clang__bindings.ml])
 
 AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang__bindings.mli], [clangml/clang__bindings.mli])
