@@ -1,6 +1,6 @@
 (executable
   (name tests)
-  (preprocess (staged_pps ppx_import_module ppx_deriving.std pattern.ppx))
+  (preprocess (pps pattern.ppx))
   (link_flags -linkall)
   (libraries compiler-libs clangml clangml.lift pattern.runtime))
 
