@@ -17,6 +17,8 @@ depends: [
   "conf-zlib"
   "ppx_deriving"
   "visitors"
-  "ppxlib"
+  "ppxlib" {>= "0.6.0"}
+  "override" {>= "0.1.0"}
+  "pattern" {>= "0.1.0"}
   "dune" {build & >= "1.2"}
   "ocaml" {>= "4.04.0" & < "4.08.0"}]
