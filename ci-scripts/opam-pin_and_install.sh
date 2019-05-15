@@ -7,6 +7,6 @@ set -ex
 URL="$1"
 git pull
 opam update
-opam pin add git@gitlab.inria.fr:tmartine/pattern.git
+opam pin add https://gitlab.inria.fr/tmartine/pattern.git
 opam pin add -yn "$URL"
 opam depext -yi clangml
