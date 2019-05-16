@@ -1,5 +1,3 @@
-[@@@ocaml.warning "-30"]
-
 open Clang__bindings
 
 let pp_cxint fmt cxint =
@@ -213,11 +211,11 @@ let example = "const int one = 1;"
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
-  | [{ desc = Var { name = "one";
-      qual_type = {
+  | [{ desc = Var { var_name = "one";
+      var_type = {
         const = true;
         desc = BuiltinType Int};
-      init = Some { desc = IntegerLiteral (Int 1)}}}] -> ()
+      var_init = Some { desc = IntegerLiteral (Int 1)}}}] -> ()
   | _ -> assert false
 
 let example = "int x;"
@@ -225,11 +223,11 @@ let example = "int x;"
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
-  | [{ desc = Var { name = "x";
-      qual_type = {
+  | [{ desc = Var { var_name = "x";
+      var_type = {
         const = false;
         desc = BuiltinType Int};
-      init = None }}] -> ()
+      var_init = None }}] -> ()
   | _ -> assert false
      ]}*)
     volatile : bool;
@@ -240,8 +238,8 @@ let example = "volatile int x;"
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
-  | [{ desc = Var { name = "x";
-      qual_type = {
+  | [{ desc = Var { var_name = "x";
+      var_type = {
         volatile = true;
         desc = BuiltinType Int}}}] -> ()
   | _ -> assert false
@@ -251,8 +249,8 @@ let example = "int x;"
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
-  | [{ desc = Var { name = "x";
-      qual_type = {
+  | [{ desc = Var { var_name = "x";
+      var_type = {
         volatile = false;
         desc = BuiltinType Int}}}] -> ()
   | _ -> assert false
@@ -265,7 +263,7 @@ let example = "int * restrict x;"
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
-  | [{ desc = Var { name = "x"; qual_type = {
+  | [{ desc = Var { var_name = "x"; var_type = {
       restrict = true;
       desc = Pointer { desc = BuiltinType Int }}}}] -> ()
   | _ -> assert false
@@ -275,7 +273,7 @@ let example = "int * x;"
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
-  | [{ desc = Var { name = "x"; qual_type = {
+  | [{ desc = Var { var_name = "x"; var_type = {
       restrict = false;
       desc = Pointer { desc = BuiltinType Int }}}}] -> ()
   | _ -> assert false
@@ -292,7 +290,7 @@ let example = "char *s;"
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
-  | [{ desc = Var { name = "s"; qual_type = { desc =
+  | [{ desc = Var { var_name = "s"; var_type = { desc =
       Pointer { desc = BuiltinType Char_S }}}}] -> ()
   | _ -> assert false
     ]}*)
@@ -308,7 +306,7 @@ let example = "char s[42];"
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
-  | [{ desc = Var { name = "s"; qual_type = { desc = ConstantArray {
+  | [{ desc = Var { var_name = "s"; var_type = { desc = ConstantArray {
       element = { desc = BuiltinType Char_S };
       size = 42 }}}}] -> ()
   | _ -> assert false
@@ -327,7 +325,7 @@ let example = {|
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match List.rev ast with
-  | { desc = Var { name = "v"; qual_type = { desc = Vector {
+  | { desc = Var { var_name = "v"; var_type = { desc = Vector {
       element = { desc = Typedef (Ident "int32_t") };
       size = 4 }}}} :: _ -> ()
   | _ -> assert false
@@ -380,7 +378,7 @@ let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = EnumDecl _ };
-     { desc = Var { name = "e"; qual_type = { desc = Elaborated {
+     { desc = Var { var_name = "e"; var_type = { desc = Elaborated {
       keyword = Enum;
       named_type = { desc = Enum (Ident "example") }}}}}] -> ()
   | _ -> assert false
@@ -394,7 +392,7 @@ let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = EnumDecl _ };
-     { desc = Var { name = "e"; qual_type = { desc = Elaborated {
+     { desc = Var { var_name = "e"; var_type = { desc = Elaborated {
       keyword = Enum;
       named_type = { desc = Enum (Ident "") } as named_type }}}}] ->
         let values =
@@ -402,7 +400,7 @@ let () =
           | { desc = EnumDecl { constants }} ->
               constants |> List.map @@
               fun (constant : Clang.Ast.enum_constant) ->
-                constant.desc.name,
+                constant.desc.constant_name,
                 Clang.Enum_constant.get_value constant
           | _ -> assert false in
         assert (values = ["A", 0; "B", 1; "C", 2]);
@@ -416,7 +414,7 @@ let example = "int (*p)(void);"
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
-  | [{ desc = Var { name = "p"; qual_type = { desc =
+  | [{ desc = Var { var_name = "p"; var_type = { desc =
       Pointer { desc = FunctionType {
         result = { desc = BuiltinType Int };
         parameters = Some { non_variadic = []; variadic = false}}}}}}] -> ()
@@ -434,7 +432,7 @@ let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl { keyword = Struct }};
-     { desc = Var { name = "s"; qual_type = { desc = Elaborated {
+     { desc = Var { var_name = "s"; var_type = { desc = Elaborated {
       keyword = Struct;
       named_type = { desc = Record (Ident "") } as named_type }}}}] ->
         let fields = named_type |> Clang.Type.list_of_fields in
@@ -460,7 +458,7 @@ let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl { keyword = Union }};
-     { desc = Var { name = "u"; qual_type = { desc = Elaborated {
+     { desc = Var { var_name = "u"; var_type = { desc = Elaborated {
       keyword = Union;
       named_type = { desc = Record (Ident "") } as named_type }}}}] ->
         let fields = named_type |> Clang.Type.list_of_fields in
@@ -489,9 +487,9 @@ let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = RecordDecl { keyword = Struct }}; { desc = TypedefDecl _ };
-     { desc = Var { name = "s";
-       qual_type = { desc = Typedef (Ident "struct_t") } as qual_type }}] ->
-        let fields = qual_type |>
+     { desc = Var { var_name = "s";
+       var_type = { desc = Typedef (Ident "struct_t") } as var_type }}] ->
+        let fields = var_type |>
           Clang.Type.get_typedef_underlying_type |>
           Clang.Type.list_of_fields in
         begin
@@ -519,8 +517,8 @@ let example = "double _Complex c;"
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast ->
   match ast |> List.rev |> List.hd with
-  | { desc = Var { name = "c";
-      qual_type = { desc = Complex { desc = BuiltinType Double }}}} -> ()
+  | { desc = Var { var_name = "c";
+      var_type = { desc = Complex { desc = BuiltinType Double }}}} -> ()
   | _ -> assert false
 
 let example = "float _Complex c;"
@@ -528,8 +526,8 @@ let example = "float _Complex c;"
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast ->
   match ast |> List.rev |> List.hd with
-  | { desc = Var { name = "c";
-      qual_type = { desc = Complex { desc = BuiltinType Float }}}} -> ()
+  | { desc = Var { var_name = "c";
+      var_type = { desc = Complex { desc = BuiltinType Float }}}} -> ()
   | _ -> assert false
     ]} *)
   | Attributed of {
@@ -552,8 +550,8 @@ let () =
       + Clang.include_attributed_types) in
     check Clang.Ast.pp_decl (parse_declaration_list ~clang_options) example @@
     fun ast ->  match ast with
-    | [{ desc = Var { name = "ptr";
-         qual_type = { desc = Attributed {
+    | [{ desc = Var { var_name = "ptr";
+         var_type = { desc = Attributed {
            modified_type = { desc = Pointer { desc = BuiltinType Int }};
            attribute_kind }}}}] ->
              assert (attribute_kind = Clang.type_non_null)
@@ -575,12 +573,12 @@ let () =
     ~options:(Clang.Ast.Options.make ~ignore_paren_in_types:false ()))
     example @@
   fun ast -> match ast with
-  | [{ desc = Var { name = "p"; qual_type = { desc =
+  | [{ desc = Var { var_name = "p"; var_type = { desc =
       Pointer { desc = FunctionType {
         result = { desc = BuiltinType Int };
         parameters = Some { non_variadic = []; variadic = false}}}}}}] ->
       assert (Clang.get_clang_version () >= "clang version 7.0.0")
-  | [{ desc = Var { name = "p"; qual_type = { desc =
+  | [{ desc = Var { var_name = "p"; var_type = { desc =
       Pointer { desc = ParenType { desc = FunctionType {
         result = { desc = BuiltinType Int };
         parameters = Some { non_variadic = []; variadic = false}}}}}}}] ->
@@ -602,8 +600,8 @@ let example = "_Bool s;"
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example @@ fun ast ->
   match ast |> List.rev |> List.hd with
-  | { desc = Var { name = "s";
-      qual_type = { desc = BuiltinType Bool}}} -> ()
+  | { desc = Var { var_name = "s";
+      var_type = { desc = BuiltinType Bool}}} -> ()
   | _ -> assert false
     ]}*)
   | UnexposedType of clang_ext_typekind
@@ -928,9 +926,9 @@ let () =
   fun ast -> match ast with
   | [{ desc = For {
       init = Some { desc = Decl [{ desc = Var {
-        name = "i";
-        qual_type = { desc = BuiltinType Int};
-        init = Some { desc = IntegerLiteral (Int 0)}}}] };
+        var_name = "i";
+        var_type = { desc = BuiltinType Int};
+        var_init = Some { desc = IntegerLiteral (Int 0)}}}] };
       condition_variable = None;
       cond = Some { desc = BinaryOperator {
         lhs = { desc = DeclRef (Ident "i")};
@@ -950,13 +948,13 @@ let () =
     ~language:CXX) example @@ fun ast -> match ast with
   | [{ desc = For {
       init = Some { desc = Decl [{ desc = Var {
-        name = "i";
-        qual_type = { desc = BuiltinType Int};
-        init = Some { desc = IntegerLiteral (Int 0)}}}] };
+        var_name = "i";
+        var_type = { desc = BuiltinType Int};
+        var_init = Some { desc = IntegerLiteral (Int 0)}}}] };
       condition_variable = Some { desc = {
-        name = "j";
-        qual_type = { desc = BuiltinType Int};
-        init = Some { desc = BinaryOperator {
+        var_name = "j";
+        var_type = { desc = BuiltinType Int};
+        var_init = Some { desc = BinaryOperator {
           lhs = { desc = DeclRef (Ident "i")};
           kind = Sub;
           rhs = { desc = IntegerLiteral (Int 1)}}}}};
@@ -1015,9 +1013,9 @@ let () =
   | [{ desc = If {
        init = None;
        condition_variable = Some ({ desc = {
-         qual_type = { desc = BuiltinType Int};
-         name = "i";
-         init = Some { desc = IntegerLiteral (Int 1) }}});
+         var_type = { desc = BuiltinType Int};
+         var_name = "i";
+         var_init = Some { desc = IntegerLiteral (Int 1) }}});
        cond = { desc = DeclRef (Ident "i")};
        then_branch = { desc = Compound [{
          desc = Expr { desc = DeclRef (Ident "i") }}] };
@@ -1037,9 +1035,9 @@ let () =
     @@ fun ast -> match ast with
     | [{ desc = If {
          init = Some { desc = Decl [{ desc = Var {
-           name = "i";
-           qual_type = { desc = BuiltinType Int };
-           init = Some { desc = IntegerLiteral (Int 1) }}}] };
+           var_name = "i";
+           var_type = { desc = BuiltinType Int };
+           var_init = Some { desc = IntegerLiteral (Int 1) }}}] };
          condition_variable = None;
          then_branch = { desc = Compound [{
            desc = Expr { desc = DeclRef (Ident "i") }}] };
@@ -1085,9 +1083,9 @@ let () =
   | [{ desc = Switch {
       init = None;
       condition_variable = Some ({ desc = {
-         qual_type = { desc = BuiltinType Int};
-         name = "i";
-         init = Some { desc = IntegerLiteral (Int 1)}}});
+         var_type = { desc = BuiltinType Int};
+         var_name = "i";
+         var_init = Some { desc = IntegerLiteral (Int 1)}}});
       cond = { desc = DeclRef (Ident "i") };
       body = { desc = Compound [
         { desc = Case {
@@ -1117,9 +1115,9 @@ let () =
     fun ast -> match ast with
     | [{ desc = Switch {
         init = Some { desc = Decl [{ desc = Var {
-           name = "i";
-           qual_type = { desc = BuiltinType Int };
-           init = Some { desc = IntegerLiteral (Int 1)}}}] };
+           var_name = "i";
+           var_type = { desc = BuiltinType Int };
+           var_init = Some { desc = IntegerLiteral (Int 1)}}}] };
         condition_variable = None;
         cond = { desc = DeclRef (Ident "i") };
         body = { desc = Compound [
@@ -1224,9 +1222,9 @@ let () =
   fun ast -> match ast with
   | [{ desc = While {
       condition_variable = Some ({ desc = {
-         qual_type = { desc = BuiltinType Int};
-         name = "i";
-         init = Some { desc = IntegerLiteral (Int 1)}}});
+         var_type = { desc = BuiltinType Int};
+         var_name = "i";
+         var_init = Some { desc = IntegerLiteral (Int 1)}}});
       cond = { desc = DeclRef (Ident "i") };
       body = { desc = Compound [{ desc =
         Expr { desc = DeclRef (Ident "i") }}] }}}] -> ()
@@ -1302,9 +1300,9 @@ let () =
         label = "label";
         body = { desc = Expr { desc = IntegerLiteral (Int 1)}}}};
       { desc = Decl [{ desc = Var {
-        name = "ptr";
-        qual_type = { desc = Pointer { desc = BuiltinType Void }};
-        init = Some { desc = AddrLabel "label" }}}] };
+        var_name = "ptr";
+        var_type = { desc = Pointer { desc = BuiltinType Void }};
+        var_init = Some { desc = AddrLabel "label" }}}] };
       { desc = IndirectGoto { desc = DeclRef (Ident "ptr")}}] -> ()
   | _ -> assert false
     ]}*)
@@ -1798,11 +1796,11 @@ let example = {| int a[2] = { 1, 2 }; |}
 let () =
   check Clang.Ast.pp_decl parse_declaration_list example
   @@ fun ast -> match ast with
-  | [{ desc = Var { name = "a"; qual_type = {
+  | [{ desc = Var { var_name = "a"; var_type = {
       desc = ConstantArray {
         element = { desc = BuiltinType Int };
         size = 2 }};
-      init = Some { desc = InitList [
+      var_init = Some { desc = InitList [
         { desc = IntegerLiteral (Int 1)};
         { desc = IntegerLiteral (Int 2)}] }}}] -> ()
   | _ -> assert false
@@ -1938,9 +1936,11 @@ let () =
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
       parameters = [
-        { desc = { name = "X"; kind = Class { default = None }}};
-        { desc = { name = "i"; kind = NonType {
-            qual_type = { desc = BuiltinType Int };
+        { desc = {
+            parameter_name = "X";
+            parameter_kind = Class { default = None }}};
+        { desc = { parameter_name = "i"; parameter_kind = NonType {
+            parameter_type = { desc = BuiltinType Int };
             default = None }}}];
       decl = { desc = Function {
         function_type = {
@@ -1967,10 +1967,11 @@ let () =
   | [{ desc = TemplateDecl {
       parameters = [
         { desc = {
-            name = "X";
-            kind = Class { default = Some { desc = BuiltinType Bool }}}};
-        { desc = { name = "i"; kind = NonType {
-            qual_type = { desc = BuiltinType Int };
+            parameter_name = "X";
+            parameter_kind =
+              Class { default = Some { desc = BuiltinType Bool }}}};
+        { desc = { parameter_name = "i"; parameter_kind = NonType {
+            parameter_type = { desc = BuiltinType Int };
             default = Some { desc = IntegerLiteral (Int 4)}}}}];
       decl = { desc = RecordDecl {
         keyword = Class;
@@ -2005,8 +2006,8 @@ let () =
       fields = [
         { desc = TemplateDecl {
             parameters = [
-              { desc = { name = "X";
-                kind = Class { default = None };
+              { desc = { parameter_name = "X";
+                parameter_kind = Class { default = None };
                 parameter_pack = false; }}];
             decl = { desc = CXXMethod {
               type_ref = None;
@@ -2020,8 +2021,8 @@ let () =
               body = None; }}}}] }};
      { desc = TemplateDecl {
          parameters = [{ desc = {
-           name = "X";
-           kind = Class { default = None };
+           parameter_name = "X";
+           parameter_kind = Class { default = None };
            parameter_pack = false; }}];
          decl = { desc = CXXMethod {
            type_ref = Some { desc = Record (Ident "C") };
@@ -2045,8 +2046,8 @@ let () =
   | [{ desc = TemplateDecl {
         parameters = [
           { desc = {
-            name = "Types";
-            kind = Class { default = None };
+            parameter_name = "Types";
+            parameter_kind = Class { default = None };
             parameter_pack = true; }}];
         decl = { desc = RecordDecl {
           keyword = Struct;
@@ -2224,9 +2225,9 @@ let () =
     fun ast -> match ast with
   | [{ desc = Var {
       linkage = External;
-      qual_type = { const = false; desc = BuiltinType Int };
-      name = "x";
-      init = Some { desc = IntegerLiteral (Int 1)}}}] -> ()
+      var_type = { const = false; desc = BuiltinType Int };
+      var_name = "x";
+      var_init = Some { desc = IntegerLiteral (Int 1)}}}] -> ()
   | _ -> assert false
 
 let example = {| const int x = 1; |}
@@ -2236,9 +2237,9 @@ let () =
     fun ast -> match ast with
   | [{ desc = Var {
       linkage = External;
-      qual_type = { const = true; desc = BuiltinType Int };
-      name = "x";
-      init = Some { desc = IntegerLiteral (Int 1)}}}] -> ()
+      var_type = { const = true; desc = BuiltinType Int };
+      var_name = "x";
+      var_init = Some { desc = IntegerLiteral (Int 1)}}}] -> ()
   | _ -> assert false
 
 let example = {| static int x = 1; |}
@@ -2248,9 +2249,9 @@ let () =
     fun ast -> match ast with
   | [{ desc = Var {
       linkage = Internal;
-      qual_type = { const = false; desc = BuiltinType Int };
-      name = "x";
-      init = Some ({ desc = IntegerLiteral (Int 1)})}}] -> ()
+      var_type = { const = false; desc = BuiltinType Int };
+      var_name = "x";
+      var_init = Some ({ desc = IntegerLiteral (Int 1)})}}] -> ()
   | _ -> assert false
     ]}*)
   | EnumDecl of {
@@ -2267,11 +2268,11 @@ let () =
     [{ desc = EnumDecl {
       name = "e";
       constants = [
-        { desc = { name = "A"; init = None }} as a;
+        { desc = { constant_name = "A"; constant_init = None }} as a;
         { desc = {
-          name = "B";
-          init = Some { desc = IntegerLiteral (Int 2)}}} as b;
-        { desc = { name = "C"; init = None }} as c] }}]]
+          constant_name = "B";
+          constant_init = Some { desc = IntegerLiteral (Int 2)}}} as b;
+        { desc = { constant_name = "C"; constant_init = None }} as c] }}]]
   ~result:(fun bindings ->
     assert (Clang.Enum_constant.get_value bindings#a = 0);
     assert (Clang.Enum_constant.get_value bindings#b = 2);
@@ -2597,8 +2598,8 @@ let () =
   | [{ desc = Namespace {
       name = "example";
       declarations = [
-        { desc = Var { name = "i";
-          qual_type = { desc = BuiltinType Int}}}] }}] -> ()
+        { desc = Var { var_name = "i";
+          var_type = { desc = BuiltinType Int}}}] }}] -> ()
   | _ -> assert false
     ]}
 *)
@@ -2795,8 +2796,8 @@ let () =
          languages = { c = true; cxx = false };
          decls = [
            { desc = Var {
-               qual_type = { desc = BuiltinType Int };
-               name = "i"; }};
+               var_type = { desc = BuiltinType Int };
+               var_name = "i"; }};
            { desc = Function {
                function_type = {
                  result = { desc = BuiltinType Void };
@@ -2821,8 +2822,8 @@ let () =
          languages = { c = false; cxx = true };
          decls = [
            { desc = Var {
-               qual_type = { desc = BuiltinType Int };
-               name = "i"; }};
+               var_type = { desc = BuiltinType Int };
+               var_name = "i"; }};
            { desc = Function {
                function_type = {
                  result = { desc = BuiltinType Void };
@@ -2874,7 +2875,9 @@ let () =
   check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
-         parameters = [{ desc = { name = "T"; kind = Class _ }}];
+         parameters = [{ desc = {
+           parameter_name = "T";
+           parameter_kind = Class _ }}];
          decl = { desc = RecordDecl {
            keyword = Class;
            name = "C";
@@ -2898,7 +2901,9 @@ let () =
          keyword = Class;
          name = "C";
          fields = [{ desc = Friend (FriendDecl { desc = TemplateDecl {
-           parameters = [{ desc = { name = "T"; kind = Class _ }}];
+           parameters = [{ desc = {
+             parameter_name = "T";
+             parameter_kind = Class _ }}];
            decl = { desc = RecordDecl {
              keyword = Class;
              name = "B";
@@ -3020,17 +3025,17 @@ and label_ref = string
 and enum_constant = (enum_constant_desc, qual_type) open_node
 
 and enum_constant_desc = {
-    name : string;
-    init : expr option;
+    constant_name : string;
+    constant_init : expr option;
   }
 
 and var_decl = (var_decl_desc, qual_type) open_node
 
 and var_decl_desc = {
     linkage : linkage_kind;
-    name : string;
-    qual_type : qual_type;
-    init : expr option;
+    var_name : string;
+    var_type : qual_type;
+    var_init : expr option;
   }
 
 and cxx_method_binding_kind = NonVirtual | Virtual | PureVirtual
@@ -3040,8 +3045,8 @@ and template_parameter = (template_parameter_desc, qual_type) open_node
 (** C++ template parameter *)
 
 and template_parameter_desc = {
-    name : string;
-    kind : template_parameter_kind;
+    parameter_name : string;
+    parameter_kind : template_parameter_kind;
     parameter_pack : bool; (** C++11 *)
   }
 
@@ -3063,11 +3068,12 @@ let () =
   | [{ desc = TemplateDecl {
       parameters = [
         { desc = {
-            name = "X";
-            kind = Class { default = None }}};
+            parameter_name = "X";
+            parameter_kind = Class { default = None }}};
         { desc = {
-            name = "Y";
-            kind = Class { default = Some { desc = BuiltinType Bool }}}}];
+            parameter_name = "Y";
+            parameter_kind =
+              Class { default = Some { desc = BuiltinType Bool }}}}];
       decl = { desc = RecordDecl {
         keyword = Class;
         name = "C";
@@ -3081,7 +3087,7 @@ let () =
   | _ -> assert false
     ]}*)
   | NonType of {
-      qual_type : qual_type;
+      parameter_type : qual_type;
       default : expr option;
     }
 (** Non type template parameter.
@@ -3097,8 +3103,8 @@ let () =
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
       parameters = [
-        { desc = { name = "i"; kind = NonType {
-            qual_type = { desc = BuiltinType Int };
+        { desc = { parameter_name = "i"; parameter_kind = NonType {
+            parameter_type = { desc = BuiltinType Int };
             default = Some { desc = IntegerLiteral (Int 4)}}}}];
       decl = { desc = RecordDecl {
         keyword = Class;
@@ -3131,8 +3137,8 @@ let () =
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
        parameters = [{ desc = {
-         name = "T";
-         kind = Class { default = None };
+         parameter_name = "T";
+         parameter_kind = Class { default = None };
          parameter_pack = false; }}];
        decl = { desc = RecordDecl {
          keyword = Class;
@@ -3140,11 +3146,11 @@ let () =
          fields = [] }}}};
      { desc = TemplateDecl {
        parameters = [{ desc = {
-         name = "T";
-         kind = Template {
+         parameter_name = "T";
+         parameter_kind = Template {
            parameters = [{ desc = {
-             name = "";
-             kind = Class { default = None };
+             parameter_name = "";
+             parameter_kind = Class { default = None };
              parameter_pack = false; }}];
          default = Some "Default" };
          parameter_pack = false; }}];
@@ -3176,12 +3182,12 @@ let () =
   [%pattern?
      [{ desc = TemplateDecl {
        parameters = [{ desc = {
-         name = "T";
-         kind = Template {
+         parameter_name = "T";
+         parameter_kind = Template {
            parameters = [{ desc = {
-             name = "";
-             kind = NonType {
-               qual_type = { desc = BuiltinType Int };
+             parameter_name = "";
+             parameter_kind = NonType {
+               parameter_type = { desc = BuiltinType Int };
                default = None };
              parameter_pack = true }}];
            default = None };

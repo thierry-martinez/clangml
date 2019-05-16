@@ -439,9 +439,9 @@ module Ast = struct
 
     and var_decl_desc_of_cxcursor cursor =
       let linkage = cursor |> get_cursor_linkage in
-      let name = get_cursor_spelling cursor in
-      let qual_type = of_cxtype (get_cursor_type cursor) in
-      let init =
+      let var_name = get_cursor_spelling cursor in
+      let var_type = of_cxtype (get_cursor_type cursor) in
+      let var_init =
         if ext_var_decl_has_init cursor then
           begin
             let init_value = list_of_children cursor |> List.rev |> List.hd in
@@ -449,7 +449,7 @@ module Ast = struct
           end
         else
           None in
-      { linkage; name; qual_type; init }
+      { linkage; var_name; var_type; var_init }
 
     and enum_decl_of_cxcursor cursor =
       let name = get_cursor_spelling cursor in
@@ -461,13 +461,13 @@ module Ast = struct
       EnumDecl { name; constants }
 
     and enum_constant_of_cxcursor cursor =
-      let name = get_cursor_spelling cursor in
-      let init =
+      let constant_name = get_cursor_spelling cursor in
+      let constant_init =
         match filter_attributes (list_of_children cursor) with
         | [init] -> Some (expr_of_cxcursor init)
         | [] -> None
         | _ -> raise Invalid_structure in
-      node ~cursor { name; init }
+      node ~cursor { constant_name; constant_init }
 
     and record_decl_of_cxcursor keyword cursor =
       record_decl_of_children keyword cursor (list_of_children cursor)
@@ -832,13 +832,13 @@ module Ast = struct
                       | _ -> Some (default |> of_cxtype) in
                     Some (Class { default } : template_parameter_kind)
                 | NonTypeTemplateParameter ->
-                    let qual_type = get_cursor_type cursor |> of_cxtype in
+                    let parameter_type = get_cursor_type cursor |> of_cxtype in
                     let default : expr option =
                       match list_of_children cursor with
                       | [] -> None
                       | [default] -> Some (default |> expr_of_cxcursor)
                       | _ -> raise Invalid_structure in
-                    Some (NonType { qual_type; default })
+                    Some (NonType { parameter_type; default })
                 | TemplateTemplateParameter ->
                     let parameters, others =
                       extract_template_parameters []
@@ -852,11 +852,14 @@ module Ast = struct
                 | _ -> None
               with
               | None -> None, children
-              | Some kind ->
-                  let name = get_cursor_spelling cursor in
+              | Some parameter_kind ->
+                  let parameter_name = get_cursor_spelling cursor in
                   let parameter_pack =
                     ext_template_parm_is_parameter_pack cursor in
-                  Some (node ~cursor { name; kind; parameter_pack}), tl
+                  let node =
+                    node ~cursor
+                      { parameter_name; parameter_kind; parameter_pack} in
+                  Some node, tl
         with
         | None, tl -> List.rev accu, tl
         | Some parameter, tl ->
