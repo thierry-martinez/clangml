@@ -76,11 +76,11 @@ let rec decl fmt (d : decl) =
       print_linkage fmt linkage;
       print_function_type fmt function_type name;
       print_function_body fmt body
-  | Var { linkage; qual_type = ty; name; init } ->
+  | Var { linkage; var_type = ty; var_name; var_init } ->
       Format.fprintf fmt "@[%a%a%a;@]"
 	print_linkage linkage
-	(typed_value (fun fmt -> Format.pp_print_string fmt name)) ty
-	print_variable_init init
+	(typed_value (fun fmt -> Format.pp_print_string fmt var_name)) ty
+	print_variable_init var_init
   | RecordDecl { keyword; name; fields } ->
       Format.fprintf fmt "@[%s@ %s@ {%a}@]"
         (Clang__bindings.ext_elaborated_type_get_keyword_spelling keyword)
