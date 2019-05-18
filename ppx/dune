@@ -1,0 +1,10 @@
+(library
+  (name clangml_ppx)
+  (public_name clangml.ppx)
+  (kind ppx_rewriter)
+  (preprocess (staged_pps ppxlib.metaquot))
+  (library_flags (-linkall))
+  (flags -open Stdcompat)
+  (libraries ppxlib.metaquot clangml clangml.lift stdcompat))
+
+(ocamllex ppx_lexer)
