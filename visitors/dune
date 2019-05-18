@@ -2,6 +2,6 @@
   (name clangml_visitors)
   (public_name clangml.visitors)
   (preprocess (staged_pps override ppx_deriving visitors.ppx))
-; -warning 30: same label defined in multiple types
-  (flags -dsource -open Stdcompat -w -30)
+; -warning 40: Overridden methods
+  (flags -open Stdcompat -w -7)
   (libraries clangml visitors.runtime))

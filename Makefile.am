@@ -12,23 +12,42 @@ STUBGEN_EXE = stubgen/stubgen.exe
 
 TESTS_EXE = tests/clangml__ast/tests.exe
 
-mypkg_SCRIPTS = \
-	$(DUNE_PREFIX)/$(CLANGML_CMXA) \
-	$(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A)
+LIFT_CMXA = lift/clangml_lift.cmxa
+
+VISITORS_CMXA = visitors/clangml_visitors.cmxa
+
+PPX_CMXA = ppx/clangml_ppx.cmxa
 
 dune_files = \
 	$(CLANGML_CMXA) \
 	$(LIBCLANGML_STUBS_A) \
 	$(STUBGEN_EXE) \
-	$(TESTS_EXE)
+	$(TESTS_EXE) \
+	$(LIFT_CMXA) \
+	$(VISITORS_CMXA) \
+	$(PPX_CMXA)
 
-# Entry targets: clangml, stubgen, doc, tests, install and clean.
+mypkg_SCRIPTS = \
+	$(addprefix $(DUNE_PREFIX)/, $(filter-out $(TESTS_EXE), $(dune_files)))
+
+
+# Entry targets: clangml, stubgen, lift, visitors, doc, tests, install
+# and clean.
 
 .PHONY : clangml
 clangml : $(DUNE_PREFIX)/$(CLANGML_CMXA) $(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A)
 
 .PHONY : stubgen
 stubgen : $(DUNE_PREFIX)/$(STUBGEN_EXE)
+
+.PHONY : lift
+lift : $(DUNE_PREFIX)/$(LIFT_CMXA)
+
+.PHONY : visitors
+visitors : $(DUNE_PREFIX)/$(VISITORS_CMXA)
+
+.PHONY : ppx
+ppx : $(DUNE_PREFIX)/$(PPX_CMXA)
 
 .PHONY : doc
 doc :
