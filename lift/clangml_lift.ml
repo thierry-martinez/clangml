@@ -12,9 +12,13 @@ open Clang__bindings
     [@@deriving traverse_lift]
 end]
 
+class virtual ['a] lift = object
+  inherit ['a] Clang__bindings.lift
+  inherit ['a] Clang__ast.lift
+end
+
 class lift_expr loc = object(self)
-  inherit [Parsetree.expression] Clang__bindings.lift
-  inherit [Parsetree.expression] Clang__ast.lift
+  inherit [Parsetree.expression] lift
   inherit Ppxlib_metaquot_lifters.expression_lifters loc
 
   method! open_node :
@@ -38,8 +42,7 @@ class lift_expr loc = object(self)
 end
 
 class lift_pattern loc = object(self)
-  inherit [Parsetree.pattern] Clang__bindings.lift
-  inherit [Parsetree.pattern] Clang__ast.lift
+  inherit [Parsetree.pattern] lift
   inherit Ppxlib_metaquot_lifters.pattern_lifters loc
 
   method! open_node :
