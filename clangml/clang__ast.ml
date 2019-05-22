@@ -9,7 +9,7 @@ let pp_cxfloat fmt cxfloat =
 (** {2 Abstractions from libclang's types} *)
 
 (** The following types describe locations and literals that can be either
- produced by libclang or constructed from OCaml values to allow OCaml
+    produced by libclang or constructed from OCaml values to allow OCaml
     programs to construct parts of AST (for
     instance, to apply a transformation to the AST). *)
 
