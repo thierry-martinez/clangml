@@ -162,7 +162,7 @@ module Ast = struct
             Complex element_type
         | _ ->
             begin
-              match ext_get_type_kind cxtype with
+              match ext_type_get_kind cxtype with
               | Paren -> ParenType (cxtype |> ext_get_inner_type |> of_cxtype)
               | Elaborated -> (* Here for Clang <3.9.0 *)
                   Elaborated {
