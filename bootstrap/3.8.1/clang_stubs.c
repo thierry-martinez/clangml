@@ -5626,6 +5626,382 @@ clang_ext_Decl_GetKind_wrapper(value arg_ocaml)
   }
 }
 
+enum clang_ext_StmtKind
+Clang_ext_stmtkind_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CLANG_EXT_STMT_Invalid;
+  case 1: return CLANG_EXT_STMT_GCCAsmStmt;
+  case 2: return CLANG_EXT_STMT_MSAsmStmt;
+  case 3: return CLANG_EXT_STMT_AttributedStmt;
+  case 4: return CLANG_EXT_STMT_BreakStmt;
+  case 5: return CLANG_EXT_STMT_CXXCatchStmt;
+  case 6: return CLANG_EXT_STMT_CXXForRangeStmt;
+  case 7: return CLANG_EXT_STMT_CXXTryStmt;
+  case 8: return CLANG_EXT_STMT_CapturedStmt;
+  case 9: return CLANG_EXT_STMT_CompoundStmt;
+  case 10: return CLANG_EXT_STMT_ContinueStmt;
+  case 11: return CLANG_EXT_STMT_CoreturnStmt;
+  case 12: return CLANG_EXT_STMT_CoroutineBodyStmt;
+  case 13: return CLANG_EXT_STMT_DeclStmt;
+  case 14: return CLANG_EXT_STMT_DoStmt;
+  case 15: return CLANG_EXT_STMT_BinaryConditionalOperator;
+  case 16: return CLANG_EXT_STMT_ConditionalOperator;
+  case 17: return CLANG_EXT_STMT_AddrLabelExpr;
+  case 18: return CLANG_EXT_STMT_ArraySubscriptExpr;
+  case 19: return CLANG_EXT_STMT_ArrayTypeTraitExpr;
+  case 20: return CLANG_EXT_STMT_AsTypeExpr;
+  case 21: return CLANG_EXT_STMT_AtomicExpr;
+  case 22: return CLANG_EXT_STMT_BinaryOperator;
+  case 23: return CLANG_EXT_STMT_CompoundAssignOperator;
+  case 24: return CLANG_EXT_STMT_BlockExpr;
+  case 25: return CLANG_EXT_STMT_CXXBindTemporaryExpr;
+  case 26: return CLANG_EXT_STMT_CXXBoolLiteralExpr;
+  case 27: return CLANG_EXT_STMT_CXXConstructExpr;
+  case 28: return CLANG_EXT_STMT_CXXTemporaryObjectExpr;
+  case 29: return CLANG_EXT_STMT_CXXDefaultArgExpr;
+  case 30: return CLANG_EXT_STMT_CXXDefaultInitExpr;
+  case 31: return CLANG_EXT_STMT_CXXDeleteExpr;
+  case 32: return CLANG_EXT_STMT_CXXDependentScopeMemberExpr;
+  case 33: return CLANG_EXT_STMT_CXXFoldExpr;
+  case 34: return CLANG_EXT_STMT_CXXNewExpr;
+  case 35: return CLANG_EXT_STMT_CXXNoexceptExpr;
+  case 36: return CLANG_EXT_STMT_CXXNullPtrLiteralExpr;
+  case 37: return CLANG_EXT_STMT_CXXPseudoDestructorExpr;
+  case 38: return CLANG_EXT_STMT_CXXScalarValueInitExpr;
+  case 39: return CLANG_EXT_STMT_CXXStdInitializerListExpr;
+  case 40: return CLANG_EXT_STMT_CXXThisExpr;
+  case 41: return CLANG_EXT_STMT_CXXThrowExpr;
+  case 42: return CLANG_EXT_STMT_CXXTypeidExpr;
+  case 43: return CLANG_EXT_STMT_CXXUnresolvedConstructExpr;
+  case 44: return CLANG_EXT_STMT_CXXUuidofExpr;
+  case 45: return CLANG_EXT_STMT_CallExpr;
+  case 46: return CLANG_EXT_STMT_CUDAKernelCallExpr;
+  case 47: return CLANG_EXT_STMT_CXXMemberCallExpr;
+  case 48: return CLANG_EXT_STMT_CXXOperatorCallExpr;
+  case 49: return CLANG_EXT_STMT_UserDefinedLiteral;
+  case 50: return CLANG_EXT_STMT_CStyleCastExpr;
+  case 51: return CLANG_EXT_STMT_CXXFunctionalCastExpr;
+  case 52: return CLANG_EXT_STMT_CXXConstCastExpr;
+  case 53: return CLANG_EXT_STMT_CXXDynamicCastExpr;
+  case 54: return CLANG_EXT_STMT_CXXReinterpretCastExpr;
+  case 55: return CLANG_EXT_STMT_CXXStaticCastExpr;
+  case 56: return CLANG_EXT_STMT_ObjCBridgedCastExpr;
+  case 57: return CLANG_EXT_STMT_ImplicitCastExpr;
+  case 58: return CLANG_EXT_STMT_CharacterLiteral;
+  case 59: return CLANG_EXT_STMT_ChooseExpr;
+  case 60: return CLANG_EXT_STMT_CompoundLiteralExpr;
+  case 61: return CLANG_EXT_STMT_ConvertVectorExpr;
+  case 62: return CLANG_EXT_STMT_CoawaitExpr;
+  case 63: return CLANG_EXT_STMT_CoyieldExpr;
+  case 64: return CLANG_EXT_STMT_DeclRefExpr;
+  case 65: return CLANG_EXT_STMT_DependentScopeDeclRefExpr;
+  case 66: return CLANG_EXT_STMT_DesignatedInitExpr;
+  case 67: return CLANG_EXT_STMT_DesignatedInitUpdateExpr;
+  case 68: return CLANG_EXT_STMT_ExprWithCleanups;
+  case 69: return CLANG_EXT_STMT_ExpressionTraitExpr;
+  case 70: return CLANG_EXT_STMT_ExtVectorElementExpr;
+  case 71: return CLANG_EXT_STMT_FloatingLiteral;
+  case 72: return CLANG_EXT_STMT_FunctionParmPackExpr;
+  case 73: return CLANG_EXT_STMT_GNUNullExpr;
+  case 74: return CLANG_EXT_STMT_GenericSelectionExpr;
+  case 75: return CLANG_EXT_STMT_ImaginaryLiteral;
+  case 76: return CLANG_EXT_STMT_ImplicitValueInitExpr;
+  case 77: return CLANG_EXT_STMT_InitListExpr;
+  case 78: return CLANG_EXT_STMT_IntegerLiteral;
+  case 79: return CLANG_EXT_STMT_LambdaExpr;
+  case 80: return CLANG_EXT_STMT_MSPropertyRefExpr;
+  case 81: return CLANG_EXT_STMT_MSPropertySubscriptExpr;
+  case 82: return CLANG_EXT_STMT_MaterializeTemporaryExpr;
+  case 83: return CLANG_EXT_STMT_MemberExpr;
+  case 84: return CLANG_EXT_STMT_NoInitExpr;
+  case 85: return CLANG_EXT_STMT_OMPArraySectionExpr;
+  case 86: return CLANG_EXT_STMT_ObjCArrayLiteral;
+  case 87: return CLANG_EXT_STMT_ObjCBoolLiteralExpr;
+  case 88: return CLANG_EXT_STMT_ObjCBoxedExpr;
+  case 89: return CLANG_EXT_STMT_ObjCDictionaryLiteral;
+  case 90: return CLANG_EXT_STMT_ObjCEncodeExpr;
+  case 91: return CLANG_EXT_STMT_ObjCIndirectCopyRestoreExpr;
+  case 92: return CLANG_EXT_STMT_ObjCIsaExpr;
+  case 93: return CLANG_EXT_STMT_ObjCIvarRefExpr;
+  case 94: return CLANG_EXT_STMT_ObjCMessageExpr;
+  case 95: return CLANG_EXT_STMT_ObjCPropertyRefExpr;
+  case 96: return CLANG_EXT_STMT_ObjCProtocolExpr;
+  case 97: return CLANG_EXT_STMT_ObjCSelectorExpr;
+  case 98: return CLANG_EXT_STMT_ObjCStringLiteral;
+  case 99: return CLANG_EXT_STMT_ObjCSubscriptRefExpr;
+  case 100: return CLANG_EXT_STMT_OffsetOfExpr;
+  case 101: return CLANG_EXT_STMT_OpaqueValueExpr;
+  case 102: return CLANG_EXT_STMT_UnresolvedLookupExpr;
+  case 103: return CLANG_EXT_STMT_UnresolvedMemberExpr;
+  case 104: return CLANG_EXT_STMT_PackExpansionExpr;
+  case 105: return CLANG_EXT_STMT_ParenExpr;
+  case 106: return CLANG_EXT_STMT_ParenListExpr;
+  case 107: return CLANG_EXT_STMT_PredefinedExpr;
+  case 108: return CLANG_EXT_STMT_PseudoObjectExpr;
+  case 109: return CLANG_EXT_STMT_ShuffleVectorExpr;
+  case 110: return CLANG_EXT_STMT_SizeOfPackExpr;
+  case 111: return CLANG_EXT_STMT_StmtExpr;
+  case 112: return CLANG_EXT_STMT_StringLiteral;
+  case 113: return CLANG_EXT_STMT_SubstNonTypeTemplateParmExpr;
+  case 114: return CLANG_EXT_STMT_SubstNonTypeTemplateParmPackExpr;
+  case 115: return CLANG_EXT_STMT_TypeTraitExpr;
+  case 116: return CLANG_EXT_STMT_TypoExpr;
+  case 117: return CLANG_EXT_STMT_UnaryExprOrTypeTraitExpr;
+  case 118: return CLANG_EXT_STMT_UnaryOperator;
+  case 119: return CLANG_EXT_STMT_VAArgExpr;
+  case 120: return CLANG_EXT_STMT_ForStmt;
+  case 121: return CLANG_EXT_STMT_GotoStmt;
+  case 122: return CLANG_EXT_STMT_IfStmt;
+  case 123: return CLANG_EXT_STMT_IndirectGotoStmt;
+  case 124: return CLANG_EXT_STMT_LabelStmt;
+  case 125: return CLANG_EXT_STMT_MSDependentExistsStmt;
+  case 126: return CLANG_EXT_STMT_NullStmt;
+  case 127: return CLANG_EXT_STMT_OMPAtomicDirective;
+  case 128: return CLANG_EXT_STMT_OMPBarrierDirective;
+  case 129: return CLANG_EXT_STMT_OMPCancelDirective;
+  case 130: return CLANG_EXT_STMT_OMPCancellationPointDirective;
+  case 131: return CLANG_EXT_STMT_OMPCriticalDirective;
+  case 132: return CLANG_EXT_STMT_OMPFlushDirective;
+  case 133: return CLANG_EXT_STMT_OMPDistributeDirective;
+  case 134: return CLANG_EXT_STMT_OMPForDirective;
+  case 135: return CLANG_EXT_STMT_OMPForSimdDirective;
+  case 136: return CLANG_EXT_STMT_OMPParallelForDirective;
+  case 137: return CLANG_EXT_STMT_OMPParallelForSimdDirective;
+  case 138: return CLANG_EXT_STMT_OMPSimdDirective;
+  case 139: return CLANG_EXT_STMT_OMPTaskLoopDirective;
+  case 140: return CLANG_EXT_STMT_OMPTaskLoopSimdDirective;
+  case 141: return CLANG_EXT_STMT_OMPMasterDirective;
+  case 142: return CLANG_EXT_STMT_OMPOrderedDirective;
+  case 143: return CLANG_EXT_STMT_OMPParallelDirective;
+  case 144: return CLANG_EXT_STMT_OMPParallelSectionsDirective;
+  case 145: return CLANG_EXT_STMT_OMPSectionDirective;
+  case 146: return CLANG_EXT_STMT_OMPSectionsDirective;
+  case 147: return CLANG_EXT_STMT_OMPSingleDirective;
+  case 148: return CLANG_EXT_STMT_OMPTargetDataDirective;
+  case 149: return CLANG_EXT_STMT_OMPTargetDirective;
+  case 150: return CLANG_EXT_STMT_OMPTaskDirective;
+  case 151: return CLANG_EXT_STMT_OMPTaskgroupDirective;
+  case 152: return CLANG_EXT_STMT_OMPTaskwaitDirective;
+  case 153: return CLANG_EXT_STMT_OMPTaskyieldDirective;
+  case 154: return CLANG_EXT_STMT_OMPTeamsDirective;
+  case 155: return CLANG_EXT_STMT_ObjCAtCatchStmt;
+  case 156: return CLANG_EXT_STMT_ObjCAtFinallyStmt;
+  case 157: return CLANG_EXT_STMT_ObjCAtSynchronizedStmt;
+  case 158: return CLANG_EXT_STMT_ObjCAtThrowStmt;
+  case 159: return CLANG_EXT_STMT_ObjCAtTryStmt;
+  case 160: return CLANG_EXT_STMT_ObjCAutoreleasePoolStmt;
+  case 161: return CLANG_EXT_STMT_ObjCForCollectionStmt;
+  case 162: return CLANG_EXT_STMT_ReturnStmt;
+  case 163: return CLANG_EXT_STMT_SEHExceptStmt;
+  case 164: return CLANG_EXT_STMT_SEHFinallyStmt;
+  case 165: return CLANG_EXT_STMT_SEHLeaveStmt;
+  case 166: return CLANG_EXT_STMT_SEHTryStmt;
+  case 167: return CLANG_EXT_STMT_CaseStmt;
+  case 168: return CLANG_EXT_STMT_DefaultStmt;
+  case 169: return CLANG_EXT_STMT_SwitchStmt;
+  case 170: return CLANG_EXT_STMT_WhileStmt;
+  case 171: return CLANG_EXT_STMT_Unknown;
+  }
+  failwith_fmt("invalid value for Clang_ext_stmtkind_val: %d", Int_val(ocaml));
+  return CLANG_EXT_STMT_Invalid;
+}
+
+value
+Val_clang_ext_stmtkind(enum clang_ext_StmtKind v)
+{
+  switch (v) {
+  case CLANG_EXT_STMT_Invalid: return Val_int(0);
+  case CLANG_EXT_STMT_GCCAsmStmt: return Val_int(1);
+  case CLANG_EXT_STMT_MSAsmStmt: return Val_int(2);
+  case CLANG_EXT_STMT_AttributedStmt: return Val_int(3);
+  case CLANG_EXT_STMT_BreakStmt: return Val_int(4);
+  case CLANG_EXT_STMT_CXXCatchStmt: return Val_int(5);
+  case CLANG_EXT_STMT_CXXForRangeStmt: return Val_int(6);
+  case CLANG_EXT_STMT_CXXTryStmt: return Val_int(7);
+  case CLANG_EXT_STMT_CapturedStmt: return Val_int(8);
+  case CLANG_EXT_STMT_CompoundStmt: return Val_int(9);
+  case CLANG_EXT_STMT_ContinueStmt: return Val_int(10);
+  case CLANG_EXT_STMT_CoreturnStmt: return Val_int(11);
+  case CLANG_EXT_STMT_CoroutineBodyStmt: return Val_int(12);
+  case CLANG_EXT_STMT_DeclStmt: return Val_int(13);
+  case CLANG_EXT_STMT_DoStmt: return Val_int(14);
+  case CLANG_EXT_STMT_BinaryConditionalOperator: return Val_int(15);
+  case CLANG_EXT_STMT_ConditionalOperator: return Val_int(16);
+  case CLANG_EXT_STMT_AddrLabelExpr: return Val_int(17);
+  case CLANG_EXT_STMT_ArraySubscriptExpr: return Val_int(18);
+  case CLANG_EXT_STMT_ArrayTypeTraitExpr: return Val_int(19);
+  case CLANG_EXT_STMT_AsTypeExpr: return Val_int(20);
+  case CLANG_EXT_STMT_AtomicExpr: return Val_int(21);
+  case CLANG_EXT_STMT_BinaryOperator: return Val_int(22);
+  case CLANG_EXT_STMT_CompoundAssignOperator: return Val_int(23);
+  case CLANG_EXT_STMT_BlockExpr: return Val_int(24);
+  case CLANG_EXT_STMT_CXXBindTemporaryExpr: return Val_int(25);
+  case CLANG_EXT_STMT_CXXBoolLiteralExpr: return Val_int(26);
+  case CLANG_EXT_STMT_CXXConstructExpr: return Val_int(27);
+  case CLANG_EXT_STMT_CXXTemporaryObjectExpr: return Val_int(28);
+  case CLANG_EXT_STMT_CXXDefaultArgExpr: return Val_int(29);
+  case CLANG_EXT_STMT_CXXDefaultInitExpr: return Val_int(30);
+  case CLANG_EXT_STMT_CXXDeleteExpr: return Val_int(31);
+  case CLANG_EXT_STMT_CXXDependentScopeMemberExpr: return Val_int(32);
+  case CLANG_EXT_STMT_CXXFoldExpr: return Val_int(33);
+  case CLANG_EXT_STMT_CXXNewExpr: return Val_int(34);
+  case CLANG_EXT_STMT_CXXNoexceptExpr: return Val_int(35);
+  case CLANG_EXT_STMT_CXXNullPtrLiteralExpr: return Val_int(36);
+  case CLANG_EXT_STMT_CXXPseudoDestructorExpr: return Val_int(37);
+  case CLANG_EXT_STMT_CXXScalarValueInitExpr: return Val_int(38);
+  case CLANG_EXT_STMT_CXXStdInitializerListExpr: return Val_int(39);
+  case CLANG_EXT_STMT_CXXThisExpr: return Val_int(40);
+  case CLANG_EXT_STMT_CXXThrowExpr: return Val_int(41);
+  case CLANG_EXT_STMT_CXXTypeidExpr: return Val_int(42);
+  case CLANG_EXT_STMT_CXXUnresolvedConstructExpr: return Val_int(43);
+  case CLANG_EXT_STMT_CXXUuidofExpr: return Val_int(44);
+  case CLANG_EXT_STMT_CallExpr: return Val_int(45);
+  case CLANG_EXT_STMT_CUDAKernelCallExpr: return Val_int(46);
+  case CLANG_EXT_STMT_CXXMemberCallExpr: return Val_int(47);
+  case CLANG_EXT_STMT_CXXOperatorCallExpr: return Val_int(48);
+  case CLANG_EXT_STMT_UserDefinedLiteral: return Val_int(49);
+  case CLANG_EXT_STMT_CStyleCastExpr: return Val_int(50);
+  case CLANG_EXT_STMT_CXXFunctionalCastExpr: return Val_int(51);
+  case CLANG_EXT_STMT_CXXConstCastExpr: return Val_int(52);
+  case CLANG_EXT_STMT_CXXDynamicCastExpr: return Val_int(53);
+  case CLANG_EXT_STMT_CXXReinterpretCastExpr: return Val_int(54);
+  case CLANG_EXT_STMT_CXXStaticCastExpr: return Val_int(55);
+  case CLANG_EXT_STMT_ObjCBridgedCastExpr: return Val_int(56);
+  case CLANG_EXT_STMT_ImplicitCastExpr: return Val_int(57);
+  case CLANG_EXT_STMT_CharacterLiteral: return Val_int(58);
+  case CLANG_EXT_STMT_ChooseExpr: return Val_int(59);
+  case CLANG_EXT_STMT_CompoundLiteralExpr: return Val_int(60);
+  case CLANG_EXT_STMT_ConvertVectorExpr: return Val_int(61);
+  case CLANG_EXT_STMT_CoawaitExpr: return Val_int(62);
+  case CLANG_EXT_STMT_CoyieldExpr: return Val_int(63);
+  case CLANG_EXT_STMT_DeclRefExpr: return Val_int(64);
+  case CLANG_EXT_STMT_DependentScopeDeclRefExpr: return Val_int(65);
+  case CLANG_EXT_STMT_DesignatedInitExpr: return Val_int(66);
+  case CLANG_EXT_STMT_DesignatedInitUpdateExpr: return Val_int(67);
+  case CLANG_EXT_STMT_ExprWithCleanups: return Val_int(68);
+  case CLANG_EXT_STMT_ExpressionTraitExpr: return Val_int(69);
+  case CLANG_EXT_STMT_ExtVectorElementExpr: return Val_int(70);
+  case CLANG_EXT_STMT_FloatingLiteral: return Val_int(71);
+  case CLANG_EXT_STMT_FunctionParmPackExpr: return Val_int(72);
+  case CLANG_EXT_STMT_GNUNullExpr: return Val_int(73);
+  case CLANG_EXT_STMT_GenericSelectionExpr: return Val_int(74);
+  case CLANG_EXT_STMT_ImaginaryLiteral: return Val_int(75);
+  case CLANG_EXT_STMT_ImplicitValueInitExpr: return Val_int(76);
+  case CLANG_EXT_STMT_InitListExpr: return Val_int(77);
+  case CLANG_EXT_STMT_IntegerLiteral: return Val_int(78);
+  case CLANG_EXT_STMT_LambdaExpr: return Val_int(79);
+  case CLANG_EXT_STMT_MSPropertyRefExpr: return Val_int(80);
+  case CLANG_EXT_STMT_MSPropertySubscriptExpr: return Val_int(81);
+  case CLANG_EXT_STMT_MaterializeTemporaryExpr: return Val_int(82);
+  case CLANG_EXT_STMT_MemberExpr: return Val_int(83);
+  case CLANG_EXT_STMT_NoInitExpr: return Val_int(84);
+  case CLANG_EXT_STMT_OMPArraySectionExpr: return Val_int(85);
+  case CLANG_EXT_STMT_ObjCArrayLiteral: return Val_int(86);
+  case CLANG_EXT_STMT_ObjCBoolLiteralExpr: return Val_int(87);
+  case CLANG_EXT_STMT_ObjCBoxedExpr: return Val_int(88);
+  case CLANG_EXT_STMT_ObjCDictionaryLiteral: return Val_int(89);
+  case CLANG_EXT_STMT_ObjCEncodeExpr: return Val_int(90);
+  case CLANG_EXT_STMT_ObjCIndirectCopyRestoreExpr: return Val_int(91);
+  case CLANG_EXT_STMT_ObjCIsaExpr: return Val_int(92);
+  case CLANG_EXT_STMT_ObjCIvarRefExpr: return Val_int(93);
+  case CLANG_EXT_STMT_ObjCMessageExpr: return Val_int(94);
+  case CLANG_EXT_STMT_ObjCPropertyRefExpr: return Val_int(95);
+  case CLANG_EXT_STMT_ObjCProtocolExpr: return Val_int(96);
+  case CLANG_EXT_STMT_ObjCSelectorExpr: return Val_int(97);
+  case CLANG_EXT_STMT_ObjCStringLiteral: return Val_int(98);
+  case CLANG_EXT_STMT_ObjCSubscriptRefExpr: return Val_int(99);
+  case CLANG_EXT_STMT_OffsetOfExpr: return Val_int(100);
+  case CLANG_EXT_STMT_OpaqueValueExpr: return Val_int(101);
+  case CLANG_EXT_STMT_UnresolvedLookupExpr: return Val_int(102);
+  case CLANG_EXT_STMT_UnresolvedMemberExpr: return Val_int(103);
+  case CLANG_EXT_STMT_PackExpansionExpr: return Val_int(104);
+  case CLANG_EXT_STMT_ParenExpr: return Val_int(105);
+  case CLANG_EXT_STMT_ParenListExpr: return Val_int(106);
+  case CLANG_EXT_STMT_PredefinedExpr: return Val_int(107);
+  case CLANG_EXT_STMT_PseudoObjectExpr: return Val_int(108);
+  case CLANG_EXT_STMT_ShuffleVectorExpr: return Val_int(109);
+  case CLANG_EXT_STMT_SizeOfPackExpr: return Val_int(110);
+  case CLANG_EXT_STMT_StmtExpr: return Val_int(111);
+  case CLANG_EXT_STMT_StringLiteral: return Val_int(112);
+  case CLANG_EXT_STMT_SubstNonTypeTemplateParmExpr: return Val_int(113);
+  case CLANG_EXT_STMT_SubstNonTypeTemplateParmPackExpr: return Val_int(114);
+  case CLANG_EXT_STMT_TypeTraitExpr: return Val_int(115);
+  case CLANG_EXT_STMT_TypoExpr: return Val_int(116);
+  case CLANG_EXT_STMT_UnaryExprOrTypeTraitExpr: return Val_int(117);
+  case CLANG_EXT_STMT_UnaryOperator: return Val_int(118);
+  case CLANG_EXT_STMT_VAArgExpr: return Val_int(119);
+  case CLANG_EXT_STMT_ForStmt: return Val_int(120);
+  case CLANG_EXT_STMT_GotoStmt: return Val_int(121);
+  case CLANG_EXT_STMT_IfStmt: return Val_int(122);
+  case CLANG_EXT_STMT_IndirectGotoStmt: return Val_int(123);
+  case CLANG_EXT_STMT_LabelStmt: return Val_int(124);
+  case CLANG_EXT_STMT_MSDependentExistsStmt: return Val_int(125);
+  case CLANG_EXT_STMT_NullStmt: return Val_int(126);
+  case CLANG_EXT_STMT_OMPAtomicDirective: return Val_int(127);
+  case CLANG_EXT_STMT_OMPBarrierDirective: return Val_int(128);
+  case CLANG_EXT_STMT_OMPCancelDirective: return Val_int(129);
+  case CLANG_EXT_STMT_OMPCancellationPointDirective: return Val_int(130);
+  case CLANG_EXT_STMT_OMPCriticalDirective: return Val_int(131);
+  case CLANG_EXT_STMT_OMPFlushDirective: return Val_int(132);
+  case CLANG_EXT_STMT_OMPDistributeDirective: return Val_int(133);
+  case CLANG_EXT_STMT_OMPForDirective: return Val_int(134);
+  case CLANG_EXT_STMT_OMPForSimdDirective: return Val_int(135);
+  case CLANG_EXT_STMT_OMPParallelForDirective: return Val_int(136);
+  case CLANG_EXT_STMT_OMPParallelForSimdDirective: return Val_int(137);
+  case CLANG_EXT_STMT_OMPSimdDirective: return Val_int(138);
+  case CLANG_EXT_STMT_OMPTaskLoopDirective: return Val_int(139);
+  case CLANG_EXT_STMT_OMPTaskLoopSimdDirective: return Val_int(140);
+  case CLANG_EXT_STMT_OMPMasterDirective: return Val_int(141);
+  case CLANG_EXT_STMT_OMPOrderedDirective: return Val_int(142);
+  case CLANG_EXT_STMT_OMPParallelDirective: return Val_int(143);
+  case CLANG_EXT_STMT_OMPParallelSectionsDirective: return Val_int(144);
+  case CLANG_EXT_STMT_OMPSectionDirective: return Val_int(145);
+  case CLANG_EXT_STMT_OMPSectionsDirective: return Val_int(146);
+  case CLANG_EXT_STMT_OMPSingleDirective: return Val_int(147);
+  case CLANG_EXT_STMT_OMPTargetDataDirective: return Val_int(148);
+  case CLANG_EXT_STMT_OMPTargetDirective: return Val_int(149);
+  case CLANG_EXT_STMT_OMPTaskDirective: return Val_int(150);
+  case CLANG_EXT_STMT_OMPTaskgroupDirective: return Val_int(151);
+  case CLANG_EXT_STMT_OMPTaskwaitDirective: return Val_int(152);
+  case CLANG_EXT_STMT_OMPTaskyieldDirective: return Val_int(153);
+  case CLANG_EXT_STMT_OMPTeamsDirective: return Val_int(154);
+  case CLANG_EXT_STMT_ObjCAtCatchStmt: return Val_int(155);
+  case CLANG_EXT_STMT_ObjCAtFinallyStmt: return Val_int(156);
+  case CLANG_EXT_STMT_ObjCAtSynchronizedStmt: return Val_int(157);
+  case CLANG_EXT_STMT_ObjCAtThrowStmt: return Val_int(158);
+  case CLANG_EXT_STMT_ObjCAtTryStmt: return Val_int(159);
+  case CLANG_EXT_STMT_ObjCAutoreleasePoolStmt: return Val_int(160);
+  case CLANG_EXT_STMT_ObjCForCollectionStmt: return Val_int(161);
+  case CLANG_EXT_STMT_ReturnStmt: return Val_int(162);
+  case CLANG_EXT_STMT_SEHExceptStmt: return Val_int(163);
+  case CLANG_EXT_STMT_SEHFinallyStmt: return Val_int(164);
+  case CLANG_EXT_STMT_SEHLeaveStmt: return Val_int(165);
+  case CLANG_EXT_STMT_SEHTryStmt: return Val_int(166);
+  case CLANG_EXT_STMT_CaseStmt: return Val_int(167);
+  case CLANG_EXT_STMT_DefaultStmt: return Val_int(168);
+  case CLANG_EXT_STMT_SwitchStmt: return Val_int(169);
+  case CLANG_EXT_STMT_WhileStmt: return Val_int(170);
+  case CLANG_EXT_STMT_Unknown: return Val_int(171);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_stmtkind: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Stmt_GetKind_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  enum clang_ext_StmtKind result = clang_ext_Stmt_GetKind(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_stmtkind(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_TypeKind
 Clang_ext_typekind_val(value ocaml)
 {
@@ -5732,6 +6108,20 @@ Val_clang_ext_typekind(enum clang_ext_TypeKind v)
   }
   failwith_fmt("invalid value for Val_clang_ext_typekind: %d", v);
   return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Type_GetKind_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXType c;
+  c = Cxtype_val(Field(c_ocaml, 0));
+  enum clang_ext_TypeKind result = clang_ext_Type_GetKind(c);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_typekind(result);
+    CAMLreturn(data);
+  }
 }
 
 CAMLprim value
