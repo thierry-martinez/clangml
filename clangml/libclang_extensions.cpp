@@ -749,15 +749,31 @@ extern "C" {
   {
     if (auto *d = GetCursorDecl(c)) {
       switch (d->getKind()) {
-      #define DECL(Derived, Base) \
-        case clang::Decl::Derived: return CLANG_EXT_DECL_##Derived;
-      #define ABSTRACT_DECL(Decl)
+      #define DECL(ClassName, _Base) \
+        case clang::Decl::ClassName: return CLANG_EXT_DECL_##ClassName;
+      #define ABSTRACT_DECL(_Decl)
       #include <clang/AST/DeclNodes.inc>
       default:
         return CLANG_EXT_DECL_Unknown;
       }
     }
     return CLANG_EXT_DECL_Invalid;
+  }
+
+  enum clang_ext_StmtKind
+  clang_ext_Stmt_GetKind(CXCursor c)
+  {
+    if (auto *d = GetCursorStmt(c)) {
+      switch (d->getStmtClass()) {
+      #define STMT(ClassName, _Base) \
+        case clang::Stmt::ClassName##Class: return CLANG_EXT_STMT_##ClassName;
+      #define ABSTRACT_STMT(_Stmt)
+      #include <clang/AST/StmtNodes.inc>
+      default:
+        return CLANG_EXT_STMT_Unknown;
+      }
+    }
+    return CLANG_EXT_STMT_Invalid;
   }
 
   enum clang_ext_TypeKind
@@ -774,6 +790,12 @@ extern "C" {
       }
     }
     return CLANG_EXT_TYPE_Invalid;
+  }
+
+  enum clang_ext_TypeKind
+  clang_ext_Type_GetKind(CXType c)
+  {
+    return clang_ext_GetTypeKind(c);
   }
 
   CXType

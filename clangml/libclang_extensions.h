@@ -204,8 +204,8 @@ clang_ext_GetCursorKind(CXCursor c);
 
 enum clang_ext_DeclKind {
   CLANG_EXT_DECL_Invalid,
-  #define DECL(Derived, Base) CLANG_EXT_DECL_##Derived,
-  #define ABSTRACT_DECL(Decl)
+  #define DECL(Class, _Base) CLANG_EXT_DECL_##Class,
+  #define ABSTRACT_DECL(_Decl)
   #include <clang/AST/DeclNodes.inc>
   CLANG_EXT_DECL_Unknown
 };
@@ -213,13 +213,27 @@ enum clang_ext_DeclKind {
 enum clang_ext_DeclKind
 clang_ext_Decl_GetKind(CXCursor);
 
+enum clang_ext_StmtKind {
+  CLANG_EXT_STMT_Invalid,
+  #define STMT(Class, _Base) CLANG_EXT_STMT_##Class,
+  #define ABSTRACT_STMT(_Stmt)
+  #include <clang/AST/StmtNodes.inc>
+  CLANG_EXT_STMT_Unknown
+};
+
+enum clang_ext_StmtKind
+clang_ext_Stmt_GetKind(CXCursor);
+
 enum clang_ext_TypeKind {
   CLANG_EXT_TYPE_Invalid,
-  #define TYPE(Class, Base) CLANG_EXT_TYPE_##Class,
-  #define ABSTRACT_TYPE(Class, Base)
+  #define TYPE(Class, _Base) CLANG_EXT_TYPE_##Class,
+  #define ABSTRACT_TYPE(_Class, _Base)
   #include <clang/AST/TypeNodes.def>
   CLANG_EXT_TYPE_Unknown
 };
+
+enum clang_ext_TypeKind
+clang_ext_Type_GetKind(CXType c);
 
 enum clang_ext_TypeKind
 clang_ext_GetTypeKind(CXType c);
