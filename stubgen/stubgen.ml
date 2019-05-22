@@ -1948,6 +1948,13 @@ let string_remove_suffix ~suffix s =
   else
     s
 
+let string_option =
+  Type_info ({ ocamltype = ocaml_option ocaml_string;
+    c_of_ocaml = (fun _ -> assert false);
+    ocaml_of_c = (fun fmt ~src ~params ~references ~tgt ->
+      Printf.fprintf fmt "%s = Val_string_option(clang_getCString(%s));
+        clang_disposeString(%s);" tgt src src) }, Regular)
+
 let main cflags llvm_config prefix =
   let llvm_flags, llvm_version =
     match llvm_config with
@@ -2129,7 +2136,7 @@ let main cflags llvm_config prefix =
     add_function (Pcre.regexp "^clang_compare_")
       (empty_function_interface |>
         dont_label_unique) |>
-    add_enum (Pcre.regexp "^CXLinkageKind$|^CXTypeKind$|^CXCallingConv$|^CX_CXXAccessSpecifier$|^CXTemplateArgumentKind$|^clang_ext_UnaryOperatorKind$|^clang_ext_BinaryOperatorKind$|^clang_ext_ElaboratedTypeKeyword$|^clang_ext_CharacterKind$|^clang_ext_UnaryExpr$|^clang_ext_AttrKind$|^clang_ext_TypeKind$|^clang_ext_DeclKind$|^CXCursorKind$")
+    add_enum (Pcre.regexp "^CXLinkageKind$|^CXTypeKind$|^CXCallingConv$|^CX_CXXAccessSpecifier$|^CXTemplateArgumentKind$|^clang_ext_UnaryOperatorKind$|^clang_ext_BinaryOperatorKind$|^clang_ext_ElaboratedTypeKeyword$|^clang_ext_CharacterKind$|^clang_ext_UnaryExpr$|^clang_ext_AttrKind$|^clang_ext_TypeKind$|^clang_ext_DeclKind$|^clang_ext_StmtKind$|^CXCursorKind$|^clang_ext_PredefinedExpr_IdentKind$")
       (empty_enum_interface |>
         add_attributes [(loc "deriving", PStr [pstr_eval (pexp_tuple (["eq"; "ord"; "show"] |> List.map @@ fun plugin -> pexp_ident (loc (Longident.Lident plugin))))])]) |>
     add_enum (Pcre.regexp "^CXErrorCode$")
@@ -2248,15 +2255,11 @@ let main cflags llvm_config prefix =
     add_function (Pcre.regexp "^clang_Cursor_getBriefCommentText$")
       (empty_function_interface |>
         add_result (empty_type_interface |>
-          reinterpret_as (Type_info ({ ocamltype = ocaml_option ocaml_string;
-                c_of_ocaml = (fun _ -> assert false);
-                ocaml_of_c = (fun fmt ~src ~params ~references ~tgt ->
-                  Printf.fprintf fmt "%s = Val_string_option(clang_getCString(%s));
-                    clang_disposeString(%s);" tgt src src) }, Regular)))) |>
-   add_function (Pcre.regexp "^clang_ext_LinkageSpecDecl_getLanguageIDs$")
-     (empty_function_interface |>
-       add_result (empty_type_interface |>
-         reinterpret_as (Set_of "clang_ext_LanguageIDs"))) in
+          reinterpret_as string_option)) |>
+    add_function (Pcre.regexp "^clang_ext_LinkageSpecDecl_getLanguageIDs$")
+      (empty_function_interface |>
+        add_result (empty_type_interface |>
+          reinterpret_as (Set_of "clang_ext_LanguageIDs"))) in
   let idx = Clang.create_index true true in
   Format.printf "%a@." (Format.pp_print_list
     ~pp_sep:(fun fmt () -> Format.pp_print_string fmt " ")

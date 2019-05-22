@@ -1904,9 +1904,11 @@ let () =
   | _ -> assert false
    ]}
  *)
-  | UnexposedExpr of {
-      s : string;
+  | PredefinedExpr of {
+      kind : clang_ext_predefinedexpr_identkind;
+      function_name : string;
     }
+  | UnexposedExpr of clang_ext_stmtkind
   | UnknownExpr of cxcursorkind
 
 and cast_kind =

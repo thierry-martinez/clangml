@@ -277,7 +277,8 @@ GetTemplateName(struct clang_ext_TemplateName CTN)
 }
 
 static struct clang_ext_TemplateArgument
-MakeTemplateArgument(const clang::TemplateArgument &argument, CXTranslationUnit TU)
+MakeTemplateArgument(
+  const clang::TemplateArgument &argument, CXTranslationUnit TU)
 {
   struct clang_ext_TemplateArgument TA = {
     new clang::TemplateArgument(argument), TU };
@@ -782,7 +783,8 @@ extern "C" {
     clang::QualType T = GetQualType(c);
     if (auto TP = T.getTypePtrOrNull()) {
       switch (TP->getTypeClass()) {
-      #define TYPE(Class, Base) case clang::Type::Class: return CLANG_EXT_TYPE_##Class;
+      #define TYPE(Class, Base) \
+        case clang::Type::Class: return CLANG_EXT_TYPE_##Class;
       #define ABSTRACT_TYPE(Class, Base)
       #include <clang/AST/TypeNodes.def>
       default:
@@ -863,8 +865,8 @@ extern "C" {
   enum clang_ext_UnaryExpr
   clang_ext_UnaryExpr_GetKind(CXCursor c)
   {
-    if (auto e =
-      llvm::dyn_cast_or_null<clang::UnaryExprOrTypeTraitExpr>(GetCursorStmt(c))) {
+    if (auto e = llvm::dyn_cast_or_null<clang::UnaryExprOrTypeTraitExpr>(
+        GetCursorStmt(c))) {
       return static_cast<enum clang_ext_UnaryExpr>(e->getKind());
     }
     return UETT_SizeOf;
@@ -873,8 +875,8 @@ extern "C" {
   CXType
   clang_ext_UnaryExpr_GetArgumentType(CXCursor c)
   {
-    if (auto e =
-      llvm::dyn_cast_or_null<clang::UnaryExprOrTypeTraitExpr>(GetCursorStmt(c))) {
+    if (auto e = llvm::dyn_cast_or_null<clang::UnaryExprOrTypeTraitExpr>(
+        GetCursorStmt(c))) {
       return MakeCXType(e->getArgumentType(), getCursorTU(c));
     }
     return MakeCXTypeInvalid(getCursorTU(c));
@@ -1200,12 +1202,14 @@ extern "C" {
     if (auto *d = GetCursorDecl(c)) {
       switch (d->getKind()) {
       case clang::Decl::TemplateTypeParm:
-        if (auto *ttpd = llvm::dyn_cast_or_null<clang::TemplateTypeParmDecl>(d)) {
+        if (auto *ttpd =
+            llvm::dyn_cast_or_null<clang::TemplateTypeParmDecl>(d)) {
           return ttpd->isParameterPack();
         }
         break;
       case clang::Decl::NonTypeTemplateParm:
-        if (auto *nttpd = llvm::dyn_cast_or_null<clang::NonTypeTemplateParmDecl>(d)) {
+        if (auto *nttpd =
+            llvm::dyn_cast_or_null<clang::NonTypeTemplateParmDecl>(d)) {
           return nttpd->isParameterPack();
         }
         break;
@@ -1224,5 +1228,52 @@ extern "C" {
       }
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  enum clang_ext_PredefinedExpr_IdentKind
+  clang_ext_PredefinedExpr_getIdentKind(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::PredefinedExpr>(GetCursorStmt(c))) {
+#ifdef LLVM_VERSION_BEFORE_8_0_0
+      switch (e->getIdentType()) {
+#else
+      switch (e->getIdentKind()) {
+#endif
+      case clang::PredefinedExpr::Func:
+        return clang_ext_PredefinedExpr_Func;
+      case clang::PredefinedExpr::Function:
+        return clang_ext_PredefinedExpr_Function;
+      case clang::PredefinedExpr::LFunction:
+        return clang_ext_PredefinedExpr_LFunction;
+      case clang::PredefinedExpr::FuncDName:
+        return clang_ext_PredefinedExpr_FuncDName;
+#ifndef LLVM_VERSION_BEFORE_3_5_0
+      case clang::PredefinedExpr::FuncSig:
+        return clang_ext_PredefinedExpr_FuncSig;
+#endif
+#ifndef LLVM_VERSION_BEFORE_7_0_0
+      case clang::PredefinedExpr::LFuncSig:
+        return clang_ext_PredefinedExpr_LFuncSig;
+#endif
+      case clang::PredefinedExpr::PrettyFunction:
+        return clang_ext_PredefinedExpr_PrettyFunction;
+      case clang::PredefinedExpr::PrettyFunctionNoVirtual:
+        return clang_ext_PredefinedExpr_PrettyFunctionNoVirtual;
+      }
+    }
+    return clang_ext_PredefinedExpr_Invalid;
+  }
+
+  CXString
+  clang_ext_PredefinedExpr_getFunctionName(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::PredefinedExpr>(GetCursorStmt(c))) {
+      if (auto s = e->getFunctionName()) {
+        return cxstring_createDup(s->getString());
+      }
+    }
+    return cxstring_createRef("");
   }
 }

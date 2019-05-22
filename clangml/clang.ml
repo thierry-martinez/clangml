@@ -779,7 +779,7 @@ module Ast = struct
             end
         | UnexposedExpr ->
             begin
-              match ext_get_cursor_kind cursor with
+              match ext_stmt_get_kind cursor with
               | ImplicitCastExpr ->
                   let operand =
                     match list_of_children cursor with
@@ -798,7 +798,12 @@ module Ast = struct
                   ConditionalOperator { cond; then_branch = None; else_branch }
               | UnaryExprOrTypeTraitExpr -> (* for Clang 3.8.1 *)
                   unary_expr_of_cxcursor cursor
-              | _ -> UnexposedExpr { s = get_cursor_spelling cursor }
+              | PredefinedExpr ->
+                  let kind = ext_predefined_expr_get_ident_kind cursor in
+                  let function_name =
+                    ext_predefined_expr_get_function_name cursor in
+                  PredefinedExpr { kind; function_name }
+              | kind -> UnexposedExpr kind
             end
         | _ -> UnknownExpr kind
       with Invalid_structure -> UnknownExpr kind

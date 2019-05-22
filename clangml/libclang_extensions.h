@@ -20,6 +20,27 @@
 #ifdef LLVM_VERSION_3_8_1
 #define LLVM_VERSION_BEFORE_3_9_0
 #endif
+#ifdef LLVM_VERSION_BEFORE_3_9_0
+#define LLVM_VERSION_BEFORE_7_0_0
+#endif
+#ifdef LLVM_VERSION_3_9_1
+#define LLVM_VERSION_BEFORE_7_0_0
+#endif
+#ifdef LLVM_VERSION_4_0_1
+#define LLVM_VERSION_BEFORE_7_0_0
+#endif
+#ifdef LLVM_VERSION_5_0_2
+#define LLVM_VERSION_BEFORE_7_0_0
+#endif
+#ifdef LLVM_VERSION_6_0_1
+#define LLVM_VERSION_BEFORE_7_0_0
+#endif
+#ifdef LLVM_VERSION_BEFORE_7_0_0
+#define LLVM_VERSION_BEFORE_8_0_0
+#endif
+#ifdef LLVM_VERSION_7_0_1
+#define LLVM_VERSION_BEFORE_8_0_0
+#endif
 
 typedef struct {
   void *data;
@@ -418,3 +439,21 @@ clang_ext_TemplateParm_isParameterPack(CXCursor c);
 
 CXCursor
 clang_ext_ClassTemplateDecl_getTemplatedDecl(CXCursor c);
+
+enum clang_ext_PredefinedExpr_IdentKind {
+  clang_ext_PredefinedExpr_Func,
+  clang_ext_PredefinedExpr_Function,
+  clang_ext_PredefinedExpr_LFunction,
+  clang_ext_PredefinedExpr_FuncDName,
+  clang_ext_PredefinedExpr_FuncSig,
+  clang_ext_PredefinedExpr_LFuncSig,
+  clang_ext_PredefinedExpr_PrettyFunction,
+  clang_ext_PredefinedExpr_PrettyFunctionNoVirtual,
+  clang_ext_PredefinedExpr_Invalid
+};
+
+enum clang_ext_PredefinedExpr_IdentKind
+clang_ext_PredefinedExpr_getIdentKind(CXCursor c);
+
+CXString
+clang_ext_PredefinedExpr_getFunctionName(CXCursor c);
