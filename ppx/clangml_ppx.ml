@@ -112,6 +112,13 @@ let string_of_expression (expression : Parsetree.expression) =
   | _ ->
       Format.asprintf "%a" Pprintast.expression expression
 
+let rec remove_placeholders antiquotations items =
+  match antiquotations, items with
+  | [], _ -> items
+  | _ :: antiquotations, _ :: items ->
+      remove_placeholders antiquotations items
+  | _ -> assert false
+
 let extract_payload language (mapper : Ast_mapper.mapper) ~loc (payload : Parsetree.payload) =
   let kind, preamble, return_type, code =
     match
@@ -186,7 +193,7 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc (payload : Parset
                     end
           | _ -> assert false
         end
-    | Stmt | Decl ->
+    | Stmt ->
         function_declaration, "}",
         begin fun lift ast ->
           match List.rev ast.desc.items with
@@ -209,14 +216,16 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc (payload : Parset
                             lift#qual_type qual_type
           | _ -> assert false
         end
+    | Decl ->
+        "", "", begin fun lift ast ->
+          lift#decl
+            begin match List.rev (remove_placeholders antiquotations ast.desc.items) with
+            | result :: _ -> result
+            | _ -> assert false
+            end
+        end
     | Translation_unit ->
         "", "", begin fun lift ast ->
-          let rec remove_placeholders antiquotations items =
-            match antiquotations, items with
-            | [], _ -> items
-            | _ :: antiquotations, _ :: items ->
-                remove_placeholders antiquotations items
-            | _ -> assert false in
           lift#translation_unit
             { ast with desc =
               { ast.desc with items =
