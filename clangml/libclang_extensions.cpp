@@ -1265,7 +1265,7 @@ extern "C" {
     return clang_ext_PredefinedExpr_Invalid;
   }
 
-#ifndef LLVM_VERSION_BEFORE_3_5_0
+#ifndef LLVM_VERSION_BEFORE_3_6_0
   CXString
   clang_ext_PredefinedExpr_getFunctionName(CXCursor c)
   {
