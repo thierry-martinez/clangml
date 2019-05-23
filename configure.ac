@@ -364,6 +364,7 @@ AC_CONFIG_FILES([
   config/ldflags_quoted.sexp
   config/libs.sexp
   config/libs_quoted.sexp
+  config/clangml_config.ml
   clangml/clang__compat.ml
 ])
 
