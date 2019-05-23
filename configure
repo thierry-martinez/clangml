@@ -666,6 +666,12 @@ ENDIF_CLANG_BEFORE_8_0
 IF_CLANG_BEFORE_8_0
 ENDIF_CLANG_BEFORE_3_7
 IF_CLANG_BEFORE_3_7
+ENDIF_CLANG_FROM_3_6
+IF_CLANG_FROM_3_6
+ENDIF_CLANG_BEFORE_3_6
+IF_CLANG_BEFORE_3_6
+ENDIF_CLANG_FROM_3_5
+IF_CLANG_FROM_3_5
 ENDIF_CLANG_BEFORE_3_5
 IF_CLANG_BEFORE_3_5
 LLVM_VERSION
@@ -4130,10 +4136,38 @@ if test `printf "$LLVM_VERSION\n3.5" | sort | head -n1` = "3.5"; then :
 
    ENDIF_CLANG_BEFORE_3_5="*)"
 
+   IF_CLANG_FROM_3_5=""
+
+   ENDIF_CLANG_FROM_3_5=""
+
 else
   IF_CLANG_BEFORE_3_5=""
 
    ENDIF_CLANG_BEFORE_3_5=""
+
+   IF_CLANG_FROM_3_5="(*"
+
+   ENDIF_CLANG_FROM_3_5="*)"
+
+fi
+
+if test `printf "$LLVM_VERSION\n3.6" | sort | head -n1` = "3.6"; then :
+  IF_CLANG_BEFORE_3_6="(*"
+
+   ENDIF_CLANG_BEFORE_3_6="*)"
+
+   IF_CLANG_FROM_3_6=""
+
+   ENDIF_CLANG_FROM_3_6=""
+
+else
+  IF_CLANG_BEFORE_3_6=""
+
+   ENDIF_CLANG_BEFORE_3_6=""
+
+   IF_CLANG_FROM_3_6="(*"
+
+   ENDIF_CLANG_FROM_3_6="*)"
 
 fi
 
@@ -6426,7 +6460,7 @@ else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
 
-ac_config_files="$ac_config_files Makefile config/cflags.sexp config/cppflags.sexp config/ldflags.sexp config/ldflags_quoted.sexp config/libs.sexp config/libs_quoted.sexp clangml/clang__compat.ml"
+ac_config_files="$ac_config_files Makefile config/cflags.sexp config/cppflags.sexp config/ldflags.sexp config/ldflags_quoted.sexp config/libs.sexp config/libs_quoted.sexp config/clangml_config.ml clangml/clang__compat.ml"
 
 
 cat >confcache <<\_ACEOF
@@ -7191,6 +7225,7 @@ do
     "config/ldflags_quoted.sexp") CONFIG_FILES="$CONFIG_FILES config/ldflags_quoted.sexp" ;;
     "config/libs.sexp") CONFIG_FILES="$CONFIG_FILES config/libs.sexp" ;;
     "config/libs_quoted.sexp") CONFIG_FILES="$CONFIG_FILES config/libs_quoted.sexp" ;;
+    "config/clangml_config.ml") CONFIG_FILES="$CONFIG_FILES config/clangml_config.ml" ;;
     "clangml/clang__compat.ml") CONFIG_FILES="$CONFIG_FILES clangml/clang__compat.ml" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;

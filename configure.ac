@@ -205,9 +205,23 @@ AS_IF([test -d $srcdir/bootstrap/$LLVM_VERSION],
 
 AS_IF([test `printf "$LLVM_VERSION\n3.5" | sort | head -n1` = "3.5"],
   [AC_SUBST([IF_CLANG_BEFORE_3_5], ["(*"])
-   AC_SUBST([ENDIF_CLANG_BEFORE_3_5], ["*)"])],
+   AC_SUBST([ENDIF_CLANG_BEFORE_3_5], ["*)"])
+   AC_SUBST([IF_CLANG_FROM_3_5], [""])
+   AC_SUBST([ENDIF_CLANG_FROM_3_5], [""])],
   [AC_SUBST([IF_CLANG_BEFORE_3_5], [""])
-   AC_SUBST([ENDIF_CLANG_BEFORE_3_5], [""])])
+   AC_SUBST([ENDIF_CLANG_BEFORE_3_5], [""])
+   AC_SUBST([IF_CLANG_FROM_3_5], ["(*"])
+   AC_SUBST([ENDIF_CLANG_FROM_3_5], ["*)"])])
+
+AS_IF([test `printf "$LLVM_VERSION\n3.6" | sort | head -n1` = "3.6"],
+  [AC_SUBST([IF_CLANG_BEFORE_3_6], ["(*"])
+   AC_SUBST([ENDIF_CLANG_BEFORE_3_6], ["*)"])
+   AC_SUBST([IF_CLANG_FROM_3_6], [""])
+   AC_SUBST([ENDIF_CLANG_FROM_3_6], [""])],
+  [AC_SUBST([IF_CLANG_BEFORE_3_6], [""])
+   AC_SUBST([ENDIF_CLANG_BEFORE_3_6], [""])
+   AC_SUBST([IF_CLANG_FROM_3_6], ["(*"])
+   AC_SUBST([ENDIF_CLANG_FROM_3_6], ["*)"])])
 
 AS_IF([test `printf "$LLVM_VERSION\n3.7" | sort | head -n1` = "3.7"],
   [AC_SUBST([IF_CLANG_BEFORE_3_7], ["(*"])
@@ -364,6 +378,7 @@ AC_CONFIG_FILES([
   config/ldflags_quoted.sexp
   config/libs.sexp
   config/libs_quoted.sexp
+  config/clangml_config.ml
   clangml/clang__compat.ml
 ])
 
