@@ -1265,6 +1265,7 @@ extern "C" {
     return clang_ext_PredefinedExpr_Invalid;
   }
 
+#ifndef LLVM_VERSION_BEFORE_3_5_0
   CXString
   clang_ext_PredefinedExpr_getFunctionName(CXCursor c)
   {
@@ -1273,6 +1274,56 @@ extern "C" {
       if (auto s = e->getFunctionName()) {
         return cxstring_createDup(s->getString());
       }
+    }
+    return cxstring_createRef("");
+  }
+#endif
+
+  CXString
+  clang_ext_PredefinedExpr_ComputeName(
+    enum clang_ext_PredefinedExpr_IdentKind kind,
+    CXCursor decl)
+  {
+    #ifdef LLVM_VERSION_BEFORE_8_0_0
+      clang::PredefinedExpr::IdentType clang_kind;
+    #else
+      clang::PredefinedExpr::IdentKind clang_kind;
+    #endif
+    switch (kind) {
+    case clang_ext_PredefinedExpr_Func:
+      clang_kind = clang::PredefinedExpr::Func;
+      break;
+    case clang_ext_PredefinedExpr_Function:
+      clang_kind = clang::PredefinedExpr::Function;
+      break;
+    case clang_ext_PredefinedExpr_LFunction:
+      clang_kind = clang::PredefinedExpr::LFunction;
+      break;
+    case clang_ext_PredefinedExpr_FuncDName:
+      clang_kind = clang::PredefinedExpr::FuncDName;
+      break;
+#ifndef LLVM_VERSION_BEFORE_3_5_0
+    case clang_ext_PredefinedExpr_FuncSig:
+      clang_kind = clang::PredefinedExpr::FuncSig;
+      break;
+#endif
+#ifndef LLVM_VERSION_BEFORE_7_0_0
+    case clang_ext_PredefinedExpr_LFuncSig:
+      clang_kind = clang::PredefinedExpr::LFuncSig;
+      break;
+#endif
+    case clang_ext_PredefinedExpr_PrettyFunction:
+      clang_kind = clang::PredefinedExpr::PrettyFunction;
+      break;
+    case clang_ext_PredefinedExpr_PrettyFunctionNoVirtual:
+      clang_kind = clang::PredefinedExpr::PrettyFunctionNoVirtual;
+      break;
+    default:
+      return cxstring_createRef("");
+    }
+    if (auto *d = GetCursorDecl(decl)) {
+      auto name = clang::PredefinedExpr::ComputeName(clang_kind, d);
+      return cxstring_createRef(name.c_str());
     }
     return cxstring_createRef("");
   }

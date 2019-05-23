@@ -1917,10 +1917,39 @@ let () =
   | _ -> assert false
    ]}
  *)
-  | PredefinedExpr of {
+  | Predefined of {
       kind : clang_ext_predefinedexpr_identkind;
       function_name : string;
     }
+(**
+   Predefined identifiers.
+
+   {[
+let example = {|
+  void myfunc(void)
+    {
+      char *_s = __func__;
+    }
+  |}
+
+let () =
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = Function {
+      linkage = External;
+      function_type = {
+        calling_conv = C;
+        result = { desc = BuiltinType Void};
+        parameters = Some { non_variadic = []; variadic = false }};
+      name = "myfunc";
+      body = Some { desc = Compound [{
+        desc = Decl [{ desc = Var {
+          var_type = { desc = Pointer { desc = BuiltinType Char_S }};
+          var_name = "_s";
+          var_init = Some { desc = Predefined {
+            kind = Func;
+            function_name = "myfunc"; }}}}] }] }}}]]
+   ]}*)
   | UnexposedExpr of clang_ext_stmtkind
   | UnknownExpr of cxcursorkind
 

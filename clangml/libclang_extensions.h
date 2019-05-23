@@ -455,5 +455,12 @@ enum clang_ext_PredefinedExpr_IdentKind {
 enum clang_ext_PredefinedExpr_IdentKind
 clang_ext_PredefinedExpr_getIdentKind(CXCursor c);
 
+#ifndef LLVM_VERSION_BEFORE_3_5_0
 CXString
 clang_ext_PredefinedExpr_getFunctionName(CXCursor c);
+#endif
+
+CXString
+clang_ext_PredefinedExpr_ComputeName(
+  enum clang_ext_PredefinedExpr_IdentKind kind,
+  CXCursor decl);

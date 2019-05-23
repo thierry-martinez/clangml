@@ -22,7 +22,16 @@ let parse_translation_unit2 index filename command_line_args unsaved_files
   | Some tu -> Ok tu
 (** Compatibility wrapper for [parse_translation_unit].
     In case of error, [Error Failure] will be returned. *)
+
+let predefined_expr_get_function_name cursor decl =
+  ext_predefined_expr_compute_name
+    (ext_predefined_expr_get_ident_kind cursor) decl
 @ENDIF_CLANG_BEFORE_3_5@
+
+@IF_CLANG_FROM_3_5@
+let predefined_expr_get_function_name cursor _decl =
+  ext_predefined_expr_get_function_name cursor
+@ENDIF_CLANG_FROM_3_5@
 
 @IF_CLANG_BEFORE_3_7@
 type cxvisitorresult =

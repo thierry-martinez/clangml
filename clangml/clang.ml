@@ -57,6 +57,8 @@ module Ast = struct
   module Converter (Options : OptionsS) = struct
     exception Invalid_structure
 
+    let current_decl = ref (get_null_cursor ())
+
     let filter_attributes list =
       list |> List.filter @@ fun cursor ->
         match get_cursor_kind cursor with
@@ -365,6 +367,7 @@ module Ast = struct
         None
 
     and function_type_of_decl cursor =
+      current_decl := cursor;
       cursor |> get_cursor_type |>
         function_type_of_cxtype (parameters_of_function_decl_or_proto cursor)
 
@@ -802,8 +805,8 @@ module Ast = struct
               | PredefinedExpr ->
                   let kind = ext_predefined_expr_get_ident_kind cursor in
                   let function_name =
-                    ext_predefined_expr_get_function_name cursor in
-                  PredefinedExpr { kind; function_name }
+                    predefined_expr_get_function_name cursor !current_decl in
+                  Predefined { kind; function_name }
               | kind -> UnexposedExpr kind
             end
         | _ -> UnknownExpr kind
