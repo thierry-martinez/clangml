@@ -39,16 +39,7 @@ module Ast = struct
 
   include Clang__ast_utils
 
-  module Options = struct
-    type t = {
-        ignore_implicit_cast : bool [@default true];
-        ignore_paren : bool [@default true];
-        ignore_paren_in_types : bool [@default true];
-        convert_integer_literals : bool [@default true];
-        convert_floating_literals : bool [@default true];
-      }
-          [@@deriving make]
-  end
+  module Options = Clang__ast_options
 
   module type OptionsS = sig
     val options : Options.t

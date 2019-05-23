@@ -343,6 +343,7 @@ AS_IF([test -d clangml],
      AC_CP([$srcdir/clangml/clang__ast.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang__types.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang__utils.ml], [clangml/])
+     AC_CP([$srcdir/clangml/clang__ast_options.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang__ast_utils.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang__printer.ml], [clangml/])
      AC_CP([$srcdir/clangml/dune], [clangml/])
