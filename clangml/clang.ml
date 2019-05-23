@@ -57,6 +57,8 @@ module Ast = struct
   module Converter (Options : OptionsS) = struct
     exception Invalid_structure
 
+    (* Hack for having current function declaration to provide function name
+       for predefined identifiers on Clang 3.4 and Clang 3.5. *)
     let current_decl = ref (get_null_cursor ())
 
     let filter_attributes list =
@@ -367,6 +369,7 @@ module Ast = struct
         None
 
     and function_type_of_decl cursor =
+      (* Hack for Clang 3.4 and 3.5! See current_decl declaration. *)
       current_decl := cursor;
       cursor |> get_cursor_type |>
         function_type_of_cxtype (parameters_of_function_decl_or_proto cursor)
