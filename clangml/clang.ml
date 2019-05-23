@@ -189,6 +189,7 @@ module Ast = struct
                       make_template_argument in
                   TemplateSpecialization { name; arguments }
               | Builtin -> BuiltinType (get_type_kind cxtype)
+              | Auto -> Auto
               | kind -> UnexposedType kind
             end in
       match desc with

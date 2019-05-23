@@ -604,6 +604,19 @@ let () =
       var_type = { desc = BuiltinType Bool}}} -> ()
   | _ -> assert false
     ]}*)
+  | Auto
+(** Auto type. (C++11)
+    {[
+let example = "auto i = 1;"
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = Var {
+      var_name = "i";
+      var_type = { desc = Auto };
+      var_init = Some { desc = IntegerLiteral (Int 1)}}}]]
+    ]} *)
   | UnexposedType of clang_ext_typekind
   | InvalidType
 
