@@ -4128,7 +4128,7 @@ clang_Cursor_getBriefCommentText_wrapper(value C_ocaml)
   {
     CAMLlocal1(data);
     data = Val_string_option(clang_getCString(result));
-                    clang_disposeString(result);
+        clang_disposeString(result);
     CAMLreturn(data);
   }
 }
@@ -7537,6 +7537,88 @@ clang_ext_ClassTemplateDecl_getTemplatedDecl_wrapper(value c_ocaml)
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
   Store_field(data, 1, safe_field(c_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_PredefinedExpr_IdentKind
+Clang_ext_predefinedexpr_identkind_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_PredefinedExpr_Func;
+  case 1: return clang_ext_PredefinedExpr_Function;
+  case 2: return clang_ext_PredefinedExpr_LFunction;
+  case 3: return clang_ext_PredefinedExpr_FuncDName;
+  case 4: return clang_ext_PredefinedExpr_FuncSig;
+  case 5: return clang_ext_PredefinedExpr_LFuncSig;
+  case 6: return clang_ext_PredefinedExpr_PrettyFunction;
+  case 7: return clang_ext_PredefinedExpr_PrettyFunctionNoVirtual;
+  case 8: return clang_ext_PredefinedExpr_Invalid;
+  }
+  failwith_fmt("invalid value for Clang_ext_predefinedexpr_identkind_val: %d", Int_val(ocaml));
+  return clang_ext_PredefinedExpr_Func;
+}
+
+value
+Val_clang_ext_predefinedexpr_identkind(enum clang_ext_PredefinedExpr_IdentKind v)
+{
+  switch (v) {
+  case clang_ext_PredefinedExpr_Func: return Val_int(0);
+  case clang_ext_PredefinedExpr_Function: return Val_int(1);
+  case clang_ext_PredefinedExpr_LFunction: return Val_int(2);
+  case clang_ext_PredefinedExpr_FuncDName: return Val_int(3);
+  case clang_ext_PredefinedExpr_FuncSig: return Val_int(4);
+  case clang_ext_PredefinedExpr_LFuncSig: return Val_int(5);
+  case clang_ext_PredefinedExpr_PrettyFunction: return Val_int(6);
+  case clang_ext_PredefinedExpr_PrettyFunctionNoVirtual: return Val_int(7);
+  case clang_ext_PredefinedExpr_Invalid: return Val_int(8);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_predefinedexpr_identkind: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_PredefinedExpr_getIdentKind_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  enum clang_ext_PredefinedExpr_IdentKind result = clang_ext_PredefinedExpr_getIdentKind(c);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_predefinedexpr_identkind(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_PredefinedExpr_getFunctionName_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  CXString result = clang_ext_PredefinedExpr_getFunctionName(c);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(safe_string(clang_getCString(result)));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_PredefinedExpr_ComputeName_wrapper(value kind_ocaml, value decl_ocaml)
+{
+  CAMLparam2(kind_ocaml, decl_ocaml);
+  enum clang_ext_PredefinedExpr_IdentKind kind;
+  kind = Clang_ext_predefinedexpr_identkind_val(kind_ocaml);
+  CXCursor decl;
+  decl = Cxcursor_val(Field(decl_ocaml, 0));
+  CXString result = clang_ext_PredefinedExpr_ComputeName(kind, decl);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(safe_string(clang_getCString(result)));
+                    clang_disposeString(result);
     CAMLreturn(data);
   }
 }

@@ -2282,7 +2282,7 @@ type clang_ext_stmtkind =
   | DefaultStmt 
   | SwitchStmt 
   | WhileStmt 
-  | Unknown 
+  | Unknown [@@deriving (eq, ord, show)]
 external ext_stmt_get_kind :
   cxcursor -> clang_ext_stmtkind = "clang_ext_Stmt_GetKind_wrapper"
 type clang_ext_typekind =
@@ -2701,3 +2701,21 @@ external ext_template_parm_is_parameter_pack :
 external ext_class_template_decl_get_templated_decl :
   cxcursor -> cxcursor =
     "clang_ext_ClassTemplateDecl_getTemplatedDecl_wrapper"
+type clang_ext_predefinedexpr_identkind =
+  | Func 
+  | Function 
+  | LFunction 
+  | FuncDName 
+  | FuncSig 
+  | LFuncSig 
+  | PrettyFunction 
+  | PrettyFunctionNoVirtual 
+  | Invalid [@@deriving (eq, ord, show)]
+external ext_predefined_expr_get_ident_kind :
+  cxcursor -> clang_ext_predefinedexpr_identkind =
+    "clang_ext_PredefinedExpr_getIdentKind_wrapper"
+external ext_predefined_expr_get_function_name :
+  cxcursor -> string = "clang_ext_PredefinedExpr_getFunctionName_wrapper"
+external ext_predefined_expr_compute_name :
+  clang_ext_predefinedexpr_identkind -> cxcursor -> string =
+    "clang_ext_PredefinedExpr_ComputeName_wrapper"
