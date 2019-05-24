@@ -161,6 +161,12 @@ and calling_conv = cxcallingconv
 
 and linkage_kind = cxlinkagekind
 
+and predefined_identifier_kind = clang_ext_predefinedexpr_identkind
+
+and lambda_capture_default = clang_ext_lambdacapturedefault
+
+and lambda_capture_kind = clang_ext_lambdacapturekind
+
 and integer_literal =
   | Int of int
   | CXInt of cxint
@@ -1918,7 +1924,7 @@ let () =
    ]}
  *)
   | Predefined of {
-      kind : clang_ext_predefinedexpr_identkind;
+      kind : predefined_identifier_kind;
       function_name : string;
     }
 (**
@@ -1950,8 +1956,24 @@ let () =
             kind = Func;
             function_name = "myfunc"; }}}}] }] }}}]]
    ]}*)
+  | ExprWithCleanups of expr
+  | MaterializeTemporaryExpr of expr
+  | Lambda of {
+      capture_default : lambda_capture_default;
+      captures : lambda_capture list;
+      is_mutable : bool;
+      has_explicit_parameters : bool;
+      has_explicit_result_type : bool;
+      body : stmt list;
+    }
   | UnexposedExpr of clang_ext_stmtkind
   | UnknownExpr of cxcursorkind
+
+and lambda_capture = {
+   capture_kind : lambda_capture_kind;
+   implicit : bool;
+   captured_var_name : string option;
+ }
 
 and cast_kind =
   | CStyle

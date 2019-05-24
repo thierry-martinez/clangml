@@ -1,6 +1,7 @@
 #include <clang-c/Index.h>
 #include <clang/AST/Stmt.h>
 #include <clang/AST/Expr.h>
+#include <clang/AST/ExprCXX.h>
 #include <clang/AST/Type.h>
 #include <clang/AST/DeclCXX.h>
 #include <clang/AST/DeclTemplate.h>
@@ -271,9 +272,9 @@ MakeTemplateNameInvalid(CXTranslationUnit TU)
 }
 
 static const clang::TemplateName *
-GetTemplateName(struct clang_ext_TemplateName CTN)
+GetTemplateName(struct clang_ext_TemplateName TN)
 {
-  return static_cast<const clang::TemplateName *>(CTN.data);
+  return static_cast<const clang::TemplateName *>(TN.data);
 }
 
 static struct clang_ext_TemplateArgument
@@ -293,9 +294,31 @@ MakeTemplateArgumentInvalid(CXTranslationUnit TU)
 }
 
 static const clang::TemplateArgument *
-GetTemplateArgument(struct clang_ext_TemplateArgument CTA)
+GetTemplateArgument(struct clang_ext_TemplateArgument TA)
 {
-  return static_cast<const clang::TemplateArgument *>(CTA.data);
+  return static_cast<const clang::TemplateArgument *>(TA.data);
+}
+
+static struct clang_ext_LambdaCapture
+MakeLambdaCapture(
+  const clang::LambdaCapture &argument, CXTranslationUnit TU)
+{
+  struct clang_ext_LambdaCapture LC = {
+    new clang::LambdaCapture(argument), TU };
+  return LC;
+}
+
+static struct clang_ext_LambdaCapture
+MakeLambdaCaptureInvalid(CXTranslationUnit TU)
+{
+  struct clang_ext_LambdaCapture LC = { nullptr, TU };
+  return LC;
+}
+
+static const clang::LambdaCapture *
+GetLambdaCapture(struct clang_ext_LambdaCapture LC)
+{
+  return static_cast<const clang::LambdaCapture *>(LC.data);
 }
 
 extern "C" {
@@ -1326,5 +1349,107 @@ extern "C" {
       return cxstring_createRef(name.c_str());
     }
     return cxstring_createRef("");
+  }
+
+  enum clang_ext_LambdaCaptureDefault
+  clang_ext_LambdaExpr_getCaptureDefault(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::LambdaExpr>(GetCursorStmt(c))) {
+      return static_cast<enum clang_ext_LambdaCaptureDefault>(
+        e->getCaptureDefault());
+    }
+    return clang_ext_LCD_CaptureNone;
+  }
+
+  unsigned
+  clang_ext_LambdaExpr_getCaptureCount(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::LambdaExpr>(GetCursorStmt(c))) {
+      return e->capture_end() - e->capture_begin();
+    }
+    return 0;
+  }
+
+  struct clang_ext_LambdaCapture
+  clang_ext_LambdaExpr_getCapture(CXCursor c, unsigned index)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::LambdaExpr>(GetCursorStmt(c))) {
+      if (index < e->capture_end() - e->capture_begin()) {
+        return MakeLambdaCapture(
+          e->capture_begin()[index], getCursorTU(c));
+      }
+    }
+    return MakeLambdaCaptureInvalid(getCursorTU(c));
+  }
+
+  bool
+  clang_ext_LambdaExpr_isMutable(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::LambdaExpr>(GetCursorStmt(c))) {
+      return e->isMutable();
+    }
+    return false;
+  }
+
+  bool
+  clang_ext_LambdaExpr_hasExplicitParameters(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::LambdaExpr>(GetCursorStmt(c))) {
+      return e->hasExplicitParameters();
+    }
+    return false;
+  }
+
+  bool
+  clang_ext_LambdaExpr_hasExplicitResultType(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::LambdaExpr>(GetCursorStmt(c))) {
+      return e->hasExplicitResultType();
+    }
+    return false;
+  }
+
+  enum clang_ext_LambdaCaptureKind
+  clang_ext_LambdaCapture_getKind(struct clang_ext_LambdaCapture capture)
+  {
+    if (auto *LC = GetLambdaCapture(capture)) {
+      return static_cast<enum clang_ext_LambdaCaptureKind>(
+        LC->getCaptureKind());
+    }
+    return clang_ext_LCK_This;
+  }
+
+  CXCursor
+  clang_ext_LambdaCapture_getCapturedVar(struct clang_ext_LambdaCapture capture)
+  {
+    if (auto *LC = GetLambdaCapture(capture)) {
+      if (auto *VarDecl = LC->getCapturedVar()) {
+        return MakeCXCursor(VarDecl, capture.TU);
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, capture.TU);
+  }
+
+  bool
+  clang_ext_LambdaCapture_isImplicit(struct clang_ext_LambdaCapture capture)
+  {
+    if (auto *LC = GetLambdaCapture(capture)) {
+      return LC->isImplicit();
+    }
+    return false;
+  }
+
+  void
+  clang_ext_LambdaCapture_dispose(struct clang_ext_LambdaCapture capture)
+  {
+    if (auto *LC = GetLambdaCapture(capture)) {
+      delete LC;
+    }
   }
 }

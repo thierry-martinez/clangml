@@ -440,6 +440,7 @@ clang_ext_TemplateParm_isParameterPack(CXCursor c);
 CXCursor
 clang_ext_ClassTemplateDecl_getTemplatedDecl(CXCursor c);
 
+/* Copied from AST/Expr.h */
 enum clang_ext_PredefinedExpr_IdentKind {
   clang_ext_PredefinedExpr_Func,
   clang_ext_PredefinedExpr_Function,
@@ -464,3 +465,54 @@ CXString
 clang_ext_PredefinedExpr_ComputeName(
   enum clang_ext_PredefinedExpr_IdentKind kind,
   CXCursor decl);
+
+bool
+clang_ext_LambdaExpr_isMutable(CXCursor c);
+
+bool
+clang_ext_LambdaExpr_hasExplicitParameters(CXCursor c);
+
+bool
+clang_ext_LambdaExpr_hasExplicitResultType(CXCursor c);
+
+/* Copied from Basic/Lambda.h.
+   clang_ext_LCD_None is renamed clang_ext_LCD_CaptureNone to avoid name clash */
+enum clang_ext_LambdaCaptureDefault {
+  clang_ext_LCD_CaptureNone,
+  clang_ext_LCD_ByCopy,
+  clang_ext_LCD_ByRef
+};
+
+enum clang_ext_LambdaCaptureDefault
+clang_ext_LambdaExpr_getCaptureDefault(CXCursor c);
+
+unsigned
+clang_ext_LambdaExpr_getCaptureCount(CXCursor c);
+
+struct clang_ext_LambdaCapture {
+  const void *data;
+  CXTranslationUnit TU;
+};
+
+struct clang_ext_LambdaCapture
+clang_ext_LambdaExpr_getCapture(CXCursor c, unsigned index);
+
+/* Copied from Basic/Lambda.h */
+enum clang_ext_LambdaCaptureKind {
+  clang_ext_LCK_This,
+  clang_ext_LCK_StarThis,
+  clang_ext_LCK_ByCopy,
+  clang_ext_LCK_ByRef,
+  clang_ext_LCK_VLAType
+};
+enum clang_ext_LambdaCaptureKind
+clang_ext_LambdaCapture_getKind(struct clang_ext_LambdaCapture capture);
+
+CXCursor
+clang_ext_LambdaCapture_getCapturedVar(struct clang_ext_LambdaCapture capture);
+
+bool
+clang_ext_LambdaCapture_isImplicit(struct clang_ext_LambdaCapture capture);
+
+void
+clang_ext_LambdaCapture_dispose(struct clang_ext_LambdaCapture capture);
