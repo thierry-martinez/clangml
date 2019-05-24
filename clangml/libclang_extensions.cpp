@@ -299,12 +299,18 @@ GetTemplateArgument(struct clang_ext_TemplateArgument TA)
   return static_cast<const clang::TemplateArgument *>(TA.data);
 }
 
+#ifdef LLVM_VERSION_BEFORE_3_5_0
+typedef clang::LambdaExpr::Capture LambdaCapture;
+#else
+typedef clang::LambdaCapture LambdaCapture;
+#endif
+
 static struct clang_ext_LambdaCapture
 MakeLambdaCapture(
-  const clang::LambdaCapture &argument, CXTranslationUnit TU)
+  const LambdaCapture &argument, CXTranslationUnit TU)
 {
   struct clang_ext_LambdaCapture LC = {
-    new clang::LambdaCapture(argument), TU };
+    new LambdaCapture(argument), TU };
   return LC;
 }
 
@@ -315,10 +321,10 @@ MakeLambdaCaptureInvalid(CXTranslationUnit TU)
   return LC;
 }
 
-static const clang::LambdaCapture *
+static const LambdaCapture *
 GetLambdaCapture(struct clang_ext_LambdaCapture LC)
 {
-  return static_cast<const clang::LambdaCapture *>(LC.data);
+  return static_cast<const LambdaCapture *>(LC.data);
 }
 
 extern "C" {
