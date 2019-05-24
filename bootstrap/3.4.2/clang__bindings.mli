@@ -2109,3 +2109,37 @@ external ext_predefined_expr_get_ident_kind :
 external ext_predefined_expr_compute_name :
   clang_ext_predefinedexpr_identkind -> cxcursor -> string =
     "clang_ext_PredefinedExpr_ComputeName_wrapper"
+external ext_lambda_expr_is_mutable :
+  cxcursor -> bool = "clang_ext_LambdaExpr_isMutable_wrapper"
+external ext_lambda_expr_has_explicit_parameters :
+  cxcursor -> bool = "clang_ext_LambdaExpr_hasExplicitParameters_wrapper"
+external ext_lambda_expr_has_explicit_result_type :
+  cxcursor -> bool = "clang_ext_LambdaExpr_hasExplicitResultType_wrapper"
+type clang_ext_lambdacapturedefault =
+  | CaptureNone 
+  | ByCopy 
+  | ByRef [@@deriving (eq, ord, show)]
+external ext_lambda_expr_get_capture_default :
+  cxcursor -> clang_ext_lambdacapturedefault =
+    "clang_ext_LambdaExpr_getCaptureDefault_wrapper"
+external ext_lambda_expr_get_capture_count :
+  cxcursor -> int = "clang_ext_LambdaExpr_getCaptureCount_wrapper"
+type clang_ext_lambdacapture
+external ext_lambda_expr_get_capture :
+  cxcursor -> int -> clang_ext_lambdacapture =
+    "clang_ext_LambdaExpr_getCapture_wrapper"
+type clang_ext_lambdacapturekind =
+  | This 
+  | StarThis 
+  | ByCopy 
+  | ByRef 
+  | VLAType [@@deriving (eq, ord, show)]
+external ext_lambda_capture_get_kind :
+  clang_ext_lambdacapture -> clang_ext_lambdacapturekind =
+    "clang_ext_LambdaCapture_getKind_wrapper"
+external ext_lambda_capture_get_captured_var :
+  clang_ext_lambdacapture -> cxcursor =
+    "clang_ext_LambdaCapture_getCapturedVar_wrapper"
+external ext_lambda_capture_is_implicit :
+  clang_ext_lambdacapture -> bool =
+    "clang_ext_LambdaCapture_isImplicit_wrapper"

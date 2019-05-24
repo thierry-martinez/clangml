@@ -8705,3 +8705,192 @@ clang_ext_PredefinedExpr_ComputeName_wrapper(value kind_ocaml, value decl_ocaml)
   }
 }
 
+CAMLprim value
+clang_ext_LambdaExpr_isMutable_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  _Bool result = clang_ext_LambdaExpr_isMutable(c);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_LambdaExpr_hasExplicitParameters_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  _Bool result = clang_ext_LambdaExpr_hasExplicitParameters(c);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_LambdaExpr_hasExplicitResultType_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  _Bool result = clang_ext_LambdaExpr_hasExplicitResultType(c);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_LambdaCaptureDefault
+Clang_ext_lambdacapturedefault_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_LCD_CaptureNone;
+  case 1: return clang_ext_LCD_ByCopy;
+  case 2: return clang_ext_LCD_ByRef;
+  }
+  failwith_fmt("invalid value for Clang_ext_lambdacapturedefault_val: %d", Int_val(ocaml));
+  return clang_ext_LCD_CaptureNone;
+}
+
+value
+Val_clang_ext_lambdacapturedefault(enum clang_ext_LambdaCaptureDefault v)
+{
+  switch (v) {
+  case clang_ext_LCD_CaptureNone: return Val_int(0);
+  case clang_ext_LCD_ByCopy: return Val_int(1);
+  case clang_ext_LCD_ByRef: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_lambdacapturedefault: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_LambdaExpr_getCaptureDefault_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  enum clang_ext_LambdaCaptureDefault result = clang_ext_LambdaExpr_getCaptureDefault(c);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_lambdacapturedefault(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_LambdaExpr_getCaptureCount_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  unsigned int result = clang_ext_LambdaExpr_getCaptureCount(c);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+static void finalize_clang_ext_lambdacapture(value v) {
+  clang_ext_LambdaCapture_dispose(*((struct clang_ext_LambdaCapture *) Data_custom_val(v)));;
+}
+DECLARE_OPAQUE(struct clang_ext_LambdaCapture, clang_ext_lambdacapture, Clang_ext_lambdacapture_val, Val_clang_ext_lambdacapture, finalize_clang_ext_lambdacapture)
+
+CAMLprim value
+clang_ext_LambdaExpr_getCapture_wrapper(value c_ocaml, value index_ocaml)
+{
+  CAMLparam2(c_ocaml, index_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  unsigned int index;
+  index = Int_val(index_ocaml);
+  struct clang_ext_LambdaCapture result = clang_ext_LambdaExpr_getCapture(c, index);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_lambdacapture(result));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_LambdaCaptureKind
+Clang_ext_lambdacapturekind_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_LCK_This;
+  case 1: return clang_ext_LCK_StarThis;
+  case 2: return clang_ext_LCK_ByCopy;
+  case 3: return clang_ext_LCK_ByRef;
+  case 4: return clang_ext_LCK_VLAType;
+  }
+  failwith_fmt("invalid value for Clang_ext_lambdacapturekind_val: %d", Int_val(ocaml));
+  return clang_ext_LCK_This;
+}
+
+value
+Val_clang_ext_lambdacapturekind(enum clang_ext_LambdaCaptureKind v)
+{
+  switch (v) {
+  case clang_ext_LCK_This: return Val_int(0);
+  case clang_ext_LCK_StarThis: return Val_int(1);
+  case clang_ext_LCK_ByCopy: return Val_int(2);
+  case clang_ext_LCK_ByRef: return Val_int(3);
+  case clang_ext_LCK_VLAType: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_lambdacapturekind: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_LambdaCapture_getKind_wrapper(value capture_ocaml)
+{
+  CAMLparam1(capture_ocaml);
+  struct clang_ext_LambdaCapture capture;
+  capture = Clang_ext_lambdacapture_val(Field(capture_ocaml, 0));
+  enum clang_ext_LambdaCaptureKind result = clang_ext_LambdaCapture_getKind(capture);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_lambdacapturekind(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_LambdaCapture_getCapturedVar_wrapper(value capture_ocaml)
+{
+  CAMLparam1(capture_ocaml);
+  struct clang_ext_LambdaCapture capture;
+  capture = Clang_ext_lambdacapture_val(Field(capture_ocaml, 0));
+  CXCursor result = clang_ext_LambdaCapture_getCapturedVar(capture);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(capture_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_LambdaCapture_isImplicit_wrapper(value capture_ocaml)
+{
+  CAMLparam1(capture_ocaml);
+  struct clang_ext_LambdaCapture capture;
+  capture = Clang_ext_lambdacapture_val(Field(capture_ocaml, 0));
+  _Bool result = clang_ext_LambdaCapture_isImplicit(capture);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
