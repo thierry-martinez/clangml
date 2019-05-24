@@ -67,7 +67,7 @@ install :
 		$(INSTALL_NAME_TOOL) -add_rpath $(LLVM_LIBDIR) \
 			$(DUNE_INSTALL_PREFIX)/lib/stublibs/dllclangml_stubs.so
 # obuild does not support line break in 'requires' field
-	sed -i '/requires = "[^"]*$/{:x N;s/\n */ /;/[^"]$/bx}' \
+	sed -i '/requires = "[^"]*$$/{:x N;s/\n */ /;/[^"]$$/bx}' \
 		$(DUNE_INSTALL_PREFIX)/lib/clangml/META
 	dune install
 
