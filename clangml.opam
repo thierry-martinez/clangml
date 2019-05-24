@@ -10,6 +10,8 @@ dev-repo: "git+https://gitlab.inria.fr/tmartine/clangml.git"
 build: [
   ["./configure" "--prefix=%{prefix}%"]
   ["dune" "build" "-p" name "-j" jobs]]
+# use Makefile for install since there is some manual patches applied
+install: [make "install"]
 depends: [
   "stdcompat"
   "conf-libclang"
