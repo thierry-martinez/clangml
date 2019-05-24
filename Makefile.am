@@ -70,6 +70,10 @@ install :
 	sed -i '/requires = "[^"]*$$/{:x N;s/\n */ /;/[^"]$$/bx}' \
 		$(DUNE_INSTALL_PREFIX)/lib/clangml/META
 	dune install
+# obuild does not support sub-package directories
+	clangml_lib=`ocamlfind query clangml` \
+		sh -c 'cp $$clangml_lib/visitors/* \
+			$$clangml_lib/ppx/* $$clangml_lib/lift/* $$clangml_lib'
 
 .PHONY : uninstall
 uninstall :
