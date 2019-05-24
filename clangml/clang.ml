@@ -39,22 +39,15 @@ module Ast = struct
 
   include Clang__ast_utils
 
-  module Options = struct
-    type t = {
-        ignore_implicit_cast : bool [@default true];
-        ignore_paren : bool [@default true];
-        ignore_paren_in_types : bool [@default true];
-        convert_integer_literals : bool [@default true];
-        convert_floating_literals : bool [@default true];
-      }
-          [@@deriving make]
-  end
+  module Options = Clang__ast_options
 
   module type OptionsS = sig
     val options : Options.t
   end
 
   module Converter (Options : OptionsS) = struct
+    let options = Options.options
+
     exception Invalid_structure
 
     (* Hack for having current function declaration to provide function name
@@ -68,7 +61,7 @@ module Ast = struct
         | _ -> true
 
     let make_integer_literal i =
-      if Options.options.convert_integer_literals then
+      if options.convert_integer_literals then
         match int_of_cxint_opt i with
         | None -> CXInt i
         | Some i -> Int i
@@ -197,7 +190,7 @@ module Ast = struct
               | kind -> UnexposedType kind
             end in
       match desc with
-      | ParenType inner when Options.options.ignore_paren_in_types ->
+      | ParenType inner when options.ignore_paren_in_types ->
           { inner with cxtype }
       | _ ->
           { cxtype; desc;
@@ -654,10 +647,10 @@ module Ast = struct
 
     and expr_of_cxcursor cursor =
       match expr_desc_of_cxcursor cursor with
-      | Paren subexpr when Options.options.ignore_paren ->
+      | Paren subexpr when options.ignore_paren ->
           node ~cursor subexpr.desc
       | Cast { kind = Implicit; operand }
-        when Options.options.ignore_implicit_cast ->
+        when options.ignore_implicit_cast ->
           node ~cursor operand.desc
       | desc -> node ~cursor desc
 
@@ -672,7 +665,7 @@ module Ast = struct
         | FloatingLiteral ->
             let f = ext_floating_literal_get_value cursor in
             let literal =
-              if Options.options.convert_floating_literals then
+              if options.convert_floating_literals then
                 Float (float_of_cxfloat f)
               else CXFloat f in
             FloatingLiteral literal
@@ -784,6 +777,8 @@ module Ast = struct
                       (ty, sub_cursor |> expr_of_cxcursor) in
               GenericSelection { controlling_expr; assocs }
             end
+        | LambdaExpr ->
+            lambda_expr_of_cxcursor cursor
         | UnexposedExpr ->
             begin
               match ext_stmt_get_kind cursor with
@@ -810,10 +805,57 @@ module Ast = struct
                   let function_name =
                     predefined_expr_get_function_name cursor !current_decl in
                   Predefined { kind; function_name }
+              | ExprWithCleanups ->
+                  let sub =
+                    match list_of_children cursor with
+                    | [sub] -> expr_of_cxcursor sub
+                    | _ -> raise Invalid_structure in
+                  if options.ignore_expr_with_cleanups then
+                    sub.desc
+                  else
+                    ExprWithCleanups sub
+              | MaterializeTemporaryExpr ->
+                  let sub =
+                    match list_of_children cursor with
+                    | [sub] -> expr_of_cxcursor sub
+                    | _ -> raise Invalid_structure in
+                  if options.ignore_materialize_temporary_expr then
+                    sub.desc
+                  else
+                    MaterializeTemporaryExpr sub
               | kind -> UnexposedExpr kind
             end
         | _ -> UnknownExpr kind
       with Invalid_structure -> UnknownExpr kind
+
+    and lambda_expr_of_cxcursor cursor =
+      let captures =
+        List.init (ext_lambda_expr_get_capture_count cursor)
+          begin fun i ->
+            ext_lambda_expr_get_capture cursor i |>
+            lambda_capture_of_capture
+          end in
+      let body = list_of_children cursor |> List.map stmt_of_cxcursor in
+      Lambda {
+        captures; body;
+        capture_default = ext_lambda_expr_get_capture_default cursor;
+        is_mutable = ext_lambda_expr_is_mutable cursor;
+        has_explicit_parameters =
+          ext_lambda_expr_has_explicit_parameters cursor;
+        has_explicit_result_type =
+          ext_lambda_expr_has_explicit_result_type cursor; }
+
+    and lambda_capture_of_capture capture =
+      let captured_var =
+        ext_lambda_capture_get_captured_var capture in
+      let captured_var_name : string option =
+        if get_cursor_kind captured_var = InvalidCode then
+          None
+        else
+          Some (get_cursor_spelling captured_var) in
+      { implicit = ext_lambda_capture_is_implicit capture;
+        capture_kind = ext_lambda_capture_get_kind capture;
+        captured_var_name; }
 
     and unary_expr_of_cxcursor cursor =
       let kind = cursor |> ext_unary_expr_get_kind in

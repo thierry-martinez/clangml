@@ -2021,6 +2021,9 @@ let main cflags llvm_config prefix =
     add_type (Pcre.regexp "^clang_ext_TemplateArgument$")
       (empty_type_interface |>
        make_destructor "clang_ext_TemplateArgument_dispose") |>
+    add_type (Pcre.regexp "^clang_ext_LambdaCapture$")
+      (empty_type_interface |>
+       make_destructor "clang_ext_LambdaCapture_dispose") |>
     add_type (Pcre.regexp "^CXIndex$")
       (empty_type_interface |>
        make_destructor "clang_disposeIndex") |>
@@ -2028,7 +2031,7 @@ let main cflags llvm_config prefix =
       (empty_type_interface |>
        make_destructor "clang_disposeTranslationUnit" |>
        carry_reference "CXIndex") |>
-    add_type (Pcre.regexp "^CXCursor$|^CXType$|^CXFile$|^CXModule$|^CXSourceRange$|^CXSourceLocation$|^CXComment$|^clang_ext_TemplateName$|^clang_ext_TemplateArgument$")
+    add_type (Pcre.regexp "^CXCursor$|^CXType$|^CXFile$|^CXModule$|^CXSourceRange$|^CXSourceLocation$|^CXComment$|^clang_ext_TemplateName$|^clang_ext_TemplateArgument$|^clang_ext_LambdaCapture$")
       (empty_type_interface |> carry_reference "CXTranslationUnit") |>
     add_type (Pcre.regexp "^CXVirtualFileOverlay$")
       (empty_type_interface |>
@@ -2136,7 +2139,7 @@ let main cflags llvm_config prefix =
     add_function (Pcre.regexp "^clang_compare_")
       (empty_function_interface |>
         dont_label_unique) |>
-    add_enum (Pcre.regexp "^CXLinkageKind$|^CXTypeKind$|^CXCallingConv$|^CX_CXXAccessSpecifier$|^CXTemplateArgumentKind$|^clang_ext_UnaryOperatorKind$|^clang_ext_BinaryOperatorKind$|^clang_ext_ElaboratedTypeKeyword$|^clang_ext_CharacterKind$|^clang_ext_UnaryExpr$|^clang_ext_AttrKind$|^clang_ext_TypeKind$|^clang_ext_DeclKind$|^clang_ext_StmtKind$|^CXCursorKind$|^clang_ext_PredefinedExpr_IdentKind$")
+    add_enum (Pcre.regexp "^CXLinkageKind$|^CXTypeKind$|^CXCallingConv$|^CX_CXXAccessSpecifier$|^CXTemplateArgumentKind$|^clang_ext_UnaryOperatorKind$|^clang_ext_BinaryOperatorKind$|^clang_ext_ElaboratedTypeKeyword$|^clang_ext_CharacterKind$|^clang_ext_UnaryExpr$|^clang_ext_AttrKind$|^clang_ext_TypeKind$|^clang_ext_DeclKind$|^clang_ext_StmtKind$|^CXCursorKind$|^clang_ext_PredefinedExpr_IdentKind$|^clang_ext_LambdaCaptureDefault$|^clang_ext_LambdaCaptureKind$")
       (empty_enum_interface |>
         add_attributes [(loc "deriving", PStr [pstr_eval (pexp_tuple (["eq"; "ord"; "show"] |> List.map @@ fun plugin -> pexp_ident (loc (Longident.Lident plugin))))])]) |>
     add_enum (Pcre.regexp "^CXErrorCode$")

@@ -3,6 +3,7 @@ mypkgdir=$(pkglibdir)
 .DEFAULT_GOAL = all
 
 DUNE_PREFIX = _build/default
+DUNE_INSTALL_PREFIX = _build/install/default
 
 CLANGML_CMXA = clangml/clangml.cmxa
 
@@ -61,10 +62,22 @@ tests : $(DUNE_PREFIX)/$(TESTS_EXE)
 .PHONY : install
 install :
 	dune build @install
+# rpath required for dynamic link on Mac OS X
 	- test -z $(INSTALL_NAME_TOOL) || \
 		$(INSTALL_NAME_TOOL) -add_rpath $(LLVM_LIBDIR) \
-			_build/install/default/lib/stublibs/dllclangml_stubs.so
+			$(DUNE_INSTALL_PREFIX)/lib/stublibs/dllclangml_stubs.so
+# obuild does not support line break in 'requires' field
+	sed -i '/requires = "[^"]*$$/{:x N;s/\n */ /;/[^"]$$/bx}' \
+		$(DUNE_INSTALL_PREFIX)/lib/clangml/META
 	dune install
+# obuild does not support sub-package directories
+	clangml_lib=`ocamlfind query clangml` \
+		sh -c 'cp $$clangml_lib/visitors/* \
+			$$clangml_lib/ppx/* $$clangml_lib/lift/* $$clangml_lib'
+
+.PHONY : uninstall
+uninstall :
+	dune uninstall
 
 clean-local : clean-local-dune
 

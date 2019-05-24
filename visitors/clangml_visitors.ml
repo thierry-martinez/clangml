@@ -39,6 +39,14 @@
           [@opaque] [@@rewrite] [@@remove]
     type cxsourcelocation =
       Clang__bindings.cxsourcelocation [@opaque] [@@rewrite] [@@remove]
+    type clang_ext_stmtkind =
+      Clang__bindings.clang_ext_stmtkind [@opaque] [@@rewrite] [@@remove]
+    type clang_ext_lambdacapturekind =
+      Clang__bindings.clang_ext_lambdacapturekind [@opaque] [@@rewrite] [@@remove]
+    type clang_ext_lambdacapturedefault =
+      Clang__bindings.clang_ext_lambdacapturedefault [@opaque] [@@rewrite] [@@remove]
+    type clang_ext_predefinedexpr_identkind =
+      Clang__bindings.clang_ext_predefinedexpr_identkind [@opaque] [@@rewrite] [@@remove]
   end
 
   module%import Clang__ast = struct
