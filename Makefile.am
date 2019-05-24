@@ -71,6 +71,10 @@ install :
 		$(DUNE_INSTALL_PREFIX)/lib/clangml/META
 	dune install
 
+.PHONY : uninstall
+uninstall :
+	dune uninstall
+
 clean-local : clean-local-dune
 
 .PHONY : clean-local-dune

@@ -12,6 +12,7 @@ build: [
   ["dune" "build" "-p" name "-j" jobs]]
 # use Makefile for install since there is some manual patches applied
 install: [make "install"]
+remove: [make "uninstall"]
 depends: [
   "stdcompat"
   "conf-libclang"
