@@ -21,16 +21,17 @@ let run_llvm_config llvm_config arguments =
     failwith (Printf.sprintf "%s: execution failed" command);
   result
 
-let parse_string s =
+let parse_string ?(command_line_args = []) s =
   let llvm_config = Clangml_config.llvm_config in
   let llvm_version = run_llvm_config llvm_config ["--version"] in
   let llvm_include_dir = run_llvm_config llvm_config ["--includedir"] in
   let clang_include_dir =
     List.fold_left Filename.concat llvm_include_dir
       [".."; "lib"; "clang"; llvm_version; "include"] in
-  let command_line_args = [
-    Clang.Command_line.include_directory clang_include_dir;
-    Clang.Command_line.language CXX] in
+  let command_line_args =
+    Clang.Command_line.include_directory clang_include_dir ::
+    Clang.Command_line.language CXX ::
+    command_line_args in
   Clang.Ast.parse_string ~command_line_args s
 
 (* 5.1.2 This *)
@@ -69,7 +70,8 @@ let () =
 (* 5.3.4 New *)
 
 let () =
-  let ast = parse_string {|
+  let ast = parse_string
+    ~command_line_args:[Clang.Command_line.standard Cxx11] {|
     void
     f()
     {
@@ -113,6 +115,40 @@ let () =
   |} in
   Format.fprintf Format.err_formatter "%a@." Clang.Ast.pp_translation_unit ast
 
+(* 5.5 Pointer-to-member operators *)
+
+let () =
+  let ast = parse_string {|
+    struct S {
+      S() : i(0) { }
+      mutable int i;
+    };
+
+    void
+    f()
+    {
+      const S cs;
+      int S::* pm = &S::i;
+    }
+  |} in
+  Format.fprintf Format.err_formatter "%a@." Clang.Ast.pp_translation_unit ast
+
+let () =
+  let ast = parse_string {|
+    struct S {
+      void f const(int);
+    };
+    void
+    f()
+    {
+      const S cs;
+      const S* ptr_to_obj = &cs;
+      void S::(*ptr_to_mfct) const(int) = &S::f;
+      (ptr_to_obj->*ptr_to_mfct)(10);
+    }
+  |} in
+  Format.fprintf Format.err_formatter "%a@." Clang.Ast.pp_translation_unit ast
+
 (* 5.19 Constant expression *)
 
 let () =
@@ -146,8 +182,11 @@ let () =
 
 (* 7.5.5 Lambda expressions *)
 
+(* C++ 17: auto in function return type *)
+
 let () =
-  let ast = parse_string {|
+  let ast = parse_string
+    ~command_line_args:[Clang.Command_line.standard Cxx17] {|
     void
     f()
     {
@@ -156,7 +195,7 @@ let () =
       auto x3 = [=]()->auto&& { return j; };
     }
   |} in
-  let bindings = check_pattern_tu ast [%pattern? [%cpp-tu {|
+  let bindings = check_pattern_tu ast [%pattern? [%cpp-tu "c++17" {|
       void
       f()
       {
@@ -168,33 +207,27 @@ let () =
   let x1 = bindings#x1 in
   let x3 = bindings#x3 in
   check_pattern_expr x1 [%pattern? {
-    desc = Call {
-      callee = {
-        desc = Lambda {
-          capture_default = CaptureNone;
-          captures = [];
-          parameters = Some [{
-            desc = {
-              qual_type = { desc = BuiltinType Int };
-              name = "i"; }}];
-          result_type = None;
-          body = { desc = Compound [{ desc =
-            Return (Some { desc = DeclRef (Ident "i")})}]}}};
-      args = []}}];
+    desc = Lambda {
+      capture_default = CaptureNone;
+      captures = [];
+      parameters = Some [{
+        desc = {
+          qual_type = { desc = BuiltinType Int };
+          name = "i"; }}];
+      result_type = None;
+      body = { desc = Compound [{ desc =
+        Return (Some { desc = DeclRef (Ident "i")})}]}}}];
   check_pattern_expr x3 [%pattern? {
-    desc = Call {
-      callee = {
-        desc = Lambda {
-          capture_default = ByCopy;
-          captures = [{
-            capture_kind = ByCopy;
-            implicit = true;
-            captured_var_name = Some "j" }];
-          parameters = Some [];
-          result_type =
-            Some { desc = LValueReference { desc = BuiltinType Int }};
-          body = { desc = Compound [{ desc =
-            Return (Some { desc = DeclRef (Ident "j")})}]}}};
-      args = []}}]
+    desc = Lambda {
+      capture_default = ByCopy;
+      captures = [{
+        capture_kind = ByCopy;
+        implicit = true;
+        captured_var_name = Some "j" }];
+      parameters = Some [];
+      result_type =
+        Some { desc = LValueReference { desc = BuiltinType Int }};
+      body = { desc = Compound [{ desc =
+        Return (Some { desc = DeclRef (Ident "j")})}]}}}]
 
 (* 7.5.5.2 Captures *)

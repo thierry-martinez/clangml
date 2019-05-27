@@ -1600,4 +1600,26 @@ extern "C" {
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
   }
+
+  const char *
+  clang_ext_LangStandard_getName(enum clang_ext_langstandards s)
+  {
+    switch (s) {
+    #define LANGSTANDARD(Ident, Name, _Lang, _Desc, _Features) \
+      case CLANG_EXT_LANGSTANDARDS_##Ident: return Name;
+    #include <clang/Frontend/LangStandards.def>
+    default:
+      return "";
+    }
+  }
+
+  enum clang_ext_langstandards
+  clang_ext_LangStandard_ofName(const char *s)
+  {
+    #define LANGSTANDARD(Ident, Name, _Lang, _Desc, _Features) \
+      if (strcmp(Name, s) == 0) \
+        return CLANG_EXT_LANGSTANDARDS_##Ident;
+    #include <clang/Frontend/LangStandards.def>
+    return CLANG_EXT_LANGSTANDARDS_Invalid;
+  }
 }

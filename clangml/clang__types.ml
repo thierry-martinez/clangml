@@ -10,3 +10,6 @@
 (* From FrontendOptions.h:InputKind:Language *)
 type language = C | CXX | ObjC | ObjCXX | OpenCL | CUDA | RenderScript | HIP
   [@@deriving eq, ord, show]
+
+type standard = Clang__bindings.clang_ext_langstandards
+  [@@deriving eq, ord, show]

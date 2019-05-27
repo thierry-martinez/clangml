@@ -556,3 +556,16 @@ clang_ext_CXXTypeidExpr_getTypeOperand(CXCursor c);
 
 CXCursor
 clang_ext_CXXTypeidExpr_getExprOperand(CXCursor c);
+
+enum clang_ext_langstandards {
+  #define LANGSTANDARD(Ident, _Name, _Lang, _Desc, _Features) \
+    CLANG_EXT_LANGSTANDARDS_##Ident,
+  #include <clang/Frontend/LangStandards.def>
+  CLANG_EXT_LANGSTANDARDS_Invalid
+};
+
+const char *
+clang_ext_LangStandard_getName(enum clang_ext_langstandards s);
+
+enum clang_ext_langstandards
+clang_ext_LangStandard_ofName(const char *s);

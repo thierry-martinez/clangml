@@ -119,12 +119,25 @@ let rec remove_placeholders antiquotations items =
       remove_placeholders antiquotations items
   | _ -> assert false
 
-let extract_payload language (mapper : Ast_mapper.mapper) ~loc (payload : Parsetree.payload) =
-  let kind, preamble, return_type, code =
+type arguments = {
+    preamble : string list;
+    standard : Clang.standard option;
+    return_type : string option;
+  }
+
+let empty_arguments = {
+  preamble = [];
+  standard = None;
+  return_type = None;
+}
+
+let extract_payload language (mapper : Ast_mapper.mapper) ~loc
+    (payload : Parsetree.payload) =
+  let kind, arguments, code =
     match
       match payload with
-      | PStr [%str - [%e? { pexp_desc =
-            Pexp_apply ({ pexp_desc = Pexp_ident { txt = Lident kind; loc = kind_loc }; _},
+      | PStr [%str - [%e? { pexp_desc = Pexp_apply (
+            { pexp_desc = Pexp_ident { txt = Lident kind; loc = kind_loc }; _},
               args); _ }]] ->
           let kind =
             try kind_of_string kind
@@ -136,26 +149,33 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc (payload : Parset
                 Location.raise_errorf ~loc "Code expected"
             | (_, code) :: rev_args ->
                 string_of_expression code, rev_args in
-          let handle_arg (preamble, return_type) (_, (arg : Parsetree.expression)) =
+          let handle_arg arguments (_, (arg : Parsetree.expression)) =
+            let loc = arg.pexp_loc in
             match arg with
             | [%expr return [%e? arg ]] ->
-                begin
-                  match return_type with
-                  | Some _ ->
-                      Location.raise_errorf ~loc:arg.pexp_loc
-                        "Return type already given"
-                  | None ->
-                      (preamble, Some (string_of_expression arg))
-                end
+                if arguments.return_type <> None then
+                  Location.raise_errorf ~loc
+                    "Return type already given";
+                { arguments with
+                  return_type = Some (string_of_expression arg) }
             | _ ->
-                (string_of_expression arg :: preamble, return_type) in
-          let preamble, return_type =
-            List.fold_left handle_arg ([], None) rev_args in
-          Some (kind, preamble, return_type, code)
+                let arg = string_of_expression arg in
+                match Clang.ext_lang_standard_of_name arg with
+                | Invalid ->
+                    { arguments with
+                      preamble = arg :: arguments.preamble }
+                | standard ->
+                    if arguments.standard <> None then
+                      Location.raise_errorf ~loc
+                        "Standard already given";
+                    { arguments with standard = Some standard } in
+          let arguments =
+            List.fold_left handle_arg empty_arguments rev_args in
+          Some (kind, arguments, code)
       | _ -> None
     with
-    | Some (kind, preamble, return_type, code) ->
-        kind, preamble, return_type, code
+    | Some (kind, arguments, code) ->
+        kind, arguments, code
     | None ->
         Location.raise_errorf ~loc
           "ClangML quotations have to be of the form [%%c-kind {| code |}]" in
@@ -171,7 +191,7 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc (payload : Parset
         Buffer.add_string buffer
           (Printf.sprintf "void * const %s = 0;" placeholder));
   let return_type =
-    match return_type with
+    match arguments.return_type with
     | None -> "void"
     | Some return_type -> return_type in
   let function_declaration =
@@ -234,16 +254,22 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc (payload : Parset
                 remove_placeholders antiquotations ast.desc.items }}
         end in
   Buffer.add_string buffer prelude;
-  preamble |> List.iter (fun s ->
+  arguments.preamble |> List.iter (fun s ->
     Buffer.add_string buffer s;
     Buffer.add_char buffer ';');
   Buffer.add_string buffer prelude';
   Buffer.add_string buffer code;
   Buffer.add_string buffer postlude;
   let code = Buffer.contents buffer in
+  let command_line_args = [Clang.Command_line.language language] in
+  let command_line_args =
+    match arguments.standard with
+    | None -> command_line_args
+    | Some standard ->
+        Clang.Command_line.standard standard :: command_line_args in
   let ast =
     Clang.Ast.parse_string
-      ~command_line_args:[Clang.Command_line.language language] code in
+      ~command_line_args code in
   let tu = Clang.Ast.cursor_of_node ast |> Clang.cursor_get_translation_unit in
   let has_diagnostics = ref false in
   Clang.seq_of_diagnostics tu |> Seq.iter begin fun diagnostics ->
