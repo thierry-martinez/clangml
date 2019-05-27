@@ -327,6 +327,12 @@ GetLambdaCapture(struct clang_ext_LambdaCapture LC)
   return static_cast<const LambdaCapture *>(LC.data);
 }
 
+static clang::ASTContext &
+getCursorContext(CXCursor c)
+{
+  return getCursorTU(c)->TheASTUnit->getASTContext();
+}
+
 extern "C" {
   bool
   clang_equal_cxint(CXInt a, CXInt b)
@@ -1552,7 +1558,7 @@ extern "C" {
       llvm::dyn_cast_or_null<clang::CXXDeleteExpr>(GetCursorStmt(c))) {
       return e->isGlobalDelete();
     }
-    return 0;
+    return false;
   }
 
   bool
@@ -1562,6 +1568,36 @@ extern "C" {
       llvm::dyn_cast_or_null<clang::CXXDeleteExpr>(GetCursorStmt(c))) {
       return e->isArrayForm();
     }
-    return 0;
+    return false;
+  }
+
+  bool
+  clang_ext_CXXTypeidExpr_isTypeOperand(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXTypeidExpr>(GetCursorStmt(c))) {
+      return e->isTypeOperand();
+    }
+    return false;
+  }
+
+  CXType
+  clang_ext_CXXTypeidExpr_getTypeOperand(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXTypeidExpr>(GetCursorStmt(c))) {
+      return MakeCXType(e->getTypeOperand(getCursorContext(c)), getCursorTU(c));
+    }
+    return MakeCXTypeInvalid(getCursorTU(c));
+  }
+
+  CXCursor
+  clang_ext_CXXTypeidExpr_getExprOperand(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXTypeidExpr>(GetCursorStmt(c))) {
+      return MakeCXCursor(e->getExprOperand(), getCursorTU(c));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
   }
 }

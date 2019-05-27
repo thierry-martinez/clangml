@@ -2088,6 +2088,7 @@ let () =
           array_form = false;
           argument = { desc = DeclRef (Ident "t")}}}}] }}}]]
    ]}*)
+  | Typeid of unary_expr_or_type_trait
   | UnexposedExpr of clang_ext_stmtkind
   | UnknownExpr of cxcursorkind
 

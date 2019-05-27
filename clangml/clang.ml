@@ -456,11 +456,11 @@ module Ast = struct
       let linkage = cursor |> get_cursor_linkage in
       let var_name = get_cursor_spelling cursor in
       let var_type = of_cxtype (get_cursor_type cursor) in
-      let var_init =
+      let var_init : 'a option =
         if ext_var_decl_has_init cursor then
           begin
             let init_value = list_of_children cursor |> List.rev |> List.hd in
-            Some (expr_of_cxcursor init_value)
+            option_call_expr_of_cxcursor init_value
           end
         else
           None in
@@ -811,13 +811,7 @@ module Ast = struct
                 option_cursor expr_of_cxcursor in
               let init =
                 cursor |> ext_cxxnew_expr_get_initializer |>
-                option_cursor_bind begin fun init ->
-                  if get_cursor_kind init = CallExpr &&
-                    list_of_children init = [] then
-                    None
-                  else
-                    Some (expr_of_cxcursor init)
-                end in
+                option_call_expr_of_cxcursor in
               New { placement_args; qual_type; array_size; init }
             end
         | CXXDeleteExpr ->
@@ -828,6 +822,15 @@ module Ast = struct
             Delete { argument;
               global_delete = ext_cxxdelete_expr_is_global_delete cursor;
               array_form = ext_cxxdelete_expr_is_array_form cursor; }
+        | CXXTypeidExpr ->
+            let argument =
+              if ext_cxxtypeid_expr_is_type_operand cursor then
+                ArgumentType (ext_cxxtypeid_expr_get_type_operand cursor |>
+                  of_cxtype)
+              else
+                ArgumentExpr (ext_cxxtypeid_expr_get_expr_operand cursor |>
+                  expr_of_cxcursor) in
+            Typeid argument
         | UnexposedExpr ->
             begin
               match ext_stmt_get_kind cursor with
@@ -876,6 +879,15 @@ module Ast = struct
             end
         | _ -> UnknownExpr kind
       with Invalid_structure -> UnknownExpr kind
+
+    and option_call_expr_of_cxcursor cursor =
+      cursor |> option_cursor_bind begin fun init ->
+        if get_cursor_kind init = CallExpr &&
+          list_of_children init = [] then
+          None
+        else
+          Some (expr_of_cxcursor init)
+      end
 
     and lambda_expr_of_cxcursor cursor =
       let captures =

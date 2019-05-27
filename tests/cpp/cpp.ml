@@ -48,6 +48,24 @@ let () =
   |} in
   Format.fprintf Format.err_formatter "%a@." Clang.Ast.pp_translation_unit ast
 
+(* 5.2.8 Type identification *)
+
+let () =
+  let ast = parse_string {|
+    #include <typeinfo>
+    class D { /* ... */ };
+    D d1;
+    const D d2;
+
+    void f() {
+      typeid(d1) == typeid(d2);
+      typeid(D) == typeid(const D);
+      typeid(D) == typeid(d2);
+      typeid(D) == typeid(const D&);
+    }
+  |} in
+  Format.fprintf Format.err_formatter "%a@." Clang.Ast.pp_translation_unit ast
+
 (* 5.3.4 New *)
 
 let () =

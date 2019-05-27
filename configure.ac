@@ -360,6 +360,18 @@ AS_IF([test -d lift],
      AC_CP([$srcdir/lift/clangml_lift.ml], [lift/])
      AC_CP([$srcdir/lift/dune], [lift/]))])
 
+AS_IF([test -d ppx],
+  [true],
+  [AS_IF([mkdir ppx],
+     AC_CP([$srcdir/ppx/clangml_ppx.ml], [ppx/])
+     AC_CP([$srcdir/ppx/dune], [ppx/]))])
+
+AS_IF([test -d visitors],
+  [true],
+  [AS_IF([mkdir visitors],
+     AC_CP([$srcdir/visitors/clangml_visitors.ml], [visitors/])
+     AC_CP([$srcdir/visitors/dune], [visitors/]))])
+
 AS_IF([test -d tests],
   [true],
   [AS_IF([mkdir tests],

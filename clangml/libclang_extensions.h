@@ -547,3 +547,12 @@ clang_ext_CXXDeleteExpr_isGlobalDelete(CXCursor c);
 
 bool
 clang_ext_CXXDeleteExpr_isArrayForm(CXCursor c);
+
+bool
+clang_ext_CXXTypeidExpr_isTypeOperand(CXCursor c);
+
+CXType
+clang_ext_CXXTypeidExpr_getTypeOperand(CXCursor c);
+
+CXCursor
+clang_ext_CXXTypeidExpr_getExprOperand(CXCursor c);
