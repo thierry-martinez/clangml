@@ -21,12 +21,15 @@
 #define LLVM_VERSION_BEFORE_3_9_0
 #endif
 #ifdef LLVM_VERSION_BEFORE_3_9_0
-#define LLVM_VERSION_BEFORE_7_0_0
+#define LLVM_VERSION_BEFORE_5_0_0
 #endif
 #ifdef LLVM_VERSION_3_9_1
-#define LLVM_VERSION_BEFORE_7_0_0
+#define LLVM_VERSION_BEFORE_5_0_0
 #endif
 #ifdef LLVM_VERSION_4_0_1
+#define LLVM_VERSION_BEFORE_5_0_0
+#endif
+#ifdef LLVM_VERSION_BEFORE_5_0_0
 #define LLVM_VERSION_BEFORE_7_0_0
 #endif
 #ifdef LLVM_VERSION_5_0_2
@@ -558,9 +561,17 @@ CXCursor
 clang_ext_CXXTypeidExpr_getExprOperand(CXCursor c);
 
 enum clang_ext_langstandards {
-  #define LANGSTANDARD(Ident, _Name, _Lang, _Desc, _Features) \
+  #define FOREACH_STANDARD(Ident, Name) \
     CLANG_EXT_LANGSTANDARDS_##Ident,
+  #ifdef LLVM_VERSION_BEFORE_5_0_0
+  #define LANGSTANDARD(Ident, Name, _Desc, _Features) \
+    FOREACH_STANDARD(Ident, Name)
+  #else
+  #define LANGSTANDARD(Ident, Name, _Lang, _Desc, _Features) \
+    FOREACH_STANDARD(Ident, Name)
+  #endif
   #include <clang/Frontend/LangStandards.def>
+  #undef FOREACH_STANDARD
   CLANG_EXT_LANGSTANDARDS_Invalid
 };
 

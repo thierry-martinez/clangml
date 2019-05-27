@@ -1605,9 +1605,17 @@ extern "C" {
   clang_ext_LangStandard_getName(enum clang_ext_langstandards s)
   {
     switch (s) {
-    #define LANGSTANDARD(Ident, Name, _Lang, _Desc, _Features) \
+    #define FOREACH_STANDARD(Ident, Name) \
       case CLANG_EXT_LANGSTANDARDS_##Ident: return Name;
+    #ifdef LLVM_VERSION_BEFORE_5_0_0
+    #define LANGSTANDARD(Ident, Name, _Desc, _Features) \
+      FOREACH_STANDARD(Ident, Name)
+    #else
+    #define LANGSTANDARD(Ident, Name, _Lang, _Desc, _Features) \
+      FOREACH_STANDARD(Ident, Name)
+    #endif
     #include <clang/Frontend/LangStandards.def>
+    #undef FOREACH_STANDARD
     default:
       return "";
     }
@@ -1616,10 +1624,18 @@ extern "C" {
   enum clang_ext_langstandards
   clang_ext_LangStandard_ofName(const char *s)
   {
-    #define LANGSTANDARD(Ident, Name, _Lang, _Desc, _Features) \
+    #define FOREACH_STANDARD(Ident, Name) \
       if (strcmp(Name, s) == 0) \
         return CLANG_EXT_LANGSTANDARDS_##Ident;
+    #ifdef LLVM_VERSION_BEFORE_5_0_0
+    #define LANGSTANDARD(Ident, Name, _Desc, _Features) \
+      FOREACH_STANDARD(Ident, Name)
+    #else
+    #define LANGSTANDARD(Ident, Name, _Lang, _Desc, _Features) \
+      FOREACH_STANDARD(Ident, Name)
+    #endif
     #include <clang/Frontend/LangStandards.def>
+    #undef FOREACH_STANDARD
     return CLANG_EXT_LANGSTANDARDS_Invalid;
   }
 }
