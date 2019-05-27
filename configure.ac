@@ -364,6 +364,7 @@ AS_IF([test -d ppx],
   [true],
   [AS_IF([mkdir ppx],
      AC_CP([$srcdir/ppx/clangml_ppx.ml], [ppx/])
+     AC_CP([$srcdir/ppx/ppx_lexer.mll], [ppx/])
      AC_CP([$srcdir/ppx/dune], [ppx/]))])
 
 AS_IF([test -d visitors],
