@@ -9,3 +9,4 @@
 
 (* From FrontendOptions.h:InputKind:Language *)
 type language = C | CXX | ObjC | ObjCXX | OpenCL | CUDA | RenderScript | HIP
+  [@@deriving eq, ord, show]

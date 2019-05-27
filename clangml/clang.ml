@@ -6,6 +6,18 @@ include Clang__types
 
 include Clang__utils
 
+module Command_line = Clang__command_line
+
+let option_cursor_bind f cursor : 'a option =
+  if get_cursor_kind cursor = InvalidCode then
+    None
+  else
+    f cursor
+
+
+let option_cursor f cursor : 'a option =
+  option_cursor_bind (fun x -> Some (f x)) cursor
+
 module Ast = struct
   include Clang__ast
 
@@ -244,13 +256,12 @@ module Ast = struct
                 | _ -> raise Invalid_structure
               else
                 None in
-            let init = ext_field_decl_get_in_class_initializer cursor in
-            let init : expr option =
-              if get_cursor_kind init = InvalidCode then None
-              else Some (init |> expr_of_cxcursor) in
+            let init =
+              ext_field_decl_get_in_class_initializer cursor |>
+              option_cursor expr_of_cxcursor in
             Field { name; qual_type; bitwidth; init }
         | CXXAccessSpecifier ->
-            CXXAccessSpecifier (cursor |> get_cxxaccess_specifier)
+            AccessSpecifier (cursor |> get_cxxaccess_specifier)
         | Namespace ->
             let name = get_cursor_spelling cursor in
             let declarations =
@@ -324,12 +335,12 @@ module Ast = struct
             match ext_decl_get_kind cursor with
             | Empty -> EmptyDecl
             | LinkageSpec ->
-                let languages =
-                  languages_of_ids
+                let language =
+                  language_of_ids
                     (ext_linkage_spec_decl_get_language_ids cursor) in
                 let decls =
                   list_of_children cursor |> List.map decl_of_cxcursor in
-                LinkageSpec { languages; decls }
+                LinkageSpec { language; decls }
             | Friend -> (* No FriendDecl : cxcursortype in Clang <4.0.0 *)
                 let friend_type = ext_friend_decl_get_friend_type cursor in
                 if get_type_kind friend_type = Invalid then
@@ -344,15 +355,7 @@ module Ast = struct
     and parameters_of_function_decl cursor =
       { non_variadic =
       List.init (ext_function_decl_get_num_params cursor) (fun i ->
-        let param = ext_function_decl_get_param_decl cursor i in
-        node ~cursor:param {
-          name = get_cursor_spelling param;
-          qual_type = get_cursor_type param |> of_cxtype;
-          default =
-            match list_of_children param with
-            | [] -> None
-            | [default] -> Some (default |> expr_of_cxcursor)
-            | _ -> raise Invalid_structure });
+        parameter_of_cxcursor (ext_function_decl_get_param_decl cursor i));
       variadic = is_function_type_variadic (get_cursor_type cursor) }
 
     and parameters_of_function_decl_or_proto cursor =
@@ -360,6 +363,16 @@ module Ast = struct
         Some (parameters_of_function_decl cursor)
       else
         None
+
+    and parameter_of_cxcursor cursor =
+      node ~cursor {
+          name = cursor |> get_cursor_spelling;
+          qual_type = cursor |> get_cursor_type |> of_cxtype;
+          default =
+            match list_of_children cursor with
+            | [] -> None
+            | [default] -> Some (default |> expr_of_cxcursor)
+            | _ -> raise Invalid_structure }
 
     and function_type_of_decl cursor =
       (* Hack for Clang 3.4 and 3.5! See current_decl declaration. *)
@@ -376,8 +389,9 @@ module Ast = struct
         | last :: _ when get_cursor_kind last = CompoundStmt ->
             Some (stmt_of_cxcursor last)
     | _ -> None in
-      let deleted = ext_function_decl_is_deleted cursor in
-      Clang__ast.Function { linkage; function_type; name; body; deleted }
+      Clang__ast.Function { linkage; function_type; name; body;
+        deleted = ext_function_decl_is_deleted cursor;
+        constexpr = ext_function_decl_is_constexpr cursor; }
 
     and cxxmethod_decl_of_cxcursor ?(can_be_function = false) cursor children =
       let function_type = function_type_of_decl cursor in
@@ -397,9 +411,10 @@ module Ast = struct
             else
               None in
       let deleted = ext_function_decl_is_deleted cursor in
+      let constexpr = ext_function_decl_is_constexpr cursor in
       if can_be_function && type_ref = None then
         let linkage = cursor |> get_cursor_linkage in
-        Function { linkage; function_type; name; body; deleted }
+        Function { linkage; function_type; name; body; deleted; constexpr }
       else
         CXXMethod {
           type_ref; function_type; name; body;
@@ -413,7 +428,7 @@ module Ast = struct
             else
               NonVirtual;
           const = ext_cxxmethod_is_const cursor;
-          deleted
+          deleted; constexpr
         }
 
     and parameters_of_cxtype cxtype =
@@ -432,7 +447,7 @@ module Ast = struct
     and function_type_of_cxtype parameters cxtype =
       let calling_conv = cxtype |> get_function_type_calling_conv in
       let result = cxtype |> get_result_type |> of_cxtype in
-      { calling_conv; result; parameters }
+      { calling_conv; result; parameters; }
 
     and var_decl_of_cxcursor cursor =
       node ~cursor (var_decl_desc_of_cxcursor cursor)
@@ -449,7 +464,8 @@ module Ast = struct
           end
         else
           None in
-      { linkage; var_name; var_type; var_init }
+      { linkage; var_name; var_type; var_init;
+        constexpr = ext_var_decl_is_constexpr cursor }
 
     and enum_decl_of_cxcursor cursor =
       let name = get_cursor_spelling cursor in
@@ -779,6 +795,39 @@ module Ast = struct
             end
         | LambdaExpr ->
             lambda_expr_of_cxcursor cursor
+        | CXXThisExpr -> This
+        | CXXNewExpr ->
+            begin
+              let placement_args =
+                List.init (cursor |> ext_cxxnew_expr_get_num_placement_args)
+                  begin fun i ->
+                    ext_cxxnew_expr_get_placement_arg cursor i |>
+                    expr_of_cxcursor
+                  end in
+              let qual_type =
+                cursor |> ext_cxxnew_expr_get_allocated_type |> of_cxtype in
+              let array_size =
+                cursor |> ext_cxxnew_expr_get_array_size |>
+                option_cursor expr_of_cxcursor in
+              let init =
+                cursor |> ext_cxxnew_expr_get_initializer |>
+                option_cursor_bind begin fun init ->
+                  if get_cursor_kind init = CallExpr &&
+                    list_of_children init = [] then
+                    None
+                  else
+                    Some (expr_of_cxcursor init)
+                end in
+              New { placement_args; qual_type; array_size; init }
+            end
+        | CXXDeleteExpr ->
+            let argument =
+              match list_of_children cursor with
+              | [operand] -> operand |> expr_of_cxcursor
+              | _ -> raise Invalid_structure in
+            Delete { argument;
+              global_delete = ext_cxxdelete_expr_is_global_delete cursor;
+              array_form = ext_cxxdelete_expr_is_array_form cursor; }
         | UnexposedExpr ->
             begin
               match ext_stmt_get_kind cursor with
@@ -835,24 +884,41 @@ module Ast = struct
             ext_lambda_expr_get_capture cursor i |>
             lambda_capture_of_capture
           end in
-      let body = list_of_children cursor |> List.map stmt_of_cxcursor in
+      let children = list_of_children cursor in
+      let parameters, children =
+        if ext_lambda_expr_has_explicit_parameters cursor then
+          let parameters, children = extract_parameters children in
+          Some parameters, children
+        else
+          None, children in
+      let result_type =
+        if ext_lambda_expr_has_explicit_result_type cursor then
+          Some (
+            cursor |> ext_lambda_expr_get_call_operator |> get_cursor_type |>
+              get_result_type |> of_cxtype)
+        else
+          None in
+      let body =
+        match children with
+        | [body] -> stmt_of_cxcursor body
+        | _ -> raise Invalid_structure in
       Lambda {
-        captures; body;
+        captures; body; parameters; result_type;
         capture_default = ext_lambda_expr_get_capture_default cursor;
-        is_mutable = ext_lambda_expr_is_mutable cursor;
-        has_explicit_parameters =
-          ext_lambda_expr_has_explicit_parameters cursor;
-        has_explicit_result_type =
-          ext_lambda_expr_has_explicit_result_type cursor; }
+        is_mutable = ext_lambda_expr_is_mutable cursor; }
+
+    and extract_parameters children =
+      let rec extract accu children =
+        match children with
+        | child :: tail when get_cursor_kind child = ParmDecl ->
+            extract (parameter_of_cxcursor child :: accu) tail
+        | _ -> List.rev accu, children in
+      extract [] children
 
     and lambda_capture_of_capture capture =
-      let captured_var =
-        ext_lambda_capture_get_captured_var capture in
       let captured_var_name : string option =
-        if get_cursor_kind captured_var = InvalidCode then
-          None
-        else
-          Some (get_cursor_spelling captured_var) in
+        capture |> ext_lambda_capture_get_captured_var |>
+        option_cursor get_cursor_spelling in
       { implicit = ext_lambda_capture_is_implicit capture;
         capture_kind = ext_lambda_capture_get_kind capture;
         captured_var_name; }
@@ -976,15 +1042,15 @@ module Ast = struct
       filename |>
     of_cxtranslationunit ?options
 
-  let parse_string_res ?index ?filename ?command_line_args ?language
+  let parse_string_res ?index ?filename ?command_line_args
       ?unsaved_files ?clang_options ?options string =
-    parse_string_res ?index ?filename ?command_line_args ?language
+    parse_string_res ?index ?filename ?command_line_args
       ?unsaved_files ?options:clang_options string |>
     Result.map @@ of_cxtranslationunit ?options
 
-  let parse_string ?index ?filename ?command_line_args ?language ?unsaved_files
+  let parse_string ?index ?filename ?command_line_args ?unsaved_files
       ?clang_options ?options string =
-    parse_string ?index ?filename ?command_line_args ?language ?unsaved_files
+    parse_string ?index ?filename ?command_line_args ?unsaved_files
       ?options:clang_options string |>
     of_cxtranslationunit ?options
 

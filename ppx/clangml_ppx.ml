@@ -154,7 +154,8 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc (payload : Parset
           Some (kind, preamble, return_type, code)
       | _ -> None
     with
-    | Some (kind, preamble, return_type, code) -> kind, preamble, return_type, code
+    | Some (kind, preamble, return_type, code) ->
+        kind, preamble, return_type, code
     | None ->
         Location.raise_errorf ~loc
           "ClangML quotations have to be of the form [%%c-kind {| code |}]" in
@@ -175,26 +176,26 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc (payload : Parset
     | Some return_type -> return_type in
   let function_declaration =
     Printf.sprintf "%s f(void) {" return_type in
-  let prelude, postlude,
+  let prelude, prelude', postlude,
     (extraction :
        _ -> Clang.Ast.translation_unit -> _) =
     match kind with
     | Expr ->
-        function_declaration, ";}",
+        function_declaration, "", ";}",
         begin fun lift ast ->
           match List.rev ast.desc.items with
           | { desc = Function
                 { body = Some {
                   desc = Compound stmts; _}; _}; _} :: _ ->
                     begin match List.rev stmts with
-                    | { desc = Expr item; _} :: _ ->
+                    | { desc = Expr item; _ } :: _ ->
                         lift#expr item
                     | _ -> assert false
                     end
           | _ -> assert false
         end
     | Stmt ->
-        function_declaration, "}",
+        function_declaration, "", "}",
         begin fun lift ast ->
           match List.rev ast.desc.items with
           | { desc = Function
@@ -204,7 +205,7 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc (payload : Parset
           | _ -> assert false
         end
     | Qual_type ->
-        "void f(void) { void *x; (", ") x; }",
+        "void f(void) {", "void *x; (", ") x; }",
         begin fun lift ast ->
           match List.rev ast.desc.items with
           | { desc = Function
@@ -217,15 +218,16 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc (payload : Parset
           | _ -> assert false
         end
     | Decl ->
-        "", "", begin fun lift ast ->
+        "", "", "", begin fun lift ast ->
           lift#decl
-            begin match List.rev (remove_placeholders antiquotations ast.desc.items) with
+            begin match
+              List.rev (remove_placeholders antiquotations ast.desc.items) with
             | result :: _ -> result
             | _ -> assert false
             end
         end
     | Translation_unit ->
-        "", "", begin fun lift ast ->
+        "", "", "", begin fun lift ast ->
           lift#translation_unit
             { ast with desc =
               { ast.desc with items =
@@ -235,9 +237,33 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc (payload : Parset
   preamble |> List.iter (fun s ->
     Buffer.add_string buffer s;
     Buffer.add_char buffer ';');
+  Buffer.add_string buffer prelude';
   Buffer.add_string buffer code;
   Buffer.add_string buffer postlude;
-  let ast = Clang.Ast.parse_string ~language (Buffer.contents buffer) in
+  let code = Buffer.contents buffer in
+  let ast =
+    Clang.Ast.parse_string
+      ~command_line_args:[Clang.Command_line.language language] code in
+  let tu = Clang.Ast.cursor_of_node ast |> Clang.cursor_get_translation_unit in
+  let has_diagnostics = ref false in
+  Clang.seq_of_diagnostics tu |> Seq.iter begin fun diagnostics ->
+    if
+      List.mem (Clang.get_diagnostic_severity diagnostics) Clang.error then
+      begin
+        if not !has_diagnostics then
+          begin
+            Format.fprintf Format.err_formatter
+              "@[%a@]@[Compiling quotation code:@ %s@]@."
+              Location.print loc code;
+            has_diagnostics := true;
+          end;
+        prerr_endline
+          (Clang.format_diagnostic diagnostics
+            Clang.Cxdiagnosticdisplayoptions.display_source_location)
+      end
+  end;
+  if Clang.has_severity Clang.error tu then
+    Location.raise_errorf ~loc "clang error while compiling quotation code";
   let placeholder_map = List.fold_left (fun map antiquotation ->
     String_map.add antiquotation.placeholder
       { antiquotation.payload with
@@ -354,6 +380,6 @@ let ppx_pattern_mapper = {
 }
 
 let () =
-  Migrate_parsetree.Driver.register ~name:"clangml.ppx"
+  Migrate_parsetree.Driver.register ~name:"clangml.ppx" ~position:(-10)
     (module Migrate_parsetree.OCaml_current)
     (fun _ _ -> ppx_pattern_mapper)

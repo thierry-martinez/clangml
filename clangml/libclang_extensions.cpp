@@ -718,6 +718,15 @@ extern "C" {
   }
 
   bool
+  clang_ext_VarDecl_isConstexpr(CXCursor c)
+  {
+    if (auto D = llvm::dyn_cast_or_null<clang::VarDecl>(GetCursorDecl(c))) {
+      return D->isConstexpr();
+    }
+    return false;
+  }
+
+  bool
   clang_ext_MemberRefExpr_isArrow(CXCursor c)
   {
     const clang::Expr *e = GetCursorExpr(c);
@@ -1008,6 +1017,15 @@ extern "C" {
       return MakeCXCursor(Function->getParamDecl(i), getCursorTU(C));
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(C));
+  }
+
+  bool
+  clang_ext_FunctionDecl_isConstexpr(CXCursor c)
+  {
+    if (auto *Function = getFunctionDecl(c)) {
+      return Function->isConstexpr();
+    }
+    return false;
   }
 
   unsigned
@@ -1421,6 +1439,18 @@ extern "C" {
     return false;
   }
 
+  CXCursor
+  clang_ext_LambdaExpr_getCallOperator(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::LambdaExpr>(GetCursorStmt(c))) {
+      if (auto *m = e->getCallOperator()) {
+        return MakeCXCursor(m, getCursorTU(c));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
   enum clang_ext_LambdaCaptureKind
   clang_ext_LambdaCapture_getKind(struct clang_ext_LambdaCapture capture)
   {
@@ -1457,5 +1487,81 @@ extern "C" {
     if (auto *LC = GetLambdaCapture(capture)) {
       delete LC;
     }
+  }
+
+  CXType
+  clang_ext_CXXNewExpr_getAllocatedType(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXNewExpr>(GetCursorStmt(c))) {
+        return MakeCXType(e->getAllocatedType(), getCursorTU(c));
+    }
+    return MakeCXTypeInvalid(getCursorTU(c));
+  }
+
+  CXCursor
+  clang_ext_CXXNewExpr_getArraySize(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXNewExpr>(GetCursorStmt(c))) {
+      if (auto *s = e->getArraySize()) {
+        return MakeCXCursor(s, getCursorTU(c));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  unsigned int
+  clang_ext_CXXNewExpr_getNumPlacementArgs(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXNewExpr>(GetCursorStmt(c))) {
+      return e->getNumPlacementArgs();
+    }
+    return 0;
+  }
+
+  CXCursor
+  clang_ext_CXXNewExpr_getPlacementArg(CXCursor c, unsigned int i)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXNewExpr>(GetCursorStmt(c))) {
+      if (auto *s = e->getPlacementArg(i)) {
+        return MakeCXCursor(s, getCursorTU(c));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  CXCursor
+  clang_ext_CXXNewExpr_getInitializer(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXNewExpr>(GetCursorStmt(c))) {
+      if (auto *s = e->getInitializer()) {
+        return MakeCXCursor(s, getCursorTU(c));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  bool
+  clang_ext_CXXDeleteExpr_isGlobalDelete(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXDeleteExpr>(GetCursorStmt(c))) {
+      return e->isGlobalDelete();
+    }
+    return 0;
+  }
+
+  bool
+  clang_ext_CXXDeleteExpr_isArrayForm(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXDeleteExpr>(GetCursorStmt(c))) {
+      return e->isArrayForm();
+    }
+    return 0;
   }
 }

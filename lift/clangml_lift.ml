@@ -1,16 +1,22 @@
 [@@@ocaml.warning "-30"]
 
-[%%override module Clang__bindings = struct
+module%override Clang__bindings = struct
   [%%recursive [%%types]]
     [@@deriving traverse_lift]
-end]
+end
 
 open Clang__bindings
 
-[%%override module Clang__ast = struct
-  [%%recursive [%%types]]
+module Clang__ast = struct
+  [%%recursive
+     module%import Clang__types = struct
+       [%%types]
+     end
+     module%import Clang__ast = struct
+       [%%types]
+     end]
     [@@deriving traverse_lift]
-end]
+end
 
 class virtual ['a] lift = object
   inherit ['a] Clang__bindings.lift

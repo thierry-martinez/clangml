@@ -345,6 +345,7 @@ AS_IF([test -d clangml],
      AC_CP([$srcdir/clangml/clang__utils.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang__ast_options.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang__ast_utils.ml], [clangml/])
+     AC_CP([$srcdir/clangml/clang__command_line.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang__printer.ml], [clangml/])
      AC_CP([$srcdir/clangml/dune], [clangml/])
      AC_CP([$srcdir/clangml/stubgen.h], [clangml/])
@@ -363,7 +364,16 @@ AS_IF([test -d tests],
   [true],
   [AS_IF([mkdir tests],
     [AS_IF([mkdir tests/clangml__ast],
-      [AC_CP([$srcdir/tests/clangml__ast/dune], [tests/clangml__ast/])])])])
+      [AC_CP([$srcdir/tests/clangml__ast/dune], [tests/clangml__ast/])])]
+    [AS_IF([mkdir tests/c17],
+      [AC_CP([$srcdir/tests/c17/dune], [tests/c17/])
+       AC_CP([$srcdir/tests/c17/c17.ml], [tests/c17/])])]
+    [AS_IF([mkdir tests/cpp],
+      [AC_CP([$srcdir/tests/cpp/dune], [tests/cpp/])
+       AC_CP([$srcdir/tests/cpp/cpp.ml], [tests/cpp/])])]
+    [AS_IF([mkdir tests/ppx],
+      [AC_CP([$srcdir/tests/ppx/dune], [tests/ppx/])
+       AC_CP([$srcdir/tests/ppx/ppx.ml], [tests/ppx/])])])])
 
 AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang__bindings.ml], [clangml/clang__bindings.ml])
 

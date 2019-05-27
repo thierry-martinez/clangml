@@ -86,7 +86,21 @@ let languages_of_ids e =
   { c = Clang_ext_languageids.(subset c e);
     cxx = Clang_ext_languageids.(subset cxx e) }
 
+let language_of_ids e : Clang__types.language =
+  if e = Clang_ext_languageids.c then
+    C
+  else if e = Clang_ext_languageids.cxx then
+    CXX
+  else
+    invalid_arg "language_of_ids"
+
 let ids_of_languages li =
   Clang_ext_languageids.
     ((if li.c then c else zero) +
      (if li.cxx then cxx else zero))
+
+let ids_of_language (l : Clang__types.language) =
+  match l with
+  | C -> Clang_ext_languageids.c
+  | CXX -> Clang_ext_languageids.cxx
+  | _ -> invalid_arg "ids_of_language"

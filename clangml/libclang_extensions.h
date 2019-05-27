@@ -203,6 +203,9 @@ bool
 clang_ext_VarDecl_hasInit(CXCursor c);
 
 bool
+clang_ext_VarDecl_isConstexpr(CXCursor c);
+
+bool
 clang_ext_MemberRefExpr_isArrow(CXCursor c);
 
 CXString
@@ -328,6 +331,9 @@ clang_ext_FunctionDecl_getNumParams(CXCursor C);
 
 CXCursor
 clang_ext_FunctionDecl_getParamDecl(CXCursor C, unsigned i);
+
+bool
+clang_ext_FunctionDecl_isConstexpr(CXCursor c);
 
 /* Adapted from DeclCXX.h:LinkageSpecDecl:LanguageIDs */
 enum clang_ext_LanguageIDs {
@@ -497,6 +503,9 @@ struct clang_ext_LambdaCapture {
 struct clang_ext_LambdaCapture
 clang_ext_LambdaExpr_getCapture(CXCursor c, unsigned index);
 
+CXCursor
+clang_ext_LambdaExpr_getCallOperator(CXCursor c);
+
 /* Copied from Basic/Lambda.h */
 enum clang_ext_LambdaCaptureKind {
   clang_ext_LCK_This,
@@ -505,6 +514,7 @@ enum clang_ext_LambdaCaptureKind {
   clang_ext_LCK_ByRef,
   clang_ext_LCK_VLAType
 };
+
 enum clang_ext_LambdaCaptureKind
 clang_ext_LambdaCapture_getKind(struct clang_ext_LambdaCapture capture);
 
@@ -516,3 +526,24 @@ clang_ext_LambdaCapture_isImplicit(struct clang_ext_LambdaCapture capture);
 
 void
 clang_ext_LambdaCapture_dispose(struct clang_ext_LambdaCapture capture);
+
+CXType
+clang_ext_CXXNewExpr_getAllocatedType(CXCursor c);
+
+CXCursor
+clang_ext_CXXNewExpr_getArraySize(CXCursor c);
+
+unsigned int
+clang_ext_CXXNewExpr_getNumPlacementArgs(CXCursor c);
+
+CXCursor
+clang_ext_CXXNewExpr_getPlacementArg(CXCursor c, unsigned int i);
+
+CXCursor
+clang_ext_CXXNewExpr_getInitializer(CXCursor c);
+
+bool
+clang_ext_CXXDeleteExpr_isGlobalDelete(CXCursor c);
+
+bool
+clang_ext_CXXDeleteExpr_isArrayForm(CXCursor c);

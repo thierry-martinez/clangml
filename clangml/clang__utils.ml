@@ -55,33 +55,22 @@ let seq_of_diagnostics tu =
       Seq.Nil in
   next 0
 
-let is_error diagnostic_severity =
-  match diagnostic_severity with
-  | Error | Fatal -> true
-  | _ -> false
+let error = [Error; Fatal]
 
-let is_warning_or_error diagnostic_severity =
-  match diagnostic_severity with
-  | Warning | Error | Fatal -> true
-  | _ -> false
+let warning_or_error = Warning :: error
 
-let has_error tu =
+let seq_exists pred seq =
+  let exception Exists in
   try
-    seq_of_diagnostics tu |>
-    Seq.iter (fun d ->
-      if is_error (get_diagnostic_severity d) then raise Exit);
+    seq |> Seq.iter (fun d -> if pred d then raise Exists);
     false
-  with Exit ->
+  with Exists ->
     true
 
-let has_warning_or_error tu =
-  try
-    seq_of_diagnostics tu |>
-    Seq.iter (fun d ->
-      if is_warning_or_error (get_diagnostic_severity d) then raise Exit);
-    false
-  with Exit ->
-    true
+let has_severity l tu =
+  seq_of_diagnostics tu |> seq_exists begin fun d ->
+    List.mem (get_diagnostic_severity d) l
+  end
 
 let int64_of_cxint_opt cxint =
   if ext_int_get_min_signed_bits cxint <= 64 then
@@ -155,35 +144,31 @@ let language_of_string_opt s =
     None
 
 let parse_file_res ?(index = create_index true true)
-    ?(command_line_args = []) ?language ?(unsaved_files = [])
+    ?(command_line_args = []) ?(unsaved_files = [])
     ?(options = default_editing_translation_unit_options ()) filename =
-  let command_line_args =
-    match language with
-    | None -> command_line_args
-    | Some language -> "-x" :: string_of_language language :: command_line_args in
   parse_translation_unit2 index filename (Array.of_list command_line_args)
     (Array.of_list unsaved_files) options
 
-let parse_file ?index ?command_line_args ?language ?unsaved_files ?options
+let parse_file ?index ?command_line_args ?unsaved_files ?options
     filename =
   match
-    parse_file_res ?index ?command_line_args ?language ?unsaved_files ?options
+    parse_file_res ?index ?command_line_args ?unsaved_files ?options
       filename
   with
   | Ok cxtranslationunit -> cxtranslationunit
   | Error cxerrorcode -> failwith (string_of_cxerrorcode cxerrorcode)
 
 let parse_string_res ?index ?(filename = "<string>.c")
-    ?command_line_args ?language ?(unsaved_files = [])
+    ?command_line_args ?(unsaved_files = [])
     ?options contents =
-  parse_file_res ?index ?command_line_args ?language
+  parse_file_res ?index ?command_line_args
     ~unsaved_files:({ filename; contents } :: unsaved_files)
     ?options filename
 
-let parse_string ?index ?filename ?command_line_args ?language ?unsaved_files
+let parse_string ?index ?filename ?command_line_args ?unsaved_files
     ?options contents =
   match
-    parse_string_res ?index ?filename ?language ?command_line_args
+    parse_string_res ?index ?filename ?command_line_args
       ?unsaved_files ?options contents
   with
   | Ok cxtranslationunit -> cxtranslationunit
@@ -196,3 +181,6 @@ let string_of_cxx_access_specifier specifier =
   | CXXPublic -> "public"
   | CXXProtected -> "protected"
   | CXXPrivate -> "private"
+
+let cursor_get_translation_unit cursor =
+  Obj.obj (Obj.field (Obj.repr cursor) 1)

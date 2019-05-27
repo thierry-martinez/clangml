@@ -1,10 +1,10 @@
 (executable
-  (name tests)
+  (name clangml__ast)
   (preprocess (pps pattern.ppx))
   (link_flags -linkall)
   (libraries compiler-libs clangml clangml.lift pattern.runtime))
 
 (rule
-  (targets tests.ml)
+  (targets clangml__ast.ml)
   (deps ../../clangml/clang__ast.ml)
   (action (run ocamlcodoc %{deps} -o %{targets})))

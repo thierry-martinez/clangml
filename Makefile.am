@@ -11,7 +11,7 @@ LIBCLANGML_STUBS_A = clangml/libclangml_stubs.a
 
 STUBGEN_EXE = stubgen/stubgen.exe
 
-TESTS_EXE = tests/clangml__ast/tests.exe
+TESTS_DIR = tests
 
 LIFT_CMXA = lift/clangml_lift.cmxa
 
@@ -19,18 +19,19 @@ VISITORS_CMXA = visitors/clangml_visitors.cmxa
 
 PPX_CMXA = ppx/clangml_ppx.cmxa
 
-dune_files = \
+tests ::= $(notdir $(wildcard $(TESTS_DIR)/*))
+
+tests_exe ::= $(foreach test,$(tests),$(TESTS_DIR)/$(test)/$(test).exe)
+
+dune_files ::= \
 	$(CLANGML_CMXA) \
 	$(LIBCLANGML_STUBS_A) \
 	$(STUBGEN_EXE) \
-	$(TESTS_EXE) \
 	$(LIFT_CMXA) \
 	$(VISITORS_CMXA) \
 	$(PPX_CMXA)
 
-mypkg_SCRIPTS = \
-	$(addprefix $(DUNE_PREFIX)/, $(filter-out $(TESTS_EXE), $(dune_files)))
-
+mypkg_SCRIPTS ::= $(addprefix $(DUNE_PREFIX)/, $(dune_files))
 
 # Entry targets: clangml, stubgen, lift, visitors, doc, tests, install
 # and clean.
@@ -55,9 +56,14 @@ doc :
 	dune build @doc
 
 .PHONY : tests
-tests : $(DUNE_PREFIX)/$(TESTS_EXE)
-	$(DUNE_PREFIX)/$(TESTS_EXE)
-#	dune runtest
+tests : $(foreach test,$(tests),$(TESTS_DIR)/$(test))
+
+define foreach_test
+.PHONY : $(TESTS_DIR)/$(test)
+$(TESTS_DIR)/$(test) : $(DUNE_PREFIX)/$(TESTS_DIR)/$(test)/$(test).exe
+	$(DUNE_PREFIX)/$(TESTS_DIR)/$(test)/$(test).exe
+endef
+$(foreach test, $(tests), $(eval $(foreach_test)))
 
 .PHONY : install
 install :
@@ -94,7 +100,7 @@ define foreach_dune_file
 $(DUNE_PREFIX)/$(dune_file) :
 	$(DUNE) build $(dune_file)
 endef
-$(foreach dune_file,$(dune_files),$(eval $(foreach_dune_file)))
+$(foreach dune_file, $(dune_files) $(tests_exe), $(eval $(foreach_dune_file)))
 
 # Targets for bootstrapping bindings
 
