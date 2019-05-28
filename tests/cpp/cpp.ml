@@ -185,49 +185,52 @@ let () =
 (* C++ 17: auto in function return type *)
 
 let () =
-  let ast = parse_string
-    ~command_line_args:[Clang.Command_line.standard Cxx17] {|
-    void
-    f()
-    {
-      auto x1 = [](int i){ return i; };
-      int j;
-      auto x3 = [=]()->auto&& { return j; };
-    }
-  |} in
-  let bindings = check_pattern_tu ast [%pattern? [%cpp-tu "c++17" {|
+  [%if standard "c++17" available begin
+    let ast = parse_string
+      ~command_line_args:[Clang.Command_line.standard Cxx17] {|
       void
       f()
       {
-        auto x1 = [%(void *(*)())? x1];
+        auto x1 = [](int i){ return i; };
         int j;
-        auto x3 = [%(void *(*)())? x3];
+        auto x3 = [=]()->auto&& { return j; };
       }
-    |}]] in
-  let x1 = bindings#x1 in
-  let x3 = bindings#x3 in
-  check_pattern_expr x1 [%pattern? {
-    desc = Lambda {
-      capture_default = CaptureNone;
-      captures = [];
-      parameters = Some [{
-        desc = {
-          qual_type = { desc = BuiltinType Int };
-          name = "i"; }}];
-      result_type = None;
-      body = { desc = Compound [{ desc =
-        Return (Some { desc = DeclRef (Ident "i")})}]}}}];
-  check_pattern_expr x3 [%pattern? {
-    desc = Lambda {
-      capture_default = ByCopy;
-      captures = [{
-        capture_kind = ByCopy;
-        implicit = true;
-        captured_var_name = Some "j" }];
-      parameters = Some [];
-      result_type =
-        Some { desc = LValueReference { desc = BuiltinType Int }};
-      body = { desc = Compound [{ desc =
-        Return (Some { desc = DeclRef (Ident "j")})}]}}}]
+    |} in
+    let bindings =
+      check_pattern_tu ast [%pattern? [%cpp-tu (standard "c++17") {|
+        void
+        f()
+        {
+          auto x1 = [%(void *(*)())? x1];
+          int j;
+          auto x3 = [%(void *(*)())? x3];
+        }
+      |}]] in
+    let x1 = bindings#x1 in
+    let x3 = bindings#x3 in
+    check_pattern_expr x1 [%pattern? {
+      desc = Lambda {
+        capture_default = CaptureNone;
+        captures = [];
+        parameters = Some [{
+          desc = {
+            qual_type = { desc = BuiltinType Int };
+            name = "i"; }}];
+        result_type = None;
+        body = { desc = Compound [{ desc =
+          Return (Some { desc = DeclRef (Ident "i")})}]}}}];
+    check_pattern_expr x3 [%pattern? {
+      desc = Lambda {
+        capture_default = ByCopy;
+        captures = [{
+          capture_kind = ByCopy;
+          implicit = true;
+          captured_var_name = Some "j" }];
+        parameters = Some [];
+        result_type =
+          Some { desc = LValueReference { desc = BuiltinType Int }};
+        body = { desc = Compound [{ desc =
+          Return (Some { desc = DeclRef (Ident "j")})}]}}}]
+  end]
 
 (* 7.5.5.2 Captures *)

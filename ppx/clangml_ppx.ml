@@ -158,17 +158,20 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc
                     "Return type already given";
                 { arguments with
                   return_type = Some (string_of_expression arg) }
+            | [%expr standard [%e? arg ]] ->
+                if arguments.standard <> None then
+                  Location.raise_errorf ~loc
+                    "Standard already given";
+                let arg = arg |> string_of_expression in
+                let standard = arg |> Clang.ext_lang_standard_of_name in
+                if standard = Invalid then
+                  Location.raise_errorf ~loc
+                    "Unknown standard: %s" arg;
+                { arguments with standard = Some standard }
             | _ ->
                 let arg = string_of_expression arg in
-                match Clang.ext_lang_standard_of_name arg with
-                | Invalid ->
-                    { arguments with
-                      preamble = arg :: arguments.preamble }
-                | standard ->
-                    if arguments.standard <> None then
-                      Location.raise_errorf ~loc
-                        "Standard already given";
-                    { arguments with standard = Some standard } in
+                { arguments with
+                  preamble = arg :: arguments.preamble } in
           let arguments =
             List.fold_left handle_arg empty_arguments rev_args in
           Some (kind, arguments, code)
@@ -335,19 +338,37 @@ module Remove_placeholder (X : Lifter) = struct
   end
 end
 
+type extension =
+  | Quotation of {
+      language : Clang.language;
+      payload : Parsetree.payload;
+      loc : Location.t;
+    }
+  | If_standard of {
+      name : string;
+      expr : Parsetree.expression;
+      loc : Location.t;
+    }
+
 let rec expr_mapper (mapper : Ast_mapper.mapper) (expr : Parsetree.expression) =
   match
     match expr.pexp_desc with
+    | Pexp_extension ({ loc; txt = "if" }, payload) ->
+        begin match payload with
+        | PStr [%str standard [%e? name] available [%e? expr]] ->
+            Some (If_standard { name = string_of_expression name; expr; loc })
+        | _ -> None
+        end
     | Pexp_extension ({ loc; txt }, payload) ->
         begin match Clang.language_of_string txt with
         | exception (Invalid_argument _) -> None
-        | language -> Some (language, loc, payload)
+        | language -> Some (Quotation { language; loc; payload })
         end
     | _ -> None
   with
   | None ->
       Ast_mapper.default_mapper.expr mapper expr
-  | Some (language, loc, payload) ->
+  | Some (Quotation { language; loc; payload }) ->
       let ast, extraction, placeholder_map =
         extract_payload language mapper ~loc payload in
       let module Expr_remove = Remove_placeholder
@@ -366,6 +387,11 @@ let rec expr_mapper (mapper : Ast_mapper.mapper) (expr : Parsetree.expression) =
             raise (Location.Error (Location.error ~loc:payload.loc
               "Expression expected in anti-quotation")) in
       extraction (new Expr_remove.lifter subst_payload placeholder_map) ast
+  | Some (If_standard { name; expr; loc }) ->
+      if name |> Clang.ext_lang_standard_of_name = Invalid then
+        [%expr ()]
+      else
+        Ast_mapper.default_mapper.expr mapper expr
 
 and pat_mapper (mapper : Ast_mapper.mapper) (pat : Parsetree.pattern) =
   match
