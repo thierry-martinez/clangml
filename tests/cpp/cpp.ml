@@ -54,7 +54,7 @@ let () =
 let () =
   let ast = parse_string {|
     #include <typeinfo>
-    class D { /* ... */ };
+    class D { public: D() {} };
     D d1;
     const D d2;
 
@@ -136,14 +136,15 @@ let () =
 let () =
   let ast = parse_string {|
     struct S {
-      void f const(int);
+      void f(int) const;
+      S() {};
     };
     void
     f()
     {
       const S cs;
       const S* ptr_to_obj = &cs;
-      void S::(*ptr_to_mfct) const(int) = &S::f;
+      void (S::*ptr_to_mfct)(int) const = &S::f;
       (ptr_to_obj->*ptr_to_mfct)(10);
     }
   |} in
@@ -152,33 +153,36 @@ let () =
 (* 5.19 Constant expression *)
 
 let () =
-  let ast = parse_string {|
-    int x;
+  [%if standard "c++17" available begin
+    let ast = parse_string
+      ~command_line_args:[Clang.Command_line.standard Cxx17] {|
+      int x;
 
-    struct A {
-      constexpr A(bool b) : m(b?42:x) { }
-      int m;
-    };
+      struct A {
+        constexpr A(bool b) : m(b?42:x) { }
+        int m;
+      };
 
-    constexpr int v = A(true).m;
+      constexpr int v = A(true).m;
 
-    constexpr int f2(int k) {
-      int x = k;
-      return x;
-    }
+      constexpr int f2(int k) {
+        int x = k;
+        return x;
+      }
 
-    constexpr int incr(int &n) {
-      return ++n;
-    }
+      constexpr int incr(int &n) {
+        return ++n;
+      }
 
-    constexpr int h(int k) {
-      int x = incr(k);
-      return x;
-    }
+      constexpr int h(int k) {
+        int x = incr(k);
+        return x;
+      }
 
-    constexpr int y = h(1);
-  |} in
-  Format.fprintf Format.err_formatter "%a@." Clang.Ast.pp_translation_unit ast
+      constexpr int y = h(1);
+    |} in
+    Format.fprintf Format.err_formatter "%a@." Clang.Ast.pp_translation_unit ast
+  end]
 
 (* 7.5.5 Lambda expressions *)
 

@@ -33,8 +33,11 @@ dune_files ::= \
 
 mypkg_SCRIPTS ::= $(addprefix $(DUNE_PREFIX)/, $(dune_files))
 
-# Entry targets: clangml, stubgen, lift, visitors, doc, tests, install
+# Entry targets: clangml, stubgen, lift, visitors, ppx, doc, tests, install
 # and clean.
+
+.PHONY : all
+all : clangml lift visitors ppx
 
 .PHONY : clangml
 clangml : $(DUNE_PREFIX)/$(CLANGML_CMXA) $(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A)
