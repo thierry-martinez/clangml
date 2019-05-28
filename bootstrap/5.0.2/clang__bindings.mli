@@ -910,9 +910,6 @@ type cxlanguagekind =
 external get_cursor_language :
   cxcursor -> cxlanguagekind = "clang_getCursorLanguage_wrapper"[@@ocaml.doc
                                                                   "Determine the \"language\" of the entity referred to by a given cursor."]
-external cursor_get_translation_unit :
-  cxcursor -> cxtranslationunit = "clang_Cursor_getTranslationUnit_wrapper"
-[@@ocaml.doc "Returns the translation unit that a cursor originated from."]
 type cxcursorset
 external create_cxcursor_set :
   unit -> cxcursorset = "clang_createCXCursorSet_wrapper"[@@ocaml.doc
@@ -1897,6 +1894,8 @@ external ext_elaborated_type_get_keyword_spelling :
     "clang_ext_ElaboratedType_getKeywordSpelling_wrapper"
 external ext_var_decl_has_init :
   cxcursor -> bool = "clang_ext_VarDecl_hasInit_wrapper"
+external ext_var_decl_is_constexpr :
+  cxcursor -> bool = "clang_ext_VarDecl_isConstexpr_wrapper"
 external ext_member_ref_expr_is_arrow :
   cxcursor -> bool = "clang_ext_MemberRefExpr_isArrow_wrapper"
 external ext_stmt_get_class_name :
@@ -2508,6 +2507,8 @@ external ext_function_decl_get_num_params :
   cxcursor -> int = "clang_ext_FunctionDecl_getNumParams_wrapper"
 external ext_function_decl_get_param_decl :
   cxcursor -> int -> cxcursor = "clang_ext_FunctionDecl_getParamDecl_wrapper"
+external ext_function_decl_is_constexpr :
+  cxcursor -> bool = "clang_ext_FunctionDecl_isConstexpr_wrapper"
 module Clang_ext_languageids :
 sig
   type t
@@ -2625,6 +2626,8 @@ type clang_ext_lambdacapture
 external ext_lambda_expr_get_capture :
   cxcursor -> int -> clang_ext_lambdacapture =
     "clang_ext_LambdaExpr_getCapture_wrapper"
+external ext_lambda_expr_get_call_operator :
+  cxcursor -> cxcursor = "clang_ext_LambdaExpr_getCallOperator_wrapper"
 type clang_ext_lambdacapturekind =
   | This 
   | StarThis 
@@ -2640,3 +2643,53 @@ external ext_lambda_capture_get_captured_var :
 external ext_lambda_capture_is_implicit :
   clang_ext_lambdacapture -> bool =
     "clang_ext_LambdaCapture_isImplicit_wrapper"
+external ext_cxxnew_expr_get_allocated_type :
+  cxcursor -> cxtype = "clang_ext_CXXNewExpr_getAllocatedType_wrapper"
+external ext_cxxnew_expr_get_array_size :
+  cxcursor -> cxcursor = "clang_ext_CXXNewExpr_getArraySize_wrapper"
+external ext_cxxnew_expr_get_num_placement_args :
+  cxcursor -> int = "clang_ext_CXXNewExpr_getNumPlacementArgs_wrapper"
+external ext_cxxnew_expr_get_placement_arg :
+  cxcursor -> int -> cxcursor =
+    "clang_ext_CXXNewExpr_getPlacementArg_wrapper"
+external ext_cxxnew_expr_get_initializer :
+  cxcursor -> cxcursor = "clang_ext_CXXNewExpr_getInitializer_wrapper"
+external ext_cxxdelete_expr_is_global_delete :
+  cxcursor -> bool = "clang_ext_CXXDeleteExpr_isGlobalDelete_wrapper"
+external ext_cxxdelete_expr_is_array_form :
+  cxcursor -> bool = "clang_ext_CXXDeleteExpr_isArrayForm_wrapper"
+external ext_cxxtypeid_expr_is_type_operand :
+  cxcursor -> bool = "clang_ext_CXXTypeidExpr_isTypeOperand_wrapper"
+external ext_cxxtypeid_expr_get_type_operand :
+  cxcursor -> cxtype = "clang_ext_CXXTypeidExpr_getTypeOperand_wrapper"
+external ext_cxxtypeid_expr_get_expr_operand :
+  cxcursor -> cxcursor = "clang_ext_CXXTypeidExpr_getExprOperand_wrapper"
+type clang_ext_langstandards =
+  | C89 
+  | C94 
+  | Gnu89 
+  | C99 
+  | Gnu99 
+  | C11 
+  | Gnu11 
+  | Cxx98 
+  | Gnucxx98 
+  | Cxx11 
+  | Gnucxx11 
+  | Cxx14 
+  | Gnucxx14 
+  | Cxx17 
+  | Gnucxx17 
+  | Cxx2a 
+  | Gnucxx2a 
+  | Opencl10 
+  | Opencl11 
+  | Opencl12 
+  | Opencl20 
+  | Cuda 
+  | Invalid [@@deriving (eq, ord, show)]
+external ext_lang_standard_get_name :
+  clang_ext_langstandards -> string =
+    "clang_ext_LangStandard_getName_wrapper"
+external ext_lang_standard_of_name :
+  string -> clang_ext_langstandards = "clang_ext_LangStandard_ofName_wrapper"
