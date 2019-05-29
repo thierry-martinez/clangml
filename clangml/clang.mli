@@ -22,6 +22,10 @@ include module type of struct
   include Clang__utils
 end
 
+module Command_line : module type of struct
+  include Clang__command_line
+end
+
 (** {2 Abstract syntax tree} *)
 
 module Ast : sig
@@ -62,7 +66,7 @@ module Ast : sig
     raising [Failure _] if parsing fails. *)
 
   val parse_string : ?index:cxindex -> ?filename:string ->
-    ?command_line_args:string list -> ?language:language ->
+    ?command_line_args:string list ->
       ?unsaved_files:cxunsavedfile list ->
         ?clang_options:Cxtranslationunit_flags.t ->
           ?options:Options.t ->
@@ -74,7 +78,7 @@ module Ast : sig
    of the translation unit (as obtained by {!val:of_cxtranslationunit}). *)
 
   val parse_string_res : ?index:cxindex -> ?filename:string ->
-    ?command_line_args:string list -> ?language:language ->
+    ?command_line_args:string list ->
       ?unsaved_files:cxunsavedfile list ->
         ?clang_options:Cxtranslationunit_flags.t ->
           ?options:Options.t ->

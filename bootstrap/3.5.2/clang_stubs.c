@@ -2306,22 +2306,6 @@ clang_getCursorLanguage_wrapper(value cursor_ocaml)
   }
 }
 
-CAMLprim value
-clang_Cursor_getTranslationUnit_wrapper(value arg_ocaml)
-{
-  CAMLparam1(arg_ocaml);
-  CXCursor arg;
-  arg = Cxcursor_val(Field(arg_ocaml, 0));
-  CXTranslationUnit result = clang_Cursor_getTranslationUnit(arg);
-  {
-    CAMLlocal1(data);
-    data = caml_alloc_tuple(2);
-  Store_field(data, 0, Val_cxtranslationunit(result));
-  Store_field(data, 1, safe_field(safe_field(arg_ocaml, 1), 1));
-    CAMLreturn(data);
-  }
-}
-
 DECLARE_OPAQUE(CXCursorSet, cxcursorset, Cxcursorset_val, Val_cxcursorset, custom_finalize_default)
 
 CAMLprim value
@@ -5546,6 +5530,20 @@ clang_ext_VarDecl_hasInit_wrapper(value c_ocaml)
 }
 
 CAMLprim value
+clang_ext_VarDecl_isConstexpr_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  _Bool result = clang_ext_VarDecl_isConstexpr(c);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
 clang_ext_MemberRefExpr_isArrow_wrapper(value c_ocaml)
 {
   CAMLparam1(c_ocaml);
@@ -6891,6 +6889,20 @@ clang_ext_FunctionDecl_getParamDecl_wrapper(value C_ocaml, value i_ocaml)
 }
 
 CAMLprim value
+clang_ext_FunctionDecl_isConstexpr_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  _Bool result = clang_ext_FunctionDecl_isConstexpr(c);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
 clang_ext_LinkageSpecDecl_getLanguageIDs_wrapper(value C_ocaml)
 {
   CAMLparam1(C_ocaml);
@@ -7482,6 +7494,22 @@ clang_ext_LambdaExpr_getCapture_wrapper(value c_ocaml, value index_ocaml)
   }
 }
 
+CAMLprim value
+clang_ext_LambdaExpr_getCallOperator_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  CXCursor result = clang_ext_LambdaExpr_getCallOperator(c);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_LambdaCaptureKind
 Clang_ext_lambdacapturekind_val(value ocaml)
 {
@@ -7550,6 +7578,278 @@ clang_ext_LambdaCapture_isImplicit_wrapper(value capture_ocaml)
   {
     CAMLlocal1(data);
     data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CXXNewExpr_getAllocatedType_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  CXType result = clang_ext_CXXNewExpr_getAllocatedType(c);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxtype(result));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CXXNewExpr_getArraySize_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  CXCursor result = clang_ext_CXXNewExpr_getArraySize(c);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CXXNewExpr_getNumPlacementArgs_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  unsigned int result = clang_ext_CXXNewExpr_getNumPlacementArgs(c);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CXXNewExpr_getPlacementArg_wrapper(value c_ocaml, value i_ocaml)
+{
+  CAMLparam2(c_ocaml, i_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  unsigned int i;
+  i = Int_val(i_ocaml);
+  CXCursor result = clang_ext_CXXNewExpr_getPlacementArg(c, i);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CXXNewExpr_getInitializer_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  CXCursor result = clang_ext_CXXNewExpr_getInitializer(c);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CXXDeleteExpr_isGlobalDelete_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  _Bool result = clang_ext_CXXDeleteExpr_isGlobalDelete(c);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CXXDeleteExpr_isArrayForm_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  _Bool result = clang_ext_CXXDeleteExpr_isArrayForm(c);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CXXTypeidExpr_isTypeOperand_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  _Bool result = clang_ext_CXXTypeidExpr_isTypeOperand(c);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CXXTypeidExpr_getTypeOperand_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  CXType result = clang_ext_CXXTypeidExpr_getTypeOperand(c);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxtype(result));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CXXTypeidExpr_getExprOperand_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  CXCursor result = clang_ext_CXXTypeidExpr_getExprOperand(c);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_langstandards
+Clang_ext_langstandards_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CLANG_EXT_LANGSTANDARDS_c89;
+  case 1: return CLANG_EXT_LANGSTANDARDS_c90;
+  case 2: return CLANG_EXT_LANGSTANDARDS_iso9899_1990;
+  case 3: return CLANG_EXT_LANGSTANDARDS_c94;
+  case 4: return CLANG_EXT_LANGSTANDARDS_gnu89;
+  case 5: return CLANG_EXT_LANGSTANDARDS_gnu90;
+  case 6: return CLANG_EXT_LANGSTANDARDS_c99;
+  case 7: return CLANG_EXT_LANGSTANDARDS_c9x;
+  case 8: return CLANG_EXT_LANGSTANDARDS_iso9899_1999;
+  case 9: return CLANG_EXT_LANGSTANDARDS_iso9899_199x;
+  case 10: return CLANG_EXT_LANGSTANDARDS_gnu99;
+  case 11: return CLANG_EXT_LANGSTANDARDS_gnu9x;
+  case 12: return CLANG_EXT_LANGSTANDARDS_c11;
+  case 13: return CLANG_EXT_LANGSTANDARDS_c1x;
+  case 14: return CLANG_EXT_LANGSTANDARDS_iso9899_2011;
+  case 15: return CLANG_EXT_LANGSTANDARDS_iso9899_201x;
+  case 16: return CLANG_EXT_LANGSTANDARDS_gnu11;
+  case 17: return CLANG_EXT_LANGSTANDARDS_gnu1x;
+  case 18: return CLANG_EXT_LANGSTANDARDS_cxx98;
+  case 19: return CLANG_EXT_LANGSTANDARDS_cxx03;
+  case 20: return CLANG_EXT_LANGSTANDARDS_gnucxx98;
+  case 21: return CLANG_EXT_LANGSTANDARDS_cxx0x;
+  case 22: return CLANG_EXT_LANGSTANDARDS_cxx11;
+  case 23: return CLANG_EXT_LANGSTANDARDS_gnucxx0x;
+  case 24: return CLANG_EXT_LANGSTANDARDS_gnucxx11;
+  case 25: return CLANG_EXT_LANGSTANDARDS_cxx1y;
+  case 26: return CLANG_EXT_LANGSTANDARDS_cxx14;
+  case 27: return CLANG_EXT_LANGSTANDARDS_gnucxx1y;
+  case 28: return CLANG_EXT_LANGSTANDARDS_gnucxx14;
+  case 29: return CLANG_EXT_LANGSTANDARDS_cxx1z;
+  case 30: return CLANG_EXT_LANGSTANDARDS_gnucxx1z;
+  case 31: return CLANG_EXT_LANGSTANDARDS_opencl;
+  case 32: return CLANG_EXT_LANGSTANDARDS_opencl11;
+  case 33: return CLANG_EXT_LANGSTANDARDS_opencl12;
+  case 34: return CLANG_EXT_LANGSTANDARDS_cuda;
+  case 35: return CLANG_EXT_LANGSTANDARDS_Invalid;
+  }
+  failwith_fmt("invalid value for Clang_ext_langstandards_val: %d", Int_val(ocaml));
+  return CLANG_EXT_LANGSTANDARDS_c89;
+}
+
+value
+Val_clang_ext_langstandards(enum clang_ext_langstandards v)
+{
+  switch (v) {
+  case CLANG_EXT_LANGSTANDARDS_c89: return Val_int(0);
+  case CLANG_EXT_LANGSTANDARDS_c90: return Val_int(1);
+  case CLANG_EXT_LANGSTANDARDS_iso9899_1990: return Val_int(2);
+  case CLANG_EXT_LANGSTANDARDS_c94: return Val_int(3);
+  case CLANG_EXT_LANGSTANDARDS_gnu89: return Val_int(4);
+  case CLANG_EXT_LANGSTANDARDS_gnu90: return Val_int(5);
+  case CLANG_EXT_LANGSTANDARDS_c99: return Val_int(6);
+  case CLANG_EXT_LANGSTANDARDS_c9x: return Val_int(7);
+  case CLANG_EXT_LANGSTANDARDS_iso9899_1999: return Val_int(8);
+  case CLANG_EXT_LANGSTANDARDS_iso9899_199x: return Val_int(9);
+  case CLANG_EXT_LANGSTANDARDS_gnu99: return Val_int(10);
+  case CLANG_EXT_LANGSTANDARDS_gnu9x: return Val_int(11);
+  case CLANG_EXT_LANGSTANDARDS_c11: return Val_int(12);
+  case CLANG_EXT_LANGSTANDARDS_c1x: return Val_int(13);
+  case CLANG_EXT_LANGSTANDARDS_iso9899_2011: return Val_int(14);
+  case CLANG_EXT_LANGSTANDARDS_iso9899_201x: return Val_int(15);
+  case CLANG_EXT_LANGSTANDARDS_gnu11: return Val_int(16);
+  case CLANG_EXT_LANGSTANDARDS_gnu1x: return Val_int(17);
+  case CLANG_EXT_LANGSTANDARDS_cxx98: return Val_int(18);
+  case CLANG_EXT_LANGSTANDARDS_cxx03: return Val_int(19);
+  case CLANG_EXT_LANGSTANDARDS_gnucxx98: return Val_int(20);
+  case CLANG_EXT_LANGSTANDARDS_cxx0x: return Val_int(21);
+  case CLANG_EXT_LANGSTANDARDS_cxx11: return Val_int(22);
+  case CLANG_EXT_LANGSTANDARDS_gnucxx0x: return Val_int(23);
+  case CLANG_EXT_LANGSTANDARDS_gnucxx11: return Val_int(24);
+  case CLANG_EXT_LANGSTANDARDS_cxx1y: return Val_int(25);
+  case CLANG_EXT_LANGSTANDARDS_cxx14: return Val_int(26);
+  case CLANG_EXT_LANGSTANDARDS_gnucxx1y: return Val_int(27);
+  case CLANG_EXT_LANGSTANDARDS_gnucxx14: return Val_int(28);
+  case CLANG_EXT_LANGSTANDARDS_cxx1z: return Val_int(29);
+  case CLANG_EXT_LANGSTANDARDS_gnucxx1z: return Val_int(30);
+  case CLANG_EXT_LANGSTANDARDS_opencl: return Val_int(31);
+  case CLANG_EXT_LANGSTANDARDS_opencl11: return Val_int(32);
+  case CLANG_EXT_LANGSTANDARDS_opencl12: return Val_int(33);
+  case CLANG_EXT_LANGSTANDARDS_cuda: return Val_int(34);
+  case CLANG_EXT_LANGSTANDARDS_Invalid: return Val_int(35);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_langstandards: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_LangStandard_getName_wrapper(value s_ocaml)
+{
+  CAMLparam1(s_ocaml);
+  enum clang_ext_langstandards s;
+  s = Clang_ext_langstandards_val(s_ocaml);
+  const char * result = clang_ext_LangStandard_getName(s);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_LangStandard_ofName_wrapper(value s_ocaml)
+{
+  CAMLparam1(s_ocaml);
+  const char * s;
+  s = String_val(s_ocaml);
+  enum clang_ext_langstandards result = clang_ext_LangStandard_ofName(s);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_langstandards(result);
     CAMLreturn(data);
   }
 }

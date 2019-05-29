@@ -1,0 +1,6 @@
+(executable
+  (name cpp)
+  (preprocess (pps clangml.ppx pattern.ppx))
+; -warning 9: the following labels are not bound in this record pattern
+  (flags -w -9)
+  (libraries clangml clangml.lift clangml_config pattern.runtime))

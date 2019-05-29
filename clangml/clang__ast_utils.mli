@@ -64,4 +64,8 @@ val pp_print_floating_literal : Format.formatter -> floating_literal -> unit
 
 val languages_of_ids : Clang_ext_languageids.t -> languages
 
+val language_of_ids : Clang_ext_languageids.t -> Clang__types.language
+
 val ids_of_languages : languages -> Clang_ext_languageids.t
+
+val ids_of_language :  Clang__types.language -> Clang_ext_languageids.t

@@ -1,4 +1,4 @@
-[@@@warning "-30"]
+let placeholder_hashtbl_sz = 17
 
 type antiquotation_type =
   | Typename
@@ -75,7 +75,8 @@ let extract_antiquotations s =
           match antiquotation_type with
           | Typename -> placeholder
           | Expression antiquotation_type ->
-              Printf.sprintf "((%s) %s)" antiquotation_type placeholder in
+              Printf.sprintf "(\"%s\", (%s) 0)" placeholder
+                antiquotation_type in
         Buffer.add_char code_buffer ' ';
         let pos_begin = Buffer.length code_buffer in
         Buffer.add_string code_buffer placeholder_code;
@@ -104,7 +105,13 @@ let kind_of_string s =
   | "translation_unit" | "tu" -> Translation_unit
   | _ -> invalid_arg "kind_of_string"
 
-module String_map = Map.Make (String)
+module String_hashtbl = Hashtbl.Make (struct
+  type t = string
+
+  let equal = ( = )
+
+  let hash = Hashtbl.hash
+end)
 
 let string_of_expression (expression : Parsetree.expression) =
   match expression with
@@ -115,16 +122,31 @@ let string_of_expression (expression : Parsetree.expression) =
 let rec remove_placeholders antiquotations items =
   match antiquotations, items with
   | [], _ -> items
-  | _ :: antiquotations, _ :: items ->
+  | { antiquotation_type = Typename; _ } :: antiquotations, _ :: items ->
+      remove_placeholders antiquotations items
+  | { antiquotation_type = Expression _; _ } :: antiquotations, items ->
       remove_placeholders antiquotations items
   | _ -> assert false
 
-let extract_payload language (mapper : Ast_mapper.mapper) ~loc (payload : Parsetree.payload) =
-  let kind, preamble, return_type, code =
+type arguments = {
+    preamble : string list;
+    standard : Clang.standard option;
+    return_type : string option;
+  }
+
+let empty_arguments = {
+  preamble = [];
+  standard = None;
+  return_type = None;
+}
+
+let extract_payload language (mapper : Ast_mapper.mapper) ~loc
+    (payload : Parsetree.payload) =
+  let kind, arguments, code =
     match
       match payload with
-      | PStr [%str - [%e? { pexp_desc =
-            Pexp_apply ({ pexp_desc = Pexp_ident { txt = Lident kind; loc = kind_loc }; _},
+      | PStr [%str - [%e? { pexp_desc = Pexp_apply (
+            { pexp_desc = Pexp_ident { txt = Lident kind; loc = kind_loc }; _},
               args); _ }]] ->
           let kind =
             try kind_of_string kind
@@ -136,25 +158,36 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc (payload : Parset
                 Location.raise_errorf ~loc "Code expected"
             | (_, code) :: rev_args ->
                 string_of_expression code, rev_args in
-          let handle_arg (preamble, return_type) (_, (arg : Parsetree.expression)) =
+          let handle_arg arguments (_, (arg : Parsetree.expression)) =
+            let loc = arg.pexp_loc in
             match arg with
             | [%expr return [%e? arg ]] ->
-                begin
-                  match return_type with
-                  | Some _ ->
-                      Location.raise_errorf ~loc:arg.pexp_loc
-                        "Return type already given"
-                  | None ->
-                      (preamble, Some (string_of_expression arg))
-                end
+                if arguments.return_type <> None then
+                  Location.raise_errorf ~loc
+                    "Return type already given";
+                { arguments with
+                  return_type = Some (string_of_expression arg) }
+            | [%expr standard [%e? arg ]] ->
+                if arguments.standard <> None then
+                  Location.raise_errorf ~loc
+                    "Standard already given";
+                let arg = arg |> string_of_expression in
+                let standard = arg |> Clang.ext_lang_standard_of_name in
+                if standard = Invalid then
+                  Location.raise_errorf ~loc
+                    "Unknown standard: %s" arg;
+                { arguments with standard = Some standard }
             | _ ->
-                (string_of_expression arg :: preamble, return_type) in
-          let preamble, return_type =
-            List.fold_left handle_arg ([], None) rev_args in
-          Some (kind, preamble, return_type, code)
+                let arg = string_of_expression arg in
+                { arguments with
+                  preamble = arg :: arguments.preamble } in
+          let arguments =
+            List.fold_left handle_arg empty_arguments rev_args in
+          Some (kind, arguments, code)
       | _ -> None
     with
-    | Some (kind, preamble, return_type, code) -> kind, preamble, return_type, code
+    | Some (kind, arguments, code) ->
+        kind, arguments, code
     | None ->
         Location.raise_errorf ~loc
           "ClangML quotations have to be of the form [%%c-kind {| code |}]" in
@@ -166,35 +199,33 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc (payload : Parset
     | Typename ->
         Buffer.add_string buffer
           (Printf.sprintf "typedef void *%s;" placeholder);
-    | Expression _ ->
-        Buffer.add_string buffer
-          (Printf.sprintf "void * const %s = 0;" placeholder));
+    | Expression _ -> ());
   let return_type =
-    match return_type with
+    match arguments.return_type with
     | None -> "void"
     | Some return_type -> return_type in
   let function_declaration =
     Printf.sprintf "%s f(void) {" return_type in
-  let prelude, postlude,
+  let prelude, prelude', postlude,
     (extraction :
        _ -> Clang.Ast.translation_unit -> _) =
     match kind with
     | Expr ->
-        function_declaration, ";}",
+        function_declaration, "", ";}",
         begin fun lift ast ->
           match List.rev ast.desc.items with
           | { desc = Function
                 { body = Some {
                   desc = Compound stmts; _}; _}; _} :: _ ->
                     begin match List.rev stmts with
-                    | { desc = Expr item; _} :: _ ->
+                    | { desc = Expr item; _ } :: _ ->
                         lift#expr item
                     | _ -> assert false
                     end
           | _ -> assert false
         end
     | Stmt ->
-        function_declaration, "}",
+        function_declaration, "", "}",
         begin fun lift ast ->
           match List.rev ast.desc.items with
           | { desc = Function
@@ -204,7 +235,7 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc (payload : Parset
           | _ -> assert false
         end
     | Qual_type ->
-        "void f(void) { void *x; (", ") x; }",
+        "void f(void) {", "void *x; (", ") x; }",
         begin fun lift ast ->
           match List.rev ast.desc.items with
           | { desc = Function
@@ -217,33 +248,63 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc (payload : Parset
           | _ -> assert false
         end
     | Decl ->
-        "", "", begin fun lift ast ->
+        "", "", "", begin fun lift ast ->
           lift#decl
-            begin match List.rev (remove_placeholders antiquotations ast.desc.items) with
+            begin match
+              List.rev (remove_placeholders antiquotations ast.desc.items) with
             | result :: _ -> result
             | _ -> assert false
             end
         end
     | Translation_unit ->
-        "", "", begin fun lift ast ->
+        "", "", "", begin fun lift ast ->
           lift#translation_unit
             { ast with desc =
               { ast.desc with items =
                 remove_placeholders antiquotations ast.desc.items }}
         end in
   Buffer.add_string buffer prelude;
-  preamble |> List.iter (fun s ->
+  arguments.preamble |> List.iter (fun s ->
     Buffer.add_string buffer s;
     Buffer.add_char buffer ';');
+  Buffer.add_string buffer prelude';
   Buffer.add_string buffer code;
   Buffer.add_string buffer postlude;
-  let ast = Clang.Ast.parse_string ~language (Buffer.contents buffer) in
-  let placeholder_map = List.fold_left (fun map antiquotation ->
-    String_map.add antiquotation.placeholder
+  let code = Buffer.contents buffer in
+  let command_line_args = [Clang.Command_line.language language] in
+  let command_line_args =
+    match arguments.standard with
+    | None -> command_line_args
+    | Some standard ->
+        Clang.Command_line.standard standard :: command_line_args in
+  let ast = Clang.Ast.parse_string ~command_line_args code in
+  let tu = Clang.Ast.cursor_of_node ast |> Clang.cursor_get_translation_unit in
+  let has_diagnostics = ref false in
+  Clang.seq_of_diagnostics tu |> Seq.iter begin fun diagnostics ->
+    if
+      List.mem (Clang.get_diagnostic_severity diagnostics) Clang.error then
+      begin
+        if not !has_diagnostics then
+          begin
+            Format.fprintf Format.err_formatter
+              "@[%a@]@[Compiling quotation code:@ %s@]@."
+              Location.print loc code;
+            has_diagnostics := true;
+          end;
+        prerr_endline
+          (Clang.format_diagnostic diagnostics
+            Clang.Cxdiagnosticdisplayoptions.display_source_location)
+      end
+  end;
+  if Clang.has_severity Clang.error tu then
+    Location.raise_errorf ~loc "clang error while compiling quotation code";
+  let placeholder_hashtbl = String_hashtbl.create placeholder_hashtbl_sz in
+  antiquotations |> List.iter begin fun antiquotation ->
+    String_hashtbl.add placeholder_hashtbl antiquotation.placeholder
       { antiquotation.payload with
         txt = mapper.payload mapper antiquotation.payload.txt }
-      map) String_map.empty antiquotations in
-  ast, extraction, placeholder_map
+  end;
+  ast, extraction, placeholder_hashtbl
 
 module type Lifter = sig
   type t
@@ -254,49 +315,85 @@ module type Lifter = sig
   end
 end
 
+let find_and_remove table ident =
+  let result = String_hashtbl.find_opt table ident in
+  if result <> None then
+    String_hashtbl.remove table ident;
+  result
+
+let is_empty table =
+  try
+    table |> String_hashtbl.iter (fun _ _ -> raise Exit);
+    true
+  with Exit ->
+    false
+
 module Remove_placeholder (X : Lifter) = struct
   type t = X.t
 
-  class lifter subst_payload map = object
+  class lifter subst_payload table = object
     inherit X.lifter as super
 
     method expr (expr : Clang.Ast.expr) =
       match
         match expr with
-        | { desc =
-              Cast { operand = { desc = DeclRef (Ident ident); _ }; _ }; _ } ->
-            String_map.find_opt ident map
+        | { desc = BinaryOperator {
+              lhs = { desc = StringLiteral ident };
+              kind = Comma;
+              rhs = { desc = Cast { operand =
+                { desc = IntegerLiteral (Int 0); _ }; _ }; _ }}; _} ->
+            find_and_remove table ident
         | _ -> None
       with
-      | Some payload -> subst_payload payload
+      | Some payload ->
+          subst_payload payload
       | None -> super#expr expr
 
     method qual_type (qual_type : Clang.Ast.qual_type) =
       match
         match qual_type with
         | { desc = Typedef (Ident ident) } ->
-            String_map.find_opt ident map
+            find_and_remove table ident
         | _ -> None
       with
-      | Some payload -> subst_payload payload
+      | Some payload ->
+          subst_payload payload
       | None -> super#qual_type qual_type
   end
 end
 
+type extension =
+  | Quotation of {
+      language : Clang.language;
+      payload : Parsetree.payload;
+      loc : Location.t;
+    }
+  | If_standard of {
+      name : string;
+      expr : Parsetree.expression;
+      loc : Location.t;
+    }
+
 let rec expr_mapper (mapper : Ast_mapper.mapper) (expr : Parsetree.expression) =
   match
     match expr.pexp_desc with
+    | Pexp_extension ({ loc; txt = "if" }, payload) ->
+        begin match payload with
+        | PStr [%str standard [%e? name] available [%e? expr]] ->
+            Some (If_standard { name = string_of_expression name; expr; loc })
+        | _ -> None
+        end
     | Pexp_extension ({ loc; txt }, payload) ->
         begin match Clang.language_of_string txt with
         | exception (Invalid_argument _) -> None
-        | language -> Some (language, loc, payload)
+        | language -> Some (Quotation { language; loc; payload })
         end
     | _ -> None
   with
   | None ->
       Ast_mapper.default_mapper.expr mapper expr
-  | Some (language, loc, payload) ->
-      let ast, extraction, placeholder_map =
+  | Some (Quotation { language; loc; payload }) ->
+      let ast, extraction, placeholder_table =
         extract_payload language mapper ~loc payload in
       let module Expr_remove = Remove_placeholder
           (struct
@@ -313,7 +410,15 @@ let rec expr_mapper (mapper : Ast_mapper.mapper) (expr : Parsetree.expression) =
         | _ ->
             raise (Location.Error (Location.error ~loc:payload.loc
               "Expression expected in anti-quotation")) in
-      extraction (new Expr_remove.lifter subst_payload placeholder_map) ast
+      let remover = new Expr_remove.lifter subst_payload placeholder_table in
+      let expr = extraction remover ast in
+      assert (is_empty placeholder_table);
+      expr
+  | Some (If_standard { name; expr; loc }) ->
+      if name |> Clang.ext_lang_standard_of_name = Invalid then
+        [%expr ()]
+      else
+        Ast_mapper.default_mapper.expr mapper expr
 
 and pat_mapper (mapper : Ast_mapper.mapper) (pat : Parsetree.pattern) =
   match
@@ -328,7 +433,7 @@ and pat_mapper (mapper : Ast_mapper.mapper) (pat : Parsetree.pattern) =
   | None ->
     Ast_mapper.default_mapper.pat mapper pat
   | Some (language, loc, payload) ->
-      let ast, extraction, placeholder_map =
+      let ast, extraction, placeholder_table =
         extract_payload language mapper ~loc payload in
       let module Pat_remove = Remove_placeholder
           (struct
@@ -345,7 +450,10 @@ and pat_mapper (mapper : Ast_mapper.mapper) (pat : Parsetree.pattern) =
         | _ ->
             raise (Location.Error (Location.error ~loc:payload.loc
               "Pattern expected in anti-quotation")) in
-      extraction (new Pat_remove.lifter subst_payload placeholder_map) ast
+      let remover = new Pat_remove.lifter subst_payload placeholder_table in
+      let pat = extraction remover ast in
+      assert (is_empty placeholder_table);
+      pat
 
 let ppx_pattern_mapper = {
   Ast_mapper.default_mapper with
@@ -354,6 +462,6 @@ let ppx_pattern_mapper = {
 }
 
 let () =
-  Migrate_parsetree.Driver.register ~name:"clangml.ppx"
+  Migrate_parsetree.Driver.register ~name:"clangml.ppx" ~position:(-10)
     (module Migrate_parsetree.OCaml_current)
     (fun _ _ -> ppx_pattern_mapper)

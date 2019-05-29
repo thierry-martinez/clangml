@@ -6381,6 +6381,11 @@ fi
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
+     if cp $srcdir/clangml/clang__command_line.ml clangml/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
      if cp $srcdir/clangml/clang__printer.ml clangml/; then :
   true
 else
@@ -6433,6 +6438,45 @@ fi
 fi
 fi
 
+if test -d ppx; then :
+  true
+else
+  if mkdir ppx; then :
+  if cp $srcdir/ppx/clangml_ppx.ml ppx/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/ppx/ppx_lexer.mll ppx/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/ppx/dune ppx/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+fi
+fi
+
+if test -d visitors; then :
+  true
+else
+  if mkdir visitors; then :
+  if cp $srcdir/visitors/clangml_visitors.ml visitors/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/visitors/dune visitors/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+fi
+fi
+
 if test -d tests; then :
   true
 else
@@ -6444,8 +6488,57 @@ else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
 fi
+    if mkdir tests/c17; then :
+  if cp $srcdir/tests/c17/dune tests/c17/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+       if cp $srcdir/tests/c17/c17.ml tests/c17/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
 fi
+    if mkdir tests/cpp; then :
+  if cp $srcdir/tests/cpp/dune tests/cpp/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+       if cp $srcdir/tests/cpp/cpp.ml tests/cpp/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+fi
+    if mkdir tests/ppx; then :
+  if cp $srcdir/tests/ppx/dune tests/ppx/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+       if cp $srcdir/tests/ppx/ppx.ml tests/ppx/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+fi
+fi
+fi
+
+if test -d config; then :
+  true
+else
+  if mkdir config; then :
+  if cp $srcdir/config/dune config/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+fi
+fi
+
 
 if cp $srcdir/bootstrap/$LLVM_VERSION/clang__bindings.ml clangml/clang__bindings.ml; then :
   true

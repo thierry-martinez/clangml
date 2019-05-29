@@ -15,7 +15,7 @@ val string_of_cxx_access_specifier : cx_cxxaccessspecifier -> string
 (** {2 Parsing files and strings } *)
 
 val parse_file : ?index:cxindex ->
-  ?command_line_args:string list -> ?language:language ->
+  ?command_line_args:string list ->
     ?unsaved_files:cxunsavedfile list ->
       ?options:Cxtranslationunit_flags.t ->
         string -> cxtranslationunit
@@ -31,7 +31,7 @@ val parse_file : ?index:cxindex ->
     representation of the AST. *)
 
 val parse_file_res : ?index:cxindex ->
-  ?command_line_args:string list -> ?language:language ->
+  ?command_line_args:string list ->
     ?unsaved_files:cxunsavedfile list ->
       ?options:Cxtranslationunit_flags.t ->
         string -> (cxtranslationunit, cxerrorcode) result
@@ -39,7 +39,7 @@ val parse_file_res : ?index:cxindex ->
     raising [Failure _] if parsing fails. *)
 
 val parse_string : ?index:cxindex -> ?filename:string ->
-  ?command_line_args:string list -> ?language:language ->
+  ?command_line_args:string list ->
     ?unsaved_files:cxunsavedfile list ->
       ?options:Cxtranslationunit_flags.t ->
         string -> cxtranslationunit
@@ -54,7 +54,7 @@ val parse_string : ?index:cxindex -> ?filename:string ->
     representation of the AST. *)
 
 val parse_string_res : ?index:cxindex -> ?filename:string ->
-  ?command_line_args:string list -> ?language:language ->
+  ?command_line_args:string list ->
     ?unsaved_files:cxunsavedfile list ->
       ?options:Cxtranslationunit_flags.t ->
         string -> (cxtranslationunit, cxerrorcode) result
@@ -122,16 +122,14 @@ val seq_of_diagnostics : cxtranslationunit -> cxdiagnostic Seq.t
 (** [seq_of_diagnostics tu] returns the diagnostics (warnings and errors)
     produced for the given translation unit *)
 
-val is_error : cxdiagnosticseverity -> bool
-(** [is_error d] returns whether [d] is [Error] or [Fatal]. *)
+val error : cxdiagnosticseverity list
+(** [error] contains the severities [Error] and [Fatal]. *)
 
-val is_warning_or_error : cxdiagnosticseverity -> bool
-(** [is_warning_or_error d] returns whether [d] is [Warning] or [Error] or [Fatal]. *)
+val warning_or_error : cxdiagnosticseverity list
+(** [warning_or_error] contains the severities [Warning], [Error] and [Fatal]. *)
 
-val has_error : cxtranslationunit -> bool
-(** [has_error tu] returns whether the translation unit [tu] produced an
-    error. *)
+val has_severity : cxdiagnosticseverity list -> cxtranslationunit -> bool
+(** [has_severity l tu] returns whether the translation unit [tu] produced a
+    diagnostic, the severity of which belongs to [l]. *)
 
-val has_warning_or_error : cxtranslationunit -> bool
-(** [has_warning_or_error tu] returns whether the translation unit [tu] produced a
-    warning or an error. *)
+val cursor_get_translation_unit : cxcursor -> cxtranslationunit

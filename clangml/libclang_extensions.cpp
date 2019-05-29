@@ -327,6 +327,12 @@ GetLambdaCapture(struct clang_ext_LambdaCapture LC)
   return static_cast<const LambdaCapture *>(LC.data);
 }
 
+static clang::ASTContext &
+getCursorContext(CXCursor c)
+{
+  return getCursorTU(c)->TheASTUnit->getASTContext();
+}
+
 extern "C" {
   bool
   clang_equal_cxint(CXInt a, CXInt b)
@@ -718,6 +724,15 @@ extern "C" {
   }
 
   bool
+  clang_ext_VarDecl_isConstexpr(CXCursor c)
+  {
+    if (auto D = llvm::dyn_cast_or_null<clang::VarDecl>(GetCursorDecl(c))) {
+      return D->isConstexpr();
+    }
+    return false;
+  }
+
+  bool
   clang_ext_MemberRefExpr_isArrow(CXCursor c)
   {
     const clang::Expr *e = GetCursorExpr(c);
@@ -1008,6 +1023,15 @@ extern "C" {
       return MakeCXCursor(Function->getParamDecl(i), getCursorTU(C));
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(C));
+  }
+
+  bool
+  clang_ext_FunctionDecl_isConstexpr(CXCursor c)
+  {
+    if (auto *Function = getFunctionDecl(c)) {
+      return Function->isConstexpr();
+    }
+    return false;
   }
 
   unsigned
@@ -1421,6 +1445,18 @@ extern "C" {
     return false;
   }
 
+  CXCursor
+  clang_ext_LambdaExpr_getCallOperator(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::LambdaExpr>(GetCursorStmt(c))) {
+      if (auto *m = e->getCallOperator()) {
+        return MakeCXCursor(m, getCursorTU(c));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
   enum clang_ext_LambdaCaptureKind
   clang_ext_LambdaCapture_getKind(struct clang_ext_LambdaCapture capture)
   {
@@ -1457,5 +1493,149 @@ extern "C" {
     if (auto *LC = GetLambdaCapture(capture)) {
       delete LC;
     }
+  }
+
+  CXType
+  clang_ext_CXXNewExpr_getAllocatedType(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXNewExpr>(GetCursorStmt(c))) {
+        return MakeCXType(e->getAllocatedType(), getCursorTU(c));
+    }
+    return MakeCXTypeInvalid(getCursorTU(c));
+  }
+
+  CXCursor
+  clang_ext_CXXNewExpr_getArraySize(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXNewExpr>(GetCursorStmt(c))) {
+      if (auto *s = e->getArraySize()) {
+        return MakeCXCursor(s, getCursorTU(c));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  unsigned int
+  clang_ext_CXXNewExpr_getNumPlacementArgs(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXNewExpr>(GetCursorStmt(c))) {
+      return e->getNumPlacementArgs();
+    }
+    return 0;
+  }
+
+  CXCursor
+  clang_ext_CXXNewExpr_getPlacementArg(CXCursor c, unsigned int i)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXNewExpr>(GetCursorStmt(c))) {
+      if (auto *s = e->getPlacementArg(i)) {
+        return MakeCXCursor(s, getCursorTU(c));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  CXCursor
+  clang_ext_CXXNewExpr_getInitializer(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXNewExpr>(GetCursorStmt(c))) {
+      if (auto *s = e->getInitializer()) {
+        return MakeCXCursor(s, getCursorTU(c));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  bool
+  clang_ext_CXXDeleteExpr_isGlobalDelete(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXDeleteExpr>(GetCursorStmt(c))) {
+      return e->isGlobalDelete();
+    }
+    return false;
+  }
+
+  bool
+  clang_ext_CXXDeleteExpr_isArrayForm(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXDeleteExpr>(GetCursorStmt(c))) {
+      return e->isArrayForm();
+    }
+    return false;
+  }
+
+  bool
+  clang_ext_CXXTypeidExpr_isTypeOperand(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXTypeidExpr>(GetCursorStmt(c))) {
+      return e->isTypeOperand();
+    }
+    return false;
+  }
+
+  CXType
+  clang_ext_CXXTypeidExpr_getTypeOperand(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXTypeidExpr>(GetCursorStmt(c))) {
+      return MakeCXType(e->getTypeOperand(getCursorContext(c)), getCursorTU(c));
+    }
+    return MakeCXTypeInvalid(getCursorTU(c));
+  }
+
+  CXCursor
+  clang_ext_CXXTypeidExpr_getExprOperand(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXTypeidExpr>(GetCursorStmt(c))) {
+      return MakeCXCursor(e->getExprOperand(), getCursorTU(c));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  const char *
+  clang_ext_LangStandard_getName(enum clang_ext_langstandards s)
+  {
+    switch (s) {
+    #define FOREACH_STANDARD(Ident, Name) \
+      case CLANG_EXT_LANGSTANDARDS_##Ident: return Name;
+    #ifdef LLVM_VERSION_BEFORE_5_0_0
+    #define LANGSTANDARD(Ident, Name, _Desc, _Features) \
+      FOREACH_STANDARD(Ident, Name)
+    #else
+    #define LANGSTANDARD(Ident, Name, _Lang, _Desc, _Features) \
+      FOREACH_STANDARD(Ident, Name)
+    #endif
+    #include <clang/Frontend/LangStandards.def>
+    #undef FOREACH_STANDARD
+    default:
+      return "";
+    }
+  }
+
+  enum clang_ext_langstandards
+  clang_ext_LangStandard_ofName(const char *s)
+  {
+    #define FOREACH_STANDARD(Ident, Name) \
+      if (strcmp(Name, s) == 0) \
+        return CLANG_EXT_LANGSTANDARDS_##Ident;
+    #ifdef LLVM_VERSION_BEFORE_5_0_0
+    #define LANGSTANDARD(Ident, Name, _Desc, _Features) \
+      FOREACH_STANDARD(Ident, Name)
+    #else
+    #define LANGSTANDARD(Ident, Name, _Lang, _Desc, _Features) \
+      FOREACH_STANDARD(Ident, Name)
+    #endif
+    #include <clang/Frontend/LangStandards.def>
+    #undef FOREACH_STANDARD
+    return CLANG_EXT_LANGSTANDARDS_Invalid;
   }
 }

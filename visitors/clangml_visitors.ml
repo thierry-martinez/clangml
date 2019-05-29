@@ -49,25 +49,30 @@
       Clang__bindings.clang_ext_predefinedexpr_identkind [@opaque] [@@rewrite] [@@remove]
   end
 
-  module%import Clang__ast = struct
+  module Clang__ast = struct
     [%%recursive
-      type concrete_location = _
-      type source_location = _
-      type 'qual_type open_decoration = _ and co]
+      module%import Clang__ast = struct
+        type concrete_location = _
+        type source_location = _
+        type 'qual_type open_decoration = _ and co
+      end]
       [@@deriving
-        visitors { variety = "iter"; name = "base_iter"; polymorphic = true },
-        visitors { variety = "map"; name = "base_map"; polymorphic = true },
-        visitors {
-          variety = "reduce"; name = "base_reduce"; polymorphic = true },
-        visitors {
-          variety = "mapreduce"; name = "base_mapreduce"; polymorphic = true }]
-
+         visitors { variety = "iter"; name = "base_iter"; polymorphic = true },
+         visitors { variety = "map"; name = "base_map"; polymorphic = true },
+         visitors {
+           variety = "reduce"; name = "base_reduce"; polymorphic = true },
+         visitors {
+           variety = "mapreduce"; name = "base_mapreduce"; polymorphic = true }]
     [%%recursive
-      type translation_unit = _ and co]
-      [@@deriving
-        visitors { variety = "iter"; ancestors = ["base_iter"] },
-        visitors { variety = "map"; ancestors = ["base_map"] },
-        visitors { variety = "reduce"; ancestors = ["base_reduce"] },
-        visitors { variety = "mapreduce"; ancestors = ["base_mapreduce"] }]
-
+      module%import Clang__types = struct
+        type language = _ [@@rewrite]
+      end
+      module%import Clang__ast = struct
+        type translation_unit = _ and co
+      end]
+        [@@deriving
+          visitors { variety = "iter"; ancestors = ["base_iter"] },
+          visitors { variety = "map"; ancestors = ["base_map"] },
+          visitors { variety = "reduce"; ancestors = ["base_reduce"] },
+          visitors { variety = "mapreduce"; ancestors = ["base_mapreduce"] }]
   end]

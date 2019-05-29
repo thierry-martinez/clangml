@@ -21,12 +21,15 @@
 #define LLVM_VERSION_BEFORE_3_9_0
 #endif
 #ifdef LLVM_VERSION_BEFORE_3_9_0
-#define LLVM_VERSION_BEFORE_7_0_0
+#define LLVM_VERSION_BEFORE_5_0_0
 #endif
 #ifdef LLVM_VERSION_3_9_1
-#define LLVM_VERSION_BEFORE_7_0_0
+#define LLVM_VERSION_BEFORE_5_0_0
 #endif
 #ifdef LLVM_VERSION_4_0_1
+#define LLVM_VERSION_BEFORE_5_0_0
+#endif
+#ifdef LLVM_VERSION_BEFORE_5_0_0
 #define LLVM_VERSION_BEFORE_7_0_0
 #endif
 #ifdef LLVM_VERSION_5_0_2
@@ -203,6 +206,9 @@ bool
 clang_ext_VarDecl_hasInit(CXCursor c);
 
 bool
+clang_ext_VarDecl_isConstexpr(CXCursor c);
+
+bool
 clang_ext_MemberRefExpr_isArrow(CXCursor c);
 
 CXString
@@ -328,6 +334,9 @@ clang_ext_FunctionDecl_getNumParams(CXCursor C);
 
 CXCursor
 clang_ext_FunctionDecl_getParamDecl(CXCursor C, unsigned i);
+
+bool
+clang_ext_FunctionDecl_isConstexpr(CXCursor c);
 
 /* Adapted from DeclCXX.h:LinkageSpecDecl:LanguageIDs */
 enum clang_ext_LanguageIDs {
@@ -497,6 +506,9 @@ struct clang_ext_LambdaCapture {
 struct clang_ext_LambdaCapture
 clang_ext_LambdaExpr_getCapture(CXCursor c, unsigned index);
 
+CXCursor
+clang_ext_LambdaExpr_getCallOperator(CXCursor c);
+
 /* Copied from Basic/Lambda.h */
 enum clang_ext_LambdaCaptureKind {
   clang_ext_LCK_This,
@@ -505,6 +517,7 @@ enum clang_ext_LambdaCaptureKind {
   clang_ext_LCK_ByRef,
   clang_ext_LCK_VLAType
 };
+
 enum clang_ext_LambdaCaptureKind
 clang_ext_LambdaCapture_getKind(struct clang_ext_LambdaCapture capture);
 
@@ -516,3 +529,54 @@ clang_ext_LambdaCapture_isImplicit(struct clang_ext_LambdaCapture capture);
 
 void
 clang_ext_LambdaCapture_dispose(struct clang_ext_LambdaCapture capture);
+
+CXType
+clang_ext_CXXNewExpr_getAllocatedType(CXCursor c);
+
+CXCursor
+clang_ext_CXXNewExpr_getArraySize(CXCursor c);
+
+unsigned int
+clang_ext_CXXNewExpr_getNumPlacementArgs(CXCursor c);
+
+CXCursor
+clang_ext_CXXNewExpr_getPlacementArg(CXCursor c, unsigned int i);
+
+CXCursor
+clang_ext_CXXNewExpr_getInitializer(CXCursor c);
+
+bool
+clang_ext_CXXDeleteExpr_isGlobalDelete(CXCursor c);
+
+bool
+clang_ext_CXXDeleteExpr_isArrayForm(CXCursor c);
+
+bool
+clang_ext_CXXTypeidExpr_isTypeOperand(CXCursor c);
+
+CXType
+clang_ext_CXXTypeidExpr_getTypeOperand(CXCursor c);
+
+CXCursor
+clang_ext_CXXTypeidExpr_getExprOperand(CXCursor c);
+
+enum clang_ext_langstandards {
+  #define FOREACH_STANDARD(Ident, Name) \
+    CLANG_EXT_LANGSTANDARDS_##Ident,
+  #ifdef LLVM_VERSION_BEFORE_5_0_0
+  #define LANGSTANDARD(Ident, Name, _Desc, _Features) \
+    FOREACH_STANDARD(Ident, Name)
+  #else
+  #define LANGSTANDARD(Ident, Name, _Lang, _Desc, _Features) \
+    FOREACH_STANDARD(Ident, Name)
+  #endif
+  #include <clang/Frontend/LangStandards.def>
+  #undef FOREACH_STANDARD
+  CLANG_EXT_LANGSTANDARDS_Invalid
+};
+
+const char *
+clang_ext_LangStandard_getName(enum clang_ext_langstandards s);
+
+enum clang_ext_langstandards
+clang_ext_LangStandard_ofName(const char *s);

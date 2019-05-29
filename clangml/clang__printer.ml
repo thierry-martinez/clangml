@@ -94,7 +94,7 @@ let rec decl fmt (d : decl) =
           match bitwidth with
           | None -> ()
           | Some bitwidth -> Format.fprintf fmt "@ :@ %a" expr bitwidth)
-  | CXXAccessSpecifier specifier ->
+  | AccessSpecifier specifier ->
       Format.fprintf fmt "%s:" (Clang__utils.string_of_cxx_access_specifier specifier)
   | Constructor { class_name; parameters; initializer_list; body; explicit; defaulted; deleted } ->
       Format.fprintf fmt "%t%s(%a)%t%t%a"
