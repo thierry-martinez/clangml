@@ -30,6 +30,10 @@ module Ast = struct
       | _ -> invalid_arg "node" in
     { decoration; desc }
 
+  let var
+      ?(linkage = NoLinkage) ?var_init ?(constexpr = false) var_name var_type =
+    { linkage; var_name; var_type; var_init; constexpr }
+
   let cursor_of_decoration decoration =
     match decoration with
     | Cursor cursor -> cursor
