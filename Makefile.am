@@ -5,9 +5,9 @@ mypkgdir=$(pkglibdir)
 DUNE_PREFIX = _build/default
 DUNE_INSTALL_PREFIX = _build/install/default
 
-CLANGML_CMXA = clangml/clangml.cmxa
+CLANGML_CMXA = clangml/clang.cmxa
 
-LIBCLANGML_STUBS_A = clangml/libclangml_stubs.a
+LIBCLANGML_STUBS_A = clangml/libclang_stubs.a
 
 STUBGEN_EXE = stubgen/stubgen.exe
 
@@ -83,6 +83,7 @@ install :
 	clangml_lib=`ocamlfind query clangml` \
 		sh -c 'cp $$clangml_lib/visitors/* \
 			$$clangml_lib/ppx/* $$clangml_lib/lift/* $$clangml_lib'
+
 
 .PHONY : uninstall
 uninstall :

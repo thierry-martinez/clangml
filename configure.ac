@@ -393,7 +393,6 @@ AS_IF([test -d config],
   [AS_IF([mkdir config],
      AC_CP([$srcdir/config/dune], [config/]))])
 
-
 AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang__bindings.ml], [clangml/clang__bindings.ml])
 
 AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang__bindings.mli], [clangml/clang__bindings.mli])

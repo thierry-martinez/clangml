@@ -6539,7 +6539,6 @@ fi
 fi
 fi
 
-
 if cp $srcdir/bootstrap/$LLVM_VERSION/clang__bindings.ml clangml/clang__bindings.ml; then :
   true
 else

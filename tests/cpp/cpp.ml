@@ -40,12 +40,89 @@ let () =
   let ast = parse_string {|
     class Outer {
       unsigned int sz = sizeof(*this);
-      void
-      f()
-      {
+      void f() {
         int b[sizeof(*this)];
       }
     };
+  |} in
+(*
+  let bindings =
+    check_pattern_tu ast [%pattern? [%cpp-tu (standard "c++17") {|
+      class Outer {
+|} in
+    check_pattern_expr bindings#x1 [%pattern? {
+      desc = Lambda {
+*)
+  Format.fprintf Format.err_formatter "%a@." Clang.Ast.pp_translation_unit ast
+
+(* 5.1.5 Lambda expressions *)
+
+(* C++ 17: auto in function return type *)
+
+let () =
+  [%if standard "c++17" available begin
+    let ast = parse_string
+      ~command_line_args:[Clang.Command_line.standard Cxx17] {|
+      void f() {
+        auto x1 = [](int i){ return i; };
+        int j;
+        auto x3 = [=]()->auto&& { return j; };
+      }
+    |} in
+    let bindings =
+      check_pattern_tu ast [%pattern? [%cpp-tu (standard "c++17") {|
+        void f() {
+          auto x1 = [%(void *(*)())? x1];
+          int j;
+          auto x3 = [%(void *(*)())? x3];
+        }
+      |}]] in
+    check_pattern_expr bindings#x1 [%pattern? {
+      desc = Lambda {
+        capture_default = CaptureNone;
+        captures = [];
+        parameters = Some [{
+          desc = {
+            qual_type = { desc = BuiltinType Int };
+            name = "i"; }}];
+        result_type = None;
+        body = { desc = Compound [{ desc =
+          Return (Some { desc = DeclRef (Ident "i")})}]}}}];
+    check_pattern_expr bindings#x3 [%pattern? {
+      desc = Lambda {
+        capture_default = ByCopy;
+        captures = [{
+          capture_kind = ByCopy;
+          implicit = true;
+          captured_var_name = Some "j" }];
+        parameters = Some [];
+        result_type =
+          Some { desc = LValueReference { desc = BuiltinType Int }};
+        body = { desc = Compound [{ desc =
+          Return (Some { desc = DeclRef (Ident "j")})}]}}}]
+  end]
+
+let () =
+  [%if standard "c++17" available begin
+    let ast = parse_string
+        ~command_line_args:[Clang.Command_line.standard Cxx17] "
+      template<class... Args>
+      void f(Args... args) {
+        auto lm = [&, args...] { return g(args...); };
+        lm();
+      }
+    " in
+    Format.fprintf Format.err_formatter "%a@." Clang.Ast.pp_translation_unit ast
+  end]
+
+(* 5.1.6 Fold expressions *)
+
+let () =
+  let ast = parse_string {|
+    template<typename ...Args>
+    bool f(Args ...args) {
+      return (true && ... && args);
+    }
   |} in
   Format.fprintf Format.err_formatter "%a@." Clang.Ast.pp_translation_unit ast
 
@@ -64,6 +141,17 @@ let () =
       typeid(D) == typeid(d2);
       typeid(D) == typeid(const D&);
     }
+  |} in
+  Format.fprintf Format.err_formatter "%a@." Clang.Ast.pp_translation_unit ast
+
+(* 5.3.3 Sizeof *)
+
+let () =
+  let ast = parse_string {|
+    template<class... Types>
+    struct count {
+      static const std::size_t value = sizeof...(Types);
+    };
   |} in
   Format.fprintf Format.err_formatter "%a@." Clang.Ast.pp_translation_unit ast
 
@@ -183,58 +271,3 @@ let () =
     |} in
     Format.fprintf Format.err_formatter "%a@." Clang.Ast.pp_translation_unit ast
   end]
-
-(* 7.5.5 Lambda expressions *)
-
-(* C++ 17: auto in function return type *)
-
-let () =
-  [%if standard "c++17" available begin
-    let ast = parse_string
-      ~command_line_args:[Clang.Command_line.standard Cxx17] {|
-      void
-      f()
-      {
-        auto x1 = [](int i){ return i; };
-        int j;
-        auto x3 = [=]()->auto&& { return j; };
-      }
-    |} in
-    let bindings =
-      check_pattern_tu ast [%pattern? [%cpp-tu (standard "c++17") {|
-        void
-        f()
-        {
-          auto x1 = [%(void *(*)())? x1];
-          int j;
-          auto x3 = [%(void *(*)())? x3];
-        }
-      |}]] in
-    let x1 = bindings#x1 in
-    let x3 = bindings#x3 in
-    check_pattern_expr x1 [%pattern? {
-      desc = Lambda {
-        capture_default = CaptureNone;
-        captures = [];
-        parameters = Some [{
-          desc = {
-            qual_type = { desc = BuiltinType Int };
-            name = "i"; }}];
-        result_type = None;
-        body = { desc = Compound [{ desc =
-          Return (Some { desc = DeclRef (Ident "i")})}]}}}];
-    check_pattern_expr x3 [%pattern? {
-      desc = Lambda {
-        capture_default = ByCopy;
-        captures = [{
-          capture_kind = ByCopy;
-          implicit = true;
-          captured_var_name = Some "j" }];
-        parameters = Some [];
-        result_type =
-          Some { desc = LValueReference { desc = BuiltinType Int }};
-        body = { desc = Compound [{ desc =
-          Return (Some { desc = DeclRef (Ident "j")})}]}}}]
-  end]
-
-(* 7.5.5.2 Captures *)

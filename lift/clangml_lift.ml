@@ -1,26 +1,30 @@
 [@@@ocaml.warning "-30"]
 
-module%override Clang__bindings = struct
-  [%%recursive [%%types]]
-    [@@deriving traverse_lift]
-end
+module%import Clang = struct
+  module%override Bindings = struct
+    [%%recursive [%%types]]
+      [@@deriving traverse_lift]
+  end
 
-open Clang__bindings
+  open Bindings
 
-module Clang__ast = struct
-  [%%recursive
-     module%import Clang__types = struct
-       [%%types]
-     end
-     module%import Clang__ast = struct
-       [%%types]
-     end]
-    [@@deriving traverse_lift]
+  module%override Types = struct
+    [%%recursive [%%types]]
+      [@@deriving traverse_lift]
+  end
+
+  open Types
+
+  module%override Ast = struct
+    [%%recursive [%%types]]
+      [@@deriving traverse_lift]
+  end
 end
 
 class virtual ['a] lift = object
-  inherit ['a] Clang__bindings.lift
-  inherit ['a] Clang__ast.lift
+  inherit ['a] Bindings.lift
+  inherit ['a] Types.lift
+  inherit ['a] Ast.lift
 end
 
 class lift_expr loc = object(self)
@@ -41,8 +45,8 @@ class lift_expr loc = object(self)
     let volatile = lift#bool qual_type.volatile in
     let restrict = lift#bool qual_type.restrict in
     [%expr {
-      cxtype = Clang__bindings.get_cursor_type
-        (Clang__bindings.get_null_cursor ());
+      cxtype = Clang.Bindings.get_cursor_type
+        (Clang.Bindings.get_null_cursor ());
       const = [%e const]; volatile = [%e volatile]; restrict = [%e restrict];
       desc = [%e self#type_desc qual_type.desc ] }]
 end
