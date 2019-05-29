@@ -39,6 +39,9 @@ module Ast : sig
     include Clang__ast
   end
 
+  val var : ?linkage:linkage_kind -> ?var_init:expr ->
+    ?constexpr:bool -> string -> qual_type -> var_decl_desc
+
   (** {!type:Options.t} stores flags that change the construction of the
       abstract syntax tree. Beware that the nodes that are ignored by default
       can differ from one version of Clang to the other. *)
