@@ -4,4 +4,4 @@
   (preprocess (staged_pps override ppx_deriving visitors.ppx))
 ; -warning 40: Overridden methods
   (flags -open Stdcompat -w -7)
-  (libraries clangml visitors.runtime))
+  (libraries clangml.clang visitors.runtime))

@@ -2,4 +2,4 @@
   (name clangml_lift)
   (public_name clangml.lift)
   (preprocess (staged_pps override ppx_deriving.std ppxlib.metaquot ppxlib.traverse))
-  (libraries ppxlib.metaquot ppxlib.metaquot_lifters clangml))
+  (libraries ppxlib.metaquot ppxlib.metaquot_lifters clangml.clang))

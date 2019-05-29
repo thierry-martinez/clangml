@@ -3,8 +3,11 @@
 (** The module includes {!module:Clang__bindings} which contains the
 auto-generated wrappers over [libclang] and some extensions defined in
 [libclang_extensions.h]. *)
+
+module Bindings = Clang__bindings
+
 include module type of struct
-  include Clang__bindings
+  include Bindings
 end
 
 (** The module includes {!module:Clang__compat} which contains
@@ -14,17 +17,17 @@ include module type of struct
   include Clang__compat
 end
 
+module Types = Clang__types
+
 include module type of struct
-  include Clang__types
+  include Types
 end
 
 include module type of struct
   include Clang__utils
 end
 
-module Command_line : module type of struct
-  include Clang__command_line
-end
+module Command_line = Clang__command_line
 
 (** {2 Abstract syntax tree} *)
 

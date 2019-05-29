@@ -1,8 +1,12 @@
-include Clang__bindings
+module Bindings = Clang__bindings
+
+include Bindings
 
 include Clang__compat
 
-include Clang__types
+module Types = Clang__types
+
+include Types
 
 include Clang__utils
 
