@@ -4743,6 +4743,7 @@ Clang_ext_unaryoperatorkind_val(value ocaml)
   case 10: return CLANG_EXT_UNARY_OPERATOR_UO_Real;
   case 11: return CLANG_EXT_UNARY_OPERATOR_UO_Imag;
   case 12: return CLANG_EXT_UNARY_OPERATOR_UO_Extension;
+  case 13: return CLANG_EXT_UNARY_OPERATOR_UO_Invalid;
   }
   failwith_fmt("invalid value for Clang_ext_unaryoperatorkind_val: %d", Int_val(ocaml));
   return CLANG_EXT_UNARY_OPERATOR_UO_PostInc;
@@ -4765,6 +4766,7 @@ Val_clang_ext_unaryoperatorkind(enum clang_ext_UnaryOperatorKind v)
   case CLANG_EXT_UNARY_OPERATOR_UO_Real: return Val_int(10);
   case CLANG_EXT_UNARY_OPERATOR_UO_Imag: return Val_int(11);
   case CLANG_EXT_UNARY_OPERATOR_UO_Extension: return Val_int(12);
+  case CLANG_EXT_UNARY_OPERATOR_UO_Invalid: return Val_int(13);
   }
   failwith_fmt("invalid value for Val_clang_ext_unaryoperatorkind: %d", v);
   return Val_int(0);
@@ -4835,6 +4837,7 @@ Clang_ext_binaryoperatorkind_val(value ocaml)
   case 29: return CLANG_EXT_BINARY_OPERATOR_BO_XorAssign;
   case 30: return CLANG_EXT_BINARY_OPERATOR_BO_OrAssign;
   case 31: return CLANG_EXT_BINARY_OPERATOR_BO_Comma;
+  case 32: return CLANG_EXT_BINARY_OPERATOR_BO_Invalid;
   }
   failwith_fmt("invalid value for Clang_ext_binaryoperatorkind_val: %d", Int_val(ocaml));
   return CLANG_EXT_BINARY_OPERATOR_BO_PtrMemD;
@@ -4876,6 +4879,7 @@ Val_clang_ext_binaryoperatorkind(enum clang_ext_BinaryOperatorKind v)
   case CLANG_EXT_BINARY_OPERATOR_BO_XorAssign: return Val_int(29);
   case CLANG_EXT_BINARY_OPERATOR_BO_OrAssign: return Val_int(30);
   case CLANG_EXT_BINARY_OPERATOR_BO_Comma: return Val_int(31);
+  case CLANG_EXT_BINARY_OPERATOR_BO_Invalid: return Val_int(32);
   }
   failwith_fmt("invalid value for Val_clang_ext_binaryoperatorkind: %d", v);
   return Val_int(0);
@@ -7081,6 +7085,20 @@ clang_ext_LambdaCapture_isImplicit_wrapper(value capture_ocaml)
 }
 
 CAMLprim value
+clang_ext_LambdaCapture_isPackExpansion_wrapper(value capture_ocaml)
+{
+  CAMLparam1(capture_ocaml);
+  struct clang_ext_LambdaCapture capture;
+  capture = Clang_ext_lambdacapture_val(Field(capture_ocaml, 0));
+  _Bool result = clang_ext_LambdaCapture_isPackExpansion(capture);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
 clang_ext_CXXNewExpr_getAllocatedType_wrapper(value c_ocaml)
 {
   CAMLparam1(c_ocaml);
@@ -7340,6 +7358,114 @@ clang_ext_LangStandard_ofName_wrapper(value s_ocaml)
   {
     CAMLlocal1(data);
     data = Val_clang_ext_langstandards(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_PackExpansion_getPattern_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXType c;
+  c = Cxtype_val(Field(c_ocaml, 0));
+  CXType result = clang_ext_PackExpansion_getPattern(c);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxtype(result));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CXXFoldExpr_getOperator_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  enum clang_ext_BinaryOperatorKind result = clang_ext_CXXFoldExpr_getOperator(c);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_binaryoperatorkind(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CXXBoolLiteralExpr_getValue_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  _Bool result = clang_ext_CXXBoolLiteralExpr_getValue(c);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CallExpr_getCallee_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  CXCursor result = clang_ext_CallExpr_getCallee(c);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CallExpr_getNumArgs_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  unsigned int result = clang_ext_CallExpr_getNumArgs(c);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CallExpr_getArg_wrapper(value c_ocaml, value i_ocaml)
+{
+  CAMLparam2(c_ocaml, i_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  unsigned int i;
+  i = Int_val(i_ocaml);
+  CXCursor result = clang_ext_CallExpr_getArg(c, i);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_SizeOfPackExpr_getPack_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  CXCursor result = clang_ext_SizeOfPackExpr_getPack(c);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
     CAMLreturn(data);
   }
 }

@@ -2053,7 +2053,8 @@ type clang_ext_unaryoperatorkind =
   | Real 
   | Imag 
   | Extension 
-  | Coawait [@@deriving (eq, ord, show)]
+  | Coawait 
+  | Invalid [@@deriving (eq, ord, show)]
 external ext_unary_operator_get_opcode :
   cxcursor -> clang_ext_unaryoperatorkind =
     "clang_ext_UnaryOperator_getOpcode_wrapper"
@@ -2093,7 +2094,8 @@ type clang_ext_binaryoperatorkind =
   | AndAssign 
   | XorAssign 
   | OrAssign 
-  | Comma [@@deriving (eq, ord, show)]
+  | Comma 
+  | Invalid [@@deriving (eq, ord, show)]
 external ext_binary_operator_get_opcode :
   cxcursor -> clang_ext_binaryoperatorkind =
     "clang_ext_BinaryOperator_getOpcode_wrapper"
@@ -2933,6 +2935,9 @@ external ext_lambda_capture_get_captured_var :
 external ext_lambda_capture_is_implicit :
   clang_ext_lambdacapture -> bool =
     "clang_ext_LambdaCapture_isImplicit_wrapper"
+external ext_lambda_capture_is_pack_expansion :
+  clang_ext_lambdacapture -> bool =
+    "clang_ext_LambdaCapture_isPackExpansion_wrapper"
 external ext_cxxnew_expr_get_allocated_type :
   cxcursor -> cxtype = "clang_ext_CXXNewExpr_getAllocatedType_wrapper"
 external ext_cxxnew_expr_get_array_size :
@@ -2987,3 +2992,18 @@ external ext_lang_standard_get_name :
     "clang_ext_LangStandard_getName_wrapper"
 external ext_lang_standard_of_name :
   string -> clang_ext_langstandards = "clang_ext_LangStandard_ofName_wrapper"
+external ext_pack_expansion_get_pattern :
+  cxtype -> cxtype = "clang_ext_PackExpansion_getPattern_wrapper"
+external ext_cxxfold_expr_get_operator :
+  cxcursor -> clang_ext_binaryoperatorkind =
+    "clang_ext_CXXFoldExpr_getOperator_wrapper"
+external ext_cxxbool_literal_expr_get_value :
+  cxcursor -> bool = "clang_ext_CXXBoolLiteralExpr_getValue_wrapper"
+external ext_call_expr_get_callee :
+  cxcursor -> cxcursor = "clang_ext_CallExpr_getCallee_wrapper"
+external ext_call_expr_get_num_args :
+  cxcursor -> int = "clang_ext_CallExpr_getNumArgs_wrapper"
+external ext_call_expr_get_arg :
+  cxcursor -> int -> cxcursor = "clang_ext_CallExpr_getArg_wrapper"
+external ext_size_of_pack_expr_get_pack :
+  cxcursor -> cxcursor = "clang_ext_SizeOfPackExpr_getPack_wrapper"
