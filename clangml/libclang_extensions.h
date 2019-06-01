@@ -119,9 +119,14 @@ clang_ext_Float_convertToDouble(CXFloat f);
 CXString
 clang_ext_StringLiteral_GetString(CXCursor c);
 
+#ifdef LLVM_VERSION_BEFORE_3_9_0
+#define CLANG_EXT_UNARY_OPERATOR_Invalid CLANG_EXT_UNARY_OPERATOR_UO_Invalid
+#endif
+
 enum clang_ext_UnaryOperatorKind {
   #define UNARY_OPERATION(Name, Spelling) CLANG_EXT_UNARY_OPERATOR_##Name,
   #include "clangml_OperationKinds.def"
+
   CLANG_EXT_UNARY_OPERATOR_Invalid
 };
 
@@ -131,6 +136,10 @@ clang_ext_UnaryOperator_getOpcode(CXCursor c);
 CXString
 clang_ext_UnaryOperator_getOpcodeSpelling(
   enum clang_ext_UnaryOperatorKind Kind);
+
+#ifdef LLVM_VERSION_BEFORE_3_9_0
+#define CLANG_EXT_BINARY_OPERATOR_Invalid CLANG_EXT_BINARY_OPERATOR_BO_Invalid
+#endif
 
 enum clang_ext_BinaryOperatorKind {
   #define BINARY_OPERATION(Name, Spelling) CLANG_EXT_BINARY_OPERATOR_##Name,
