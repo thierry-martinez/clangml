@@ -29,6 +29,16 @@ end
 
 module Command_line = Clang__command_line
 
+val includedir : string
+(** [includedir] is equal to the path to Clang [include/] directory, i.e.,
+    [`llvm-config --includedir`/../lib/clang/`llvm-config --version`/include],
+    where [llvm-config] commands has been evaluated when [clangml] has been
+    configured.
+    This directory contains [stddef.h] and other compiler-specific headers,
+    and it is common to pass
+    [Clang.Command_line.include_directory Clang.includedir]
+    to Clang command-line. *)
+
 (** {2 Abstract syntax tree} *)
 
 module Ast : sig

@@ -5,6 +5,6 @@
   (preprocess (staged_pps ppxlib.metaquot))
   (library_flags (-linkall))
   (flags -open Stdcompat)
-  (libraries ppxlib.metaquot clangml clangml.lift stdcompat))
+  (libraries ppxlib.metaquot clangml clangml.lift stdcompat clangml.config))
 
 (ocamllex ppx_lexer)

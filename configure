@@ -656,6 +656,7 @@ CC
 CPPFLAGS
 CFLAGS
 LLVM_VERSION_MACRO
+LLVM_INCLUDEDIR
 LLVM_LIBDIR
 LLVM_LIBS
 LLVM_LDFLAGS
@@ -674,6 +675,7 @@ ENDIF_CLANG_FROM_3_5
 IF_CLANG_FROM_3_5
 ENDIF_CLANG_BEFORE_3_5
 IF_CLANG_BEFORE_3_5
+EQUIVALENT_LLVM_VERSION
 LLVM_VERSION
 BREW_LLVM_CONFIG
 BREW_CELLAR
@@ -4057,81 +4059,84 @@ fi
 LLVM_VERSION=`echo $LLVM_VERSION | sed 's/svn$//'`
 
 
+EQUIVALENT_LLVM_VERSION="$LLVM_VERSION"
+
+
 # Some version equivalences
-if test "x$LLVM_VERSION" = "x3.4"; then :
-  LLVM_VERSION=3.4.2
+if test "x$EQUIVALENT_LLVM_VERSION" = "x3.4"; then :
+  EQUIVALENT_LLVM_VERSION=3.4.2
 
 fi
-if test "x$LLVM_VERSION" = "x3.4.1"; then :
-  LLVM_VERSION=3.4.2
+if test "x$EQUIVALENT_LLVM_VERSION" = "x3.4.1"; then :
+  EQUIVALENT_LLVM_VERSION=3.4.2
 
 fi
-if test "x$LLVM_VERSION" = "x3.5.0"; then :
-  LLVM_VERSION=3.5.2
+if test "x$EQUIVALENT_LLVM_VERSION" = "x3.5.0"; then :
+  EQUIVALENT_LLVM_VERSION=3.5.2
 
 fi
-if test "x$LLVM_VERSION" = "x3.5.1"; then :
-  LLVM_VERSION=3.5.2
+if test "x$EQUIVALENT_LLVM_VERSION" = "x3.5.1"; then :
+  EQUIVALENT_LLVM_VERSION=3.5.2
 
 fi
-if test "x$LLVM_VERSION" = "x3.6.0"; then :
-  LLVM_VERSION=3.6.2
+if test "x$EQUIVALENT_LLVM_VERSION" = "x3.6.0"; then :
+  EQUIVALENT_LLVM_VERSION=3.6.2
 
 fi
-if test "x$LLVM_VERSION" = "x3.6.1"; then :
-  LLVM_VERSION=3.6.2
+if test "x$EQUIVALENT_LLVM_VERSION" = "x3.6.1"; then :
+  EQUIVALENT_LLVM_VERSION=3.6.2
 
 fi
-if test "x$LLVM_VERSION" = "x3.8.0"; then :
-  LLVM_VERSION=3.8.1
+if test "x$EQUIVALENT_LLVM_VERSION" = "x3.8.0"; then :
+  EQUIVALENT_LLVM_VERSION=3.8.1
 
 fi
-if test "x$LLVM_VERSION" = "x3.9.0"; then :
-  LLVM_VERSION=3.9.1
+if test "x$EQUIVALENT_LLVM_VERSION" = "x3.9.0"; then :
+  EQUIVALENT_LLVM_VERSION=3.9.1
 
 fi
-if test "x$LLVM_VERSION" = "x4.0.0"; then :
-  LLVM_VERSION=4.0.1
+if test "x$EQUIVALENT_LLVM_VERSION" = "x4.0.0"; then :
+  EQUIVALENT_LLVM_VERSION=4.0.1
 
 fi
-if test "x$LLVM_VERSION" = "x5.0.0"; then :
-  LLVM_VERSION=5.0.2
+if test "x$EQUIVALENT_LLVM_VERSION" = "x5.0.0"; then :
+  EQUIVALENT_LLVM_VERSION=5.0.2
 
 fi
-if test "x$LLVM_VERSION" = "x5.0.1"; then :
-  LLVM_VERSION=5.0.2
+if test "x$EQUIVALENT_LLVM_VERSION" = "x5.0.1"; then :
+  EQUIVALENT_LLVM_VERSION=5.0.2
 
 fi
-if test "x$LLVM_VERSION" = "x6.0.0"; then :
-  LLVM_VERSION=6.0.1
+if test "x$EQUIVALENT_LLVM_VERSION" = "x6.0.0"; then :
+  EQUIVALENT_LLVM_VERSION=6.0.1
 
 fi
-if test "x$LLVM_VERSION" = "x7.0.0"; then :
-  LLVM_VERSION=7.0.1
+if test "x$EQUIVALENT_LLVM_VERSION" = "x7.0.0"; then :
+  EQUIVALENT_LLVM_VERSION=7.0.1
 
 fi
-if test "x$LLVM_VERSION" = "x7.1.0"; then :
-  LLVM_VERSION=7.0.1
+if test "x$EQUIVALENT_LLVM_VERSION" = "x7.1.0"; then :
+  EQUIVALENT_LLVM_VERSION=7.0.1
 
 fi
 
 
 # Check whether --with-llvm-version was given.
 if test "${with_llvm_version+set}" = set; then :
-  withval=$with_llvm_version; LLVM_VERSION="$with_llvm_version"
+  withval=$with_llvm_version; EQUIVALENT_LLVM_VERSION="$with_llvm_version"
 
-   { $as_echo "$as_me:${as_lineno-$LINENO}: Will consider bindings for version $LLVM_VERSION (--with-llvm-version)" >&5
-$as_echo "$as_me: Will consider bindings for version $LLVM_VERSION (--with-llvm-version)" >&6;}
+   { $as_echo "$as_me:${as_lineno-$LINENO}: Will consider bindings for version $EQUIVALENT_LLVM_VERSION (--with-llvm-version)" >&5
+$as_echo "$as_me: Will consider bindings for version $EQUIVALENT_LLVM_VERSION (--with-llvm-version)" >&6;}
 fi
 
 
-if test -d $srcdir/bootstrap/$LLVM_VERSION; then :
+if test -d $srcdir/bootstrap/$EQUIVALENT_LLVM_VERSION; then :
   true
 else
-  as_fn_error $? "LLVM version $LLVM_VERSION not supported. Please report: thierry.martinez@inria.fr . You may try to force another bindings version with ./configure --with-llvm-version= (to obtain the list of supported versions: ls $srcdir/bootstrap)." "$LINENO" 5
+  as_fn_error $? "LLVM version $EQUIVALENT_LLVM_VERSION not supported. Please report: thierry.martinez@inria.fr . You may try to force another bindings version with ./configure --with-llvm-version= (to obtain the list of supported versions: ls $srcdir/bootstrap)." "$LINENO" 5
 fi
 
-if test `printf "$LLVM_VERSION\n3.5" | sort | head -n1` = "3.5"; then :
+if test `printf "$EQUIVALENT_LLVM_VERSION\n3.5" | sort | head -n1` = "3.5"; then :
   IF_CLANG_BEFORE_3_5="(*"
 
    ENDIF_CLANG_BEFORE_3_5="*)"
@@ -4151,7 +4156,7 @@ else
 
 fi
 
-if test `printf "$LLVM_VERSION\n3.6" | sort | head -n1` = "3.6"; then :
+if test `printf "$EQUIVALENT_LLVM_VERSION\n3.6" | sort | head -n1` = "3.6"; then :
   IF_CLANG_BEFORE_3_6="(*"
 
    ENDIF_CLANG_BEFORE_3_6="*)"
@@ -4171,7 +4176,7 @@ else
 
 fi
 
-if test `printf "$LLVM_VERSION\n3.7" | sort | head -n1` = "3.7"; then :
+if test `printf "$EQUIVALENT_LLVM_VERSION\n3.7" | sort | head -n1` = "3.7"; then :
   IF_CLANG_BEFORE_3_7="(*"
 
    ENDIF_CLANG_BEFORE_3_7="*)"
@@ -4183,7 +4188,7 @@ else
 
 fi
 
-if test `printf "$LLVM_VERSION\n8.0" | sort | head -n1` = "8.0"; then :
+if test `printf "$EQUIVALENT_LLVM_VERSION\n8.0" | sort | head -n1` = "8.0"; then :
   IF_CLANG_BEFORE_8_0="(*"
 
    ENDIF_CLANG_BEFORE_8_0="*)"
@@ -4215,7 +4220,10 @@ LLVM_LIBS=`$LLVM_CONFIG --libs`
 LLVM_LIBDIR=`$LLVM_CONFIG --libdir`
 
 
-LLVM_VERSION_MACRO=LLVM_VERSION_`echo $LLVM_VERSION | sed 's/[.]/_/g'`
+LLVM_INCLUDEDIR=`$LLVM_CONFIG --includedir`
+
+
+LLVM_VERSION_MACRO=LLVM_VERSION_`echo $EQUIVALENT_LLVM_VERSION | sed 's/[.]/_/g'`
 
 
 # These filters enable compilation with gcc.
@@ -6539,19 +6547,19 @@ fi
 fi
 fi
 
-if cp $srcdir/bootstrap/$LLVM_VERSION/clang__bindings.ml clangml/clang__bindings.ml; then :
+if cp $srcdir/bootstrap/$EQUIVALENT_LLVM_VERSION/clang__bindings.ml clangml/clang__bindings.ml; then :
   true
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
 
-if cp $srcdir/bootstrap/$LLVM_VERSION/clang__bindings.mli clangml/clang__bindings.mli; then :
+if cp $srcdir/bootstrap/$EQUIVALENT_LLVM_VERSION/clang__bindings.mli clangml/clang__bindings.mli; then :
   true
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
 
-if cp $srcdir/bootstrap/$LLVM_VERSION/clang_stubs.c clangml/clang_stubs.c; then :
+if cp $srcdir/bootstrap/$EQUIVALENT_LLVM_VERSION/clang_stubs.c clangml/clang_stubs.c; then :
   true
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5
