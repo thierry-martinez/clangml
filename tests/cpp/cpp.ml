@@ -15,23 +15,9 @@ let check_pattern_decl decl pattern = check_pattern lift_expr#decl decl pattern
 
 let check_pattern_tu expr tu = check_pattern lift_expr#translation_unit expr tu
 
-let run_llvm_config llvm_config arguments =
-  let command = String.concat " " (llvm_config :: arguments) in
-  let output = Unix.open_process_in command in
-  let result = input_line output in
-  if Unix.close_process_in output <> Unix.WEXITED 0 then
-    failwith (Printf.sprintf "%s: execution failed" command);
-  result
-
 let parse_string ?(command_line_args = []) s =
-  let llvm_config = Clangml_config.llvm_config in
-  let llvm_version = run_llvm_config llvm_config ["--version"] in
-  let llvm_include_dir = run_llvm_config llvm_config ["--includedir"] in
-  let clang_include_dir =
-    List.fold_left Filename.concat llvm_include_dir
-      [".."; "lib"; "clang"; llvm_version; "include"] in
   let command_line_args =
-    Clang.Command_line.include_directory clang_include_dir ::
+    Clang.Command_line.include_directory Clang.includedir ::
     Clang.Command_line.language CXX ::
     command_line_args in
   let ast = Clang.Ast.parse_string ~command_line_args s in
