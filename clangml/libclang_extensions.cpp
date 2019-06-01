@@ -1661,10 +1661,12 @@ extern "C" {
   enum clang_ext_BinaryOperatorKind
   clang_ext_CXXFoldExpr_getOperator(CXCursor c)
   {
+    #ifndef LLVM_VERSION_BEFORE_3_6_0
     if (auto e =
       llvm::dyn_cast_or_null<clang::CXXFoldExpr>(GetCursorStmt(c))) {
       return static_cast<clang_ext_BinaryOperatorKind>(e->getOperator());
     }
+    #endif
     return CLANG_EXT_BINARY_OPERATOR_Invalid;
   }
 

@@ -3,6 +3,17 @@
 
 open Clang__bindings
 
+type compat_stmt_kind =
+  | CXXFoldExpr
+  | Unknown
+
+let compat_stmt_kind (kind : clang_ext_stmtkind) : compat_stmt_kind =
+  match kind with
+@IF_CLANG_FROM_3_6@
+  | CXXFoldExpr -> CXXFoldExpr
+@ENDIF_CLANG_FROM_3_6@
+  | _ -> Unknown
+
 @IF_CLANG_BEFORE_3_5@
 type cxerrorcode =
   | Failure
@@ -23,7 +34,6 @@ let parse_translation_unit2 index filename command_line_args unsaved_files
 (** Compatibility wrapper for [parse_translation_unit].
     In case of error, [Error Failure] will be returned. *)
 @ENDIF_CLANG_BEFORE_3_5@
-
 
 @IF_CLANG_BEFORE_3_6@
 let predefined_expr_get_function_name cursor decl =

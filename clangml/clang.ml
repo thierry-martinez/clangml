@@ -887,14 +887,18 @@ module Ast = struct
                     sub.desc
                   else
                     MaterializeTemporaryExpr sub
-              | CXXFoldExpr ->
-                  let lhs, rhs = 
-                    match list_of_children cursor with
-                    | [lhs; rhs] -> expr_of_cxcursor lhs, expr_of_cxcursor rhs
-                    | _ -> raise Invalid_structure in
-                  let operator = ext_cxxfold_expr_get_operator cursor in
-                  Fold { lhs; operator; rhs }
-              | kind -> UnexposedExpr kind
+              | kind ->
+                  match compat_stmt_kind kind with
+                  | CXXFoldExpr ->
+                      let lhs, rhs =
+                        match list_of_children cursor with
+                        | [lhs; rhs] ->
+                            expr_of_cxcursor lhs, expr_of_cxcursor rhs
+                        | _ -> raise Invalid_structure in
+                      let operator = ext_cxxfold_expr_get_operator cursor in
+                      Fold { lhs; operator; rhs }
+                  | _ ->
+                      UnexposedExpr kind
             end
         | PackExpansionExpr ->
             let sub =
