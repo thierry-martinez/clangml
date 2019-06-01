@@ -247,6 +247,8 @@ AC_SUBST([LLVM_LIBS], [[`$LLVM_CONFIG --libs`]])
 
 AC_SUBST([LLVM_LIBDIR], [[`$LLVM_CONFIG --libdir`]])
 
+AC_SUBST([LLVM_INCLUDEDIR], [[`$LLVM_CONFIG --includedir`]])
+
 AC_SUBST([LLVM_VERSION_MACRO],
   [[LLVM_VERSION_`echo $LLVM_VERSION | sed 's/[.]/_/g'`]])
 

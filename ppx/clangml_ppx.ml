@@ -134,14 +134,6 @@ let empty_arguments = {
   return_type = None;
 }
 
-let run_llvm_config llvm_config arguments =
-  let command = String.concat " " (llvm_config :: arguments) in
-  let output = Unix.open_process_in command in
-  let result = input_line output in
-  if Unix.close_process_in output <> Unix.WEXITED 0 then
-    failwith (Printf.sprintf "%s: execution failed" command);
-  result
-
 let extract_payload language (mapper : Ast_mapper.mapper) ~loc
     (payload : Parsetree.payload) =
   let kind, arguments, code =
@@ -279,14 +271,8 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc
     | None -> command_line_args
     | Some standard ->
         Clang.Command_line.standard standard :: command_line_args in
-  let llvm_config = Clangml_config.llvm_config in
-  let llvm_version = run_llvm_config llvm_config ["--version"] in
-  let llvm_include_dir = run_llvm_config llvm_config ["--includedir"] in
-  let clang_include_dir =
-    List.fold_left Filename.concat llvm_include_dir
-      [".."; "lib"; "clang"; llvm_version; "include"] in
   let command_line_args =
-    Clang.Command_line.include_directory clang_include_dir
+    Clang.Command_line.include_directory Clang.includedir
     :: command_line_args in
   let ast = Clang.Ast.parse_string ~command_line_args code in
   let tu = Clang.Ast.cursor_of_node ast |> Clang.cursor_get_translation_unit in

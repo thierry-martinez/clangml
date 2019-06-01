@@ -18,13 +18,8 @@ let run_llvm_config llvm_config arguments =
   result
 
 let parse_string s =
-  let llvm_config = Clangml_config.llvm_config in
-  let llvm_version = run_llvm_config llvm_config ["--version"] in
-  let llvm_include_dir = run_llvm_config llvm_config ["--includedir"] in
-  let clang_include_dir =
-    List.fold_left Filename.concat llvm_include_dir
-      [".."; "lib"; "clang"; llvm_version; "include"] in
-  let command_line_args = ["-I"; clang_include_dir] in
+  let command_line_args =
+    [Clang.Command_line.include_directory Clang.includedir] in
   Clang.Ast.parse_string ~command_line_args s
 
 (* 6.4.2.2 Predefined identifiers *)
