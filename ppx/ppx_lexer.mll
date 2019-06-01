@@ -1,4 +1,9 @@
 {
+ type antiquotation_type =
+   | Typename
+   | Decl
+   | Expression of string
+
  let type_buffer = Buffer.create 17
 }
 
@@ -6,6 +11,11 @@ let ident = ['a' - 'z' '_'] ['A' - 'Z' 'a' - 'z' '0' - '9' '_']*
 
 rule main = parse
 | "[%" (ident as antiquotation_type) {
+  let antiquotation_type =
+    match antiquotation_type with
+    | "class" | "typename" -> Typename
+    | "decl" -> Decl
+    | _ -> Expression antiquotation_type in
   Some antiquotation_type
 }
 | "[%(" {
@@ -14,7 +24,7 @@ rule main = parse
   let antiquotation_type = Buffer.contents type_buffer in
   Buffer.clear type_buffer;
   lexbuf.lex_start_p <- start;
-  Some antiquotation_type
+  Some (Expression antiquotation_type)
 }
 | "//" {
   ignore_line_comment lexbuf;

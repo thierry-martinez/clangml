@@ -144,6 +144,10 @@ and expr_prec prec fmt (e : expr) =
       Format.pp_print_string fmt "\"";
       String.iter (c_escape_char fmt) str;
       Format.pp_print_string fmt "\""
+  | Call {
+        callee = { desc = DeclRef (BinaryOperatorRef kind) };
+        args = [lhs; rhs]} ->
+      expr_prec prec fmt { e with desc = BinaryOperator { lhs; kind; rhs }}
   | Call { callee; args } ->
       maybe_parentheses 1 prec fmt (fun fmt ->
 	Format.fprintf fmt "@[%a(@[%a@])@]" (expr_prec 1) callee
@@ -242,9 +246,12 @@ and print_function_body fmt body =
 and print_ident_ref fmt ident_ref =
   match ident_ref with
   | Ident name -> Format.pp_print_string fmt name
+  | BinaryOperatorRef EQ ->
+      Format.pp_print_string fmt "operator=="
   | NamespaceRef { namespace_ref = ref; ident }
   | TypeRef { type_ref = ref; ident; _ } ->
       Format.fprintf fmt "@[%a::%s@]" print_ident_ref ref ident
+  | _ -> failwith "Not implemented ident"
 
 and typed_value fmt_value fmt t =
   match t.desc with

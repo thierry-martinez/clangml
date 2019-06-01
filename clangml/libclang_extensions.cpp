@@ -556,7 +556,7 @@ extern "C" {
         llvm::dyn_cast_or_null<clang::UnaryOperator>(GetCursorStmt(c))) {
       return static_cast<clang_ext_UnaryOperatorKind>(Op->getOpcode());
     }
-    return static_cast<clang_ext_UnaryOperatorKind>(0);
+    return CLANG_EXT_UNARY_OPERATOR_Invalid;
   }
 
   CXString
@@ -568,9 +568,9 @@ extern "C" {
       case CLANG_EXT_UNARY_OPERATOR_##Name:     \
         return cxstring_createRef(Spelling);
 #include "clangml_OperationKinds.def"
+    default:
+      return cxstring_createRef("");
     }
-    //llvm_unreachable("Unsupported UnaryOperatorKind");
-    return cxstring_createRef("");
   }
 
   enum clang_ext_BinaryOperatorKind
@@ -580,7 +580,7 @@ extern "C" {
         llvm::dyn_cast_or_null<clang::BinaryOperator>(GetCursorStmt(c))) {
       return static_cast<clang_ext_BinaryOperatorKind>(Op->getOpcode());
     }
-    return static_cast<clang_ext_BinaryOperatorKind>(0);
+    return CLANG_EXT_BINARY_OPERATOR_Invalid;
   }
 
   CXString
@@ -592,9 +592,9 @@ extern "C" {
       case CLANG_EXT_BINARY_OPERATOR_##Name:     \
         return cxstring_createRef(Spelling);
 #include "clangml_OperationKinds.def"
+    default:
+      return cxstring_createRef("");
     }
-    //llvm_unreachable("Unsupported BinaryOperatorKind");
-    return cxstring_createRef("");
   }
 
   unsigned
@@ -1487,6 +1487,16 @@ extern "C" {
     return false;
   }
 
+  bool
+  clang_ext_LambdaCapture_isPackExpansion(
+    struct clang_ext_LambdaCapture capture)
+  {
+    if (auto *LC = GetLambdaCapture(capture)) {
+      return LC->isPackExpansion();
+    }
+    return false;
+  }
+
   void
   clang_ext_LambdaCapture_dispose(struct clang_ext_LambdaCapture capture)
   {
@@ -1637,5 +1647,70 @@ extern "C" {
     #include <clang/Frontend/LangStandards.def>
     #undef FOREACH_STANDARD
     return CLANG_EXT_LANGSTANDARDS_Invalid;
+  }
+
+  CXType
+  clang_ext_PackExpansion_getPattern(CXType c)
+  {
+    if (auto PET = GetQualType(c)->getAs<clang::PackExpansionType>()) {
+      return MakeCXType(PET->getPattern(), GetTU(c));
+    }
+    return MakeCXTypeInvalid(GetTU(c));    
+  }
+
+  enum clang_ext_BinaryOperatorKind
+  clang_ext_CXXFoldExpr_getOperator(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXFoldExpr>(GetCursorStmt(c))) {
+      return static_cast<clang_ext_BinaryOperatorKind>(e->getOperator());
+    }
+    return CLANG_EXT_BINARY_OPERATOR_Invalid;
+  }
+
+  bool
+  clang_ext_CXXBoolLiteralExpr_getValue(CXCursor c)
+  {
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXBoolLiteralExpr>(GetCursorStmt(c))) {
+      return e->getValue();
+    }
+    return false;
+  }
+
+  CXCursor
+  clang_ext_CallExpr_getCallee(CXCursor c)
+  {
+    if (auto e = llvm::dyn_cast_or_null<clang::CallExpr>(GetCursorStmt(c))) {
+      return MakeCXCursor(e->getCallee(), getCursorTU(c));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  unsigned int
+  clang_ext_CallExpr_getNumArgs(CXCursor c)
+  {
+    if (auto e = llvm::dyn_cast_or_null<clang::CallExpr>(GetCursorStmt(c))) {
+      return e->getNumArgs();
+    }
+    return 0;
+  }
+
+  CXCursor
+  clang_ext_CallExpr_getArg(CXCursor c, unsigned int i)
+  {
+    if (auto e = llvm::dyn_cast_or_null<clang::CallExpr>(GetCursorStmt(c))) {
+      return MakeCXCursor(e->getArg(i), getCursorTU(c));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  CXCursor
+  clang_ext_SizeOfPackExpr_getPack(CXCursor c)
+  {
+    if (auto e = llvm::dyn_cast_or_null<clang::SizeOfPackExpr>(GetCursorStmt(c))) {
+      return MakeCXCursor(e->getPack(), getCursorTU(c));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
   }
 }

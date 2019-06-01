@@ -600,7 +600,7 @@ let () =
   | TemplateTypeParm of string
   | TemplateSpecialization of {
       name : template_name;
-      arguments : template_argument list;
+      args : template_argument list;
     }
   | BuiltinType of builtin_type
 (** Built-in type.
@@ -627,6 +627,11 @@ let () =
       var_type = { desc = Auto };
       var_init = Some { desc = IntegerLiteral (Int 1)}}}]]
     ]} *)
+  | PackExpansion of qual_type
+  | MemberPointer of {
+      pointee : qual_type;
+      class_ : qual_type;
+    }
   | UnexposedType of clang_ext_typekind
   | InvalidType
 
@@ -1554,6 +1559,7 @@ let () =
       ImaginaryLiteral { desc = FloatingLiteral (Float 2.5)}}}] -> ()
   | _ -> assert false
     ]}*)
+  | BoolLiteral of bool
   | UnaryOperator of {
       kind : unary_operator_kind;
       operand : expr;
@@ -2089,6 +2095,17 @@ let () =
           argument = { desc = DeclRef (Ident "t")}}}}] }}}]]
    ]}*)
   | Typeid of unary_expr_or_type_trait
+  | PackExpansionExpr of expr
+  | Fold of {
+      lhs : expr;
+      operator : binary_operator_kind;
+      rhs : expr;
+    }
+  | SizeOfPack of ident_ref
+  | Construct of {
+      name : string;
+      args : expr list;
+    }
   | UnexposedExpr of clang_ext_stmtkind
   | UnknownExpr of cxcursorkind
 
@@ -2096,11 +2113,13 @@ and lambda_capture = {
    capture_kind : lambda_capture_kind;
    implicit : bool;
    captured_var_name : string option;
+   pack_expansion : bool;
  }
 
 and cast_kind =
   | CStyle
   | Implicit
+  | Functional
 
 and unary_expr_or_type_trait =
   | ArgumentExpr of expr
@@ -2844,6 +2863,7 @@ let () =
       explicit : bool;
       defaulted : bool;
       deleted : bool;
+      constexpr : bool;
     }
 (**
   C++ class constructor.
@@ -3126,6 +3146,7 @@ let () =
 
 and ident_ref =
   | Ident of string
+  | BinaryOperatorRef of binary_operator_kind
   | NamespaceRef of {
       namespace_ref : ident_ref;
       ident : string;
@@ -3362,12 +3383,12 @@ let () =
                name = "x";
                qual_type = { desc = TemplateSpecialization {
                  name = NameTemplate { desc = TemplateTemplateParameter "T" };
-                 arguments = [Type { desc = BuiltinType Bool }] }}}};
+                 args = [Type { desc = BuiltinType Bool }] }}}};
            { desc = Field {
                name = "y";
                qual_type = { desc = TemplateSpecialization {
                  name = NameTemplate { desc = TemplateTemplateParameter "T" };
-                 arguments = [Type { desc = BuiltinType Int }] }}}}] }}}}] -> ()
+                 args = [Type { desc = BuiltinType Int }] }}}}] }}}}] -> ()
   | _ -> assert false
 
 let example = {|
@@ -3400,7 +3421,7 @@ let () =
                name = "x";
                qual_type = { desc = TemplateSpecialization {
                  name = NameTemplate { desc = TemplateTemplateParameter "T" };
-                 arguments = [
+                 args = [
                    ExprTemplateArgument { desc = IntegerLiteral (Int 1) };
                    ExprTemplateArgument { desc = IntegerLiteral (Int 2) };
                    ExprTemplateArgument { desc = IntegerLiteral (Int 3) }]

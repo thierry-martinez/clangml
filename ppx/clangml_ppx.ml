@@ -1,11 +1,7 @@
 let placeholder_hashtbl_sz = 17
 
-type antiquotation_type =
-  | Typename
-  | Expression of string
-
 type antiquotation = {
-    antiquotation_type : antiquotation_type;
+    antiquotation_type : Ppx_lexer.antiquotation_type;
     placeholder : string;
     payload : Parsetree.payload Location.loc;
     pos_begin : int;
@@ -25,10 +21,6 @@ let extract_antiquotations s =
     match has_antiquotation with
     | None -> ()
     | Some antiquotation_type ->
-        let antiquotation_type =
-          match antiquotation_type with
-          | "typename" | " class" -> Typename
-          | _ -> Expression antiquotation_type in
         let lbracket_count_ref = ref 0 in
         let pattern, (token_buf : Parser.token option) =
           match Lexer.token lexbuf with
@@ -74,6 +66,7 @@ let extract_antiquotations s =
         let placeholder_code =
           match antiquotation_type with
           | Typename -> placeholder
+          | Decl -> Printf.sprintf "int %s;" placeholder
           | Expression antiquotation_type ->
               Printf.sprintf "(\"%s\", (%s) 0)" placeholder
                 antiquotation_type in
@@ -124,7 +117,8 @@ let rec remove_placeholders antiquotations items =
   | [], _ -> items
   | { antiquotation_type = Typename; _ } :: antiquotations, _ :: items ->
       remove_placeholders antiquotations items
-  | { antiquotation_type = Expression _; _ } :: antiquotations, items ->
+  | { antiquotation_type = (Decl | Expression _); _ } :: antiquotations,
+    items ->
       remove_placeholders antiquotations items
   | _ -> assert false
 
@@ -139,6 +133,14 @@ let empty_arguments = {
   standard = None;
   return_type = None;
 }
+
+let run_llvm_config llvm_config arguments =
+  let command = String.concat " " (llvm_config :: arguments) in
+  let output = Unix.open_process_in command in
+  let result = input_line output in
+  if Unix.close_process_in output <> Unix.WEXITED 0 then
+    failwith (Printf.sprintf "%s: execution failed" command);
+  result
 
 let extract_payload language (mapper : Ast_mapper.mapper) ~loc
     (payload : Parsetree.payload) =
@@ -199,7 +201,7 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc
     | Typename ->
         Buffer.add_string buffer
           (Printf.sprintf "typedef void *%s;" placeholder);
-    | Expression _ -> ());
+    | Decl | Expression _ -> ());
   let return_type =
     match arguments.return_type with
     | None -> "void"
@@ -277,6 +279,15 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc
     | None -> command_line_args
     | Some standard ->
         Clang.Command_line.standard standard :: command_line_args in
+  let llvm_config = Clangml_config.llvm_config in
+  let llvm_version = run_llvm_config llvm_config ["--version"] in
+  let llvm_include_dir = run_llvm_config llvm_config ["--includedir"] in
+  let clang_include_dir =
+    List.fold_left Filename.concat llvm_include_dir
+      [".."; "lib"; "clang"; llvm_version; "include"] in
+  let command_line_args =
+    Clang.Command_line.include_directory clang_include_dir
+    :: command_line_args in
   let ast = Clang.Ast.parse_string ~command_line_args code in
   let tu = Clang.Ast.cursor_of_node ast |> Clang.cursor_get_translation_unit in
   let has_diagnostics = ref false in
@@ -348,6 +359,22 @@ module Remove_placeholder (X : Lifter) = struct
       | Some payload ->
           subst_payload payload
       | None -> super#expr expr
+
+    method decl (decl : Clang.Ast.decl) =
+      match
+        match decl with
+        | { desc = Var {
+            var_name = ident;
+            var_type = { desc = BuiltinType Int }}}
+        | { desc = Field {
+            name = ident;
+            qual_type = { desc = BuiltinType Int }}} ->
+            find_and_remove table ident
+        | _ -> None
+      with
+      | Some payload ->
+          subst_payload payload
+      | None -> super#decl decl
 
     method qual_type (qual_type : Clang.Ast.qual_type) =
       match
@@ -452,7 +479,12 @@ and pat_mapper (mapper : Ast_mapper.mapper) (pat : Parsetree.pattern) =
               "Pattern expected in anti-quotation")) in
       let remover = new Pat_remove.lifter subst_payload placeholder_table in
       let pat = extraction remover ast in
-      assert (is_empty placeholder_table);
+      placeholder_table |> String_hashtbl.iter begin
+        fun _ (quotation : _ Location.loc) ->
+          Format.eprintf "%a@." Clang.Ast.pp_translation_unit ast;
+          raise (Location.Error (Location.error ~loc:quotation.loc
+            "Antiquotation disappeared"))
+      end;
       pat
 
 let ppx_pattern_mapper = {

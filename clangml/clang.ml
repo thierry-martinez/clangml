@@ -18,7 +18,6 @@ let option_cursor_bind f cursor : 'a option =
   else
     f cursor
 
-
 let option_cursor f cursor : 'a option =
   option_cursor_bind (fun x -> Some (f x)) cursor
 
@@ -177,6 +176,10 @@ module Ast = struct
         | Complex ->
             let element_type = cxtype |> get_element_type |> of_cxtype in
             Complex element_type
+        | MemberPointer ->
+            let pointee = cxtype |> get_pointee_type |> of_cxtype in
+            let class_ = cxtype |> type_get_class_type |> of_cxtype in
+            MemberPointer { pointee; class_ }
         | _ ->
             begin
               match ext_type_get_kind cxtype with
@@ -198,15 +201,19 @@ module Ast = struct
                     cxtype |>
                     ext_template_specialization_type_get_template_name |>
                     make_template_name in
-                  let arguments =
+                  let args =
                     List.init
                       (ext_template_specialization_type_get_num_args cxtype)
                     @@ fun i ->
                       ext_template_specialization_type_get_argument cxtype i |>
                       make_template_argument in
-                  TemplateSpecialization { name; arguments }
+                  TemplateSpecialization { name; args }
               | Builtin -> BuiltinType (get_type_kind cxtype)
               | Auto -> Auto
+              | PackExpansion ->
+                  let pattern =
+                    ext_pack_expansion_get_pattern cxtype |> of_cxtype in
+                  PackExpansion pattern
               | kind -> UnexposedType kind
             end in
       match desc with
@@ -297,13 +304,9 @@ module Ast = struct
             let children = list_of_children cursor in
             let rec extract_initializer_list children =
               match children with
-              | member :: unexposed :: children when
-                  get_cursor_kind member = MemberRef &&
-                  get_cursor_kind unexposed = UnexposedExpr ->
-                    let init_expr =
-                      match list_of_children unexposed with
-                      | [init_expr] -> expr_of_cxcursor init_expr
-                      | _ -> raise Invalid_structure in
+              | member :: value :: children when
+                  get_cursor_kind member = MemberRef ->
+                    let init_expr = expr_of_cxcursor value in
                     (get_cursor_spelling member, init_expr) ::
                     extract_initializer_list children
               | _ :: tl -> extract_initializer_list tl
@@ -321,6 +324,7 @@ module Ast = struct
               defaulted = ext_cxxmethod_is_defaulted cursor;
               deleted = ext_function_decl_is_deleted cursor;
               explicit = ext_cxxconstructor_is_explicit cursor;
+              constexpr = ext_function_decl_is_constexpr cursor;
             }
         | Destructor ->
             let children = list_of_children cursor in
@@ -377,7 +381,9 @@ module Ast = struct
           name = cursor |> get_cursor_spelling;
           qual_type = cursor |> get_cursor_type |> of_cxtype;
           default =
-            match list_of_children cursor with
+            match list_of_children cursor |> List.filter begin fun c ->
+              get_cursor_kind c <> TypeRef
+            end with
             | [] -> None
             | [default] -> Some (default |> expr_of_cxcursor)
             | _ -> raise Invalid_structure }
@@ -443,10 +449,9 @@ module Ast = struct
       if cxtype |> get_type_kind = FunctionProto then
         let non_variadic =
           List.init (get_num_arg_types cxtype) @@ fun i ->
-            node {
-              name = "";
-              qual_type = of_cxtype (get_arg_type cxtype i);
-              default = None } in
+            let qual_type = of_cxtype (get_arg_type cxtype i) in
+            node ~qual_type {
+              name = ""; qual_type; default = None } in
         let variadic = is_function_type_variadic cxtype in
         Some { non_variadic; variadic }
       else
@@ -705,6 +710,8 @@ module Ast = struct
               | [operand] -> expr_of_cxcursor operand
               | _ -> raise Invalid_structure in
             ImaginaryLiteral sub_expr
+        | CXXBoolLiteralExpr ->
+            BoolLiteral (ext_cxxbool_literal_expr_get_value cursor)
         | UnaryOperator ->
             let operand =
               match list_of_children cursor with
@@ -721,21 +728,23 @@ module Ast = struct
             BinaryOperator { lhs; kind; rhs }
         | DeclRefExpr -> DeclRef (ident_ref_of_cxcursor cursor)
         | CallExpr ->
-            let callee, args =
-              match list_of_children cursor with
-              | callee :: args ->
-                  let callee = callee |> expr_of_cxcursor in
-                  let args = args |> List.map expr_of_cxcursor in
-                  callee, args
-              | _ -> raise Invalid_structure in
-            Call { callee; args }
+            begin match ext_stmt_get_kind cursor with
+            | CXXConstructExpr ->
+                Construct {
+                  name = get_cursor_spelling cursor;
+                  args = list_of_children cursor |> List.map expr_of_cxcursor;
+                }
+            | _ ->
+                Call {
+                  callee = ext_call_expr_get_callee cursor |> expr_of_cxcursor;
+                  args = List.init (ext_call_expr_get_num_args cursor) begin
+                    fun i ->
+                      ext_call_expr_get_arg cursor i |> expr_of_cxcursor
+                  end
+                }
+            end
         | CStyleCastExpr ->
-            let qual_type = get_cursor_type cursor |> of_cxtype in
-            let operand =
-              match list_of_children cursor with
-              | [operand] | [_; operand] -> expr_of_cxcursor operand
-              | _ -> raise Invalid_structure in
-            Cast { kind = CStyle; qual_type; operand }
+            cast_of_cxcursor CStyle cursor
         | MemberRefExpr ->
             begin match list_of_children cursor with
             | [] -> MemberRef (get_cursor_spelling cursor)
@@ -843,12 +852,7 @@ module Ast = struct
             begin
               match ext_stmt_get_kind cursor with
               | ImplicitCastExpr ->
-                  let operand =
-                    match list_of_children cursor with
-                    | [operand] | [_; operand] -> expr_of_cxcursor operand
-                    | _ -> raise Invalid_structure in
-                  let qual_type = get_cursor_type cursor |> of_cxtype in
-                  Cast { kind = Implicit; qual_type; operand }
+                  cast_of_cxcursor Implicit cursor
               | BinaryConditionalOperator ->
                   let cond, else_branch =
                     match
@@ -883,10 +887,36 @@ module Ast = struct
                     sub.desc
                   else
                     MaterializeTemporaryExpr sub
+              | CXXFoldExpr ->
+                  let lhs, rhs = 
+                    match list_of_children cursor with
+                    | [lhs; rhs] -> expr_of_cxcursor lhs, expr_of_cxcursor rhs
+                    | _ -> raise Invalid_structure in
+                  let operator = ext_cxxfold_expr_get_operator cursor in
+                  Fold { lhs; operator; rhs }
               | kind -> UnexposedExpr kind
             end
+        | PackExpansionExpr ->
+            let sub =
+              match list_of_children cursor with
+              | [sub] -> expr_of_cxcursor sub
+              | _ -> raise Invalid_structure in
+            PackExpansionExpr sub
+        | SizeOfPackExpr ->
+            SizeOfPack (
+              ext_size_of_pack_expr_get_pack cursor |> ident_ref_of_cxcursor)
+        | CXXFunctionalCastExpr ->
+            cast_of_cxcursor Functional cursor
         | _ -> UnknownExpr kind
       with Invalid_structure -> UnknownExpr kind
+
+    and cast_of_cxcursor kind cursor =
+      let operand =
+        match List.rev (list_of_children cursor) with
+        | operand :: _ -> expr_of_cxcursor operand
+        | _ -> raise Invalid_structure in
+      let qual_type = get_cursor_type cursor |> of_cxtype in
+      Cast { kind; qual_type; operand }
 
     and option_call_expr_of_cxcursor cursor =
       cursor |> option_cursor_bind begin fun init ->
@@ -919,8 +949,8 @@ module Ast = struct
         else
           None in
       let body =
-        match children with
-        | [body] -> stmt_of_cxcursor body
+        match List.rev children with
+        | body :: _ -> stmt_of_cxcursor body
         | _ -> raise Invalid_structure in
       Lambda {
         captures; body; parameters; result_type;
@@ -941,7 +971,9 @@ module Ast = struct
         option_cursor get_cursor_spelling in
       { implicit = ext_lambda_capture_is_implicit capture;
         capture_kind = ext_lambda_capture_get_kind capture;
-        captured_var_name; }
+        captured_var_name;
+        pack_expansion = ext_lambda_capture_is_pack_expansion capture;
+      }
 
     and unary_expr_of_cxcursor cursor =
       let kind = cursor |> ext_unary_expr_get_kind in
@@ -1011,6 +1043,11 @@ module Ast = struct
       | [] -> decl
       | _ -> TemplateDecl { parameters; decl = node ~cursor decl }
 
+    and ident_of_string s =
+      match s with
+      | "operator==" -> BinaryOperatorRef EQ
+      | _ -> Ident s
+
     and ident_ref_of_cxcursor cursor =
       let ident = get_cursor_spelling cursor in
       let rec pop_ref list ident =
@@ -1028,7 +1065,9 @@ module Ast = struct
         | Some (NamespaceRef, hd, tl) ->
             let namespace_ref = pop_ref tl (get_cursor_spelling hd) in
             NamespaceRef { namespace_ref; ident }
-        | _ -> Ident ident in
+        | Some (OverloadedDeclRef, hd, _) ->
+            ident_of_string (get_cursor_spelling hd)
+        | _ -> ident_of_string ident in
       pop_ref (List.rev (list_of_children cursor)) ident
 
     let translation_unit_of_cxcursor cursor =

@@ -23,7 +23,9 @@ let iter_children f c =
 
 let list_of_children c =
   let children_ref = ref [] in
-  c |> iter_children (fun cur -> children_ref := cur :: !children_ref);
+  c |> iter_children begin fun cur ->
+    children_ref := cur :: !children_ref
+  end;
   List.rev !children_ref
 
 let iter_type_fields f ty =
@@ -43,7 +45,9 @@ let iter_type_fields f ty =
 
 let list_of_type_fields c =
   let fields_ref = ref [] in
-  c |> iter_type_fields (fun cur -> fields_ref := cur :: !fields_ref);
+  c |> iter_type_fields begin fun cur ->
+    fields_ref := cur :: !fields_ref
+  end;
   List.rev !fields_ref
 
 let seq_of_diagnostics tu =
@@ -62,7 +66,10 @@ let warning_or_error = Warning :: error
 let seq_exists pred seq =
   let exception Exists in
   try
-    seq |> Seq.iter (fun d -> if pred d then raise Exists);
+    seq |> Seq.iter begin fun d ->
+      if pred d then
+        raise Exists
+    end;
     false
   with Exists ->
     true

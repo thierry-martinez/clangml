@@ -122,6 +122,7 @@ clang_ext_StringLiteral_GetString(CXCursor c);
 enum clang_ext_UnaryOperatorKind {
   #define UNARY_OPERATION(Name, Spelling) CLANG_EXT_UNARY_OPERATOR_##Name,
   #include "clangml_OperationKinds.def"
+  CLANG_EXT_UNARY_OPERATOR_Invalid
 };
 
 enum clang_ext_UnaryOperatorKind
@@ -134,6 +135,7 @@ clang_ext_UnaryOperator_getOpcodeSpelling(
 enum clang_ext_BinaryOperatorKind {
   #define BINARY_OPERATION(Name, Spelling) CLANG_EXT_BINARY_OPERATOR_##Name,
   #include "clangml_OperationKinds.def"
+  CLANG_EXT_BINARY_OPERATOR_Invalid
 };
 
 enum clang_ext_BinaryOperatorKind
@@ -527,6 +529,9 @@ clang_ext_LambdaCapture_getCapturedVar(struct clang_ext_LambdaCapture capture);
 bool
 clang_ext_LambdaCapture_isImplicit(struct clang_ext_LambdaCapture capture);
 
+bool
+clang_ext_LambdaCapture_isPackExpansion(struct clang_ext_LambdaCapture capture);
+
 void
 clang_ext_LambdaCapture_dispose(struct clang_ext_LambdaCapture capture);
 
@@ -580,3 +585,25 @@ clang_ext_LangStandard_getName(enum clang_ext_langstandards s);
 
 enum clang_ext_langstandards
 clang_ext_LangStandard_ofName(const char *s);
+
+CXType
+clang_ext_PackExpansion_getPattern(CXType c);
+
+enum clang_ext_BinaryOperatorKind
+clang_ext_CXXFoldExpr_getOperator(CXCursor c);
+
+bool
+clang_ext_CXXBoolLiteralExpr_getValue(CXCursor c);
+
+CXCursor
+clang_ext_CallExpr_getCallee(CXCursor c);
+
+unsigned int
+clang_ext_CallExpr_getNumArgs(CXCursor c);
+
+CXCursor
+clang_ext_CallExpr_getArg(CXCursor c, unsigned int i);
+
+CXCursor
+clang_ext_SizeOfPackExpr_getPack(CXCursor c);
+
