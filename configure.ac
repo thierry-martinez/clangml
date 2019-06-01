@@ -160,50 +160,51 @@ AS_IF([test "x$with_llvm" != "x"],
     [true],
     [AC_MSG_ERROR([[LLVM version $LLVM_VERSION found but $with_llvm expected]])]))
 
-AC_SUBST([LLVM_VERSION],
-  [[`echo $LLVM_VERSION | sed 's/svn$//'`]])
+AC_SUBST([LLVM_VERSION], [[`echo $LLVM_VERSION | sed 's/svn$//'`]])
+
+AC_SUBST([EQUIVALENT_LLVM_VERSION], [["$LLVM_VERSION"]])
 
 # Some version equivalences
-AS_IF([test "x$LLVM_VERSION" = "x3.4"],
-  [AC_SUBST([LLVM_VERSION], [[3.4.2]])])
-AS_IF([test "x$LLVM_VERSION" = "x3.4.1"],
-  [AC_SUBST([LLVM_VERSION], [[3.4.2]])])
-AS_IF([test "x$LLVM_VERSION" = "x3.5.0"],
-  [AC_SUBST([LLVM_VERSION], [[3.5.2]])])
-AS_IF([test "x$LLVM_VERSION" = "x3.5.1"],
-  [AC_SUBST([LLVM_VERSION], [[3.5.2]])])
-AS_IF([test "x$LLVM_VERSION" = "x3.6.0"],
-  [AC_SUBST([LLVM_VERSION], [[3.6.2]])])
-AS_IF([test "x$LLVM_VERSION" = "x3.6.1"],
-  [AC_SUBST([LLVM_VERSION], [[3.6.2]])])
-AS_IF([test "x$LLVM_VERSION" = "x3.8.0"],
-  [AC_SUBST([LLVM_VERSION], [[3.8.1]])])
-AS_IF([test "x$LLVM_VERSION" = "x3.9.0"],
-  [AC_SUBST([LLVM_VERSION], [[3.9.1]])])
-AS_IF([test "x$LLVM_VERSION" = "x4.0.0"],
-  [AC_SUBST([LLVM_VERSION], [[4.0.1]])])
-AS_IF([test "x$LLVM_VERSION" = "x5.0.0"],
-  [AC_SUBST([LLVM_VERSION], [[5.0.2]])])
-AS_IF([test "x$LLVM_VERSION" = "x5.0.1"],
-  [AC_SUBST([LLVM_VERSION], [[5.0.2]])])
-AS_IF([test "x$LLVM_VERSION" = "x6.0.0"],
-  [AC_SUBST([LLVM_VERSION], [[6.0.1]])])
-AS_IF([test "x$LLVM_VERSION" = "x7.0.0"],
-  [AC_SUBST([LLVM_VERSION], [[7.0.1]])])
-AS_IF([test "x$LLVM_VERSION" = "x7.1.0"],
-  [AC_SUBST([LLVM_VERSION], [[7.0.1]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x3.4"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[3.4.2]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x3.4.1"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[3.4.2]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x3.5.0"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[3.5.2]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x3.5.1"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[3.5.2]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x3.6.0"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[3.6.2]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x3.6.1"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[3.6.2]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x3.8.0"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[3.8.1]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x3.9.0"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[3.9.1]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x4.0.0"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[4.0.1]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x5.0.0"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[5.0.2]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x5.0.1"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[5.0.2]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x6.0.0"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[6.0.1]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x7.0.0"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[7.0.1]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x7.1.0"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[7.0.1]])])
 
 AC_ARG_WITH([llvm-version],
   AS_HELP_STRING([--with-llvm-version=VERSION],
     [Sets the LLVM version.]),
-  [AC_SUBST([LLVM_VERSION], [["$with_llvm_version"]])
-   AC_MSG_NOTICE([[Will consider bindings for version $LLVM_VERSION (--with-llvm-version)]])])
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [["$with_llvm_version"]])
+   AC_MSG_NOTICE([[Will consider bindings for version $EQUIVALENT_LLVM_VERSION (--with-llvm-version)]])])
 
-AS_IF([test -d $srcdir/bootstrap/$LLVM_VERSION],
+AS_IF([test -d $srcdir/bootstrap/$EQUIVALENT_LLVM_VERSION],
   [true],
-  [AC_MSG_ERROR([LLVM version $LLVM_VERSION not supported. Please report: thierry.martinez@inria.fr . You may try to force another bindings version with ./configure --with-llvm-version= (to obtain the list of supported versions: ls $srcdir/bootstrap).])])
+  [AC_MSG_ERROR([LLVM version $EQUIVALENT_LLVM_VERSION not supported. Please report: thierry.martinez@inria.fr . You may try to force another bindings version with ./configure --with-llvm-version= (to obtain the list of supported versions: ls $srcdir/bootstrap).])])
 
-AS_IF([test `printf "$LLVM_VERSION\n3.5" | sort | head -n1` = "3.5"],
+AS_IF([test `printf "$EQUIVALENT_LLVM_VERSION\n3.5" | sort | head -n1` = "3.5"],
   [AC_SUBST([IF_CLANG_BEFORE_3_5], ["(*"])
    AC_SUBST([ENDIF_CLANG_BEFORE_3_5], ["*)"])
    AC_SUBST([IF_CLANG_FROM_3_5], [""])
@@ -213,7 +214,7 @@ AS_IF([test `printf "$LLVM_VERSION\n3.5" | sort | head -n1` = "3.5"],
    AC_SUBST([IF_CLANG_FROM_3_5], ["(*"])
    AC_SUBST([ENDIF_CLANG_FROM_3_5], ["*)"])])
 
-AS_IF([test `printf "$LLVM_VERSION\n3.6" | sort | head -n1` = "3.6"],
+AS_IF([test `printf "$EQUIVALENT_LLVM_VERSION\n3.6" | sort | head -n1` = "3.6"],
   [AC_SUBST([IF_CLANG_BEFORE_3_6], ["(*"])
    AC_SUBST([ENDIF_CLANG_BEFORE_3_6], ["*)"])
    AC_SUBST([IF_CLANG_FROM_3_6], [""])
@@ -223,13 +224,13 @@ AS_IF([test `printf "$LLVM_VERSION\n3.6" | sort | head -n1` = "3.6"],
    AC_SUBST([IF_CLANG_FROM_3_6], ["(*"])
    AC_SUBST([ENDIF_CLANG_FROM_3_6], ["*)"])])
 
-AS_IF([test `printf "$LLVM_VERSION\n3.7" | sort | head -n1` = "3.7"],
+AS_IF([test `printf "$EQUIVALENT_LLVM_VERSION\n3.7" | sort | head -n1` = "3.7"],
   [AC_SUBST([IF_CLANG_BEFORE_3_7], ["(*"])
    AC_SUBST([ENDIF_CLANG_BEFORE_3_7], ["*)"])],
   [AC_SUBST([IF_CLANG_BEFORE_3_7], [""])
    AC_SUBST([ENDIF_CLANG_BEFORE_3_7], [""])])
 
-AS_IF([test `printf "$LLVM_VERSION\n8.0" | sort | head -n1` = "8.0"],
+AS_IF([test `printf "$EQUIVALENT_LLVM_VERSION\n8.0" | sort | head -n1` = "8.0"],
   [AC_SUBST([IF_CLANG_BEFORE_8_0], ["(*"])
    AC_SUBST([ENDIF_CLANG_BEFORE_8_0], ["*)"])
    AC_SUBST([IF_CLANG_FROM_8_0], [""])
@@ -250,7 +251,7 @@ AC_SUBST([LLVM_LIBDIR], [[`$LLVM_CONFIG --libdir`]])
 AC_SUBST([LLVM_INCLUDEDIR], [[`$LLVM_CONFIG --includedir`]])
 
 AC_SUBST([LLVM_VERSION_MACRO],
-  [[LLVM_VERSION_`echo $LLVM_VERSION | sed 's/[.]/_/g'`]])
+  [[LLVM_VERSION_`echo $EQUIVALENT_LLVM_VERSION | sed 's/[.]/_/g'`]])
 
 # These filters enable compilation with gcc.
 # Filter -Wstring-conversion for OpenSUSE
@@ -395,11 +396,14 @@ AS_IF([test -d config],
   [AS_IF([mkdir config],
      AC_CP([$srcdir/config/dune], [config/]))])
 
-AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang__bindings.ml], [clangml/clang__bindings.ml])
+AC_CP([$srcdir/bootstrap/$EQUIVALENT_LLVM_VERSION/clang__bindings.ml],
+  [clangml/clang__bindings.ml])
 
-AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang__bindings.mli], [clangml/clang__bindings.mli])
+AC_CP([$srcdir/bootstrap/$EQUIVALENT_LLVM_VERSION/clang__bindings.mli],
+  [clangml/clang__bindings.mli])
 
-AC_CP([$srcdir/bootstrap/$LLVM_VERSION/clang_stubs.c], [clangml/clang_stubs.c])
+AC_CP([$srcdir/bootstrap/$EQUIVALENT_LLVM_VERSION/clang_stubs.c],
+  [clangml/clang_stubs.c])
 
 AC_CONFIG_FILES([
   Makefile
