@@ -29,21 +29,43 @@ else
     CC=gcc
     CXX=g++
 fi
-case "$version" in
-*rc*)
-    base_version="${version%rc*}"
-    rc="${version#*rc}"
-    base_url="https://prereleases.llvm.org/$base_version/rc$rc"
-    ;;
-*)
-    base_url="http://releases.llvm.org/$version"
-esac
-wget "$base_url/llvm-$version.src$suffix"
-tar -xf llvm-$version.src$suffix
-wget "$base_url/$cfe-$version.src$suffix"
-tar -xf $cfe-$version.src$suffix
-mv $cfe-$version$dir_suffix llvm-$version$dir_suffix/tools/clang
-mkdir llvm-$version.build
+if [ "$version" "<" 8.0.1 ]; then
+    case "$version" in
+    *rc*)
+        base_version="${version%rc*}"
+        rc="${version#*rc}"
+        base_url="https://prereleases.llvm.org/$base_version/rc$rc"
+        ;;
+    *)
+        base_url="http://releases.llvm.org/$version"
+    esac
+else
+    case "$version" in
+    *rc*)
+        version_dash="${version%rc*}-rc${version#*rc}"
+        ;;
+    *)
+        version_dash="$version"
+    esac
+    base_url=\
+"https://github.com/llvm/llvm-project/releases/download/llvmorg-$version_dash"
+fi
+if [ ! -d llvm-$version$dir_suffix ]; then
+    if [ ! -f llvm-$version.src$suffix ]; then
+        wget "$base_url/llvm-$version.src$suffix"
+    fi
+    tar -xf llvm-$version.src$suffix
+fi
+if [ ! -d llvm-$version$dir_suffix/tools/clang ]; then
+    if [ ! -d $cfe-$version$dir_suffix ]; then
+        if [ ! -f $cfe-$version.src$suffix ]; then
+            wget "$base_url/$cfe-$version.src$suffix"
+        fi
+        tar -xf $cfe-$version.src$suffix
+    fi
+    mv $cfe-$version$dir_suffix llvm-$version$dir_suffix/tools/clang
+fi
+mkdir llvm-$version.build || true
 pushd llvm-$version.build
     cmake ../llvm-$version$dir_suffix \
         -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DLLVM_ENABLE_PIC=ON
