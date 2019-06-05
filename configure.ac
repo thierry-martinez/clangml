@@ -417,5 +417,5 @@ AC_CONFIG_FILES([
   clangml/clang__compat.ml
 ])
 
-AC_OUTPUT
 AM_MAINTAINER_MODE
+AC_OUTPUT
