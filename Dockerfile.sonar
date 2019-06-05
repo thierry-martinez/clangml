@@ -1,7 +1,6 @@
-FROM debian:testing
-RUN apt-get update && \
-    apt-get install -y sudo wget unzip openjdk-8-jre ocaml llvm-dev \
-      libclang-dev libc6-dev-i386
+FROM debian
+RUN apt-get update
+RUN apt-get install --yes sudo wget unzip default-jre
 RUN useradd -m -s /bin/bash ci
 RUN echo ci      ALL=\(ALL\) NOPASSWD:ALL >/etc/sudoers
 USER ci
