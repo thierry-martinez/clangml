@@ -84,12 +84,14 @@ module Ast = struct
         | _ -> true
 
     let make_integer_literal i =
-      if options.convert_integer_literals then
-        match int_of_cxint_opt i with
-        | None -> CXInt i
-        | Some i -> Int i
-      else
-        CXInt i
+      match
+        if options.convert_integer_literals then
+          int_of_cxint_opt i
+        else
+          None
+      with
+      | None -> CXInt i
+      | Some i -> Int i
 
     let rec make_template_name name =
       match ext_template_name_get_kind name with
@@ -698,9 +700,14 @@ module Ast = struct
         | FloatingLiteral ->
             let f = ext_floating_literal_get_value cursor in
             let literal =
-              if options.convert_floating_literals then
-                Float (float_of_cxfloat f)
-              else CXFloat f in
+              match
+                if options.convert_floating_literals then
+                  float_of_cxfloat_opt f
+                else
+                  None
+              with
+              | None -> CXFloat f
+              | Some f -> Float f in
             FloatingLiteral literal
         | StringLiteral ->
             StringLiteral (ext_string_literal_get_string cursor)

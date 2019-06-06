@@ -89,7 +89,7 @@ val int64_of_cxint_opt : cxint -> Int64.t option
 
 val int64_of_cxint : cxint -> Int64.t
 (** [int64_of_cxint x] returns [i] if [x] is representable as
-    a 64-bit integer value [i], or raises [Failure _] otherwise. *)
+    a 64-bit integer value [i], or raises [Invalid_argument _] otherwise. *)
 
 val int_of_cxint_opt : cxint -> int option
 (** [int_of_cxint_opt x] returns [Some i] if [x] is representable as
@@ -97,7 +97,7 @@ val int_of_cxint_opt : cxint -> int option
 
 val int_of_cxint : cxint -> int
 (** [int_of_cxint x] returns [i] if [x] is representable as
-    an integer value [i], or raises [Failure _] otherwise. *)
+    an integer value [i], or raises [Invalid_argument _] otherwise. *)
 
 val string_of_cxint : cxint -> string
 (** [string_of_cxint f] is an alias for
@@ -105,9 +105,15 @@ val string_of_cxint : cxint -> string
 
 (** {2 Floating conversions } *)
 
+val float_of_cxfloat_opt : cxfloat -> float option
+(** [float_of_cxfloat_opt x] returns [Some f] if [x] is a floating-point
+    value with either IEEE single or double semantics,
+    or [None] otherwise. *)
+
 val float_of_cxfloat : cxfloat -> float
-(** [float_of_cxfloat f] is an alias for
-    {!val:Clang__bindings.ext_float_convert_to_double}. *)
+(** [float_of_cxfloat x] returns [f] if [x] is a floating-point
+    value with either IEEE single or double semantics,
+    or raises [Invalid_argument _] otherwise. *)
 
 val string_of_cxfloat : cxfloat -> string
 (** [string_of_cxfloat f] is an alias for

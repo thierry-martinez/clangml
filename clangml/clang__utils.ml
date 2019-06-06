@@ -89,7 +89,7 @@ let int64_of_cxint cxint =
   if ext_int_get_min_signed_bits cxint <= 64 then
     ext_int_get_sext_value64 cxint
   else
-    failwith "int64_of_cxint"
+    invalid_arg "int64_of_cxint"
 
 let int_of_cxint_opt cxint =
   if ext_int_get_min_signed_bits cxint <= Sys.int_size then
@@ -101,13 +101,22 @@ let int_of_cxint cxint =
   if ext_int_get_min_signed_bits cxint <= Sys.int_size then
     ext_int_get_sext_value cxint
   else
-    failwith "int_of_cxint"
+    invalid_arg "int_of_cxint"
 
 let string_of_cxint cxint =
   ext_int_to_string cxint 10 true
 
+let float_of_cxfloat_opt cxfloat =
+  match ext_float_get_semantics cxfloat with
+  | IEEEsingle -> Some (ext_float_convert_to_float cxfloat)
+  | IEEEdouble -> Some (ext_float_convert_to_double cxfloat)
+  | _ -> None
+
 let float_of_cxfloat cxfloat =
-  ext_float_convert_to_double cxfloat
+  match ext_float_get_semantics cxfloat with
+  | IEEEsingle -> ext_float_convert_to_float cxfloat
+  | IEEEdouble -> ext_float_convert_to_double cxfloat
+  | _ -> invalid_arg "float_of_cxfloat"
 
 let string_of_cxfloat cxfloat =
   ext_float_to_string cxfloat
