@@ -636,7 +636,7 @@ let () =
   | InvalidType
 
 and template_name =
-  | NameTemplate of decl
+  | NameTemplate of string
   | OverloadedTemplate
   | QualifiedTemplate
   | DependentTemplate
@@ -3382,12 +3382,12 @@ let () =
            { desc = Field {
                name = "x";
                qual_type = { desc = TemplateSpecialization {
-                 name = NameTemplate { desc = TemplateTemplateParameter "T" };
+                 name = NameTemplate "T";
                  args = [Type { desc = BuiltinType Bool }] }}}};
            { desc = Field {
                name = "y";
                qual_type = { desc = TemplateSpecialization {
-                 name = NameTemplate { desc = TemplateTemplateParameter "T" };
+                 name = NameTemplate "T";
                  args = [Type { desc = BuiltinType Int }] }}}}] }}}}] -> ()
   | _ -> assert false
 
@@ -3420,7 +3420,7 @@ let () =
            { desc = Field {
                name = "x";
                qual_type = { desc = TemplateSpecialization {
-                 name = NameTemplate { desc = TemplateTemplateParameter "T" };
+                 name = NameTemplate "T";
                  args = [
                    ExprTemplateArgument { desc = IntegerLiteral (Int 1) };
                    ExprTemplateArgument { desc = IntegerLiteral (Int 2) };

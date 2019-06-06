@@ -95,7 +95,7 @@ module Ast = struct
       match ext_template_name_get_kind name with
       | Template ->
           NameTemplate (
-            decl_of_cxcursor (ext_template_name_get_as_template_decl name))
+            ext_template_name_get_as_template_decl name |> get_cursor_spelling)
       | OverloadedTemplate -> OverloadedTemplate
       | QualifiedTemplate -> QualifiedTemplate
       | DependentTemplate -> DependentTemplate
