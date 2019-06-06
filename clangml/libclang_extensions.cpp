@@ -534,25 +534,25 @@ extern "C" {
   {
     if (auto f = static_cast<llvm::APFloat *>(c.data)) {
       const llvm::fltSemantics *semantics = &f->getSemantics();
-      if (semantics == &llvm::APFloatBase::IEEEhalf()) {
+      if (semantics == &llvm::APFloat::IEEEhalf()) {
         return CLANG_EXT_fltSemantics_IEEEhalf;
       }
-      if (semantics == &llvm::APFloatBase::IEEEsingle()) {
+      if (semantics == &llvm::APFloat::IEEEsingle()) {
         return CLANG_EXT_fltSemantics_IEEEsingle;
       }
-      if (semantics == &llvm::APFloatBase::IEEEdouble()) {
+      if (semantics == &llvm::APFloat::IEEEdouble()) {
         return CLANG_EXT_fltSemantics_IEEEdouble;
       }
-      if (semantics == &llvm::APFloatBase::IEEEquad()) {
+      if (semantics == &llvm::APFloat::IEEEquad()) {
         return CLANG_EXT_fltSemantics_IEEEquad;
       }
-      if (semantics == &llvm::APFloatBase::PPCDoubleDouble()) {
+      if (semantics == &llvm::APFloat::PPCDoubleDouble()) {
         return CLANG_EXT_fltSemantics_PPCDoubleDouble;
       }
-      if (semantics == &llvm::APFloatBase::x87DoubleExtended()) {
+      if (semantics == &llvm::APFloat::x87DoubleExtended()) {
         return CLANG_EXT_fltSemantics_x87DoubleExtended;
       }
-      if (semantics == &llvm::APFloatBase::Bogus()) {
+      if (semantics == &llvm::APFloat::Bogus()) {
         return CLANG_EXT_fltSemantics_Bogus;
       }
     }
