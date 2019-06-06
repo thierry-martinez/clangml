@@ -5153,6 +5153,68 @@ clang_ext_Float_toString_wrapper(value f_ocaml)
   }
 }
 
+enum clang_ext_fltSemantics
+Clang_ext_fltsemantics_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CLANG_EXT_fltSemantics_IEEEhalf;
+  case 1: return CLANG_EXT_fltSemantics_IEEEsingle;
+  case 2: return CLANG_EXT_fltSemantics_IEEEdouble;
+  case 3: return CLANG_EXT_fltSemantics_IEEEquad;
+  case 4: return CLANG_EXT_fltSemantics_PPCDoubleDouble;
+  case 5: return CLANG_EXT_fltSemantics_x87DoubleExtended;
+  case 6: return CLANG_EXT_fltSemantics_Bogus;
+  case 7: return CLANG_EXT_fltSemantics_Invalid;
+  }
+  failwith_fmt("invalid value for Clang_ext_fltsemantics_val: %d", Int_val(ocaml));
+  return CLANG_EXT_fltSemantics_IEEEhalf;
+}
+
+value
+Val_clang_ext_fltsemantics(enum clang_ext_fltSemantics v)
+{
+  switch (v) {
+  case CLANG_EXT_fltSemantics_IEEEhalf: return Val_int(0);
+  case CLANG_EXT_fltSemantics_IEEEsingle: return Val_int(1);
+  case CLANG_EXT_fltSemantics_IEEEdouble: return Val_int(2);
+  case CLANG_EXT_fltSemantics_IEEEquad: return Val_int(3);
+  case CLANG_EXT_fltSemantics_PPCDoubleDouble: return Val_int(4);
+  case CLANG_EXT_fltSemantics_x87DoubleExtended: return Val_int(5);
+  case CLANG_EXT_fltSemantics_Bogus: return Val_int(6);
+  case CLANG_EXT_fltSemantics_Invalid: return Val_int(7);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_fltsemantics: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Float_getSemantics_wrapper(value f_ocaml)
+{
+  CAMLparam1(f_ocaml);
+  CXFloat f;
+  f = Cxfloat_val(f_ocaml);
+  enum clang_ext_fltSemantics result = clang_ext_Float_getSemantics(f);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_fltsemantics(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_Float_convertToFloat_wrapper(value f_ocaml)
+{
+  CAMLparam1(f_ocaml);
+  CXFloat f;
+  f = Cxfloat_val(f_ocaml);
+  float result = clang_ext_Float_convertToFloat(f);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_double(result);
+    CAMLreturn(data);
+  }
+}
+
 CAMLprim value
 clang_ext_Float_convertToDouble_wrapper(value f_ocaml)
 {
