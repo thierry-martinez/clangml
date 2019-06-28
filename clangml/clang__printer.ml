@@ -117,6 +117,17 @@ let rec decl fmt (d : decl) =
           if deleted then
             Format.fprintf fmt "@ =@ delete")
         print_function_body body
+  | Directive (Include { program_context; filename }) ->
+      let pp_arg fmt =
+        if program_context then
+          Format.fprintf fmt "\"%s\"" filename
+        else
+          Format.fprintf fmt "<%s>" filename in
+      Format.fprintf fmt "@\n#include %t@\n" pp_arg
+  | LinkageSpec { language; decls = list } ->
+      Format.fprintf fmt "@[extern@ \"%s\"@ {@ @[%a@]@ }@]"
+        (Clang__utils.extern_of_language language)
+        decls list
   | _ -> failwith (Format.asprintf "Not implemented decl: %a" pp_decl d)
 
 and print_variable_init fmt init =
@@ -180,9 +191,29 @@ and expr_prec prec fmt (e : expr) =
       print_ident_ref fmt ident_ref
   | MemberRef member_ref ->
       Format.pp_print_string fmt member_ref
+  | Member { base; arrow; field } ->
+      let arrow_str =
+        if arrow then "->"
+        else "." in
+      Format.fprintf fmt "@[%a%s%a@]" expr base arrow_str print_ident_ref
+        field.desc
   | Cast { kind = CStyle; qual_type = ty; operand } ->
       maybe_parentheses 2 prec fmt (fun fmt ->
         Format.fprintf fmt "@[(%a)@ %a@]" qual_type ty (expr_prec 4) operand)
+  | New { qual_type = ty; init } ->
+      let format_init fmt (init : expr option) =
+        match init with
+        | None -> ()
+        | Some { desc = Construct { args }} ->
+            Format.fprintf fmt "@[(%a)@]"
+              (Format.pp_print_list
+                ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ")
+                expr) args
+        | Some expr ->
+            failwith (Format.asprintf "Unexpected constructor argument %a" pp_expr e) in
+      Format.fprintf fmt "new@ %a%a" qual_type ty format_init init
+  | Delete { argument } ->
+      Format.fprintf fmt "delete@ %a" expr argument
   | _ -> failwith (Format.asprintf "Not implemented expr %a" pp_expr e)
 
 and stmt fmt (s : stmt) =
@@ -261,12 +292,25 @@ and typed_value fmt_value fmt t =
       Format.fprintf fmt "@[void@ %t@]" fmt_value
   | BuiltinType Int ->
       Format.fprintf fmt "@[int@ %t@]" fmt_value
+  | BuiltinType SChar ->
+      Format.fprintf fmt "@[char@ %t@]" fmt_value
   | ConstantArray { element; size } ->
       typed_value (fun fmt -> Format.fprintf fmt "@[%t[%d]@]" fmt_value size) fmt element
+  | Elaborated { keyword; named_type } ->
+      Format.fprintf fmt "@[%s@ %a@]"
+        (Clang__bindings.ext_elaborated_type_get_keyword_spelling keyword)
+        (typed_value fmt_value) named_type
+  | Record ident
+  | Enum ident ->
+      Format.fprintf fmt "@[%a@ %t@]" print_ident_ref ident fmt_value
   | _ -> failwith (Format.asprintf "Not implemented qual type: %a" pp_qual_type t)
 
 and qual_type fmt t =
   typed_value (fun fmt -> ()) fmt t
 
+and decls fmt decls =
+  Format.fprintf fmt "@[%a@]"
+    (Format.pp_print_list ~pp_sep:Format.pp_print_space decl) decls
+
 let translation_unit fmt (tu : translation_unit) =
-  List.iter (decl fmt) tu.desc.items
+  decls fmt tu.desc.items

@@ -10,6 +10,10 @@ val language_of_string : string -> language
 
 val language_of_string_opt : string -> language option
 
+val suffix_of_language : language -> string
+
+val extern_of_language : language -> string
+
 val string_of_cxx_access_specifier : cx_cxxaccessspecifier -> string
 
 (** {2 Parsing files and strings } *)
@@ -89,7 +93,7 @@ val int64_of_cxint_opt : cxint -> Int64.t option
 
 val int64_of_cxint : cxint -> Int64.t
 (** [int64_of_cxint x] returns [i] if [x] is representable as
-    a 64-bit integer value [i], or raises [Failure _] otherwise. *)
+    a 64-bit integer value [i], or raises [Invalid_argument _] otherwise. *)
 
 val int_of_cxint_opt : cxint -> int option
 (** [int_of_cxint_opt x] returns [Some i] if [x] is representable as
@@ -97,7 +101,7 @@ val int_of_cxint_opt : cxint -> int option
 
 val int_of_cxint : cxint -> int
 (** [int_of_cxint x] returns [i] if [x] is representable as
-    an integer value [i], or raises [Failure _] otherwise. *)
+    an integer value [i], or raises [Invalid_argument _] otherwise. *)
 
 val string_of_cxint : cxint -> string
 (** [string_of_cxint f] is an alias for
@@ -105,9 +109,15 @@ val string_of_cxint : cxint -> string
 
 (** {2 Floating conversions } *)
 
+val float_of_cxfloat_opt : cxfloat -> float option
+(** [float_of_cxfloat_opt x] returns [Some f] if [x] is a floating-point
+    value with either IEEE single or double semantics,
+    or [None] otherwise. *)
+
 val float_of_cxfloat : cxfloat -> float
-(** [float_of_cxfloat f] is an alias for
-    {!val:Clang__bindings.ext_float_convert_to_double}. *)
+(** [float_of_cxfloat x] returns [f] if [x] is a floating-point
+    value with either IEEE single or double semantics,
+    or raises [Invalid_argument _] otherwise. *)
 
 val string_of_cxfloat : cxfloat -> string
 (** [string_of_cxfloat f] is an alias for
@@ -119,8 +129,22 @@ val string_of_cxerrorcode : cxerrorcode -> string
 (** [string_of_cxerrorcode ec] returns a message describing [ec]. *)
 
 val seq_of_diagnostics : cxtranslationunit -> cxdiagnostic Seq.t
-(** [seq_of_diagnostics tu] returns the diagnostics (warnings and errors)
+(** [seq_of_diagnostics tu] returns the diagnostics
+    (notes, warnings, errors, ...)
     produced for the given translation unit *)
+
+val format_diagnostics :
+  ?pp:((Format.formatter -> unit -> unit)
+       -> Format.formatter -> unit -> unit) ->
+  cxdiagnosticseverity list -> Format.formatter ->
+  cxtranslationunit -> unit
+(** [format_diagnostics ?pp severities fmt tu] formats the
+    diagnostics produced for the given translation unit. Only the diagnostics,
+    the severity of which is listed in [severities] are displayed.
+    If there is a printer given in [pp], then this printer is called once if
+    and only if there is at least one diagnostic to display, and [pp] should call
+    the printer passed in its first argument to display the diagnostics.
+    In the case there is no diagnostic to display, nothing is printed. *)
 
 val error : cxdiagnosticseverity list
 (** [error] contains the severities [Error] and [Fatal]. *)
@@ -128,8 +152,18 @@ val error : cxdiagnosticseverity list
 val warning_or_error : cxdiagnosticseverity list
 (** [warning_or_error] contains the severities [Warning], [Error] and [Fatal]. *)
 
+val not_ignored_diagnostics : cxdiagnosticseverity list
+(** [not_ignored_diagnostics] contains the severities [Note], [Warning],
+    [Error] and [Fatal]. *)
+
+val all_diagnostics : cxdiagnosticseverity list
+(** [all_diagnostics] contains the severities [Ignored], [Note], [Warning],
+    [Error] and [Fatal]. *)
+
 val has_severity : cxdiagnosticseverity list -> cxtranslationunit -> bool
 (** [has_severity l tu] returns whether the translation unit [tu] produced a
     diagnostic, the severity of which belongs to [l]. *)
 
 val cursor_get_translation_unit : cxcursor -> cxtranslationunit
+(** [cursor_get_translation_unit cursor] returns the translation unit
+    associated to [cursor]. *)

@@ -21,9 +21,12 @@
 #define LLVM_VERSION_BEFORE_3_9_0
 #endif
 #ifdef LLVM_VERSION_BEFORE_3_9_0
-#define LLVM_VERSION_BEFORE_5_0_0
+#define LLVM_VERSION_BEFORE_4_0_0
 #endif
 #ifdef LLVM_VERSION_3_9_1
+#define LLVM_VERSION_BEFORE_4_0_0
+#endif
+#ifdef LLVM_VERSION_BEFORE_4_0_0
 #define LLVM_VERSION_BEFORE_5_0_0
 #endif
 #ifdef LLVM_VERSION_4_0_1
@@ -112,6 +115,23 @@ clang_ext_Float_isValid(CXFloat f);
 
 CXString
 clang_ext_Float_toString(CXFloat f);
+
+enum clang_ext_fltSemantics {
+  CLANG_EXT_fltSemantics_IEEEhalf,
+  CLANG_EXT_fltSemantics_IEEEsingle,
+  CLANG_EXT_fltSemantics_IEEEdouble,
+  CLANG_EXT_fltSemantics_IEEEquad,
+  CLANG_EXT_fltSemantics_PPCDoubleDouble,
+  CLANG_EXT_fltSemantics_x87DoubleExtended,
+  CLANG_EXT_fltSemantics_Bogus,
+  CLANG_EXT_fltSemantics_Invalid
+};
+
+enum clang_ext_fltSemantics
+clang_ext_Float_getSemantics(CXFloat f);
+
+float
+clang_ext_Float_convertToFloat(CXFloat f);
 
 double
 clang_ext_Float_convertToDouble(CXFloat f);
@@ -616,3 +636,11 @@ clang_ext_CallExpr_getArg(CXCursor c, unsigned int i);
 CXCursor
 clang_ext_SizeOfPackExpr_getPack(CXCursor c);
 
+CXCursor
+clang_ext_DecltypeType_getUnderlyingExpr(CXType t);
+
+bool
+clang_ext_NamespaceDecl_isInline(CXCursor c);
+
+typedef enum CXVisitorResult (*CXDeclContextVisitor)(
+  CXCursor , CXClientData client_data);

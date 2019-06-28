@@ -1,54 +1,56 @@
+
 open Clang__bindings
 
 open Clang__compat
 
 open Clang__types
 
-let iter_children f c =
+let iter_visitor f visitor =
   let exn_ref = ref (None : exn option) in
-  if
-    visit_children c @@ fun cur _par ->
-      try
-        f cur;
-        Continue
-      with exn ->
-        exn_ref := Some exn;
-        Break
-  then
-    assert (!exn_ref = None)
-  else
-    match !exn_ref with
-    | None -> assert false
-    | Some exn -> raise exn
+  visitor begin fun cur ->
+    try
+      f cur;
+      true
+    with exn ->
+      exn_ref := Some exn;
+      false
+  end;
+  match !exn_ref with
+  | None -> ()
+  | Some exn -> raise exn 
 
-let list_of_children c =
+let list_of_iter iter =
   let children_ref = ref [] in
-  c |> iter_children begin fun cur ->
+  iter begin fun cur ->
     children_ref := cur :: !children_ref
   end;
   List.rev !children_ref
 
-let iter_type_fields f ty =
-  let exn_ref = ref (None : exn option) in
-  assert begin
-    type_visit_fields ty @@ fun cur ->
-      try
-        f cur;
+let iter_children f c =
+  iter_visitor f begin fun f ->
+    ignore (visit_children c begin fun cur _par ->
+      if f cur then
         Continue
-      with exn ->
-        exn_ref := Some exn;
+      else
         Break
-  end;
-  match !exn_ref with
-  | None -> ()
-  | Some exn -> raise exn
+    end)
+  end
 
-let list_of_type_fields c =
-  let fields_ref = ref [] in
-  c |> iter_type_fields begin fun cur ->
-    fields_ref := cur :: !fields_ref
-  end;
-  List.rev !fields_ref
+let list_of_children c =
+  list_of_iter (fun f -> iter_children f c)
+
+let iter_type_fields f ty =
+  iter_visitor f begin fun f ->
+    ignore (type_visit_fields ty begin fun cur ->
+      if f cur then
+        Continue
+      else
+        Break
+    end)
+  end
+
+let list_of_type_fields ty =
+  list_of_iter (fun f -> iter_type_fields f ty)
 
 let seq_of_diagnostics tu =
   let count = get_num_diagnostics tu in
@@ -59,9 +61,30 @@ let seq_of_diagnostics tu =
       Seq.Nil in
   next 0
 
+let format_diagnostics ?pp severities fmt tu =
+  let filter diagnostics =
+    List.mem (get_diagnostic_severity diagnostics) severities in
+  match (seq_of_diagnostics tu |> Seq.filter filter) () with
+  | Nil -> ()
+  | Cons (hd, tl) ->
+      let print_all_diagnostics fmt () =
+        let print_diagnostics diagnostics =
+          Format.fprintf fmt "@[%s@]@ "
+            (format_diagnostic diagnostics
+               Cxdiagnosticdisplayoptions.display_source_location) in
+        print_diagnostics hd;
+        tl |> Seq.iter print_diagnostics in
+      match pp with
+      | None -> Format.fprintf fmt "@[<v>%a@]" print_all_diagnostics ()
+      | Some pp -> pp print_all_diagnostics fmt ()
+
 let error = [Error; Fatal]
 
 let warning_or_error = Warning :: error
+
+let not_ignored_diagnostics = Note :: warning_or_error
+
+let all_diagnostics = Ignored :: not_ignored_diagnostics
 
 let seq_exists pred seq =
   let exception Exists in
@@ -89,7 +112,7 @@ let int64_of_cxint cxint =
   if ext_int_get_min_signed_bits cxint <= 64 then
     ext_int_get_sext_value64 cxint
   else
-    failwith "int64_of_cxint"
+    invalid_arg "int64_of_cxint"
 
 let int_of_cxint_opt cxint =
   if ext_int_get_min_signed_bits cxint <= Sys.int_size then
@@ -101,13 +124,22 @@ let int_of_cxint cxint =
   if ext_int_get_min_signed_bits cxint <= Sys.int_size then
     ext_int_get_sext_value cxint
   else
-    failwith "int_of_cxint"
+    invalid_arg "int_of_cxint"
 
 let string_of_cxint cxint =
   ext_int_to_string cxint 10 true
 
+let float_of_cxfloat_opt cxfloat =
+  match ext_float_get_semantics cxfloat with
+  | IEEEsingle -> Some (ext_float_convert_to_float cxfloat)
+  | IEEEdouble -> Some (ext_float_convert_to_double cxfloat)
+  | _ -> None
+
 let float_of_cxfloat cxfloat =
-  ext_float_convert_to_double cxfloat
+  match ext_float_get_semantics cxfloat with
+  | IEEEsingle -> ext_float_convert_to_float cxfloat
+  | IEEEdouble -> ext_float_convert_to_double cxfloat
+  | _ -> invalid_arg "float_of_cxfloat"
 
 let string_of_cxfloat cxfloat =
   ext_float_to_string cxfloat
@@ -134,11 +166,11 @@ let string_of_language language =
 
 let language_of_string s =
   match s with
-  | "c" -> C
+  | "c" | "C" -> C
   | "cl" -> OpenCL
   | "cuda" -> CUDA
   | "hip" -> HIP
-  | "c++" | "cpp" -> CXX
+  | "c++" | "C++" | "cpp" | "CPP" -> CXX
   | "objective-c" | "objc" -> ObjC
   | "objective-c++" | "objc++" | "objcpp" -> ObjCXX
   | "renderscript" -> RenderScript
@@ -149,6 +181,23 @@ let language_of_string_opt s =
     Some (language_of_string s)
   with Invalid_argument _ ->
     None
+
+let suffix_of_language language =
+  match language with
+  | C -> ".c"
+  | OpenCL -> ".cl"
+  | CUDA -> ".cuda"
+  | HIP -> ".hip"
+  | CXX -> ".cpp"
+  | ObjC -> ".m"
+  | ObjCXX -> ".mm"
+  | RenderScript -> ".renderscript"
+
+let extern_of_language language =
+  match language with
+  | C -> "C"
+  | CXX -> "C++"
+  | _ -> invalid_arg "extern_of_language"
 
 let parse_file_res ?(index = create_index true true)
     ?(command_line_args = []) ?(unsaved_files = [])

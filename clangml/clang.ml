@@ -25,6 +25,34 @@ let option_cursor_bind f cursor : 'a option =
 let option_cursor f cursor : 'a option =
   option_cursor_bind (fun x -> Some (f x)) cursor
 
+let rec extract_prefix_from_list'
+    (p : 'a -> 'b option) (accu : 'b list) (list : 'a list)
+    : 'b list * 'a list =
+  match
+    match list with
+    | [] -> (None : _ option), []
+    | hd :: tl ->
+        match p hd with
+        | None -> None, list
+        | (Some _) as y -> y, tl
+  with
+  | Some x, tl -> extract_prefix_from_list' p (x :: accu) tl
+  | None, tl -> List.rev accu, tl
+
+let extract_prefix_from_list p list =
+  extract_prefix_from_list' p [] list
+
+let string_chop_prefix_opt prefix s =
+  let prefix_length = String.length prefix in
+  let length = String.length s in
+  if prefix_length <= length then
+    if String.sub s 0 prefix_length = prefix then
+      Some (String.sub s prefix_length (length - prefix_length))
+    else
+      None
+  else
+    None
+
 module Ast = struct
   include Clang__ast
 
@@ -40,6 +68,36 @@ module Ast = struct
   let var
       ?(linkage = NoLinkage) ?var_init ?(constexpr = false) var_name var_type =
     { linkage; var_name; var_type; var_init; constexpr }
+
+  let function_decl
+      ?(linkage = NoLinkage) ?body ?(deleted = false) ?(constexpr = false)
+      function_type name =
+    { linkage; body; deleted; constexpr; function_type; name }
+
+  let function_type ?(calling_conv = (C : cxcallingconv)) ?parameters result =
+    { calling_conv; parameters; result }
+
+  let parameters ?(variadic = false) non_variadic =
+    { variadic; non_variadic }
+
+  let parameter ?default qual_type name =
+    { default; qual_type; name }
+
+  let new_instance ?(placement_args = []) ?array_size ?init ?args qual_type =
+    let init =
+      match init, args with
+      | Some _, Some _ ->
+          invalid_arg
+          "Clang.Ast.new_instance: ~init and ~args are mutually exclusive"
+      | init, None -> init
+      | None, Some args ->
+          Some (node (Construct {
+            name = get_type_spelling qual_type.cxtype;
+            args; })) in
+    New { placement_args; qual_type; array_size; init }
+
+  let delete ?(global_delete = false) ?(array_form = false) argument =
+    Delete { global_delete; array_form; argument }
 
   let cursor_of_decoration decoration =
     match decoration with
@@ -84,18 +142,20 @@ module Ast = struct
         | _ -> true
 
     let make_integer_literal i =
-      if options.convert_integer_literals then
-        match int_of_cxint_opt i with
-        | None -> CXInt i
-        | Some i -> Int i
-      else
-        CXInt i
+      match
+        if options.convert_integer_literals then
+          int_of_cxint_opt i
+        else
+          None
+      with
+      | None -> CXInt i
+      | Some i -> Int i
 
     let rec make_template_name name =
       match ext_template_name_get_kind name with
       | Template ->
           NameTemplate (
-            decl_of_cxcursor (ext_template_name_get_as_template_decl name))
+            ext_template_name_get_as_template_decl name |> get_cursor_spelling)
       | OverloadedTemplate -> OverloadedTemplate
       | QualifiedTemplate -> QualifiedTemplate
       | DependentTemplate -> DependentTemplate
@@ -171,7 +231,7 @@ module Ast = struct
         | Record ->
             Record (cxtype |> get_type_declaration |> ident_ref_of_cxcursor)
         | Typedef ->
-            Typedef (Ident (cxtype |> get_type_declaration |> get_cursor_spelling))
+            Typedef (cxtype |> get_type_declaration |> ident_ref_of_cxcursor)
         | FunctionProto
         | FunctionNoProto ->
             let function_type =
@@ -218,6 +278,11 @@ module Ast = struct
                   let pattern =
                     ext_pack_expansion_get_pattern cxtype |> of_cxtype in
                   PackExpansion pattern
+              | Decltype ->
+                  let sub =
+                    ext_decltype_type_get_underlying_expr cxtype |>
+                    expr_of_cxcursor in
+                  Decltype sub
               | kind -> UnexposedType kind
             end in
       match desc with
@@ -241,7 +306,8 @@ module Ast = struct
             cursor |> make_template @@ fun children ->
               cxxmethod_decl_of_cxcursor ~can_be_function:(not in_record)
                 cursor children
-        | CXXMethod ->
+        | CXXMethod
+        | ConversionFunction ->
             cxxmethod_decl_of_cxcursor cursor (list_of_children cursor)
         | VarDecl -> Var (var_decl_desc_of_cxcursor cursor)
         | StructDecl -> record_decl_of_cxcursor Struct cursor
@@ -263,7 +329,7 @@ module Ast = struct
         | TypedefDecl ->
             let name = get_cursor_spelling cursor in
             let underlying_type = cursor |>
-            get_typedef_decl_underlying_type |> of_cxtype in
+              get_typedef_decl_underlying_type |> of_cxtype in
             TypedefDecl { name; underlying_type }
         | FieldDecl ->
             let name = get_cursor_spelling cursor in
@@ -281,11 +347,6 @@ module Ast = struct
             Field { name; qual_type; bitwidth; init }
         | CXXAccessSpecifier ->
             AccessSpecifier (cursor |> get_cxxaccess_specifier)
-        | Namespace ->
-            let name = get_cursor_spelling cursor in
-            let declarations =
-              list_of_children cursor |> List.map decl_of_cxcursor in
-            Namespace { name; declarations }
         | UsingDirective ->
             let namespace =
               match list_of_children cursor with
@@ -364,6 +425,12 @@ module Ast = struct
                   Friend (FriendDecl (decl_of_cxcursor decl))
                 else
                   Friend (FriendType (of_cxtype friend_type))
+            | Namespace ->
+                let name = get_cursor_spelling cursor in
+                let declarations =
+                  list_of_children cursor |> List.map decl_of_cxcursor in
+                let inline = ext_namespace_decl_is_inline cursor in
+                Namespace { name; declarations; inline }
             | ext_kind -> UnknownDecl (kind, ext_kind)
       with Invalid_structure ->
         UnknownDecl (get_cursor_kind cursor, ext_decl_get_kind cursor)
@@ -505,10 +572,23 @@ module Ast = struct
     and record_decl_of_cxcursor keyword cursor =
       record_decl_of_children keyword cursor (list_of_children cursor)
 
+    and base_specifier_of_cxcursor_opt cursor =
+      match get_cursor_kind cursor with
+      | CXXBaseSpecifier -> Some (base_specifier_of_cxcursor cursor)
+      | _ -> None
+
+    and base_specifier_of_cxcursor cursor =
+      { ident = get_cursor_spelling cursor;
+        virtual_base = is_virtual_base cursor;
+        access_specifier = get_cxxaccess_specifier cursor;
+      }
+
     and record_decl_of_children keyword cursor children =
       let name = get_cursor_spelling cursor in
+      let bases, children =
+        extract_prefix_from_list base_specifier_of_cxcursor_opt children in
       let fields = fields_of_children children in
-      RecordDecl { keyword; name; fields }
+      RecordDecl { keyword; name; bases; fields }
 
     and fields_of_children children =
       children |> List.map (decl_of_cxcursor ~in_record:true)
@@ -698,9 +778,14 @@ module Ast = struct
         | FloatingLiteral ->
             let f = ext_floating_literal_get_value cursor in
             let literal =
-              if options.convert_floating_literals then
-                Float (float_of_cxfloat f)
-              else CXFloat f in
+              match
+                if options.convert_floating_literals then
+                  float_of_cxfloat_opt f
+                else
+                  None
+              with
+              | None -> CXFloat f
+              | Some f -> Float f in
             FloatingLiteral literal
         | StringLiteral ->
             StringLiteral (ext_string_literal_get_string cursor)
@@ -716,6 +801,8 @@ module Ast = struct
             ImaginaryLiteral sub_expr
         | CXXBoolLiteralExpr ->
             BoolLiteral (ext_cxxbool_literal_expr_get_value cursor)
+        | CXXNullPtrLiteralExpr ->
+            NullPtrLiteral
         | UnaryOperator ->
             let operand =
               match list_of_children cursor with
@@ -755,7 +842,8 @@ module Ast = struct
             | [lhs] ->
                 let base = expr_of_cxcursor lhs in
                 let field = get_cursor_referenced cursor in
-                let field = node ~cursor:field (get_cursor_spelling field) in
+                let ident = ident_of_string (get_cursor_spelling field) in
+                let field = node ~cursor:field ident in
                 let arrow = ext_member_ref_expr_is_arrow cursor in
                 Member { base; arrow; field }
             | _ -> raise Invalid_structure
@@ -974,11 +1062,15 @@ module Ast = struct
       extract [] children
 
     and lambda_capture_of_capture capture =
+      let capture_kind = ext_lambda_capture_get_kind capture in
       let captured_var_name : string option =
-        capture |> ext_lambda_capture_get_captured_var |>
-        option_cursor get_cursor_spelling in
+        match capture_kind with
+        | ByCopy | ByRef ->
+            capture |> ext_lambda_capture_get_captured_var |>
+            option_cursor get_cursor_spelling
+        | This | StarThis | VLAType -> None in
       { implicit = ext_lambda_capture_is_implicit capture;
-        capture_kind = ext_lambda_capture_get_kind capture;
+        capture_kind;
         captured_var_name;
         pack_expansion = ext_lambda_capture_is_pack_expansion capture;
       }
@@ -995,57 +1087,51 @@ module Ast = struct
         | _ -> raise Invalid_structure in
       UnaryExpr { kind; argument }
 
+    and template_parameter_of_cxcursor_opt cursor : template_parameter option =
+      match
+        match get_cursor_kind cursor with
+        | TemplateTypeParameter ->
+            let default =
+              ext_template_type_parm_decl_get_default_argument cursor in
+            let default : qual_type option =
+              match get_type_kind default with
+              | Invalid -> None
+              | _ -> Some (default |> of_cxtype) in
+            Some (Class { default } : template_parameter_kind)
+        | NonTypeTemplateParameter ->
+            let parameter_type = get_cursor_type cursor |> of_cxtype in
+            let default : expr option =
+              match list_of_children cursor |> List.filter (fun e -> get_cursor_kind e <> TypeRef) with
+              | [] -> None
+              | [default] -> Some (default |> expr_of_cxcursor)
+              | _ -> raise Invalid_structure in
+            Some (NonType { parameter_type; default })
+        | TemplateTemplateParameter ->
+            let parameters, others = extract_template_parameters cursor in
+            let default : string option =
+              match others with
+              | [] -> None
+              | [default] -> Some (get_cursor_spelling default)
+              | _ -> raise Invalid_structure in
+            Some (Template { parameters; default })
+        | _ -> None
+      with
+      | None -> None
+      | Some parameter_kind ->
+          let parameter_name = get_cursor_spelling cursor in
+          let parameter_pack =
+            ext_template_parm_is_parameter_pack cursor in
+          let node =
+            node ~cursor
+              { parameter_name; parameter_kind; parameter_pack} in
+          Some node
+
+    and extract_template_parameters cursor =
+      extract_prefix_from_list template_parameter_of_cxcursor_opt
+        (list_of_children cursor)
+
     and make_template make_body cursor =
-      let rec extract_template_parameters accu children =
-        match
-          match children with
-          | [] -> (None : template_parameter option), []
-          | cursor :: tl ->
-              match
-                match get_cursor_kind cursor with
-                | TemplateTypeParameter ->
-                    let default =
-                      ext_template_type_parm_decl_get_default_argument cursor in
-                    let default : qual_type option =
-                      match get_type_kind default with
-                      | Invalid -> None
-                      | _ -> Some (default |> of_cxtype) in
-                    Some (Class { default } : template_parameter_kind)
-                | NonTypeTemplateParameter ->
-                    let parameter_type = get_cursor_type cursor |> of_cxtype in
-                    let default : expr option =
-                      match list_of_children cursor with
-                      | [] -> None
-                      | [default] -> Some (default |> expr_of_cxcursor)
-                      | _ -> raise Invalid_structure in
-                    Some (NonType { parameter_type; default })
-                | TemplateTemplateParameter ->
-                    let parameters, others =
-                      extract_template_parameters []
-                        (list_of_children cursor) in
-                    let default : string option =
-                      match others with
-                      | [] -> None
-                      | [default] -> Some (get_cursor_spelling default)
-                      | _ -> raise Invalid_structure in
-                    Some (Template { parameters; default })
-                | _ -> None
-              with
-              | None -> None, children
-              | Some parameter_kind ->
-                  let parameter_name = get_cursor_spelling cursor in
-                  let parameter_pack =
-                    ext_template_parm_is_parameter_pack cursor in
-                  let node =
-                    node ~cursor
-                      { parameter_name; parameter_kind; parameter_pack} in
-                  Some node, tl
-        with
-        | None, tl -> List.rev accu, tl
-        | Some parameter, tl ->
-            extract_template_parameters (parameter :: accu) tl in
-      let parameters, others =
-        extract_template_parameters [] (list_of_children cursor) in
+      let parameters, others = extract_template_parameters cursor in
       let decl = make_body others in
       match parameters with
       | [] -> decl
@@ -1054,14 +1140,18 @@ module Ast = struct
     and ident_of_string s =
       match s with
       | "operator==" -> BinaryOperatorRef EQ
-      | _ -> Ident s
+      | _ ->
+          match string_chop_prefix_opt "operator " s with
+          | Some target -> ConversionOperatorRef target
+          | _ -> Ident s
 
     and ident_ref_of_cxcursor cursor =
       let ident = get_cursor_spelling cursor in
       let rec pop_ref list ident =
         match
           match list with
-          | hd :: tl -> Some (get_cursor_kind hd, hd, tl)
+          | hd :: tl ->
+              Some (get_cursor_kind hd, hd, tl)
           | [] -> None
         with
         | Some (TypeRef, hd, tl) ->
@@ -1121,20 +1211,31 @@ module Ast = struct
       ?options:clang_options string |>
     of_cxtranslationunit ?options
 
-  let get_presumed_location source_location =
-    match source_location with
-    | Clang source_location ->
-        let filename, line, column = get_presumed_location source_location in
-        { filename; line; column }
-    | Concrete concrete_location -> concrete_location
+  let to_cxtranslationunit tu =
+    tu |> cursor_of_node |> cursor_get_translation_unit
 
-  let get_expansion_location source_location =
-    match source_location with
-    | Clang source_location ->
-        let file, line, column, _offset =
-          get_expansion_location source_location in
+  let seq_of_diagnostics tu =
+    seq_of_diagnostics (tu |> to_cxtranslationunit)
+
+  let format_diagnostics ?pp filter format tu =
+    format_diagnostics ?pp filter format (tu |> to_cxtranslationunit)
+
+  let has_severity filter tu =
+    has_severity filter (tu |> to_cxtranslationunit)
+
+  let concrete_of_cxsourcelocation kind location =
+    match kind with
+    | Presumed ->
+        let filename, line, column = get_presumed_location location in
+        { filename; line; column }
+    | Expansion ->
+        let file, line, column, _offset = get_expansion_location location in
         { filename = get_file_name file; line; column }
-    | Concrete concrete_location -> concrete_location
+
+  let concrete_of_source_location kind location =
+    match location with
+    | Clang location -> concrete_of_cxsourcelocation kind location
+    | Concrete location -> location
 end
 
 module Decl = struct
@@ -1281,6 +1382,11 @@ module Enum_constant = struct
 
   let get_value enum_constant =
     enum_constant |> Ast.cursor_of_node |> get_enum_constant_decl_value
+end
+
+module Translation_unit = struct
+  let make ?(filename = "") items : Ast.translation_unit_desc =
+    { filename; items }
 end
 
 module Printer = struct

@@ -4119,6 +4119,10 @@ if test "x$EQUIVALENT_LLVM_VERSION" = "x7.1.0"; then :
   EQUIVALENT_LLVM_VERSION=7.0.1
 
 fi
+if test "x$EQUIVALENT_LLVM_VERSION" = "x8.0.1"; then :
+  EQUIVALENT_LLVM_VERSION=8.0.0
+
+fi
 
 
 # Check whether --with-llvm-version was given.

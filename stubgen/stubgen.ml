@@ -1550,6 +1550,48 @@ let array_find p a =
       None in
   aux 0
 
+let find_carried_reference name carry_reference args module_interface =
+  match carry_reference with
+  | None -> []
+  | Some ty ->
+    match args |> array_find begin fun i ->
+      match i with CXType ty' -> Clang.get_type_spelling ty' = ty | _ -> false
+    end with
+    | Some index -> [(index, fun x -> x)]
+    | None ->
+        match args |> array_find begin fun i -> match i with
+        | CXType ty' ->
+          begin
+            let type_interface = get_type (Clang.get_type_spelling ty') module_interface in
+            match type_interface.carry_reference with
+            | None -> false
+            | Some ty' -> ty = ty'
+          end
+        | _ ->
+            false
+        end with
+        | Some index ->
+            [(index, fun x -> Printf.sprintf "safe_field(%s, 1)" x)]
+        | None ->
+            match args |> array_find (fun i -> match i with CXType ty' ->
+              begin
+                let type_interface = get_type (Clang.get_type_spelling ty') module_interface in
+                match type_interface.carry_reference with
+                | None -> false
+                | Some ty' ->
+                    let type_interface = get_type ty' module_interface in
+                    match type_interface.carry_reference with
+                    | None -> false
+                    | Some ty' -> ty = ty'
+              end
+            | _ ->
+                false) with
+            | Some index ->
+                [(index, fun x -> Printf.sprintf "safe_field(safe_field(%s, 1), 1)" x)]
+            | None ->
+                Printf.fprintf stderr "warning: reference not found in %s\n" name;
+                []
+
 let translate_function_decl context cur =
   let name = Clang.get_cursor_spelling cur in
   let function_interface = get_function name context.module_interface in
@@ -1651,44 +1693,7 @@ let translate_function_decl context cur =
     get_type (Clang.get_type_spelling result_type) context.module_interface in
   let result_type_interface =
     union_type_interfaces result_type_interface function_interface.result in
-  let references =
-    match result_type_interface.carry_reference with
-    | None -> []
-    | Some ty ->
-        match args |> array_find (fun i -> match i with CXType ty' -> Clang.get_type_spelling ty' = ty | _ -> false) with
-        | Some index ->
-            [(index, fun x -> x)]
-        | None ->
-            match args |> array_find (fun i -> match i with CXType ty' ->
-              begin
-                let type_interface = get_type (Clang.get_type_spelling ty') context.module_interface in
-                match type_interface.carry_reference with
-                | None -> false
-                | Some ty' -> ty = ty'
-               end
-| _ ->
- false) with
-            | Some index ->
-                [(index, fun x -> Printf.sprintf "safe_field(%s, 1)" x)]
-            | None ->
-            match args |> array_find (fun i -> match i with CXType ty' ->
-              begin
-                let type_interface = get_type (Clang.get_type_spelling ty') context.module_interface in
-                match type_interface.carry_reference with
-                | None -> false
-                | Some ty' ->
-                let type_interface = get_type ty' context.module_interface in
-                match type_interface.carry_reference with
-                | None -> false
-                | Some ty' -> ty = ty'
-               end
-| _ ->
- false) with
-            | Some index ->
-                [(index, fun x -> Printf.sprintf "safe_field(safe_field(%s, 1), 1)" x)]
-            | None ->
-                Printf.fprintf stderr "warning: reference not found in %s\n" name;
-                [] in
+  let references = find_carried_reference name result_type_interface.carry_reference args context.module_interface in
   let result_type_info =
     find_type_info ~parameters context result_type_interface result_type in
   let used_arg_names = String_hashtbl.create 17 in
@@ -1773,17 +1778,19 @@ let translate_function_decl context cur =
           let callback_name =
             Printf.sprintf "%s_%s_callback" name wrapper_arg_names.(i) in
           let closure_result_string = Clang.get_type_spelling closure_result in
-          let args = closure_args |>
+          let closure_args' = closure_args |>
            Array.mapi (fun i (name, ty) -> if i = data_callee then None else Some (name, ty, name ^ "_ocaml")) in
-          let ocaml_args = args
+          let ocaml_args = closure_args'
            |> Array.to_seq |> Seq.filter_map (Option.map (fun (_, _, name) -> name)) |> List.of_seq in
           let local = "result" :: "f" :: ocaml_args in
-          let references' = List.mapi (fun i _ -> Printf.sprintf "*((value **)%s)[%d]" (fst closure_args.(data_callee)) (i + 1)) references  |> Array.of_list in
           let init_args chan =
-            args |> Array.iter @@ Option.iter @@ fun (name, ty, name_ocaml) ->
-              let arg_info, _ = find_type_info context empty_type_interface ty in
+            closure_args' |> Array.iter @@ Option.iter @@ fun (name, ty, name_ocaml) ->
+              let type_interface =
+                get_type (Clang.get_type_spelling ty) context.module_interface in
+              let arg_info, _ = find_type_info context type_interface ty in
+              let references' = find_carried_reference name type_interface.carry_reference (Array.of_list (references |> List.map (fun i -> args.(i)))) context.module_interface in
               flush chan;
-              arg_info.ocaml_of_c chan ~src:name ~params:[| |] ~references:references' ~tgt:name_ocaml in
+              arg_info.ocaml_of_c chan ~src:name ~params:[| |] ~references:(references' |> Array.of_list |> Array.map @@ fun (i, accessor) -> accessor (Printf.sprintf "*((value **)%s)[%d]" (fst closure_args.(data_callee)) (i + 1))) ~tgt:name_ocaml in
           let print_expression channel =
             Printf.fprintf channel "caml_callback%s(%a)"
               (match List.length ocaml_args with 1 -> "" | n -> string_of_int n)
@@ -1981,6 +1988,7 @@ let main cflags llvm_config prefix =
           | "6.0.0" -> "6.0.1"
           | "7.0.0"
           | "7.1.0" -> "7.0.1"
+          | "8.0.1" -> "8.0.0"
           | _ -> llvm_version in
         String.split_on_char ' ' llvm_cflags @
         ["-I"; List.fold_left Filename.concat llvm_prefix

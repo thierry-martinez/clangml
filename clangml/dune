@@ -9,5 +9,5 @@
   (preprocessor_deps (file "clangml_OperationKinds.def"))
   (library_flags -linkall)
   (flags -open Stdcompat)
-  (libraries unix stdcompat visitors.runtime clangml_config)
-  (preprocess (pps ppx_deriving.std visitors.ppx)))
+  (libraries unix stdcompat clangml_config)
+  (preprocess (pps ppx_deriving.std)))

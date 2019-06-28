@@ -186,28 +186,21 @@ MakeCXCursor(const clang::Stmt *S, CXTranslationUnit TU)
 static CXCursor
 MakeCXCursor(const clang::Decl *T, CXTranslationUnit TU)
 {
-  clang::DeclGroupRef DGR(const_cast<clang::Decl *>(T));
-  clang::DeclStmt DS(DGR,
-    clang::SourceLocation::getFromRawEncoding(0),
-    clang::SourceLocation::getFromRawEncoding(0));
-  CXCursor C = { CXCursor_DeclStmt, 0, { nullptr, &DS, TU }};
-  CXCursor Result;
-  clang_visitChildren(C, MakeCXCursor_visitor, &Result);
-  return Result;
+  CXCursor C = { CXCursor_UnexposedStmt, 0, { T, nullptr, TU }};
+  return clang_getCursorSemanticParent(C);
 }
 
 /* MakeCXType is not exported in libclang.
-   The following implementation makes a (not well-formed) cursor on an
-   OpaqueValueExpr of type T. Querying the type of this cursor calls
-   libclang's MakeCXType on T.
+   The following implementation makes a (not well-formed) CXType for a pointer
+   to values of type T. Querying the type of the pointee type calls libclang's
+   MakeCXType on T.
 */
 static CXType
 MakeCXType(clang::QualType T, CXTranslationUnit TU)
 {
-  clang::OpaqueValueExpr OV(
-    clang::SourceLocation::getFromRawEncoding(0), T, clang::VK_RValue);
-  CXCursor C = { CXCursor_FirstExpr, 0, { nullptr, &OV, TU }};
-  return clang_getCursorType(C);
+  clang::QualType P = TU->TheASTUnit->getASTContext().getPointerType(T);
+  CXType CT = { CXType_Invalid, { P.getAsOpaquePtr(), TU }};
+  return clang_getPointeeType(CT);
 }
 
 static const clang::FunctionDecl *
@@ -528,6 +521,50 @@ extern "C" {
       return cxstring_createDup(S.str());
     }
     return cxstring_createRef("");
+  }
+
+  enum clang_ext_fltSemantics
+  clang_ext_Float_getSemantics(CXFloat c)
+  {
+    if (auto f = static_cast<llvm::APFloat *>(c.data)) {
+      const llvm::fltSemantics *semantics = &f->getSemantics();
+      #ifdef LLVM_VERSION_BEFORE_4_0_0
+      #define FLTSEMANTICS_ARGS
+      #else
+      #define FLTSEMANTICS_ARGS ()
+      #endif
+      if (semantics == &llvm::APFloat::IEEEhalf FLTSEMANTICS_ARGS) {
+        return CLANG_EXT_fltSemantics_IEEEhalf;
+      }
+      if (semantics == &llvm::APFloat::IEEEsingle FLTSEMANTICS_ARGS) {
+        return CLANG_EXT_fltSemantics_IEEEsingle;
+      }
+      if (semantics == &llvm::APFloat::IEEEdouble FLTSEMANTICS_ARGS) {
+        return CLANG_EXT_fltSemantics_IEEEdouble;
+      }
+      if (semantics == &llvm::APFloat::IEEEquad FLTSEMANTICS_ARGS) {
+        return CLANG_EXT_fltSemantics_IEEEquad;
+      }
+      if (semantics == &llvm::APFloat::PPCDoubleDouble FLTSEMANTICS_ARGS) {
+        return CLANG_EXT_fltSemantics_PPCDoubleDouble;
+      }
+      if (semantics == &llvm::APFloat::x87DoubleExtended FLTSEMANTICS_ARGS) {
+        return CLANG_EXT_fltSemantics_x87DoubleExtended;
+      }
+      if (semantics == &llvm::APFloat::Bogus FLTSEMANTICS_ARGS) {
+        return CLANG_EXT_fltSemantics_Bogus;
+      }
+    }
+    return CLANG_EXT_fltSemantics_Invalid;
+  }
+
+  float
+  clang_ext_Float_convertToFloat(CXFloat c)
+  {
+    if (auto f = static_cast<llvm::APFloat *>(c.data)) {
+      return f->convertToFloat();
+    }
+    return 0.;
   }
 
   double
@@ -1050,8 +1087,8 @@ extern "C" {
   {
     if (auto *D = GetCursorDecl(C)) {
       if (auto TTPD = llvm::dyn_cast_or_null<clang::TemplateTypeParmDecl>(D)) {
-        if (TTPD->hasDefaultArgument()) {
-          return MakeCXType(TTPD->getDefaultArgument(), getCursorTU(C));
+        if (auto *type = TTPD->getDefaultArgumentInfo()) {
+          return MakeCXType(type->getType(), getCursorTU(C));
         }
       }
     }
@@ -1714,5 +1751,23 @@ extern "C" {
       return MakeCXCursor(e->getPack(), getCursorTU(c));
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  CXCursor
+  clang_ext_DecltypeType_getUnderlyingExpr(CXType t)
+  {
+    if (auto *dt = GetQualType(t)->getAs<clang::DecltypeType>()) {
+      return MakeCXCursor(dt->getUnderlyingExpr(), GetTU(t));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, GetTU(t));
+  }
+
+  bool
+  clang_ext_NamespaceDecl_isInline(CXCursor c)
+  {
+    if (auto nd = llvm::dyn_cast_or_null<clang::NamespaceDecl>(GetCursorDecl(c))) {
+      return nd->isInline();
+    }
+    return false;
   }
 }

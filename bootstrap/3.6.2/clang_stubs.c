@@ -3565,9 +3565,9 @@ clang_visitChildren_visitor_callback(CXCursor arg0, CXCursor arg1, CXClientData 
   f = *((value *) ((value **)arg2)[0]);
 arg0_ocaml = caml_alloc_tuple(2);
   Store_field(arg0_ocaml, 0, Val_cxcursor(arg0));
-  Store_field(arg0_ocaml, 1, *((value **)arg2)[1]);arg1_ocaml = caml_alloc_tuple(2);
+  Store_field(arg0_ocaml, 1, safe_field(*((value **)arg2)[1], 1));arg1_ocaml = caml_alloc_tuple(2);
   Store_field(arg1_ocaml, 0, Val_cxcursor(arg1));
-  Store_field(arg1_ocaml, 1, *((value **)arg2)[1]);  result = caml_callback2(f, arg0_ocaml, arg1_ocaml);
+  Store_field(arg1_ocaml, 1, safe_field(*((value **)arg2)[1], 1));  result = caml_callback2(f, arg0_ocaml, arg1_ocaml);
   {
     CAMLlocal1(data);
     data = Cxchildvisitresult_val(result);
@@ -5362,6 +5362,68 @@ clang_ext_Float_toString_wrapper(value f_ocaml)
     CAMLlocal1(data);
     data = caml_copy_string(safe_string(clang_getCString(result)));
                     clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_fltSemantics
+Clang_ext_fltsemantics_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CLANG_EXT_fltSemantics_IEEEhalf;
+  case 1: return CLANG_EXT_fltSemantics_IEEEsingle;
+  case 2: return CLANG_EXT_fltSemantics_IEEEdouble;
+  case 3: return CLANG_EXT_fltSemantics_IEEEquad;
+  case 4: return CLANG_EXT_fltSemantics_PPCDoubleDouble;
+  case 5: return CLANG_EXT_fltSemantics_x87DoubleExtended;
+  case 6: return CLANG_EXT_fltSemantics_Bogus;
+  case 7: return CLANG_EXT_fltSemantics_Invalid;
+  }
+  failwith_fmt("invalid value for Clang_ext_fltsemantics_val: %d", Int_val(ocaml));
+  return CLANG_EXT_fltSemantics_IEEEhalf;
+}
+
+value
+Val_clang_ext_fltsemantics(enum clang_ext_fltSemantics v)
+{
+  switch (v) {
+  case CLANG_EXT_fltSemantics_IEEEhalf: return Val_int(0);
+  case CLANG_EXT_fltSemantics_IEEEsingle: return Val_int(1);
+  case CLANG_EXT_fltSemantics_IEEEdouble: return Val_int(2);
+  case CLANG_EXT_fltSemantics_IEEEquad: return Val_int(3);
+  case CLANG_EXT_fltSemantics_PPCDoubleDouble: return Val_int(4);
+  case CLANG_EXT_fltSemantics_x87DoubleExtended: return Val_int(5);
+  case CLANG_EXT_fltSemantics_Bogus: return Val_int(6);
+  case CLANG_EXT_fltSemantics_Invalid: return Val_int(7);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_fltsemantics: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Float_getSemantics_wrapper(value f_ocaml)
+{
+  CAMLparam1(f_ocaml);
+  CXFloat f;
+  f = Cxfloat_val(f_ocaml);
+  enum clang_ext_fltSemantics result = clang_ext_Float_getSemantics(f);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_fltsemantics(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_Float_convertToFloat_wrapper(value f_ocaml)
+{
+  CAMLparam1(f_ocaml);
+  CXFloat f;
+  f = Cxfloat_val(f_ocaml);
+  float result = clang_ext_Float_convertToFloat(f);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_double(result);
     CAMLreturn(data);
   }
 }
@@ -8200,6 +8262,36 @@ clang_ext_SizeOfPackExpr_getPack_wrapper(value c_ocaml)
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
   Store_field(data, 1, safe_field(c_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_DecltypeType_getUnderlyingExpr_wrapper(value t_ocaml)
+{
+  CAMLparam1(t_ocaml);
+  CXType t;
+  t = Cxtype_val(Field(t_ocaml, 0));
+  CXCursor result = clang_ext_DecltypeType_getUnderlyingExpr(t);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(t_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_NamespaceDecl_isInline_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  _Bool result = clang_ext_NamespaceDecl_isInline(c);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
     CAMLreturn(data);
   }
 }

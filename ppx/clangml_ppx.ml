@@ -275,25 +275,13 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc
     Clang.Command_line.include_directory Clang.includedir
     :: command_line_args in
   let ast = Clang.Ast.parse_string ~command_line_args code in
-  let tu = Clang.Ast.cursor_of_node ast |> Clang.cursor_get_translation_unit in
-  let has_diagnostics = ref false in
-  Clang.seq_of_diagnostics tu |> Seq.iter begin fun diagnostics ->
-    if
-      List.mem (Clang.get_diagnostic_severity diagnostics) Clang.error then
-      begin
-        if not !has_diagnostics then
-          begin
-            Format.fprintf Format.err_formatter
-              "@[%a@]@[Compiling quotation code:@ %s@]@."
-              Location.print loc code;
-            has_diagnostics := true;
-          end;
-        prerr_endline
-          (Clang.format_diagnostic diagnostics
-            Clang.Cxdiagnosticdisplayoptions.display_source_location)
-      end
-  end;
-  if Clang.has_severity Clang.error tu then
+  Clang.Ast.format_diagnostics Clang.error Format.err_formatter ast
+    ~pp:begin fun pp fmt () ->
+      Format.fprintf fmt
+        "@[%a@]@[Compiling quotation code:@ %s@]@ %a@."
+        Location.print loc code pp ()
+    end;
+  if Clang.Ast.has_severity Clang.error ast then
     Location.raise_errorf ~loc "clang error while compiling quotation code";
   let placeholder_hashtbl = String_hashtbl.create placeholder_hashtbl_sz in
   antiquotations |> List.iter begin fun antiquotation ->

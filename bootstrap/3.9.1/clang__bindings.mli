@@ -1607,6 +1607,19 @@ external ext_float_is_valid :
   cxfloat -> bool = "clang_ext_Float_isValid_wrapper"
 external ext_float_to_string :
   cxfloat -> string = "clang_ext_Float_toString_wrapper"
+type clang_ext_fltsemantics =
+  | IEEEhalf 
+  | IEEEsingle 
+  | IEEEdouble 
+  | IEEEquad 
+  | PPCDoubleDouble 
+  | X87DoubleExtended 
+  | Bogus 
+  | Invalid 
+external ext_float_get_semantics :
+  cxfloat -> clang_ext_fltsemantics = "clang_ext_Float_getSemantics_wrapper"
+external ext_float_convert_to_float :
+  cxfloat -> float = "clang_ext_Float_convertToFloat_wrapper"
 external ext_float_convert_to_double :
   cxfloat -> float = "clang_ext_Float_convertToDouble_wrapper"
 external ext_string_literal_get_string :
@@ -2489,3 +2502,7 @@ external ext_call_expr_get_arg :
   cxcursor -> int -> cxcursor = "clang_ext_CallExpr_getArg_wrapper"
 external ext_size_of_pack_expr_get_pack :
   cxcursor -> cxcursor = "clang_ext_SizeOfPackExpr_getPack_wrapper"
+external ext_decltype_type_get_underlying_expr :
+  cxtype -> cxcursor = "clang_ext_DecltypeType_getUnderlyingExpr_wrapper"
+external ext_namespace_decl_is_inline :
+  cxcursor -> bool = "clang_ext_NamespaceDecl_isInline_wrapper"
