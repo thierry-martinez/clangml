@@ -258,7 +258,8 @@ let () =
 (* 5.3.3 Sizeof *)
 
 let () =
-  let ast = parse_string {|
+  let ast = parse_string 
+      ~command_line_args:[Clang.Command_line.standard Cxx11] {|
     #include <cstdlib>
 
     template<class... Types>
@@ -269,7 +270,7 @@ let () =
   match List.rev ast.desc.items with
   | d :: _ ->
     let bindings =
-      check_pattern_decl d [%pattern? [%cpp-decl
+      check_pattern_decl d [%pattern? [%cpp-decl (standard "c++11")
       {|
         #include <cstdlib>
       |} {|
