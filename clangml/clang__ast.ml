@@ -1626,7 +1626,8 @@ let () =
 let example = "nullptr;"
 
 let () =
-  check Clang.Ast.pp_stmt (parse_statement_list ~language:CXX) example
+  check Clang.Ast.pp_stmt
+    (parse_statement_list ~language:CXX ~standard:Cxx11) example
   @@ fun ast -> match ast with
   | [{ desc = Expr { desc = NullPtrLiteral }}] -> ()
   | _ -> assert false
