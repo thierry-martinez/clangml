@@ -408,6 +408,12 @@ module Ast = struct
           }
         | TemplateTemplateParameter ->
             TemplateTemplateParameter (get_cursor_spelling cursor)
+        | NamespaceAlias ->
+            let alias, original =
+              match ident_ref_of_cxcursor cursor with
+              | NamespaceRef { namespace_ref; ident } -> ident, namespace_ref
+              | _ -> raise Invalid_structure in
+            NamespaceAlias { alias; original }
         | kind ->
             match ext_decl_get_kind cursor with
             | Empty -> EmptyDecl
