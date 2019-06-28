@@ -899,10 +899,11 @@ this function is used in the following examples to check Clang.Ast.pp_decl the
 AST of various types.
     {[
 let parse_statement_list ?(return_type = "void") ?filename ?command_line_args
-    ?language ?options source =
+    ?language ?standard ?options source =
   match
     Printf.sprintf "%s f(void) { %s }" return_type source |>
-    parse_declaration_list ?filename ?command_line_args ?language ?options
+    parse_declaration_list ?filename ?command_line_args ?language ?standard
+      ?options
   with
   | [{ desc = Function { body = Some { desc = Compound items }}}] -> items
   | decls ->
