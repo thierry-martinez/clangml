@@ -193,11 +193,15 @@ declaration list:
 this function is used in the following examples to check the AST of
 various programs.
     {[
-let parse_declaration_list ?filename ?(command_line_args = []) ?language ?options
-    ?clang_options source =
+let parse_declaration_list ?filename ?(command_line_args = []) ?language ?standard
+    ?options ?clang_options source =
   let command_line_args =
     match language with
     | Some language -> Clang.Command_line.language language :: command_line_args
+    | None -> command_line_args in
+  let command_line_args =
+    match standard with
+    | Some standard -> Clang.Command_line.standard standard :: command_line_args
     | None -> command_line_args in
   let ast =
     Clang.Ast.parse_string ?filename ~command_line_args ?options
@@ -645,7 +649,8 @@ let () =
 let example = "decltype(1) i = 1;"
 
 let () =
-  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX ~standard:Cxx11)
+    example
   [%pattern?
     [{ desc = Var {
       var_name = "i";
