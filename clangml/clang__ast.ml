@@ -2899,7 +2899,7 @@ let () =
     ]}
 *)
   | Using of {
-      namespace : string;
+      namespace : ident_ref;
       decl : string option;
     }
 (** C++ "using" directive and declaration.

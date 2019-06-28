@@ -151,7 +151,55 @@ module Ast = struct
       | None -> CXInt i
       | Some i -> Int i
 
-    let rec make_template_name name =
+    let ident_of_string s =
+      match s with
+      | "operator==" -> BinaryOperatorRef EQ
+      | _ ->
+          match string_chop_prefix_opt "operator " s with
+          | Some target -> ConversionOperatorRef target
+          | _ -> Ident s
+
+    let ident_ref_of_namespaces namespaces =
+      match List.rev namespaces with
+      | [] -> raise Invalid_structure
+      | hd :: tl ->
+          tl |> List.fold_left begin fun namespace_ref ident ->
+            NamespaceRef { namespace_ref; ident }
+          end (Ident hd)
+
+    let extract (f : 'a -> 'b option) (list : 'a list) : 'b list * 'a list =
+      let acc_match, acc_others =
+        list |> List.fold_left begin fun (acc_match, acc_others) item ->
+          match f item with
+          | None -> (acc_match, item :: acc_others)
+          | Some x -> (x :: acc_match, acc_others)
+        end ([], []) in
+      List.rev acc_match, List.rev acc_others
+
+    let rec ident_ref_of_cxcursor cursor =
+      let ident = get_cursor_spelling cursor in
+      let rec pop_ref list ident =
+        match
+          match list with
+          | hd :: tl ->
+              Some (get_cursor_kind hd, hd, tl)
+          | [] -> None
+        with
+        | Some (TypeRef, hd, tl) ->
+            let ty = get_cursor_type hd in
+            let decl = get_type_declaration ty in
+            let type_ref = pop_ref tl (get_cursor_spelling decl) in
+            let qual_type = of_cxtype ty in
+            TypeRef { type_ref; qual_type; ident }
+        | Some (NamespaceRef, hd, tl) ->
+            let namespace_ref = pop_ref tl (get_cursor_spelling hd) in
+            NamespaceRef { namespace_ref; ident }
+        | Some (OverloadedDeclRef, hd, _) ->
+            ident_of_string (get_cursor_spelling hd)
+        | _ -> ident_of_string ident in
+      pop_ref (List.rev (list_of_children cursor)) ident
+
+    and make_template_name name =
       match ext_template_name_get_kind name with
       | Template ->
           NameTemplate (
@@ -348,20 +396,27 @@ module Ast = struct
         | CXXAccessSpecifier ->
             AccessSpecifier (cursor |> get_cxxaccess_specifier)
         | UsingDirective ->
-            let namespace =
-              match list_of_children cursor with
-              | [namespace] -> namespace
-              | _ -> raise Invalid_structure in
-            let namespace = get_cursor_spelling namespace in
+            let namespaces =
+              list_of_children cursor |> List.map begin fun c ->
+                  match get_cursor_kind c with
+                  | NamespaceRef -> get_cursor_spelling c
+                  | _ -> raise Invalid_structure
+              end in
+            let namespace = ident_ref_of_namespaces namespaces in
             Using { namespace; decl = None }
         | UsingDeclaration ->
+            let namespaces, others =
+              list_of_children cursor |> extract begin fun c ->
+                  match get_cursor_kind c with
+                  | NamespaceRef -> Some (get_cursor_spelling c)
+                  | _ -> None
+              end in
             begin
-              match list_of_children cursor with
-              | [namespace_ref; decl_ref] when
-                  get_cursor_kind namespace_ref = NamespaceRef &&
+              match others with
+              | [decl_ref] when
                   get_cursor_kind decl_ref = OverloadedDeclRef ->
                     Using {
-                    namespace = get_cursor_spelling namespace_ref;
+                    namespace = ident_ref_of_namespaces namespaces;
                     decl = Some (get_cursor_spelling decl_ref) }
               | _ -> raise Invalid_structure
             end
@@ -454,13 +509,43 @@ module Ast = struct
         None
 
     and parameter_of_cxcursor cursor =
+      let namespaces, others = list_of_children cursor |>
+        extract begin fun c : string option ->
+          match get_cursor_kind c with
+          | NamespaceRef -> Some (get_cursor_spelling c)
+          | _ -> None
+        end in
+      let others = others |> List.filter begin fun c ->
+        match get_cursor_kind c with
+        | TypeRef -> false
+        | _ -> true
+      end in
+      let qual_type = cursor |> get_cursor_type |> of_cxtype in
+      let qual_type =
+        match namespaces, qual_type with
+        | _ :: _, { desc = Elaborated { keyword; named_type }} ->
+            let namespace_ref = ident_ref_of_namespaces namespaces in
+            let add_namespace ident_ref =
+              match ident_ref with
+              | Ident ident ->
+                  NamespaceRef {
+                    namespace_ref;
+                    ident }
+              | _ -> raise Invalid_structure in
+            let desc =
+              match named_type.desc with
+              | Record ident_ref -> Record (add_namespace ident_ref)
+              | Enum ident_ref -> Enum (add_namespace ident_ref)
+              | _ -> named_type.desc in
+            { qual_type with
+              desc = Elaborated { keyword;
+                named_type = { named_type with desc }}}
+        | _ -> qual_type in
       node ~cursor {
           name = cursor |> get_cursor_spelling;
-          qual_type = cursor |> get_cursor_type |> of_cxtype;
+          qual_type;
           default =
-            match list_of_children cursor |> List.filter begin fun c ->
-              get_cursor_kind c <> TypeRef
-            end with
+            match others with
             | [] -> None
             | [default] -> Some (default |> expr_of_cxcursor)
             | _ -> raise Invalid_structure }
@@ -1142,37 +1227,6 @@ module Ast = struct
       match parameters with
       | [] -> decl
       | _ -> TemplateDecl { parameters; decl = node ~cursor decl }
-
-    and ident_of_string s =
-      match s with
-      | "operator==" -> BinaryOperatorRef EQ
-      | _ ->
-          match string_chop_prefix_opt "operator " s with
-          | Some target -> ConversionOperatorRef target
-          | _ -> Ident s
-
-    and ident_ref_of_cxcursor cursor =
-      let ident = get_cursor_spelling cursor in
-      let rec pop_ref list ident =
-        match
-          match list with
-          | hd :: tl ->
-              Some (get_cursor_kind hd, hd, tl)
-          | [] -> None
-        with
-        | Some (TypeRef, hd, tl) ->
-            let ty = get_cursor_type hd in
-            let decl = get_type_declaration ty in
-            let type_ref = pop_ref tl (get_cursor_spelling decl) in
-            let qual_type = of_cxtype ty in
-            TypeRef { type_ref; qual_type; ident }
-        | Some (NamespaceRef, hd, tl) ->
-            let namespace_ref = pop_ref tl (get_cursor_spelling hd) in
-            NamespaceRef { namespace_ref; ident }
-        | Some (OverloadedDeclRef, hd, _) ->
-            ident_of_string (get_cursor_spelling hd)
-        | _ -> ident_of_string ident in
-      pop_ref (List.rev (list_of_children cursor)) ident
 
     let translation_unit_of_cxcursor cursor =
       let filename = get_cursor_spelling cursor in
