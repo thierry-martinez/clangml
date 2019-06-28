@@ -15,18 +15,50 @@ let check_pattern_decl decl pattern = check_pattern lift_expr#decl decl pattern
 
 let check_pattern_tu expr tu = check_pattern lift_expr#translation_unit expr tu
 
-let parse_string ?(command_line_args = []) s =
+let parse_string ?(command_line_args = []) ?options s =
   let command_line_args =
     Clang.Command_line.include_directory Clang.includedir ::
     Clang.Command_line.language CXX ::
     command_line_args in
-  let ast = Clang.Ast.parse_string ~command_line_args s in
+  let ast = Clang.Ast.parse_string ~command_line_args ?options s in
   let tu = Clang.Ast.cursor_of_node ast |> Clang.cursor_get_translation_unit in
-  Clang.seq_of_diagnostics tu |> Seq.iter (fun diagnostics ->
-    prerr_endline (Clang.format_diagnostic diagnostics
-      Clang.Cxdiagnosticdisplayoptions.display_source_location));
+  Clang.format_diagnostics Clang.warning_or_error Format.err_formatter tu
+    ~pp:begin fun pp fmt () ->
+      Format.fprintf fmt "@[Compiling:@ %s@]%a@." s pp ()
+    end;
   assert (not (Clang.has_severity Clang.error tu));
   ast
+
+(* 2.13.6 Boolean literals *)
+
+let () =
+  let ast = parse_string {|
+    bool f = false;
+    bool t = true;
+  |} in
+  let bindings =
+    check_pattern_tu ast [%pattern? [%cpp-tu {|
+      bool f = [%bool? f];
+      bool t = [%bool? t];
+    |}]] in
+  check_pattern_expr bindings#f [%pattern? {
+    desc = BoolLiteral false }];
+  check_pattern_expr bindings#t [%pattern? {
+    desc = BoolLiteral true }]
+
+
+(* 2.13.7 Pointer literals *)
+
+let () =
+  let ast = parse_string {|
+    void *p = nullptr;
+  |} in
+  let bindings =
+    check_pattern_tu ast [%pattern? [%cpp-tu {|
+      void *p = [%(void *)? p];
+    |}]] in
+  check_pattern_expr bindings#p [%pattern? {
+    desc = NullPtrLiteral }]
 
 (* 5.1.2 This *)
 
@@ -514,7 +546,7 @@ let () =
               name = "A";
               args = [{ desc = BoolLiteral true }]}}}};
           arrow = false;
-          field = { desc = "m" }}};
+          field = { desc = Ident "m" }}};
         constexpr = true }}];
     check_pattern_decl bindings#f2 [%pattern? {
       desc = Function {
@@ -555,3 +587,179 @@ let () =
           args = [{ desc = IntegerLiteral (Int 1)}]; }};
         constexpr = true }}]
   end]
+
+(* 7.1.7.2 Simple type specifiers *)
+
+let () =
+  let ast = parse_string
+    ~command_line_args:[Clang.Command_line.standard Cxx11] {|
+      const int&& foo();
+      int i;
+      struct A { double x; };
+      const A* a = new A();
+
+      decltype(foo()) x1 = 17;
+      decltype(i) x2;
+      decltype(a->x) x3;
+      decltype((a->x)) x4 = x3;
+  |} in
+  let bindings =
+    check_pattern_tu ast [%pattern? [%cpp-tu (standard "c++11") {|
+      const int&& foo();
+      int i;
+      struct A { double x; };
+      const A* a = new A();
+
+      [%decl? x1]
+      [%decl? x2]
+      [%decl? x3]
+      [%decl? x4]
+    |}]] in
+  check_pattern_decl bindings#x1 [%pattern? {
+    desc = Var {
+      var_type = { desc = Decltype { desc = Call {
+        callee = { desc = DeclRef (Ident "foo")};
+        args = []}}}}}];
+  check_pattern_decl bindings#x2 [%pattern? {
+    desc = Var {
+      var_type = { desc = Decltype { desc = DeclRef (Ident "i")}}}}];
+  check_pattern_decl bindings#x3 [%pattern? {
+    desc = Var {
+      var_type = { desc = Decltype { desc = Member {
+        base = { desc = DeclRef (Ident "a")};
+        arrow = true;
+        field = { desc = Ident "x" }}}}}}];
+  check_pattern_decl bindings#x4 [%pattern? {
+    desc = Var {
+      var_type = { desc = Decltype { desc = Member {
+        base = { desc = DeclRef (Ident "a")};
+        arrow = true;
+        field = { desc = Ident "x" }}}}}}]
+
+(* 12.1 Constructors *)
+
+(*
+let () =
+  let ast = parse_string {|
+      complex zz = complex(1, 2.3);
+      cprint( complex(7.8,1.2) );
+  |} in
+*)
+
+(* 12.3.2 Conversion functions *)
+
+let () =
+  let ast = parse_string
+    ~options:(Clang.Ast.Options.make ~ignore_implicit_cast:false ()) {|
+    struct X {
+      operator int();
+    };
+    void f(X a) {
+      int i = int(a);
+      i = (int)a;
+      i = a;
+    }
+  |} in
+  let bindings =
+    check_pattern_tu ast [%pattern? [%cpp-tu {|
+      struct X {
+        [%decl? int]
+      };
+      void f(X a) {
+        int i = [%int? i1];
+        i = [%int? i2];
+        i = [%int? i3];
+      }
+    |}]] in
+  check_pattern_decl bindings#int [%pattern? {
+    desc = CXXMethod {
+      type_ref = None;
+      function_type = {
+        result = { desc = BuiltinType Int };
+        parameters = Some { non_variadic = [] }};
+      name = "operator int";
+      body = None; }}];
+  check_pattern_expr bindings#i1 [%pattern? {
+    desc = Cast {
+      kind = Functional;
+      qual_type = { desc = BuiltinType Int };
+      operand = { desc = Cast {
+        kind = Implicit;
+        qual_type = { desc = BuiltinType Int };
+        operand = { desc = Call {
+          callee = {
+            desc = Member {
+              base = { desc = DeclRef (Ident "a")};
+              arrow = false;
+              field = { desc = ConversionOperatorRef "int" }}}}}}}}}];
+  check_pattern_expr bindings#i2 [%pattern? {
+    desc = Cast {
+      kind = CStyle;
+      qual_type = { desc = BuiltinType Int };
+      operand = { desc = Cast {
+        kind = Implicit;
+        qual_type = { desc = BuiltinType Int };
+        operand = { desc = Call {
+          callee = {
+            desc = Member {
+              base = { desc = DeclRef (Ident "a")};
+              arrow = false;
+              field = { desc = ConversionOperatorRef "int" }}}}}}}}}];
+  check_pattern_expr bindings#i3 [%pattern? {
+    desc = Cast {
+      kind = Implicit;
+      qual_type = { desc = BuiltinType Int };
+      operand = { desc = Call {
+        callee = {
+          desc = Member {
+            base = { desc = DeclRef (Ident "a")};
+            arrow = false;
+            field = { desc = ConversionOperatorRef "int" }}}}}}}]
+
+(* 14.1 Template parameters *)
+
+let () =
+  let ast = parse_string {|
+    class T { public: T(int i) {} /* ... */ };
+    int i;
+
+    template<class T, T i> void f(T t) {
+      T t1 = i; // template-parameters T and i
+      ::T t2 = ::i; // global namespace members T and i
+    }
+  |} in
+  let bindings =
+    check_pattern_tu ast [%pattern? [%cpp-tu {|
+      class T { public: T(int i) {} /* ... */ };
+      int i;
+
+      [%decl? f]
+    |}]] in
+  check_pattern_decl bindings#f [%pattern? {
+    desc = TemplateDecl {
+      parameters = [
+        { desc = {
+            parameter_name = "T";
+            parameter_kind = Class { default = None }}};
+        { desc = {
+            parameter_name = "i";
+            parameter_kind = NonType {
+              parameter_type = { desc = TemplateTypeParm "T" };
+              default = None }}}];
+      decl = { desc = Function {
+        function_type = {
+          result = { desc = BuiltinType Void };
+          parameters = Some { non_variadic = [{ desc = {
+            name = "t";
+            qual_type = { desc = TemplateTypeParm "T" }}}]}};
+        name = "f";
+        body = Some { desc = Compound [
+          { desc = Decl [{ desc = Var {
+              var_type = { desc = TemplateTypeParm "T" };
+              var_name = "t1";
+              var_init = Some { desc = DeclRef (Ident "i")}}}]};
+          { desc = Decl [{ desc = Var {
+              var_type = { desc = Elaborated {
+                named_type = { desc = Record (Ident "T") }}};
+              var_name = "t2";
+              var_init = Some { desc = Construct { name = ""; args = [{ desc = Construct { name = "T"; args = [{desc = DeclRef (Ident "i")}]}}]}}}}]}]}}}}}]

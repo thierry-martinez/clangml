@@ -55,6 +55,21 @@ module Ast : sig
   val var : ?linkage:linkage_kind -> ?var_init:expr ->
     ?constexpr:bool -> string -> qual_type -> var_decl_desc
 
+  val function_decl : ?linkage:linkage_kind -> ?body:stmt -> ?deleted:bool ->
+    ?constexpr:bool -> function_type -> string -> function_decl
+
+  val function_type : ?calling_conv:calling_conv -> ?parameters:parameters ->
+    qual_type -> function_type
+
+  val parameters : ?variadic:bool -> parameter list -> parameters
+
+  val parameter : ?default:expr -> qual_type -> string -> parameter_desc
+
+  val new_instance : ?placement_args:expr list -> ?array_size:expr ->
+    ?init:expr -> ?args:expr list -> qual_type -> expr_desc
+
+  val delete : ?global_delete:bool -> ?array_form:bool -> expr -> expr_desc
+
   (** {!type:Options.t} stores flags that change the construction of the
       abstract syntax tree. Beware that the nodes that are ignored by default
       can differ from one version of Clang to the other. *)
@@ -135,17 +150,40 @@ module Ast : sig
   (** [location_of_node node] is equivalent to
       {!val:location_of_decoration}[ node.decoration]. *)
 
-  val get_presumed_location : source_location -> concrete_location
-  (** [get_presumed_location location] returns the concrete location
-      associated to [location]. If [location] is libclang's, then
-      this function calls {!val:Clang.get_presumed_location} (which
-      honors [#] line directive). *)
+  val concrete_of_cxsourcelocation : location_kind -> cxsourcelocation -> concrete_location
+  (** [concrete_of_cxsourcelocation kind location] returns the concrete location
+      associated to [location]. [kind] selects whether
+      {!val:Clang.get_presumed_location} (which ignores [#] line directive)
+      or {!val:Clang.get_expansion_location} (which honors [#] line directive)
+      is called. *)
 
-  val get_expansion_location : source_location -> concrete_location
-  (** [get_expansion_location location] returns the concrete location
-      associated to [location]. If [location] is libclang's, then
-      this function calls {!val:Clang.get_expansion_location} (which
-      ignores [#] line directive). *)
+  val concrete_of_source_location : location_kind -> source_location -> concrete_location
+  (** [concrete_of_source_location kind location] returns the concrete location
+      associated to [location].
+      If [location] is concrete, it is returned directly.
+      If [location] is libclang's, [concrete_of_cxsourcelocation] is called. *)
+
+  val seq_of_diagnostics : translation_unit -> cxdiagnostic Seq.t
+  (** [seq_of_diagnostics tu] returns the diagnostics
+      (notes, warnings, errors, ...)
+      produced for the given translation unit *)
+
+  val format_diagnostics :
+    ?pp:((Format.formatter -> unit -> unit)
+         -> Format.formatter -> unit -> unit) ->
+    cxdiagnosticseverity list -> Format.formatter ->
+      translation_unit -> unit
+  (** [format_diagnostics ?pp severities fmt tu] formats the
+      diagnostics produced for the given translation unit. Only the diagnostics,
+      the severity of which is listed in [severities] are displayed.
+      If there is a printer given in [pp], then this printer is called once if
+      and only if there is at least one diagnostic to display, and [pp] should call
+      the printer passed in its first argument to display the diagnostics.
+      In the case there is no diagnostic to display, nothing is printed. *)
+
+  val has_severity : cxdiagnosticseverity list -> translation_unit -> bool
+  (** [has_severity l tu] returns whether the translation unit [tu] produced a
+      diagnostic, the severity of which belongs to [l]. *)
 
   include module type of struct
     include Clang__ast_utils
@@ -270,6 +308,7 @@ module Decl : sig
 
   val equal : t -> t -> bool
 
+
   val compare : t -> t -> int
 
   module Set : Set.S with type elt = t
@@ -309,6 +348,10 @@ module Enum_constant : sig
 
   val get_value : t -> int
   (** [get_value c] returns the value associated to the constant [c].*)
+end
+
+module Translation_unit : sig
+  val make : ?filename:string -> Ast.decl list -> Ast.translation_unit_desc
 end
 
 module Printer : sig

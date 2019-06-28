@@ -636,3 +636,11 @@ clang_ext_CallExpr_getArg(CXCursor c, unsigned int i);
 CXCursor
 clang_ext_SizeOfPackExpr_getPack(CXCursor c);
 
+CXCursor
+clang_ext_DecltypeType_getUnderlyingExpr(CXType t);
+
+bool
+clang_ext_NamespaceDecl_isInline(CXCursor c);
+
+typedef enum CXVisitorResult (*CXDeclContextVisitor)(
+  CXCursor , CXClientData client_data);

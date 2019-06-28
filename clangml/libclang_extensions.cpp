@@ -186,14 +186,8 @@ MakeCXCursor(const clang::Stmt *S, CXTranslationUnit TU)
 static CXCursor
 MakeCXCursor(const clang::Decl *T, CXTranslationUnit TU)
 {
-  clang::DeclGroupRef DGR(const_cast<clang::Decl *>(T));
-  clang::DeclStmt DS(DGR,
-    clang::SourceLocation::getFromRawEncoding(0),
-    clang::SourceLocation::getFromRawEncoding(0));
-  CXCursor C = { CXCursor_DeclStmt, 0, { nullptr, &DS, TU }};
-  CXCursor Result;
-  clang_visitChildren(C, MakeCXCursor_visitor, &Result);
-  return Result;
+  CXCursor C = { CXCursor_UnexposedStmt, 0, { T, nullptr, TU }};
+  return clang_getCursorSemanticParent(C);
 }
 
 /* MakeCXType is not exported in libclang.
@@ -1757,5 +1751,23 @@ extern "C" {
       return MakeCXCursor(e->getPack(), getCursorTU(c));
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  CXCursor
+  clang_ext_DecltypeType_getUnderlyingExpr(CXType t)
+  {
+    if (auto *dt = GetQualType(t)->getAs<clang::DecltypeType>()) {
+      return MakeCXCursor(dt->getUnderlyingExpr(), GetTU(t));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, GetTU(t));
+  }
+
+  bool
+  clang_ext_NamespaceDecl_isInline(CXCursor c)
+  {
+    if (auto nd = llvm::dyn_cast_or_null<clang::NamespaceDecl>(GetCursorDecl(c))) {
+      return nd->isInline();
+    }
+    return false;
   }
 }

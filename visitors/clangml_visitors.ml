@@ -1,3 +1,5 @@
+[@@@ocaml.warning "-30"]
+
 [%%rewrite
   module%import Clang__ = struct
     module%import Clang__bindings = struct
