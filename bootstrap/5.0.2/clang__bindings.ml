@@ -2726,3 +2726,7 @@ external ext_call_expr_get_arg :
   cxcursor -> int -> cxcursor = "clang_ext_CallExpr_getArg_wrapper"
 external ext_size_of_pack_expr_get_pack :
   cxcursor -> cxcursor = "clang_ext_SizeOfPackExpr_getPack_wrapper"
+external ext_decltype_type_get_underlying_expr :
+  cxtype -> cxcursor = "clang_ext_DecltypeType_getUnderlyingExpr_wrapper"
+external ext_namespace_decl_is_inline :
+  cxcursor -> bool = "clang_ext_NamespaceDecl_isInline_wrapper"

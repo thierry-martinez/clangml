@@ -4077,9 +4077,9 @@ clang_visitChildren_visitor_callback(CXCursor arg0, CXCursor arg1, CXClientData 
   f = *((value *) ((value **)arg2)[0]);
 arg0_ocaml = caml_alloc_tuple(2);
   Store_field(arg0_ocaml, 0, Val_cxcursor(arg0));
-  Store_field(arg0_ocaml, 1, *((value **)arg2)[1]);arg1_ocaml = caml_alloc_tuple(2);
+  Store_field(arg0_ocaml, 1, safe_field(*((value **)arg2)[1], 1));arg1_ocaml = caml_alloc_tuple(2);
   Store_field(arg1_ocaml, 0, Val_cxcursor(arg1));
-  Store_field(arg1_ocaml, 1, *((value **)arg2)[1]);  result = caml_callback2(f, arg0_ocaml, arg1_ocaml);
+  Store_field(arg1_ocaml, 1, safe_field(*((value **)arg2)[1], 1));  result = caml_callback2(f, arg0_ocaml, arg1_ocaml);
   {
     CAMLlocal1(data);
     data = Cxchildvisitresult_val(result);
@@ -5331,7 +5331,7 @@ clang_Type_visitFields_visitor_callback(CXCursor arg0, CXClientData arg1)
   f = *((value *) ((value **)arg1)[0]);
 arg0_ocaml = caml_alloc_tuple(2);
   Store_field(arg0_ocaml, 0, Val_cxcursor(arg0));
-  Store_field(arg0_ocaml, 1, *((value **)arg1)[1]);  result = caml_callback(f, arg0_ocaml);
+  Store_field(arg0_ocaml, 1, safe_field(*((value **)arg1)[1], 1));  result = caml_callback(f, arg0_ocaml);
   {
     CAMLlocal1(data);
     data = Cxvisitorresult_val(result);
@@ -8712,6 +8712,36 @@ clang_ext_SizeOfPackExpr_getPack_wrapper(value c_ocaml)
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
   Store_field(data, 1, safe_field(c_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_DecltypeType_getUnderlyingExpr_wrapper(value t_ocaml)
+{
+  CAMLparam1(t_ocaml);
+  CXType t;
+  t = Cxtype_val(Field(t_ocaml, 0));
+  CXCursor result = clang_ext_DecltypeType_getUnderlyingExpr(t);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(t_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_NamespaceDecl_isInline_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  _Bool result = clang_ext_NamespaceDecl_isInline(c);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
     CAMLreturn(data);
   }
 }
