@@ -3208,6 +3208,21 @@ let () =
              fields = [] }}}})}] }}] -> ()
   | _ -> assert false
    ]}*)
+  | NamespaceAlias of { alias : string; original : ident_ref }
+(** C++ namespace alias.
+
+    {[
+let example = {|
+  namespace N { int d; }
+  namespace N1 = N;
+|}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX)
+    example [%pattern?
+    [{ desc = _ };
+     { desc = NamespaceAlias { alias = "N1"; original = Ident "N" }}]]
+    ]}*)
   | EmptyDecl
 (**
   Empty declaration.
@@ -3220,8 +3235,7 @@ let () =
   fun ast -> match ast with
   | [{ desc = EmptyDecl }] -> ()
   | _ -> assert false
-    ]}
-*)
+    ]}*)
   | Directive of directive
   | UnknownDecl of cxcursorkind * clang_ext_declkind
 
