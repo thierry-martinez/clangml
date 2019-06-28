@@ -50,7 +50,8 @@ let () =
 (* 2.13.7 Pointer literals *)
 
 let () =
-  let ast = parse_string {|
+  let ast = parse_string
+      ~command_line_args:[Clang.Command_line.standard Cxx11] {|
     void *p = nullptr;
   |} in
   let bindings =
