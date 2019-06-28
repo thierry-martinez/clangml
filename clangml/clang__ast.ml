@@ -2915,7 +2915,7 @@ let () =
   fun ast -> match ast with
   | [{ desc = Namespace { name = "std" }};
      { desc = Using {
-      namespace = "std";
+      namespace = Ident "std";
       decl = None }}] -> ()
   | _ -> assert false
 
@@ -2930,7 +2930,7 @@ let () =
   check Clang.Ast.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match List.hd (List.rev ast) with
   | { desc = Using {
-      namespace = "std";
+      namespace = Ident "std";
       decl = Some "cout" }} -> ()
   | _ -> assert false
     ]}
