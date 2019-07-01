@@ -28,12 +28,12 @@ class virtual ['a] lift = object
 end
 
 class lift_expr loc = object(self)
-  inherit [Parsetree.expression] lift
+  inherit [Ppxlib.expression] lift
   inherit Ppxlib_metaquot_lifters.expression_lifters loc
 
   method! open_node :
-    'a 'b . ('a -> Parsetree.expression) -> ('b -> Parsetree.expression) ->
-      ('a, 'b) Clang.Ast.open_node -> Parsetree.expression =
+    'a 'b . ('a -> Ppxlib.expression) -> ('b -> Ppxlib.expression) ->
+      ('a, 'b) Clang.Ast.open_node -> Ppxlib.expression =
     fun _a _qual_type node ->
       [%expr {
         decoration = Custom { location = None; qual_type = None };
@@ -52,12 +52,12 @@ class lift_expr loc = object(self)
 end
 
 class lift_pattern loc = object(self)
-  inherit [Parsetree.pattern] lift
+  inherit [Ppxlib.pattern] lift
   inherit Ppxlib_metaquot_lifters.pattern_lifters loc
 
   method! open_node :
-    'a 'b . ('a -> Parsetree.pattern) -> ('b -> Parsetree.pattern) ->
-      ('a, 'b) Clang.Ast.open_node -> Parsetree.pattern =
+    'a 'b . ('a -> Ppxlib.pattern) -> ('b -> Ppxlib.pattern) ->
+      ('a, 'b) Clang.Ast.open_node -> Ppxlib.pattern =
     fun _a _qual_type node ->
       [%pat? {
         decoration = _;

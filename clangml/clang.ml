@@ -1237,13 +1237,11 @@ module Ast = struct
       translation_unit_of_cxcursor (get_translation_unit_cursor tu)
   end
 
-  let of_cxtype ?(options = Options.make ()) tu =
+  let of_cxtype ?(options = Options.default) tu =
     let module Convert = Converter (struct let options = options end) in
     Convert.of_cxtype tu
 
-  let of_cxtranslationunit
-      ?(options = Options.make ())
-      tu =
+  let of_cxtranslationunit ?(options = Options.default) tu =
     let module Convert = Converter (struct let options = options end) in
     Convert.of_cxtranslationunit tu
 
@@ -1313,7 +1311,7 @@ module Decl = struct
 
   module Map = Map.Make (Self)
 
-  let of_cxcursor ?(options = Ast.Options.make ()) cur =
+  let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
     Convert.decl_of_cxcursor cur
 
@@ -1396,7 +1394,7 @@ module Expr = struct
 
   module Map = Map.Make (Self)
 
-  let of_cxcursor ?(options = Ast.Options.make ()) cur =
+  let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
     Convert.expr_of_cxcursor cur
 end
@@ -1416,7 +1414,7 @@ module Stmt = struct
 
   module Map = Map.Make (Self)
 
-  let of_cxcursor ?(options = Ast.Options.make ()) cur =
+  let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
     Convert.stmt_of_cxcursor cur
 end
@@ -1436,7 +1434,7 @@ module Enum_constant = struct
 
   module Map = Map.Make (Self)
 
-  let of_cxcursor ?(options = Ast.Options.make ()) cur =
+  let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
     Convert.enum_constant_of_cxcursor cur
 

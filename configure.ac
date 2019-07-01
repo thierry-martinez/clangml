@@ -42,11 +42,8 @@ AC_SUBST([OCAMLDOC], [["$OCAMLFIND ocamldoc"]])
 AC_SUBST([OCAMLDEP], [["$OCAMLFIND ocamldep"]])
 AC_SUBST([OCAMLMKLIB], [["$OCAMLFIND ocamlmklib"]])
 AC_CHECK_OCAMLFIND_PKG([stdcompat])
-AC_CHECK_OCAMLFIND_PKG([ppx_deriving])
-AC_CHECK_OCAMLFIND_PKG([visitors])
 AC_CHECK_OCAMLFIND_PKG([ppxlib])
 AC_CHECK_OCAMLFIND_PKG([override])
-AC_CHECK_OCAMLFIND_PKG([pattern])
 
 AS_IF([test "x$has_missing_packages" = "xsingle"],
   [AC_MSG_ERROR([Package$missing_packages not found. Hint: opam install$missing_packages.])],
@@ -371,12 +368,6 @@ AS_IF([test -d ppx],
      AC_CP([$srcdir/ppx/clangml_ppx.ml], [ppx/])
      AC_CP([$srcdir/ppx/ppx_lexer.mll], [ppx/])
      AC_CP([$srcdir/ppx/dune], [ppx/]))])
-
-AS_IF([test -d visitors],
-  [true],
-  [AS_IF([mkdir visitors],
-     AC_CP([$srcdir/visitors/clangml_visitors.ml], [visitors/])
-     AC_CP([$srcdir/visitors/dune], [visitors/]))])
 
 AS_IF([test -d tests],
   [true],

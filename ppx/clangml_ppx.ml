@@ -1,9 +1,23 @@
+module Versioned = Migrate_parsetree.OCaml_407
+
+module From =
+  Migrate_parsetree.Convert (Versioned) (Migrate_parsetree.OCaml_current)
+
+module To =
+  Migrate_parsetree.Convert (Migrate_parsetree.OCaml_current) (Versioned)
+
+module T = Versioned.Ast.Asttypes
+
+module P = Versioned.Ast.Parsetree
+
+module H = Versioned.Ast.Ast_helper
+
 let placeholder_hashtbl_sz = 17
 
 type antiquotation = {
     antiquotation_type : Ppx_lexer.antiquotation_type;
     placeholder : string;
-    payload : Parsetree.payload Location.loc;
+    payload : Ppxlib.payload Location.loc;
     pos_begin : int;
     pos_end : int;
   }
@@ -54,9 +68,9 @@ let extract_antiquotations s =
                 end
           | _ -> token in
         let loc_start = lexbuf.lex_curr_p in
-        let payload : Parsetree.payload =
-          if pattern then PPat (Parser.parse_pattern lexer lexbuf, None)
-          else PStr (Parser.implementation lexer lexbuf) in
+        let payload : Ppxlib.payload =
+          if pattern then PPat (Ppxlib.Parser.parse_pattern lexer lexbuf, None)
+          else PStr (Ppxlib.Parser.implementation lexer lexbuf) in
         let loc_end = lexbuf.lex_curr_p in
         let loc = { Location.loc_start; loc_end; loc_ghost = false } in
         let payload = { Location.loc; txt = payload } in
@@ -106,11 +120,11 @@ module String_hashtbl = Hashtbl.Make (struct
   let hash = Hashtbl.hash
 end)
 
-let string_of_expression (expression : Parsetree.expression) =
+let string_of_expression (expression : Ppxlib.expression) =
   match expression with
   | { pexp_desc = Pexp_constant (Pconst_string (s, _)); _ } -> s
   | _ ->
-      Format.asprintf "%a" Pprintast.expression expression
+      Format.asprintf "%a" Ppxlib.Pprintast.expression expression
 
 let rec remove_placeholders antiquotations items =
   match antiquotations, items with
@@ -134,8 +148,8 @@ let empty_arguments = {
   return_type = None;
 }
 
-let extract_payload language (mapper : Ast_mapper.mapper) ~loc
-    (payload : Parsetree.payload) =
+let extract_payload language (mapper : Versioned.Ast.Ast_mapper.mapper) ~loc
+    (payload : Ppxlib.payload) =
   let kind, arguments, code =
     match
       match payload with
@@ -152,7 +166,7 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc
                 Location.raise_errorf ~loc "Code expected"
             | (_, code) :: rev_args ->
                 string_of_expression code, rev_args in
-          let handle_arg arguments (_, (arg : Parsetree.expression)) =
+          let handle_arg arguments (_, (arg : Ppxlib.expression)) =
             let loc = arg.pexp_loc in
             match arg with
             | [%expr return [%e? arg ]] ->
@@ -279,7 +293,7 @@ let extract_payload language (mapper : Ast_mapper.mapper) ~loc
     ~pp:begin fun pp fmt () ->
       Format.fprintf fmt
         "@[%a@]@[Compiling quotation code:@ %s@]@ %a@."
-        Location.print loc code pp ()
+        Location.print_loc loc code pp ()
     end;
   if Clang.Ast.has_severity Clang.error ast then
     Location.raise_errorf ~loc "clang error while compiling quotation code";
@@ -366,16 +380,16 @@ end
 type extension =
   | Quotation of {
       language : Clang.language;
-      payload : Parsetree.payload;
+      payload : Ppxlib.payload;
       loc : Location.t;
     }
   | If_standard of {
       name : string;
-      expr : Parsetree.expression;
+      expr : Ppxlib.expression;
       loc : Location.t;
     }
 
-let rec expr_mapper (mapper : Ast_mapper.mapper) (expr : Parsetree.expression) =
+let rec expr_mapper (mapper : Versioned.Ast.Ast_mapper.mapper) (expr : Ppxlib.expression) =
   match
     match expr.pexp_desc with
     | Pexp_extension ({ loc; txt = "if" }, payload) ->
@@ -392,19 +406,19 @@ let rec expr_mapper (mapper : Ast_mapper.mapper) (expr : Parsetree.expression) =
     | _ -> None
   with
   | None ->
-      Ast_mapper.default_mapper.expr mapper expr
+      Versioned.Ast.Ast_mapper.default_mapper.expr mapper expr
   | Some (Quotation { language; loc; payload }) ->
       let ast, extraction, placeholder_table =
         extract_payload language mapper ~loc payload in
       let module Expr_remove = Remove_placeholder
           (struct
-            type t = Parsetree.expression
+            type t = Ppxlib.expression
 
             class lifter = object
               inherit Clangml_lift.lift_expr Location.none
             end
           end) in
-      let subst_payload (payload : Parsetree.payload Location.loc) =
+      let subst_payload (payload : Ppxlib.payload Location.loc) =
         match payload.txt with
         | PStr [{ pstr_desc = Pstr_eval (e, _); _ }] ->
             e
@@ -419,9 +433,9 @@ let rec expr_mapper (mapper : Ast_mapper.mapper) (expr : Parsetree.expression) =
       if name |> Clang.ext_lang_standard_of_name = Invalid then
         [%expr ()]
       else
-        Ast_mapper.default_mapper.expr mapper expr
+        Versioned.Ast.Ast_mapper.default_mapper.expr mapper expr
 
-and pat_mapper (mapper : Ast_mapper.mapper) (pat : Parsetree.pattern) =
+and pat_mapper (mapper : Versioned.Ast.Ast_mapper.mapper) (pat : Ppxlib.pattern) =
   match
     match pat.ppat_desc with
     | Ppat_extension ({ loc; txt }, payload) ->
@@ -432,19 +446,19 @@ and pat_mapper (mapper : Ast_mapper.mapper) (pat : Parsetree.pattern) =
     | _ -> None
   with
   | None ->
-    Ast_mapper.default_mapper.pat mapper pat
+    Versioned.Ast.Ast_mapper.default_mapper.pat mapper pat
   | Some (language, loc, payload) ->
       let ast, extraction, placeholder_table =
         extract_payload language mapper ~loc payload in
       let module Pat_remove = Remove_placeholder
           (struct
-            type t = Parsetree.pattern
+            type t = Ppxlib.pattern
 
             class lifter = object
               inherit Clangml_lift.lift_pattern Location.none
             end
           end) in
-      let subst_payload (payload : Parsetree.payload Location.loc) =
+      let subst_payload (payload : Ppxlib.payload Location.loc) =
         match payload.txt with
         | PPat (p, None) ->
             p
@@ -462,12 +476,12 @@ and pat_mapper (mapper : Ast_mapper.mapper) (pat : Parsetree.pattern) =
       pat
 
 let ppx_pattern_mapper = {
-  Ast_mapper.default_mapper with
+  Versioned.Ast.Ast_mapper.default_mapper with
   expr = expr_mapper;
   pat = pat_mapper
 }
 
 let () =
   Migrate_parsetree.Driver.register ~name:"clangml.ppx" ~position:(-10)
-    (module Migrate_parsetree.OCaml_current)
+    (module Versioned)
     (fun _ _ -> ppx_pattern_mapper)

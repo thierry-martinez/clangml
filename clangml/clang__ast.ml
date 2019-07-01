@@ -2,6 +2,8 @@
 
 open Clang__bindings
 
+open Ppx_compare_lib.Builtin
+
 let pp_cxint fmt cxint =
   Format.pp_print_string fmt (ext_int_to_string cxint 10 true)
 
@@ -111,14 +113,14 @@ let check_pattern ?(result = fun _ -> ()) quoter parser source pattern =
     for the concrete AST nodes themselves.
 *)
 
+let compare_cxcursor _ _ = 0
+
+let equal_cxcursor _ _ = true
+
 type 'qual_type open_decoration =
-  | Cursor of (cxcursor [@opaque]
-      [@equal fun _ _ -> true]
-      [@compare fun _ _ -> 0])
+  | Cursor of (cxcursor [@opaque])
   | Custom of {
-      location : (source_location option [@opaque]
-        [@equal fun _ _ -> true]
-        [@compare fun _ _ -> 0]);
+      location : (source_location option [@opaque]) [@ignore];
       qual_type : 'qual_type option;
     }
 
@@ -128,7 +130,7 @@ and ('a, 'qual_type) open_node = {
       [@compare fun _ _ -> 0];
     desc : 'a;
   }
-    [@@deriving show, eq, ord]
+      [@@deriving equal, compare, show]
 
 (** {2 Aliases} *)
 
@@ -220,10 +222,7 @@ let parse_declaration_list_last ?filename ?command_line_args ?language ?options
 (** {3 Qualified types } *)
 
 and qual_type = {
-    cxtype : (cxtype [@quote.opaque])
-      [@equal fun _ _ -> true]
-      [@compare fun _ _ -> 0]
-      [@opaque];
+    cxtype : (cxtype [@quote.opaque] [@opaque]) [@ignore];
     const : bool;
 (** [true] if the type is const-qualified.
       {[
@@ -581,7 +580,7 @@ let () =
 (** Parenthesized type.
 
     Warning: parenthesized type only occurs with Clang <7.0.0 and when
-    [~ignore_paren_in_types:false] argument is passed to the AST converting
+    [ignore_paren_in_types = false] option is passed to the AST converting
     function. From 7.0.0, Clang automatically passes through parentheses in
     types.
 
@@ -590,7 +589,7 @@ let example = "int (*p)(void);"
 
 let () =
   check Clang.Ast.pp_decl (parse_declaration_list
-    ~options:(Clang.Ast.Options.make ~ignore_paren_in_types:false ()))
+    ~options:({ Clang.Ast.Options.default with ignore_paren_in_types = false }))
     example @@
   fun ast -> match ast with
   | [{ desc = Var { var_name = "p"; var_type = { desc =
@@ -1472,7 +1471,7 @@ let () =
 
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list
-    ~options:(Clang.Ast.Options.make ~convert_integer_literals:false ()))
+    ~options:({ Clang.Ast.Options.default with convert_integer_literals = false }))
     example @@ fun ast -> match ast with
   | [{ desc = Expr { desc = IntegerLiteral (CXInt _ as zero) }}] ->
       assert (Clang.Ast.int_of_literal zero = 0)
@@ -1512,7 +1511,7 @@ let () =
 
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list
-    ~options:(Clang.Ast.Options.make ~convert_floating_literals:true ()))
+    ~options:({ Clang.Ast.Options.default with convert_floating_literals = true }))
     example @@ fun ast -> match ast with
   | [{ desc = Expr { desc = FloatingLiteral f }}] ->
     assert (Clang.Ast.float_of_literal f = 0.5)
@@ -1735,7 +1734,7 @@ let () =
   | _ -> assert false
     ]}
 
-    Implicit casts are removed in the AST unless [~ignore_implicit_cast:false]
+    Implicit casts are removed in the AST unless [ignore_implicit_cast = false]
     is passed to the converting function.
 
     {[
@@ -1743,7 +1742,7 @@ let example = {| int i; i; |}
 
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list
-    ~options:(Clang.Ast.Options.make ~ignore_implicit_cast:false ()))
+    ~options:({ Clang.Ast.Options.default with ignore_implicit_cast = false }))
     example @@
   fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = Cast {
@@ -1848,7 +1847,7 @@ let example = {| (1); |}
 
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list
-    ~options:(Clang.Ast.Options.make ~ignore_paren:false ()))
+    ~options:{ Clang.Ast.Options.default with ignore_paren = false })
     example @@
   fun ast -> match ast with
   | [{ desc = Expr { desc = Paren { desc = IntegerLiteral (Int 1)}}}] -> ()
@@ -1864,7 +1863,7 @@ let example = {| int i; sizeof(i); |}
 
 let () =
   check Clang.Ast.pp_stmt (parse_statement_list
-    ~options:(Clang.Ast.Options.make ~ignore_paren:false ()))
+    ~options:{ Clang.Ast.Options.default with ignore_paren = false })
     example @@
   fun ast -> match ast with
   | [ { desc = Decl _ };
@@ -3543,7 +3542,7 @@ and translation_unit = (translation_unit_desc, qual_type) open_node
 and translation_unit_desc = {
     filename : string; items : decl list
   }
-    [@@deriving show, eq, ord]
+    [@@deriving equal, compare, show]
 
 type 'a node = ('a, qual_type) open_node
 

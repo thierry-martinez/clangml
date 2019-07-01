@@ -2,6 +2,8 @@
   (name clangml__ast)
   (preprocess (pps pattern.ppx))
   (link_flags -linkall)
+; -warning 33: Unused open module.
+  (flags -open Stdcompat -w -33)
   (libraries compiler-libs clangml clangml.lift pattern.runtime))
 
 (rule

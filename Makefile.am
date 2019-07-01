@@ -15,8 +15,6 @@ TESTS_DIR = tests
 
 LIFT_CMXA = lift/clangml_lift.cmxa
 
-VISITORS_CMXA = visitors/clangml_visitors.cmxa
-
 PPX_CMXA = ppx/clangml_ppx.cmxa
 
 tests ::= $(notdir $(wildcard $(TESTS_DIR)/*))
@@ -28,16 +26,15 @@ dune_files ::= \
 	$(LIBCLANGML_STUBS_A) \
 	$(STUBGEN_EXE) \
 	$(LIFT_CMXA) \
-	$(VISITORS_CMXA) \
 	$(PPX_CMXA)
 
 mypkg_SCRIPTS ::= $(addprefix $(DUNE_PREFIX)/, $(dune_files))
 
-# Entry targets: clangml, stubgen, lift, visitors, ppx, doc, tests, install
+# Entry targets: clangml, stubgen, lift, ppx, doc, tests, install
 # and clean.
 
 .PHONY : all
-all : clangml lift visitors ppx
+all : clangml lift ppx
 
 .PHONY : clangml
 clangml : $(DUNE_PREFIX)/$(CLANGML_CMXA) $(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A)
@@ -47,9 +44,6 @@ stubgen : $(DUNE_PREFIX)/$(STUBGEN_EXE)
 
 .PHONY : lift
 lift : $(DUNE_PREFIX)/$(LIFT_CMXA)
-
-.PHONY : visitors
-visitors : $(DUNE_PREFIX)/$(VISITORS_CMXA)
 
 .PHONY : ppx
 ppx : $(DUNE_PREFIX)/$(PPX_CMXA)
@@ -75,14 +69,7 @@ install :
 	- test -z $(INSTALL_NAME_TOOL) || \
 		$(INSTALL_NAME_TOOL) -add_rpath $(LLVM_LIBDIR) \
 			$(DUNE_INSTALL_PREFIX)/lib/stublibs/dllclangml_stubs.so
-# obuild does not support line break in 'requires' field
-	sed -i '/requires = "[^"]*$$/{:x N;s/\n */ /;/[^"]$$/bx}' \
-		$(DUNE_INSTALL_PREFIX)/lib/clangml/META
 	dune install
-# obuild does not support sub-package directories
-	clangml_lib=`ocamlfind query clangml` \
-		sh -c 'cp $$clangml_lib/visitors/* \
-			$$clangml_lib/ppx/* $$clangml_lib/lift/* $$clangml_lib'
 
 
 .PHONY : uninstall

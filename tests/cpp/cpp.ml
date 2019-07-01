@@ -1,6 +1,6 @@
 let lift_expr = new Clangml_lift.lift_expr Location.none
 
-let check_pattern (quoter : 'obj -> Parsetree.expression) (x : 'obj)
+let check_pattern (quoter : 'obj -> Ppxlib.expression) (x : 'obj)
     (pattern : ('obj, 'a) Pattern_runtime.matcher) =
   match pattern ~quoted:(quoter x) x with
   | Ok result -> result
@@ -652,7 +652,7 @@ let () =
 
 let () =
   let ast = parse_string
-    ~options:(Clang.Ast.Options.make ~ignore_implicit_cast:false ()) {|
+    ~options:{ Clang.Ast.Options.default with ignore_implicit_cast = false } {|
     struct X {
       operator int();
     };
