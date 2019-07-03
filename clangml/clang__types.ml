@@ -9,9 +9,7 @@
 
 (* From FrontendOptions.h:InputKind:Language *)
 type language = C | CXX | ObjC | ObjCXX | OpenCL | CUDA | RenderScript | HIP
-  [@@deriving equal, compare, show]
 
 type standard = Clang__bindings.clang_ext_langstandards
-  [@@deriving equal, compare, show]
 
 type location_kind = Presumed | Expansion

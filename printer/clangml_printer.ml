@@ -1,7 +1,3 @@
-open Clang__ast
-
-open Clang__ast_utils
-
 let maybe_parentheses in_prec out_prec fmt k =
   if in_prec >= out_prec then
     Format.fprintf fmt "(@[%t@])" k
@@ -34,7 +30,7 @@ type unary_position =
   | Prefix
   | Postfix
 
-let prec_of_unary_operator (kind : unary_operator_kind) =
+let prec_of_unary_operator (kind : Clang.Ast.unary_operator_kind) =
   match kind with
   | PostInc | PostDec -> 1, Postfix
   | PreInc | PreDec -> 1, Prefix
@@ -44,7 +40,7 @@ let prec_of_unary_operator (kind : unary_operator_kind) =
   | Not | LNot -> 2, Prefix
   | _ -> invalid_arg "prec_of_unary_operator"
 
-let prec_of_binary_operator (kind : binary_operator_kind) =
+let prec_of_binary_operator (kind : Clang.Ast.binary_operator_kind) =
   match kind with
   | Mul | Div | Rem -> 3, Left_to_right
   | Add | Sub -> 4, Left_to_right
@@ -70,24 +66,24 @@ let prec_of_binary_operator (kind : binary_operator_kind) =
   | Comma -> 15, Left_to_right
   | _ -> invalid_arg "prec_of_binary_operator"
 
-let rec decl fmt (d : decl) =
+let rec decl fmt (d : Clang.Decl.t) =
   match d.desc with
-  | Function { linkage; function_type; name; body } ->
+  | Function { linkage; function_type; name; body; _ } ->
       print_linkage fmt linkage;
       print_function_type fmt function_type name;
       print_function_body fmt body
-  | Var { linkage; var_type = ty; var_name; var_init } ->
+  | Var { linkage; var_type = ty; var_name; var_init; _ } ->
       Format.fprintf fmt "@[%a%a%a;@]"
 	print_linkage linkage
 	(typed_value (fun fmt -> Format.pp_print_string fmt var_name)) ty
 	print_variable_init var_init
-  | RecordDecl { keyword; name; fields } ->
+  | RecordDecl { keyword; name; fields; _ } ->
       Format.fprintf fmt "@[%s@ %s@ {%a}@]"
-        (Clang__bindings.ext_elaborated_type_get_keyword_spelling keyword)
+        (Clang.ext_elaborated_type_get_keyword_spelling keyword)
         name
         (Format.pp_print_list decl)
         fields
-  | Field { name; qual_type = ty; bitwidth } ->
+  | Field { name; qual_type = ty; bitwidth; _ } ->
       Format.fprintf fmt "@[%a%t;@]"
         (typed_value (fun fmt -> Format.pp_print_string fmt name)) ty
         (fun fmt ->
@@ -95,8 +91,8 @@ let rec decl fmt (d : decl) =
           | None -> ()
           | Some bitwidth -> Format.fprintf fmt "@ :@ %a" expr bitwidth)
   | AccessSpecifier specifier ->
-      Format.fprintf fmt "%s:" (Clang__utils.string_of_cxx_access_specifier specifier)
-  | Constructor { class_name; parameters; initializer_list; body; explicit; defaulted; deleted } ->
+      Format.fprintf fmt "%s:" (Clang.string_of_cxx_access_specifier specifier)
+  | Constructor { class_name; parameters; initializer_list; body; explicit; defaulted; deleted; _ } ->
       Format.fprintf fmt "%t%s(%a)%t%t%a"
         (fun fmt ->
           if explicit then Format.fprintf fmt "explicit@ ")
@@ -126,9 +122,9 @@ let rec decl fmt (d : decl) =
       Format.fprintf fmt "@\n#include %t@\n" pp_arg
   | LinkageSpec { language; decls = list } ->
       Format.fprintf fmt "@[extern@ \"%s\"@ {@ @[%a@]@ }@]"
-        (Clang__utils.extern_of_language language)
+        (Clang.extern_of_language language)
         decls list
-  | _ -> failwith (Format.asprintf "Not implemented decl: %a" pp_decl d)
+  | _ -> failwith (Format.asprintf "Not implemented decl: %a" Clangml_show.pp_decl d)
 
 and print_variable_init fmt init =
   match init with
@@ -139,12 +135,12 @@ and print_variable_init fmt init =
 and expr fmt e =
   expr_prec 15 fmt e
 
-and expr_prec prec fmt (e : expr) =
+and expr_prec prec fmt (e : Clang.Expr.t) =
   match e.desc with
   | IntegerLiteral i ->
-      pp_print_integer_literal fmt i
+      Clang.Ast.pp_print_integer_literal fmt i
   | FloatingLiteral f ->
-      pp_print_floating_literal fmt f
+      Clang.Ast.pp_print_floating_literal fmt f
   | CharacterLiteral { kind; value } ->
       begin
         match kind with
@@ -156,7 +152,7 @@ and expr_prec prec fmt (e : expr) =
       String.iter (c_escape_char fmt) str;
       Format.pp_print_string fmt "\""
   | Call {
-        callee = { desc = DeclRef (BinaryOperatorRef kind) };
+        callee = { desc = DeclRef (BinaryOperatorRef kind); _ };
         args = [lhs; rhs]} ->
       expr_prec prec fmt { e with desc = BinaryOperator { lhs; kind; rhs }}
   | Call { callee; args } ->
@@ -170,12 +166,12 @@ and expr_prec prec fmt (e : expr) =
       | Prefix ->
           maybe_parentheses op_prec prec fmt (fun fmt ->
 	    Format.fprintf fmt "@[%s@ %a@]"
-              (Clang__bindings.ext_unary_operator_get_opcode_spelling kind)
+              (Clang.ext_unary_operator_get_opcode_spelling kind)
               (expr_prec op_prec) operand)
       | Postfix ->
           maybe_parentheses op_prec prec fmt (fun fmt ->
 	    Format.fprintf fmt "@[%a@ %s@]" (expr_prec op_prec)
-              operand (Clang__bindings.ext_unary_operator_get_opcode_spelling kind))
+              operand (Clang.ext_unary_operator_get_opcode_spelling kind))
       end
   | BinaryOperator { lhs; kind; rhs } ->
       let op_prec, associativity = prec_of_binary_operator kind in
@@ -185,7 +181,7 @@ and expr_prec prec fmt (e : expr) =
         | Right_to_left -> op_prec, op_prec - 1 in
       maybe_parentheses op_prec prec fmt (fun fmt ->
 	Format.fprintf fmt "@[%a@ %s@ %a@]" (expr_prec left_prec) lhs
-          (Clang__bindings.ext_binary_operator_get_opcode_spelling kind)
+          (Clang.ext_binary_operator_get_opcode_spelling kind)
           (expr_prec right_prec) rhs)
   | DeclRef ident_ref ->
       print_ident_ref fmt ident_ref
@@ -200,23 +196,25 @@ and expr_prec prec fmt (e : expr) =
   | Cast { kind = CStyle; qual_type = ty; operand } ->
       maybe_parentheses 2 prec fmt (fun fmt ->
         Format.fprintf fmt "@[(%a)@ %a@]" qual_type ty (expr_prec 4) operand)
-  | New { qual_type = ty; init } ->
-      let format_init fmt (init : expr option) =
+  | New { qual_type = ty; init; _ } ->
+      let format_init fmt (init : Clang.Expr.t option) =
         match init with
         | None -> ()
-        | Some { desc = Construct { args }} ->
+        | Some { desc = Construct { args; _ }; _ } ->
             Format.fprintf fmt "@[(%a)@]"
               (Format.pp_print_list
                 ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ")
                 expr) args
         | Some expr ->
-            failwith (Format.asprintf "Unexpected constructor argument %a" pp_expr e) in
+            failwith
+              (Format.asprintf "Unexpected constructor argument %a"
+                 Clangml_show.pp_expr e) in
       Format.fprintf fmt "new@ %a%a" qual_type ty format_init init
-  | Delete { argument } ->
+  | Delete { argument; _ } ->
       Format.fprintf fmt "delete@ %a" expr argument
-  | _ -> failwith (Format.asprintf "Not implemented expr %a" pp_expr e)
+  | _ -> failwith (Format.asprintf "Not implemented expr %a" Clangml_show.pp_expr e)
 
-and stmt fmt (s : stmt) =
+and stmt fmt (s : Clang.Stmt.t) =
   match s.desc with
   | Null -> Format.pp_print_string fmt ";"
   | Compound list ->
@@ -235,7 +233,7 @@ and stmt fmt (s : stmt) =
       Format.pp_print_list decl fmt d
   | Expr e ->
       Format.fprintf fmt "@[%a;@]" expr e
-  | _ -> failwith (Format.asprintf "Not implemented stmt: %a" pp_stmt s)
+  | _ -> failwith (Format.asprintf "Not implemented stmt: %a" Clangml_show.pp_stmt s)
 
 and print_else_branch fmt else_branch =
   match else_branch with
@@ -248,13 +246,15 @@ and print_linkage fmt linkage =
   | Internal -> Format.fprintf fmt "static@ "
   | External
   | NoLinkage -> ()
-  | _ -> failwith (Format.asprintf "Not implemented linkage: %a" pp_linkage_kind linkage)
+  | _ ->
+      failwith (Format.asprintf "Not implemented linkage: %a"
+        Clangml_show.pp_linkage_kind linkage)
 
 and print_parameters fmt parameters =
   let all_parameters = List.map Option.some parameters.non_variadic in
   let all_parameters =
     if parameters.variadic then all_parameters @ [None] else all_parameters in
-  let print_parameter fmt (parameter : parameter option) =
+  let print_parameter fmt (parameter : Clang.Ast.parameter option) =
     match parameter with
     | None -> Format.pp_print_string fmt "..."
     | Some { desc = { name; qual_type = ty; _ }} ->
@@ -298,12 +298,14 @@ and typed_value fmt_value fmt t =
       typed_value (fun fmt -> Format.fprintf fmt "@[%t[%d]@]" fmt_value size) fmt element
   | Elaborated { keyword; named_type } ->
       Format.fprintf fmt "@[%s@ %a@]"
-        (Clang__bindings.ext_elaborated_type_get_keyword_spelling keyword)
+        (Clang.ext_elaborated_type_get_keyword_spelling keyword)
         (typed_value fmt_value) named_type
   | Record ident
   | Enum ident ->
       Format.fprintf fmt "@[%a@ %t@]" print_ident_ref ident fmt_value
-  | _ -> failwith (Format.asprintf "Not implemented qual type: %a" pp_qual_type t)
+  | _ ->
+      failwith (
+        Format.asprintf "Not implemented qual type: %a" Clangml_show.pp_type t)
 
 and qual_type fmt t =
   typed_value (fun fmt -> ()) fmt t
@@ -312,5 +314,5 @@ and decls fmt decls =
   Format.fprintf fmt "@[%a@]"
     (Format.pp_print_list ~pp_sep:Format.pp_print_space decl) decls
 
-let translation_unit fmt (tu : translation_unit) =
+let translation_unit fmt (tu : Clang.Translation_unit.t) =
   decls fmt tu.desc.items

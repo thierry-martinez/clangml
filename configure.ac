@@ -348,7 +348,6 @@ AS_IF([test -d clangml],
      AC_CP([$srcdir/clangml/clang__ast_options.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang__ast_utils.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang__command_line.ml], [clangml/])
-     AC_CP([$srcdir/clangml/clang__printer.ml], [clangml/])
      AC_CP([$srcdir/clangml/dune], [clangml/])
      AC_CP([$srcdir/clangml/stubgen.h], [clangml/])
      AC_CP([$srcdir/clangml/libclang_extensions.cpp], [clangml/])
@@ -368,6 +367,18 @@ AS_IF([test -d ppx],
      AC_CP([$srcdir/ppx/clangml_ppx.ml], [ppx/])
      AC_CP([$srcdir/ppx/ppx_lexer.mll], [ppx/])
      AC_CP([$srcdir/ppx/dune], [ppx/]))])
+
+AS_IF([test -d show],
+  [true],
+  [AS_IF([mkdir show],
+     AC_CP([$srcdir/show/clangml_show.ml], [show/])
+     AC_CP([$srcdir/show/dune], [show/]))])
+
+AS_IF([test -d compare],
+  [true],
+  [AS_IF([mkdir compare],
+     AC_CP([$srcdir/compare/clangml_compare.ml], [compare/])
+     AC_CP([$srcdir/compare/dune], [compare/]))])
 
 AS_IF([test -d tests],
   [true],

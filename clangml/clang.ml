@@ -1297,19 +1297,7 @@ module Ast = struct
 end
 
 module Decl = struct
-  module Self = struct
-    type t = Ast.decl
-
-    let equal = Ast.equal_decl
-
-    let compare = Ast.compare_decl
-  end
-
-  include Self
-
-  module Set = Set.Make (Self)
-
-  module Map = Map.Make (Self)
+  type t = Ast.decl
 
   let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
@@ -1324,19 +1312,7 @@ module Decl = struct
 end
 
 module Type = struct
-  module Self = struct
-    type t = Ast.qual_type
-
-    let equal = Ast.equal_qual_type
-
-    let compare = Ast.compare_qual_type
-  end
-
-  include Self
-
-  module Set = Set.Make (Self)
-
-  module Map = Map.Make (Self)
+  type t = Ast.qual_type
 
   let make ?(const = false) ?(volatile = false) ?(restrict = false) desc : t =
     { cxtype = get_cursor_type (get_null_cursor ());
@@ -1380,19 +1356,7 @@ module Type = struct
 end
 
 module Expr = struct
-  module Self = struct
-    type t = Ast.expr
-
-    let equal = Ast.equal_expr
-
-    let compare = Ast.compare_expr
-  end
-
-  include Self
-
-  module Set = Set.Make (Self)
-
-  module Map = Map.Make (Self)
+  type t = Ast.expr
 
   let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
@@ -1400,19 +1364,7 @@ module Expr = struct
 end
 
 module Stmt = struct
-  module Self = struct
-    type t = Ast.stmt
-
-    let equal = Ast.equal_stmt
-
-    let compare = Ast.compare_stmt
-  end
-
-  include Self
-
-  module Set = Set.Make (Self)
-
-  module Map = Map.Make (Self)
+  type t = Ast.stmt
 
   let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
@@ -1420,19 +1372,7 @@ module Stmt = struct
 end
 
 module Enum_constant = struct
-  module Self = struct
-    type t = Ast.enum_constant
-
-    let equal = Ast.equal_enum_constant
-
-    let compare = Ast.compare_enum_constant
-  end
-
-  include Self
-
-  module Set = Set.Make (Self)
-
-  module Map = Map.Make (Self)
+  type t = Ast.enum_constant
 
   let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
@@ -1443,10 +1383,8 @@ module Enum_constant = struct
 end
 
 module Translation_unit = struct
+  type t = Ast.translation_unit
+
   let make ?(filename = "") items : Ast.translation_unit_desc =
     { filename; items }
-end
-
-module Printer = struct
-  include Clang__printer
 end

@@ -194,14 +194,6 @@ end
 module Type : sig
   type t = Ast.qual_type
 
-  val equal : t -> t -> bool
-
-  val compare : t -> t -> int
-
-  module Set : Set.S with type elt = t
-
-  module Map : Map.S with type key = t
-
   val of_node : ?options:Ast.Options.t -> 'a Ast.node -> t
   (** [of_node ?options node] returns the type associated to [node].
       If [node] comes from libclang's AST, the function calls
@@ -272,14 +264,6 @@ end
 module Expr : sig
   type t = Ast.expr
 
-  val equal : t -> t -> bool
-
-  val compare : t -> t -> int
-
-  module Set : Set.S with type elt = t
-
-  module Map : Map.S with type key = t
-
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
   (** [of_cxcursor ?options cu] translates [cu] into its high-level
       representation, supposing that [cu] points to an expression. *)
@@ -289,14 +273,6 @@ end
 module Stmt : sig
   type t = Ast.stmt
 
-  val equal : t -> t -> bool
-
-  val compare : t -> t -> int
-
-  module Set : Set.S with type elt = t
-
-  module Map : Map.S with type key = t
-
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
   (** [of_cxcursor ?options cu] translates [cu] into its high-level
       representation, supposing that [cu] points to a statement. *)
@@ -305,15 +281,6 @@ end
 (** AST declarations as ordered types. *)
 module Decl : sig
   type t = Ast.decl
-
-  val equal : t -> t -> bool
-
-
-  val compare : t -> t -> int
-
-  module Set : Set.S with type elt = t
-
-  module Map : Map.S with type key = t
 
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
   (** [of_cxcursor ?options cu] translates [cu] into its high-level
@@ -334,14 +301,6 @@ end
 module Enum_constant : sig
   type t = Ast.enum_constant
 
-  val equal : t -> t -> bool
-
-  val compare : t -> t -> int
-
-  module Set : Set.S with type elt = t
-
-  module Map : Map.S with type key = t
-
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
   (** [of_cxcursor ?options cu] translates [cu] into its high-level
       representation, supposing that [cu] points to a enumeration constant. *)
@@ -351,11 +310,7 @@ module Enum_constant : sig
 end
 
 module Translation_unit : sig
-  val make : ?filename:string -> Ast.decl list -> Ast.translation_unit_desc
-end
+  type t = Ast.translation_unit
 
-module Printer : sig
-  include module type of struct
-    include Clang__printer
-  end
+  val make : ?filename:string -> Ast.decl list -> Ast.translation_unit_desc
 end

@@ -1,0 +1,5 @@
+(library
+  (name clangml_printer)
+  (public_name clangml.printer)
+  (libraries stdcompat clangml.show)
+  (flags -open Stdcompat))

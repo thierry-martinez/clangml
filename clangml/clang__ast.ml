@@ -2,8 +2,6 @@
 
 open Clang__bindings
 
-open Ppx_compare_lib.Builtin
-
 let pp_cxint fmt cxint =
   Format.pp_print_string fmt (ext_int_to_string cxint 10 true)
 
@@ -113,24 +111,17 @@ let check_pattern ?(result = fun _ -> ()) quoter parser source pattern =
     for the concrete AST nodes themselves.
 *)
 
-let compare_cxcursor _ _ = 0
-
-let equal_cxcursor _ _ = true
-
 type 'qual_type open_decoration =
-  | Cursor of (cxcursor [@opaque])
+  | Cursor of cxcursor
   | Custom of {
-      location : (source_location option [@opaque]) [@ignore];
+      location : source_location option;
       qual_type : 'qual_type option;
     }
 
-and ('a, 'qual_type) open_node = {
-    decoration : 'qual_type open_decoration
-      [@equal fun _ _ -> true]
-      [@compare fun _ _ -> 0];
+type ('a, 'qual_type) open_node = {
+    decoration : 'qual_type open_decoration;
     desc : 'a;
   }
-      [@@deriving equal, compare, show]
 
 (** {2 Aliases} *)
 
@@ -222,7 +213,7 @@ let parse_declaration_list_last ?filename ?command_line_args ?language ?options
 (** {3 Qualified types } *)
 
 and qual_type = {
-    cxtype : (cxtype [@quote.opaque] [@opaque]) [@ignore];
+    cxtype : cxtype;
     const : bool;
 (** [true] if the type is const-qualified.
       {[
@@ -1449,12 +1440,6 @@ and expr = (expr_desc, qual_type) open_node
 
 and expr_desc =
   | IntegerLiteral of integer_literal
-        [@printer fun fmt i ->
-          let s =
-            match i with
-            | Int i -> string_of_int i
-            | CXInt i -> ext_int_to_string i 10 true in
-          fprintf fmt "%s" s]
 (** Integer literal.
     By default, integer literals are converted if possible into {!constr:Int}
     and integers too large to be represented as [int] are not converted.
@@ -1489,12 +1474,6 @@ let () =
 
     ]}*)
   | FloatingLiteral of floating_literal
-        [@printer fun fmt f ->
-          let s =
-            match f with
-            | Float f -> string_of_float f
-            | CXFloat f -> ext_float_to_string f in
-          fprintf fmt "%s" s]
 (** Floating literal.
 
     By default, floating literals are converted into {!constr:Float}.
@@ -3542,7 +3521,7 @@ and translation_unit = (translation_unit_desc, qual_type) open_node
 and translation_unit_desc = {
     filename : string; items : decl list
   }
-    [@@deriving equal, compare, show]
+    
 
 type 'a node = ('a, qual_type) open_node
 

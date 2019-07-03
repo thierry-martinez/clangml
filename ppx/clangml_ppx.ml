@@ -469,7 +469,6 @@ and pat_mapper (mapper : Versioned.Ast.Ast_mapper.mapper) (pat : Ppxlib.pattern)
       let pat = extraction remover ast in
       placeholder_table |> String_hashtbl.iter begin
         fun _ (quotation : _ Location.loc) ->
-          Format.eprintf "%a@." Clang.Ast.pp_translation_unit ast;
           raise (Location.Error (Location.error ~loc:quotation.loc
             "Antiquotation disappeared"))
       end;

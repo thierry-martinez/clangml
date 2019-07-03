@@ -13,28 +13,28 @@ STUBGEN_EXE = stubgen/stubgen.exe
 
 TESTS_DIR = tests
 
-LIFT_CMXA = lift/clangml_lift.cmxa
-
-PPX_CMXA = ppx/clangml_ppx.cmxa
+libraries ::= lift ppx show printer compare
 
 tests ::= $(notdir $(wildcard $(TESTS_DIR)/*))
 
 tests_exe ::= $(foreach test,$(tests),$(TESTS_DIR)/$(test)/$(test).exe)
 
+# This variable is expanded for each $(library)
+library_cmxa = $(library)/clangml_$(library).cmxa
+
 dune_files ::= \
 	$(CLANGML_CMXA) \
 	$(LIBCLANGML_STUBS_A) \
 	$(STUBGEN_EXE) \
-	$(LIFT_CMXA) \
-	$(PPX_CMXA)
+	$(foreach library,$(libraries),$(library_cmxa))
 
 mypkg_SCRIPTS ::= $(addprefix $(DUNE_PREFIX)/, $(dune_files))
 
-# Entry targets: clangml, stubgen, lift, ppx, doc, tests, install
-# and clean.
+# Entry targets: all, clangml, stubgen, doc, tests, install, uninstall, clean,
+# and one by library and one by test.
 
 .PHONY : all
-all : clangml lift ppx
+all : clangml $(libraries)
 
 .PHONY : clangml
 clangml : $(DUNE_PREFIX)/$(CLANGML_CMXA) $(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A)
@@ -42,25 +42,12 @@ clangml : $(DUNE_PREFIX)/$(CLANGML_CMXA) $(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A)
 .PHONY : stubgen
 stubgen : $(DUNE_PREFIX)/$(STUBGEN_EXE)
 
-.PHONY : lift
-lift : $(DUNE_PREFIX)/$(LIFT_CMXA)
-
-.PHONY : ppx
-ppx : $(DUNE_PREFIX)/$(PPX_CMXA)
-
 .PHONY : doc
 doc :
 	dune build @doc
 
 .PHONY : tests
 tests : $(foreach test,$(tests),$(TESTS_DIR)/$(test))
-
-define foreach_test
-.PHONY : $(TESTS_DIR)/$(test)
-$(TESTS_DIR)/$(test) : $(DUNE_PREFIX)/$(TESTS_DIR)/$(test)/$(test).exe
-	$(DUNE_PREFIX)/$(TESTS_DIR)/$(test)/$(test).exe
-endef
-$(foreach test, $(tests), $(eval $(foreach_test)))
 
 .PHONY : install
 install :
@@ -81,6 +68,19 @@ clean-local : clean-local-dune
 .PHONY : clean-local-dune
 clean-local-dune :
 	dune clean
+
+define foreach_library
+.PHONY : ($library)
+$(library) : $(DUNE_PREFIX)/$(library_cmxa)
+endef
+$(foreach library, $(libraries), $(eval $(foreach_library)))
+
+define foreach_test
+.PHONY : $(TESTS_DIR)/$(test)
+$(TESTS_DIR)/$(test) : $(DUNE_PREFIX)/$(TESTS_DIR)/$(test)/$(test).exe
+	$(DUNE_PREFIX)/$(TESTS_DIR)/$(test)/$(test).exe
+endef
+$(foreach test, $(tests), $(eval $(foreach_test)))
 
 # Delegate to dune the building of $(DUNE_PREFIX)/* files
 # They are all phony targets since we want to rely on dune for dependency
