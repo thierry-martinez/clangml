@@ -6,8 +6,7 @@ let opaque fmt _ =
 module%import Clang = struct
   module%override Bindings = struct
     [%%recursive
-      type cxerrorcode
-      and clang_ext_langstandards
+      type clang_ext_langstandards
       and clang_ext_elaboratedtypekeyword
       and clang_ext_characterkind
       and clang_ext_unaryexpr
