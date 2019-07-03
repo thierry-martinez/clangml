@@ -383,7 +383,7 @@ AS_IF([test -d compare],
 AS_IF([test -d printer],
   [true],
   [AS_IF([mkdir printer],
-     AC_CP([$srcdir/printer/clangml_compare.ml], [printer/])
+     AC_CP([$srcdir/printer/clangml_printer.ml], [printer/])
      AC_CP([$srcdir/printer/dune], [printer/]))])
 
 AS_IF([test -d tests],
