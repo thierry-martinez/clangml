@@ -4,7 +4,7 @@
   (link_flags -linkall)
 ; -warning 33: Unused open module.
   (flags -open Stdcompat -w -33)
-  (libraries compiler-libs clangml clangml.lift pattern.runtime))
+  (libraries compiler-libs clangml clangml.lift clangml.show pattern.runtime))
 
 (rule
   (targets clangml__ast.ml)
