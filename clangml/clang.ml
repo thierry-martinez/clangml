@@ -169,11 +169,13 @@ module Ast = struct
 
     let ident_ref_of_namespaces namespaces =
       match List.rev namespaces with
-      | [] -> raise Invalid_structure
       | hd :: tl ->
-          tl |> List.fold_left begin fun namespace_ref ident ->
-            NamespaceRef { namespace_ref; ident }
-          end (Ident hd)
+          let namespace =
+            tl |> List.fold_left begin fun namespace_ref ident ->
+              NamespaceRef { namespace_ref; ident }
+            end (Ident hd) in
+          Some namespace
+      | [] -> None
 
     let extract (f : 'a -> 'b option) (list : 'a list) : 'b list * 'a list =
       let acc_match, acc_others =
@@ -184,7 +186,7 @@ module Ast = struct
         end ([], []) in
       List.rev acc_match, List.rev acc_others
 
-    let rec extract_namespace_and_type_ref cursor =
+    let rec extract_namespace_or_type_ref cursor =
       let namespaces, others =
         list_of_children cursor |> extract begin fun c ->
           match get_cursor_kind c with
@@ -197,13 +199,13 @@ module Ast = struct
           | TypeRef -> Some c
           | _ -> None
         end in
-      let namespace = ident_ref_of_namespaces namespaces in
-      let type_ref =
-        match type_refs with
-        | [type_ref] -> Some (type_ref |> get_cursor_type |> of_cxtype)
-        | [] -> None
+      let namespace_or_type_ref =
+        match ident_ref_of_namespaces namespaces, type_refs with
+        | Some namespace, [] -> UsingNamespace namespace
+        | None, [type_ref] ->
+            UsingType (type_ref |> get_cursor_type |> of_cxtype)
         | _ -> raise Invalid_structure in
-      namespace, type_ref, others
+      namespace_or_type_ref, others
 
     and ident_ref_of_cxcursor cursor =
       let ident = get_cursor_spelling cursor in
@@ -264,11 +266,13 @@ module Ast = struct
               of_cxtype }
       | Template ->
           TemplateTemplateArgument (
-            ext_template_argument_get_as_template_or_template_pattern argument |>
+            ext_template_argument_get_as_template_or_template_pattern
+              argument |>
             make_template_name)
       | TemplateExpansion ->
           TemplateExpansion (
-            ext_template_argument_get_as_template_or_template_pattern argument |>
+            ext_template_argument_get_as_template_or_template_pattern
+              argument |>
             make_template_name)
       | Expression ->
           ExprTemplateArgument (
@@ -430,18 +434,18 @@ module Ast = struct
         | CXXAccessSpecifier ->
             AccessSpecifier (cursor |> get_cxxaccess_specifier)
         | UsingDirective ->
-            let namespace, type_ref, others =
-              extract_namespace_and_type_ref cursor in
-            Using { namespace; type_ref; decl = None }
+            let namespace_or_type_ref, others =
+              extract_namespace_or_type_ref cursor in
+            Using { namespace_or_type_ref; decl = None }
         | UsingDeclaration ->
-            let namespace, type_ref, others =
-              extract_namespace_and_type_ref cursor in
+            let namespace_or_type_ref, others =
+              extract_namespace_or_type_ref cursor in
             begin
               match others with
               | [decl_ref] when
                   get_cursor_kind decl_ref = OverloadedDeclRef ->
                     Using {
-                      namespace; type_ref;
+                      namespace_or_type_ref;
                       decl = Some (get_cursor_spelling decl_ref) }
               | _ -> raise Invalid_structure
             end
@@ -561,7 +565,10 @@ module Ast = struct
       let qual_type =
         match namespaces, qual_type with
         | _ :: _, { desc = Elaborated { keyword; named_type }} ->
-            let namespace_ref = ident_ref_of_namespaces namespaces in
+            let namespace_ref =
+              match ident_ref_of_namespaces namespaces with
+              | Some namespace_ref -> namespace_ref
+              | None -> raise Invalid_structure in
             let add_namespace ident_ref =
               match ident_ref with
               | Ident ident ->
@@ -877,6 +884,15 @@ module Ast = struct
               GCCAsm (code, parameters)
           | MSAsmStmt ->
               MSAsm (ext_asm_stmt_get_asm_string cursor)
+          | CXXForRangeStmt ->
+              let var, range, body =
+                match list_of_children cursor with
+                | [var; range; body] ->
+                    var |> var_decl_of_cxcursor,
+                    range |> expr_of_cxcursor,
+                    body |> stmt_of_cxcursor
+                | _ -> raise Invalid_structure in
+              ForRange { var; range; body }
           | _ -> Decl [node ~cursor (decl_desc_of_cxcursor cursor)]
         with Invalid_structure -> OtherStmt in
       match desc with
@@ -1134,6 +1150,8 @@ module Ast = struct
             cast_of_cxcursor Static cursor
         | CXXDynamicCastExpr ->
             cast_of_cxcursor Dynamic cursor
+        | CXXConstCastExpr ->
+            cast_of_cxcursor Const cursor
         | CXXThrowExpr ->
             let sub =
               match list_of_children cursor with

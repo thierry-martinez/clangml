@@ -1027,6 +1027,11 @@ let () =
       body = { desc = Compound [] }}}] -> ()
   | _ -> assert false
     ]}*)
+  | ForRange of {
+      var : var_decl;
+      range : expr;
+      body : stmt;
+    }
   | If of {
       init : stmt option; (** C++17 *)
       condition_variable : var_decl option; (** C++ *)
@@ -2176,6 +2181,7 @@ and cast_kind =
   | Functional
   | Static
   | Dynamic
+  | Const
 
 and unary_expr_or_type_trait =
   | ArgumentExpr of expr
@@ -2882,8 +2888,7 @@ let () =
     ]}
 *)
   | Using of {
-      namespace : ident_ref;
-      type_ref : qual_type option;
+      namespace_or_type_ref : namespace_of_type_ref;
       decl : string option;
     }
 (** C++ "using" directive and declaration.
@@ -2899,7 +2904,7 @@ let () =
   fun ast -> match ast with
   | [{ desc = Namespace { name = "std" }};
      { desc = Using {
-      namespace = Ident "std";
+      namespace = Some (Ident "std");
       decl = None }}] -> ()
   | _ -> assert false
 
@@ -2914,7 +2919,7 @@ let () =
   check Clangml_show.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match List.hd (List.rev ast) with
   | { desc = Using {
-      namespace = Ident "std";
+      namespace = Some (Ident "std");
       decl = Some "cout" }} -> ()
   | _ -> assert false
     ]}
@@ -3231,6 +3236,10 @@ let () =
       qual_type : qual_type;
     }
   | UnknownDecl of cxcursorkind * clang_ext_declkind
+
+and namespace_of_type_ref =
+  | UsingNamespace of ident_ref
+  | UsingType of qual_type
 
 and directive =
   | Include of {
