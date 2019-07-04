@@ -339,7 +339,6 @@ AS_IF([test -d clangml],
   [true],
   [AS_IF([mkdir clangml],
     [AC_CP([$srcdir/dune-project], [.])
-     AC_CP([$srcdir/clangml.opam], [.])
      AC_CP([$srcdir/clangml/clang.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang.mli], [clangml/])
      AC_CP([$srcdir/clangml/clang__ast.ml], [clangml/])
