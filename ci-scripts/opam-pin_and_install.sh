@@ -13,6 +13,7 @@ opam update
 cd ~
 git clone https://gitlab.inria.fr/tmartine/override.git
 cd ~/override
+opam install --yes dune
 make override.opam
 opam pin add --yes --no-action file://~/override
 
