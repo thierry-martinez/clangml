@@ -27,7 +27,7 @@ pipeline {
         stage('Build') {
             steps {
                 sh 'make -C build clangml'
-                sh 'make -C build clangml.opam'
+                sh 'make -C build clangml.opam && cp build/clangml.opam src/'
                 sh 'make -C build stubgen'
             }
         }
