@@ -494,16 +494,6 @@ module Ast = struct
               | NamespaceRef { namespace_ref; ident } -> ident, namespace_ref
               | _ -> raise Invalid_structure in
             NamespaceAlias { alias; original }
-        | StaticAssert ->
-            let constexpr, message =
-              match list_of_children cursor with
-              | [constexpr; message] ->
-                  constexpr |> expr_of_cxcursor,
-                  Some (message |> expr_of_cxcursor)
-              | [constexpr] ->
-                  constexpr |> expr_of_cxcursor, None
-              | _ -> raise Invalid_structure in
-            StaticAssert { constexpr; message }
         | TypeAliasDecl ->
             let ident_ref = ident_ref_of_cxcursor cursor in
             let qual_type =
@@ -532,6 +522,17 @@ module Ast = struct
                   list_of_children cursor |> List.map decl_of_cxcursor in
                 let inline = ext_namespace_decl_is_inline cursor in
                 Namespace { name; declarations; inline }
+            | StaticAssert ->
+                (* No StaticAssert : cxcursortype in Clang <6.0.1 *)
+                let constexpr, message =
+                  match list_of_children cursor with
+                  | [constexpr; message] ->
+                      constexpr |> expr_of_cxcursor,
+                      Some (message |> expr_of_cxcursor)
+                  | [constexpr] ->
+                      constexpr |> expr_of_cxcursor, None
+                  | _ -> raise Invalid_structure in
+                StaticAssert { constexpr; message }
             | ext_kind -> UnknownDecl (kind, ext_kind)
       with Invalid_structure ->
         UnknownDecl (get_cursor_kind cursor, ext_decl_get_kind cursor)
