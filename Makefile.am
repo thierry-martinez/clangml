@@ -34,10 +34,13 @@ mypkg_SCRIPTS ::= $(addprefix $(DUNE_PREFIX)/, $(dune_files))
 # and one by library and one by test.
 
 .PHONY : all
-all : clangml $(libraries)
+all : clangml clangml.opam $(libraries)
 
 .PHONY : clangml
 clangml : $(DUNE_PREFIX)/$(CLANGML_CMXA) $(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A)
+
+clangml.opam : dune-project
+	dune build clangml.opam
 
 .PHONY : stubgen
 stubgen : $(DUNE_PREFIX)/$(STUBGEN_EXE)
