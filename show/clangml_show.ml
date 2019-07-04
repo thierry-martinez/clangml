@@ -1,4 +1,6 @@
-type 'a pp = Format.formatter -> 'a -> unit
+module%import Clangml_show = struct
+  [%%types]
+end
 
 let opaque fmt _ =
   Format.pp_print_string fmt "<opaque>"
@@ -81,3 +83,17 @@ end
 include Ast
 
 let pp_type = pp_qual_type
+
+let show_type = show_qual_type
+
+let pp_ext_declkind = Bindings.pp_clang_ext_declkind
+
+let show_ext_declkind = Bindings.show_clang_ext_declkind
+
+let pp_ext_stmtkind = Bindings.pp_clang_ext_stmtkind
+
+let show_ext_stmtkind = Bindings.show_clang_ext_stmtkind
+
+let pp_ext_typekind = Bindings.pp_clang_ext_typekind
+
+let show_ext_typekind = Bindings.show_clang_ext_typekind
