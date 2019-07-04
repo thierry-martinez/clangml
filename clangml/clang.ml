@@ -184,7 +184,28 @@ module Ast = struct
         end ([], []) in
       List.rev acc_match, List.rev acc_others
 
-    let rec ident_ref_of_cxcursor cursor =
+    let rec extract_namespace_and_type_ref cursor =
+      let namespaces, others =
+        list_of_children cursor |> extract begin fun c ->
+          match get_cursor_kind c with
+          | NamespaceRef -> Some (get_cursor_spelling c)
+          | _ -> None
+        end in
+      let type_refs, others =
+        list_of_children cursor |> extract begin fun c ->
+          match get_cursor_kind c with
+          | TypeRef -> Some c
+          | _ -> None
+        end in
+      let namespace = ident_ref_of_namespaces namespaces in
+      let type_ref =
+        match type_refs with
+        | [type_ref] -> Some (type_ref |> get_cursor_type |> of_cxtype)
+        | [] -> None
+        | _ -> raise Invalid_structure in
+      namespace, type_ref, others
+
+    and ident_ref_of_cxcursor cursor =
       let ident = get_cursor_spelling cursor in
       let rec pop_ref list ident =
         match
@@ -409,28 +430,19 @@ module Ast = struct
         | CXXAccessSpecifier ->
             AccessSpecifier (cursor |> get_cxxaccess_specifier)
         | UsingDirective ->
-            let namespaces =
-              list_of_children cursor |> List.map begin fun c ->
-                  match get_cursor_kind c with
-                  | NamespaceRef -> get_cursor_spelling c
-                  | _ -> raise Invalid_structure
-              end in
-            let namespace = ident_ref_of_namespaces namespaces in
-            Using { namespace; decl = None }
+            let namespace, type_ref, others =
+              extract_namespace_and_type_ref cursor in
+            Using { namespace; type_ref; decl = None }
         | UsingDeclaration ->
-            let namespaces, others =
-              list_of_children cursor |> extract begin fun c ->
-                  match get_cursor_kind c with
-                  | NamespaceRef -> Some (get_cursor_spelling c)
-                  | _ -> None
-              end in
+            let namespace, type_ref, others =
+              extract_namespace_and_type_ref cursor in
             begin
               match others with
               | [decl_ref] when
                   get_cursor_kind decl_ref = OverloadedDeclRef ->
                     Using {
-                    namespace = ident_ref_of_namespaces namespaces;
-                    decl = Some (get_cursor_spelling decl_ref) }
+                      namespace; type_ref;
+                      decl = Some (get_cursor_spelling decl_ref) }
               | _ -> raise Invalid_structure
             end
         | Constructor ->
@@ -482,6 +494,21 @@ module Ast = struct
               | NamespaceRef { namespace_ref; ident } -> ident, namespace_ref
               | _ -> raise Invalid_structure in
             NamespaceAlias { alias; original }
+        | StaticAssert ->
+            let constexpr, message =
+              match list_of_children cursor with 
+              | [constexpr; message] ->
+                  constexpr |> expr_of_cxcursor,
+                  Some (message |> expr_of_cxcursor)
+              | [constexpr] ->
+                  constexpr |> expr_of_cxcursor, None
+              | _ -> raise Invalid_structure in
+            StaticAssert { constexpr; message }
+        | TypeAliasDecl ->
+            let ident_ref = ident_ref_of_cxcursor cursor in
+            let qual_type =
+              get_typedef_decl_underlying_type cursor |> of_cxtype in
+            TypeAlias { ident_ref; qual_type }
         | kind ->
             match ext_decl_get_kind cursor with
             | Empty -> EmptyDecl
@@ -554,10 +581,9 @@ module Ast = struct
           name = cursor |> get_cursor_spelling;
           qual_type;
           default =
-            match others with
+            match List.rev others with
             | [] -> None
-            | [default] -> Some (default |> expr_of_cxcursor)
-            | _ -> raise Invalid_structure }
+            | default :: _ -> Some (default |> expr_of_cxcursor) }
 
     and function_type_of_decl cursor =
       (* Hack for Clang 3.4 and 3.5! See current_decl declaration. *)
@@ -573,7 +599,7 @@ module Ast = struct
         match List.rev children with
         | last :: _ when get_cursor_kind last = CompoundStmt ->
             Some (stmt_of_cxcursor last)
-    | _ -> None in
+        | _ -> None in
       Clang__ast.Function { linkage; function_type; name; body;
         deleted = ext_function_decl_is_deleted cursor;
         constexpr = ext_function_decl_is_constexpr cursor; }
@@ -1079,10 +1105,6 @@ module Ast = struct
                     sub.desc
                   else
                     MaterializeTemporaryExpr sub
-              | CXXStaticCastExpr ->
-                  cast_of_cxcursor Static cursor
-              | CXXDynamicCastExpr ->
-                  cast_of_cxcursor Dynamic cursor
               | kind ->
                   match compat_stmt_kind kind with
                   | CXXFoldExpr ->
@@ -1107,6 +1129,16 @@ module Ast = struct
               ext_size_of_pack_expr_get_pack cursor |> ident_ref_of_cxcursor)
         | CXXFunctionalCastExpr ->
             cast_of_cxcursor Functional cursor
+        | CXXStaticCastExpr ->
+            cast_of_cxcursor Static cursor
+        | CXXDynamicCastExpr ->
+            cast_of_cxcursor Dynamic cursor
+        | CXXThrowExpr ->
+            let sub =
+              match list_of_children cursor with
+              | [sub] -> expr_of_cxcursor sub
+              | _ -> raise Invalid_structure in
+            Throw sub
         | _ -> UnknownExpr kind
       with Invalid_structure -> UnknownExpr kind
 

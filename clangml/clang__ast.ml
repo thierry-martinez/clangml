@@ -2159,6 +2159,7 @@ let () =
       name : string;
       args : expr list;
     }
+  | Throw of expr
   | UnexposedExpr of clang_ext_stmtkind
   | UnknownExpr of cxcursorkind
 
@@ -2882,6 +2883,7 @@ let () =
 *)
   | Using of {
       namespace : ident_ref;
+      type_ref : qual_type option;
       decl : string option;
     }
 (** C++ "using" directive and declaration.
@@ -3219,6 +3221,15 @@ let () =
   | _ -> assert false
     ]}*)
   | Directive of directive
+  | StaticAssert of {
+      constexpr : expr;
+      message : expr option; (** Optional since C++ 17 *)
+    }
+(** Static assertion. (C++ 11) *)
+  | TypeAlias of {
+      ident_ref : ident_ref;
+      qual_type : qual_type;
+    }
   | UnknownDecl of cxcursorkind * clang_ext_declkind
 
 and directive =
