@@ -2024,6 +2024,10 @@ let () =
             function_name = "myfunc"; }}}}] }] }}}]]
    ]}*)
   | ExprWithCleanups of expr
+  | TemporaryObject of {
+      qual_type : qual_type;
+      args : expr list;
+    }
   | MaterializeTemporaryExpr of expr
   | Lambda of {
       capture_default : lambda_capture_default;
@@ -2161,12 +2165,12 @@ let () =
     }
   | SizeOfPack of ident_ref
   | Construct of {
-      name : string;
+      qual_type : qual_type;
       args : expr list;
     }
   | Throw of expr
   | UnexposedExpr of clang_ext_stmtkind
-  | UnknownExpr of cxcursorkind
+  | UnknownExpr of cxcursorkind * clang_ext_stmtkind
 
 and lambda_capture = {
    capture_kind : lambda_capture_kind;

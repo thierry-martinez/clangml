@@ -91,9 +91,7 @@ module Ast = struct
           "Clang.Ast.new_instance: ~init and ~args are mutually exclusive"
       | init, None -> init
       | None, Some args ->
-          Some (node (Construct {
-            name = get_type_spelling qual_type.cxtype;
-            args; })) in
+          Some (node (Construct { qual_type; args; })) in
     New { placement_args; qual_type; array_size; init }
 
   let delete ?(global_delete = false) ?(array_form = false) argument =
@@ -973,17 +971,29 @@ module Ast = struct
             begin match ext_stmt_get_kind cursor with
             | CXXConstructExpr ->
                 Construct {
-                  name = get_cursor_spelling cursor;
+                  qual_type = cursor |> get_cursor_type |> of_cxtype;
                   args = list_of_children cursor |> List.map expr_of_cxcursor;
                 }
-            | _ ->
-                Call {
-                  callee = ext_call_expr_get_callee cursor |> expr_of_cxcursor;
-                  args = List.init (ext_call_expr_get_num_args cursor) begin
-                    fun i ->
-                      ext_call_expr_get_arg cursor i |> expr_of_cxcursor
-                  end
+            | CXXTemporaryObjectExpr ->
+                TemporaryObject {
+                  qual_type = cursor |> get_cursor_type |> of_cxtype;
+                  args =
+                    list_of_children cursor |> filter_out_typeref |>
+                    List.map expr_of_cxcursor;
                 }
+            | _ ->
+                let callee = ext_call_expr_get_callee cursor in
+                if get_cursor_kind callee = InvalidCode then
+                  raise Invalid_structure
+                else
+                  let callee = callee |> expr_of_cxcursor in
+                  Call {
+                    callee;
+                    args = List.init (ext_call_expr_get_num_args cursor) begin
+                      fun i ->
+                        ext_call_expr_get_arg cursor i |> expr_of_cxcursor
+                    end
+                  }
             end
         | CStyleCastExpr ->
             cast_of_cxcursor CStyle cursor
@@ -1166,8 +1176,8 @@ module Ast = struct
               | [sub] -> expr_of_cxcursor sub
               | _ -> raise Invalid_structure in
             Throw sub
-        | _ -> UnknownExpr kind
-      with Invalid_structure -> UnknownExpr kind
+        | _ -> UnknownExpr (kind, ext_stmt_get_kind cursor)
+      with Invalid_structure -> UnknownExpr (kind, ext_stmt_get_kind cursor)
 
     and cast_of_cxcursor kind cursor =
       let operand =
