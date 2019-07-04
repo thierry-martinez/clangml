@@ -2888,7 +2888,7 @@ let () =
     ]}
 *)
   | Using of {
-      namespace_or_type_ref : namespace_of_type_ref;
+      namespace_or_type_ref : namespace_of_type_ref option;
       decl : string option;
     }
 (** C++ "using" directive and declaration.
@@ -2904,7 +2904,7 @@ let () =
   fun ast -> match ast with
   | [{ desc = Namespace { name = "std" }};
      { desc = Using {
-      namespace = Some (Ident "std");
+      namespace_or_type_ref = Some (UsingNamespace (Ident "std"));
       decl = None }}] -> ()
   | _ -> assert false
 
@@ -2919,7 +2919,7 @@ let () =
   check Clangml_show.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match List.hd (List.rev ast) with
   | { desc = Using {
-      namespace = Some (Ident "std");
+      namespace_or_type_ref = Some (UsingNamespace (Ident "std"));
       decl = Some "cout" }} -> ()
   | _ -> assert false
     ]}

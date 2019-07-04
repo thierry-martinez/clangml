@@ -149,6 +149,13 @@ module Ast = struct
         | _ -> true
       end
 
+    let filter_out_parmdecl list =
+      list |> List.filter begin fun cursor ->
+        match get_cursor_kind cursor with
+        | ParmDecl -> false
+        | _ -> true
+      end
+
     let make_integer_literal i =
       match
         if options.convert_integer_literals then
@@ -201,9 +208,10 @@ module Ast = struct
         end in
       let namespace_or_type_ref =
         match ident_ref_of_namespaces namespaces, type_refs with
-        | Some namespace, [] -> UsingNamespace namespace
+        | Some namespace, [] -> Some (UsingNamespace namespace)
         | None, [type_ref] ->
-            UsingType (type_ref |> get_cursor_type |> of_cxtype)
+            Some (UsingType (type_ref |> get_cursor_type |> of_cxtype))
+        | None, [] -> None
         | _ -> raise Invalid_structure in
       namespace_or_type_ref, others
 
@@ -560,7 +568,7 @@ module Ast = struct
           | NamespaceRef -> Some (get_cursor_spelling c)
           | _ -> None
         end in
-      let others = others |> filter_out_typeref in
+      let others = others |> filter_out_typeref |> filter_out_parmdecl in
       let qual_type = cursor |> get_cursor_type |> of_cxtype in
       let qual_type =
         match namespaces, qual_type with
