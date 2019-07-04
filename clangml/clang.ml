@@ -135,11 +135,19 @@ module Ast = struct
        for predefined identifiers on Clang 3.4 and Clang 3.5. *)
     let current_decl = ref (get_null_cursor ())
 
-    let filter_attributes list =
-      list |> List.filter @@ fun cursor ->
+    let filter_out_attributes list =
+      list |> List.filter begin fun cursor ->
         match get_cursor_kind cursor with
         | UnexposedAttr -> false
         | _ -> true
+      end
+
+    let filter_out_typeref list =
+      list |> List.filter begin fun cursor ->
+        match get_cursor_kind cursor with
+        | TypeRef -> false
+        | _ -> true
+      end
 
     let make_integer_literal i =
       match
@@ -274,6 +282,9 @@ module Ast = struct
         | LValueReference ->
             let pointee = cxtype |> get_pointee_type |> of_cxtype in
             LValueReference pointee
+        | RValueReference ->
+            let pointee = cxtype |> get_pointee_type |> of_cxtype in
+            RValueReference pointee
         | Enum ->
             Enum (cxtype |> get_type_declaration |> ident_ref_of_cxcursor)
         | Record ->
@@ -306,8 +317,10 @@ module Ast = struct
                     modified_type = type_get_modified_type cxtype |> of_cxtype;
                     attribute_kind = ext_type_get_attribute_kind cxtype;
                   }
-              | TemplateTypeParm ->
+              | TemplateTypeParm->
                   TemplateTypeParm (get_type_spelling cxtype);
+              | SubstTemplateTypeParm->
+                  SubstTemplateTypeParm (get_type_spelling cxtype);
               | TemplateSpecialization ->
                   let name =
                     cxtype |>
@@ -515,11 +528,7 @@ module Ast = struct
           | NamespaceRef -> Some (get_cursor_spelling c)
           | _ -> None
         end in
-      let others = others |> List.filter begin fun c ->
-        match get_cursor_kind c with
-        | TypeRef -> false
-        | _ -> true
-      end in
+      let others = others |> filter_out_typeref in
       let qual_type = cursor |> get_cursor_type |> of_cxtype in
       let qual_type =
         match namespaces, qual_type with
@@ -654,7 +663,7 @@ module Ast = struct
     and enum_constant_of_cxcursor cursor =
       let constant_name = get_cursor_spelling cursor in
       let constant_init =
-        match filter_attributes (list_of_children cursor) with
+        match filter_out_attributes (list_of_children cursor) with
         | [init] -> Some (expr_of_cxcursor init)
         | [] -> None
         | _ -> raise Invalid_structure in
@@ -928,7 +937,7 @@ module Ast = struct
         | CStyleCastExpr ->
             cast_of_cxcursor CStyle cursor
         | MemberRefExpr ->
-            begin match list_of_children cursor with
+            begin match list_of_children cursor |> filter_out_typeref with
             | [] -> MemberRef (get_cursor_spelling cursor)
             | [lhs] ->
                 let base = expr_of_cxcursor lhs in
@@ -1070,6 +1079,10 @@ module Ast = struct
                     sub.desc
                   else
                     MaterializeTemporaryExpr sub
+              | CXXStaticCastExpr ->
+                  cast_of_cxcursor Static cursor
+              | CXXDynamicCastExpr ->
+                  cast_of_cxcursor Dynamic cursor
               | kind ->
                   match compat_stmt_kind kind with
                   | CXXFoldExpr ->
@@ -1192,7 +1205,7 @@ module Ast = struct
         | NonTypeTemplateParameter ->
             let parameter_type = get_cursor_type cursor |> of_cxtype in
             let default : expr option =
-              match list_of_children cursor |> List.filter (fun e -> get_cursor_kind e <> TypeRef) with
+              match list_of_children cursor |> filter_out_typeref with
               | [] -> None
               | [default] -> Some (default |> expr_of_cxcursor)
               | _ -> raise Invalid_structure in

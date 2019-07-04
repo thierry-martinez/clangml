@@ -306,6 +306,7 @@ let () =
   | _ -> assert false
     ]}*)
   | LValueReference of qual_type
+  | RValueReference of qual_type
   | ConstantArray of {
       element : qual_type;
       size : int;
@@ -598,6 +599,7 @@ let () =
 
 *)
   | TemplateTypeParm of string
+  | SubstTemplateTypeParm of string
   | TemplateSpecialization of {
       name : template_name;
       args : template_argument list;
@@ -2171,6 +2173,8 @@ and cast_kind =
   | CStyle
   | Implicit
   | Functional
+  | Static
+  | Dynamic
 
 and unary_expr_or_type_trait =
   | ArgumentExpr of expr
