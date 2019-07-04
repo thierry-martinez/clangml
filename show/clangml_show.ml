@@ -1,6 +1,6 @@
-module%import Clangml_show = struct
-  [%%types]
-end
+type 'a pp = Format.formatter -> 'a -> unit
+
+type 'a show = 'a -> string
 
 let opaque fmt _ =
   Format.pp_print_string fmt "<opaque>"
