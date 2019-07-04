@@ -496,7 +496,7 @@ module Ast = struct
             NamespaceAlias { alias; original }
         | StaticAssert ->
             let constexpr, message =
-              match list_of_children cursor with 
+              match list_of_children cursor with
               | [constexpr; message] ->
                   constexpr |> expr_of_cxcursor,
                   Some (message |> expr_of_cxcursor)
