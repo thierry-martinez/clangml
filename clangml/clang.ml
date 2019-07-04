@@ -192,7 +192,7 @@ module Ast = struct
           | _ -> None
         end in
       let type_refs, others =
-        list_of_children cursor |> extract begin fun c ->
+        others |> extract begin fun c ->
           match get_cursor_kind c with
           | TypeRef -> Some c
           | _ -> None
