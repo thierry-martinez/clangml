@@ -77,9 +77,9 @@ GetCursorDecl(CXCursor Cursor)
 static const clang::Stmt *
 GetCursorStmt(CXCursor Cursor)
 {
-  if (Cursor.kind == CXCursor_ObjCSuperClassRef ||
-      Cursor.kind == CXCursor_ObjCProtocolRef ||
-      Cursor.kind == CXCursor_ObjCClassRef)
+  if ((Cursor.kind >= CXCursor_FirstRef &&
+      Cursor.kind <= CXCursor_LastRef) ||
+      Cursor.kind == CXCursor_InvalidCode)
     return nullptr;
 
   return static_cast<const clang::Stmt *>(Cursor.data[1]);
