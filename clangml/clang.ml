@@ -428,8 +428,8 @@ module Ast = struct
             let qual_type = get_cursor_type cursor |> of_cxtype in
             let bitwidth =
               if cursor_is_bit_field cursor then
-                match list_of_children cursor with
-                | [bitwidth] -> Some (expr_of_cxcursor bitwidth)
+                match List.rev (list_of_children cursor) with
+                | bitwidth :: _ -> Some (expr_of_cxcursor bitwidth)
                 | _ -> raise Invalid_structure
               else
                 None in
@@ -725,10 +725,14 @@ module Ast = struct
 
     and record_decl_of_children keyword cursor children =
       let name = get_cursor_spelling cursor in
+      let final, children =
+        match children with
+        | attr :: tl when get_cursor_kind attr = CXXFinalAttr -> true, tl
+        | _ -> false, children in
       let bases, children =
         extract_prefix_from_list base_specifier_of_cxcursor_opt children in
       let fields = fields_of_children children in
-      RecordDecl { keyword; name; bases; fields }
+      RecordDecl { keyword; name; bases; fields; final }
 
     and fields_of_children children =
       children |> List.map (decl_of_cxcursor ~in_record:true)

@@ -677,6 +677,7 @@ and record_decl = {
     name : string;
     bases : base_specifier list; (** C++ *)
     fields : decl list;
+    final : bool; (** C++11 *)
   }
 
 and function_decl = {
