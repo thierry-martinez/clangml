@@ -328,6 +328,49 @@ getCursorContext(CXCursor c)
   return getCursorTU(c)->TheASTUnit->getASTContext();
 }
 
+static struct clang_ext_DeclarationName
+MakeDeclarationName(
+  const clang::DeclarationName name, CXTranslationUnit tu)
+{
+  struct clang_ext_DeclarationName result = {
+    new clang::DeclarationName(name), tu };
+  return result;
+}
+
+static struct clang_ext_DeclarationName
+MakeDeclarationNameInvalid(CXTranslationUnit tu)
+{
+  struct clang_ext_DeclarationName result = { nullptr, tu };
+  return result;
+}
+
+static const clang::DeclarationName *
+GetDeclarationName(struct clang_ext_DeclarationName name)
+{
+  return static_cast<const clang::DeclarationName *>(name.data);
+}
+
+static struct clang_ext_NestedNameSpecifier
+MakeNestedNameSpecifier(
+  const clang::NestedNameSpecifier *specifier, CXTranslationUnit tu)
+{
+  struct clang_ext_NestedNameSpecifier result = { specifier, tu };
+  return result;
+}
+
+static struct clang_ext_NestedNameSpecifier
+MakeNestedNameSpecifierInvalid(CXTranslationUnit tu)
+{
+  struct clang_ext_NestedNameSpecifier result = { nullptr, tu };
+  return result;
+}
+
+static const clang::NestedNameSpecifier *
+GetNestedNameSpecifier(struct clang_ext_NestedNameSpecifier specifier)
+{
+  return static_cast<const clang::NestedNameSpecifier *>(specifier.data);
+}
+
 extern "C" {
   bool
   clang_equal_cxint(CXInt a, CXInt b)
@@ -1694,7 +1737,7 @@ extern "C" {
     if (auto PET = GetQualType(c)->getAs<clang::PackExpansionType>()) {
       return MakeCXType(PET->getPattern(), GetTU(c));
     }
-    return MakeCXTypeInvalid(GetTU(c));    
+    return MakeCXTypeInvalid(GetTU(c));
   }
 
   enum clang_ext_BinaryOperatorKind
@@ -1749,7 +1792,8 @@ extern "C" {
   CXCursor
   clang_ext_SizeOfPackExpr_getPack(CXCursor c)
   {
-    if (auto e = llvm::dyn_cast_or_null<clang::SizeOfPackExpr>(GetCursorStmt(c))) {
+    if (auto e =
+        llvm::dyn_cast_or_null<clang::SizeOfPackExpr>(GetCursorStmt(c))) {
       return MakeCXCursor(e->getPack(), getCursorTU(c));
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
@@ -1767,9 +1811,201 @@ extern "C" {
   bool
   clang_ext_NamespaceDecl_isInline(CXCursor c)
   {
-    if (auto nd = llvm::dyn_cast_or_null<clang::NamespaceDecl>(GetCursorDecl(c))) {
+    if (auto nd =
+        llvm::dyn_cast_or_null<clang::NamespaceDecl>(GetCursorDecl(c))) {
       return nd->isInline();
     }
     return false;
+  }
+
+  enum clang_ext_DeclarationNameKind
+  clang_ext_DeclarationName_getKind(
+    struct clang_ext_DeclarationName name)
+  {
+    if (auto d = GetDeclarationName(name)) {
+      switch (d->getNameKind()) {
+      case clang::DeclarationName::NameKind::Identifier:
+        return CLANG_EXT_DECLARATION_NAME_Identifier;
+      case clang::DeclarationName::NameKind::ObjCZeroArgSelector:
+        return CLANG_EXT_DECLARATION_NAME_ObjCZeroArgSelector;
+      case clang::DeclarationName::NameKind::ObjCOneArgSelector:
+        return CLANG_EXT_DECLARATION_NAME_ObjCOneArgSelector;
+      case clang::DeclarationName::NameKind::ObjCMultiArgSelector:
+        return CLANG_EXT_DECLARATION_NAME_ObjCMultiArgSelector;
+      case clang::DeclarationName::NameKind::CXXConstructorName:
+        return CLANG_EXT_DECLARATION_NAME_CXXConstructorName;
+      case clang::DeclarationName::NameKind::CXXDestructorName:
+        return CLANG_EXT_DECLARATION_NAME_CXXDestructorName;
+      case clang::DeclarationName::NameKind::CXXConversionFunctionName:
+        return CLANG_EXT_DECLARATION_NAME_CXXConversionFunctionName;
+      case clang::DeclarationName::NameKind::CXXDeductionGuideName:
+        return CLANG_EXT_DECLARATION_NAME_CXXDeductionGuideName;
+      case clang::DeclarationName::NameKind::CXXOperatorName:
+        return CLANG_EXT_DECLARATION_NAME_CXXOperatorName;
+      case clang::DeclarationName::NameKind::CXXLiteralOperatorName:
+        return CLANG_EXT_DECLARATION_NAME_CXXLiteralOperatorName;
+      case clang::DeclarationName::NameKind::CXXUsingDirective:
+        return CLANG_EXT_DECLARATION_NAME_CXXUsingDirective;
+      }
+    }
+    return CLANG_EXT_DECLARATION_NAME_Invalid;
+  }
+
+  const char *
+  clang_ext_OverloadedOperator_getSpelling(
+    enum clang_ext_OverloadedOperatorKind kind)
+  {
+    switch (kind) {
+    #define OVERLOADED_OPERATOR(Name,Spelling,Token,Unary,Binary,MemberOnly) \
+      case CLANG_EXT_OVERLOADED_OPERATOR_##Name: return Spelling;
+    #include <clang/Basic/OperatorKinds.def>
+    default:;
+    }
+    return "";
+  }
+
+  enum clang_ext_OverloadedOperatorKind
+  clang_ext_DeclarationName_getCXXOverloadedOperator(
+    struct clang_ext_DeclarationName name)
+  {
+    if (auto d = GetDeclarationName(name)) {
+      switch (d->getCXXOverloadedOperator()) {
+      case clang::OO_None:
+        return CLANG_EXT_OVERLOADED_OPERATOR_None;
+      #define OVERLOADED_OPERATOR(Name,Spelling,Token,Unary,Binary,MemberOnly) \
+        case clang::OO_##Name: return CLANG_EXT_OVERLOADED_OPERATOR_##Name;
+      #include <clang/Basic/OperatorKinds.def>
+      default:;
+      }
+    }
+    return CLANG_EXT_OVERLOADED_OPERATOR_None;
+  }
+
+  CXType
+  clang_ext_DeclarationName_getCXXNameType(
+    struct clang_ext_DeclarationName name)
+  {
+    if (auto d = GetDeclarationName(name)) {
+      return MakeCXType(d->getCXXNameType(), name.tu);
+    }
+    return MakeCXTypeInvalid(name.tu);
+  }
+
+  struct clang_ext_DeclarationName
+  clang_ext_Decl_getName(CXCursor c)
+  {
+    if (auto d = GetCursorDecl(c)) {
+      if (auto nd = llvm::dyn_cast_or_null<clang::NamedDecl>(d)) {
+        return MakeDeclarationName(nd->getDeclName(), getCursorTU(c));
+      }
+    }
+    return MakeDeclarationNameInvalid(getCursorTU(c));
+  }
+
+  enum clang_ext_NestedNameSpecifierKind
+  clang_ext_NestedNameSpecifier_getKind(
+    struct clang_ext_NestedNameSpecifier specifier)
+  {
+    if (auto s = GetNestedNameSpecifier(specifier)) {
+      switch (s->getKind()) {
+      case clang::NestedNameSpecifier::SpecifierKind::Identifier:
+        return CLANG_EXT_NESTED_NAME_SPECIFIER_Identifier;
+      case clang::NestedNameSpecifier::SpecifierKind::Namespace:
+        return CLANG_EXT_NESTED_NAME_SPECIFIER_Namespace;
+      case clang::NestedNameSpecifier::SpecifierKind::NamespaceAlias:
+        return CLANG_EXT_NESTED_NAME_SPECIFIER_NamespaceAlias;
+      case clang::NestedNameSpecifier::SpecifierKind::TypeSpec:
+        return CLANG_EXT_NESTED_NAME_SPECIFIER_TypeSpec;
+      case clang::NestedNameSpecifier::SpecifierKind::TypeSpecWithTemplate:
+        return CLANG_EXT_NESTED_NAME_SPECIFIER_TypeSpecWithTemplate;
+      case clang::NestedNameSpecifier::SpecifierKind::Global:
+        return CLANG_EXT_NESTED_NAME_SPECIFIER_Global;
+      case clang::NestedNameSpecifier::SpecifierKind::Super:
+        return CLANG_EXT_NESTED_NAME_SPECIFIER_Super;
+      default:;
+      }
+    }
+    return CLANG_EXT_NESTED_NAME_SPECIFIER_Invalid;
+  }
+
+  struct clang_ext_NestedNameSpecifier
+  clang_ext_NestedNameSpecifier_getPrefix(
+    struct clang_ext_NestedNameSpecifier specifier)
+  {
+    if (auto s = GetNestedNameSpecifier(specifier)) {
+      return MakeNestedNameSpecifier(s->getPrefix(), specifier.tu);
+    }
+    return MakeNestedNameSpecifierInvalid(specifier.tu);
+  }
+
+  CXString
+  clang_ext_NestedNameSpecifier_getAsIdentifier(
+    struct clang_ext_NestedNameSpecifier specifier)
+  {
+    if (auto s = GetNestedNameSpecifier(specifier)) {
+      if (auto i = s->getAsIdentifier()) {
+        return cxstring_createDup(i->getName());
+    }
+    }
+    return cxstring_createRef("");
+  }
+
+  CXCursor
+  clang_ext_NestedNameSpecifier_getAsNamespace(
+    struct clang_ext_NestedNameSpecifier specifier)
+  {
+    if (auto s = GetNestedNameSpecifier(specifier)) {
+      if (auto n = s->getAsNamespace()) {
+        return MakeCXCursor(n, specifier.tu);
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, specifier.tu);
+  }
+
+  CXType
+  clang_ext_NestedNameSpecifier_getAsType(
+    struct clang_ext_NestedNameSpecifier specifier)
+  {
+    if (auto s = GetNestedNameSpecifier(specifier)) {
+      if (auto t = s->getAsType()) {
+        return MakeCXType(clang::QualType(t, 0), specifier.tu);
+      }
+    }
+    return MakeCXTypeInvalid(specifier.tu);
+  }
+
+  struct clang_ext_NestedNameSpecifier
+  clang_ext_Decl_getNestedNameSpecifier(CXCursor cursor)
+  {
+    switch (cursor.kind) {
+    case CXCursor_DeclRefExpr:
+      if (auto d =
+          llvm::dyn_cast_or_null<clang::DeclRefExpr>(GetCursorExpr(cursor))) {
+        return MakeNestedNameSpecifier(d->getQualifier(), getCursorTU(cursor));
+      }
+      return MakeNestedNameSpecifierInvalid(getCursorTU(cursor));
+    case CXCursor_UsingDirective:
+      if (auto d =
+          llvm::dyn_cast_or_null<clang::UsingDirectiveDecl>(
+            GetCursorDecl(cursor))) {
+        return MakeNestedNameSpecifier(d->getQualifier(), getCursorTU(cursor));
+      }
+      return MakeNestedNameSpecifierInvalid(getCursorTU(cursor));
+    case CXCursor_NamespaceAlias:
+      if (auto d =
+          llvm::dyn_cast_or_null<clang::NamespaceAliasDecl>(
+            GetCursorDecl(cursor))) {
+        return MakeNestedNameSpecifier(d->getQualifier(), getCursorTU(cursor));
+      }
+      return MakeNestedNameSpecifierInvalid(getCursorTU(cursor));
+    case CXCursor_UsingDeclaration:
+      if (auto d =
+          llvm::dyn_cast_or_null<clang::UsingDecl>(GetCursorDecl(cursor))) {
+        return MakeNestedNameSpecifier(d->getQualifier(), getCursorTU(cursor));
+      }
+      return MakeNestedNameSpecifierInvalid(getCursorTU(cursor));
+    default:
+      return MakeNestedNameSpecifierInvalid(getCursorTU(cursor));
+    }
   }
 }
