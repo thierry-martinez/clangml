@@ -8072,3 +8072,356 @@ clang_ext_NamespaceDecl_isInline_wrapper(value c_ocaml)
   }
 }
 
+enum clang_ext_OverloadedOperatorKind
+Clang_ext_overloadedoperatorkind_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CLANG_EXT_OVERLOADED_OPERATOR_None;
+  case 1: return CLANG_EXT_OVERLOADED_OPERATOR_New;
+  case 2: return CLANG_EXT_OVERLOADED_OPERATOR_Delete;
+  case 3: return CLANG_EXT_OVERLOADED_OPERATOR_Array_New;
+  case 4: return CLANG_EXT_OVERLOADED_OPERATOR_Array_Delete;
+  case 5: return CLANG_EXT_OVERLOADED_OPERATOR_Plus;
+  case 6: return CLANG_EXT_OVERLOADED_OPERATOR_Minus;
+  case 7: return CLANG_EXT_OVERLOADED_OPERATOR_Star;
+  case 8: return CLANG_EXT_OVERLOADED_OPERATOR_Slash;
+  case 9: return CLANG_EXT_OVERLOADED_OPERATOR_Percent;
+  case 10: return CLANG_EXT_OVERLOADED_OPERATOR_Caret;
+  case 11: return CLANG_EXT_OVERLOADED_OPERATOR_Amp;
+  case 12: return CLANG_EXT_OVERLOADED_OPERATOR_Pipe;
+  case 13: return CLANG_EXT_OVERLOADED_OPERATOR_Tilde;
+  case 14: return CLANG_EXT_OVERLOADED_OPERATOR_Exclaim;
+  case 15: return CLANG_EXT_OVERLOADED_OPERATOR_Equal;
+  case 16: return CLANG_EXT_OVERLOADED_OPERATOR_Less;
+  case 17: return CLANG_EXT_OVERLOADED_OPERATOR_Greater;
+  case 18: return CLANG_EXT_OVERLOADED_OPERATOR_PlusEqual;
+  case 19: return CLANG_EXT_OVERLOADED_OPERATOR_MinusEqual;
+  case 20: return CLANG_EXT_OVERLOADED_OPERATOR_StarEqual;
+  case 21: return CLANG_EXT_OVERLOADED_OPERATOR_SlashEqual;
+  case 22: return CLANG_EXT_OVERLOADED_OPERATOR_PercentEqual;
+  case 23: return CLANG_EXT_OVERLOADED_OPERATOR_CaretEqual;
+  case 24: return CLANG_EXT_OVERLOADED_OPERATOR_AmpEqual;
+  case 25: return CLANG_EXT_OVERLOADED_OPERATOR_PipeEqual;
+  case 26: return CLANG_EXT_OVERLOADED_OPERATOR_LessLess;
+  case 27: return CLANG_EXT_OVERLOADED_OPERATOR_GreaterGreater;
+  case 28: return CLANG_EXT_OVERLOADED_OPERATOR_LessLessEqual;
+  case 29: return CLANG_EXT_OVERLOADED_OPERATOR_GreaterGreaterEqual;
+  case 30: return CLANG_EXT_OVERLOADED_OPERATOR_EqualEqual;
+  case 31: return CLANG_EXT_OVERLOADED_OPERATOR_ExclaimEqual;
+  case 32: return CLANG_EXT_OVERLOADED_OPERATOR_LessEqual;
+  case 33: return CLANG_EXT_OVERLOADED_OPERATOR_GreaterEqual;
+  case 34: return CLANG_EXT_OVERLOADED_OPERATOR_AmpAmp;
+  case 35: return CLANG_EXT_OVERLOADED_OPERATOR_PipePipe;
+  case 36: return CLANG_EXT_OVERLOADED_OPERATOR_PlusPlus;
+  case 37: return CLANG_EXT_OVERLOADED_OPERATOR_MinusMinus;
+  case 38: return CLANG_EXT_OVERLOADED_OPERATOR_Comma;
+  case 39: return CLANG_EXT_OVERLOADED_OPERATOR_ArrowStar;
+  case 40: return CLANG_EXT_OVERLOADED_OPERATOR_Arrow;
+  case 41: return CLANG_EXT_OVERLOADED_OPERATOR_Call;
+  case 42: return CLANG_EXT_OVERLOADED_OPERATOR_Subscript;
+  case 43: return CLANG_EXT_OVERLOADED_OPERATOR_Conditional;
+  }
+  failwith_fmt("invalid value for Clang_ext_overloadedoperatorkind_val: %d", Int_val(ocaml));
+  return CLANG_EXT_OVERLOADED_OPERATOR_None;
+}
+
+value
+Val_clang_ext_overloadedoperatorkind(enum clang_ext_OverloadedOperatorKind v)
+{
+  switch (v) {
+  case CLANG_EXT_OVERLOADED_OPERATOR_None: return Val_int(0);
+  case CLANG_EXT_OVERLOADED_OPERATOR_New: return Val_int(1);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Delete: return Val_int(2);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Array_New: return Val_int(3);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Array_Delete: return Val_int(4);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Plus: return Val_int(5);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Minus: return Val_int(6);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Star: return Val_int(7);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Slash: return Val_int(8);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Percent: return Val_int(9);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Caret: return Val_int(10);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Amp: return Val_int(11);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Pipe: return Val_int(12);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Tilde: return Val_int(13);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Exclaim: return Val_int(14);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Equal: return Val_int(15);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Less: return Val_int(16);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Greater: return Val_int(17);
+  case CLANG_EXT_OVERLOADED_OPERATOR_PlusEqual: return Val_int(18);
+  case CLANG_EXT_OVERLOADED_OPERATOR_MinusEqual: return Val_int(19);
+  case CLANG_EXT_OVERLOADED_OPERATOR_StarEqual: return Val_int(20);
+  case CLANG_EXT_OVERLOADED_OPERATOR_SlashEqual: return Val_int(21);
+  case CLANG_EXT_OVERLOADED_OPERATOR_PercentEqual: return Val_int(22);
+  case CLANG_EXT_OVERLOADED_OPERATOR_CaretEqual: return Val_int(23);
+  case CLANG_EXT_OVERLOADED_OPERATOR_AmpEqual: return Val_int(24);
+  case CLANG_EXT_OVERLOADED_OPERATOR_PipeEqual: return Val_int(25);
+  case CLANG_EXT_OVERLOADED_OPERATOR_LessLess: return Val_int(26);
+  case CLANG_EXT_OVERLOADED_OPERATOR_GreaterGreater: return Val_int(27);
+  case CLANG_EXT_OVERLOADED_OPERATOR_LessLessEqual: return Val_int(28);
+  case CLANG_EXT_OVERLOADED_OPERATOR_GreaterGreaterEqual: return Val_int(29);
+  case CLANG_EXT_OVERLOADED_OPERATOR_EqualEqual: return Val_int(30);
+  case CLANG_EXT_OVERLOADED_OPERATOR_ExclaimEqual: return Val_int(31);
+  case CLANG_EXT_OVERLOADED_OPERATOR_LessEqual: return Val_int(32);
+  case CLANG_EXT_OVERLOADED_OPERATOR_GreaterEqual: return Val_int(33);
+  case CLANG_EXT_OVERLOADED_OPERATOR_AmpAmp: return Val_int(34);
+  case CLANG_EXT_OVERLOADED_OPERATOR_PipePipe: return Val_int(35);
+  case CLANG_EXT_OVERLOADED_OPERATOR_PlusPlus: return Val_int(36);
+  case CLANG_EXT_OVERLOADED_OPERATOR_MinusMinus: return Val_int(37);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Comma: return Val_int(38);
+  case CLANG_EXT_OVERLOADED_OPERATOR_ArrowStar: return Val_int(39);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Arrow: return Val_int(40);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Call: return Val_int(41);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Subscript: return Val_int(42);
+  case CLANG_EXT_OVERLOADED_OPERATOR_Conditional: return Val_int(43);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_overloadedoperatorkind: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_OverloadedOperator_getSpelling_wrapper(value kind_ocaml)
+{
+  CAMLparam1(kind_ocaml);
+  enum clang_ext_OverloadedOperatorKind kind;
+  kind = Clang_ext_overloadedoperatorkind_val(kind_ocaml);
+  const char * result = clang_ext_OverloadedOperator_getSpelling(kind);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_DeclarationNameKind
+Clang_ext_declarationnamekind_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CLANG_EXT_DECLARATION_NAME_Identifier;
+  case 1: return CLANG_EXT_DECLARATION_NAME_ObjCZeroArgSelector;
+  case 2: return CLANG_EXT_DECLARATION_NAME_ObjCOneArgSelector;
+  case 3: return CLANG_EXT_DECLARATION_NAME_ObjCMultiArgSelector;
+  case 4: return CLANG_EXT_DECLARATION_NAME_CXXConstructorName;
+  case 5: return CLANG_EXT_DECLARATION_NAME_CXXDestructorName;
+  case 6: return CLANG_EXT_DECLARATION_NAME_CXXConversionFunctionName;
+  case 7: return CLANG_EXT_DECLARATION_NAME_CXXDeductionGuideName;
+  case 8: return CLANG_EXT_DECLARATION_NAME_CXXOperatorName;
+  case 9: return CLANG_EXT_DECLARATION_NAME_CXXLiteralOperatorName;
+  case 10: return CLANG_EXT_DECLARATION_NAME_CXXUsingDirective;
+  case 11: return CLANG_EXT_DECLARATION_NAME_Invalid;
+  }
+  failwith_fmt("invalid value for Clang_ext_declarationnamekind_val: %d", Int_val(ocaml));
+  return CLANG_EXT_DECLARATION_NAME_Identifier;
+}
+
+value
+Val_clang_ext_declarationnamekind(enum clang_ext_DeclarationNameKind v)
+{
+  switch (v) {
+  case CLANG_EXT_DECLARATION_NAME_Identifier: return Val_int(0);
+  case CLANG_EXT_DECLARATION_NAME_ObjCZeroArgSelector: return Val_int(1);
+  case CLANG_EXT_DECLARATION_NAME_ObjCOneArgSelector: return Val_int(2);
+  case CLANG_EXT_DECLARATION_NAME_ObjCMultiArgSelector: return Val_int(3);
+  case CLANG_EXT_DECLARATION_NAME_CXXConstructorName: return Val_int(4);
+  case CLANG_EXT_DECLARATION_NAME_CXXDestructorName: return Val_int(5);
+  case CLANG_EXT_DECLARATION_NAME_CXXConversionFunctionName: return Val_int(6);
+  case CLANG_EXT_DECLARATION_NAME_CXXDeductionGuideName: return Val_int(7);
+  case CLANG_EXT_DECLARATION_NAME_CXXOperatorName: return Val_int(8);
+  case CLANG_EXT_DECLARATION_NAME_CXXLiteralOperatorName: return Val_int(9);
+  case CLANG_EXT_DECLARATION_NAME_CXXUsingDirective: return Val_int(10);
+  case CLANG_EXT_DECLARATION_NAME_Invalid: return Val_int(11);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_declarationnamekind: %d", v);
+  return Val_int(0);
+}
+
+DECLARE_OPAQUE(struct clang_ext_DeclarationName, clang_ext_declarationname, Clang_ext_declarationname_val, Val_clang_ext_declarationname, custom_finalize_default)
+
+CAMLprim value
+clang_ext_DeclarationName_getKind_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_DeclarationName arg;
+  arg = Clang_ext_declarationname_val(Field(arg_ocaml, 0));
+  enum clang_ext_DeclarationNameKind result = clang_ext_DeclarationName_getKind(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_declarationnamekind(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_DeclarationName_getCXXOverloadedOperator_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_DeclarationName arg;
+  arg = Clang_ext_declarationname_val(Field(arg_ocaml, 0));
+  enum clang_ext_OverloadedOperatorKind result = clang_ext_DeclarationName_getCXXOverloadedOperator(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_overloadedoperatorkind(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_DeclarationName_getCXXNameType_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_DeclarationName arg;
+  arg = Clang_ext_declarationname_val(Field(arg_ocaml, 0));
+  CXType result = clang_ext_DeclarationName_getCXXNameType(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxtype(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_Decl_getName_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  struct clang_ext_DeclarationName result = clang_ext_Decl_getName(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_declarationname(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NestedNameSpecifierKind
+Clang_ext_nestednamespecifierkind_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CLANG_EXT_NESTED_NAME_SPECIFIER_Invalid;
+  case 1: return CLANG_EXT_NESTED_NAME_SPECIFIER_Identifier;
+  case 2: return CLANG_EXT_NESTED_NAME_SPECIFIER_Namespace;
+  case 3: return CLANG_EXT_NESTED_NAME_SPECIFIER_NamespaceAlias;
+  case 4: return CLANG_EXT_NESTED_NAME_SPECIFIER_TypeSpec;
+  case 5: return CLANG_EXT_NESTED_NAME_SPECIFIER_TypeSpecWithTemplate;
+  case 6: return CLANG_EXT_NESTED_NAME_SPECIFIER_Global;
+  case 7: return CLANG_EXT_NESTED_NAME_SPECIFIER_Super;
+  }
+  failwith_fmt("invalid value for Clang_ext_nestednamespecifierkind_val: %d", Int_val(ocaml));
+  return CLANG_EXT_NESTED_NAME_SPECIFIER_Invalid;
+}
+
+value
+Val_clang_ext_nestednamespecifierkind(enum clang_ext_NestedNameSpecifierKind v)
+{
+  switch (v) {
+  case CLANG_EXT_NESTED_NAME_SPECIFIER_Invalid: return Val_int(0);
+  case CLANG_EXT_NESTED_NAME_SPECIFIER_Identifier: return Val_int(1);
+  case CLANG_EXT_NESTED_NAME_SPECIFIER_Namespace: return Val_int(2);
+  case CLANG_EXT_NESTED_NAME_SPECIFIER_NamespaceAlias: return Val_int(3);
+  case CLANG_EXT_NESTED_NAME_SPECIFIER_TypeSpec: return Val_int(4);
+  case CLANG_EXT_NESTED_NAME_SPECIFIER_TypeSpecWithTemplate: return Val_int(5);
+  case CLANG_EXT_NESTED_NAME_SPECIFIER_Global: return Val_int(6);
+  case CLANG_EXT_NESTED_NAME_SPECIFIER_Super: return Val_int(7);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nestednamespecifierkind: %d", v);
+  return Val_int(0);
+}
+
+DECLARE_OPAQUE(struct clang_ext_NestedNameSpecifier, clang_ext_nestednamespecifier, Clang_ext_nestednamespecifier_val, Val_clang_ext_nestednamespecifier, custom_finalize_default)
+
+CAMLprim value
+clang_ext_NestedNameSpecifier_getKind_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_NestedNameSpecifier arg;
+  arg = Clang_ext_nestednamespecifier_val(Field(arg_ocaml, 0));
+  enum clang_ext_NestedNameSpecifierKind result = clang_ext_NestedNameSpecifier_getKind(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nestednamespecifierkind(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_NestedNameSpecifier_getPrefix_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_NestedNameSpecifier arg;
+  arg = Clang_ext_nestednamespecifier_val(Field(arg_ocaml, 0));
+  struct clang_ext_NestedNameSpecifier result = clang_ext_NestedNameSpecifier_getPrefix(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_nestednamespecifier(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_NestedNameSpecifier_getAsIdentifier_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_NestedNameSpecifier arg;
+  arg = Clang_ext_nestednamespecifier_val(Field(arg_ocaml, 0));
+  CXString result = clang_ext_NestedNameSpecifier_getAsIdentifier(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(safe_string(clang_getCString(result)));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_NestedNameSpecifier_getAsNamespace_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_NestedNameSpecifier arg;
+  arg = Clang_ext_nestednamespecifier_val(Field(arg_ocaml, 0));
+  CXCursor result = clang_ext_NestedNameSpecifier_getAsNamespace(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_NestedNameSpecifier_getAsType_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_NestedNameSpecifier arg;
+  arg = Clang_ext_nestednamespecifier_val(Field(arg_ocaml, 0));
+  CXType result = clang_ext_NestedNameSpecifier_getAsType(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxtype(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_Decl_getNestedNameSpecifier_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  struct clang_ext_NestedNameSpecifier result = clang_ext_Decl_getNestedNameSpecifier(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_nestednamespecifier(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+

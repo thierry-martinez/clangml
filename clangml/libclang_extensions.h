@@ -644,3 +644,90 @@ clang_ext_NamespaceDecl_isInline(CXCursor c);
 
 typedef enum CXVisitorResult (*CXDeclContextVisitor)(
   CXCursor , CXClientData client_data);
+
+enum clang_ext_OverloadedOperatorKind {
+  CLANG_EXT_OVERLOADED_OPERATOR_None,
+  #define OVERLOADED_OPERATOR(Name,Spelling,Token,Unary,Binary,MemberOnly) \
+    CLANG_EXT_OVERLOADED_OPERATOR_##Name,
+  #include <clang/Basic/OperatorKinds.def>
+};
+
+const char *
+clang_ext_OverloadedOperator_getSpelling(
+  enum clang_ext_OverloadedOperatorKind kind);
+
+struct clang_ext_DeclarationName {
+  const void *data;
+  CXTranslationUnit tu;
+};
+
+/* Copied from clang/AST/DeclarationName.h */
+enum clang_ext_DeclarationNameKind {
+  CLANG_EXT_DECLARATION_NAME_Identifier,
+  CLANG_EXT_DECLARATION_NAME_ObjCZeroArgSelector,
+  CLANG_EXT_DECLARATION_NAME_ObjCOneArgSelector,
+  CLANG_EXT_DECLARATION_NAME_ObjCMultiArgSelector,
+  CLANG_EXT_DECLARATION_NAME_CXXConstructorName,
+  CLANG_EXT_DECLARATION_NAME_CXXDestructorName,
+  CLANG_EXT_DECLARATION_NAME_CXXConversionFunctionName,
+  CLANG_EXT_DECLARATION_NAME_CXXDeductionGuideName,
+  CLANG_EXT_DECLARATION_NAME_CXXOperatorName,
+  CLANG_EXT_DECLARATION_NAME_CXXLiteralOperatorName,
+  CLANG_EXT_DECLARATION_NAME_CXXUsingDirective,
+  CLANG_EXT_DECLARATION_NAME_Invalid
+};
+
+enum clang_ext_DeclarationNameKind
+clang_ext_DeclarationName_getKind(
+  struct clang_ext_DeclarationName);
+
+enum clang_ext_OverloadedOperatorKind
+clang_ext_DeclarationName_getCXXOverloadedOperator(
+  struct clang_ext_DeclarationName);
+
+CXType
+clang_ext_DeclarationName_getCXXNameType(
+  struct clang_ext_DeclarationName);
+
+struct clang_ext_DeclarationName
+clang_ext_Decl_getName(CXCursor);
+
+struct clang_ext_NestedNameSpecifier {
+  const void *data;
+  CXTranslationUnit tu;
+};
+
+/* Copied from clang/AST/NestedNameSpecifier.h */
+enum clang_ext_NestedNameSpecifierKind {
+  CLANG_EXT_NESTED_NAME_SPECIFIER_Invalid,
+  CLANG_EXT_NESTED_NAME_SPECIFIER_Identifier,
+  CLANG_EXT_NESTED_NAME_SPECIFIER_Namespace,
+  CLANG_EXT_NESTED_NAME_SPECIFIER_NamespaceAlias,
+  CLANG_EXT_NESTED_NAME_SPECIFIER_TypeSpec,
+  CLANG_EXT_NESTED_NAME_SPECIFIER_TypeSpecWithTemplate,
+  CLANG_EXT_NESTED_NAME_SPECIFIER_Global,
+  CLANG_EXT_NESTED_NAME_SPECIFIER_Super
+};
+
+enum clang_ext_NestedNameSpecifierKind
+clang_ext_NestedNameSpecifier_getKind(
+  struct clang_ext_NestedNameSpecifier);
+
+struct clang_ext_NestedNameSpecifier
+clang_ext_NestedNameSpecifier_getPrefix(
+  struct clang_ext_NestedNameSpecifier);
+
+CXString
+clang_ext_NestedNameSpecifier_getAsIdentifier(
+  struct clang_ext_NestedNameSpecifier);
+
+CXCursor
+clang_ext_NestedNameSpecifier_getAsNamespace(
+  struct clang_ext_NestedNameSpecifier);
+
+CXType
+clang_ext_NestedNameSpecifier_getAsType(
+  struct clang_ext_NestedNameSpecifier);
+
+struct clang_ext_NestedNameSpecifier
+clang_ext_Decl_getNestedNameSpecifier(CXCursor);
