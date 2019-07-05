@@ -545,7 +545,7 @@ let () =
             kind = Functional;
             qual_type = { desc = Record (Ident "A") };
             operand = { desc = Construct {
-              name = "A";
+              qual_type = { desc = Record (Ident "A") };
               args = [{ desc = BoolLiteral true }]}}}};
           arrow = false;
           field = { desc = Ident "m" }}};
@@ -764,4 +764,10 @@ let () =
               var_type = { desc = Elaborated {
                 named_type = { desc = Record (Ident "T") }}};
               var_name = "t2";
-              var_init = Some { desc = Construct { name = ""; args = [{ desc = Construct { name = "T"; args = [{desc = DeclRef (Ident "i")}]}}]}}}}]}]}}}}}]
+              var_init = Some { desc = Construct {
+                qual_type = { desc = Elaborated {
+                  named_type = { desc = Record (Ident "T")}}};
+                  args = [{ desc = Construct {
+                    qual_type = { desc = Elaborated {
+                      named_type = { desc = Record (Ident "T")}}};
+                    args = [{desc = DeclRef (Ident "i")}]}}]}}}}]}]}}}}}]
