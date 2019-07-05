@@ -1176,8 +1176,10 @@ module Ast = struct
               | [sub] -> expr_of_cxcursor sub
               | _ -> raise Invalid_structure in
             Throw sub
-        | _ -> UnknownExpr (kind, ext_stmt_get_kind cursor)
-      with Invalid_structure -> UnknownExpr (kind, ext_stmt_get_kind cursor)
+        | _ ->
+            UnknownExpr (kind, ext_stmt_get_kind cursor)
+      with Invalid_structure ->
+        UnknownExpr (kind, ext_stmt_get_kind cursor)
 
     and cast_of_cxcursor kind cursor =
       let operand =
