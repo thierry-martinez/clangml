@@ -2386,3 +2386,104 @@ external ext_decltype_type_get_underlying_expr :
   cxtype -> cxcursor = "clang_ext_DecltypeType_getUnderlyingExpr_wrapper"
 external ext_namespace_decl_is_inline :
   cxcursor -> bool = "clang_ext_NamespaceDecl_isInline_wrapper"
+type clang_ext_overloadedoperatorkind =
+  | None 
+  | New 
+  | Delete 
+  | Array_New 
+  | Array_Delete 
+  | Plus 
+  | Minus 
+  | Star 
+  | Slash 
+  | Percent 
+  | Caret 
+  | Amp 
+  | Pipe 
+  | Tilde 
+  | Exclaim 
+  | Equal 
+  | Less 
+  | Greater 
+  | PlusEqual 
+  | MinusEqual 
+  | StarEqual 
+  | SlashEqual 
+  | PercentEqual 
+  | CaretEqual 
+  | AmpEqual 
+  | PipeEqual 
+  | LessLess 
+  | GreaterGreater 
+  | LessLessEqual 
+  | GreaterGreaterEqual 
+  | EqualEqual 
+  | ExclaimEqual 
+  | LessEqual 
+  | GreaterEqual 
+  | AmpAmp 
+  | PipePipe 
+  | PlusPlus 
+  | MinusMinus 
+  | Comma 
+  | ArrowStar 
+  | Arrow 
+  | Call 
+  | Subscript 
+  | Conditional 
+external ext_overloaded_operator_get_spelling :
+  clang_ext_overloadedoperatorkind -> string =
+    "clang_ext_OverloadedOperator_getSpelling_wrapper"
+type clang_ext_declarationnamekind =
+  | Identifier 
+  | ObjCZeroArgSelector 
+  | ObjCOneArgSelector 
+  | ObjCMultiArgSelector 
+  | CXXConstructorName 
+  | CXXDestructorName 
+  | CXXConversionFunctionName 
+  | CXXDeductionGuideName 
+  | CXXOperatorName 
+  | CXXLiteralOperatorName 
+  | CXXUsingDirective 
+  | Invalid 
+type clang_ext_declarationname
+external ext_declaration_name_get_kind :
+  clang_ext_declarationname -> clang_ext_declarationnamekind =
+    "clang_ext_DeclarationName_getKind_wrapper"
+external ext_declaration_name_get_cxxoverloaded_operator :
+  clang_ext_declarationname -> clang_ext_overloadedoperatorkind =
+    "clang_ext_DeclarationName_getCXXOverloadedOperator_wrapper"
+external ext_declaration_name_get_cxxname_type :
+  clang_ext_declarationname -> cxtype =
+    "clang_ext_DeclarationName_getCXXNameType_wrapper"
+external ext_decl_get_name :
+  cxcursor -> clang_ext_declarationname = "clang_ext_Decl_getName_wrapper"
+type clang_ext_nestednamespecifierkind =
+  | Invalid 
+  | Identifier 
+  | Namespace 
+  | NamespaceAlias 
+  | TypeSpec 
+  | TypeSpecWithTemplate 
+  | Global 
+  | Super 
+type clang_ext_nestednamespecifier
+external ext_nested_name_specifier_get_kind :
+  clang_ext_nestednamespecifier -> clang_ext_nestednamespecifierkind =
+    "clang_ext_NestedNameSpecifier_getKind_wrapper"
+external ext_nested_name_specifier_get_prefix :
+  clang_ext_nestednamespecifier -> clang_ext_nestednamespecifier =
+    "clang_ext_NestedNameSpecifier_getPrefix_wrapper"
+external ext_nested_name_specifier_get_as_identifier :
+  clang_ext_nestednamespecifier -> string =
+    "clang_ext_NestedNameSpecifier_getAsIdentifier_wrapper"
+external ext_nested_name_specifier_get_as_namespace :
+  clang_ext_nestednamespecifier -> cxcursor =
+    "clang_ext_NestedNameSpecifier_getAsNamespace_wrapper"
+external ext_nested_name_specifier_get_as_type :
+  clang_ext_nestednamespecifier -> cxtype =
+    "clang_ext_NestedNameSpecifier_getAsType_wrapper"
+external ext_decl_get_nested_name_specifier :
+  cxcursor -> clang_ext_nestednamespecifier =
+    "clang_ext_Decl_getNestedNameSpecifier_wrapper"
