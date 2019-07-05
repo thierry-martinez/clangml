@@ -78,7 +78,9 @@ static const clang::Stmt *
 GetCursorStmt(CXCursor Cursor)
 {
   if ((Cursor.kind >= CXCursor_FirstRef &&
-      Cursor.kind <= CXCursor_LastRef) ||
+       Cursor.kind <= CXCursor_LastRef) ||
+      (Cursor.kind >= CXCursor_FirstDecl &&
+       Cursor.kind <= CXCursor_LastDecl) ||
       Cursor.kind == CXCursor_InvalidCode)
     return nullptr;
 
