@@ -714,7 +714,6 @@ type cxcursorkind =
     "An attribute whose specific kind is not exposed via this interface."]
   | ModuleImportDecl [@ocaml.doc "A module import declaration."][@@ocaml.doc
                                                                   "Describes the kind of entity that a cursor refers to."]
-[@@deriving (eq, ord, show)]
 type cxcursor[@@ocaml.doc
                "A cursor representing some element in the abstract syntax tree for a translation unit."]
 external get_null_cursor : unit -> cxcursor = "clang_getNullCursor_wrapper"
@@ -777,7 +776,6 @@ type cxlinkagekind =
   [@ocaml.doc
     "This is the linkage for entities with true, external linkage."][@@ocaml.doc
                                                                     "Describe the linkage of the entity referred to by a cursor."]
-[@@deriving (eq, ord, show)]
 external get_cursor_linkage :
   cxcursor -> cxlinkagekind = "clang_getCursorLinkage_wrapper"[@@ocaml.doc
                                                                 "Determine the linkage of the entity referred to by a given cursor."]
@@ -985,7 +983,6 @@ type cxtypekind =
   [@ocaml.doc
     "A type whose specific kind is not exposed via this interface."][@@ocaml.doc
                                                                     "Describes the kind of type"]
-[@@deriving (eq, ord, show)]
 type cxtype[@@ocaml.doc
              "The type of an element in the abstract syntax tree."]
 external get_type_kind : cxtype -> cxtypekind = "clang_getTypeKind_wrapper"
@@ -1029,7 +1026,6 @@ type cxtemplateargumentkind =
   | Expression 
   | Pack 
   | Invalid [@@ocaml.doc "Describes the kind of a template argument."]
-[@@deriving (eq, ord, show)]
 external cursor_get_template_argument_kind :
   cxcursor -> int -> cxtemplateargumentkind =
     "clang_Cursor_getTemplateArgumentKind_wrapper"[@@ocaml.doc
@@ -1088,7 +1084,6 @@ type cxcallingconv =
   | Invalid 
   | Unexposed [@@ocaml.doc
                 "Describes the calling convention of a function type"]
-[@@deriving (eq, ord, show)]
 external get_function_type_calling_conv :
   cxtype -> cxcallingconv = "clang_getFunctionTypeCallingConv_wrapper"
 [@@ocaml.doc
@@ -1155,7 +1150,6 @@ type cx_cxxaccessspecifier =
   | CXXProtected 
   | CXXPrivate [@@ocaml.doc
                  "Represents the C++ access control level to a base class for a cursor with kind CX_CXXBaseSpecifier."]
-[@@deriving (eq, ord, show)]
 external get_cxxaccess_specifier :
   cxcursor -> cx_cxxaccessspecifier = "clang_getCXXAccessSpecifier_wrapper"
 [@@ocaml.doc "Returns the access control level for the referenced object."]
@@ -1656,7 +1650,7 @@ type clang_ext_unaryoperatorkind =
   | Real 
   | Imag 
   | Extension 
-  | Invalid [@@deriving (eq, ord, show)]
+  | Invalid 
 external ext_unary_operator_get_opcode :
   cxcursor -> clang_ext_unaryoperatorkind =
     "clang_ext_UnaryOperator_getOpcode_wrapper"
@@ -1696,7 +1690,7 @@ type clang_ext_binaryoperatorkind =
   | XorAssign 
   | OrAssign 
   | Comma 
-  | Invalid [@@deriving (eq, ord, show)]
+  | Invalid 
 external ext_binary_operator_get_opcode :
   cxcursor -> clang_ext_binaryoperatorkind =
     "clang_ext_BinaryOperator_getOpcode_wrapper"
@@ -1722,7 +1716,7 @@ type clang_ext_elaboratedtypekeyword =
   | Class 
   | Enum 
   | Typename 
-  | None [@@deriving (eq, ord, show)]
+  | None 
 external ext_elaborated_type_get_keyword :
   cxtype -> clang_ext_elaboratedtypekeyword =
     "clang_ext_ElaboratedType_getKeyword_wrapper"
@@ -1810,7 +1804,7 @@ type clang_ext_declkind =
   | ObjCPropertyImpl 
   | StaticAssert 
   | TranslationUnit 
-  | Unknown [@@deriving (eq, ord, show)]
+  | Unknown 
 external ext_decl_get_kind :
   cxcursor -> clang_ext_declkind = "clang_ext_Decl_GetKind_wrapper"
 type clang_ext_stmtkind =
@@ -1970,7 +1964,7 @@ type clang_ext_stmtkind =
   | DefaultStmt 
   | SwitchStmt 
   | WhileStmt 
-  | Unknown [@@deriving (eq, ord, show)]
+  | Unknown 
 external ext_stmt_get_kind :
   cxcursor -> clang_ext_stmtkind = "clang_ext_Stmt_GetKind_wrapper"
 type clang_ext_typekind =
@@ -2017,7 +2011,7 @@ type clang_ext_typekind =
   | ObjCInterface 
   | ObjCObjectPointer 
   | Atomic 
-  | Unknown [@@deriving (eq, ord, show)]
+  | Unknown 
 external ext_type_get_kind :
   cxtype -> clang_ext_typekind = "clang_ext_Type_GetKind_wrapper"
 external ext_get_type_kind :
@@ -2033,7 +2027,7 @@ type clang_ext_characterkind =
   | Wide 
   | UTF8 
   | UTF16 
-  | UTF32 [@@deriving (eq, ord, show)]
+  | UTF32 
 external ext_character_literal_get_character_kind :
   cxcursor -> clang_ext_characterkind =
     "clang_ext_CharacterLiteral_GetCharacterKind_wrapper"
@@ -2043,7 +2037,7 @@ type clang_ext_unaryexpr =
   | SizeOf 
   | AlignOf 
   | VecStep 
-  | OpenMPRequiredSimdAlign [@@deriving (eq, ord, show)]
+  | OpenMPRequiredSimdAlign 
 external ext_unary_expr_get_kind :
   cxcursor -> clang_ext_unaryexpr = "clang_ext_UnaryExpr_GetKind_wrapper"
 external ext_unary_expr_get_argument_type :
@@ -2222,7 +2216,7 @@ type clang_ext_attrkind =
   | ObjCRuntimeName 
   | OpenCLImageAccess 
   | Overloadable 
-  | Thread [@@deriving (eq, ord, show)]
+  | Thread 
 external ext_type_get_attribute_kind :
   cxtype -> clang_ext_attrkind = "clang_ext_Type_GetAttributeKind_wrapper"
 external ext_attr_kind_get_spelling :
@@ -2330,7 +2324,7 @@ type clang_ext_predefinedexpr_identkind =
   | LFuncSig 
   | PrettyFunction 
   | PrettyFunctionNoVirtual 
-  | Invalid [@@deriving (eq, ord, show)]
+  | Invalid 
 external ext_predefined_expr_get_ident_kind :
   cxcursor -> clang_ext_predefinedexpr_identkind =
     "clang_ext_PredefinedExpr_getIdentKind_wrapper"
@@ -2348,7 +2342,7 @@ external ext_lambda_expr_has_explicit_result_type :
 type clang_ext_lambdacapturedefault =
   | CaptureNone 
   | ByCopy 
-  | ByRef [@@deriving (eq, ord, show)]
+  | ByRef 
 external ext_lambda_expr_get_capture_default :
   cxcursor -> clang_ext_lambdacapturedefault =
     "clang_ext_LambdaExpr_getCaptureDefault_wrapper"
@@ -2365,7 +2359,7 @@ type clang_ext_lambdacapturekind =
   | StarThis 
   | ByCopy 
   | ByRef 
-  | VLAType [@@deriving (eq, ord, show)]
+  | VLAType 
 external ext_lambda_capture_get_kind :
   clang_ext_lambdacapture -> clang_ext_lambdacapturekind =
     "clang_ext_LambdaCapture_getKind_wrapper"
@@ -2436,7 +2430,7 @@ type clang_ext_langstandards =
   | Opencl12 
   | Opencl20 
   | Cuda 
-  | Invalid [@@deriving (eq, ord, show)]
+  | Invalid 
 external ext_lang_standard_get_name :
   clang_ext_langstandards -> string =
     "clang_ext_LangStandard_getName_wrapper"

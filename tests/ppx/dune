@@ -1,4 +1,4 @@
 (executable
   (name ppx)
   (preprocess (pps clangml.ppx))
-  (libraries clangml))
+  (libraries clangml clangml.printer))

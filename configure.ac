@@ -42,11 +42,8 @@ AC_SUBST([OCAMLDOC], [["$OCAMLFIND ocamldoc"]])
 AC_SUBST([OCAMLDEP], [["$OCAMLFIND ocamldep"]])
 AC_SUBST([OCAMLMKLIB], [["$OCAMLFIND ocamlmklib"]])
 AC_CHECK_OCAMLFIND_PKG([stdcompat])
-AC_CHECK_OCAMLFIND_PKG([ppx_deriving])
-AC_CHECK_OCAMLFIND_PKG([visitors])
 AC_CHECK_OCAMLFIND_PKG([ppxlib])
 AC_CHECK_OCAMLFIND_PKG([override])
-AC_CHECK_OCAMLFIND_PKG([pattern])
 
 AS_IF([test "x$has_missing_packages" = "xsingle"],
   [AC_MSG_ERROR([Package$missing_packages not found. Hint: opam install$missing_packages.])],
@@ -342,7 +339,7 @@ AS_IF([test -d clangml],
   [true],
   [AS_IF([mkdir clangml],
     [AC_CP([$srcdir/dune-project], [.])
-     AC_CP([$srcdir/clangml.opam], [.])
+     AC_CP([$srcdir/clangml.opam.template], [.])
      AC_CP([$srcdir/clangml/clang.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang.mli], [clangml/])
      AC_CP([$srcdir/clangml/clang__ast.ml], [clangml/])
@@ -351,7 +348,6 @@ AS_IF([test -d clangml],
      AC_CP([$srcdir/clangml/clang__ast_options.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang__ast_utils.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang__command_line.ml], [clangml/])
-     AC_CP([$srcdir/clangml/clang__printer.ml], [clangml/])
      AC_CP([$srcdir/clangml/dune], [clangml/])
      AC_CP([$srcdir/clangml/stubgen.h], [clangml/])
      AC_CP([$srcdir/clangml/libclang_extensions.cpp], [clangml/])
@@ -372,11 +368,23 @@ AS_IF([test -d ppx],
      AC_CP([$srcdir/ppx/ppx_lexer.mll], [ppx/])
      AC_CP([$srcdir/ppx/dune], [ppx/]))])
 
-AS_IF([test -d visitors],
+AS_IF([test -d show],
   [true],
-  [AS_IF([mkdir visitors],
-     AC_CP([$srcdir/visitors/clangml_visitors.ml], [visitors/])
-     AC_CP([$srcdir/visitors/dune], [visitors/]))])
+  [AS_IF([mkdir show],
+     AC_CP([$srcdir/show/clangml_show.ml], [show/])
+     AC_CP([$srcdir/show/dune], [show/]))])
+
+AS_IF([test -d compare],
+  [true],
+  [AS_IF([mkdir compare],
+     AC_CP([$srcdir/compare/clangml_compare.ml], [compare/])
+     AC_CP([$srcdir/compare/dune], [compare/]))])
+
+AS_IF([test -d printer],
+  [true],
+  [AS_IF([mkdir printer],
+     AC_CP([$srcdir/printer/clangml_printer.ml], [printer/])
+     AC_CP([$srcdir/printer/dune], [printer/]))])
 
 AS_IF([test -d tests],
   [true],

@@ -1,0 +1,3 @@
+build: [
+  ["./configure" "--prefix=%{prefix}%"]
+  ["dune" "build" "-p" name "-j" jobs]]

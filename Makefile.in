@@ -292,9 +292,9 @@ CLANGML_CMXA = clangml/clang.cmxa
 LIBCLANGML_STUBS_A = clangml/libclang_stubs.a
 STUBGEN_EXE = stubgen/stubgen.exe
 TESTS_DIR = tests
-LIFT_CMXA = lift/clangml_lift.cmxa
-VISITORS_CMXA = visitors/clangml_visitors.cmxa
-PPX_CMXA = ppx/clangml_ppx.cmxa
+
+# This variable is expanded for each $(library)
+library_cmxa = $(library)/clangml_$(library).cmxa
 all: all-am
 
 .SUFFIXES:
@@ -637,6 +637,8 @@ uninstall-am:
 .PRECIOUS: Makefile
 
 
+libraries ::= lift ppx show printer compare
+
 tests ::= $(notdir $(wildcard $(TESTS_DIR)/*))
 
 tests_exe ::= $(foreach test,$(tests),$(TESTS_DIR)/$(test)/$(test).exe)
@@ -645,32 +647,24 @@ dune_files ::= \
 	$(CLANGML_CMXA) \
 	$(LIBCLANGML_STUBS_A) \
 	$(STUBGEN_EXE) \
-	$(LIFT_CMXA) \
-	$(VISITORS_CMXA) \
-	$(PPX_CMXA)
+	$(foreach library,$(libraries),$(library_cmxa))
 
 mypkg_SCRIPTS ::= $(addprefix $(DUNE_PREFIX)/, $(dune_files))
 
-# Entry targets: clangml, stubgen, lift, visitors, ppx, doc, tests, install
-# and clean.
+# Entry targets: all, clangml, stubgen, doc, tests, install, uninstall, clean,
+# and one by library and one by test.
 
 .PHONY : all
-all : clangml lift visitors ppx
+all : clangml clangml.opam $(libraries)
 
 .PHONY : clangml
 clangml : $(DUNE_PREFIX)/$(CLANGML_CMXA) $(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A)
 
+clangml.opam : dune-project
+	dune build clangml.opam
+
 .PHONY : stubgen
 stubgen : $(DUNE_PREFIX)/$(STUBGEN_EXE)
-
-.PHONY : lift
-lift : $(DUNE_PREFIX)/$(LIFT_CMXA)
-
-.PHONY : visitors
-visitors : $(DUNE_PREFIX)/$(VISITORS_CMXA)
-
-.PHONY : ppx
-ppx : $(DUNE_PREFIX)/$(PPX_CMXA)
 
 .PHONY : doc
 doc :
@@ -679,13 +673,6 @@ doc :
 .PHONY : tests
 tests : $(foreach test,$(tests),$(TESTS_DIR)/$(test))
 
-define foreach_test
-.PHONY : $(TESTS_DIR)/$(test)
-$(TESTS_DIR)/$(test) : $(DUNE_PREFIX)/$(TESTS_DIR)/$(test)/$(test).exe
-	$(DUNE_PREFIX)/$(TESTS_DIR)/$(test)/$(test).exe
-endef
-$(foreach test, $(tests), $(eval $(foreach_test)))
-
 .PHONY : install
 install :
 	dune build @install
@@ -693,14 +680,7 @@ install :
 	- test -z $(INSTALL_NAME_TOOL) || \
 		$(INSTALL_NAME_TOOL) -add_rpath $(LLVM_LIBDIR) \
 			$(DUNE_INSTALL_PREFIX)/lib/stublibs/dllclangml_stubs.so
-# obuild does not support line break in 'requires' field
-	sed -i '/requires = "[^"]*$$/{:x N;s/\n */ /;/[^"]$$/bx}' \
-		$(DUNE_INSTALL_PREFIX)/lib/clangml/META
 	dune install
-# obuild does not support sub-package directories
-	clangml_lib=`ocamlfind query clangml` \
-		sh -c 'cp $$clangml_lib/visitors/* \
-			$$clangml_lib/ppx/* $$clangml_lib/lift/* $$clangml_lib'
 
 .PHONY : uninstall
 uninstall :
@@ -711,6 +691,19 @@ clean-local : clean-local-dune
 .PHONY : clean-local-dune
 clean-local-dune :
 	dune clean
+
+define foreach_library
+.PHONY : ($library)
+$(library) : $(DUNE_PREFIX)/$(library_cmxa)
+endef
+$(foreach library, $(libraries), $(eval $(foreach_library)))
+
+define foreach_test
+.PHONY : $(TESTS_DIR)/$(test)
+$(TESTS_DIR)/$(test) : $(DUNE_PREFIX)/$(TESTS_DIR)/$(test)/$(test).exe
+	$(DUNE_PREFIX)/$(TESTS_DIR)/$(test)/$(test).exe
+endef
+$(foreach test, $(tests), $(eval $(foreach_test)))
 
 # Delegate to dune the building of $(DUNE_PREFIX)/* files
 # They are all phony targets since we want to rely on dune for dependency

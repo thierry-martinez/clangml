@@ -3010,42 +3010,6 @@ else
 
 fi
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ocamlfind package ppx_deriving" >&5
-$as_echo_n "checking for ocamlfind package ppx_deriving... " >&6; }
-   if $OCAMLFIND query ppx_deriving >/dev/null 2>&1; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-      missing_packages="$missing_packages ppx_deriving"
-
-      if test "x$has_missing_packages" = "xno"; then :
-  has_missing_packages=single
-
-else
-  has_missing_packages=multiple
-
-fi
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ocamlfind package visitors" >&5
-$as_echo_n "checking for ocamlfind package visitors... " >&6; }
-   if $OCAMLFIND query visitors >/dev/null 2>&1; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-      missing_packages="$missing_packages visitors"
-
-      if test "x$has_missing_packages" = "xno"; then :
-  has_missing_packages=single
-
-else
-  has_missing_packages=multiple
-
-fi
-fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ocamlfind package ppxlib" >&5
 $as_echo_n "checking for ocamlfind package ppxlib... " >&6; }
    if $OCAMLFIND query ppxlib >/dev/null 2>&1; then :
@@ -3073,24 +3037,6 @@ else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
       missing_packages="$missing_packages override"
-
-      if test "x$has_missing_packages" = "xno"; then :
-  has_missing_packages=single
-
-else
-  has_missing_packages=multiple
-
-fi
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ocamlfind package pattern" >&5
-$as_echo_n "checking for ocamlfind package pattern... " >&6; }
-   if $OCAMLFIND query pattern >/dev/null 2>&1; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-      missing_packages="$missing_packages pattern"
 
       if test "x$has_missing_packages" = "xno"; then :
   has_missing_packages=single
@@ -6353,7 +6299,7 @@ else
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
-     if cp $srcdir/clangml.opam .; then :
+     if cp $srcdir/clangml.opam.template .; then :
   true
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5
@@ -6394,11 +6340,6 @@ else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
      if cp $srcdir/clangml/clang__command_line.ml clangml/; then :
-  true
-else
-  as_fn_error $? "cannot copy file" "$LINENO" 5
-fi
-     if cp $srcdir/clangml/clang__printer.ml clangml/; then :
   true
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5
@@ -6472,16 +6413,50 @@ fi
 fi
 fi
 
-if test -d visitors; then :
+if test -d show; then :
   true
 else
-  if mkdir visitors; then :
-  if cp $srcdir/visitors/clangml_visitors.ml visitors/; then :
+  if mkdir show; then :
+  if cp $srcdir/show/clangml_show.ml show/; then :
   true
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
-     if cp $srcdir/visitors/dune visitors/; then :
+     if cp $srcdir/show/dune show/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+fi
+fi
+
+if test -d compare; then :
+  true
+else
+  if mkdir compare; then :
+  if cp $srcdir/compare/clangml_compare.ml compare/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/compare/dune compare/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+fi
+fi
+
+if test -d printer; then :
+  true
+else
+  if mkdir printer; then :
+  if cp $srcdir/printer/clangml_printer.ml printer/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/printer/dune printer/; then :
   true
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5
