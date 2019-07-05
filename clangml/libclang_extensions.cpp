@@ -1838,8 +1838,10 @@ extern "C" {
         return CLANG_EXT_DECLARATION_NAME_CXXDestructorName;
       case clang::DeclarationName::NameKind::CXXConversionFunctionName:
         return CLANG_EXT_DECLARATION_NAME_CXXConversionFunctionName;
+      #ifdef LLVM_VERSION_BEFORE_5_0_0
       case clang::DeclarationName::NameKind::CXXDeductionGuideName:
         return CLANG_EXT_DECLARATION_NAME_CXXDeductionGuideName;
+      #endif
       case clang::DeclarationName::NameKind::CXXOperatorName:
         return CLANG_EXT_DECLARATION_NAME_CXXOperatorName;
       case clang::DeclarationName::NameKind::CXXLiteralOperatorName:
@@ -1920,8 +1922,10 @@ extern "C" {
         return CLANG_EXT_NESTED_NAME_SPECIFIER_TypeSpecWithTemplate;
       case clang::NestedNameSpecifier::SpecifierKind::Global:
         return CLANG_EXT_NESTED_NAME_SPECIFIER_Global;
+      #ifdef LLVM_VERSION_BEFORE_3_6_0
       case clang::NestedNameSpecifier::SpecifierKind::Super:
         return CLANG_EXT_NESTED_NAME_SPECIFIER_Super;
+      #endif
       default:;
       }
     }
