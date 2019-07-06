@@ -1893,15 +1893,79 @@ extern "C" {
     return MakeCXTypeInvalid(name.tu);
   }
 
-  struct clang_ext_DeclarationName
-  clang_ext_Decl_getName(CXCursor c)
+  CXString
+  clang_ext_DeclarationName_getAsIdentifier(
+    struct clang_ext_DeclarationName name)
   {
-    if (auto d = GetCursorDecl(c)) {
-      if (auto nd = llvm::dyn_cast_or_null<clang::NamedDecl>(d)) {
-        return MakeDeclarationName(nd->getDeclName(), getCursorTU(c));
+    if (auto d = GetDeclarationName(name)) {
+      if (auto i = d->getAsIdentifierInfo()) {
+        return cxstring_createDup(i->getName());
       }
     }
-    return MakeDeclarationNameInvalid(getCursorTU(c));
+    return cxstring_createRef("");
+  }
+
+  CXCursor
+  clang_ext_DeclarationName_getCXXDeductionGuideTemplate(
+    struct clang_ext_DeclarationName name)
+  {
+    #ifndef LLVM_VERSION_BEFORE_5_0_0
+    if (auto d = GetDeclarationName(name)) {
+      if (auto dg = d->getCXXDeductionGuideTemplate()) {
+        return MakeCXCursor(dg, name.tu);
+      }
+    }
+    #endif
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, name.tu);
+  }
+
+  CXString
+  clang_ext_DeclarationName_getCXXLiteralIdentifier(
+    struct clang_ext_DeclarationName name)
+  {
+    if (auto d = GetDeclarationName(name)) {
+      if (auto i = d->getCXXLiteralIdentifier()) {
+        return cxstring_createDup(i->getName());
+      }
+    }
+    return cxstring_createRef("");
+  }
+
+  struct clang_ext_DeclarationName
+  clang_ext_Decl_getName(CXCursor cursor)
+  {
+    switch (cursor.kind) {
+    case CXCursor_DeclRefExpr:
+      if (auto s = GetCursorStmt(cursor)) {
+        if (auto d = llvm::dyn_cast_or_null<clang::DeclRefExpr>(s)) {
+          return MakeDeclarationName(
+            d->getNameInfo().getName(), getCursorTU(cursor));
+        }
+        else if (auto d = llvm::dyn_cast_or_null<clang::OverloadExpr>(s)) {
+          return MakeDeclarationName(
+            d->getNameInfo().getName(), getCursorTU(cursor));
+        }
+      }
+      return MakeDeclarationNameInvalid(getCursorTU(cursor));
+    default:
+      if (auto d = GetCursorDecl(cursor)) {
+        if (auto nd = llvm::dyn_cast_or_null<clang::NamedDecl>(d)) {
+          return MakeDeclarationName(nd->getDeclName(), getCursorTU(cursor));
+        }
+      }
+    }
+    return MakeDeclarationNameInvalid(getCursorTU(cursor));
+  }
+
+  CXCursor
+  clang_ext_UsingDirectiveDecl_getNominatedNamespace(CXCursor c)
+  {
+    if (auto d = GetCursorDecl(c)) {
+      if (auto ud = llvm::dyn_cast_or_null<clang::UsingDirectiveDecl>(d)) {
+        return MakeCXCursor(ud->getNominatedNamespace(), getCursorTU(c));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
   }
 
   enum clang_ext_NestedNameSpecifierKind
@@ -1987,6 +2051,10 @@ extern "C" {
           llvm::dyn_cast_or_null<clang::DeclRefExpr>(GetCursorExpr(cursor))) {
         return MakeNestedNameSpecifier(d->getQualifier(), getCursorTU(cursor));
       }
+      else if (auto d =
+          llvm::dyn_cast_or_null<clang::OverloadExpr>(GetCursorExpr(cursor))) {
+        return MakeNestedNameSpecifier(d->getQualifier(), getCursorTU(cursor));
+      }
       return MakeNestedNameSpecifierInvalid(getCursorTU(cursor));
     case CXCursor_UsingDirective:
       if (auto d =
@@ -2012,4 +2080,26 @@ extern "C" {
       return MakeNestedNameSpecifierInvalid(getCursorTU(cursor));
     }
   }
+
+  struct clang_ext_NestedNameSpecifier
+  clang_ext_Type_getQualifier(CXType t)
+  {
+    if (auto tp = GetQualType(t).getTypePtrOrNull()) {
+      switch (tp->getTypeClass()) {
+      case clang::Type::Elaborated:
+        if (auto et = tp->getAs<clang::ElaboratedType>()) {
+          return MakeNestedNameSpecifier(et->getQualifier(), GetTU(t));
+        }
+        return MakeNestedNameSpecifierInvalid(GetTU(t));
+      case clang::Type::DependentName:
+        if (auto dt = tp->getAs<clang::DependentNameType>()) {
+          return MakeNestedNameSpecifier(dt->getQualifier(), GetTU(t));
+        }
+        return MakeNestedNameSpecifierInvalid(GetTU(t));
+      default:;
+      }
+    }
+    return MakeNestedNameSpecifierInvalid(GetTU(t));
+  }
+
 }

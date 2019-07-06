@@ -22,6 +22,7 @@ module%import Clang = struct
       and clang_ext_unaryoperatorkind
       and clang_ext_binaryoperatorkind
       and clang_ext_attrkind
+      and clang_ext_overloadedoperatorkind
       and cxtypekind
       and cx_cxxaccessspecifier
       and cxcallingconv

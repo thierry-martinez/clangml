@@ -1,5 +1,5 @@
 (executable
-  (name clangml__ast)
+  (name ast)
   (preprocess (pps pattern.ppx))
   (link_flags -linkall)
 ; -warning 33: Unused open module.
@@ -7,6 +7,6 @@
   (libraries compiler-libs clangml clangml.lift clangml.show pattern.runtime))
 
 (rule
-  (targets clangml__ast.ml)
+  (targets ast.ml)
   (deps ../../clangml/clang__ast.ml)
   (action (run ocamlcodoc %{deps} -o %{targets})))

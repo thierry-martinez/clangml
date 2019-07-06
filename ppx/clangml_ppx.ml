@@ -367,7 +367,7 @@ module Remove_placeholder (X : Lifter) = struct
     method qual_type (qual_type : Clang.Ast.qual_type) =
       match
         match qual_type with
-        | { desc = Typedef (Ident ident) } ->
+        | { desc = Typedef { name = IdentifierName ident }} ->
             find_and_remove table ident
         | _ -> None
       with

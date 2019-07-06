@@ -164,6 +164,8 @@ and lambda_capture_default = clang_ext_lambdacapturedefault
 
 and lambda_capture_kind = clang_ext_lambdacapturekind
 
+and overloaded_operator_kind = clang_ext_overloadedoperatorkind
+
 and integer_literal =
   | Int of int
   | CXInt of cxint
@@ -338,7 +340,7 @@ let () =
   check_pattern quote_decl parse_declaration_list_last example
   [%pattern?
     { desc = Var { var_name = "v"; var_type = { desc = Vector {
-      element = { desc = Typedef (TypeRef { ident = "int32_t" })};
+      element = { desc = Typedef ({ name = IdentifierName "int32_t" })};
       size = 4 }}}} ]
     ]}*)
   | IncompleteArray of qual_type
@@ -373,12 +375,13 @@ let () =
             { desc = { name = "i"; qual_type = { desc = BuiltinType Int }}};
             { desc = { name = "array"; qual_type = { desc = VariableArray {
                element = { desc = BuiltinType Char_S };
-               size = { desc = DeclRef (Ident "i") }}}}}];
+               size = { desc = DeclRef ({ name = IdentifierName "i" }) }}}}}];
           variadic = false }}}}] -> ()
   | _ -> assert false
     ]}*)
   | Elaborated of {
       keyword : elaborated_type_keyword;
+      nested_name_specifier : nested_name_specifier option; (** C++ *)
       named_type : qual_type;
     }
 (** Elaborated type.
@@ -391,7 +394,7 @@ let () =
   | [{ desc = EnumDecl _ };
      { desc = Var { var_name = "e"; var_type = { desc = Elaborated {
       keyword = Enum;
-      named_type = { desc = Enum (Ident "example") }}}}}] -> ()
+      named_type = { desc = Enum ({ name = IdentifierName "example" }) }}}}}] -> ()
   | _ -> assert false
     ]}*)
   | Enum of ident_ref
@@ -405,7 +408,7 @@ let () =
   | [{ desc = EnumDecl _ };
      { desc = Var { var_name = "e"; var_type = { desc = Elaborated {
       keyword = Enum;
-      named_type = { desc = Enum (Ident "") } as named_type }}}}] ->
+      named_type = { desc = Enum ({ name = IdentifierName "" }) } as named_type }}}}] ->
         let values =
           match Clang.Type.get_declaration named_type with
           | { desc = EnumDecl { constants }} ->
@@ -445,7 +448,7 @@ let () =
   | [{ desc = RecordDecl { keyword = Struct }};
      { desc = Var { var_name = "s"; var_type = { desc = Elaborated {
       keyword = Struct;
-      named_type = { desc = Record (Ident "") } as named_type }}}}] ->
+      named_type = { desc = Record ({ name = IdentifierName "" }) } as named_type }}}}] ->
         let fields = named_type |> Clang.Type.list_of_fields in
         begin
           match fields with
@@ -471,7 +474,7 @@ let () =
   | [{ desc = RecordDecl { keyword = Union }};
      { desc = Var { var_name = "u"; var_type = { desc = Elaborated {
       keyword = Union;
-      named_type = { desc = Record (Ident "") } as named_type }}}}] ->
+      named_type = { desc = Record ({ name = IdentifierName "" }) } as named_type }}}}] ->
         let fields = named_type |> Clang.Type.list_of_fields in
         begin
           match fields with
@@ -499,7 +502,7 @@ let () =
   fun ast -> match ast with
   | [{ desc = RecordDecl { keyword = Struct }}; { desc = TypedefDecl _ };
      { desc = Var { var_name = "s";
-       var_type = { desc = Typedef (Ident "struct_t") } as var_type }}] ->
+       var_type = { desc = Typedef ({ name = IdentifierName "struct_t" }) } as var_type }}] ->
         let fields = var_type |>
           Clang.Type.get_typedef_underlying_type |>
           Clang.Type.list_of_fields in
@@ -672,8 +675,28 @@ and template_argument =
   | NonTypeTemplateArgument of qual_type
   | ExprTemplateArgument of expr
 
+and nested_name_specifier = nested_name_specifier_component list
+
+and nested_name_specifier_component =
+  | NestedIdentifier of string
+  | Namespace of decl
+  | NamespaceAlias of decl
+  | TypeSpec of qual_type
+  | TypeSpecWithTemplate of qual_type
+
+and declaration_name =
+  | IdentifierName of string
+  | ConstructorName of qual_type
+  | DestructorName of qual_type
+  | ConversionFunctionName of qual_type
+  | DeductionGuideName of decl
+  | OperatorName of overloaded_operator_kind
+  | LiteralOperatorName of string
+  | UsingDirective
+
 and record_decl = {
     keyword : elaborated_type_keyword;
+    nested_name_specifier : nested_name_specifier option; (** C++ *)
     name : string;
     bases : base_specifier list; (** C++ *)
     fields : decl list;
@@ -969,17 +992,17 @@ let () =
   fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = For {
       init = Some { desc = Expr { desc = BinaryOperator {
-        lhs = { desc = DeclRef (Ident "i")};
+        lhs = { desc = DeclRef ({ name = IdentifierName "i" })};
         kind = Assign;
         rhs = { desc = IntegerLiteral (Int 0)}}}};
       condition_variable = None;
       cond = Some { desc = BinaryOperator {
-        lhs = { desc = DeclRef (Ident "i")};
+        lhs = { desc = DeclRef ({ name = IdentifierName "i" })};
         kind = LT;
         rhs = { desc = IntegerLiteral (Int 4)}}};
       inc = Some { desc = Expr { desc = UnaryOperator {
         kind = PostInc;
-        operand = { desc = DeclRef (Ident "i")}}}};
+        operand = { desc = DeclRef ({ name = IdentifierName "i" })}}}};
       body = { desc = Compound [] }}}] -> ()
   | _ -> assert false
 
@@ -995,12 +1018,12 @@ let () =
         var_init = Some { desc = IntegerLiteral (Int 0)}}}] };
       condition_variable = None;
       cond = Some { desc = BinaryOperator {
-        lhs = { desc = DeclRef (Ident "i")};
+        lhs = { desc = DeclRef ({ name = IdentifierName "i" })};
         kind = LT;
         rhs = { desc = IntegerLiteral (Int 4)}}};
       inc = Some { desc = Expr { desc = UnaryOperator {
         kind = PostInc;
-        operand = { desc = DeclRef (Ident "i")}}}};
+        operand = { desc = DeclRef ({ name = IdentifierName "i" })}}}};
       body = { desc = Compound [] }}}] -> ()
   | _ -> assert false
 
@@ -1018,13 +1041,13 @@ let () =
         var_name = "j";
         var_type = { desc = BuiltinType Int};
         var_init = Some { desc = BinaryOperator {
-          lhs = { desc = DeclRef (Ident "i")};
+          lhs = { desc = DeclRef ({ name = IdentifierName "i" })};
           kind = Sub;
           rhs = { desc = IntegerLiteral (Int 1)}}}}};
-      cond = Some { desc = DeclRef (Ident "j") };
+      cond = Some { desc = DeclRef ({ name = IdentifierName "j" }) };
       inc = Some { desc = Expr { desc = UnaryOperator {
         kind = PostDec;
-        operand = { desc = DeclRef (Ident "i")}}}};
+        operand = { desc = DeclRef ({ name = IdentifierName "i" })}}}};
       body = { desc = Compound [] }}}] -> ()
   | _ -> assert false
     ]}*)
@@ -1083,9 +1106,9 @@ let () =
          var_type = { desc = BuiltinType Int};
          var_name = "i";
          var_init = Some { desc = IntegerLiteral (Int 1) }}});
-       cond = { desc = DeclRef (Ident "i")};
+       cond = { desc = DeclRef ({ name = IdentifierName "i" })};
        then_branch = { desc = Compound [{
-         desc = Expr { desc = DeclRef (Ident "i") }}] };
+         desc = Expr { desc = DeclRef ({ name = IdentifierName "i" }) }}] };
        else_branch = None }}] -> ()
   | _ -> assert false
 
@@ -1107,7 +1130,7 @@ let () =
            var_init = Some { desc = IntegerLiteral (Int 1) }}}] };
          condition_variable = None;
          then_branch = { desc = Compound [{
-           desc = Expr { desc = DeclRef (Ident "i") }}] };
+           desc = Expr { desc = DeclRef ({ name = IdentifierName "i" }) }}] };
          else_branch = None }}] -> ()
     | _ -> assert false
    ]}*)
@@ -1133,7 +1156,7 @@ let () =
           lhs = { desc = IntegerLiteral (Int 1)};
           body = { desc =
             Expr { desc =
-              Call { callee = { desc = DeclRef (Ident "f") }; args = [] }}}}};
+              Call { callee = { desc = DeclRef ({ name = IdentifierName "f" }) }; args = [] }}}}};
         { desc = Break };
         { desc = Case {
           lhs = { desc = IntegerLiteral (Int 2)};
@@ -1153,13 +1176,13 @@ let () =
          var_type = { desc = BuiltinType Int};
          var_name = "i";
          var_init = Some { desc = IntegerLiteral (Int 1)}}});
-      cond = { desc = DeclRef (Ident "i") };
+      cond = { desc = DeclRef ({ name = IdentifierName "i" }) };
       body = { desc = Compound [
         { desc = Case {
           lhs = { desc = IntegerLiteral (Int 1)};
           body = { desc =
             Expr { desc =
-              Call { callee = { desc = DeclRef (Ident "f") }; args = [] }}}}};
+              Call { callee = { desc = DeclRef ({ name = IdentifierName "f" }) }; args = [] }}}}};
         { desc = Break };
         { desc = Case {
           lhs = { desc = IntegerLiteral (Int 2)};
@@ -1186,13 +1209,13 @@ let () =
            var_type = { desc = BuiltinType Int };
            var_init = Some { desc = IntegerLiteral (Int 1)}}}] };
         condition_variable = None;
-        cond = { desc = DeclRef (Ident "i") };
+        cond = { desc = DeclRef ({ name = IdentifierName "i" }) };
         body = { desc = Compound [
           { desc = Case {
             lhs = { desc = IntegerLiteral (Int 1)};
             body = { desc =
               Expr { desc = Call {
-                callee = { desc = DeclRef (Ident "f") }; args = [] }}}}};
+                callee = { desc = DeclRef ({ name = IdentifierName "f" }) }; args = [] }}}}};
           { desc = Break };
           { desc = Case {
             lhs = { desc = IntegerLiteral (Int 2)};
@@ -1225,7 +1248,7 @@ let () =
           rhs = None;
           body = { desc =
             Expr { desc = Call {
-              callee = { desc = DeclRef (Ident "f") }; args = [] }}}}};
+              callee = { desc = DeclRef ({ name = IdentifierName "f" }) }; args = [] }}}}};
         { desc = Break };
         { desc = Case {
           lhs = { desc = IntegerLiteral (Int 2)};
@@ -1292,9 +1315,9 @@ let () =
          var_type = { desc = BuiltinType Int};
          var_name = "i";
          var_init = Some { desc = IntegerLiteral (Int 1)}}});
-      cond = { desc = DeclRef (Ident "i") };
+      cond = { desc = DeclRef ({ name = IdentifierName "i" }) };
       body = { desc = Compound [{ desc =
-        Expr { desc = DeclRef (Ident "i") }}] }}}] -> ()
+        Expr { desc = DeclRef ({ name = IdentifierName "i" }) }}] }}}] -> ()
   | _ -> assert false
     ]}*)
   | Do of {
@@ -1320,7 +1343,7 @@ let () =
   @@ fun ast -> match ast with
   | [{ desc = Do {
       body = { desc = Compound [{ desc =
-        Expr { desc = Call { callee = { desc = DeclRef (Ident "f") }; args = [] }}}] };
+        Expr { desc = Call { callee = { desc = DeclRef ({ name = IdentifierName "f" }) }; args = [] }}}] };
       cond = { desc = IntegerLiteral (Int 1)}}}] -> ()
   | _ -> assert false
     ]}*)
@@ -1370,7 +1393,7 @@ let () =
         var_name = "ptr";
         var_type = { desc = Pointer { desc = BuiltinType Void }};
         var_init = Some { desc = AddrLabel "label" }}}] };
-      { desc = IndirectGoto { desc = DeclRef (Ident "ptr")}}] -> ()
+      { desc = IndirectGoto { desc = DeclRef ({ name = IdentifierName "ptr" })}}] -> ()
   | _ -> assert false
     ]}*)
   | Continue
@@ -1642,7 +1665,7 @@ let () =
   @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = UnaryOperator {
       kind = AddrOf;
-      operand = { desc = DeclRef (Ident "x") }} }}] -> ()
+      operand = { desc = DeclRef ({ name = IdentifierName "x" }) }} }}] -> ()
   | _ -> assert false
     ]}*)
   | BinaryOperator of {
@@ -1669,7 +1692,7 @@ let () =
   check Clangml_show.pp_stmt parse_statement_list example
   @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = BinaryOperator {
-      lhs = { desc = DeclRef (Ident "i")};
+      lhs = { desc = DeclRef ({ name = IdentifierName "i" })};
       kind = MulAssign;
       rhs = { desc = IntegerLiteral (Int 3)}}}}] -> ()
   | _ -> assert false
@@ -1682,7 +1705,7 @@ let example = "int i; i;"
 let () =
   check Clangml_show.pp_stmt parse_statement_list example
   @@ fun ast -> match ast with
-  | [{ desc = Decl _ }; { desc = Expr { desc = DeclRef (Ident "i") }}] -> ()
+  | [{ desc = Decl _ }; { desc = Expr { desc = DeclRef ({ name = IdentifierName "i" }) }}] -> ()
   | _ -> assert false
     ]} *)
   | Call of {
@@ -1697,7 +1720,7 @@ let () =
   check Clangml_show.pp_stmt parse_statement_list example
   @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = Call {
-      callee = { desc = DeclRef (Ident "g") };
+      callee = { desc = DeclRef ({ name = IdentifierName "g" }) };
       args = [{ desc = IntegerLiteral (Int 1)}] }}}] -> ()
   | _ -> assert false
     ]} *)
@@ -1735,7 +1758,7 @@ let () =
   | [{ desc = Decl _ }; { desc = Expr { desc = Cast {
       kind = Implicit;
       qual_type = { desc = BuiltinType Int };
-      operand = { desc = DeclRef (Ident "i") }} }}] -> ()
+      operand = { desc = DeclRef ({ name = IdentifierName "i" }) }} }}] -> ()
   | _ -> assert false
     ]}
 *)
@@ -1753,9 +1776,9 @@ let () =
   @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = BinaryOperator {
       lhs = { desc = Member {
-        base = { desc = DeclRef (Ident "s") };
+        base = { desc = DeclRef ({ name = IdentifierName "s" }) };
         arrow = false;
-        field = { desc = Ident "i" }}};
+        field = { desc = { name = IdentifierName "i" } }}};
       kind = Assign;
       rhs = { desc = IntegerLiteral (Int 0)}}}}] -> ()
   | _ -> assert false
@@ -1767,9 +1790,9 @@ let () =
   @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = BinaryOperator {
       lhs = { desc = Member {
-        base = { desc = DeclRef (Ident "p") };
+        base = { desc = DeclRef ({ name = IdentifierName "p" }) };
         arrow = true;
-        field = { desc = Ident "i" }}};
+        field = { desc = { name = IdentifierName "i" } }}};
       kind = Assign;
       rhs = { desc = IntegerLiteral (Int 0)}}}}] -> ()
   | _ -> assert false
@@ -1788,7 +1811,7 @@ let () =
   @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = BinaryOperator {
       lhs = { desc = ArraySubscript {
-        base = { desc = DeclRef (Ident "a") };
+        base = { desc = DeclRef ({ name = IdentifierName "a" }) };
         index = { desc = IntegerLiteral (Int 0)}}};
       kind = Assign;
       rhs = { desc = IntegerLiteral (Int 1)}}}}] -> ()
@@ -1856,7 +1879,7 @@ let () =
   | [ { desc = Decl _ };
       { desc = Expr { desc = UnaryExpr {
           kind = SizeOf;
-          argument = ArgumentExpr { desc = Paren { desc = DeclRef (Ident "i") }}} }}] ->
+          argument = ArgumentExpr { desc = Paren { desc = DeclRef ({ name = IdentifierName "i" }) }}} }}] ->
       ()
   | _ -> assert false
     ]}*)
@@ -1926,7 +1949,7 @@ let () =
   | [ { desc = Decl _ };
       { desc = Expr { desc = UnaryExpr {
           kind = SizeOf;
-          argument = ArgumentExpr { desc = DeclRef (Ident "i") }} }}] -> ()
+          argument = ArgumentExpr { desc = DeclRef ({ name = IdentifierName "i" }) }} }}] -> ()
   | _ -> assert false
 
 let example = {| sizeof(int); |}
@@ -2077,17 +2100,17 @@ let () =
       name = "f";
       body = Some { desc = Compound [
         { desc = Decl [{ desc = Var {
-          var_type = { desc = Pointer { desc = Record (Ident "T")}};
+          var_type = { desc = Pointer { desc = Record ({ name = IdentifierName "T" })}};
           var_name = "t";
           var_init = Some { desc = New {
             placement_args = [];
-            qual_type = { desc = Record (Ident "T")};
+            qual_type = { desc = Record ({ name = IdentifierName "T" })};
             array_size = None;
             init = None; }}}}] };
         { desc = Expr { desc = Delete {
           global_delete = false;
           array_form = false;
-          argument = { desc = DeclRef (Ident "t")}}}}] }}}]]
+          argument = { desc = DeclRef ({ name = IdentifierName "t" })}}}}] }}}]]
 
 let example = {|
   void
@@ -2120,7 +2143,7 @@ let () =
         { desc = Expr { desc = Delete {
           global_delete = false;
           array_form = true;
-          argument = { desc = DeclRef (Ident "t")}}}}] }}}]]
+          argument = { desc = DeclRef ({ name = IdentifierName "t" })}}}}] }}}]]
 
 let example = {|
   struct T {};
@@ -2145,17 +2168,17 @@ let () =
       name = "f";
       body = Some { desc = Compound [
         { desc = Decl [{ desc = Var {
-          var_type = { desc = Pointer { desc = Record (Ident "T")}};
+          var_type = { desc = Pointer { desc = Record ({ name = IdentifierName "T" })}};
           var_name = "t";
           var_init = Some { desc = New {
             placement_args = [];
-            qual_type = { desc = Record (Ident "T")};
+            qual_type = { desc = Record ({ name = IdentifierName "T" })};
             array_size = None;
             init = None; }}}}] };
         { desc = Expr { desc = Delete {
           global_delete = true;
           array_form = false;
-          argument = { desc = DeclRef (Ident "t")}}}}] }}}]]
+          argument = { desc = DeclRef ({ name = IdentifierName "t" })}}}}] }}}]]
    ]}*)
   | Typeid of unary_expr_or_type_trait
   | PackExpansionExpr of expr
@@ -2300,7 +2323,7 @@ let () =
            parameter_kind = Class { default = None };
            parameter_pack = false; }}];
          decl = { desc = CXXMethod {
-           type_ref = Some { desc = Record (Ident "C") };
+           type_ref = Some { desc = Record ({ name = IdentifierName "C" }) };
            function_type = {
              result = { desc = BuiltinType Int };
              parameters = Some { non_variadic = [
@@ -2464,22 +2487,22 @@ let () =
           body = None;
           deleted = true; }};
         { desc = CXXMethod {
-          type_ref = Some { desc = Record (Ident "C") };
+          type_ref = Some { desc = Record ({ name = IdentifierName "C" }) };
           name = "operator+";
           function_type = {
-            result = { desc = LValueReference { desc = Record (Ident "C") }};
+            result = { desc = LValueReference { desc = Record ({ name = IdentifierName "C" }) }};
             parameters = Some {
               non_variadic = [{ desc = {
                 name = "rhs";
                 qual_type = { desc =
-                  LValueReference { desc = Record (Ident "C") }}}}] }};
+                  LValueReference { desc = Record ({ name = IdentifierName "C" }) }}}}] }};
           body = Some { desc = Compound [{
             desc = Return (Some {
               desc = UnaryOperator {
                 kind = Deref;
                 operand = { desc = This }}})}] }}}] }};
       { desc = CXXMethod {
-        type_ref = Some { desc = Record (Ident "C") };
+        type_ref = Some { desc = Record ({ name = IdentifierName "C" }) };
         name = "f";
         function_type = {
           result = { desc = BuiltinType Int };
@@ -2701,7 +2724,7 @@ let () =
         name = "u_t";
         underlying_type = { desc = Elaborated {
           keyword = Union;
-          named_type = { desc = Record (Ident "u") }}}}}] -> ()
+          named_type = { desc = Record ({ name = IdentifierName "u" }) }}}}}] -> ()
   | _ -> assert false
 
 let example = {| typedef union { int i; float f; } u_t; |}
@@ -2723,7 +2746,7 @@ let () =
         name = "u_t";
         underlying_type = { desc = Elaborated {
           keyword = Union;
-          named_type = { desc = Record (Ident "") }}} as underlying_type }}] ->
+          named_type = { desc = Record ({ name = IdentifierName "" }) }}} as underlying_type }}] ->
         let fields = underlying_type |> Clang.Type.list_of_fields in
         begin
           match fields with
@@ -2775,7 +2798,7 @@ let () =
         { desc = Field { name = "data";
           qual_type = { desc = Elaborated {
             keyword = Union;
-            named_type = { desc = Record (Ident "u") }}};
+            named_type = { desc = Record ({ name = IdentifierName "u" }) }}};
           bitwidth = None;
           init = None; }}] }}] -> ()
   | _ -> assert false
@@ -2892,11 +2915,11 @@ let () =
   | _ -> assert false
     ]}
 *)
-  | Using of {
-      namespace_or_type_ref : namespace_of_type_ref option;
-      decl : string option;
+  | UsingDirective of {
+      nested_name_specifier : nested_name_specifier option;
+      namespace : decl;
     }
-(** C++ "using" directive and declaration.
+(** C++ "using" directive.
 
     {[
 let example = {|
@@ -2905,14 +2928,17 @@ let example = {|
     |}
 
 let () =
-  check Clangml_show.pp_decl (parse_declaration_list ~language:CXX) example @@
-  fun ast -> match ast with
-  | [{ desc = Namespace { name = "std" }};
-     { desc = Using {
-      namespace_or_type_ref = Some (UsingNamespace (Ident "std"));
-      decl = None }}] -> ()
-  | _ -> assert false
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = Namespace { name = "std" }};
+     { desc = UsingDirective {
+      nested_name_specifier = None;
+      namespace = { desc = Namespace { name = "std" }}}}]]
+    ]}*)
+  | UsingDeclaration of ident_ref
+(** C++ "using" declaration.
 
+    {[
 let example = {|
     namespace std {
       void cout() {}
@@ -2921,14 +2947,13 @@ let example = {|
     |}
 
 let () =
-  check Clangml_show.pp_decl (parse_declaration_list ~language:CXX) example @@
-  fun ast -> match List.hd (List.rev ast) with
-  | { desc = Using {
-      namespace_or_type_ref = Some (UsingNamespace (Ident "std"));
-      decl = Some "cout" }} -> ()
-  | _ -> assert false
-    ]}
-*)
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [_; { desc = UsingDeclaration {
+      nested_name_specifier =
+        Some [Namespace { desc = Namespace { name = "std" }}];
+      name = IdentifierName "cout" }}]]
+    ]}*)
   | Constructor of {
       class_name : string;
       parameters : parameters;
@@ -2980,7 +3005,7 @@ let () =
                    qual_type = { desc = BuiltinType Int}}}];
                  variadic = false;
                };
-               initializer_list = ["i", { desc = DeclRef (Ident "v") }];
+               initializer_list = ["i", { desc = DeclRef ({ name = IdentifierName "v" }) }];
                body = Some { desc = Compound [] };
                explicit = true;
                defaulted = false;
@@ -3152,7 +3177,7 @@ let () =
                body = None }})};
            { desc = Friend (FriendType { desc = Elaborated {
                keyword = Class;
-               named_type = { desc = Record (Ident "B") }}})}] }}] -> ()
+               named_type = { desc = Record ({ name = IdentifierName "B" }) }}})}] }}] -> ()
   | _ -> assert false
    ]}
 
@@ -3202,7 +3227,7 @@ let () =
              fields = [] }}}})}] }}] -> ()
   | _ -> assert false
    ]}*)
-  | NamespaceAlias of { alias : string; original : ident_ref }
+  | NamespaceAlias of { alias : ident_ref; original : ident_ref }
 (** C++ namespace alias.
 
     {[
@@ -3215,7 +3240,9 @@ let () =
   check_pattern quote_decl_list (parse_declaration_list ~language:CXX)
     example [%pattern?
     [{ desc = _ };
-     { desc = NamespaceAlias { alias = "N1"; original = Ident "N" }}]]
+     { desc = NamespaceAlias {
+         alias = { name = IdentifierName "N1" };
+         original = { name = IdentifierName "N" } }}]]
     ]}*)
   | EmptyDecl
 (**
@@ -3242,10 +3269,6 @@ let () =
     }
   | UnknownDecl of cxcursorkind * clang_ext_declkind
 
-and namespace_of_type_ref =
-  | UsingNamespace of ident_ref
-  | UsingType of qual_type
-
 and directive =
   | Include of {
       program_context : bool;
@@ -3258,17 +3281,11 @@ and base_specifier = {
   access_specifier : cxx_access_specifier;
 }
 
-and ident_ref =
-  | Ident of string
-  | BinaryOperatorRef of binary_operator_kind
-  | ConversionOperatorRef of string
-  | NamespaceRef of {
-      namespace_ref : ident_ref;
-      ident : string;
-    }
+and ident_ref = {
+  nested_name_specifier : nested_name_specifier option;
+  name : declaration_name;
+}
 (**
-  Identifier qualified by a namespace reference (C++).
-
     {[
 let example = {|
   namespace ns1 {
@@ -3292,27 +3309,14 @@ let () =
         name = "g";
         body = Some { desc = Compound [
           { desc = Return (Some { desc = Call {
-              callee = { desc = DeclRef (
-                NamespaceRef {
-                  namespace_ref = NamespaceRef {
-                    namespace_ref = Ident "ns1";
-                    ident = "ns2";
-                  };
-                  ident = "f";
-                })};
+              callee = { desc = DeclRef ({
+                nested_name_specifier = Some [
+                  Namespace { desc = Namespace { name = "ns1" }};
+                  Namespace { desc = Namespace { name = "ns2" }}];
+                name = IdentifierName "f"})};
               args = []; }})}] }}}] -> ()
   | _ -> assert false
     ]}
-*)
-  | TypeRef of {
-      type_ref : ident_ref;
-      qual_type : qual_type;
-      ident : string;
-    }
-(**
-  Identifier qualified by a type reference (C++).
-
-  E.g., enumeration in a nested name specifier (C++11 extension).
 
     {[
 let example = {|
@@ -3330,26 +3334,25 @@ let example = {|
 
 let () =
   if Clang.get_clang_version () >= "clang version 3.7.0" then
-    check Clangml_show.pp_decl
+    check_pattern quote_decl_list
       (parse_declaration_list ~command_line_args:[
-         Clang.Command_line.language CXX; "-std=c++11"]) example @@
-    fun ast -> match ast with
-    | [_; { desc =
+         Clang.Command_line.language CXX; "-std=c++11"]) example
+    [%pattern?
+      [_; { desc =
         Function {
+          function_type = {
+            result = { desc = Elaborated {
+              nested_name_specifier = Some [
+                TypeSpec { desc = Record { name = IdentifierName "C" }}];
+              named_type = { desc = Enum { name = IdentifierName "E" }}}}};
           name = "g";
           body = Some { desc = Compound [
-            { desc = Return (Some { desc = DeclRef (
-                TypeRef {
-                  type_ref = TypeRef {
-                    type_ref = Ident "C";
-                    qual_type = { desc = Record (Ident "C") };
-                    ident = "E";
-                  };
-                  qual_type = { desc = Enum (Ident "E") };
-                  ident = "A" })})}] }}}] -> ()
-    | _ -> assert false
-    ]}
-*)
+            { desc = Return (Some { desc = DeclRef {
+                nested_name_specifier = Some [
+                  TypeSpec { desc = Record { name = IdentifierName "C" }};
+                  TypeSpec { desc = Enum { name = IdentifierName "E" }}];
+                name = IdentifierName "A"}})}] }}}]]
+    ]}*)
 
 and friend_decl =
   | FriendDecl of decl

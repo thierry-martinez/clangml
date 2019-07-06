@@ -689,8 +689,23 @@ CXType
 clang_ext_DeclarationName_getCXXNameType(
   struct clang_ext_DeclarationName);
 
+CXString
+clang_ext_DeclarationName_getAsIdentifier(
+  struct clang_ext_DeclarationName name);
+
+CXCursor
+clang_ext_DeclarationName_getCXXDeductionGuideTemplate(
+  struct clang_ext_DeclarationName name);
+
+CXString
+clang_ext_DeclarationName_getCXXLiteralIdentifier(
+  struct clang_ext_DeclarationName name);
+
 struct clang_ext_DeclarationName
 clang_ext_Decl_getName(CXCursor);
+
+CXCursor
+clang_ext_UsingDirectiveDecl_getNominatedNamespace(CXCursor c);
 
 struct clang_ext_NestedNameSpecifier {
   const void *data;
@@ -731,3 +746,6 @@ clang_ext_NestedNameSpecifier_getAsType(
 
 struct clang_ext_NestedNameSpecifier
 clang_ext_Decl_getNestedNameSpecifier(CXCursor);
+
+struct clang_ext_NestedNameSpecifier
+clang_ext_Type_getQualifier(CXType);

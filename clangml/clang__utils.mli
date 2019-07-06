@@ -167,3 +167,6 @@ val has_severity : cxdiagnosticseverity list -> cxtranslationunit -> bool
 val cursor_get_translation_unit : cxcursor -> cxtranslationunit
 (** [cursor_get_translation_unit cursor] returns the translation unit
     associated to [cursor]. *)
+
+val binary_of_overloaded_operator_kind :
+    clang_ext_overloadedoperatorkind -> clang_ext_binaryoperatorkind
