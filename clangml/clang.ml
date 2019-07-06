@@ -164,24 +164,6 @@ module Ast = struct
       | None -> CXInt i
       | Some i -> Int i
 
-    let ident_of_string s =
-      match s with
-      | "operator==" -> BinaryOperatorRef EQ
-      | _ ->
-          match string_chop_prefix_opt "operator " s with
-          | Some target -> ConversionOperatorRef target
-          | _ -> Ident s
-
-    let ident_ref_of_namespaces namespaces =
-      match List.rev namespaces with
-      | hd :: tl ->
-          let namespace =
-            tl |> List.fold_left begin fun namespace_ref ident ->
-              NamespaceRef { namespace_ref; ident }
-            end (Ident hd) in
-          Some namespace
-      | [] -> None
-
     let extract (f : 'a -> 'b option) (list : 'a list) : 'b list * 'a list =
       let acc_match, acc_others =
         list |> List.fold_left begin fun (acc_match, acc_others) item ->
@@ -191,50 +173,70 @@ module Ast = struct
         end ([], []) in
       List.rev acc_match, List.rev acc_others
 
-    let rec extract_namespace_or_type_ref cursor =
-      let namespaces, others =
-        list_of_children cursor |> extract begin fun c ->
-          match get_cursor_kind c with
-          | NamespaceRef -> Some (get_cursor_spelling c)
-          | _ -> None
-        end in
-      let type_refs, others =
-        others |> extract begin fun c ->
-          match get_cursor_kind c with
-          | TypeRef -> Some c
-          | _ -> None
-        end in
-      let namespace_or_type_ref =
-        match ident_ref_of_namespaces namespaces, type_refs with
-        | Some namespace, [] -> Some (UsingNamespace namespace)
-        | None, [type_ref] ->
-            Some (UsingType (type_ref |> get_cursor_type |> of_cxtype))
-        | None, [] -> None
-        | _ -> raise Invalid_structure in
-      namespace_or_type_ref, others
+    let rec convert_nested_name_specifier (name : clang_ext_nestednamespecifier)
+        : nested_name_specifier option =
+      let rec enumerate accu name (kind : clang_ext_nestednamespecifierkind) =
+        let component =
+          match kind with
+          | Identifier ->
+              let ident = ext_nested_name_specifier_get_as_identifier name in
+              Some (NestedIdentifier ident)
+          | Namespace ->
+              let decl = ext_nested_name_specifier_get_as_namespace name in
+              Some (Namespace (decl_of_cxcursor decl))
+          | NamespaceAlias ->
+              let decl = ext_nested_name_specifier_get_as_namespace name in
+              Some (NamespaceAlias (decl_of_cxcursor decl))
+          | TypeSpec ->
+              let ty = ext_nested_name_specifier_get_as_type name in
+              Some (TypeSpec (ty |> of_cxtype))
+          | TypeSpecWithTemplate ->
+              let ty = ext_nested_name_specifier_get_as_type name in
+              Some (TypeSpecWithTemplate (ty |> of_cxtype))
+          | Invalid -> None
+          | Global | Super -> raise Invalid_structure in
+        match component with
+        | None -> accu
+        | Some component ->
+            let name = ext_nested_name_specifier_get_prefix name in
+            enumerate (component :: accu) name
+              (ext_nested_name_specifier_get_kind name) in
+      match ext_nested_name_specifier_get_kind name with
+      | Invalid -> None
+      | Global -> Some []
+      | kind -> Some (enumerate [] name kind)
+
+    and extract_declaration_name cursor =
+      let name = ext_decl_get_name cursor in
+      match ext_declaration_name_get_kind name with
+      | Identifier ->
+          IdentifierName (ext_declaration_name_get_as_identifier name)
+      | CXXConstructorName ->
+          ConstructorName
+            (ext_declaration_name_get_cxxname_type name |> of_cxtype)
+      | CXXDestructorName ->
+          DestructorName
+            (ext_declaration_name_get_cxxname_type name |> of_cxtype)
+      | CXXConversionFunctionName ->
+          ConversionFunctionName
+            (ext_declaration_name_get_cxxname_type name |> of_cxtype)
+      | CXXDeductionGuideName ->
+          DeductionGuideName
+            (ext_declaration_name_get_cxxdeduction_guide_template name |>
+             decl_of_cxcursor)
+      | CXXOperatorName ->
+          OperatorName (ext_declaration_name_get_cxxoverloaded_operator name)
+      | CXXLiteralOperatorName ->
+          LiteralOperatorName
+            (ext_declaration_name_get_cxxliteral_identifier name)
+      | _ -> raise Invalid_structure
 
     and ident_ref_of_cxcursor cursor =
-      let ident = get_cursor_spelling cursor in
-      let rec pop_ref list ident =
-        match
-          match list with
-          | hd :: tl ->
-              Some (get_cursor_kind hd, hd, tl)
-          | [] -> None
-        with
-        | Some (TypeRef, hd, tl) ->
-            let ty = get_cursor_type hd in
-            let decl = get_type_declaration ty in
-            let type_ref = pop_ref tl (get_cursor_spelling decl) in
-            let qual_type = of_cxtype ty in
-            TypeRef { type_ref; qual_type; ident }
-        | Some (NamespaceRef, hd, tl) ->
-            let namespace_ref = pop_ref tl (get_cursor_spelling hd) in
-            NamespaceRef { namespace_ref; ident }
-        | Some (OverloadedDeclRef, hd, _) ->
-            ident_of_string (get_cursor_spelling hd)
-        | _ -> ident_of_string ident in
-      pop_ref (List.rev (list_of_children cursor)) ident
+      let nested_name_specifier =
+        cursor |> ext_decl_get_nested_name_specifier |>
+        convert_nested_name_specifier in
+      let name = extract_declaration_name cursor in
+      { nested_name_specifier; name }
 
     and make_template_name name =
       match ext_template_name_get_kind name with
@@ -339,8 +341,12 @@ module Ast = struct
               match ext_type_get_kind cxtype with
               | Paren -> ParenType (cxtype |> ext_get_inner_type |> of_cxtype)
               | Elaborated -> (* Here for Clang <3.9.0 *)
+                  let nested_name_specifier =
+                    ext_type_get_qualifier cxtype |>
+                    convert_nested_name_specifier in
                   Elaborated {
                     keyword = ext_elaborated_type_get_keyword cxtype;
+                    nested_name_specifier;
                     named_type = ext_type_get_named_type cxtype |> of_cxtype;
                   }
               | Attributed -> (* Here for Clang <8.0.0 *)
@@ -440,21 +446,15 @@ module Ast = struct
         | CXXAccessSpecifier ->
             AccessSpecifier (cursor |> get_cxxaccess_specifier)
         | UsingDirective ->
-            let namespace_or_type_ref, others =
-              extract_namespace_or_type_ref cursor in
-            Using { namespace_or_type_ref; decl = None }
+            let nested_name_specifier =
+              cursor |> ext_decl_get_nested_name_specifier |>
+              convert_nested_name_specifier in
+            let namespace =
+              ext_using_directive_decl_get_nominated_namespace cursor |>
+              decl_of_cxcursor in
+            UsingDirective { nested_name_specifier; namespace }
         | UsingDeclaration ->
-            let namespace_or_type_ref, others =
-              extract_namespace_or_type_ref cursor in
-            begin
-              match others with
-              | [decl_ref] when
-                  get_cursor_kind decl_ref = OverloadedDeclRef ->
-                    Using {
-                      namespace_or_type_ref;
-                      decl = Some (get_cursor_spelling decl_ref) }
-              | _ -> raise Invalid_structure
-            end
+            UsingDeclaration (ident_ref_of_cxcursor cursor)
         | Constructor ->
             let children = list_of_children cursor in
             let rec extract_initializer_list children =
@@ -499,10 +499,9 @@ module Ast = struct
         | TemplateTemplateParameter ->
             TemplateTemplateParameter (get_cursor_spelling cursor)
         | NamespaceAlias ->
-            let alias, original =
-              match ident_ref_of_cxcursor cursor with
-              | NamespaceRef { namespace_ref; ident } -> ident, namespace_ref
-              | _ -> raise Invalid_structure in
+            let alias = ident_ref_of_cxcursor cursor in
+            let original =
+              ident_ref_of_cxcursor (get_cursor_definition cursor) in
             NamespaceAlias { alias; original }
         | TypeAliasDecl ->
             let ident_ref = ident_ref_of_cxcursor cursor in
@@ -568,29 +567,6 @@ module Ast = struct
         end in
       let others = others |> filter_out_typeref |> filter_out_parmdecl in
       let qual_type = cursor |> get_cursor_type |> of_cxtype in
-      let qual_type =
-        match namespaces, qual_type with
-        | _ :: _, { desc = Elaborated { keyword; named_type }} ->
-            let namespace_ref =
-              match ident_ref_of_namespaces namespaces with
-              | Some namespace_ref -> namespace_ref
-              | None -> raise Invalid_structure in
-            let add_namespace ident_ref =
-              match ident_ref with
-              | Ident ident ->
-                  NamespaceRef {
-                    namespace_ref;
-                    ident }
-              | _ -> raise Invalid_structure in
-            let desc =
-              match named_type.desc with
-              | Record ident_ref -> Record (add_namespace ident_ref)
-              | Enum ident_ref -> Enum (add_namespace ident_ref)
-              | _ -> named_type.desc in
-            { qual_type with
-              desc = Elaborated { keyword;
-                named_type = { named_type with desc }}}
-        | _ -> qual_type in
       node ~cursor {
           name = cursor |> get_cursor_spelling;
           qual_type;
@@ -725,6 +701,9 @@ module Ast = struct
 
     and record_decl_of_children keyword cursor children =
       let name = get_cursor_spelling cursor in
+      let nested_name_specifier =
+        cursor |> ext_decl_get_nested_name_specifier |>
+        convert_nested_name_specifier in
       let final, children =
         match children with
         | attr :: tl when get_cursor_kind attr = CXXFinalAttr -> true, tl
@@ -732,7 +711,7 @@ module Ast = struct
       let bases, children =
         extract_prefix_from_list base_specifier_of_cxcursor_opt children in
       let fields = fields_of_children children in
-      RecordDecl { keyword; name; bases; fields; final }
+      RecordDecl { keyword; nested_name_specifier; name; bases; fields; final }
 
     and fields_of_children children =
       children |> List.map (decl_of_cxcursor ~in_record:true)
@@ -1007,7 +986,7 @@ module Ast = struct
             | [lhs] ->
                 let base = expr_of_cxcursor lhs in
                 let field = get_cursor_referenced cursor in
-                let ident = ident_of_string (get_cursor_spelling field) in
+                let ident = ident_ref_of_cxcursor field in
                 let field = node ~cursor:field ident in
                 let arrow = ext_member_ref_expr_is_arrow cursor in
                 Member { base; arrow; field }

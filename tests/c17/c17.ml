@@ -87,7 +87,7 @@ let () =
       desc = GenericSelection {
         controlling_expr = { desc = IntegerLiteral (Int 729) };
         assocs = [
-          (Some { desc = BuiltinType LongDouble }, { desc = DeclRef (Ident "cbrtl")});
-          (None, { desc = DeclRef (Ident "cbrt")});
-          (Some { desc = BuiltinType Float }, { desc = DeclRef (Ident "cbrtf")})]}}]
+          (Some { desc = BuiltinType LongDouble }, { desc = DeclRef { name = IdentifierName "cbrtl" }});
+          (None, { desc = DeclRef ({ name = IdentifierName "cbrt" })});
+          (Some { desc = BuiltinType Float }, { desc = DeclRef { name = IdentifierName "cbrtf" }})]}}]
   | _ -> assert false

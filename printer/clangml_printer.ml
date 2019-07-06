@@ -152,8 +152,9 @@ and expr_prec prec fmt (e : Clang.Expr.t) =
       String.iter (c_escape_char fmt) str;
       Format.pp_print_string fmt "\""
   | Call {
-        callee = { desc = DeclRef (BinaryOperatorRef kind); _ };
+        callee = { desc = DeclRef { name = OperatorName kind }; _ };
         args = [lhs; rhs]} ->
+      let kind = Clang.binary_of_overloaded_operator_kind kind in
       expr_prec prec fmt { e with desc = BinaryOperator { lhs; kind; rhs }}
   | Call { callee; args } ->
       maybe_parentheses 1 prec fmt (fun fmt ->
@@ -275,14 +276,36 @@ and print_function_body fmt body =
   | Some body -> stmt fmt body
 
 and print_ident_ref fmt ident_ref =
-  match ident_ref with
-  | Ident name -> Format.pp_print_string fmt name
-  | BinaryOperatorRef EQ ->
-      Format.pp_print_string fmt "operator=="
-  | NamespaceRef { namespace_ref = ref; ident }
-  | TypeRef { type_ref = ref; ident; _ } ->
-      Format.fprintf fmt "@[%a::%s@]" print_ident_ref ref ident
-  | _ -> failwith "Not implemented ident"
+  let print_nested_name_specifier_component
+      (component : Clang.Ast.nested_name_specifier_component) =
+    match component with
+    | NestedIdentifier s -> Format.fprintf fmt "%s::" s
+    | Namespace { desc = Namespace { name }}
+    | NamespaceAlias { desc= Namespace { name }} ->
+        Format.fprintf fmt "%s::" name
+    | TypeSpec ty
+    | TypeSpecWithTemplate ty ->
+        Format.fprintf fmt "%a::" qual_type ty
+    | _ -> failwith "Not implemented print_ident_ref" in
+  let print_nested_name_specifier nested_name_specifier =
+    match nested_name_specifier with
+    | [] -> Format.pp_print_string fmt "::"
+    | _ ->
+        nested_name_specifier |>
+        List.iter print_nested_name_specifier_component in
+  Option.iter print_nested_name_specifier ident_ref.nested_name_specifier;
+  let print_declaration_name (name : Clang.Ast.declaration_name) =
+    match name with
+    | IdentifierName s
+    | LiteralOperatorName s -> Format.pp_print_string fmt s
+    | ConstructorName ty
+    | ConversionFunctionName ty -> qual_type fmt ty
+    | DestructorName ty -> Format.fprintf fmt "~%a" qual_type ty
+    | OperatorName op ->
+        Format.fprintf fmt "operator%s"
+          (Clang.ext_overloaded_operator_get_spelling op)
+    | _ -> failwith "Not implemented print_ident_ref.declaration_name" in
+  print_declaration_name ident_ref.name
 
 and typed_value fmt_value fmt t =
   match t.desc with

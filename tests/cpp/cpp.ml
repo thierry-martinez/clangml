@@ -126,7 +126,7 @@ let () =
             name = "i"; }}];
         result_type = None;
         body = { desc = Compound [{ desc =
-          Return (Some { desc = DeclRef (Ident "i")})}]}}}];
+          Return (Some { desc = DeclRef ({ name = IdentifierName "i" })})}]}}}];
     check_pattern_expr bindings#x3 [%pattern? {
       desc = Lambda {
         capture_default = ByCopy;
@@ -139,7 +139,7 @@ let () =
         result_type =
           Some { desc = LValueReference { desc = BuiltinType Int }};
         body = { desc = Compound [{ desc =
-          Return (Some { desc = DeclRef (Ident "j")})}]}}}]
+          Return (Some { desc = DeclRef ({ name = IdentifierName "j" })})}]}}}]
   end]
 
 let () =
@@ -172,9 +172,9 @@ let () =
         result_type = None;
         body = { desc = Compound [{ desc =
           Return (Some { desc = Call {
-            callee = { desc = DeclRef (Ident "g")};
+            callee = { desc = DeclRef ({ name = IdentifierName "g" })};
             args = [{ desc = PackExpansionExpr {
-              desc = DeclRef (Ident "args")}}]}})}]}}}]
+              desc = DeclRef ({ name = IdentifierName "args" })}}]}})}]}}}]
   end]
 
 (* 5.1.6 Fold expressions *)
@@ -199,7 +199,7 @@ let () =
       desc = Fold {
         lhs = { desc = BoolLiteral true };
         operator = LAnd;
-        rhs = { desc = DeclRef (Ident "args") }}}]
+        rhs = { desc = DeclRef ({ name = IdentifierName "args" }) }}}]
   end]
 
 (* 5.2.8 Type identification *)
@@ -231,28 +231,28 @@ let () =
       |}]] in
     check_pattern_expr bindings#e1 [%pattern? {
       desc = Call {
-        callee = { desc = DeclRef (BinaryOperatorRef EQ)};
+        callee = { desc = DeclRef { name = OperatorName EqualEqual }};
         args = [
-          { desc = Typeid (ArgumentExpr { desc = DeclRef (Ident "d1")})};
-          { desc = Typeid (ArgumentExpr { desc = DeclRef (Ident "d2")})}]}}];
+          { desc = Typeid (ArgumentExpr { desc = DeclRef ({ name = IdentifierName "d1" })})};
+          { desc = Typeid (ArgumentExpr { desc = DeclRef ({ name = IdentifierName "d2" })})}]}}];
     check_pattern_expr bindings#e2 [%pattern? {
       desc = Call {
-        callee = { desc = DeclRef (BinaryOperatorRef EQ)};
+        callee = { desc = DeclRef { name = OperatorName EqualEqual }};
         args = [
-          { desc = Typeid (ArgumentType { desc = Record (Ident "D")})};
-          { desc = Typeid (ArgumentType { desc = Record (Ident "D")})}]}}];
+          { desc = Typeid (ArgumentType { desc = Record ({ name = IdentifierName "D" })})};
+          { desc = Typeid (ArgumentType { desc = Record ({ name = IdentifierName "D" })})}]}}];
     check_pattern_expr bindings#e3 [%pattern? {
       desc = Call {
-        callee = { desc = DeclRef (BinaryOperatorRef EQ)};
+        callee = { desc = DeclRef { name = OperatorName EqualEqual }};
         args = [
-          { desc = Typeid (ArgumentType { desc = Record (Ident "D")})};
-          { desc = Typeid (ArgumentExpr { desc = DeclRef (Ident "d2")})}]}}];
+          { desc = Typeid (ArgumentType { desc = Record ({ name = IdentifierName "D" })})};
+          { desc = Typeid (ArgumentExpr { desc = DeclRef ({ name = IdentifierName "d2" })})}]}}];
     check_pattern_expr bindings#e4 [%pattern? {
       desc = Call {
-        callee = { desc = DeclRef (BinaryOperatorRef EQ)};
+        callee = { desc = DeclRef { name = OperatorName EqualEqual }};
         args = [
-          { desc = Typeid (ArgumentType { desc = Record (Ident "D")})};
-          { desc = Typeid (ArgumentType { desc = Record (Ident "D")})}]}}]
+          { desc = Typeid (ArgumentType { desc = Record ({ name = IdentifierName "D" })})};
+          { desc = Typeid (ArgumentType { desc = Record ({ name = IdentifierName "D" })})}]}}]
   | _ -> assert false
 
 (* 5.3.3 Sizeof *)
@@ -280,7 +280,7 @@ let () =
         };
       |}]] in
     check_pattern_expr bindings#sz [%pattern? {
-      desc = SizeOfPack (Ident "Types")}]
+      desc = SizeOfPack ({ name = IdentifierName "Types" })}]
   | _ -> assert false
 
 (* 5.3.4 New *)
@@ -360,29 +360,29 @@ let () =
     check_pattern_expr bindings#n1 [%pattern? {
       desc = New {
         placement_args = [];
-        qual_type = { desc = Record (Ident "T")};
+        qual_type = { desc = Record ({ name = IdentifierName "T" })};
         array_size = None;
         init = None }}];
     check_pattern_expr bindings#n2 [%pattern? {
       desc = New {
         placement_args = [
           { desc = IntegerLiteral (Int 2)};
-          { desc = DeclRef (Ident "f") }];
-        qual_type = { desc = Record (Ident "T")};
+          { desc = DeclRef ({ name = IdentifierName "f" }) }];
+        qual_type = { desc = Record ({ name = IdentifierName "T" })};
         array_size = None;
         init = None }}];
     check_pattern_expr bindings#n3 [%pattern? {
       desc = New {
         placement_args = [];
-        qual_type = { desc = Record (Ident "T")};
+        qual_type = { desc = Record ({ name = IdentifierName "T" })};
         array_size = Some { desc = IntegerLiteral (Int 5) };
         init = None }}];
     check_pattern_expr bindings#n4 [%pattern? {
       desc = New {
         placement_args = [
           { desc = IntegerLiteral (Int 2)};
-          { desc = DeclRef (Ident "f") }];
-        qual_type = { desc = Record (Ident "T")};
+          { desc = DeclRef ({ name = IdentifierName "f" }) }];
+        qual_type = { desc = Record ({ name = IdentifierName "T" })};
         array_size = Some { desc = IntegerLiteral (Int 5) };
         init = None }}]
   | _ -> assert false
@@ -416,16 +416,16 @@ let () =
   check_pattern_decl bindings#d [%pattern? {
     desc = Var {
       var_type = { desc = MemberPointer {
-        class_ = { desc = Record (Ident "S")};
+        class_ = { desc = Record ({ name = IdentifierName "S" })};
         pointee = { desc = BuiltinType Int }}};
       var_name = "pm";
       var_init = Some { desc = UnaryOperator {
         kind = AddrOf;
         operand = {
-          desc = DeclRef TypeRef {
-            type_ref = Ident "S";
-            qual_type = { desc = Record (Ident "S")};
-            ident = "i" }}}}}}]
+          desc = DeclRef {
+            nested_name_specifier = Some [
+              TypeSpec { desc = Record { name = IdentifierName "S" }}];
+            name = IdentifierName "i" }}}}}}]
 
 let () =
   let ast = parse_string {|
@@ -461,21 +461,21 @@ let () =
           parameters = Some {
             non_variadic = [{ desc = {
               qual_type = { desc = BuiltinType Int }}}]}}};
-        class_ = { desc = Record (Ident "S")}}};
+        class_ = { desc = Record ({ name = IdentifierName "S" })}}};
       var_name = "ptr_to_mfct";
       var_init = Some { desc = UnaryOperator {
         kind = AddrOf;
         operand = {
-          desc = DeclRef TypeRef {
-            type_ref = Ident "S";
-            qual_type = { desc = Record (Ident "S")};
-            ident = "f" }}}}}}];
+          desc = DeclRef {
+            nested_name_specifier = Some [
+              TypeSpec { desc = Record { name = IdentifierName "S" }}];
+            name = IdentifierName "f" }}}}}}];
   check_pattern_expr bindings#e [%pattern? {
     desc = Call {
       callee = { desc = BinaryOperator {
-        lhs = { desc = DeclRef (Ident "ptr_to_obj")};
+        lhs = { desc = DeclRef ({ name = IdentifierName "ptr_to_obj" })};
         kind = PtrMemI;
-        rhs = { desc = DeclRef (Ident "ptr_to_mfct")}}};
+        rhs = { desc = DeclRef ({ name = IdentifierName "ptr_to_mfct" })}}};
       args = [{ desc = IntegerLiteral (Int 10)}]}}]
 
 (* 5.19 Constant expression *)
@@ -531,9 +531,9 @@ let () =
             name = "b" }}]};
         initializer_list = [("m", {
           desc = ConditionalOperator {
-            cond = { desc = DeclRef (Ident "b")};
+            cond = { desc = DeclRef ({ name = IdentifierName "b" })};
             then_branch = Some { desc = IntegerLiteral (Int 42)};
-            else_branch = { desc = DeclRef (Ident "x")}}})];
+            else_branch = { desc = DeclRef ({ name = IdentifierName "x" })}}})];
         body = Some { desc = Compound []};
         constexpr = true; }}];
     check_pattern_decl bindings#v [%pattern? {
@@ -543,12 +543,12 @@ let () =
         var_init = Some { desc = Member {
           base = { desc = Cast {
             kind = Functional;
-            qual_type = { desc = Record (Ident "A") };
+            qual_type = { desc = Record ({ name = IdentifierName "A" }) };
             operand = { desc = Construct {
-              qual_type = { desc = Record (Ident "A") };
+              qual_type = { desc = Record ({ name = IdentifierName "A" }) };
               args = [{ desc = BoolLiteral true }]}}}};
           arrow = false;
-          field = { desc = Ident "m" }}};
+          field = { desc = { name = IdentifierName "m" } }}};
         constexpr = true }}];
     check_pattern_decl bindings#f2 [%pattern? {
       desc = Function {
@@ -585,7 +585,7 @@ let () =
         var_type = { desc = BuiltinType Int };
         var_name = "y";
         var_init = Some { desc = Call {
-          callee = { desc = DeclRef (Ident "h")};
+          callee = { desc = DeclRef ({ name = IdentifierName "h" })};
           args = [{ desc = IntegerLiteral (Int 1)}]; }};
         constexpr = true }}]
   end]
@@ -620,23 +620,23 @@ let () =
   check_pattern_decl bindings#x1 [%pattern? {
     desc = Var {
       var_type = { desc = Decltype { desc = Call {
-        callee = { desc = DeclRef (Ident "foo")};
+        callee = { desc = DeclRef ({ name = IdentifierName "foo" })};
         args = []}}}}}];
   check_pattern_decl bindings#x2 [%pattern? {
     desc = Var {
-      var_type = { desc = Decltype { desc = DeclRef (Ident "i")}}}}];
+      var_type = { desc = Decltype { desc = DeclRef ({ name = IdentifierName "i" })}}}}];
   check_pattern_decl bindings#x3 [%pattern? {
     desc = Var {
       var_type = { desc = Decltype { desc = Member {
-        base = { desc = DeclRef (Ident "a")};
+        base = { desc = DeclRef ({ name = IdentifierName "a" })};
         arrow = true;
-        field = { desc = Ident "x" }}}}}}];
+        field = { desc = { name = IdentifierName "x" } }}}}}}];
   check_pattern_decl bindings#x4 [%pattern? {
     desc = Var {
       var_type = { desc = Decltype { desc = Member {
-        base = { desc = DeclRef (Ident "a")};
+        base = { desc = DeclRef ({ name = IdentifierName "a" })};
         arrow = true;
-        field = { desc = Ident "x" }}}}}}]
+        field = { desc = { name = IdentifierName "x" } }}}}}}]
 
 (* 12.1 Constructors *)
 
@@ -691,9 +691,10 @@ let () =
         operand = { desc = Call {
           callee = {
             desc = Member {
-              base = { desc = DeclRef (Ident "a")};
+              base = { desc = DeclRef ({ name = IdentifierName "a" })};
               arrow = false;
-              field = { desc = ConversionOperatorRef "int" }}}}}}}}}];
+              field = { desc = { name = ConversionFunctionName
+                { desc = BuiltinType Int }}}}}}}}}}}];
   check_pattern_expr bindings#i2 [%pattern? {
     desc = Cast {
       kind = CStyle;
@@ -704,9 +705,10 @@ let () =
         operand = { desc = Call {
           callee = {
             desc = Member {
-              base = { desc = DeclRef (Ident "a")};
+              base = { desc = DeclRef ({ name = IdentifierName "a" })};
               arrow = false;
-              field = { desc = ConversionOperatorRef "int" }}}}}}}}}];
+              field = { desc = { name = ConversionFunctionName
+                { desc = BuiltinType Int }}}}}}}}}}}];
   check_pattern_expr bindings#i3 [%pattern? {
     desc = Cast {
       kind = Implicit;
@@ -714,9 +716,10 @@ let () =
       operand = { desc = Call {
         callee = {
           desc = Member {
-            base = { desc = DeclRef (Ident "a")};
+            base = { desc = DeclRef ({ name = IdentifierName "a" })};
             arrow = false;
-            field = { desc = ConversionOperatorRef "int" }}}}}}}]
+            field = { desc = { name = ConversionFunctionName
+              { desc = BuiltinType Int }}}}}}}}}]
 
 (* 14.1 Template parameters *)
 
@@ -759,15 +762,15 @@ let () =
           { desc = Decl [{ desc = Var {
               var_type = { desc = TemplateTypeParm "T" };
               var_name = "t1";
-              var_init = Some { desc = DeclRef (Ident "i")}}}]};
+              var_init = Some { desc = DeclRef ({ name = IdentifierName "i" })}}}]};
           { desc = Decl [{ desc = Var {
               var_type = { desc = Elaborated {
-                named_type = { desc = Record (Ident "T") }}};
+                named_type = { desc = Record ({ name = IdentifierName "T" }) }}};
               var_name = "t2";
               var_init = Some { desc = Construct {
                 qual_type = { desc = Elaborated {
-                  named_type = { desc = Record (Ident "T")}}};
+                  named_type = { desc = Record ({ name = IdentifierName "T" })}}};
                   args = [{ desc = Construct {
                     qual_type = { desc = Elaborated {
-                      named_type = { desc = Record (Ident "T")}}};
-                    args = [{desc = DeclRef (Ident "i")}]}}]}}}}]}]}}}}}]
+                      named_type = { desc = Record ({ name = IdentifierName "T" })}}};
+                    args = [{desc = DeclRef ({ name = IdentifierName "i" })}]}}]}}}}]}]}}}}}]

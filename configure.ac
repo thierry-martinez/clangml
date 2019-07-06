@@ -389,8 +389,8 @@ AS_IF([test -d printer],
 AS_IF([test -d tests],
   [true],
   [AS_IF([mkdir tests],
-    [AS_IF([mkdir tests/clangml__ast],
-      [AC_CP([$srcdir/tests/clangml__ast/dune], [tests/clangml__ast/])])]
+    [AS_IF([mkdir tests/ast],
+      [AC_CP([$srcdir/tests/ast/dune], [tests/ast/])])]
     [AS_IF([mkdir tests/c17],
       [AC_CP([$srcdir/tests/c17/dune], [tests/c17/])
        AC_CP([$srcdir/tests/c17/c17.ml], [tests/c17/])])]

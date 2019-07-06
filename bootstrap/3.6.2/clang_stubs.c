@@ -8505,6 +8505,52 @@ clang_ext_DeclarationName_getCXXNameType_wrapper(value arg_ocaml)
 }
 
 CAMLprim value
+clang_ext_DeclarationName_getAsIdentifier_wrapper(value name_ocaml)
+{
+  CAMLparam1(name_ocaml);
+  struct clang_ext_DeclarationName name;
+  name = Clang_ext_declarationname_val(Field(name_ocaml, 0));
+  CXString result = clang_ext_DeclarationName_getAsIdentifier(name);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(safe_string(clang_getCString(result)));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_DeclarationName_getCXXDeductionGuideTemplate_wrapper(value name_ocaml)
+{
+  CAMLparam1(name_ocaml);
+  struct clang_ext_DeclarationName name;
+  name = Clang_ext_declarationname_val(Field(name_ocaml, 0));
+  CXCursor result = clang_ext_DeclarationName_getCXXDeductionGuideTemplate(name);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(name_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_DeclarationName_getCXXLiteralIdentifier_wrapper(value name_ocaml)
+{
+  CAMLparam1(name_ocaml);
+  struct clang_ext_DeclarationName name;
+  name = Clang_ext_declarationname_val(Field(name_ocaml, 0));
+  CXString result = clang_ext_DeclarationName_getCXXLiteralIdentifier(name);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(safe_string(clang_getCString(result)));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
 clang_ext_Decl_getName_wrapper(value arg_ocaml)
 {
   CAMLparam1(arg_ocaml);
@@ -8516,6 +8562,22 @@ clang_ext_Decl_getName_wrapper(value arg_ocaml)
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_clang_ext_declarationname(result));
   Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_UsingDirectiveDecl_getNominatedNamespace_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  CXCursor result = clang_ext_UsingDirectiveDecl_getNominatedNamespace(c);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -8640,6 +8702,22 @@ clang_ext_Decl_getNestedNameSpecifier_wrapper(value arg_ocaml)
   CXCursor arg;
   arg = Cxcursor_val(Field(arg_ocaml, 0));
   struct clang_ext_NestedNameSpecifier result = clang_ext_Decl_getNestedNameSpecifier(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_nestednamespecifier(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_Type_getQualifier_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXType arg;
+  arg = Cxtype_val(Field(arg_ocaml, 0));
+  struct clang_ext_NestedNameSpecifier result = clang_ext_Type_getQualifier(arg);
   {
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);

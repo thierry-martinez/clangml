@@ -240,3 +240,36 @@ let string_of_cxx_access_specifier specifier =
 
 let cursor_get_translation_unit cursor =
   Obj.obj (Obj.field (Obj.repr cursor) 1)
+
+let binary_of_overloaded_operator_kind kind =
+  match kind with
+  | Plus -> Add
+  | Minus -> Sub
+  | Star -> Mul
+  | Slash -> Div
+  | Percent -> Rem
+  | Amp -> And
+  | Pipe -> Or 
+  | Equal  -> Assign
+  | Less -> LT
+  | Greater -> GT
+  | PlusEqual -> AddAssign
+  | MinusEqual -> SubAssign
+  | StarEqual -> MulAssign
+  | SlashEqual -> DivAssign
+  | PercentEqual -> RemAssign
+  | AmpEqual -> AndAssign
+  | PipeEqual -> OrAssign
+  | LessLess -> Shl
+  | GreaterGreater -> Shr
+  | LessLessEqual -> ShlAssign
+  | GreaterGreaterEqual -> ShrAssign
+  | EqualEqual -> EQ
+  | ExclaimEqual -> NE
+  | LessEqual -> LE
+  | GreaterEqual -> GE
+  | AmpAmp -> LAnd
+  | PipePipe -> LOr
+  | Comma -> Comma
+  | ArrowStar -> PtrMemD
+  | _ -> invalid_arg "binary_of_overloaded_operator_kind"

@@ -6468,8 +6468,8 @@ if test -d tests; then :
   true
 else
   if mkdir tests; then :
-  if mkdir tests/clangml__ast; then :
-  if cp $srcdir/tests/clangml__ast/dune tests/clangml__ast/; then :
+  if mkdir tests/ast; then :
+  if cp $srcdir/tests/ast/dune tests/ast/; then :
   true
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5
