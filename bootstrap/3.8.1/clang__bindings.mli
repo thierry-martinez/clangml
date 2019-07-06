@@ -2452,8 +2452,20 @@ external ext_declaration_name_get_cxxoverloaded_operator :
 external ext_declaration_name_get_cxxname_type :
   clang_ext_declarationname -> cxtype =
     "clang_ext_DeclarationName_getCXXNameType_wrapper"
+external ext_declaration_name_get_as_identifier :
+  clang_ext_declarationname -> string =
+    "clang_ext_DeclarationName_getAsIdentifier_wrapper"
+external ext_declaration_name_get_cxxdeduction_guide_template :
+  clang_ext_declarationname -> cxcursor =
+    "clang_ext_DeclarationName_getCXXDeductionGuideTemplate_wrapper"
+external ext_declaration_name_get_cxxliteral_identifier :
+  clang_ext_declarationname -> string =
+    "clang_ext_DeclarationName_getCXXLiteralIdentifier_wrapper"
 external ext_decl_get_name :
   cxcursor -> clang_ext_declarationname = "clang_ext_Decl_getName_wrapper"
+external ext_using_directive_decl_get_nominated_namespace :
+  cxcursor -> cxcursor =
+    "clang_ext_UsingDirectiveDecl_getNominatedNamespace_wrapper"
 type clang_ext_nestednamespecifierkind =
   | Invalid 
   | Identifier 
@@ -2482,3 +2494,6 @@ external ext_nested_name_specifier_get_as_type :
 external ext_decl_get_nested_name_specifier :
   cxcursor -> clang_ext_nestednamespecifier =
     "clang_ext_Decl_getNestedNameSpecifier_wrapper"
+external ext_type_get_qualifier :
+  cxtype -> clang_ext_nestednamespecifier =
+    "clang_ext_Type_getQualifier_wrapper"
