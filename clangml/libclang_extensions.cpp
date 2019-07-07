@@ -2136,6 +2136,12 @@ extern "C" {
       }
       return MakeNestedNameSpecifierInvalid(getCursorTU(cursor));
     default:
+      if (auto d = GetCursorDecl(cursor)) {
+        if (auto td = llvm::dyn_cast_or_null<clang::TagDecl>(d)) {
+          return MakeNestedNameSpecifier(
+            td->getQualifier(), getCursorTU(cursor));
+        }
+      }
       return MakeNestedNameSpecifierInvalid(getCursorTU(cursor));
     }
   }
