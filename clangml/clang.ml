@@ -1123,6 +1123,21 @@ module Ast = struct
                     sub.desc
                   else
                     MaterializeTemporaryExpr sub
+              | BindTemporaryExpr ->
+                  let sub =
+                    match list_of_children cursor with
+                    | [sub] -> expr_of_cxcursor sub
+                    | _ -> raise Invalid_structure in
+                  if options.ignore_bind_temporary_expr then
+                    sub.desc
+                  else
+                    BindTemporaryExpr sub
+              | CXXDefaultArgExpr ->
+                  let sub =
+                    match list_of_children cursor with
+                    | [sub] -> expr_of_cxcursor sub
+                    | _ -> raise Invalid_structure in
+                  DefaultArg sub
               | kind ->
                   match compat_stmt_kind kind with
                   | CXXFoldExpr ->
@@ -1159,6 +1174,11 @@ module Ast = struct
               | [sub] -> expr_of_cxcursor sub
               | _ -> raise Invalid_structure in
             Throw sub
+        | TemplateRef ->
+            TemplateRef (ident_ref_of_cxcursor cursor)
+        | CXXStdInitializerListExpr ->
+            StdInitializerList
+              (cursor |> list_of_children |> List.map expr_of_cxcursor)
         | _ ->
             UnknownExpr (kind, ext_stmt_get_kind cursor)
       with Invalid_structure ->

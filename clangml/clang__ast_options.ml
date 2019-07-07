@@ -19,6 +19,8 @@ type t = {
 
     ignore_materialize_temporary_expr : bool;
 
+    ignore_bind_temporary_expr : bool;
+
     convert_integer_literals : bool;
     (** Convert integer literals into {!constr:Clang__ast.Int}.
         See {!constr:Clang__ast.IntegerLiteral} for examples. *)
@@ -34,6 +36,7 @@ let default = {
   ignore_paren_in_types = true;
   ignore_expr_with_cleanups = true;
   ignore_materialize_temporary_expr = true;
+  ignore_bind_temporary_expr = true;
   convert_integer_literals = true;
   convert_floating_literals = true;
 }

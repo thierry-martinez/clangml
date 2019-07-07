@@ -2053,6 +2053,7 @@ let () =
       args : expr list;
     }
   | MaterializeTemporaryExpr of expr
+  | BindTemporaryExpr of expr
   | Lambda of {
       capture_default : lambda_capture_default;
       captures : lambda_capture list;
@@ -2193,6 +2194,9 @@ let () =
       args : expr list;
     }
   | Throw of expr
+  | TemplateRef of ident_ref
+  | StdInitializerList of expr list
+  | DefaultArg of expr
   | UnexposedExpr of clang_ext_stmtkind
   | UnknownExpr of cxcursorkind * clang_ext_stmtkind
 
