@@ -2970,8 +2970,7 @@ let () =
   check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
   [%pattern?
     [_; { desc = UsingDeclaration {
-      nested_name_specifier =
-        Some [Namespace { desc = Namespace { name = "std" }}];
+      nested_name_specifier = Some [Namespace "std"];
       name = IdentifierName "cout" }}]]
     ]}*)
   | Constructor of {
@@ -3331,8 +3330,8 @@ let () =
           { desc = Return (Some { desc = Call {
               callee = { desc = DeclRef ({
                 nested_name_specifier = Some [
-                  Namespace { desc = Namespace { name = "ns1" }};
-                  Namespace { desc = Namespace { name = "ns2" }}];
+                  Namespace "ns1";
+                  Namespace "ns2";];
                 name = IdentifierName "f"})};
               args = []; }})}] }}}] -> ()
   | _ -> assert false

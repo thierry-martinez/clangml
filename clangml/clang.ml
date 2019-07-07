@@ -926,7 +926,7 @@ module Ast = struct
         | StringLiteral ->
             StringLiteral {
               bytes = ext_string_literal_get_bytes cursor;
-              byte_width = ext_string_literal_get_byte_length cursor;
+              byte_width = ext_string_literal_get_char_byte_width cursor;
               string_kind = ext_string_literal_get_kind cursor;
             }
         | CharacterLiteral ->
