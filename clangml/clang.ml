@@ -25,6 +25,11 @@ let option_cursor_bind f cursor : 'a option =
 let option_cursor f cursor : 'a option =
   option_cursor_bind (fun x -> Some (f x)) cursor
 
+let rec filter_out_prefix_from_list p list =
+  match list with
+  | hd :: tl when p hd -> filter_out_prefix_from_list p tl
+  | _ -> list
+
 let rec extract_prefix_from_list'
     (p : 'a -> 'b option) (accu : 'b list) (list : 'a list)
     : 'b list * 'a list =
@@ -709,6 +714,9 @@ module Ast = struct
         match children with
         | attr :: tl when get_cursor_kind attr = CXXFinalAttr -> true, tl
         | _ -> false, children in
+      let children =
+         children |> filter_out_prefix_from_list
+           (fun cursor -> get_cursor_kind cursor = TypeRef) in
       let bases, children =
         extract_prefix_from_list base_specifier_of_cxcursor_opt children in
       let fields = fields_of_children children in
