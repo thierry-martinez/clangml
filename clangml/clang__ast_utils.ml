@@ -92,7 +92,7 @@ let language_of_ids e : Clang__types.language =
   else if e = Clang_ext_languageids.cxx then
     CXX
   else
-    invalid_arg "language_of_ids"
+    invalid_arg (Printf.sprintf "language_of_ids: %d" (Obj.magic e))
 
 let ids_of_languages li =
   Clang_ext_languageids.

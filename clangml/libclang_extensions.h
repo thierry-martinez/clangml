@@ -139,6 +139,28 @@ clang_ext_Float_convertToDouble(CXFloat f);
 CXString
 clang_ext_StringLiteral_GetString(CXCursor c);
 
+CXString
+clang_ext_StringLiteral_getBytes(CXCursor c);
+
+unsigned int
+clang_ext_StringLiteral_getByteLength(CXCursor c);
+
+unsigned int
+clang_ext_StringLiteral_getCharByteWidth(CXCursor c);
+
+/* Copied from Expr.h:StringLiteral:StringKind */
+enum clang_ext_StringKind {
+  clang_ext_StringKind_Ascii,
+  clang_ext_StringKind_Wide,
+  clang_ext_StringKind_UTF8,
+  clang_ext_StringKind_UTF16,
+  clang_ext_StringKind_UTF32,
+  clang_ext_StringKind_Invalid
+};
+
+enum clang_ext_StringKind
+clang_ext_StringLiteral_getKind(CXCursor c);
+
 #ifdef LLVM_VERSION_BEFORE_3_9_0
 #define CLANG_EXT_UNARY_OPERATOR_Invalid CLANG_EXT_UNARY_OPERATOR_UO_Invalid
 #endif
@@ -752,3 +774,6 @@ clang_ext_Decl_getNestedNameSpecifier(CXCursor);
 
 struct clang_ext_NestedNameSpecifier
 clang_ext_Type_getQualifier(CXType);
+
+bool
+clang_ext_TagDecl_isCompleteDefinition(CXCursor);

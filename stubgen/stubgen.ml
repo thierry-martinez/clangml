@@ -1,3 +1,5 @@
+open Ppxlib
+
 module String_hashtbl = Hashtbl.Make (struct
   type t = string
 

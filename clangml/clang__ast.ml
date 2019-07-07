@@ -166,6 +166,8 @@ and lambda_capture_kind = clang_ext_lambdacapturekind
 
 and overloaded_operator_kind = clang_ext_overloadedoperatorkind
 
+and string_kind = clang_ext_stringkind
+
 and integer_literal =
   | Int of int
   | CXInt of cxint
@@ -701,6 +703,7 @@ and record_decl = {
     bases : base_specifier list; (** C++ *)
     fields : decl list;
     final : bool; (** C++11 *)
+    complete_definition : bool;
   }
 
 and function_decl = {
@@ -1521,13 +1524,14 @@ let () =
 
 let () =
   check Clangml_show.pp_stmt (parse_statement_list
-    ~options:({ Clang.Ast.Options.default with convert_floating_literals = true }))
+    ~options:({ Clang.Ast.Options.default with
+      convert_floating_literals = true }))
     example @@ fun ast -> match ast with
   | [{ desc = Expr { desc = FloatingLiteral f }}] ->
     assert (Clang.Ast.float_of_literal f = 0.5)
   | _ -> assert false
     ]}*)
-  | StringLiteral of string
+  | StringLiteral of string_literal
 (** String literal.
     {[
 let example = "\"Hello!\";"
@@ -1535,7 +1539,8 @@ let example = "\"Hello!\";"
 let () =
   check Clangml_show.pp_stmt parse_statement_list example @@
   fun ast -> match ast with
-  | [{ desc = Expr { desc = StringLiteral "Hello!" }}] -> ()
+  | [{ desc = Expr { desc =
+      StringLiteral { byte_width = 1; bytes = "Hello!" } }}] -> ()
   | _ -> assert false
     ]}*)
   | CharacterLiteral of {
@@ -1740,7 +1745,7 @@ let () =
   | [{ desc = Expr { desc = Cast {
       kind = CStyle;
       qual_type = { desc = Pointer _ };
-      operand = { desc = StringLiteral "Hello" }} }}] -> ()
+      operand = { desc = StringLiteral { bytes = "Hello" }} }}] -> ()
   | _ -> assert false
     ]}
 
@@ -2005,10 +2010,12 @@ let () =
   check Clangml_show.pp_stmt parse_statement_list example
   @@ fun ast -> match ast with
   | [ { desc = Expr { desc = GenericSelection {
-          controlling_expr = { desc = StringLiteral "expr" };
+          controlling_expr = { desc = StringLiteral { bytes = "expr" } };
           assocs = [
-            (Some { desc = BuiltinType Double}, { desc = IntegerLiteral (Int 1)});
-            (Some { desc = BuiltinType Float}, { desc = IntegerLiteral (Int 2)});
+            (Some { desc = BuiltinType Double},
+              { desc = IntegerLiteral (Int 1)});
+            (Some { desc = BuiltinType Float},
+              { desc = IntegerLiteral (Int 2)});
             (None, { desc = IntegerLiteral (Int 3)})] }}}] -> ()
   | _ -> assert false
    ]}
@@ -2195,6 +2202,7 @@ let () =
     }
   | Throw of expr
   | TemplateRef of ident_ref
+  | OverloadedDeclRef of ident_ref
   | StdInitializerList of expr list
   | DefaultArg of expr
   | UnexposedExpr of clang_ext_stmtkind
@@ -2218,6 +2226,12 @@ and cast_kind =
 and unary_expr_or_type_trait =
   | ArgumentExpr of expr
   | ArgumentType of qual_type
+
+and string_literal = {
+  byte_width : int;
+  bytes : string;
+  string_kind : string_kind;
+}
 
 (** {3 Declarations} *)
 
@@ -2559,6 +2573,7 @@ let () =
   | EnumDecl of {
       name : string;
       constants : enum_constant list;
+      complete_definition : bool;
     }
 (** Enum declaration.
     {[

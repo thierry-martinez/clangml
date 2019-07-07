@@ -631,6 +631,57 @@ extern "C" {
     return cxstring_createRef("");
   }
 
+  CXString
+  clang_ext_StringLiteral_getBytes(CXCursor c)
+  {
+    const clang::Expr *e = GetCursorExpr(c);
+    if (auto m = llvm::dyn_cast_or_null<clang::StringLiteral>(e)) {
+      return cxstring_createDup(m->getBytes());
+    }
+    return cxstring_createRef("");
+  }
+
+  unsigned int
+  clang_ext_StringLiteral_getByteLength(CXCursor c)
+  {
+    const clang::Expr *e = GetCursorExpr(c);
+    if (auto m = llvm::dyn_cast_or_null<clang::StringLiteral>(e)) {
+      return m->getByteLength();
+    }
+    return 0;
+  }
+
+  unsigned int
+  clang_ext_StringLiteral_getCharByteWidth(CXCursor c)
+  {
+    const clang::Expr *e = GetCursorExpr(c);
+    if (auto m = llvm::dyn_cast_or_null<clang::StringLiteral>(e)) {
+      return m->getCharByteWidth();
+    }
+    return 0;
+  }
+
+  enum clang_ext_StringKind
+  clang_ext_StringLiteral_getKind(CXCursor c)
+  {
+    const clang::Expr *e = GetCursorExpr(c);
+    if (auto m = llvm::dyn_cast_or_null<clang::StringLiteral>(e)) {
+      switch (m->getKind()) {
+      case clang::StringLiteral::Ascii:
+        return clang_ext_StringKind_Ascii;
+      case clang::StringLiteral::Wide:
+        return clang_ext_StringKind_Wide;
+      case clang::StringLiteral::UTF8:
+        return clang_ext_StringKind_UTF8;
+      case clang::StringLiteral::UTF16:
+        return clang_ext_StringKind_UTF16;
+      case clang::StringLiteral::UTF32:
+        return clang_ext_StringKind_UTF32;
+      }
+    }
+    return clang_ext_StringKind_Invalid;
+  }
+
   enum clang_ext_UnaryOperatorKind
   clang_ext_UnaryOperator_getOpcode(CXCursor c)
   {
@@ -2110,4 +2161,14 @@ extern "C" {
     return MakeNestedNameSpecifierInvalid(GetTU(t));
   }
 
+  bool
+  clang_ext_TagDecl_isCompleteDefinition(CXCursor cursor)
+  {
+    if (auto d = GetCursorDecl(cursor)) {
+      if (auto td = llvm::dyn_cast_or_null<clang::TagDecl>(d)) {
+        return td->isCompleteDefinition();
+      }
+    }
+    return false;
+  }
 }

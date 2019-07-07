@@ -674,7 +674,8 @@ module Ast = struct
           match get_cursor_kind cursor with
           | EnumConstantDecl -> enum_constant_of_cxcursor cursor
           | _ -> raise Invalid_structure in
-      EnumDecl { name; constants }
+      let complete_definition = ext_tag_decl_is_complete_definition cursor in
+      EnumDecl { name; constants; complete_definition }
 
     and enum_constant_of_cxcursor cursor =
       let constant_name = get_cursor_spelling cursor in
@@ -711,7 +712,10 @@ module Ast = struct
       let bases, children =
         extract_prefix_from_list base_specifier_of_cxcursor_opt children in
       let fields = fields_of_children children in
-      RecordDecl { keyword; nested_name_specifier; name; bases; fields; final }
+      let complete_definition = ext_tag_decl_is_complete_definition cursor in
+      RecordDecl {
+        keyword; nested_name_specifier; name; bases; fields; final;
+        complete_definition }
 
     and fields_of_children children =
       children |> List.map (decl_of_cxcursor ~in_record:true)
@@ -920,7 +924,11 @@ module Ast = struct
               | Some f -> Float f in
             FloatingLiteral literal
         | StringLiteral ->
-            StringLiteral (ext_string_literal_get_string cursor)
+            StringLiteral {
+              bytes = ext_string_literal_get_bytes cursor;
+              byte_width = ext_string_literal_get_byte_length cursor;
+              string_kind = ext_string_literal_get_kind cursor;
+            }
         | CharacterLiteral ->
             let kind = ext_character_literal_get_character_kind cursor in
             let value = ext_character_literal_get_value cursor in
@@ -1123,7 +1131,7 @@ module Ast = struct
                     sub.desc
                   else
                     MaterializeTemporaryExpr sub
-              | BindTemporaryExpr ->
+              | CXXBindTemporaryExpr ->
                   let sub =
                     match list_of_children cursor with
                     | [sub] -> expr_of_cxcursor sub
@@ -1138,6 +1146,9 @@ module Ast = struct
                     | [sub] -> expr_of_cxcursor sub
                     | _ -> raise Invalid_structure in
                   DefaultArg sub
+              | CXXStdInitializerListExpr ->
+                  StdInitializerList
+                    (cursor |> list_of_children |> List.map expr_of_cxcursor)
               | kind ->
                   match compat_stmt_kind kind with
                   | CXXFoldExpr ->
@@ -1176,9 +1187,8 @@ module Ast = struct
             Throw sub
         | TemplateRef ->
             TemplateRef (ident_ref_of_cxcursor cursor)
-        | CXXStdInitializerListExpr ->
-            StdInitializerList
-              (cursor |> list_of_children |> List.map expr_of_cxcursor)
+        | OverloadedDeclRef ->
+            OverloadedDeclRef (ident_ref_of_cxcursor cursor)
         | _ ->
             UnknownExpr (kind, ext_stmt_get_kind cursor)
       with Invalid_structure ->

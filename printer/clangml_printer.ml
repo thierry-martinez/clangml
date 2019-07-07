@@ -147,9 +147,9 @@ and expr_prec prec fmt (e : Clang.Expr.t) =
         | Ascii -> Format.fprintf fmt "'%a'" c_escape_char (char_of_int value)
         | _ -> failwith "Not implemented character kind"
       end
-  | StringLiteral str ->
+  | StringLiteral { bytes } ->
       Format.pp_print_string fmt "\"";
-      String.iter (c_escape_char fmt) str;
+      String.iter (c_escape_char fmt) bytes;
       Format.pp_print_string fmt "\""
   | Call {
         callee = { desc = DeclRef { name = OperatorName kind }; _ };

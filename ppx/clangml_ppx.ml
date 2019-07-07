@@ -337,11 +337,11 @@ module Remove_placeholder (X : Lifter) = struct
       match
         match expr with
         | { desc = BinaryOperator {
-              lhs = { desc = StringLiteral ident };
+              lhs = { desc = StringLiteral { bytes } };
               kind = Comma;
               rhs = { desc = Cast { operand =
                 { desc = IntegerLiteral (Int 0); _ }; _ }; _ }}; _} ->
-            find_and_remove table ident
+            find_and_remove table bytes
         | _ -> None
       with
       | Some payload ->
