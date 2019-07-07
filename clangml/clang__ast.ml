@@ -2205,7 +2205,7 @@ let () =
   | TemplateRef of ident_ref
   | OverloadedDeclRef of ident_ref
   | StdInitializerList of expr list
-  | DefaultArg of expr
+  | DefaultArg
   | UnexposedExpr of clang_ext_stmtkind
   | UnknownExpr of cxcursorkind * clang_ext_stmtkind
 

@@ -1141,11 +1141,7 @@ module Ast = struct
                   else
                     BindTemporaryExpr sub
               | CXXDefaultArgExpr ->
-                  let sub =
-                    match list_of_children cursor with
-                    | [sub] -> expr_of_cxcursor sub
-                    | _ -> raise Invalid_structure in
-                  DefaultArg sub
+                  DefaultArg
               | CXXStdInitializerListExpr ->
                   StdInitializerList
                     (cursor |> list_of_children |> List.map expr_of_cxcursor)
