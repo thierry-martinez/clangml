@@ -1818,6 +1818,14 @@ extern "C" {
     return false;
   }
 
+  void
+  clang_ext_DeclarationName_dispose(struct clang_ext_DeclarationName name)
+  {
+    if (auto *d = GetDeclarationName(name)) {
+      delete d;
+    }
+  }
+
   enum clang_ext_DeclarationNameKind
   clang_ext_DeclarationName_getKind(
     struct clang_ext_DeclarationName name)

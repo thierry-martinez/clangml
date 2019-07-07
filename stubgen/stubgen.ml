@@ -2030,6 +2030,9 @@ let main cflags llvm_config prefix =
     add_type (Pcre.regexp "^clang_ext_LambdaCapture$")
       (empty_type_interface |>
        make_destructor "clang_ext_LambdaCapture_dispose") |>
+    add_type (Pcre.regexp "^clang_ext_DeclarationName$")
+      (empty_type_interface |>
+       make_destructor "clang_ext_DeclarationName_dispose") |>
     add_type (Pcre.regexp "^CXIndex$")
       (empty_type_interface |>
        make_destructor "clang_disposeIndex") |>

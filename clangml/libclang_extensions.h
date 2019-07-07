@@ -661,6 +661,9 @@ struct clang_ext_DeclarationName {
   CXTranslationUnit tu;
 };
 
+void
+clang_ext_DeclarationName_dispose(struct clang_ext_DeclarationName name);
+
 /* Copied from clang/AST/DeclarationName.h */
 enum clang_ext_DeclarationNameKind {
   CLANG_EXT_DECLARATION_NAME_Identifier,
