@@ -2176,7 +2176,8 @@ let () =
       name = "f";
       body = Some { desc = Compound [
         { desc = Decl [{ desc = Var {
-          var_type = { desc = Pointer { desc = Record ({ name = IdentifierName "T" })}};
+          var_type = { desc = Pointer { desc =
+            Record ({ name = IdentifierName "T" })}};
           var_name = "t";
           var_init = Some { desc = New {
             placement_args = [];
