@@ -183,10 +183,10 @@ module Ast = struct
               Some (NestedIdentifier ident)
           | Namespace ->
               let decl = ext_nested_name_specifier_get_as_namespace name in
-              Some (Namespace (decl_of_cxcursor decl))
+              Some (Namespace (get_cursor_spelling decl))
           | NamespaceAlias ->
               let decl = ext_nested_name_specifier_get_as_namespace name in
-              Some (NamespaceAlias (decl_of_cxcursor decl))
+              Some (NamespaceAlias (get_cursor_spelling decl))
           | TypeSpec ->
               let ty = ext_nested_name_specifier_get_as_type name in
               Some (TypeSpec (ty |> of_cxtype))
@@ -223,7 +223,7 @@ module Ast = struct
       | CXXDeductionGuideName ->
           DeductionGuideName
             (ext_declaration_name_get_cxxdeduction_guide_template name |>
-             decl_of_cxcursor)
+             (decl_of_cxcursor ~in_record:false))
       | CXXOperatorName ->
           OperatorName (ext_declaration_name_get_cxxoverloaded_operator name)
       | CXXLiteralOperatorName ->

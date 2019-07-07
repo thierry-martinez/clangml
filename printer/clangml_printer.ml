@@ -280,13 +280,12 @@ and print_ident_ref fmt ident_ref =
       (component : Clang.Ast.nested_name_specifier_component) =
     match component with
     | NestedIdentifier s -> Format.fprintf fmt "%s::" s
-    | Namespace { desc = Namespace { name }}
-    | NamespaceAlias { desc= Namespace { name }} ->
+    | Namespace name
+    | NamespaceAlias name ->
         Format.fprintf fmt "%s::" name
     | TypeSpec ty
     | TypeSpecWithTemplate ty ->
-        Format.fprintf fmt "%a::" qual_type ty
-    | _ -> failwith "Not implemented print_ident_ref" in
+        Format.fprintf fmt "%a::" qual_type ty in
   let print_nested_name_specifier nested_name_specifier =
     match nested_name_specifier with
     | [] -> Format.pp_print_string fmt "::"

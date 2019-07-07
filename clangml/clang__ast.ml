@@ -679,8 +679,8 @@ and nested_name_specifier = nested_name_specifier_component list
 
 and nested_name_specifier_component =
   | NestedIdentifier of string
-  | Namespace of decl
-  | NamespaceAlias of decl
+  | Namespace of string
+  | NamespaceAlias of string
   | TypeSpec of qual_type
   | TypeSpecWithTemplate of qual_type
 
