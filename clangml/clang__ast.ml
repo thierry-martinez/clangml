@@ -1540,7 +1540,7 @@ let () =
   check Clangml_show.pp_stmt parse_statement_list example @@
   fun ast -> match ast with
   | [{ desc = Expr { desc =
-      StringLiteral { byte_width = 1; bytes = "Hello!" } }}] -> ()
+      StringLiteral { byte_width = 1; bytes = "Hello!" }}}] -> ()
   | _ -> assert false
     ]}*)
   | CharacterLiteral of {
@@ -1745,7 +1745,7 @@ let () =
   | [{ desc = Expr { desc = Cast {
       kind = CStyle;
       qual_type = { desc = Pointer _ };
-      operand = { desc = StringLiteral { bytes = "Hello" }} }}] -> ()
+      operand = { desc = StringLiteral { bytes = "Hello" }}}}}] -> ()
   | _ -> assert false
     ]}
 
@@ -2010,7 +2010,7 @@ let () =
   check Clangml_show.pp_stmt parse_statement_list example
   @@ fun ast -> match ast with
   | [ { desc = Expr { desc = GenericSelection {
-          controlling_expr = { desc = StringLiteral { bytes = "expr" } };
+          controlling_expr = { desc = StringLiteral { bytes = "expr" }};
           assocs = [
             (Some { desc = BuiltinType Double},
               { desc = IntegerLiteral (Int 1)});
