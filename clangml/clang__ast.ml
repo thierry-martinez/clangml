@@ -680,6 +680,7 @@ and template_argument =
 and nested_name_specifier = nested_name_specifier_component list
 
 and nested_name_specifier_component =
+  | Global
   | NestedIdentifier of string
   | Namespace of string
   | NamespaceAlias of string
@@ -709,6 +710,7 @@ and record_decl = {
 and function_decl = {
     linkage : linkage_kind;
     function_type : function_type;
+    nested_name_specifier : nested_name_specifier option; (** C++ *)
     name : string;
     body : stmt option;
     deleted : bool;
@@ -1770,7 +1772,7 @@ let () =
   | Member of {
       base : expr;
       arrow : bool;
-      field : (ident_ref, qual_type) open_node;
+      field : field;
     }
 (** Member dot or arrow
     {[
@@ -1783,7 +1785,7 @@ let () =
       lhs = { desc = Member {
         base = { desc = DeclRef ({ name = IdentifierName "s" }) };
         arrow = false;
-        field = { desc = { name = IdentifierName "i" } }}};
+        field = FieldName { desc = { name = IdentifierName "i" } }}};
       kind = Assign;
       rhs = { desc = IntegerLiteral (Int 0)}}}}] -> ()
   | _ -> assert false
@@ -1797,7 +1799,7 @@ let () =
       lhs = { desc = Member {
         base = { desc = DeclRef ({ name = IdentifierName "p" }) };
         arrow = true;
-        field = { desc = { name = IdentifierName "i" } }}};
+        field = FieldName { desc = { name = IdentifierName "i" } }}};
       kind = Assign;
       rhs = { desc = IntegerLiteral (Int 0)}}}}] -> ()
   | _ -> assert false
@@ -2209,6 +2211,17 @@ let () =
   | UnexposedExpr of clang_ext_stmtkind
   | UnknownExpr of cxcursorkind * clang_ext_stmtkind
 
+and field =
+  | FieldName of (ident_ref, qual_type) open_node
+  | PseudoDestructor of {
+      nested_name_specifier : nested_name_specifier option;
+      qual_type : qual_type;
+    }
+  | DependentScopeMember of {
+      ident_ref : ident_ref;
+      template_arguments : template_argument list;
+    }
+
 and lambda_capture = {
    capture_kind : lambda_capture_kind;
    implicit : bool;
@@ -2413,16 +2426,12 @@ let () =
   | _ -> assert false
     ]}*)
   | CXXMethod of {
+      function_decl : function_decl;
       type_ref : qual_type option;
-      function_type : function_type;
-      name : string;
-      body : stmt option;
       defaulted : bool;
       static : bool;
       binding : cxx_method_binding_kind;
       const : bool;
-      deleted : bool;
-      constexpr : bool;
     }
 (** C++ method.
 

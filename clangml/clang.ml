@@ -76,8 +76,9 @@ module Ast = struct
 
   let function_decl
       ?(linkage = NoLinkage) ?body ?(deleted = false) ?(constexpr = false)
-      function_type name =
-    { linkage; body; deleted; constexpr; function_type; name }
+      ?nested_name_specifier function_type name =
+    { linkage; body; deleted; constexpr; function_type; nested_name_specifier;
+      name }
 
   let function_type ?(calling_conv = (C : cxcallingconv)) ?parameters result =
     { calling_conv; parameters; result }
@@ -198,8 +199,9 @@ module Ast = struct
           | TypeSpecWithTemplate ->
               let ty = ext_nested_name_specifier_get_as_type name in
               Some (TypeSpecWithTemplate (ty |> of_cxtype))
+          | Global -> Some Global
           | Invalid -> None
-          | Global | Super -> raise Invalid_structure in
+          | Super -> raise Invalid_structure in
         match component with
         | None -> accu
         | Some component ->
@@ -208,7 +210,6 @@ module Ast = struct
               (ext_nested_name_specifier_get_kind name) in
       match ext_nested_name_specifier_get_kind name with
       | Invalid -> None
-      | Global -> Some []
       | kind -> Some (enumerate [] name kind)
 
     and extract_declaration_name cursor =
@@ -588,6 +589,9 @@ module Ast = struct
 
     and function_decl_of_cxcursor cursor children =
       let linkage = cursor |> get_cursor_linkage in
+      let nested_name_specifier =
+        cursor |> ext_decl_get_nested_name_specifier |>
+        convert_nested_name_specifier in
       let function_type = function_type_of_decl cursor in
       let name = get_cursor_spelling cursor in
       let body : stmt option =
@@ -595,7 +599,8 @@ module Ast = struct
         | last :: _ when get_cursor_kind last = CompoundStmt ->
             Some (stmt_of_cxcursor last)
         | _ -> None in
-      Clang__ast.Function { linkage; function_type; name; body;
+      Clang__ast.Function { linkage; function_type;
+        nested_name_specifier; name; body;
         deleted = ext_function_decl_is_deleted cursor;
         constexpr = ext_function_decl_is_constexpr cursor; }
 
@@ -618,12 +623,18 @@ module Ast = struct
               None in
       let deleted = ext_function_decl_is_deleted cursor in
       let constexpr = ext_function_decl_is_constexpr cursor in
+      let nested_name_specifier =
+        cursor |> ext_decl_get_nested_name_specifier |>
+        convert_nested_name_specifier in
+      let linkage = cursor |> get_cursor_linkage in
+      let function_decl = {
+        linkage; function_type; nested_name_specifier; name; body; deleted;
+        constexpr } in
       if can_be_function && type_ref = None then
-        let linkage = cursor |> get_cursor_linkage in
-        Function { linkage; function_type; name; body; deleted; constexpr }
+        Function function_decl
       else
         CXXMethod {
-          type_ref; function_type; name; body;
+          type_ref; function_decl;
           defaulted = ext_cxxmethod_is_defaulted cursor;
           static = cxxmethod_is_static cursor;
           binding =
@@ -634,7 +645,6 @@ module Ast = struct
             else
               NonVirtual;
           const = ext_cxxmethod_is_const cursor;
-          deleted; constexpr
         }
 
     and parameters_of_cxtype cxtype =
@@ -999,14 +1009,37 @@ module Ast = struct
         | MemberRefExpr ->
             begin match list_of_children cursor |> filter_out_typeref with
             | [] -> MemberRef (get_cursor_spelling cursor)
-            | [lhs] ->
+            | lhs :: _ ->
                 let base = expr_of_cxcursor lhs in
-                let field = get_cursor_referenced cursor in
-                let ident = ident_ref_of_cxcursor field in
-                let field = node ~cursor:field ident in
+                let field : field =
+                  match ext_stmt_get_kind cursor with
+                  | CXXPseudoDestructorExpr ->
+                      PseudoDestructor {
+                        nested_name_specifier =
+                          ext_decl_get_nested_name_specifier cursor |>
+                          convert_nested_name_specifier;
+                        qual_type =
+                          cursor |>
+                          ext_cxxpseudo_destructor_expr_get_destroyed_type |>
+                          of_cxtype }
+                  | CXXDependentScopeMemberExpr ->
+                      let template_arguments =
+                        List.init
+                       (ext_cxxdependent_scope_member_expr_get_num_template_args
+                           cursor) begin fun i ->
+                 ext_cxxdependent_scope_member_expr_get_template_arg cursor i |>
+                           make_template_argument
+                           end in
+                      DependentScopeMember {
+                        ident_ref = ident_ref_of_cxcursor cursor;
+                        template_arguments
+                      }
+                  | _ ->
+                      let field = get_cursor_referenced cursor in
+                      let ident = ident_ref_of_cxcursor field in
+                      FieldName (node ~cursor:field ident) in
                 let arrow = ext_member_ref_expr_is_arrow cursor in
                 Member { base; arrow; field }
-            | _ -> raise Invalid_structure
             end
         | ArraySubscriptExpr ->
             let base, index =

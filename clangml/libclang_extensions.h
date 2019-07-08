@@ -777,3 +777,12 @@ clang_ext_Type_getQualifier(CXType);
 
 bool
 clang_ext_TagDecl_isCompleteDefinition(CXCursor);
+
+CXType
+clang_ext_CXXPseudoDestructorExpr_getDestroyedType(CXCursor);
+
+unsigned int
+clang_ext_CXXDependentScopeMemberExpr_getNumTemplateArgs(CXCursor);
+
+struct clang_ext_TemplateArgument
+clang_ext_CXXDependentScopeMemberExpr_getTemplateArg(CXCursor, unsigned int);

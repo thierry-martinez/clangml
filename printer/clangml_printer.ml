@@ -192,8 +192,12 @@ and expr_prec prec fmt (e : Clang.Expr.t) =
       let arrow_str =
         if arrow then "->"
         else "." in
-      Format.fprintf fmt "@[%a%s%a@]" expr base arrow_str print_ident_ref
-        field.desc
+      let print_field fmt (field : Clang.Ast.field) =
+        match field with
+        | FieldName name -> print_ident_ref fmt name.desc
+        | _ -> invalid_arg "print_field" in
+      Format.fprintf fmt "@[%a%s%a@]" expr base arrow_str
+        print_field field
   | Cast { kind = CStyle; qual_type = ty; operand } ->
       maybe_parentheses 2 prec fmt (fun fmt ->
         Format.fprintf fmt "@[(%a)@ %a@]" qual_type ty (expr_prec 4) operand)
@@ -279,6 +283,7 @@ and print_ident_ref fmt ident_ref =
   let print_nested_name_specifier_component
       (component : Clang.Ast.nested_name_specifier_component) =
     match component with
+    | Global -> Format.pp_print_string fmt "::"
     | NestedIdentifier s -> Format.fprintf fmt "%s::" s
     | Namespace name
     | NamespaceAlias name ->
@@ -286,13 +291,8 @@ and print_ident_ref fmt ident_ref =
     | TypeSpec ty
     | TypeSpecWithTemplate ty ->
         Format.fprintf fmt "%a::" qual_type ty in
-  let print_nested_name_specifier nested_name_specifier =
-    match nested_name_specifier with
-    | [] -> Format.pp_print_string fmt "::"
-    | _ ->
-        nested_name_specifier |>
-        List.iter print_nested_name_specifier_component in
-  Option.iter print_nested_name_specifier ident_ref.nested_name_specifier;
+  Option.iter (List.iter print_nested_name_specifier_component)
+    ident_ref.nested_name_specifier;
   let print_declaration_name (name : Clang.Ast.declaration_name) =
     match name with
     | IdentifierName s
