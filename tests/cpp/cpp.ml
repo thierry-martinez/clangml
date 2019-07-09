@@ -541,14 +541,14 @@ let () =
         var_name = "v";
         var_type = { desc = BuiltinType Int };
         var_init = Some { desc = Member {
-          base = { desc = Cast {
+          base = Some { desc = Cast {
             kind = Functional;
             qual_type = { desc = Record ({ name = IdentifierName "A" }) };
             operand = { desc = Construct {
               qual_type = { desc = Record ({ name = IdentifierName "A" }) };
               args = [{ desc = BoolLiteral true }]}}}};
           arrow = false;
-          field = { desc = { name = IdentifierName "m" } }}};
+          field = FieldName { desc = { name = IdentifierName "m" } }}};
         constexpr = true }}];
     check_pattern_decl bindings#f2 [%pattern? {
       desc = Function {
@@ -558,7 +558,7 @@ let () =
             non_variadic = [{ desc = {
               qual_type = { desc = BuiltinType Int };
               name = "k" }}]}};
-        name = "f2";
+        name = IdentifierName "f2";
         constexpr = true }}];
     check_pattern_decl bindings#incr [%pattern? {
       desc = Function {
@@ -568,7 +568,7 @@ let () =
             non_variadic = [{ desc = {
               qual_type = { desc = LValueReference { desc = BuiltinType Int }};
               name = "n" }}]}};
-        name = "incr";
+        name = IdentifierName "incr";
         constexpr = true }}];
     check_pattern_decl bindings#h [%pattern? {
       desc = Function {
@@ -578,7 +578,7 @@ let () =
             non_variadic = [{ desc = {
               qual_type = { desc = BuiltinType Int };
               name = "k" }}]}};
-        name = "h";
+        name = IdentifierName "h";
         constexpr = true }}];
     check_pattern_decl bindings#y [%pattern? {
       desc = Var {
@@ -628,15 +628,15 @@ let () =
   check_pattern_decl bindings#x3 [%pattern? {
     desc = Var {
       var_type = { desc = Decltype { desc = Member {
-        base = { desc = DeclRef ({ name = IdentifierName "a" })};
+        base = Some { desc = DeclRef ({ name = IdentifierName "a" })};
         arrow = true;
-        field = { desc = { name = IdentifierName "x" } }}}}}}];
+        field = FieldName { desc = { name = IdentifierName "x" } }}}}}}];
   check_pattern_decl bindings#x4 [%pattern? {
     desc = Var {
       var_type = { desc = Decltype { desc = Member {
-        base = { desc = DeclRef ({ name = IdentifierName "a" })};
+        base = Some { desc = DeclRef ({ name = IdentifierName "a" })};
         arrow = true;
-        field = { desc = { name = IdentifierName "x" } }}}}}}]
+        field = FieldName { desc = { name = IdentifierName "x" } }}}}}}]
 
 (* 12.1 Constructors *)
 
@@ -676,11 +676,12 @@ let () =
   check_pattern_decl bindings#int [%pattern? {
     desc = CXXMethod {
       type_ref = None;
-      function_type = {
-        result = { desc = BuiltinType Int };
-        parameters = Some { non_variadic = [] }};
-      name = "operator int";
-      body = None; }}];
+      function_decl = {
+        function_type = {
+          result = { desc = BuiltinType Int };
+          parameters = Some { non_variadic = [] }};
+        name = ConversionFunctionName { desc = BuiltinType Int };
+        body = None; }}}];
   check_pattern_expr bindings#i1 [%pattern? {
     desc = Cast {
       kind = Functional;
@@ -691,9 +692,9 @@ let () =
         operand = { desc = Call {
           callee = {
             desc = Member {
-              base = { desc = DeclRef ({ name = IdentifierName "a" })};
+              base = Some { desc = DeclRef ({ name = IdentifierName "a" })};
               arrow = false;
-              field = { desc = { name = ConversionFunctionName
+              field = FieldName { desc = { name = ConversionFunctionName
                 { desc = BuiltinType Int }}}}}}}}}}}];
   check_pattern_expr bindings#i2 [%pattern? {
     desc = Cast {
@@ -705,9 +706,9 @@ let () =
         operand = { desc = Call {
           callee = {
             desc = Member {
-              base = { desc = DeclRef ({ name = IdentifierName "a" })};
+              base = Some { desc = DeclRef ({ name = IdentifierName "a" })};
               arrow = false;
-              field = { desc = { name = ConversionFunctionName
+              field = FieldName { desc = { name = ConversionFunctionName
                 { desc = BuiltinType Int }}}}}}}}}}}];
   check_pattern_expr bindings#i3 [%pattern? {
     desc = Cast {
@@ -716,9 +717,9 @@ let () =
       operand = { desc = Call {
         callee = {
           desc = Member {
-            base = { desc = DeclRef ({ name = IdentifierName "a" })};
+            base = Some { desc = DeclRef ({ name = IdentifierName "a" })};
             arrow = false;
-            field = { desc = { name = ConversionFunctionName
+            field = FieldName { desc = { name = ConversionFunctionName
               { desc = BuiltinType Int }}}}}}}}}]
 
 (* 14.1 Template parameters *)
@@ -757,7 +758,7 @@ let () =
           parameters = Some { non_variadic = [{ desc = {
             name = "t";
             qual_type = { desc = TemplateTypeParm "T" }}}]}};
-        name = "f";
+        name = IdentifierName "f";
         body = Some { desc = Compound [
           { desc = Decl [{ desc = Var {
               var_type = { desc = TemplateTypeParm "T" };

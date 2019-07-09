@@ -57,7 +57,7 @@ module Ast : sig
 
   val function_decl : ?linkage:linkage_kind -> ?body:stmt -> ?deleted:bool ->
     ?constexpr:bool -> ?nested_name_specifier:nested_name_specifier ->
-    function_type -> string -> function_decl
+    function_type -> declaration_name -> function_decl
 
   val function_type : ?calling_conv:calling_conv -> ?parameters:parameters ->
     qual_type -> function_type

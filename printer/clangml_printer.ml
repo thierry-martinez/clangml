@@ -186,9 +186,9 @@ and expr_prec prec fmt (e : Clang.Expr.t) =
           (expr_prec right_prec) rhs)
   | DeclRef ident_ref ->
       print_ident_ref fmt ident_ref
-  | MemberRef member_ref ->
-      Format.pp_print_string fmt member_ref
-  | Member { base; arrow; field } ->
+  | Member { base = None; field = FieldName field } ->
+      print_ident_ref fmt field.desc
+  | Member { base = Some base; arrow; field } ->
       let arrow_str =
         if arrow then "->"
         else "." in
@@ -270,7 +270,7 @@ and print_parameters fmt parameters =
 
 and print_function_type fmt function_type name =
   typed_value
-    (fun fmt -> Format.fprintf fmt "@[%s(%a)@]" name
+    (fun fmt -> Format.fprintf fmt "@[%a(%a)@]" print_declaration_name name
         (pp_print_option print_parameters) function_type.parameters)
     fmt function_type.result
 
@@ -293,18 +293,19 @@ and print_ident_ref fmt ident_ref =
         Format.fprintf fmt "%a::" qual_type ty in
   Option.iter (List.iter print_nested_name_specifier_component)
     ident_ref.nested_name_specifier;
-  let print_declaration_name (name : Clang.Ast.declaration_name) =
-    match name with
-    | IdentifierName s
-    | LiteralOperatorName s -> Format.pp_print_string fmt s
-    | ConstructorName ty
-    | ConversionFunctionName ty -> qual_type fmt ty
-    | DestructorName ty -> Format.fprintf fmt "~%a" qual_type ty
-    | OperatorName op ->
-        Format.fprintf fmt "operator%s"
-          (Clang.ext_overloaded_operator_get_spelling op)
-    | _ -> failwith "Not implemented print_ident_ref.declaration_name" in
-  print_declaration_name ident_ref.name
+  print_declaration_name fmt ident_ref.name
+
+and print_declaration_name fmt (name : Clang.Ast.declaration_name) =
+  match name with
+  | IdentifierName s
+  | LiteralOperatorName s -> Format.pp_print_string fmt s
+  | ConstructorName ty
+  | ConversionFunctionName ty -> qual_type fmt ty
+  | DestructorName ty -> Format.fprintf fmt "~%a" qual_type ty
+  | OperatorName op ->
+      Format.fprintf fmt "operator%s"
+        (Clang.ext_overloaded_operator_get_spelling op)
+  | _ -> failwith "Not implemented print_ident_ref.declaration_name"
 
 and typed_value fmt_value fmt t =
   match t.desc with

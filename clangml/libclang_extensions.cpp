@@ -2034,6 +2034,13 @@ extern "C" {
               d->getMember(), getCursorTU(cursor));
           }
           return MakeDeclarationNameInvalid(getCursorTU(cursor));
+        case clang::Stmt::DependentScopeDeclRefExprClass:
+          if (auto d =
+              llvm::dyn_cast_or_null<clang::DependentScopeDeclRefExpr>(s)) {
+            return MakeDeclarationName(
+              d->getDeclName(), getCursorTU(cursor));
+          }
+          return MakeDeclarationNameInvalid(getCursorTU(cursor));
         default:
           if (auto d = llvm::dyn_cast_or_null<clang::OverloadExpr>(s)) {
             return MakeDeclarationName(
@@ -2143,13 +2150,26 @@ extern "C" {
   {
     switch (cursor.kind) {
     case CXCursor_DeclRefExpr:
-      if (auto d =
-          llvm::dyn_cast_or_null<clang::DeclRefExpr>(GetCursorExpr(cursor))) {
-        return MakeNestedNameSpecifier(d->getQualifier(), getCursorTU(cursor));
-      }
-      else if (auto d =
-          llvm::dyn_cast_or_null<clang::OverloadExpr>(GetCursorExpr(cursor))) {
-        return MakeNestedNameSpecifier(d->getQualifier(), getCursorTU(cursor));
+      if (auto *d = GetCursorStmt(cursor)) {
+        switch (d->getStmtClass()) {
+        case clang::Stmt::DeclRefExprClass:
+          if (auto d =
+              llvm::dyn_cast_or_null<clang::DeclRefExpr>(GetCursorExpr(cursor))) {
+            return MakeNestedNameSpecifier(d->getQualifier(), getCursorTU(cursor));
+          }
+          return MakeNestedNameSpecifierInvalid(getCursorTU(cursor));
+        case clang::Stmt::DependentScopeDeclRefExprClass:
+          if (auto d =
+              llvm::dyn_cast_or_null<clang::DependentScopeDeclRefExpr>(GetCursorExpr(cursor))) {
+            return MakeNestedNameSpecifier(d->getQualifier(), getCursorTU(cursor));
+          }
+          return MakeNestedNameSpecifierInvalid(getCursorTU(cursor));
+        default:
+          if (auto d =
+              llvm::dyn_cast_or_null<clang::OverloadExpr>(GetCursorExpr(cursor))) {
+            return MakeNestedNameSpecifier(d->getQualifier(), getCursorTU(cursor));
+          };
+        }
       }
       return MakeNestedNameSpecifierInvalid(getCursorTU(cursor));
     case CXCursor_MemberRefExpr:
@@ -2278,6 +2298,40 @@ extern "C" {
     if (auto d = GetCursorDecl(cursor)) {
       if (auto td = llvm::dyn_cast_or_null<clang::TypeAliasTemplateDecl>(d)) {
         return MakeCXCursor(td->getTemplatedDecl(), getCursorTU(cursor));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  unsigned int
+  clang_ext_TemplateDecl_getParameterCount(CXCursor cursor)
+  {
+    if (auto d = GetCursorDecl(cursor)) {
+      if (auto td = llvm::dyn_cast_or_null<clang::TemplateDecl>(d)) {
+        return td->getTemplateParameters()->size();
+      }
+    }
+    return 0;
+  }
+
+  CXCursor
+  clang_ext_TemplateDecl_getParameter(CXCursor cursor, unsigned int i)
+  {
+    if (auto d = GetCursorDecl(cursor)) {
+      if (auto td = llvm::dyn_cast_or_null<clang::TemplateDecl>(d)) {
+        return MakeCXCursor(
+          td->getTemplateParameters()->getParam(i), getCursorTU(cursor));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  CXCursor
+  clang_ext_SubstNonTypeTemplateParmExpr_getReplacement(CXCursor cursor)
+  {
+    if (auto s = GetCursorStmt(cursor)) {
+      if (auto e = llvm::dyn_cast_or_null<clang::SubstNonTypeTemplateParmExpr>(s)) {
+        return MakeCXCursor(e->getReplacement(), getCursorTU(cursor));
       }
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));

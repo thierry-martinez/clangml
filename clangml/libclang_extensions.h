@@ -789,3 +789,12 @@ clang_ext_CXXDependentScopeMemberExpr_getTemplateArg(CXCursor, unsigned int);
 
 CXCursor
 clang_ext_TypeAliasTemplateDecl_getTemplatedDecl(CXCursor cursor);
+
+unsigned int
+clang_ext_TemplateDecl_getParameterCount(CXCursor cursor);
+
+CXCursor
+clang_ext_TemplateDecl_getParameter(CXCursor cursor, unsigned int i);
+
+CXCursor
+clang_ext_SubstNonTypeTemplateParmExpr_getReplacement(CXCursor cursor);
