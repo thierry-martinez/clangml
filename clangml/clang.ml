@@ -442,14 +442,6 @@ module Ast = struct
             let decl = record_decl_of_cxcursor Class cursor in
             TemplatePartialSpecialization
               { parameters; decl = node ~cursor decl }
-        | TypeAliasTemplateDecl ->
-            make_template cursor begin
-              let ident_ref = ident_ref_of_cxcursor cursor in
-              let qual_type = cursor |>
-                ext_type_alias_template_decl_get_templated_decl |>
-                get_typedef_decl_underlying_type |> of_cxtype in
-              TypeAlias { ident_ref; qual_type }
-            end
         | EnumDecl -> enum_decl_of_cxcursor cursor
         | TypedefDecl ->
             let name = get_cursor_spelling cursor in
@@ -572,6 +564,15 @@ module Ast = struct
             | VarTemplate ->
                 make_template cursor begin
                   Var (var_decl_desc_of_cxcursor cursor)
+                end
+            | TypeAliasTemplate ->
+                (* No TypeAliasTemplateDecl : cxcursortype in Clang <3.8.0 *)
+                make_template cursor begin
+                  let ident_ref = ident_ref_of_cxcursor cursor in
+                  let qual_type = cursor |>
+                  ext_type_alias_template_decl_get_templated_decl |>
+                  get_typedef_decl_underlying_type |> of_cxtype in
+                  TypeAlias { ident_ref; qual_type }
                 end
             | ext_kind -> UnknownDecl (kind, ext_kind)
       with Invalid_structure ->
