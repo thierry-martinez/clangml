@@ -47,6 +47,9 @@
 #ifdef LLVM_VERSION_7_0_1
 #define LLVM_VERSION_BEFORE_8_0_0
 #endif
+#ifdef LLVM_VERSION_7_1_0
+#define LLVM_VERSION_BEFORE_8_0_0
+#endif
 
 typedef struct {
   void *data;
