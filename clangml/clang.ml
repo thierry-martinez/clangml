@@ -726,7 +726,10 @@ module Ast = struct
         | _ -> false, children in
       let children =
          children |> filter_out_prefix_from_list
-           (fun cursor -> get_cursor_kind cursor = TypeRef) in
+           (fun cursor ->
+             match get_cursor_kind cursor with
+             | TypeRef | ClassTemplate -> true
+             | _ -> false) in
       let bases, children =
         extract_prefix_from_list base_specifier_of_cxcursor_opt children in
       let fields = fields_of_children children in
