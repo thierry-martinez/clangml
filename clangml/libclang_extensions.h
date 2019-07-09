@@ -786,3 +786,6 @@ clang_ext_CXXDependentScopeMemberExpr_getNumTemplateArgs(CXCursor);
 
 struct clang_ext_TemplateArgument
 clang_ext_CXXDependentScopeMemberExpr_getTemplateArg(CXCursor, unsigned int);
+
+CXCursor
+clang_ext_TypeAliasTemplateDecl_getTemplatedDecl(CXCursor cursor);

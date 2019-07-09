@@ -135,6 +135,15 @@ module Ast = struct
 
     exception Invalid_structure
 
+    let keyword_of_template cursor =
+      let decl_cursor =
+        ext_class_template_decl_get_templated_decl cursor in
+      match get_cursor_kind decl_cursor with
+      | StructDecl -> Struct
+      | UnionDecl -> Union
+      | ClassDecl -> Class
+      | kind -> raise Invalid_structure
+
     (* Hack for having current function declaration to provide function name
        for predefined identifiers on Clang 3.4 and Clang 3.5. *)
     let current_decl = ref (get_null_cursor ())
@@ -418,17 +427,24 @@ module Ast = struct
         | UnionDecl -> record_decl_of_cxcursor Union cursor
         | ClassDecl -> record_decl_of_cxcursor Class cursor
         | ClassTemplate ->
-            let decl_cursor =
-              ext_class_template_decl_get_templated_decl cursor in
-            let keyword =
-              match get_cursor_kind decl_cursor with
-              | StructDecl -> Struct
-              | UnionDecl -> Union
-              | ClassDecl -> Class
-              | kind -> raise Invalid_structure in
+            let keyword = keyword_of_template cursor in
             make_template
               (record_decl_of_children keyword cursor)
               cursor
+        | ClassTemplatePartialSpecialization ->
+            let keyword = keyword_of_template cursor in
+            let parameters, others = extract_template_parameters cursor in
+            let decl = record_decl_of_children keyword cursor others in
+            TemplatePartialSpecialization
+              { parameters; decl = node ~cursor decl }
+        | TypeAliasTemplateDecl ->
+            cursor |> make_template begin fun _children ->
+              let ident_ref = ident_ref_of_cxcursor cursor in
+              let qual_type = cursor |>
+                ext_type_alias_template_decl_get_templated_decl |>
+                get_typedef_decl_underlying_type |> of_cxtype in
+              TypeAlias { ident_ref; qual_type }
+            end
         | EnumDecl -> enum_decl_of_cxcursor cursor
         | TypedefDecl ->
             let name = get_cursor_spelling cursor in

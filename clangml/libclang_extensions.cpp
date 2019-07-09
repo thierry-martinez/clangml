@@ -2272,4 +2272,14 @@ extern "C" {
     return MakeTemplateArgumentInvalid(getCursorTU(cursor));
   }
 
+  CXCursor
+  clang_ext_TypeAliasTemplateDecl_getTemplatedDecl(CXCursor cursor)
+  {
+    if (auto d = GetCursorDecl(cursor)) {
+      if (auto td = llvm::dyn_cast_or_null<clang::TypeAliasTemplateDecl>(d)) {
+        return MakeCXCursor(td->getTemplatedDecl(), getCursorTU(cursor));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
 }

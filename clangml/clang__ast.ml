@@ -2425,6 +2425,10 @@ let () =
       body = None }}] -> ()
   | _ -> assert false
     ]}*)
+  | TemplatePartialSpecialization of {
+      parameters : template_parameter list;
+      decl : decl;
+    }
   | CXXMethod of {
       function_decl : function_decl;
       type_ref : qual_type option;
