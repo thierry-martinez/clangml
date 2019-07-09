@@ -1326,7 +1326,11 @@ module Ast = struct
         | NonTypeTemplateParameter ->
             let parameter_type = get_cursor_type cursor |> of_cxtype in
             let default : expr option =
-              match list_of_children cursor |> filter_out_typeref with
+              match list_of_children cursor |> List.filter begin fun cursor ->
+                match get_cursor_kind cursor with
+                | TypeRef | ParmDecl -> false
+                | _ -> true
+              end with
               | [] -> None
               | [default] -> Some (default |> expr_of_cxcursor)
               | _ -> raise Invalid_structure in
