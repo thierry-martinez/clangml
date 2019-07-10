@@ -67,7 +67,7 @@ By default, `llvm-config` is searched in `PATH`, and you may
 specify a path with `./configure --with-llvm-config=...`.
 
 clangml requires some dependencies:
-`opam install dune stdcompat ppx_deriving visitors`.
+`opam install dune stdcompat ppxlib`.
 Additionnally, to run `make tests`: `opam install ocamlcodoc`.
 
 `libclang` and other external dependencies can be installed with opam depext
@@ -103,8 +103,6 @@ structure.
 
 The module [`Clang.Ast`][4] includes in particular the module [`Clang__ast`][19]
 which declares the algebraic data types that represent the AST.
-The module [`Clang__ast`][19] uses [ppx_deriving][5] and [visitors][6] to make the
-data structure comparable, showable and visitable.
 The documentation of most of the nodes contains examples that can be used as references
 for how syntactic constructions are parsed, and that are extracted with [ocamlcodoc][20]
 and serve as unit tests with `dune runtest` (or, equivalently, `make tests`).
@@ -117,8 +115,6 @@ Modules [`Clang.Type`][7], [`Clang.Expr`][8], [`Clang.Stmt`][9],
 `Set` and `Map` as well as high-level abstractions to some libclang's bindings.
 
 [4]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Ast/index.html
-[5]: https://github.com/ocaml-ppx/ppx_deriving
-[6]: https://gitlab.inria.fr/fpottier/visitors
 [7]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Type/index.html
 [8]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Expr/index.html
 [9]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Stmt/index.html
