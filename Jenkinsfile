@@ -9,6 +9,7 @@ pipeline {
                 sh 'mv * src/ || true'
                 sh '''
                     cd src && \
+                    rm -rf bootstrap/ && \
                     tar -xf ~/bootstrap.tar.xz && \
                     aclocal && automake --add-missing && autoreconf
                    '''
@@ -20,7 +21,7 @@ pipeline {
                     eval $(opam env) && \
                     mkdir build && cd build && \
                     ../src/configure \
-                        --with-llvm-config=/media/llvms/7.0.1/bin/llvm-config
+                        --with-llvm-config=/media/llvms/8.0.1/bin/llvm-config
                    '''
             }
         }

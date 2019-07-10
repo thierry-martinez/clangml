@@ -2267,26 +2267,59 @@ extern "C" {
     return MakeCXTypeInvalid(getCursorTU(c));
   }
 
-
   unsigned int
-  clang_ext_CXXDependentScopeMemberExpr_getNumTemplateArgs(CXCursor cursor)
+  clang_ext_Cursor_getNumTemplateArgs(CXCursor cursor)
   {
-    if (auto s = GetCursorStmt(cursor)) {
-      if (auto e = llvm::dyn_cast_or_null<clang::CXXDependentScopeMemberExpr>(s)) {
-        return e->getNumTemplateArgs();
+    if (cursor.kind >= CXCursor_FirstDecl && cursor.kind <= CXCursor_LastDecl) {
+      if (auto d = GetCursorDecl(cursor)) {
+        if (auto cts = llvm::dyn_cast_or_null<
+            clang::ClassTemplateSpecializationDecl>(d)) {
+          return cts->getTemplateArgs().size();
+        }
+        else if (auto cts = llvm::dyn_cast_or_null<
+            clang::VarTemplateSpecializationDecl>(d)) {
+          return cts->getTemplateArgs().size();
+        }
+      }
+    }
+    else if (cursor.kind >= CXCursor_FirstExpr &&
+        cursor.kind <= CXCursor_LastExpr) {
+      if (auto s = GetCursorStmt(cursor)) {
+        if (auto e = llvm::dyn_cast_or_null<
+            clang::CXXDependentScopeMemberExpr>(s)) {
+          return e->getNumTemplateArgs();
+        }
       }
     }
     return 0;
   }
 
   struct clang_ext_TemplateArgument
-  clang_ext_CXXDependentScopeMemberExpr_getTemplateArg(
+  clang_ext_Cursor_getTemplateArg(
     CXCursor cursor, unsigned int i)
   {
-    if (auto s = GetCursorStmt(cursor)) {
-      if (auto e = llvm::dyn_cast_or_null<clang::CXXDependentScopeMemberExpr>(s)) {
-        return MakeTemplateArgument(e->getTemplateArgs()[i].getArgument(),
-          getCursorTU(cursor));
+    if (cursor.kind >= CXCursor_FirstDecl && cursor.kind <= CXCursor_LastDecl) {
+      if (auto d = GetCursorDecl(cursor)) {
+        if (auto cts = llvm::dyn_cast_or_null<
+            clang::ClassTemplateSpecializationDecl>(d)) {
+          return MakeTemplateArgument(cts->getTemplateArgs().get(i),
+            getCursorTU(cursor));
+        }
+        else if (auto cts = llvm::dyn_cast_or_null<
+            clang::VarTemplateSpecializationDecl>(d)) {
+          return MakeTemplateArgument(cts->getTemplateArgs().get(i),
+            getCursorTU(cursor));
+        }
+      }
+    }
+    else if (cursor.kind >= CXCursor_FirstExpr &&
+        cursor.kind <= CXCursor_LastExpr) {
+      if (auto s = GetCursorStmt(cursor)) {
+        if (auto e = llvm::dyn_cast_or_null<
+            clang::CXXDependentScopeMemberExpr>(s)) {
+          return MakeTemplateArgument(e->getTemplateArgs()[i].getArgument(),
+            getCursorTU(cursor));
+        }
       }
     }
     return MakeTemplateArgumentInvalid(getCursorTU(cursor));
@@ -2310,6 +2343,10 @@ extern "C" {
       if (auto td = llvm::dyn_cast_or_null<clang::TemplateDecl>(d)) {
         return td->getTemplateParameters()->size();
       }
+      else if (auto tp =
+     llvm::dyn_cast_or_null<clang::ClassTemplatePartialSpecializationDecl>(d)) {
+        return tp->getTemplateParameters()->size();
+      }
     }
     return 0;
   }
@@ -2322,6 +2359,11 @@ extern "C" {
         return MakeCXCursor(
           td->getTemplateParameters()->getParam(i), getCursorTU(cursor));
       }
+      else if (auto tp =
+     llvm::dyn_cast_or_null<clang::ClassTemplatePartialSpecializationDecl>(d)) {
+        return MakeCXCursor(
+          tp->getTemplateParameters()->getParam(i), getCursorTU(cursor));
+      }
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
   }
@@ -2330,7 +2372,8 @@ extern "C" {
   clang_ext_SubstNonTypeTemplateParmExpr_getReplacement(CXCursor cursor)
   {
     if (auto s = GetCursorStmt(cursor)) {
-      if (auto e = llvm::dyn_cast_or_null<clang::SubstNonTypeTemplateParmExpr>(s)) {
+      if (auto e =
+          llvm::dyn_cast_or_null<clang::SubstNonTypeTemplateParmExpr>(s)) {
         return MakeCXCursor(e->getReplacement(), getCursorTU(cursor));
       }
     }

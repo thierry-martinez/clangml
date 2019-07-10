@@ -438,10 +438,11 @@ module Ast = struct
             make_template cursor
               (record_decl_of_cxcursor keyword cursor)
         | ClassTemplatePartialSpecialization ->
-            let parameters = extract_template_parameters cursor in
             let decl = record_decl_of_cxcursor Class cursor in
             TemplatePartialSpecialization
-              { parameters; decl = node ~cursor decl }
+              { parameters = extract_template_parameters cursor;
+                arguments = extract_template_arguments cursor;
+                decl = node ~cursor decl }
         | EnumDecl -> enum_decl_of_cxcursor cursor
         | TypedefDecl ->
             let name = get_cursor_spelling cursor in
@@ -760,7 +761,7 @@ module Ast = struct
          children |> filter_out_prefix_from_list
            (fun cursor ->
              match get_cursor_kind cursor with
-             | TypeRef | ClassTemplate | TemplateRef -> true
+             | TypeRef | ClassTemplate | TemplateRef | ParmDecl -> true
              | _ ->
                  match ext_decl_get_kind cursor with
                  | ClassTemplatePartialSpecialization -> true
@@ -961,9 +962,13 @@ module Ast = struct
 
     and catch_of_cxcursor cursor : catch =
       match list_of_children cursor with
+      | [block] ->
+          { parameter = None;
+            block = block |> stmt_of_cxcursor;
+          }
       | [var; block] ->
-          { var = get_cursor_spelling var;
-            qual_type = get_cursor_type var |> of_cxtype;
+          { parameter =
+              Some (get_cursor_spelling var, get_cursor_type var |> of_cxtype);
             block = block |> stmt_of_cxcursor;
           }
       | _ -> raise Invalid_structure
@@ -1288,26 +1293,18 @@ module Ast = struct
       match ext_stmt_get_kind cursor with
       | CXXPseudoDestructorExpr ->
           PseudoDestructor {
-          nested_name_specifier =
-            ext_decl_get_nested_name_specifier cursor |>
-            convert_nested_name_specifier;
-          qual_type =
-            cursor |>
-            ext_cxxpseudo_destructor_expr_get_destroyed_type |>
-            of_cxtype }
+            nested_name_specifier =
+              ext_decl_get_nested_name_specifier cursor |>
+              convert_nested_name_specifier;
+            qual_type =
+              cursor |>
+              ext_cxxpseudo_destructor_expr_get_destroyed_type |>
+              of_cxtype }
       | CXXDependentScopeMemberExpr ->
-          let template_arguments =
-            List.init
-              (ext_cxxdependent_scope_member_expr_get_num_template_args
-                 cursor) begin fun i ->
-                   ext_cxxdependent_scope_member_expr_get_template_arg
-                     cursor i |>
-                     make_template_argument
-                 end in
           DependentScopeMember {
-          ident_ref = ident_ref_of_cxcursor cursor;
-          template_arguments
-        }
+            ident_ref = ident_ref_of_cxcursor cursor;
+            template_arguments = extract_template_arguments cursor;
+          }
       | UnresolvedMemberExpr ->
           UnresolvedMember (ident_ref_of_cxcursor cursor)
       | _ ->
@@ -1412,7 +1409,7 @@ module Ast = struct
             let default : expr option =
               match list_of_children cursor |> List.filter begin fun cursor ->
                 match get_cursor_kind cursor with
-                | TypeRef | ParmDecl -> false
+                | TypeRef | ParmDecl | NamespaceRef -> false
                 | _ -> true
               end with
               | [] -> None
@@ -1443,6 +1440,12 @@ module Ast = struct
       List.init (ext_template_decl_get_parameter_count cursor) begin fun i ->
         ext_template_decl_get_parameter cursor i |>
         template_parameter_of_cxcursor
+      end
+
+    and extract_template_arguments cursor =
+      List.init (ext_cursor_get_num_template_args cursor) begin fun i ->
+        ext_cursor_get_template_arg cursor i |>
+        make_template_argument
       end
 
     and make_template ?(optional = false) cursor body =

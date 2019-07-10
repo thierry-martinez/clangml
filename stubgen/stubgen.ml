@@ -1988,7 +1988,9 @@ let main cflags llvm_config prefix =
           | "5.0.0"
           | "5.0.1" -> "5.0.2"
           | "6.0.0" -> "6.0.1"
-          | "7.0.0" -> "7.0.1"
+          | "7.0.0" -> "7.1.0"
+          | "7.0.1" -> "7.1.0"
+          | "8.0.0" -> "8.0.1"
           | _ -> llvm_version in
         String.split_on_char ' ' llvm_cflags @
         ["-I"; List.fold_left Filename.concat llvm_prefix

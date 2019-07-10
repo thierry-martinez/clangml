@@ -1476,8 +1476,7 @@ let () =
   | UnknownStmt of cxcursorkind * clang_ext_stmtkind
 
 and catch = {
-  var : string;
-  qual_type : qual_type;
+  parameter : (string * qual_type) option;
   block : stmt
 }
 
@@ -2444,6 +2443,7 @@ let () =
     ]}*)
   | TemplatePartialSpecialization of {
       parameters : template_parameter list;
+      arguments : template_argument list;
       decl : decl;
     }
   | CXXMethod of {

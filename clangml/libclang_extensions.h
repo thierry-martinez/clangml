@@ -44,9 +44,6 @@
 #ifdef LLVM_VERSION_BEFORE_7_0_0
 #define LLVM_VERSION_BEFORE_8_0_0
 #endif
-#ifdef LLVM_VERSION_7_0_1
-#define LLVM_VERSION_BEFORE_8_0_0
-#endif
 #ifdef LLVM_VERSION_7_1_0
 #define LLVM_VERSION_BEFORE_8_0_0
 #endif
@@ -785,10 +782,10 @@ CXType
 clang_ext_CXXPseudoDestructorExpr_getDestroyedType(CXCursor);
 
 unsigned int
-clang_ext_CXXDependentScopeMemberExpr_getNumTemplateArgs(CXCursor);
+clang_ext_Cursor_getNumTemplateArgs(CXCursor);
 
 struct clang_ext_TemplateArgument
-clang_ext_CXXDependentScopeMemberExpr_getTemplateArg(CXCursor, unsigned int);
+clang_ext_Cursor_getTemplateArg(CXCursor, unsigned int);
 
 CXCursor
 clang_ext_TypeAliasTemplateDecl_getTemplatedDecl(CXCursor cursor);
