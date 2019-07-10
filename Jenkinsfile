@@ -29,7 +29,8 @@ pipeline {
             steps {
                 sh 'make -C build clangml'
                 sh 'make -C build clangml.opam && cp build/clangml.opam src/'
-                sh 'make -C build stubgen'
+                sh 'make -C build tools/stubgen'
+                sh 'make -C build tools/norm_extractor'
             }
         }
         stage('Generate stubs') {
@@ -59,7 +60,7 @@ pipeline {
                                 sh """
                                     cd $pwd && \
                                     mkdir -p $bootstrap_dir && \
-                                    build/_build/default/stubgen/stubgen.exe \
+                                    build/_build/default/tools/stubgen/stubgen.exe \
                                         --cc=-I,build,-I,$include_dir \
                                         --llvm-config=$llvm_config \
                                         $bootstrap_dir/
@@ -75,9 +76,9 @@ pipeline {
                                 sh "cd $pwd/$llvm_version/ && make tests"
                                 sh """
                                     cd $pwd/$llvm_version/ && \
-                                    make stubgen && \
+                                    make tools/stubgen && \
                                     mkdir current && \
-                                    _build/default/stubgen/stubgen.exe \
+                                    _build/default/tools/stubgen/stubgen.exe \
                                         --cc=-I,build,-I,$include_dir \
                                         --llvm-config=$llvm_config \
                                         current/ && \
@@ -140,6 +141,43 @@ pipeline {
                         /clangml/ci-scripts/opam-pin_and_install.sh \
 https://gitlab.inria.fr/tmartine/clangml/-/archive/snapshot/clangml-snapshot.tar.gz
                    '''
+            }
+        }
+        stage('Extract norms') {
+            parallel {
+                stage('c++14') {
+                    steps {
+                        sh '''
+                            cd $HOME/cplusplus/c++14/ && \
+                            $PWD/build/_build/default/tools/norm_extractor/norm_extractor.exe \
+                              --trigraphs -x c++ --std c++14 -i -o $PWD/norm_cxx14.ml \
+                              `sed -n -e 's/^\\\\include{\\([^}]*\\)}/\\1/p' \
+                              $HOME/cplusplus/c++14/std.tex`"
+                           '''
+                    }
+                }
+                stage('c++17') {
+                    steps {
+                        sh '''
+                            cd $HOME/cplusplus/c++17/ && \
+                            $PWD/build/_build/default/tools/norm_extractor/norm_extractor.exe \
+                              --trigraphs -x c++ --std c++17 -i -o $PWD/norm_cxx17.ml \
+                              `sed -n -e 's/^\\\\include{\\([^}]*\\)}/\\1/p' \
+                              $HOME/cplusplus/c++17/std.tex`"
+                           '''
+                    }
+                }
+            }
+        }
+        stage('Commit to norms branch') {
+            when { branch 'master' }
+            steps {
+                sh 'git checkout norms'
+                sh 'cp norm_cxx14.ml norms/'
+                sh 'cp norm_cxx17.ml norms/'
+                sh 'git add norms/*'
+                sh 'git commit -m "generated files for commit `git rev-parse master`"'
+                sh 'git push'
             }
         }
     }
