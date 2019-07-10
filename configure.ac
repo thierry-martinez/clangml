@@ -328,13 +328,6 @@ AC_DEFUN([AC_CP],
     [true],
     [AC_MSG_ERROR([[cannot copy file]])])])
 
-AS_IF([test -d stubgen],
-  [true],
-  [AS_IF([mkdir stubgen],
-    [AC_CP([$srcdir/stubgen/dune], [stubgen/])
-     AC_CP([$srcdir/stubgen/stubgen.ml], [stubgen/])],
-    [AC_MSG_ERROR([[cannot create directory stubgen/]])])])
-
 AS_IF([test -d clangml],
   [true],
   [AS_IF([mkdir clangml],
@@ -385,6 +378,36 @@ AS_IF([test -d printer],
   [AS_IF([mkdir printer],
      AC_CP([$srcdir/printer/clangml_printer.ml], [printer/])
      AC_CP([$srcdir/printer/dune], [printer/]))])
+
+AS_IF([test -d tools],
+  [true],
+  [AS_IF([mkdir tools],
+    [true])])
+
+AS_IF([test -d tools/common],
+  [true],
+  [AS_IF([mkdir tools/common],
+    [AC_CP([$srcdir/tools/common/dune], [tools/common/])
+     AC_CP([$srcdir/tools/common/clangml_tools_common.ml], [tools/common/])
+     AC_CP([$srcdir/tools/common/clangml_tools_common.mli], [tools/common/])])])
+
+AS_IF([test -d tools/stubgen],
+  [true],
+  [AS_IF([mkdir tools/stubgen],
+    [AC_CP([$srcdir/tools/stubgen/dune], [tools/stubgen/])
+     AC_CP([$srcdir/tools/stubgen/stubgen.ml], [tools/stubgen/])])])
+
+AS_IF([test -d tools/norm_extractor],
+  [true],
+  [AS_IF([mkdir tools/norm_extractor],
+     AC_CP([$srcdir/tools/norm_extractor/norm_extractor.ml], [tools/norm_extractor/])
+     AC_CP([$srcdir/tools/norm_extractor/tex_lexer.mll], [tools/norm_extractor/])
+     AC_CP([$srcdir/tools/norm_extractor/tex_lexer.mli], [tools/norm_extractor/])
+     AC_CP([$srcdir/tools/norm_extractor/aux_lexer.mll], [tools/norm_extractor/])
+     AC_CP([$srcdir/tools/norm_extractor/aux_lexer.mli], [tools/norm_extractor/])
+     AC_CP([$srcdir/tools/norm_extractor/kmp.ml], [tools/norm_extractor/])
+     AC_CP([$srcdir/tools/norm_extractor/kmp.mli], [tools/norm_extractor/])
+     AC_CP([$srcdir/tools/norm_extractor/dune], [tools/norm_extractor/]))])
 
 AS_IF([test -d tests],
   [true],
