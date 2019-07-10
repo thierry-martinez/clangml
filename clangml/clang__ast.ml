@@ -2216,7 +2216,7 @@ let () =
       qual_type : qual_type;
       args : expr list;
     }
-  | Throw of expr
+  | Throw of expr option
   | TemplateRef of ident_ref
   | OverloadedDeclRef of ident_ref
   | StdInitializerList of expr list

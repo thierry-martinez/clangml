@@ -1277,7 +1277,8 @@ module Ast = struct
         | CXXThrowExpr ->
             let sub =
               match list_of_children cursor with
-              | [sub] -> expr_of_cxcursor sub
+              | [sub] -> Some (expr_of_cxcursor sub)
+              | [] -> None
               | _ -> raise Invalid_structure in
             Throw sub
         | TemplateRef ->
