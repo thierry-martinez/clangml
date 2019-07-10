@@ -147,9 +147,9 @@ and expr_prec prec fmt (e : Clang.Expr.t) =
         | Ascii -> Format.fprintf fmt "'%a'" c_escape_char (char_of_int value)
         | _ -> failwith "Not implemented character kind"
       end
-  | StringLiteral str ->
+  | StringLiteral { bytes } ->
       Format.pp_print_string fmt "\"";
-      String.iter (c_escape_char fmt) str;
+      String.iter (c_escape_char fmt) bytes;
       Format.pp_print_string fmt "\""
   | Call {
         callee = { desc = DeclRef { name = OperatorName kind }; _ };
@@ -186,14 +186,18 @@ and expr_prec prec fmt (e : Clang.Expr.t) =
           (expr_prec right_prec) rhs)
   | DeclRef ident_ref ->
       print_ident_ref fmt ident_ref
-  | MemberRef member_ref ->
-      Format.pp_print_string fmt member_ref
-  | Member { base; arrow; field } ->
+  | Member { base = None; field = FieldName field } ->
+      print_ident_ref fmt field.desc
+  | Member { base = Some base; arrow; field } ->
       let arrow_str =
         if arrow then "->"
         else "." in
-      Format.fprintf fmt "@[%a%s%a@]" expr base arrow_str print_ident_ref
-        field.desc
+      let print_field fmt (field : Clang.Ast.field) =
+        match field with
+        | FieldName name -> print_ident_ref fmt name.desc
+        | _ -> invalid_arg "print_field" in
+      Format.fprintf fmt "@[%a%s%a@]" expr base arrow_str
+        print_field field
   | Cast { kind = CStyle; qual_type = ty; operand } ->
       maybe_parentheses 2 prec fmt (fun fmt ->
         Format.fprintf fmt "@[(%a)@ %a@]" qual_type ty (expr_prec 4) operand)
@@ -266,7 +270,7 @@ and print_parameters fmt parameters =
 
 and print_function_type fmt function_type name =
   typed_value
-    (fun fmt -> Format.fprintf fmt "@[%s(%a)@]" name
+    (fun fmt -> Format.fprintf fmt "@[%a(%a)@]" print_declaration_name name
         (pp_print_option print_parameters) function_type.parameters)
     fmt function_type.result
 
@@ -279,33 +283,29 @@ and print_ident_ref fmt ident_ref =
   let print_nested_name_specifier_component
       (component : Clang.Ast.nested_name_specifier_component) =
     match component with
+    | Global -> Format.pp_print_string fmt "::"
     | NestedIdentifier s -> Format.fprintf fmt "%s::" s
-    | Namespace { desc = Namespace { name }}
-    | NamespaceAlias { desc= Namespace { name }} ->
+    | Namespace name
+    | NamespaceAlias name ->
         Format.fprintf fmt "%s::" name
     | TypeSpec ty
     | TypeSpecWithTemplate ty ->
-        Format.fprintf fmt "%a::" qual_type ty
-    | _ -> failwith "Not implemented print_ident_ref" in
-  let print_nested_name_specifier nested_name_specifier =
-    match nested_name_specifier with
-    | [] -> Format.pp_print_string fmt "::"
-    | _ ->
-        nested_name_specifier |>
-        List.iter print_nested_name_specifier_component in
-  Option.iter print_nested_name_specifier ident_ref.nested_name_specifier;
-  let print_declaration_name (name : Clang.Ast.declaration_name) =
-    match name with
-    | IdentifierName s
-    | LiteralOperatorName s -> Format.pp_print_string fmt s
-    | ConstructorName ty
-    | ConversionFunctionName ty -> qual_type fmt ty
-    | DestructorName ty -> Format.fprintf fmt "~%a" qual_type ty
-    | OperatorName op ->
-        Format.fprintf fmt "operator%s"
-          (Clang.ext_overloaded_operator_get_spelling op)
-    | _ -> failwith "Not implemented print_ident_ref.declaration_name" in
-  print_declaration_name ident_ref.name
+        Format.fprintf fmt "%a::" qual_type ty in
+  Option.iter (List.iter print_nested_name_specifier_component)
+    ident_ref.nested_name_specifier;
+  print_declaration_name fmt ident_ref.name
+
+and print_declaration_name fmt (name : Clang.Ast.declaration_name) =
+  match name with
+  | IdentifierName s
+  | LiteralOperatorName s -> Format.pp_print_string fmt s
+  | ConstructorName ty
+  | ConversionFunctionName ty -> qual_type fmt ty
+  | DestructorName ty -> Format.fprintf fmt "~%a" qual_type ty
+  | OperatorName op ->
+      Format.fprintf fmt "operator%s"
+        (Clang.ext_overloaded_operator_get_spelling op)
+  | _ -> failwith "Not implemented print_ident_ref.declaration_name"
 
 and typed_value fmt_value fmt t =
   match t.desc with

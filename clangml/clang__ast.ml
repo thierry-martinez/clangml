@@ -166,6 +166,8 @@ and lambda_capture_kind = clang_ext_lambdacapturekind
 
 and overloaded_operator_kind = clang_ext_overloadedoperatorkind
 
+and string_kind = clang_ext_stringkind
+
 and integer_literal =
   | Int of int
   | CXInt of cxint
@@ -368,7 +370,7 @@ let example = "void f(int i, char array[i]);"
 let () =
   check Clangml_show.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
-  | [{ desc = Function { name = "f"; function_type =
+  | [{ desc = Function { name = IdentifierName "f"; function_type =
       { result = { desc = BuiltinType Void };
         parameters = Some {
           non_variadic = [
@@ -678,9 +680,10 @@ and template_argument =
 and nested_name_specifier = nested_name_specifier_component list
 
 and nested_name_specifier_component =
+  | Global
   | NestedIdentifier of string
-  | Namespace of decl
-  | NamespaceAlias of decl
+  | Namespace of string
+  | NamespaceAlias of string
   | TypeSpec of qual_type
   | TypeSpecWithTemplate of qual_type
 
@@ -701,12 +704,14 @@ and record_decl = {
     bases : base_specifier list; (** C++ *)
     fields : decl list;
     final : bool; (** C++11 *)
+    complete_definition : bool;
   }
 
 and function_decl = {
     linkage : linkage_kind;
     function_type : function_type;
-    name : string;
+    nested_name_specifier : nested_name_specifier option; (** C++ *)
+    name : declaration_name;
     body : stmt option;
     deleted : bool;
     constexpr : bool;
@@ -723,7 +728,7 @@ let () =
   check Clangml_show.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = Function {
-      name = "f";
+      name = IdentifierName "f";
       function_type = { calling_conv = C }}}] -> ()
   | _ -> assert false
 
@@ -736,13 +741,13 @@ let () =
     example @@
   fun ast -> match ast with
   | [{ desc = Function {
-      name = "f";
+      name = IdentifierName "f";
       function_type = { calling_conv = AAPCS }}}] ->
       assert (
         Clang.get_clang_version () < "clang version 3.8.0" ||
         Clang.get_clang_version () >= "clang version 3.9.0")
   | [{ desc = Function {
-      name = "f";
+      name = IdentifierName "f";
       function_type = { calling_conv = C }}}] ->
       assert (
         Clang.get_clang_version () >= "clang version 3.8.0" &&
@@ -759,7 +764,7 @@ let () =
   check Clangml_show.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = Function {
-      name = "f";
+      name = IdentifierName "f";
       function_type = { result = { desc = BuiltinType Void }}}}] -> ()
   | _ -> assert false
 
@@ -769,7 +774,7 @@ let () =
   check Clangml_show.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = Function {
-      name = "f";
+      name = IdentifierName "f";
       function_type = { result = { desc = BuiltinType Int }}}}] -> ()
   | _ -> assert false
     ]}*)
@@ -783,7 +788,7 @@ let () =
   check Clangml_show.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = Function {
-      name = "f";
+      name = IdentifierName "f";
       function_type = { parameters = Some {
         non_variadic = [];
         variadic = false }}}}] -> ()
@@ -795,7 +800,7 @@ let () =
   check Clangml_show.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = Function {
-      name = "f";
+      name = IdentifierName "f";
       function_type = { parameters = None }}}] -> ()
   | _ -> assert false
 
@@ -819,7 +824,7 @@ let () =
   check Clangml_show.pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = Function {
-      name = "f";
+      name = IdentifierName "f";
       function_type = { parameters = Some {
         non_variadic = [{ desc = {
           name = "i";
@@ -834,7 +839,7 @@ let () =
   check Clangml_show.pp_decl parse_declaration_list example
   @@ fun ast -> match ast with
   | [{ desc = Function {
-      name = "f";
+      name = IdentifierName "f";
       function_type = { parameters = Some {
         non_variadic = [{ desc = {
           name = "";
@@ -865,7 +870,7 @@ let () =
   check Clangml_show.pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = Function {
-      name = "f";
+      name = IdentifierName "f";
       function_type = { parameters = Some {
         non_variadic = [{ desc = {
           name = "i";
@@ -884,7 +889,7 @@ let () =
   check Clangml_show.pp_decl parse_declaration_list example
   @@ fun ast -> match ast with
   | [{ desc = Function {
-      name = "f";
+      name = IdentifierName "f";
       function_type = { parameters = Some {
         non_variadic = [
           { desc = { name = "i"; qual_type = { desc = BuiltinType Int }}}];
@@ -1456,14 +1461,24 @@ let () =
 let example = "return 1;"
 
 let () =
-  check Clangml_show.pp_stmt (parse_statement_list ~return_type:"int") example @@
+  check Clangml_show.pp_stmt (parse_statement_list ~return_type:"int")
+    example @@
   fun ast -> match ast with
   | [{ desc = Return (Some { desc = IntegerLiteral (Int 1)})}] -> ()
   | _ -> assert false
    ]}*)
   | Decl of decl list
   | Expr of expr
-  | OtherStmt
+  | Try of {
+      try_block : stmt;
+      handlers : catch list;
+    }
+  | UnknownStmt of cxcursorkind * clang_ext_stmtkind
+
+and catch = {
+  parameter : (string * qual_type) option;
+  block : stmt
+}
 
 (** {3 Expressions} *)
 
@@ -1521,13 +1536,14 @@ let () =
 
 let () =
   check Clangml_show.pp_stmt (parse_statement_list
-    ~options:({ Clang.Ast.Options.default with convert_floating_literals = true }))
+    ~options:({ Clang.Ast.Options.default with
+      convert_floating_literals = true }))
     example @@ fun ast -> match ast with
   | [{ desc = Expr { desc = FloatingLiteral f }}] ->
     assert (Clang.Ast.float_of_literal f = 0.5)
   | _ -> assert false
     ]}*)
-  | StringLiteral of string
+  | StringLiteral of string_literal
 (** String literal.
     {[
 let example = "\"Hello!\";"
@@ -1535,7 +1551,8 @@ let example = "\"Hello!\";"
 let () =
   check Clangml_show.pp_stmt parse_statement_list example @@
   fun ast -> match ast with
-  | [{ desc = Expr { desc = StringLiteral "Hello!" }}] -> ()
+  | [{ desc = Expr { desc =
+      StringLiteral { byte_width = 1; bytes = "Hello!" }}}] -> ()
   | _ -> assert false
     ]}*)
   | CharacterLiteral of {
@@ -1740,7 +1757,7 @@ let () =
   | [{ desc = Expr { desc = Cast {
       kind = CStyle;
       qual_type = { desc = Pointer _ };
-      operand = { desc = StringLiteral "Hello" }} }}] -> ()
+      operand = { desc = StringLiteral { bytes = "Hello" }}}}}] -> ()
   | _ -> assert false
     ]}
 
@@ -1763,9 +1780,9 @@ let () =
     ]}
 *)
   | Member of {
-      base : expr;
+      base : expr option;
       arrow : bool;
-      field : (ident_ref, qual_type) open_node;
+      field : field;
     }
 (** Member dot or arrow
     {[
@@ -1776,9 +1793,9 @@ let () =
   @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = BinaryOperator {
       lhs = { desc = Member {
-        base = { desc = DeclRef ({ name = IdentifierName "s" }) };
+        base = Some { desc = DeclRef ({ name = IdentifierName "s" }) };
         arrow = false;
-        field = { desc = { name = IdentifierName "i" } }}};
+        field = FieldName { desc = { name = IdentifierName "i" } }}};
       kind = Assign;
       rhs = { desc = IntegerLiteral (Int 0)}}}}] -> ()
   | _ -> assert false
@@ -1790,14 +1807,13 @@ let () =
   @@ fun ast -> match ast with
   | [{ desc = Decl _ }; { desc = Expr { desc = BinaryOperator {
       lhs = { desc = Member {
-        base = { desc = DeclRef ({ name = IdentifierName "p" }) };
+        base = Some { desc = DeclRef ({ name = IdentifierName "p" }) };
         arrow = true;
-        field = { desc = { name = IdentifierName "i" } }}};
+        field = FieldName { desc = { name = IdentifierName "i" } }}};
       kind = Assign;
       rhs = { desc = IntegerLiteral (Int 0)}}}}] -> ()
   | _ -> assert false
     ]}*)
-  | MemberRef of string
   | ArraySubscript of {
       base : expr;
       index : expr;
@@ -2005,10 +2021,12 @@ let () =
   check Clangml_show.pp_stmt parse_statement_list example
   @@ fun ast -> match ast with
   | [ { desc = Expr { desc = GenericSelection {
-          controlling_expr = { desc = StringLiteral "expr" };
+          controlling_expr = { desc = StringLiteral { bytes = "expr" }};
           assocs = [
-            (Some { desc = BuiltinType Double}, { desc = IntegerLiteral (Int 1)});
-            (Some { desc = BuiltinType Float}, { desc = IntegerLiteral (Int 2)});
+            (Some { desc = BuiltinType Double},
+              { desc = IntegerLiteral (Int 1)});
+            (Some { desc = BuiltinType Float},
+              { desc = IntegerLiteral (Int 2)});
             (None, { desc = IntegerLiteral (Int 3)})] }}}] -> ()
   | _ -> assert false
    ]}
@@ -2038,7 +2056,7 @@ let () =
         calling_conv = C;
         result = { desc = BuiltinType Void};
         parameters = Some { non_variadic = []; variadic = false }};
-      name = "myfunc";
+      name = IdentifierName "myfunc";
       body = Some { desc = Compound [{
         desc = Decl [{ desc = Var {
           var_type = { desc = Pointer { desc = BuiltinType Char_S }};
@@ -2053,6 +2071,7 @@ let () =
       args : expr list;
     }
   | MaterializeTemporaryExpr of expr
+  | BindTemporaryExpr of expr
   | Lambda of {
       capture_default : lambda_capture_default;
       captures : lambda_capture list;
@@ -2097,7 +2116,7 @@ let () =
         calling_conv = C;
         result = { desc = BuiltinType Void};
         parameters = Some { non_variadic = []; variadic = false }};
-      name = "f";
+      name = IdentifierName "f";
       body = Some { desc = Compound [
         { desc = Decl [{ desc = Var {
           var_type = { desc = Pointer { desc = Record ({ name = IdentifierName "T" })}};
@@ -2130,7 +2149,7 @@ let () =
         calling_conv = C;
         result = { desc = BuiltinType Void};
         parameters = Some { non_variadic = []; variadic = false }};
-      name = "f";
+      name = IdentifierName "f";
       body = Some { desc = Compound [
         { desc = Decl [{ desc = Var {
           var_type = { desc = Pointer { desc = BuiltinType Int }};
@@ -2165,10 +2184,11 @@ let () =
         calling_conv = C;
         result = { desc = BuiltinType Void};
         parameters = Some { non_variadic = []; variadic = false }};
-      name = "f";
+      name = IdentifierName "f";
       body = Some { desc = Compound [
         { desc = Decl [{ desc = Var {
-          var_type = { desc = Pointer { desc = Record ({ name = IdentifierName "T" })}};
+          var_type = { desc = Pointer { desc =
+            Record ({ name = IdentifierName "T" })}};
           var_name = "t";
           var_init = Some { desc = New {
             placement_args = [];
@@ -2192,9 +2212,30 @@ let () =
       qual_type : qual_type;
       args : expr list;
     }
+  | UnresolvedConstruct of {
+      qual_type : qual_type;
+      args : expr list;
+    }
   | Throw of expr
+  | TemplateRef of ident_ref
+  | OverloadedDeclRef of ident_ref
+  | StdInitializerList of expr list
+  | DefaultArg
   | UnexposedExpr of clang_ext_stmtkind
+  | SubstNonTypeTemplateParm of expr
   | UnknownExpr of cxcursorkind * clang_ext_stmtkind
+
+and field =
+  | FieldName of (ident_ref, qual_type) open_node
+  | PseudoDestructor of {
+      nested_name_specifier : nested_name_specifier option;
+      qual_type : qual_type;
+    }
+  | DependentScopeMember of {
+      ident_ref : ident_ref;
+      template_arguments : template_argument list;
+    }
+  | UnresolvedMember of ident_ref
 
 and lambda_capture = {
    capture_kind : lambda_capture_kind;
@@ -2214,6 +2255,12 @@ and cast_kind =
 and unary_expr_or_type_trait =
   | ArgumentExpr of expr
   | ArgumentType of qual_type
+
+and string_literal = {
+  byte_width : int;
+  bytes : string;
+  string_kind : string_kind;
+}
 
 (** {3 Declarations} *)
 
@@ -2250,7 +2297,7 @@ let () =
                   name = "";
                   qual_type = { desc = TemplateTypeParm "X"}}}];
             variadic = false }};
-        name = "f";
+        name = IdentifierName "f";
         body = None }}}}] -> ()
   | _ -> assert false
 
@@ -2296,9 +2343,9 @@ let example = {|
   } |}
 
 let () =
-  check Clangml_show.pp_decl (parse_declaration_list ~language:CXX) example @@
-  fun ast -> match ast with
-  | [{ desc = RecordDecl {
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = RecordDecl {
       keyword = Class;
       name = "C";
       fields = [
@@ -2309,14 +2356,15 @@ let () =
                 parameter_pack = false; }}];
             decl = { desc = CXXMethod {
               type_ref = None;
-              function_type = {
-                result = { desc = BuiltinType Int };
-                parameters = Some { non_variadic = [
-                  { desc = {
-                      name = "x";
-                      qual_type = { desc = TemplateTypeParm "X" }}}] }};
-              name = "f";
-              body = None; }}}}] }};
+              function_decl = {
+                function_type = {
+                  result = { desc = BuiltinType Int };
+                  parameters = Some { non_variadic = [
+                    { desc = {
+                        name = "x";
+                        qual_type = { desc = TemplateTypeParm "X" }}}] }};
+                name = IdentifierName "f";
+                body = None; }}}}}] }};
      { desc = TemplateDecl {
          parameters = [{ desc = {
            parameter_name = "X";
@@ -2324,17 +2372,17 @@ let () =
            parameter_pack = false; }}];
          decl = { desc = CXXMethod {
            type_ref = Some { desc = Record ({ name = IdentifierName "C" }) };
-           function_type = {
-             result = { desc = BuiltinType Int };
-             parameters = Some { non_variadic = [
-               { desc = {
-                   name = "x";
-                   qual_type = { desc = TemplateTypeParm "X" }}}] }};
-           name = "f";
-           body = Some { desc = Compound [
-             { desc =
-                 Return (Some { desc = IntegerLiteral (Int 0)})}] }; }}}}] -> ()
-  | _ -> assert false
+           function_decl = {
+             function_type = {
+               result = { desc = BuiltinType Int };
+               parameters = Some { non_variadic = [
+                 { desc = {
+                     name = "x";
+                     qual_type = { desc = TemplateTypeParm "X" }}}] }};
+             name = IdentifierName "f";
+             body = Some { desc = Compound [
+               { desc =
+                   Return (Some { desc = IntegerLiteral (Int 0)})}] }; }}}}}]]
 
 let example = {| template<class ... Types> struct Tuple {}; |}
 
@@ -2370,7 +2418,7 @@ let () =
         calling_conv = C;
         result = { desc = BuiltinType Int};
         parameters = Some { non_variadic = []; variadic = false }};
-      name = "f";
+      name = IdentifierName "f";
       body = Some { desc = Compound [
         { desc = Return (Some {desc = IntegerLiteral (Int 0)})}] }}}] -> ()
   | _ -> assert false
@@ -2389,21 +2437,22 @@ let () =
           non_variadic = [
             { desc = { name = "x"; qual_type = { desc = BuiltinType Int }}}];
           variadic = false }};
-      name = "f";
+      name = IdentifierName "f";
       body = None }}] -> ()
   | _ -> assert false
     ]}*)
+  | TemplatePartialSpecialization of {
+      parameters : template_parameter list;
+      arguments : template_argument list;
+      decl : decl;
+    }
   | CXXMethod of {
+      function_decl : function_decl;
       type_ref : qual_type option;
-      function_type : function_type;
-      name : string;
-      body : stmt option;
       defaulted : bool;
       static : bool;
       binding : cxx_method_binding_kind;
       const : bool;
-      deleted : bool;
-      constexpr : bool;
     }
 (** C++ method.
 
@@ -2438,79 +2487,87 @@ let () =
       fields = [
         { desc = CXXMethod {
           type_ref = None;
-          name = "f";
-          function_type = {
-            result = { desc = BuiltinType Int };
-            parameters = Some { non_variadic = [
-              { desc = {
-                  name = "";
-                  qual_type = { desc = BuiltinType Char_S }}}] }};
-          body = None; }};
+          function_decl = {
+            name = IdentifierName "f";
+            function_type = {
+              result = { desc = BuiltinType Int };
+              parameters = Some { non_variadic = [
+                { desc = {
+                    name = "";
+                    qual_type = { desc = BuiltinType Char_S }}}] }};
+            body = None; }}};
         { desc = CXXMethod {
           type_ref = None;
-          name = "const_method";
-          function_type = {
-            result = { desc = BuiltinType Void };
-            parameters = Some { non_variadic = [] }};
-          body = Some { desc = Compound [] };
+          function_decl = {
+            name = IdentifierName "const_method";
+            function_type = {
+              result = { desc = BuiltinType Void };
+              parameters = Some { non_variadic = [] }};
+            body = Some { desc = Compound [] }};
           const = true; }};
         { desc = CXXMethod {
           type_ref = None;
-          name = "virtual_method";
-          function_type = {
-            result = { desc = BuiltinType Void };
-            parameters = Some { non_variadic = [] }};
-          body = Some { desc = Compound [] };
-          binding = Virtual; }};
+          binding = Virtual;
+          function_decl = {
+            name = IdentifierName "virtual_method";
+            function_type = {
+              result = { desc = BuiltinType Void };
+              parameters = Some { non_variadic = [] }};
+            body = Some { desc = Compound [] }; }}};
         { desc = CXXMethod {
           type_ref = None;
-          name = "pure_virtual_method";
-          function_type = {
-            result = { desc = BuiltinType Void };
-            parameters = Some { non_variadic = [] }};
-          body = None;
-          binding = PureVirtual; }};
+          binding = PureVirtual;
+          function_decl = {
+            name = IdentifierName "pure_virtual_method";
+            function_type = {
+              result = { desc = BuiltinType Void };
+              parameters = Some { non_variadic = [] }};
+            body = None; }}};
         { desc = CXXMethod {
           type_ref = None;
-          name = "static_method";
-          function_type = {
-            result = { desc = BuiltinType Void };
-            parameters = Some { non_variadic = [] }};
-          body = Some { desc = Compound [] };
+          function_decl = {
+            name = IdentifierName "static_method";
+            function_type = {
+              result = { desc = BuiltinType Void };
+              parameters = Some { non_variadic = [] }};
+            body = Some { desc = Compound [] }};
           static = true; }};
         { desc = CXXMethod {
           type_ref = None;
-          name = "deleted_method";
-          function_type = {
-            result = { desc = BuiltinType Void };
-            parameters = Some { non_variadic = [] }};
-          body = None;
-          deleted = true; }};
+          function_decl = {
+            name = IdentifierName "deleted_method";
+            function_type = {
+              result = { desc = BuiltinType Void };
+              parameters = Some { non_variadic = [] }};
+            deleted = true;
+            body = None; }; }};
         { desc = CXXMethod {
           type_ref = Some { desc = Record ({ name = IdentifierName "C" }) };
-          name = "operator+";
-          function_type = {
-            result = { desc = LValueReference { desc = Record ({ name = IdentifierName "C" }) }};
-            parameters = Some {
-              non_variadic = [{ desc = {
-                name = "rhs";
-                qual_type = { desc =
-                  LValueReference { desc = Record ({ name = IdentifierName "C" }) }}}}] }};
-          body = Some { desc = Compound [{
-            desc = Return (Some {
-              desc = UnaryOperator {
-                kind = Deref;
-                operand = { desc = This }}})}] }}}] }};
+          function_decl = {
+            name = OperatorName Plus;
+            function_type = {
+              result = { desc = LValueReference { desc = Record ({ name = IdentifierName "C" }) }};
+              parameters = Some {
+                non_variadic = [{ desc = {
+                  name = "rhs";
+                  qual_type = { desc =
+                    LValueReference { desc = Record ({ name = IdentifierName "C" }) }}}}] }};
+            body = Some { desc = Compound [{
+              desc = Return (Some {
+                desc = UnaryOperator {
+                  kind = Deref;
+                  operand = { desc = This }}})}] }}}}] }};
       { desc = CXXMethod {
         type_ref = Some { desc = Record ({ name = IdentifierName "C" }) };
-        name = "f";
-        function_type = {
-          result = { desc = BuiltinType Int };
-          parameters = Some { non_variadic = [{ desc = {
-            name = "c";
-            qual_type = { desc = BuiltinType Char_S }}}] }};
-        body = Some { desc = Compound [
-          { desc = Return (Some { desc = IntegerLiteral (Int 0) })}] }}}]]
+        function_decl = {
+          name = IdentifierName "f";
+          function_type = {
+            result = { desc = BuiltinType Int };
+            parameters = Some { non_variadic = [{ desc = {
+              name = "c";
+              qual_type = { desc = BuiltinType Char_S }}}] }};
+          body = Some { desc = Compound [
+            { desc = Return (Some { desc = IntegerLiteral (Int 0) })}] }}}}]]
     ]}*)
   | Var of var_decl_desc
 (** Variable declaration.
@@ -2555,6 +2612,7 @@ let () =
   | EnumDecl of {
       name : string;
       constants : enum_constant list;
+      complete_definition : bool;
     }
 (** Enum declaration.
     {[
@@ -2950,8 +3008,7 @@ let () =
   check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
   [%pattern?
     [_; { desc = UsingDeclaration {
-      nested_name_specifier =
-        Some [Namespace { desc = Namespace { name = "std" }}];
+      nested_name_specifier = Some [Namespace "std"];
       name = IdentifierName "cout" }}]]
     ]}*)
   | Constructor of {
@@ -3119,7 +3176,7 @@ let () =
                function_type = {
                  result = { desc = BuiltinType Void };
                  parameters = Some { non_variadic = []; variadic = false }};
-               name = "f";
+               name = IdentifierName "f";
                body = Some { desc = Compound [] }}}] }}] -> ()
   | _ -> assert false
 
@@ -3145,7 +3202,7 @@ let () =
                function_type = {
                  result = { desc = BuiltinType Void };
                  parameters = Some { non_variadic = []; variadic = false }};
-               name = "f";
+               name = IdentifierName "f";
                body = Some { desc = Compound [] }}}] }}] -> ()
   | _ -> assert false
    ]}*)
@@ -3173,7 +3230,7 @@ let () =
                function_type = {
                  result = { desc = BuiltinType Void };
                  parameters = Some { non_variadic = []; variadic = false }};
-               name = "f";
+               name = IdentifierName "f";
                body = None }})};
            { desc = Friend (FriendType { desc = Elaborated {
                keyword = Class;
@@ -3306,13 +3363,13 @@ let () =
   fun ast -> match ast with
   | [_; { desc =
       Function {
-        name = "g";
+        name = IdentifierName "g";
         body = Some { desc = Compound [
           { desc = Return (Some { desc = Call {
               callee = { desc = DeclRef ({
                 nested_name_specifier = Some [
-                  Namespace { desc = Namespace { name = "ns1" }};
-                  Namespace { desc = Namespace { name = "ns2" }}];
+                  Namespace "ns1";
+                  Namespace "ns2";];
                 name = IdentifierName "f"})};
               args = []; }})}] }}}] -> ()
   | _ -> assert false
@@ -3345,7 +3402,7 @@ let () =
               nested_name_specifier = Some [
                 TypeSpec { desc = Record { name = IdentifierName "C" }}];
               named_type = { desc = Enum { name = IdentifierName "E" }}}}};
-          name = "g";
+          name = IdentifierName "g";
           body = Some { desc = Compound [
             { desc = Return (Some { desc = DeclRef {
                 nested_name_specifier = Some [
@@ -3553,7 +3610,6 @@ and translation_unit = (translation_unit_desc, qual_type) open_node
 and translation_unit_desc = {
     filename : string; items : decl list
   }
-    
 
 type 'a node = ('a, qual_type) open_node
 

@@ -2047,6 +2047,22 @@ external ext_float_convert_to_double :
   cxfloat -> float = "clang_ext_Float_convertToDouble_wrapper"
 external ext_string_literal_get_string :
   cxcursor -> string = "clang_ext_StringLiteral_GetString_wrapper"
+external ext_string_literal_get_bytes :
+  cxcursor -> string = "clang_ext_StringLiteral_getBytes_wrapper"
+external ext_string_literal_get_byte_length :
+  cxcursor -> int = "clang_ext_StringLiteral_getByteLength_wrapper"
+external ext_string_literal_get_char_byte_width :
+  cxcursor -> int = "clang_ext_StringLiteral_getCharByteWidth_wrapper"
+type clang_ext_stringkind =
+  | Ascii 
+  | Wide 
+  | UTF8 
+  | UTF16 
+  | UTF32 
+  | Invalid 
+external ext_string_literal_get_kind :
+  cxcursor -> clang_ext_stringkind =
+    "clang_ext_StringLiteral_getKind_wrapper"
 type clang_ext_unaryoperatorkind =
   | PostInc 
   | PostDec 
@@ -3137,3 +3153,23 @@ external ext_decl_get_nested_name_specifier :
 external ext_type_get_qualifier :
   cxtype -> clang_ext_nestednamespecifier =
     "clang_ext_Type_getQualifier_wrapper"
+external ext_tag_decl_is_complete_definition :
+  cxcursor -> bool = "clang_ext_TagDecl_isCompleteDefinition_wrapper"
+external ext_cxxpseudo_destructor_expr_get_destroyed_type :
+  cxcursor -> cxtype =
+    "clang_ext_CXXPseudoDestructorExpr_getDestroyedType_wrapper"
+external ext_cursor_get_num_template_args :
+  cxcursor -> int = "clang_ext_Cursor_getNumTemplateArgs_wrapper"
+external ext_cursor_get_template_arg :
+  cxcursor -> int -> clang_ext_templateargument =
+    "clang_ext_Cursor_getTemplateArg_wrapper"
+external ext_type_alias_template_decl_get_templated_decl :
+  cxcursor -> cxcursor =
+    "clang_ext_TypeAliasTemplateDecl_getTemplatedDecl_wrapper"
+external ext_template_decl_get_parameter_count :
+  cxcursor -> int = "clang_ext_TemplateDecl_getParameterCount_wrapper"
+external ext_template_decl_get_parameter :
+  cxcursor -> int -> cxcursor = "clang_ext_TemplateDecl_getParameter_wrapper"
+external ext_subst_non_type_template_parm_expr_get_replacement :
+  cxcursor -> cxcursor =
+    "clang_ext_SubstNonTypeTemplateParmExpr_getReplacement_wrapper"

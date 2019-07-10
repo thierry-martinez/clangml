@@ -1,3 +1,5 @@
+open Ppxlib
+
 module String_hashtbl = Hashtbl.Make (struct
   type t = string
 
@@ -1986,9 +1988,9 @@ let main cflags llvm_config prefix =
           | "5.0.0"
           | "5.0.1" -> "5.0.2"
           | "6.0.0" -> "6.0.1"
-          | "7.0.0"
-          | "7.1.0" -> "7.0.1"
-          | "8.0.1" -> "8.0.0"
+          | "7.0.0" -> "7.1.0"
+          | "7.0.1" -> "7.1.0"
+          | "8.0.0" -> "8.0.1"
           | _ -> llvm_version in
         String.split_on_char ' ' llvm_cflags @
         ["-I"; List.fold_left Filename.concat llvm_prefix
@@ -2032,6 +2034,9 @@ let main cflags llvm_config prefix =
     add_type (Pcre.regexp "^clang_ext_LambdaCapture$")
       (empty_type_interface |>
        make_destructor "clang_ext_LambdaCapture_dispose") |>
+    add_type (Pcre.regexp "^clang_ext_DeclarationName$")
+      (empty_type_interface |>
+       make_destructor "clang_ext_DeclarationName_dispose") |>
     add_type (Pcre.regexp "^CXIndex$")
       (empty_type_interface |>
        make_destructor "clang_disposeIndex") |>

@@ -44,7 +44,7 @@
 #ifdef LLVM_VERSION_BEFORE_7_0_0
 #define LLVM_VERSION_BEFORE_8_0_0
 #endif
-#ifdef LLVM_VERSION_7_0_1
+#ifdef LLVM_VERSION_7_1_0
 #define LLVM_VERSION_BEFORE_8_0_0
 #endif
 
@@ -138,6 +138,28 @@ clang_ext_Float_convertToDouble(CXFloat f);
 
 CXString
 clang_ext_StringLiteral_GetString(CXCursor c);
+
+CXString
+clang_ext_StringLiteral_getBytes(CXCursor c);
+
+unsigned int
+clang_ext_StringLiteral_getByteLength(CXCursor c);
+
+unsigned int
+clang_ext_StringLiteral_getCharByteWidth(CXCursor c);
+
+/* Copied from Expr.h:StringLiteral:StringKind */
+enum clang_ext_StringKind {
+  clang_ext_StringKind_Ascii,
+  clang_ext_StringKind_Wide,
+  clang_ext_StringKind_UTF8,
+  clang_ext_StringKind_UTF16,
+  clang_ext_StringKind_UTF32,
+  clang_ext_StringKind_Invalid
+};
+
+enum clang_ext_StringKind
+clang_ext_StringLiteral_getKind(CXCursor c);
 
 #ifdef LLVM_VERSION_BEFORE_3_9_0
 #define CLANG_EXT_UNARY_OPERATOR_Invalid CLANG_EXT_UNARY_OPERATOR_UO_Invalid
@@ -661,6 +683,9 @@ struct clang_ext_DeclarationName {
   CXTranslationUnit tu;
 };
 
+void
+clang_ext_DeclarationName_dispose(struct clang_ext_DeclarationName name);
+
 /* Copied from clang/AST/DeclarationName.h */
 enum clang_ext_DeclarationNameKind {
   CLANG_EXT_DECLARATION_NAME_Identifier,
@@ -749,3 +774,27 @@ clang_ext_Decl_getNestedNameSpecifier(CXCursor);
 
 struct clang_ext_NestedNameSpecifier
 clang_ext_Type_getQualifier(CXType);
+
+bool
+clang_ext_TagDecl_isCompleteDefinition(CXCursor);
+
+CXType
+clang_ext_CXXPseudoDestructorExpr_getDestroyedType(CXCursor);
+
+unsigned int
+clang_ext_Cursor_getNumTemplateArgs(CXCursor);
+
+struct clang_ext_TemplateArgument
+clang_ext_Cursor_getTemplateArg(CXCursor, unsigned int);
+
+CXCursor
+clang_ext_TypeAliasTemplateDecl_getTemplatedDecl(CXCursor cursor);
+
+unsigned int
+clang_ext_TemplateDecl_getParameterCount(CXCursor cursor);
+
+CXCursor
+clang_ext_TemplateDecl_getParameter(CXCursor cursor, unsigned int i);
+
+CXCursor
+clang_ext_SubstNonTypeTemplateParmExpr_getReplacement(CXCursor cursor);

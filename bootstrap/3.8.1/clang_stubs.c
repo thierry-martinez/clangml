@@ -5074,6 +5074,93 @@ clang_ext_StringLiteral_GetString_wrapper(value c_ocaml)
   }
 }
 
+CAMLprim value
+clang_ext_StringLiteral_getBytes_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  CXString result = clang_ext_StringLiteral_getBytes(c);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(safe_string(clang_getCString(result)));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_StringLiteral_getByteLength_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  unsigned int result = clang_ext_StringLiteral_getByteLength(c);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_StringLiteral_getCharByteWidth_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  unsigned int result = clang_ext_StringLiteral_getCharByteWidth(c);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_StringKind
+Clang_ext_stringkind_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_StringKind_Ascii;
+  case 1: return clang_ext_StringKind_Wide;
+  case 2: return clang_ext_StringKind_UTF8;
+  case 3: return clang_ext_StringKind_UTF16;
+  case 4: return clang_ext_StringKind_UTF32;
+  case 5: return clang_ext_StringKind_Invalid;
+  }
+  failwith_fmt("invalid value for Clang_ext_stringkind_val: %d", Int_val(ocaml));
+  return clang_ext_StringKind_Ascii;
+}
+
+value
+Val_clang_ext_stringkind(enum clang_ext_StringKind v)
+{
+  switch (v) {
+  case clang_ext_StringKind_Ascii: return Val_int(0);
+  case clang_ext_StringKind_Wide: return Val_int(1);
+  case clang_ext_StringKind_UTF8: return Val_int(2);
+  case clang_ext_StringKind_UTF16: return Val_int(3);
+  case clang_ext_StringKind_UTF32: return Val_int(4);
+  case clang_ext_StringKind_Invalid: return Val_int(5);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_stringkind: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_StringLiteral_getKind_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  enum clang_ext_StringKind result = clang_ext_StringLiteral_getKind(c);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_stringkind(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_UnaryOperatorKind
 Clang_ext_unaryoperatorkind_val(value ocaml)
 {
@@ -8133,7 +8220,10 @@ Val_clang_ext_declarationnamekind(enum clang_ext_DeclarationNameKind v)
   return Val_int(0);
 }
 
-DECLARE_OPAQUE(struct clang_ext_DeclarationName, clang_ext_declarationname, Clang_ext_declarationname_val, Val_clang_ext_declarationname, custom_finalize_default)
+static void finalize_clang_ext_declarationname(value v) {
+  clang_ext_DeclarationName_dispose(*((struct clang_ext_DeclarationName *) Data_custom_val(v)));;
+}
+DECLARE_OPAQUE(struct clang_ext_DeclarationName, clang_ext_declarationname, Clang_ext_declarationname_val, Val_clang_ext_declarationname, finalize_clang_ext_declarationname)
 
 CAMLprim value
 clang_ext_DeclarationName_getKind_wrapper(value arg_ocaml)
@@ -8398,6 +8488,132 @@ clang_ext_Type_getQualifier_wrapper(value arg_ocaml)
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_clang_ext_nestednamespecifier(result));
   Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TagDecl_isCompleteDefinition_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  _Bool result = clang_ext_TagDecl_isCompleteDefinition(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CXXPseudoDestructorExpr_getDestroyedType_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  CXType result = clang_ext_CXXPseudoDestructorExpr_getDestroyedType(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxtype(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_Cursor_getNumTemplateArgs_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int result = clang_ext_Cursor_getNumTemplateArgs(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_Cursor_getTemplateArg_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int arg2;
+  arg2 = Int_val(arg2_ocaml);
+  struct clang_ext_TemplateArgument result = clang_ext_Cursor_getTemplateArg(arg, arg2);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_templateargument(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TypeAliasTemplateDecl_getTemplatedDecl_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  CXCursor result = clang_ext_TypeAliasTemplateDecl_getTemplatedDecl(cursor);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TemplateDecl_getParameterCount_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  unsigned int result = clang_ext_TemplateDecl_getParameterCount(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TemplateDecl_getParameter_wrapper(value cursor_ocaml, value i_ocaml)
+{
+  CAMLparam2(cursor_ocaml, i_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  unsigned int i;
+  i = Int_val(i_ocaml);
+  CXCursor result = clang_ext_TemplateDecl_getParameter(cursor, i);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_SubstNonTypeTemplateParmExpr_getReplacement_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  CXCursor result = clang_ext_SubstNonTypeTemplateParmExpr_getReplacement(cursor);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
     CAMLreturn(data);
   }
 }
