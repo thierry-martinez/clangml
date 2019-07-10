@@ -148,23 +148,17 @@ https://gitlab.inria.fr/tmartine/clangml/-/archive/snapshot/clangml-snapshot.tar
                 stage('c++14') {
                     steps {
                         sh '''
-                            cd $HOME/cplusplus/c++14/ && \
-                            $PWD/build/_build/default/tools/norm_extractor/norm_extractor.exe \
-                              --trigraphs -x c++ --std c++14 -i -o $PWD/norm_cxx14.ml \
-                              `sed -n -e 's/^\\\\include{\\([^}]*\\)}/\\1/p' \
-                              $HOME/cplusplus/c++14/std.tex`"
-                           '''
+                            build_dir=$PWD/build target_dir=$PWD std=c++14 \
+                                src/ci-scripts/extract_norm.sh
+                        '''
                     }
                 }
                 stage('c++17') {
                     steps {
                         sh '''
-                            cd $HOME/cplusplus/c++17/ && \
-                            $PWD/build/_build/default/tools/norm_extractor/norm_extractor.exe \
-                              --trigraphs -x c++ --std c++17 -i -o $PWD/norm_cxx17.ml \
-                              `sed -n -e 's/^\\\\include{\\([^}]*\\)}/\\1/p' \
-                              $HOME/cplusplus/c++17/std.tex`"
-                           '''
+                            build_dir=$PWD/build target_dir=$PWD std=c++17 \
+                                src/ci-scripts/extract_norm.sh
+                        '''
                     }
                 }
             }

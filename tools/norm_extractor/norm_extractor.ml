@@ -235,10 +235,8 @@ namespace N {};
   X& operator=(X&);
 };
 " ^ s);
-        (fun s -> "#include <array>
-" ^ s);
-        (fun s -> "int i;
-" ^ s);
+        (fun s -> "#include <array>\n" ^ s);
+        (fun s -> "int i;\n" ^ s);
         (fun s -> "int i;
 namespace M {
   class B {};
