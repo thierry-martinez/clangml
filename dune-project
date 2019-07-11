@@ -5,10 +5,10 @@
 (license BSD)
 (maintainers "Thierry Martinez <thierry.martinez@inria.fr>")
 (authors "Thierry Martinez <thierry.martinez@inria.fr>")
-(source (uri "git+https://gitlab.inria.fr/tmartine/clangml"))
-(homepage "https://gitlab.inria.fr/tmartine/clangml")
-(bug_reports "https://gitlab.inria.fr/tmartine/clangml")
-(documentation "https://gitlab.inria.fr/tmartine/clangml")
+(source (uri "git+https://gitlab.inria.fr/memcad/clangml"))
+(homepage "https://gitlab.inria.fr/memcad/clangml")
+(bug_reports "https://gitlab.inria.fr/memcad/clangml")
+(documentation "https://gitlab.inria.fr/memcad/clangml")
 
 (package
  (name clangml)
