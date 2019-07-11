@@ -26,9 +26,9 @@ failwith_fmt(const char* format, ...)
     va_list argptr;
     ssize_t length = 255;
     char buffer[256];
+    va_start(argptr, format);
 /*
     ssize_t length;
-    va_start(argptr, format);
     length = vsnprintf(NULL, 0, format, argptr);
     if (length < 0) {
       failwith("Unable to measure error format");
