@@ -2436,20 +2436,24 @@ extern "C" {
   unsigned int
   clang_ext_DecompositionDecl_GetBindingsCount(CXCursor cursor)
   {
+    #ifndef LLVM_VERSION_BEFORE_4_0_0
     auto s = GetCursorDecl(cursor);
     if (auto e = llvm::dyn_cast_or_null<clang::DecompositionDecl>(s)) {
       return e->bindings().size();
     }
+    #endif
     return 0;
   }
 
   CXCursor
   clang_ext_DecompositionDecl_GetBindings(CXCursor cursor, unsigned int i)
   {
+    #ifndef LLVM_VERSION_BEFORE_4_0_0
     auto s = GetCursorDecl(cursor);
     if (auto e = llvm::dyn_cast_or_null<clang::DecompositionDecl>(s)) {
       return MakeCXCursor(e->bindings()[i], getCursorTU(cursor));
     }
+    #endif
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
   }
 }
