@@ -1473,6 +1473,10 @@ let () =
       try_block : stmt;
       handlers : catch list;
     }
+  | AttributedStmt of {
+      attributes : attribute_kind list;
+      sub_stmts : stmt list;
+    }
   | UnknownStmt of cxcursorkind * clang_ext_stmtkind
 
 and catch = {

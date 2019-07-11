@@ -799,3 +799,9 @@ clang_ext_TemplateDecl_getParameter(CXCursor cursor, unsigned int i);
 
 CXCursor
 clang_ext_SubstNonTypeTemplateParmExpr_getReplacement(CXCursor cursor);
+
+unsigned int
+clang_ext_AttributedStmt_GetAttributeCount(CXCursor cursor);
+
+enum clang_ext_AttrKind
+clang_ext_AttributedStmt_GetAttributeKind(CXCursor cursor, unsigned int i);

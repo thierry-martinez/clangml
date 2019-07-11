@@ -2377,12 +2377,31 @@ extern "C" {
   CXCursor
   clang_ext_SubstNonTypeTemplateParmExpr_getReplacement(CXCursor cursor)
   {
-    if (auto s = GetCursorStmt(cursor)) {
-      if (auto e =
-          llvm::dyn_cast_or_null<clang::SubstNonTypeTemplateParmExpr>(s)) {
-        return MakeCXCursor(e->getReplacement(), getCursorTU(cursor));
-      }
+    auto s = GetCursorStmt(cursor);
+    if (auto e =
+        llvm::dyn_cast_or_null<clang::SubstNonTypeTemplateParmExpr>(s)) {
+      return MakeCXCursor(e->getReplacement(), getCursorTU(cursor));
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  unsigned int
+  clang_ext_AttributedStmt_GetAttributeCount(CXCursor cursor)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::AttributedStmt>(s)) {
+      return e->getAttrs().size();
+    }
+    return 0;
+  }
+
+  enum clang_ext_AttrKind
+  clang_ext_AttributedStmt_GetAttributeKind(CXCursor cursor, unsigned int i)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::AttributedStmt>(s)) {
+      return static_cast<enum clang_ext_AttrKind>(e->getAttrs()[i]->getKind());
+    }
+    return CLANG_EXT_ATTR_NoAttr;
   }
 }

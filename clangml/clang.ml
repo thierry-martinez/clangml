@@ -951,6 +951,19 @@ module Ast = struct
                     handlers |> List.map catch_of_cxcursor
                 | _ -> raise Invalid_structure in
               Try { try_block; handlers }
+          | UnexposedStmt ->
+              begin
+                match ext_stmt_get_kind cursor with
+                | AttributedStmt ->
+                    AttributedStmt {
+                      attributes = List.init
+                        (ext_attributed_stmt_get_attribute_count cursor)
+                        (ext_attributed_stmt_get_attribute_kind cursor);
+                      sub_stmts =
+                        list_of_children cursor |> List.map stmt_of_cxcursor;
+                    }
+                | _ -> raise Invalid_structure
+              end
           | _ -> Decl [node ~cursor (decl_desc_of_cxcursor cursor)]
         with Invalid_structure ->
           UnknownStmt (get_cursor_kind cursor, ext_stmt_get_kind cursor) in
