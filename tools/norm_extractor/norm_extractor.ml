@@ -165,7 +165,6 @@ let format_check_pattern fmt (ast : Clang.Ast.translation_unit) =
   end (Ast_helper.Pat.any ()) in
   let checkers = decls |> List.map begin
     fun (binder, decl) : Parsetree.expression ->
-      Format.fprintf Format.err_formatter "%a@." Clangml_show.pp_decl decl;
       [%expr check_pattern_decl
          [%e Ast_helper.Exp.ident { loc; txt = Lident binder }]
          [%pattern? [%p lifter#decl decl]]]
@@ -248,7 +247,27 @@ namespace M {
           if Clang.has_severity Clang.error tu then
             alternative_contexts |> find_map begin fun context ->
               let contents = context contents in
-              let tu = Clang.parse_string ~command_line_args contents in
+              let unsaved_files : Clang.cxunsavedfile list =
+                [{ filename = "a.h"; contents = {|
+class A {
+  A();
+  void Use();
+};
+|} };
+                 { filename = "b.h"; contents = {|
+class B {
+  B();
+  void Use();
+};
+|} };
+                 { filename = "usefullib.h"; contents = ""; };
+                 { filename = "myprog.h"; contents = ""; };
+                 { filename = "versN.h"; contents = ""; };
+                 { filename = "vers2.h"; contents = ""; };
+                 { filename = "Date"; contents = "#include <ctime>\n"; };
+                 { filename = "jctype"; contents = ""; }] in
+              let tu =
+                Clang.parse_string ~unsaved_files ~command_line_args contents in
               if Clang.has_severity Clang.error tu then
                 None
               else

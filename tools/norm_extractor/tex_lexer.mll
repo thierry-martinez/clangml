@@ -65,6 +65,11 @@ and code_block_latex_escape buffer = parse
   Buffer.add_char buffer '\n';
   code_block_latex_escape buffer lexbuf
 }
+| "\\textbackslash" {
+  Lexing.new_line lexbuf;
+  Buffer.add_char buffer '\\';
+  code_block_latex_escape buffer lexbuf
+}
 | '\\' {
   code_block_latex_escape_skip_command buffer lexbuf
 }
