@@ -676,6 +676,7 @@ and template_argument =
   | Integral of { value : integer_literal; qual_type : qual_type }
   | NonTypeTemplateArgument of qual_type
   | ExprTemplateArgument of expr
+  | Pack of template_argument list
 
 and nested_name_specifier = nested_name_specifier_component list
 
@@ -2227,6 +2228,11 @@ let () =
   | DefaultArg
   | UnexposedExpr of clang_ext_stmtkind
   | SubstNonTypeTemplateParm of expr
+  | ArrayInitLoop of {
+      common_expr : expr;
+      sub_expr : expr;
+    }
+  | ArrayInitIndex
   | UnknownExpr of cxcursorkind * clang_ext_stmtkind
 
 and field =
@@ -3325,6 +3331,11 @@ let () =
       ident_ref : ident_ref;
       qual_type : qual_type;
     }
+  | Decomposition of {
+      bindings : declaration_name list;
+      init : expr option;
+    }
+(** Structure decomposition. (C++ 17) *)
   | UnknownDecl of cxcursorkind * clang_ext_declkind
 
 and directive =

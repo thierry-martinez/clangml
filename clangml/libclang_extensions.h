@@ -476,8 +476,19 @@ clang_ext_TemplateArgument_getIntegralType(struct clang_ext_TemplateArgument);
 CXCursor
 clang_ext_TemplateArgument_getAsExpr(struct clang_ext_TemplateArgument);
 
+unsigned int
+clang_ext_TemplateArgument_getPackSize(struct clang_ext_TemplateArgument);
+
+struct clang_ext_TemplateArgument
+clang_ext_TemplateArgument_getPackArgument(
+  struct clang_ext_TemplateArgument, unsigned int);
+
+struct clang_ext_TemplateArgument
+clang_ext_TemplateArgument_getPackExpansionPattern(
+  struct clang_ext_TemplateArgument);
+
 struct clang_ext_TemplateName
-clang_ext_TemplateSpecializationType_getTemplateName(CXType CT);
+clang_ext_TemplateSpecializationType_getTemplateName(CXType);
 
 unsigned
 clang_ext_TemplateSpecializationType_getNumArgs(CXType);
@@ -805,3 +816,9 @@ clang_ext_AttributedStmt_GetAttributeCount(CXCursor cursor);
 
 enum clang_ext_AttrKind
 clang_ext_AttributedStmt_GetAttributeKind(CXCursor cursor, unsigned int i);
+
+unsigned int
+clang_ext_DecompositionDecl_GetBindingsCount(CXCursor cursor);
+
+CXCursor
+clang_ext_DecompositionDecl_GetBindings(CXCursor cursor, unsigned int i);

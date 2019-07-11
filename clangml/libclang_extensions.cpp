@@ -1324,6 +1324,36 @@ extern "C" {
     return MakeCXCursorInvalid(CXCursor_InvalidCode, CTA.TU);
   }
 
+  unsigned int
+  clang_ext_TemplateArgument_getPackSize(
+    struct clang_ext_TemplateArgument CTA)
+  {
+    if (auto *TA = GetTemplateArgument(CTA)) {
+      return TA->pack_size();
+    }
+    return 0;
+  }
+
+  struct clang_ext_TemplateArgument
+  clang_ext_TemplateArgument_getPackArgument(
+    struct clang_ext_TemplateArgument CTA, unsigned int i)
+  {
+    if (auto *TA = GetTemplateArgument(CTA)) {
+      return MakeTemplateArgument(TA->getPackAsArray()[i], CTA.TU);
+    }
+    return MakeTemplateArgumentInvalid(CTA.TU);
+  }
+
+  struct clang_ext_TemplateArgument
+  clang_ext_TemplateArgument_getPackExpansionPattern(
+    struct clang_ext_TemplateArgument CTA)
+  {
+    if (auto *TA = GetTemplateArgument(CTA)) {
+      return MakeTemplateArgument(TA->getPackExpansionPattern(), CTA.TU);
+    }
+    return MakeTemplateArgumentInvalid(CTA.TU);
+  }
+
   void
   clang_ext_TemplateArgument_dispose(struct clang_ext_TemplateArgument CTA)
   {
@@ -2276,25 +2306,22 @@ extern "C" {
   unsigned int
   clang_ext_Cursor_getNumTemplateArgs(CXCursor cursor)
   {
-    if (cursor.kind >= CXCursor_FirstDecl && cursor.kind <= CXCursor_LastDecl) {
-      if (auto d = GetCursorDecl(cursor)) {
-        if (auto cts = llvm::dyn_cast_or_null<
-            clang::ClassTemplateSpecializationDecl>(d)) {
-          return cts->getTemplateArgs().size();
-        }
-        else if (auto cts = llvm::dyn_cast_or_null<
-            clang::VarTemplateSpecializationDecl>(d)) {
-          return cts->getTemplateArgs().size();
-        }
+    if (is_valid_decl(cursor.kind)) {
+      auto d = GetCursorDecl(cursor);
+      if (auto cts = llvm::dyn_cast_or_null<
+          clang::ClassTemplateSpecializationDecl>(d)) {
+        return cts->getTemplateArgs().size();
+      }
+      else if (auto cts = llvm::dyn_cast_or_null<
+          clang::VarTemplateSpecializationDecl>(d)) {
+        return cts->getTemplateArgs().size();
       }
     }
-    else if (cursor.kind >= CXCursor_FirstExpr &&
-        cursor.kind <= CXCursor_LastExpr) {
-      if (auto s = GetCursorStmt(cursor)) {
-        if (auto e = llvm::dyn_cast_or_null<
-            clang::CXXDependentScopeMemberExpr>(s)) {
-          return e->getNumTemplateArgs();
-        }
+    else if (is_valid_stmt(cursor.kind)) {
+      auto s = GetCursorStmt(cursor);
+      if (auto e = llvm::dyn_cast_or_null<
+          clang::CXXDependentScopeMemberExpr>(s)) {
+        return e->getNumTemplateArgs();
       }
     }
     return 0;
@@ -2304,30 +2331,30 @@ extern "C" {
   clang_ext_Cursor_getTemplateArg(
     CXCursor cursor, unsigned int i)
   {
-    if (cursor.kind >= CXCursor_FirstDecl && cursor.kind <= CXCursor_LastDecl) {
-      if (auto d = GetCursorDecl(cursor)) {
-        if (auto cts = llvm::dyn_cast_or_null<
-            clang::ClassTemplateSpecializationDecl>(d)) {
-          return MakeTemplateArgument(cts->getTemplateArgs().get(i),
-            getCursorTU(cursor));
-        }
-        else if (auto cts = llvm::dyn_cast_or_null<
-            clang::VarTemplateSpecializationDecl>(d)) {
-          return MakeTemplateArgument(cts->getTemplateArgs().get(i),
-            getCursorTU(cursor));
-        }
+    std::cerr << "clang_ext_Cursor_getTemplateArg" << std::endl;
+    if (is_valid_decl(cursor.kind)) {
+      auto d = GetCursorDecl(cursor);
+      if (auto cts = llvm::dyn_cast_or_null<
+          clang::ClassTemplateSpecializationDecl>(d)) {
+    std::cerr << "clang_ext_Cursor_getTemplateArg ClassTemplateSpecializationDecl" << std::endl;
+        return MakeTemplateArgument(cts->getTemplateArgs().get(i),
+          getCursorTU(cursor));
+      }
+      else if (auto cts = llvm::dyn_cast_or_null<
+          clang::VarTemplateSpecializationDecl>(d)) {
+        return MakeTemplateArgument(cts->getTemplateArgs().get(i),
+          getCursorTU(cursor));
       }
     }
-    else if (cursor.kind >= CXCursor_FirstExpr &&
-        cursor.kind <= CXCursor_LastExpr) {
-      if (auto s = GetCursorStmt(cursor)) {
-        if (auto e = llvm::dyn_cast_or_null<
-            clang::CXXDependentScopeMemberExpr>(s)) {
-          return MakeTemplateArgument(e->getTemplateArgs()[i].getArgument(),
-            getCursorTU(cursor));
-        }
+    else if (is_valid_stmt(cursor.kind)) {
+      auto s = GetCursorStmt(cursor);
+      if (auto e = llvm::dyn_cast_or_null<
+          clang::CXXDependentScopeMemberExpr>(s)) {
+        return MakeTemplateArgument(e->getTemplateArgs()[i].getArgument(),
+          getCursorTU(cursor));
       }
     }
+    std::cerr << "clang_ext_Cursor_getTemplateArg invalid" << std::endl;
     return MakeTemplateArgumentInvalid(getCursorTU(cursor));
   }
 
@@ -2403,5 +2430,25 @@ extern "C" {
       return static_cast<enum clang_ext_AttrKind>(e->getAttrs()[i]->getKind());
     }
     return CLANG_EXT_ATTR_NoAttr;
+  }
+
+  unsigned int
+  clang_ext_DecompositionDecl_GetBindingsCount(CXCursor cursor)
+  {
+    auto s = GetCursorDecl(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::DecompositionDecl>(s)) {
+      return e->bindings().size();
+    }
+    return 0;
+  }
+
+  CXCursor
+  clang_ext_DecompositionDecl_GetBindings(CXCursor cursor, unsigned int i)
+  {
+    auto s = GetCursorDecl(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::DecompositionDecl>(s)) {
+      return MakeCXCursor(e->bindings()[i], getCursorTU(cursor));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
   }
 }
