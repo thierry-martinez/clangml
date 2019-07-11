@@ -409,6 +409,12 @@ AS_IF([test -d tools/norm_extractor],
      AC_CP([$srcdir/tools/norm_extractor/kmp.mli], [tools/norm_extractor/])
      AC_CP([$srcdir/tools/norm_extractor/dune], [tools/norm_extractor/]))])
 
+AS_IF([test -d tools/print_tree],
+  [true],
+  [AS_IF([mkdir tools/print_tree],
+    [AC_CP([$srcdir/tools/print_tree/dune], [tools/print_tree/])
+     AC_CP([$srcdir/tools/print_tree/print_tree.ml], [tools/print_tree/])])])
+
 AS_IF([test -d tests],
   [true],
   [AS_IF([mkdir tests],

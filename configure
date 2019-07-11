@@ -6539,6 +6539,23 @@ fi
 fi
 fi
 
+if test -d tools/print_tree; then :
+  true
+else
+  if mkdir tools/print_tree; then :
+  if cp $srcdir/tools/print_tree/dune tools/print_tree/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/tools/print_tree/print_tree.ml tools/print_tree/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+fi
+fi
+
 if test -d tests; then :
   true
 else

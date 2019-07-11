@@ -347,6 +347,7 @@ enum clang_ext_UnaryExpr {
   UETT_AlignOf,
   UETT_VecStep,
   UETT_OpenMPRequiredSimdAlign,
+  UETT_PreferredAlignOf,
 };
 
 enum clang_ext_UnaryExpr
