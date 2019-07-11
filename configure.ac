@@ -229,6 +229,16 @@ AS_IF([test `printf "$EQUIVALENT_LLVM_VERSION\n3.7" | sort | head -n1` = "3.7"],
   [AC_SUBST([IF_CLANG_BEFORE_3_7], [""])
    AC_SUBST([ENDIF_CLANG_BEFORE_3_7], [""])])
 
+AS_IF([test `printf "$EQUIVALENT_LLVM_VERSION\n4.0" | sort | head -n1` = "4.0"],
+  [AC_SUBST([IF_CLANG_BEFORE_4_0], ["(*"])
+   AC_SUBST([ENDIF_CLANG_BEFORE_4_0], ["*)"])
+   AC_SUBST([IF_CLANG_FROM_4_0], [""])
+   AC_SUBST([ENDIF_CLANG_FROM_4_0], [""])],
+  [AC_SUBST([IF_CLANG_BEFORE_4_0], [""])
+   AC_SUBST([ENDIF_CLANG_BEFORE_4_0], [""])
+   AC_SUBST([IF_CLANG_FROM_4_0], ["(*"])
+   AC_SUBST([ENDIF_CLANG_FROM_4_0], ["*)"])])
+
 AS_IF([test `printf "$EQUIVALENT_LLVM_VERSION\n8.0" | sort | head -n1` = "8.0"],
   [AC_SUBST([IF_CLANG_BEFORE_8_0], ["(*"])
    AC_SUBST([ENDIF_CLANG_BEFORE_8_0], ["*)"])

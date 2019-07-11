@@ -588,22 +588,24 @@ module Ast = struct
                   get_typedef_decl_underlying_type |> of_cxtype in
                   TypeAlias { ident_ref; qual_type }
                 end
-            | Decomposition ->
-                let init =
-                  match list_of_children cursor with
-                  | [sub] -> Some (sub |> expr_of_cxcursor)
-                  | [] -> None
-                  | _ -> raise Invalid_structure in
-                Decomposition {
-                  bindings = List.init
-                    (ext_decomposition_decl_get_bindings_count cursor)
-                    begin fun i ->
-                      ext_decomposition_decl_get_bindings cursor i |>
-                      extract_declaration_name
-                    end;
-                  init;
-                }
-            | ext_kind -> UnknownDecl (kind, ext_kind)
+            | ext_kind ->
+                match compat_decl_kind ext_kind with
+                | Decomposition ->
+                    let init =
+                      match list_of_children cursor with
+                      | [sub] -> Some (sub |> expr_of_cxcursor)
+                      | [] -> None
+                      | _ -> raise Invalid_structure in
+                    Decomposition {
+                      bindings = List.init
+                        (ext_decomposition_decl_get_bindings_count cursor)
+                        begin fun i ->
+                          ext_decomposition_decl_get_bindings cursor i |>
+                          extract_declaration_name
+                        end;
+                      init;
+                    }
+                | _ -> UnknownDecl (kind, ext_kind)
       with Invalid_structure ->
         UnknownDecl (get_cursor_kind cursor, ext_decl_get_kind cursor)
 
