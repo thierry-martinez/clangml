@@ -789,7 +789,10 @@ module Ast = struct
          children |> filter_out_prefix_from_list
            (fun cursor ->
              match get_cursor_kind cursor with
-             | TypeRef | ClassTemplate | TemplateRef | ParmDecl -> true
+             | TypeRef | ClassTemplate | TemplateRef | ParmDecl | DeclRefExpr
+             | IntegerLiteral | FloatingLiteral | CharacterLiteral
+             | StringLiteral ->
+                 true
              | _ ->
                  match ext_decl_get_kind cursor with
                  | ClassTemplatePartialSpecialization -> true
