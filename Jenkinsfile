@@ -33,6 +33,7 @@ pipeline {
                 sh 'make -C build tools/norm_extractor'
             }
         }
+/*
         stage('Generate stubs') {
             steps {
                 script {
@@ -143,6 +144,7 @@ https://gitlab.inria.fr/tmartine/clangml/-/archive/snapshot/clangml-snapshot.tar
                    '''
             }
         }
+*/
         stage('Extract norms') {
             parallel {
                 stage('c++14') {
@@ -150,7 +152,7 @@ https://gitlab.inria.fr/tmartine/clangml/-/archive/snapshot/clangml-snapshot.tar
                         sh '''
                             cd $HOME/cplusplus/c++14 &&
                             build_dir=$PWD/build target_dir=$PWD std=c++14 \
-                                src/ci-scripts/extract_norm.sh
+                                $PWD/src/ci-scripts/extract_norm.sh
                         '''
                     }
                 }
@@ -159,7 +161,7 @@ https://gitlab.inria.fr/tmartine/clangml/-/archive/snapshot/clangml-snapshot.tar
                         sh '''
                             cd $HOME/cplusplus/c++17 &&
                             build_dir=$PWD/build target_dir=$PWD std=c++17 \
-                                src/ci-scripts/extract_norm.sh
+                                $PWD/src/ci-scripts/extract_norm.sh
                         '''
                     }
                 }
