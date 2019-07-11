@@ -76,7 +76,8 @@ is_valid_decl(enum CXCursorKind kind)
 {
   return
     (kind >= CXCursor_FirstDecl && kind <= CXCursor_LastDecl) ||
-    (kind >= CXCursor_FirstExtraDecl && kind <= CXCursor_LastExtraDecl);
+    (kind >= CXCursor_FirstExtraDecl && kind <= CXCursor_LastExtraDecl) ||
+    (kind == CXCursor_TemplateRef);
 }
 
 static bool
@@ -91,7 +92,9 @@ is_valid_stmt(enum CXCursorKind kind)
 static const clang::Decl *
 GetCursorDecl(CXCursor cursor)
 {
-  assert(is_valid_decl(cursor.kind));
+  if (!is_valid_decl(cursor.kind)) {
+    failwith_fmt("GetCursorDecl");
+  }
   return static_cast<const clang::Decl *>(cursor.data[0]);
 }
 
@@ -2055,7 +2058,8 @@ extern "C" {
       }
       return MakeDeclarationNameInvalid(getCursorTU(cursor));
     default:
-      if (auto d = GetCursorDecl(cursor)) {
+      if (is_valid_decl(cursor.kind)) {
+        auto d = GetCursorDecl(cursor);
         if (auto nd = llvm::dyn_cast_or_null<clang::NamedDecl>(d)) {
           return MakeDeclarationName(nd->getDeclName(), getCursorTU(cursor));
         }
@@ -2211,7 +2215,8 @@ extern "C" {
       }
       return MakeNestedNameSpecifierInvalid(getCursorTU(cursor));
     default:
-      if (auto d = GetCursorDecl(cursor)) {
+      if (is_valid_decl(cursor.kind)) {
+        auto d = GetCursorDecl(cursor);
         if (auto td = llvm::dyn_cast_or_null<clang::TagDecl>(d)) {
           return MakeNestedNameSpecifier(
             td->getQualifier(), getCursorTU(cursor));
