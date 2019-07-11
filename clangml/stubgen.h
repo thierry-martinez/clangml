@@ -20,7 +20,7 @@ xmalloc(size_t size)
     return ptr;
 }
 
-static void
+void
 failwith_fmt(const char* format, ...)
 {
     va_list argptr;

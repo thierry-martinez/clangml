@@ -3220,9 +3220,9 @@ let example = {|
    |}
 
 let () =
-  check Clangml_show.pp_decl (parse_declaration_list ~language:CXX) example @@
-  fun ast -> match ast with
-  | [{ desc = RecordDecl {
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = RecordDecl {
          keyword = Class;
          name = "C";
          fields = [
@@ -3234,8 +3234,7 @@ let () =
                body = None }})};
            { desc = Friend (FriendType { desc = Elaborated {
                keyword = Class;
-               named_type = { desc = Record ({ name = IdentifierName "B" }) }}})}] }}] -> ()
-  | _ -> assert false
+               named_type = { desc = Record ({ name = IdentifierName "B" }) }}})}] }}]]
    ]}
 
    {[
@@ -3246,19 +3245,18 @@ let example = {|
    |}
 
 let () =
-  check Clangml_show.pp_decl (parse_declaration_list ~language:CXX) example @@
-  fun ast -> match ast with
-  | [{ desc = TemplateDecl {
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = TemplateDecl {
          parameters = [{ desc = {
            parameter_name = "T";
-           parameter_kind = Class _ }}];
+           parameter_kind = Class { default = _ }}}];
          decl = { desc = RecordDecl {
            keyword = Class;
            name = "C";
            fields = [
              { desc = Friend (FriendType { desc =
-                 TemplateTypeParm "T" })}] }}}}] -> ()
-  | _ -> assert false
+                 TemplateTypeParm "T" })}] }}}}]]
    ]}
 
    {[
@@ -3269,20 +3267,19 @@ let example = {|
    |}
 
 let () =
-  check Clangml_show.pp_decl (parse_declaration_list ~language:CXX) example @@
-  fun ast -> match ast with
-  | [{ desc = RecordDecl {
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = RecordDecl {
          keyword = Class;
          name = "C";
          fields = [{ desc = Friend (FriendDecl { desc = TemplateDecl {
            parameters = [{ desc = {
              parameter_name = "T";
-             parameter_kind = Class _ }}];
+             parameter_kind = Class { default = _ }}}];
            decl = { desc = RecordDecl {
              keyword = Class;
              name = "B";
-             fields = [] }}}})}] }}] -> ()
-  | _ -> assert false
+             fields = [] }}}})}] }}]]
    ]}*)
   | NamespaceAlias of { alias : ident_ref; original : ident_ref }
 (** C++ namespace alias.
