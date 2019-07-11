@@ -1290,16 +1290,6 @@ module Ast = struct
               | CXXStdInitializerListExpr ->
                   StdInitializerList
                     (cursor |> list_of_children |> List.map expr_of_cxcursor)
-              | ArrayInitLoopExpr ->
-                  let common_expr, sub_expr =
-                    match list_of_children cursor with
-                    | [common_expr; sub_expr] ->
-                        common_expr |> expr_of_cxcursor,
-                        sub_expr |> expr_of_cxcursor
-                    | _ -> raise Invalid_structure in
-                  ArrayInitLoop { common_expr; sub_expr }
-              | ArrayInitIndexExpr ->
-                  ArrayInitIndex
               | kind ->
                   match compat_stmt_kind kind with
                   | CXXFoldExpr ->
@@ -1310,6 +1300,16 @@ module Ast = struct
                         | _ -> raise Invalid_structure in
                       let operator = ext_cxxfold_expr_get_operator cursor in
                       Fold { lhs; operator; rhs }
+                  | ArrayInitLoopExpr ->
+                      let common_expr, sub_expr =
+                        match list_of_children cursor with
+                        | [common_expr; sub_expr] ->
+                            common_expr |> expr_of_cxcursor,
+                            sub_expr |> expr_of_cxcursor
+                          | _ -> raise Invalid_structure in
+                      ArrayInitLoop { common_expr; sub_expr }
+                  | ArrayInitIndexExpr ->
+                      ArrayInitIndex
                   | _ ->
                       UnexposedExpr kind
             end
