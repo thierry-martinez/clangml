@@ -1911,6 +1911,7 @@ type clang_ext_unaryexpr =
   | AlignOf 
   | VecStep 
   | OpenMPRequiredSimdAlign 
+  | PreferredAlignOf 
 external ext_unary_expr_get_kind :
   cxcursor -> clang_ext_unaryexpr = "clang_ext_UnaryExpr_GetKind_wrapper"
 external ext_unary_expr_get_argument_type :

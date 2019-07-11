@@ -6400,6 +6400,7 @@ Clang_ext_unaryexpr_val(value ocaml)
   case 1: return UETT_AlignOf;
   case 2: return UETT_VecStep;
   case 3: return UETT_OpenMPRequiredSimdAlign;
+  case 4: return UETT_PreferredAlignOf;
   }
   failwith_fmt("invalid value for Clang_ext_unaryexpr_val: %d", Int_val(ocaml));
   return UETT_SizeOf;
@@ -6413,6 +6414,7 @@ Val_clang_ext_unaryexpr(enum clang_ext_UnaryExpr v)
   case UETT_AlignOf: return Val_int(1);
   case UETT_VecStep: return Val_int(2);
   case UETT_OpenMPRequiredSimdAlign: return Val_int(3);
+  case UETT_PreferredAlignOf: return Val_int(4);
   }
   failwith_fmt("invalid value for Val_clang_ext_unaryexpr: %d", v);
   return Val_int(0);
