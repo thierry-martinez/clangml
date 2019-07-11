@@ -120,7 +120,7 @@ let rec comment_ill_formed buffer in_commented_block lines =
       comment_ill_formed buffer in_commented_block lines
 
 let format_comment fmt pp =
-  Format.fprintf fmt "@[(*@ %a@ *)@]@ " pp ()
+  Format.fprintf fmt "@[(*@ %a@ *)@]@." pp ()
 
 type context = {
     section_table : string String_hashtbl.t;
@@ -188,32 +188,10 @@ let rec find_map f list =
       | None -> find_map f tl
       | result -> result
 
-let rec loop context title_buffer lexbuf =
-  match Tex_lexer.main lexbuf with
-  | EOF -> ()
-  | Begin_codeblock ->
-      Gc.full_major ();
-      let { target; section_table; command_line_args } = context in
-      title_buffer |> List.rev |> List.iter begin fun
-        ({ title; ident; _ } : Tex_lexer.section_title) ->
-          match String_hashtbl.find_opt section_table ident with
-          | None ->
-              Format.eprintf "Unknown section label %s@." ident
-          | Some number ->
-              format_comment target begin fun fmt () ->
-                Format.fprintf fmt "%s@ %s" number title
-              end
-      end;
-      let buffer = Buffer.create 17 in
-      Tex_lexer.code_block buffer lexbuf;
-      let s = Buffer.contents buffer in
-      let lines = String.split_on_char '\n' s in
-      Buffer.clear buffer;
-      let lines = remove_last_empty_lines lines in
-      let _ = comment_ill_formed buffer false lines in
-      let contents = Buffer.contents buffer in
-      let tu = Clang.parse_string ~command_line_args contents in
-      let alternative_contexts =
+let parse_code context contents =
+  let { target; command_line_args } = context in
+  let tu = Clang.parse_string ~command_line_args contents in
+  let alternative_contexts =
         [(fun s -> "void in_a_function() {\n" ^ s ^ "\n}");
          (fun s -> s ^ ";");
          (fun s -> "void in_a_function() {\n" ^ s ^ ";\n}");
@@ -289,7 +267,40 @@ let () =
       if Clang.Ast.has_severity Clang.error ast then
         Format.fprintf target "ignore ast"
       else
-        format_check_pattern target ast;
+        format_check_pattern target ast
+
+let rec loop context title_buffer lexbuf =
+  match Tex_lexer.main lexbuf with
+  | EOF -> ()
+  | Begin_codeblock ->
+      Gc.full_major ();
+      let { target; section_table } = context in
+      title_buffer |> List.rev |> List.iter begin fun
+        ({ title; ident; _ } : Tex_lexer.section_title) ->
+          match String_hashtbl.find_opt section_table ident with
+          | None ->
+              Format.eprintf "Unknown section label %s@." ident
+          | Some number ->
+              format_comment target begin fun fmt () ->
+                Format.fprintf fmt "%s@ %s" number title
+              end
+      end;
+      let buffer = Buffer.create 17 in
+      Tex_lexer.code_block buffer lexbuf;
+      let s = Buffer.contents buffer in
+      let lines = String.split_on_char '\n' s in
+      Buffer.clear buffer;
+      let lines = remove_last_empty_lines lines in
+      let _ = comment_ill_formed buffer false lines in
+      let contents = Buffer.contents buffer in
+      begin
+        try
+          parse_code context contents
+        with e ->
+          let bt = Printexc.get_raw_backtrace () in
+          Format.eprintf "@[Error while processing:@ %s@]@." contents;
+          Printexc.raise_with_backtrace e bt
+      end;
       loop context [] lexbuf
   | Rsec section_title ->
       let title_buffer = strip_title_buffer section_title.level title_buffer in
