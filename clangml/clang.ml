@@ -308,6 +308,15 @@ module Ast = struct
           ExprTemplateArgument (
             ext_template_argument_get_as_expr argument |>
             expr_of_cxcursor)
+      | Pack ->
+          Pack (
+              List.init
+                (ext_template_argument_get_pack_size argument)
+                begin fun i ->
+                  ext_template_argument_get_pack_argument argument i |>
+                  make_template_argument
+                end
+          )
       | _ -> raise Invalid_structure
 
     and of_cxtype cxtype =
@@ -439,10 +448,12 @@ module Ast = struct
               (record_decl_of_cxcursor keyword cursor)
         | ClassTemplatePartialSpecialization ->
             let decl = record_decl_of_cxcursor Class cursor in
+            let result =
             TemplatePartialSpecialization
               { parameters = extract_template_parameters cursor;
                 arguments = extract_template_arguments cursor;
-                decl = node ~cursor decl }
+                decl = node ~cursor decl } in
+            result
         | EnumDecl -> enum_decl_of_cxcursor cursor
         | TypedefDecl ->
             let name = get_cursor_spelling cursor in
@@ -575,7 +586,24 @@ module Ast = struct
                   get_typedef_decl_underlying_type |> of_cxtype in
                   TypeAlias { ident_ref; qual_type }
                 end
-            | ext_kind -> UnknownDecl (kind, ext_kind)
+            | ext_kind ->
+                match compat_decl_kind ext_kind with
+                | Decomposition ->
+                    let init =
+                      match list_of_children cursor with
+                      | [sub] -> Some (sub |> expr_of_cxcursor)
+                      | [] -> None
+                      | _ -> raise Invalid_structure in
+                    Decomposition {
+                      bindings = List.init
+                        (ext_decomposition_decl_get_bindings_count cursor)
+                        begin fun i ->
+                          ext_decomposition_decl_get_bindings cursor i |>
+                          extract_declaration_name
+                        end;
+                      init;
+                    }
+                | _ -> UnknownDecl (kind, ext_kind)
       with Invalid_structure ->
         UnknownDecl (get_cursor_kind cursor, ext_decl_get_kind cursor)
 
@@ -761,7 +789,10 @@ module Ast = struct
          children |> filter_out_prefix_from_list
            (fun cursor ->
              match get_cursor_kind cursor with
-             | TypeRef | ClassTemplate | TemplateRef | ParmDecl -> true
+             | TypeRef | ClassTemplate | TemplateRef | ParmDecl | DeclRefExpr
+             | IntegerLiteral | FloatingLiteral | CharacterLiteral
+             | StringLiteral ->
+                 true
              | _ ->
                  match ext_decl_get_kind cursor with
                  | ClassTemplatePartialSpecialization -> true
@@ -951,6 +982,19 @@ module Ast = struct
                     handlers |> List.map catch_of_cxcursor
                 | _ -> raise Invalid_structure in
               Try { try_block; handlers }
+          | UnexposedStmt ->
+              begin
+                match ext_stmt_get_kind cursor with
+                | AttributedStmt ->
+                    AttributedStmt {
+                      attributes = List.init
+                        (ext_attributed_stmt_get_attribute_count cursor)
+                        (ext_attributed_stmt_get_attribute_kind cursor);
+                      sub_stmts =
+                        list_of_children cursor |> List.map stmt_of_cxcursor;
+                    }
+                | _ -> raise Invalid_structure
+              end
           | _ -> Decl [node ~cursor (decl_desc_of_cxcursor cursor)]
         with Invalid_structure ->
           UnknownStmt (get_cursor_kind cursor, ext_stmt_get_kind cursor) in
@@ -1254,6 +1298,16 @@ module Ast = struct
                         | _ -> raise Invalid_structure in
                       let operator = ext_cxxfold_expr_get_operator cursor in
                       Fold { lhs; operator; rhs }
+                  | ArrayInitLoopExpr ->
+                      let common_expr, sub_expr =
+                        match list_of_children cursor with
+                        | [common_expr; sub_expr] ->
+                            common_expr |> expr_of_cxcursor,
+                            sub_expr |> expr_of_cxcursor
+                          | _ -> raise Invalid_structure in
+                      ArrayInitLoop { common_expr; sub_expr }
+                  | ArrayInitIndexExpr ->
+                      ArrayInitIndex
                   | _ ->
                       UnexposedExpr kind
             end

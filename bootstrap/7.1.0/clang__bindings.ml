@@ -2707,6 +2707,15 @@ external ext_template_argument_get_integral_type :
 external ext_template_argument_get_as_expr :
   clang_ext_templateargument -> cxcursor =
     "clang_ext_TemplateArgument_getAsExpr_wrapper"
+external ext_template_argument_get_pack_size :
+  clang_ext_templateargument -> int =
+    "clang_ext_TemplateArgument_getPackSize_wrapper"
+external ext_template_argument_get_pack_argument :
+  clang_ext_templateargument -> int -> clang_ext_templateargument =
+    "clang_ext_TemplateArgument_getPackArgument_wrapper"
+external ext_template_argument_get_pack_expansion_pattern :
+  clang_ext_templateargument -> clang_ext_templateargument =
+    "clang_ext_TemplateArgument_getPackExpansionPattern_wrapper"
 external ext_template_specialization_type_get_template_name :
   cxtype -> clang_ext_templatename =
     "clang_ext_TemplateSpecializationType_getTemplateName_wrapper"
@@ -2997,3 +3006,13 @@ external ext_template_decl_get_parameter :
 external ext_subst_non_type_template_parm_expr_get_replacement :
   cxcursor -> cxcursor =
     "clang_ext_SubstNonTypeTemplateParmExpr_getReplacement_wrapper"
+external ext_attributed_stmt_get_attribute_count :
+  cxcursor -> int = "clang_ext_AttributedStmt_GetAttributeCount_wrapper"
+external ext_attributed_stmt_get_attribute_kind :
+  cxcursor -> int -> clang_ext_attrkind =
+    "clang_ext_AttributedStmt_GetAttributeKind_wrapper"
+external ext_decomposition_decl_get_bindings_count :
+  cxcursor -> int = "clang_ext_DecompositionDecl_GetBindingsCount_wrapper"
+external ext_decomposition_decl_get_bindings :
+  cxcursor -> int -> cxcursor =
+    "clang_ext_DecompositionDecl_GetBindings_wrapper"

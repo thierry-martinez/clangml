@@ -1,17 +1,16 @@
 #include <clang-c/Index.h>
-#include <clang/AST/Stmt.h>
+#include <clang/AST/Attr.h>
+#include <clang/AST/DeclCXX.h>
+#include <clang/AST/DeclFriend.h>
+#include <clang/AST/DeclTemplate.h>
 #include <clang/AST/Expr.h>
 #include <clang/AST/ExprCXX.h>
+#include <clang/AST/Stmt.h>
 #include <clang/AST/Type.h>
-#include <clang/AST/DeclCXX.h>
-#include <clang/AST/DeclTemplate.h>
-#include <clang/AST/DeclFriend.h>
-#include "clang/Frontend/ASTUnit.h"
 #include "clang/Basic/SourceLocation.h"
+#include "clang/Frontend/ASTUnit.h"
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/ErrorHandling.h>
-
-#include <iostream>
 
 extern "C" {
   #include "libclang_extensions.h"
@@ -1324,6 +1323,36 @@ extern "C" {
     return MakeCXCursorInvalid(CXCursor_InvalidCode, CTA.TU);
   }
 
+  unsigned int
+  clang_ext_TemplateArgument_getPackSize(
+    struct clang_ext_TemplateArgument CTA)
+  {
+    if (auto *TA = GetTemplateArgument(CTA)) {
+      return TA->pack_size();
+    }
+    return 0;
+  }
+
+  struct clang_ext_TemplateArgument
+  clang_ext_TemplateArgument_getPackArgument(
+    struct clang_ext_TemplateArgument CTA, unsigned int i)
+  {
+    if (auto *TA = GetTemplateArgument(CTA)) {
+      return MakeTemplateArgument(TA->getPackAsArray()[i], CTA.TU);
+    }
+    return MakeTemplateArgumentInvalid(CTA.TU);
+  }
+
+  struct clang_ext_TemplateArgument
+  clang_ext_TemplateArgument_getPackExpansionPattern(
+    struct clang_ext_TemplateArgument CTA)
+  {
+    if (auto *TA = GetTemplateArgument(CTA)) {
+      return MakeTemplateArgument(TA->getPackExpansionPattern(), CTA.TU);
+    }
+    return MakeTemplateArgumentInvalid(CTA.TU);
+  }
+
   void
   clang_ext_TemplateArgument_dispose(struct clang_ext_TemplateArgument CTA)
   {
@@ -2276,25 +2305,22 @@ extern "C" {
   unsigned int
   clang_ext_Cursor_getNumTemplateArgs(CXCursor cursor)
   {
-    if (cursor.kind >= CXCursor_FirstDecl && cursor.kind <= CXCursor_LastDecl) {
-      if (auto d = GetCursorDecl(cursor)) {
-        if (auto cts = llvm::dyn_cast_or_null<
-            clang::ClassTemplateSpecializationDecl>(d)) {
-          return cts->getTemplateArgs().size();
-        }
-        else if (auto cts = llvm::dyn_cast_or_null<
-            clang::VarTemplateSpecializationDecl>(d)) {
-          return cts->getTemplateArgs().size();
-        }
+    if (is_valid_decl(cursor.kind)) {
+      auto d = GetCursorDecl(cursor);
+      if (auto cts = llvm::dyn_cast_or_null<
+          clang::ClassTemplateSpecializationDecl>(d)) {
+        return cts->getTemplateArgs().size();
+      }
+      else if (auto cts = llvm::dyn_cast_or_null<
+          clang::VarTemplateSpecializationDecl>(d)) {
+        return cts->getTemplateArgs().size();
       }
     }
-    else if (cursor.kind >= CXCursor_FirstExpr &&
-        cursor.kind <= CXCursor_LastExpr) {
-      if (auto s = GetCursorStmt(cursor)) {
-        if (auto e = llvm::dyn_cast_or_null<
-            clang::CXXDependentScopeMemberExpr>(s)) {
-          return e->getNumTemplateArgs();
-        }
+    else if (is_valid_stmt(cursor.kind)) {
+      auto s = GetCursorStmt(cursor);
+      if (auto e = llvm::dyn_cast_or_null<
+          clang::CXXDependentScopeMemberExpr>(s)) {
+        return e->getNumTemplateArgs();
       }
     }
     return 0;
@@ -2304,28 +2330,25 @@ extern "C" {
   clang_ext_Cursor_getTemplateArg(
     CXCursor cursor, unsigned int i)
   {
-    if (cursor.kind >= CXCursor_FirstDecl && cursor.kind <= CXCursor_LastDecl) {
-      if (auto d = GetCursorDecl(cursor)) {
-        if (auto cts = llvm::dyn_cast_or_null<
-            clang::ClassTemplateSpecializationDecl>(d)) {
-          return MakeTemplateArgument(cts->getTemplateArgs().get(i),
-            getCursorTU(cursor));
-        }
-        else if (auto cts = llvm::dyn_cast_or_null<
-            clang::VarTemplateSpecializationDecl>(d)) {
-          return MakeTemplateArgument(cts->getTemplateArgs().get(i),
-            getCursorTU(cursor));
-        }
+    if (is_valid_decl(cursor.kind)) {
+      auto d = GetCursorDecl(cursor);
+      if (auto cts = llvm::dyn_cast_or_null<
+          clang::ClassTemplateSpecializationDecl>(d)) {
+        return MakeTemplateArgument(cts->getTemplateArgs().get(i),
+          getCursorTU(cursor));
+      }
+      else if (auto cts = llvm::dyn_cast_or_null<
+          clang::VarTemplateSpecializationDecl>(d)) {
+        return MakeTemplateArgument(cts->getTemplateArgs().get(i),
+          getCursorTU(cursor));
       }
     }
-    else if (cursor.kind >= CXCursor_FirstExpr &&
-        cursor.kind <= CXCursor_LastExpr) {
-      if (auto s = GetCursorStmt(cursor)) {
-        if (auto e = llvm::dyn_cast_or_null<
-            clang::CXXDependentScopeMemberExpr>(s)) {
-          return MakeTemplateArgument(e->getTemplateArgs()[i].getArgument(),
-            getCursorTU(cursor));
-        }
+    else if (is_valid_stmt(cursor.kind)) {
+      auto s = GetCursorStmt(cursor);
+      if (auto e = llvm::dyn_cast_or_null<
+          clang::CXXDependentScopeMemberExpr>(s)) {
+        return MakeTemplateArgument(e->getTemplateArgs()[i].getArgument(),
+          getCursorTU(cursor));
       }
     }
     return MakeTemplateArgumentInvalid(getCursorTU(cursor));
@@ -2377,12 +2400,55 @@ extern "C" {
   CXCursor
   clang_ext_SubstNonTypeTemplateParmExpr_getReplacement(CXCursor cursor)
   {
-    if (auto s = GetCursorStmt(cursor)) {
-      if (auto e =
-          llvm::dyn_cast_or_null<clang::SubstNonTypeTemplateParmExpr>(s)) {
-        return MakeCXCursor(e->getReplacement(), getCursorTU(cursor));
-      }
+    auto s = GetCursorStmt(cursor);
+    if (auto e =
+        llvm::dyn_cast_or_null<clang::SubstNonTypeTemplateParmExpr>(s)) {
+      return MakeCXCursor(e->getReplacement(), getCursorTU(cursor));
     }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  unsigned int
+  clang_ext_AttributedStmt_GetAttributeCount(CXCursor cursor)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::AttributedStmt>(s)) {
+      return e->getAttrs().size();
+    }
+    return 0;
+  }
+
+  enum clang_ext_AttrKind
+  clang_ext_AttributedStmt_GetAttributeKind(CXCursor cursor, unsigned int i)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::AttributedStmt>(s)) {
+      return static_cast<enum clang_ext_AttrKind>(e->getAttrs()[i]->getKind());
+    }
+    return CLANG_EXT_ATTR_NoAttr;
+  }
+
+  unsigned int
+  clang_ext_DecompositionDecl_GetBindingsCount(CXCursor cursor)
+  {
+    #ifndef LLVM_VERSION_BEFORE_4_0_0
+    auto s = GetCursorDecl(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::DecompositionDecl>(s)) {
+      return e->bindings().size();
+    }
+    #endif
+    return 0;
+  }
+
+  CXCursor
+  clang_ext_DecompositionDecl_GetBindings(CXCursor cursor, unsigned int i)
+  {
+    #ifndef LLVM_VERSION_BEFORE_4_0_0
+    auto s = GetCursorDecl(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::DecompositionDecl>(s)) {
+      return MakeCXCursor(e->bindings()[i], getCursorTU(cursor));
+    }
+    #endif
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
   }
 }
