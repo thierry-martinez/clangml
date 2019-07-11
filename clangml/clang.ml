@@ -317,7 +317,7 @@ module Ast = struct
                   make_template_argument
                 end
           )
-      | _ -> prerr_endline "make_template_argument"; raise Invalid_structure
+      | _ -> raise Invalid_structure
 
     and of_cxtype cxtype =
       let desc =
@@ -448,13 +448,11 @@ module Ast = struct
               (record_decl_of_cxcursor keyword cursor)
         | ClassTemplatePartialSpecialization ->
             let decl = record_decl_of_cxcursor Class cursor in
-            prerr_endline "ClassTemplatePartialSpecialization";
             let result =
             TemplatePartialSpecialization
               { parameters = extract_template_parameters cursor;
                 arguments = extract_template_arguments cursor;
                 decl = node ~cursor decl } in
-            prerr_endline "done";
             result
         | EnumDecl -> enum_decl_of_cxcursor cursor
         | TypedefDecl ->
@@ -1471,7 +1469,7 @@ module Ast = struct
               end with
               | [] -> None
               | [default] -> Some (default |> expr_of_cxcursor)
-              | _ -> prerr_endline "NonType"; raise Invalid_structure in
+              | _ -> raise Invalid_structure in
             Some (NonType { parameter_type; default })
         | TemplateTemplateParameter ->
             let parameters = extract_template_parameters cursor in
@@ -1481,11 +1479,11 @@ module Ast = struct
                 filter_out_prefix_from_list is_template_parameter with
               | [] -> None
               | [default] -> Some (get_cursor_spelling default)
-              | _ -> prerr_endline "TemplateTemplate"; raise Invalid_structure in
+              | _ -> raise Invalid_structure in
             Some (Template { parameters; default })
         | _ -> None
       with
-      | None -> prerr_endline "Unknown parameter"; raise Invalid_structure
+      | None -> raise Invalid_structure
       | Some parameter_kind ->
           let parameter_name = get_cursor_spelling cursor in
           let parameter_pack =
@@ -1494,14 +1492,12 @@ module Ast = struct
             { parameter_name; parameter_kind; parameter_pack}
 
     and extract_template_parameters cursor =
-      prerr_endline "extract_template_parameters";
       List.init (ext_template_decl_get_parameter_count cursor) begin fun i ->
         ext_template_decl_get_parameter cursor i |>
         template_parameter_of_cxcursor
       end
 
     and extract_template_arguments cursor =
-      prerr_endline "extract_template_arguments";
       List.init (ext_cursor_get_num_template_args cursor) begin fun i ->
         ext_cursor_get_template_arg cursor i |>
         make_template_argument

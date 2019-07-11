@@ -12,8 +12,6 @@
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/ErrorHandling.h>
 
-#include <iostream>
-
 extern "C" {
   #include "libclang_extensions.h"
 }
@@ -2332,12 +2330,10 @@ extern "C" {
   clang_ext_Cursor_getTemplateArg(
     CXCursor cursor, unsigned int i)
   {
-    std::cerr << "clang_ext_Cursor_getTemplateArg" << std::endl;
     if (is_valid_decl(cursor.kind)) {
       auto d = GetCursorDecl(cursor);
       if (auto cts = llvm::dyn_cast_or_null<
           clang::ClassTemplateSpecializationDecl>(d)) {
-    std::cerr << "clang_ext_Cursor_getTemplateArg ClassTemplateSpecializationDecl" << std::endl;
         return MakeTemplateArgument(cts->getTemplateArgs().get(i),
           getCursorTU(cursor));
       }
@@ -2355,7 +2351,6 @@ extern "C" {
           getCursorTU(cursor));
       }
     }
-    std::cerr << "clang_ext_Cursor_getTemplateArg invalid" << std::endl;
     return MakeTemplateArgumentInvalid(getCursorTU(cursor));
   }
 
