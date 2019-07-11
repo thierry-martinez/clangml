@@ -150,18 +150,20 @@ https://gitlab.inria.fr/tmartine/clangml/-/archive/snapshot/clangml-snapshot.tar
                 stage('c++14') {
                     steps {
                         sh '''
+                            path=$PWD &&
                             cd $HOME/cplusplus/c++14 &&
-                            build_dir=$PWD/build target_dir=$PWD std=c++14 \
-                                $PWD/src/ci-scripts/extract_norm.sh
+                            build_dir=$path/build target_dir=$path std=c++14 \
+                                $path/src/ci-scripts/extract_norm.sh
                         '''
                     }
                 }
                 stage('c++17') {
                     steps {
                         sh '''
+                            path=$PWD &&
                             cd $HOME/cplusplus/c++17 &&
-                            build_dir=$PWD/build target_dir=$PWD std=c++17 \
-                                $PWD/src/ci-scripts/extract_norm.sh
+                            build_dir=$path/build target_dir=$path std=c++17 \
+                                $path/src/ci-scripts/extract_norm.sh
                         '''
                     }
                 }
