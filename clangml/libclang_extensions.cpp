@@ -87,6 +87,12 @@ is_valid_stmt(enum CXCursorKind kind)
     (kind >= CXCursor_FirstStmt && kind <= CXCursor_LastStmt);
 }
 
+static bool
+is_valid_attr(enum CXCursorKind kind)
+{
+  return (kind >= CXCursor_FirstAttr && kind <= CXCursor_LastAttr);
+}
+
 // Copied from clang source tree: tools/libclang/CXCursor.cpp
 static const clang::Decl *
 GetCursorDecl(CXCursor cursor)
@@ -103,6 +109,12 @@ GetCursorStmt(CXCursor cursor)
 {
   assert(is_valid_stmt(cursor.kind));
   return static_cast<const clang::Stmt *>(cursor.data[1]);
+}
+static const clang::Attr *
+GetCursorAttr(CXCursor cursor)
+{
+  assert(is_valid_attr(cursor.kind));
+  return static_cast<const clang::Attr *>(cursor.data[1]);
 }
 
 // From clang source tree: tools/libclang/CXType.cpp
@@ -1080,6 +1092,16 @@ extern "C" {
     return UETT_SizeOf;
   }
 
+  bool
+  clang_ext_UnaryExpr_isArgumentType(CXCursor c)
+  {
+    if (auto e = llvm::dyn_cast_or_null<clang::UnaryExprOrTypeTraitExpr>(
+        GetCursorStmt(c))) {
+      return e->isArgumentType();
+    }
+    return false;
+  }
+
   CXType
   clang_ext_UnaryExpr_GetArgumentType(CXCursor c)
   {
@@ -1850,6 +1872,18 @@ extern "C" {
     return MakeCXTypeInvalid(GetTU(c));
   }
 
+  bool
+  clang_ext_CXXFoldExpr_isRightFold(CXCursor c)
+  {
+    #ifndef LLVM_VERSION_BEFORE_3_6_0
+    if (auto e =
+      llvm::dyn_cast_or_null<clang::CXXFoldExpr>(GetCursorStmt(c))) {
+      return e->isRightFold();
+    }
+    #endif
+    return false;
+  }
+
   enum clang_ext_BinaryOperatorKind
   clang_ext_CXXFoldExpr_getOperator(CXCursor c)
   {
@@ -2450,5 +2484,12 @@ extern "C" {
     }
     #endif
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  enum clang_ext_AttrKind
+  clang_ext_Attr_GetKind(CXCursor cursor)
+  {
+    auto a = GetCursorAttr(cursor);
+    return static_cast<enum clang_ext_AttrKind>(a->getKind());
   }
 }

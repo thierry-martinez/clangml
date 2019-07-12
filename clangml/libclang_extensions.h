@@ -351,10 +351,13 @@ enum clang_ext_UnaryExpr {
 };
 
 enum clang_ext_UnaryExpr
-clang_ext_UnaryExpr_GetKind(CXCursor c);
+clang_ext_UnaryExpr_GetKind(CXCursor);
+
+bool
+clang_ext_UnaryExpr_isArgumentType(CXCursor);
 
 CXType
-clang_ext_UnaryExpr_GetArgumentType(CXCursor c);
+clang_ext_UnaryExpr_GetArgumentType(CXCursor);
 
 CXType
 clang_ext_Type_getNamedType(CXType CT);
@@ -652,8 +655,11 @@ clang_ext_LangStandard_ofName(const char *s);
 CXType
 clang_ext_PackExpansion_getPattern(CXType c);
 
+bool
+clang_ext_CXXFoldExpr_isRightFold(CXCursor);
+
 enum clang_ext_BinaryOperatorKind
-clang_ext_CXXFoldExpr_getOperator(CXCursor c);
+clang_ext_CXXFoldExpr_getOperator(CXCursor);
 
 bool
 clang_ext_CXXBoolLiteralExpr_getValue(CXCursor c);
@@ -800,25 +806,28 @@ struct clang_ext_TemplateArgument
 clang_ext_Cursor_getTemplateArg(CXCursor, unsigned int);
 
 CXCursor
-clang_ext_TypeAliasTemplateDecl_getTemplatedDecl(CXCursor cursor);
+clang_ext_TypeAliasTemplateDecl_getTemplatedDecl(CXCursor);
 
 unsigned int
-clang_ext_TemplateDecl_getParameterCount(CXCursor cursor);
+clang_ext_TemplateDecl_getParameterCount(CXCursor);
 
 CXCursor
-clang_ext_TemplateDecl_getParameter(CXCursor cursor, unsigned int i);
+clang_ext_TemplateDecl_getParameter(CXCursor, unsigned int);
 
 CXCursor
-clang_ext_SubstNonTypeTemplateParmExpr_getReplacement(CXCursor cursor);
+clang_ext_SubstNonTypeTemplateParmExpr_getReplacement(CXCursor);
 
 unsigned int
-clang_ext_AttributedStmt_GetAttributeCount(CXCursor cursor);
+clang_ext_AttributedStmt_GetAttributeCount(CXCursor);
 
 enum clang_ext_AttrKind
-clang_ext_AttributedStmt_GetAttributeKind(CXCursor cursor, unsigned int i);
+clang_ext_AttributedStmt_GetAttributeKind(CXCursor, unsigned int);
 
 unsigned int
-clang_ext_DecompositionDecl_GetBindingsCount(CXCursor cursor);
+clang_ext_DecompositionDecl_GetBindingsCount(CXCursor);
 
 CXCursor
-clang_ext_DecompositionDecl_GetBindings(CXCursor cursor, unsigned int i);
+clang_ext_DecompositionDecl_GetBindings(CXCursor, unsigned int);
+
+enum clang_ext_AttrKind
+clang_ext_Attr_GetKind(CXCursor);

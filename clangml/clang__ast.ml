@@ -700,6 +700,7 @@ and declaration_name =
 
 and record_decl = {
     keyword : elaborated_type_keyword;
+    attributes : attribute_kind list;
     nested_name_specifier : nested_name_specifier option; (** C++ *)
     name : string;
     bases : base_specifier list; (** C++ *)
@@ -2208,9 +2209,9 @@ let () =
   | Typeid of unary_expr_or_type_trait
   | PackExpansionExpr of expr
   | Fold of {
-      lhs : expr;
+      lhs : expr option;
       operator : binary_operator_kind;
-      rhs : expr;
+      rhs : expr option;
     }
   | SizeOfPack of ident_ref
   | Construct of {
