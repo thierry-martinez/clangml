@@ -275,7 +275,7 @@ AC_SUBST([LLVM_CFLAGS], [["`echo $LLVM_CFLAGS \
 
 AC_SUBST([CFLAGS], [["$LLVM_CFLAGS -D$LLVM_VERSION_MACRO -I$srcdir/clangml"]])
 
-AC_SUBST([CPPFLAGS], [["$CFLAGS" --std=c++11]])
+AC_SUBST([CXXFLAGS], [["$CFLAGS" --std=c++11]])
 
 AC_CHECK_HEADERS([clang-c/Index.h], [],
   [AC_MSG_ERROR([[Header clang-c/Index.h not found]])])
@@ -315,7 +315,7 @@ AC_TRY_LINK(
   ],
   [
     AC_MSG_CHECKING([for disabling GLIBCXX_USE_CXX11_ABI])
-    AC_SUBST([CPPFLAGS], [["$CPPFLAGS -D_GLIBCXX_USE_CXX11_ABI=0"]])
+    AC_SUBST([CXXFLAGS], [["$CXXFLAGS -D_GLIBCXX_USE_CXX11_ABI=0"]])
     AC_TRY_LINK(
       [#include <llvm/ADT/APInt.h>],
       [
@@ -329,7 +329,7 @@ AC_TRY_LINK(
       ])
   ])
 
-AC_SUBST([CPPFLAGS], [["-fPIC $CPPFLAGS"]])
+AC_SUBST([CXXFLAGS], [["-fPIC $CXXFLAGS"]])
 
 AC_MSG_NOTICE(initialize build tree)
 
@@ -457,7 +457,7 @@ AC_CP([$srcdir/bootstrap/$EQUIVALENT_LLVM_VERSION/clang_stubs.c],
 AC_CONFIG_FILES([
   Makefile
   config/cflags.sexp
-  config/cppflags.sexp
+  config/cxxflags.sexp
   config/ldflags.sexp
   config/ldflags_quoted.sexp
   config/libs.sexp
