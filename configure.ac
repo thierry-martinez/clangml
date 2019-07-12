@@ -275,7 +275,7 @@ AC_SUBST([LLVM_CFLAGS], [["`echo $LLVM_CFLAGS \
 
 AC_SUBST([CFLAGS], [["$LLVM_CFLAGS -D$LLVM_VERSION_MACRO -I$srcdir/clangml"]])
 
-AC_SUBST([CPPFLAGS], [["$CFLAGS"]])
+AC_SUBST([CPPFLAGS], [["$CFLAGS" --std=c++11]])
 
 AC_CHECK_HEADERS([clang-c/Index.h], [],
   [AC_MSG_ERROR([[Header clang-c/Index.h not found]])])
