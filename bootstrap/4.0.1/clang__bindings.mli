@@ -2126,6 +2126,8 @@ type clang_ext_unaryexpr =
   | PreferredAlignOf 
 external ext_unary_expr_get_kind :
   cxcursor -> clang_ext_unaryexpr = "clang_ext_UnaryExpr_GetKind_wrapper"
+external ext_unary_expr_is_argument_type :
+  cxcursor -> bool = "clang_ext_UnaryExpr_isArgumentType_wrapper"
 external ext_unary_expr_get_argument_type :
   cxcursor -> cxtype = "clang_ext_UnaryExpr_GetArgumentType_wrapper"
 external ext_type_get_named_type :
@@ -2568,6 +2570,8 @@ external ext_lang_standard_of_name :
   string -> clang_ext_langstandards = "clang_ext_LangStandard_ofName_wrapper"
 external ext_pack_expansion_get_pattern :
   cxtype -> cxtype = "clang_ext_PackExpansion_getPattern_wrapper"
+external ext_cxxfold_expr_is_right_fold :
+  cxcursor -> bool = "clang_ext_CXXFoldExpr_isRightFold_wrapper"
 external ext_cxxfold_expr_get_operator :
   cxcursor -> clang_ext_binaryoperatorkind =
     "clang_ext_CXXFoldExpr_getOperator_wrapper"
@@ -2732,3 +2736,5 @@ external ext_decomposition_decl_get_bindings_count :
 external ext_decomposition_decl_get_bindings :
   cxcursor -> int -> cxcursor =
     "clang_ext_DecompositionDecl_GetBindings_wrapper"
+external ext_attr_get_kind :
+  cxcursor -> clang_ext_attrkind = "clang_ext_Attr_GetKind_wrapper"
