@@ -2738,3 +2738,5 @@ external ext_decomposition_decl_get_bindings :
     "clang_ext_DecompositionDecl_GetBindings_wrapper"
 external ext_attr_get_kind :
   cxcursor -> clang_ext_attrkind = "clang_ext_Attr_GetKind_wrapper"
+external ext_var_template_decl_get_templated_decl :
+  cxcursor -> cxcursor = "clang_ext_VarTemplateDecl_getTemplatedDecl_wrapper"
