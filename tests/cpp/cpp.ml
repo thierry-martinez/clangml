@@ -197,9 +197,9 @@ let () =
       |}]] in
     check_pattern_expr bindings#fold [%pattern? {
       desc = Fold {
-        lhs = { desc = BoolLiteral true };
+        lhs = Some { desc = BoolLiteral true };
         operator = LAnd;
-        rhs = { desc = DeclRef ({ name = IdentifierName "args" }) }}}]
+        rhs = Some { desc = DeclRef ({ name = IdentifierName "args" }) }}}]
   end]
 
 (* 5.2.8 Type identification *)

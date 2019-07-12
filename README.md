@@ -48,7 +48,7 @@ is committed by continuous integration after every successful build from
 `master`.
 
 Snapshot tarball:
-https://gitlab.inria.fr/tmartine/clangml/-/archive/snapshot/clangml-snapshot.tar.gz
+https://gitlab.inria.fr/memcad/clangml/-/archive/snapshot/clangml-snapshot.tar.gz
 
 To build clangml from snapshot or from a bootstrapped source directory,
 you may either:
@@ -56,7 +56,7 @@ you may either:
 * execute `./configure && make && make install`
 (this method is recommended if you have to pass some options to configure);
 * execute
-`opam pin add git+https://gitlab.inria.fr/tmartine/clangml.git#snapshot`.
+`opam pin add git+https://gitlab.inria.fr/memcad/clangml.git#snapshot`.
 
 To bootstrap the repository from a development branch (e.g., `master`),
 execute `./bootstrap.sh` first, then `./configure && make && make install` as
@@ -73,7 +73,7 @@ Additionnally, to run `make tests`: `opam install ocamlcodoc`.
 `libclang` and other external dependencies can be installed with opam depext
 plugin:
 ```
-opam pin add -n git+https://gitlab.inria.fr/tmartine/clangml.git#snapshot
+opam pin add -n git+https://gitlab.inria.fr/memcad/clangml.git#snapshot
 opam depext -i clangml
 ```
 (`-n` option asks `opam pin` not to install clangml directly, and `-i` option
@@ -88,9 +88,9 @@ prefixes have been removed. Additional bindings have been defined in
 [`libclang_extensions.h`][3] for some parts of clang's API that have
 not been covered by libclang.
 
-[1]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/index.html
+[1]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang/index.html
 [2]: https://clang.llvm.org/doxygen/group__CINDEX.html
-[3]: https://gitlab.inria.fr/tmartine/clangml/blob/master/clangml/libclang_extensions.h
+[3]: https://gitlab.inria.fr/memcad/clangml/blob/master/clangml/libclang_extensions.h
 
 The module [`Clang.Ast`][4] provides a higher-level interface to clang's AST.
 The function [`Clang.Ast.parse_file`][17] returns the AST from a file
@@ -98,8 +98,8 @@ and [`Clang.Ast.parse_string`][18] returns the AST from a string.
 You may try these functions in OCaml toplevel to discover the resulting data
 structure.
 
-[17]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Ast/index.html#val-parse_file
-[18]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Ast/index.html#val-parse_string
+[17]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Ast/index.html#val-parse_file
+[18]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Ast/index.html#val-parse_string
 
 The module [`Clang.Ast`][4] includes in particular the module [`Clang__ast`][19]
 which declares the algebraic data types that represent the AST.
@@ -107,19 +107,19 @@ The documentation of most of the nodes contains examples that can be used as ref
 for how syntactic constructions are parsed, and that are extracted with [ocamlcodoc][20]
 and serve as unit tests with `dune runtest` (or, equivalently, `make tests`).
 
-[19]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang__ast/index.html
-[20]: https://gitlab.inria.fr/tmartine/ocamlcodoc
+[19]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang__ast/index.html
+[20]: https://gitlab.inria.fr/memcad/ocamlcodoc
 
 Modules [`Clang.Type`][7], [`Clang.Expr`][8], [`Clang.Stmt`][9],
 [`Clang.Decl`][10] and [`Clang.Enum_constant`][11] provides sub-modules
 `Set` and `Map` as well as high-level abstractions to some libclang's bindings.
 
-[4]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Ast/index.html
-[7]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Type/index.html
-[8]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Expr/index.html
-[9]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Stmt/index.html
-[10]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Decl/index.html
-[11]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Enum_constant/index.html
+[4]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Ast/index.html
+[7]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Type/index.html
+[8]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Expr/index.html
+[9]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Stmt/index.html
+[10]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Decl/index.html
+[11]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Enum_constant/index.html
 
 In particular:
 
@@ -128,11 +128,11 @@ In particular:
 - if `t : Clang.Type.t` is a `typedef`, the underlying type declared for `t` can be obtained by [`Clang.Type.get_typedef_underlying_type`][15]
 - if `t : Clang.Type.t` is a record (`struct` or `union`), the list of fields can by [`Clang.Type.list_of_fields`][16];
 
-[12]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Type/index.html#val-of_node
-[13]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Type/index.html#val-get_align_of
-[14]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Type/index.html#val-get_size_of
-[15]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Type/index.html#val-get_typedef_underlying_type
-[16]: https://tmartine.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Type/index.html#val-list_of_fields
+[12]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Type/index.html#val-of_node
+[13]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Type/index.html#val-get_align_of
+[14]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Type/index.html#val-get_size_of
+[15]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Type/index.html#val-get_typedef_underlying_type
+[16]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang/Type/index.html#val-list_of_fields
 
 ## Generating a new seed
 

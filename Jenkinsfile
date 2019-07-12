@@ -171,8 +171,8 @@ https://gitlab.inria.fr/tmartine/clangml/-/archive/snapshot/clangml-snapshot.tar
             when { branch 'master' }
             steps {
                 sh 'git checkout norms'
-                sh 'cp norm_c++14.ml norms/'
-                sh 'cp norm_c++17.ml norms/'
+                sh 'cp build/norm_c++14.ml norms/'
+                sh 'cp build/norm_c++17.ml norms/'
                 sh 'git add norms/*'
                 sh 'git commit -m "generated files for commit `git rev-parse master`"'
                 sh 'git push'

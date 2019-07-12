@@ -155,17 +155,10 @@ module Ast = struct
         | _ -> true
       end
 
-    let filter_out_typeref list =
+    let filter_out_ref list =
       list |> List.filter begin fun cursor ->
         match get_cursor_kind cursor with
-        | TypeRef -> false
-        | _ -> true
-      end
-
-    let filter_out_parmdecl list =
-      list |> List.filter begin fun cursor ->
-        match get_cursor_kind cursor with
-        | ParmDecl -> false
+        | TypeRef | NamespaceRef | ParmDecl -> false
         | _ -> true
       end
 
@@ -626,7 +619,7 @@ module Ast = struct
           | NamespaceRef -> Some (get_cursor_spelling c)
           | _ -> None
         end in
-      let others = others |> filter_out_typeref |> filter_out_parmdecl in
+      let others = others |> filter_out_ref in
       let qual_type = cursor |> get_cursor_type |> of_cxtype in
       node ~cursor {
           name = cursor |> get_cursor_spelling;
@@ -774,8 +767,17 @@ module Ast = struct
       }
 
     and record_decl_of_cxcursor keyword cursor =
-      let children =
+      let attributes, children =
         list_of_children cursor |>
+        extract begin fun cursor ->
+          let kind = get_cursor_kind cursor in
+          if kind = UnexposedAttr then
+            Some (ext_attr_get_kind cursor)
+          else
+            None
+        end in
+      let children =
+        children |>
         filter_out_prefix_from_list is_template_parameter in
       let name = get_cursor_spelling cursor in
       let nested_name_specifier =
@@ -790,6 +792,7 @@ module Ast = struct
            (fun cursor ->
              match get_cursor_kind cursor with
              | TypeRef | ClassTemplate | TemplateRef | ParmDecl | DeclRefExpr
+             | NamespaceRef
              | IntegerLiteral | FloatingLiteral | CharacterLiteral
              | StringLiteral ->
                  true
@@ -802,7 +805,7 @@ module Ast = struct
       let fields = fields_of_children children in
       let complete_definition = ext_tag_decl_is_complete_definition cursor in
       RecordDecl {
-        keyword; nested_name_specifier; name; bases; fields; final;
+        keyword; attributes; nested_name_specifier; name; bases; fields; final;
         complete_definition }
 
     and fields_of_children children =
@@ -1095,21 +1098,21 @@ module Ast = struct
                 Construct {
                   qual_type = cursor |> get_cursor_type |> of_cxtype;
                   args =
-                    list_of_children cursor |> filter_out_typeref |>
+                    list_of_children cursor |> filter_out_ref |>
                     List.map expr_of_cxcursor;
                 }
             | CXXTemporaryObjectExpr ->
                 TemporaryObject {
                   qual_type = cursor |> get_cursor_type |> of_cxtype;
                   args =
-                    list_of_children cursor |> filter_out_typeref |>
+                    list_of_children cursor |> filter_out_ref |>
                     List.map expr_of_cxcursor;
                 }
             | CXXUnresolvedConstructExpr ->
                 UnresolvedConstruct {
                   qual_type = cursor |> get_cursor_type |> of_cxtype;
                   args =
-                    list_of_children cursor |> filter_out_typeref |>
+                    list_of_children cursor |> filter_out_ref |>
                     List.map expr_of_cxcursor;
                 }
             | _ ->
@@ -1294,7 +1297,13 @@ module Ast = struct
                       let lhs, rhs =
                         match list_of_children cursor with
                         | [lhs; rhs] ->
-                            expr_of_cxcursor lhs, expr_of_cxcursor rhs
+                            Some (expr_of_cxcursor lhs),
+                            Some (expr_of_cxcursor rhs)
+                        | [sub] ->
+                            if ext_cxxfold_expr_is_right_fold cursor then
+                              Some (expr_of_cxcursor sub), None
+                            else
+                              None, Some (expr_of_cxcursor sub)
                         | _ -> raise Invalid_structure in
                       let operator = ext_cxxfold_expr_get_operator cursor in
                       Fold { lhs; operator; rhs }
@@ -1439,13 +1448,14 @@ module Ast = struct
     and unary_expr_of_cxcursor cursor =
       let kind = cursor |> ext_unary_expr_get_kind in
       let argument =
-        match list_of_children cursor with
-        | [argument] -> ArgumentExpr (argument |> expr_of_cxcursor)
-        | [] ->
-            let qual_type =
-              cursor |> ext_unary_expr_get_argument_type |> of_cxtype in
-            ArgumentType qual_type
-        | _ -> raise Invalid_structure in
+        if cursor |> ext_unary_expr_is_argument_type then
+          let qual_type =
+            cursor |> ext_unary_expr_get_argument_type |> of_cxtype in
+          ArgumentType qual_type
+        else
+          match list_of_children cursor with
+          | [argument] -> ArgumentExpr (argument |> expr_of_cxcursor)
+          | _ -> raise Invalid_structure in
       UnaryExpr { kind; argument }
 
     and template_parameter_of_cxcursor cursor : template_parameter =
@@ -1669,3 +1679,4 @@ module Translation_unit = struct
   let make ?(filename = "") items : Ast.translation_unit_desc =
     { filename; items }
 end
+

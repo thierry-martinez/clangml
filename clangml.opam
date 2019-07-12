@@ -2,11 +2,11 @@
 opam-version: "2.0"
 maintainer: ["Thierry Martinez <thierry.martinez@inria.fr>"]
 authors: ["Thierry Martinez <thierry.martinez@inria.fr>"]
-bug-reports: "https://gitlab.inria.fr/tmartine/clangml"
-homepage: "https://gitlab.inria.fr/tmartine/clangml"
-doc: "https://gitlab.inria.fr/tmartine/clangml"
+bug-reports: "https://gitlab.inria.fr/memcad/clangml"
+homepage: "https://gitlab.inria.fr/memcad/clangml"
+doc: "https://gitlab.inria.fr/memcad/clangml"
 license: "BSD"
-dev-repo: "git+https://gitlab.inria.fr/tmartine/clangml"
+dev-repo: "git+https://gitlab.inria.fr/memcad/clangml"
 synopsis: "OCaml bindings for Clang API"
 description: """
 clangml provides bindings to call the Clang API from OCaml.
