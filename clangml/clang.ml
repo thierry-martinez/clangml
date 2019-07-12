@@ -89,6 +89,12 @@ module Ast = struct
   let parameter ?default qual_type name =
     { default; qual_type; name }
 
+  let ident_ref ?nested_name_specifier name : ident_ref =
+    { nested_name_specifier; name }
+
+  let identifier_name ?nested_name_specifier name =
+    ident_ref ?nested_name_specifier (IdentifierName name)
+
   let new_instance ?(placement_args = []) ?array_size ?init ?args qual_type =
     let init =
       match init, args with
@@ -568,7 +574,8 @@ module Ast = struct
                 StaticAssert { constexpr; message }
             | VarTemplate ->
                 make_template cursor begin
-                  Var (var_decl_desc_of_cxcursor cursor)
+                  Var (var_decl_desc_of_cxcursor
+                    (cursor |> ext_var_template_decl_get_templated_decl))
                 end
             | TypeAliasTemplate ->
                 (* No TypeAliasTemplateDecl : cxcursortype in Clang <3.8.0 *)

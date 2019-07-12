@@ -52,6 +52,9 @@ module Ast : sig
     include Clang__ast
   end
 
+  (** The following functions provides convenient ways to build some AST
+      nodes. *)
+
   val var : ?linkage:linkage_kind -> ?var_init:expr ->
     ?constexpr:bool -> string -> qual_type -> var_decl_desc
 
@@ -65,6 +68,12 @@ module Ast : sig
   val parameters : ?variadic:bool -> parameter list -> parameters
 
   val parameter : ?default:expr -> qual_type -> string -> parameter_desc
+
+  val ident_ref : ?nested_name_specifier:nested_name_specifier ->
+    declaration_name -> ident_ref
+
+  val identifier_name : ?nested_name_specifier:nested_name_specifier ->
+    string -> ident_ref
 
   val new_instance : ?placement_args:expr list -> ?array_size:expr ->
     ?init:expr -> ?args:expr list -> qual_type -> expr_desc

@@ -2492,4 +2492,14 @@ extern "C" {
     auto a = GetCursorAttr(cursor);
     return static_cast<enum clang_ext_AttrKind>(a->getKind());
   }
+
+  CXCursor
+  clang_ext_VarTemplateDecl_getTemplatedDecl(CXCursor cursor)
+  {
+    auto s = GetCursorDecl(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::VarTemplateDecl>(s)) {
+      return MakeCXCursor(e->getTemplatedDecl(), getCursorTU(cursor));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
 }
