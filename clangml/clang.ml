@@ -198,10 +198,10 @@ module Ast = struct
               Some (NestedIdentifier ident)
           | Namespace ->
               let decl = ext_nested_name_specifier_get_as_namespace name in
-              Some (Namespace (get_cursor_spelling decl))
+              Some (NamespaceName (get_cursor_spelling decl))
           | NamespaceAlias ->
               let decl = ext_nested_name_specifier_get_as_namespace name in
-              Some (NamespaceAlias (get_cursor_spelling decl))
+              Some (NamespaceAliasName (get_cursor_spelling decl))
           | TypeSpec ->
               let ty = ext_nested_name_specifier_get_as_type name in
               Some (TypeSpec (ty |> of_cxtype))

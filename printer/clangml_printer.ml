@@ -285,8 +285,8 @@ and print_ident_ref fmt ident_ref =
     match component with
     | Global -> Format.pp_print_string fmt "::"
     | NestedIdentifier s -> Format.fprintf fmt "%s::" s
-    | Namespace name
-    | NamespaceAlias name ->
+    | NamespaceName name
+    | NamespaceAliasName name ->
         Format.fprintf fmt "%s::" name
     | TypeSpec ty
     | TypeSpecWithTemplate ty ->
