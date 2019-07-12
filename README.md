@@ -106,9 +106,12 @@ which declares the algebraic data types that represent the AST.
 The documentation of most of the nodes contains examples that can be used as references
 for how syntactic constructions are parsed, and that are extracted with [ocamlcodoc][20]
 and serve as unit tests with `dune runtest` (or, equivalently, `make tests`).
+Moreover, the git branch [`norms`] contains the AST corresponding to the examples
+automatically extracted from C++14 and C++17 norms.
 
 [19]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang__ast/index.html
 [20]: https://gitlab.inria.fr/memcad/ocamlcodoc
+[`norms`]: https://gitlab.inria.fr/memcad/clangml/tree/norms/norms
 
 Modules [`Clang.Type`][7], [`Clang.Expr`][8], [`Clang.Stmt`][9],
 [`Clang.Decl`][10] and [`Clang.Enum_constant`][11] provides sub-modules

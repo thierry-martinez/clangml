@@ -683,8 +683,8 @@ and nested_name_specifier = nested_name_specifier_component list
 and nested_name_specifier_component =
   | Global
   | NestedIdentifier of string
-  | Namespace of string
-  | NamespaceAlias of string
+  | NamespaceName of string
+  | NamespaceAliasName of string
   | TypeSpec of qual_type
   | TypeSpecWithTemplate of qual_type
 
@@ -696,7 +696,7 @@ and declaration_name =
   | DeductionGuideName of decl
   | OperatorName of overloaded_operator_kind
   | LiteralOperatorName of string
-  | UsingDirective
+  | UsingDirectiveName
 
 and record_decl = {
     keyword : elaborated_type_keyword;
@@ -3019,7 +3019,7 @@ let () =
   check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
   [%pattern?
     [_; { desc = UsingDeclaration {
-      nested_name_specifier = Some [Namespace "std"];
+      nested_name_specifier = Some [NamespaceName "std"];
       name = IdentifierName "cout" }}]]
     ]}*)
   | Constructor of {
@@ -3381,8 +3381,8 @@ let () =
           { desc = Return (Some { desc = Call {
               callee = { desc = DeclRef ({
                 nested_name_specifier = Some [
-                  Namespace "ns1";
-                  Namespace "ns2";];
+                  NamespaceName "ns1";
+                  NamespaceName "ns2";];
                 name = IdentifierName "f"})};
               args = []; }})}] }}}] -> ()
   | _ -> assert false
