@@ -632,7 +632,6 @@ am__fastdepCXX_FALSE
 am__fastdepCXX_TRUE
 CXXDEPMODE
 ac_ct_CXX
-CXXFLAGS
 CXX
 STRIPPED_LLVM_LDFLAGS
 EGREP
@@ -651,9 +650,10 @@ DEPDIR
 OBJEXT
 EXEEXT
 ac_ct_CC
+CPPFLAGS
 LDFLAGS
 CC
-CPPFLAGS
+CXXFLAGS
 CFLAGS
 LLVM_VERSION_MACRO
 LLVM_INCLUDEDIR
@@ -4215,7 +4215,7 @@ LLVM_CFLAGS="`echo $LLVM_CFLAGS \
 CFLAGS="$LLVM_CFLAGS -D$LLVM_VERSION_MACRO -I$srcdir/clangml"
 
 
-CPPFLAGS="$CFLAGS"
+CXXFLAGS="$CFLAGS --std=c++11"
 
 
 DEPDIR="${am__leading_dot}deps"
@@ -6254,7 +6254,7 @@ else
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for disabling GLIBCXX_USE_CXX11_ABI" >&5
 $as_echo_n "checking for disabling GLIBCXX_USE_CXX11_ABI... " >&6; }
-    CPPFLAGS="$CPPFLAGS -D_GLIBCXX_USE_CXX11_ABI=0"
+    CXXFLAGS="$CXXFLAGS -D_GLIBCXX_USE_CXX11_ABI=0"
 
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -6287,7 +6287,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
-CPPFLAGS="-fPIC $CPPFLAGS"
+CXXFLAGS="-fPIC $CXXFLAGS"
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: initialize build tree" >&5
@@ -6660,7 +6660,7 @@ else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
 
-ac_config_files="$ac_config_files Makefile config/cflags.sexp config/cppflags.sexp config/ldflags.sexp config/ldflags_quoted.sexp config/libs.sexp config/libs_quoted.sexp config/clangml_config.ml clangml/clang__compat.ml"
+ac_config_files="$ac_config_files Makefile config/cflags.sexp config/cxxflags.sexp config/ldflags.sexp config/ldflags_quoted.sexp config/libs.sexp config/libs_quoted.sexp config/clangml_config.ml clangml/clang__compat.ml"
 
 
 
@@ -7447,7 +7447,7 @@ do
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "config/cflags.sexp") CONFIG_FILES="$CONFIG_FILES config/cflags.sexp" ;;
-    "config/cppflags.sexp") CONFIG_FILES="$CONFIG_FILES config/cppflags.sexp" ;;
+    "config/cxxflags.sexp") CONFIG_FILES="$CONFIG_FILES config/cxxflags.sexp" ;;
     "config/ldflags.sexp") CONFIG_FILES="$CONFIG_FILES config/ldflags.sexp" ;;
     "config/ldflags_quoted.sexp") CONFIG_FILES="$CONFIG_FILES config/ldflags_quoted.sexp" ;;
     "config/libs.sexp") CONFIG_FILES="$CONFIG_FILES config/libs.sexp" ;;

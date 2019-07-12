@@ -95,7 +95,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
-CONFIG_CLEAN_FILES = config/cflags.sexp config/cppflags.sexp \
+CONFIG_CLEAN_FILES = config/cflags.sexp config/cxxflags.sexp \
 	config/ldflags.sexp config/ldflags_quoted.sexp \
 	config/libs.sexp config/libs_quoted.sexp \
 	config/clangml_config.ml clangml/clang__compat.ml
@@ -124,7 +124,7 @@ am__DIST_COMMON = $(srcdir)/Makefile.in \
 	$(top_srcdir)/clangml/clang__compat.ml.in \
 	$(top_srcdir)/config/cflags.sexp.in \
 	$(top_srcdir)/config/clangml_config.ml.in \
-	$(top_srcdir)/config/cppflags.sexp.in \
+	$(top_srcdir)/config/cxxflags.sexp.in \
 	$(top_srcdir)/config/ldflags.sexp.in \
 	$(top_srcdir)/config/ldflags_quoted.sexp.in \
 	$(top_srcdir)/config/libs.sexp.in \
@@ -344,7 +344,7 @@ $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 $(am__aclocal_m4_deps):
 config/cflags.sexp: $(top_builddir)/config.status $(top_srcdir)/config/cflags.sexp.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-config/cppflags.sexp: $(top_builddir)/config.status $(top_srcdir)/config/cppflags.sexp.in
+config/cxxflags.sexp: $(top_builddir)/config.status $(top_srcdir)/config/cxxflags.sexp.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 config/ldflags.sexp: $(top_builddir)/config.status $(top_srcdir)/config/ldflags.sexp.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@

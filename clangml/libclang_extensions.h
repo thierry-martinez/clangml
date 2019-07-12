@@ -831,3 +831,6 @@ clang_ext_DecompositionDecl_GetBindings(CXCursor, unsigned int);
 
 enum clang_ext_AttrKind
 clang_ext_Attr_GetKind(CXCursor);
+
+CXCursor
+clang_ext_VarTemplateDecl_getTemplatedDecl(CXCursor);

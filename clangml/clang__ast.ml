@@ -64,11 +64,14 @@ let quote_decl = lift_expr#decl
 
 let quote_decl_list = lift_expr#list lift_expr#decl
 
-let check_pattern ?(result = fun _ -> ()) quoter parser source pattern =
+let quote_stmt_list = lift_expr#list lift_expr#stmt
+
+let check_pattern ?(result = fun (_ : 'b) -> ()) quoter (parser : string -> 'a)
+      (source : string) (pattern : ('a, 'b) Pattern_runtime.matcher) =
   prerr_endline source;
   let ast = parser source in
   if
-    match pattern ?quoted:(Some (quoter ast)) ast with
+    match pattern ~quoted:(quoter ast) ast with
     | Ok bindings ->
         begin try
           result bindings;
@@ -190,8 +193,8 @@ declaration list:
 this function is used in the following examples to check the AST of
 various programs.
     {[
-let parse_declaration_list ?filename ?(command_line_args = []) ?language ?standard
-    ?options ?clang_options source =
+let parse_declaration_list ?filename ?(command_line_args = []) ?language
+    ?standard ?options ?clang_options source =
   let command_line_args =
     match language with
     | Some language -> Clang.Command_line.language language :: command_line_args
@@ -391,36 +394,46 @@ let () =
 let example = "enum example { A, B, C }; enum example e;"
 
 let () =
-  check Clangml_show.pp_decl parse_declaration_list example @@
-  fun ast -> match ast with
-  | [{ desc = EnumDecl _ };
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = EnumDecl _ };
      { desc = Var { var_name = "e"; var_type = { desc = Elaborated {
       keyword = Enum;
-      named_type = { desc = Enum ({ name = IdentifierName "example" }) }}}}}] -> ()
-  | _ -> assert false
+      named_type = { desc = Enum ({ name = IdentifierName "example" }) }}}}}]]
     ]}*)
   | Enum of ident_ref
 (** Enum type.
     {[
 let example = "enum { A, B, C } e;"
 
+let test quoter (decl : 'a) (matcher : ('a, 'b) Pattern_runtime.matcher) =
+  matcher ~quoted:(quoter decl) decl
+
 let () =
-  check Clangml_show.pp_decl parse_declaration_list example @@
-  fun ast -> match ast with
-  | [{ desc = EnumDecl _ };
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = EnumDecl _ };
      { desc = Var { var_name = "e"; var_type = { desc = Elaborated {
       keyword = Enum;
-      named_type = { desc = Enum ({ name = IdentifierName "" }) } as named_type }}}}] ->
-        let values =
-          match Clang.Type.get_declaration named_type with
-          | { desc = EnumDecl { constants }} ->
-              constants |> List.map @@
-              fun (constant : Clang.Ast.enum_constant) ->
-                constant.desc.constant_name,
-                Clang.Enum_constant.get_value constant
-          | _ -> assert false in
-        assert (values = ["A", 0; "B", 1; "C", 2]);
-  | _ -> assert false
+      named_type = { desc = Enum ({ name = IdentifierName "" }) }
+        as named_type }}}}]]
+  ~result:begin fun bindings ->
+      let decl = Clang.Type.get_declaration bindings#named_type in
+      let values =
+        match
+          test quote_decl decl [%pattern? { desc = EnumDecl { constants }}]
+        with
+        | Ok bindings ->
+            bindings#constants |> List.map @@
+            fun (constant : Clang.Ast.enum_constant) ->
+              constant.desc.constant_name,
+              Clang.Enum_constant.get_value constant
+        | Error failure ->
+            Format.printf "@[failed:@ %a@]@." Pattern_runtime.format_failure
+              failure;
+            assert false in
+      assert (values = ["A", 0; "B", 1; "C", 2])
+  end
     ]}*)
   | FunctionType of function_type
 (** Function type.
@@ -445,54 +458,54 @@ let () =
 let example = "struct { int i; float f; } s;"
 
 let () =
-  check Clangml_show.pp_decl parse_declaration_list example @@
-  fun ast -> match ast with
-  | [{ desc = RecordDecl { keyword = Struct }};
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = RecordDecl { keyword = Struct }};
      { desc = Var { var_name = "s"; var_type = { desc = Elaborated {
       keyword = Struct;
-      named_type = { desc = Record ({ name = IdentifierName "" }) } as named_type }}}}] ->
-        let fields = named_type |> Clang.Type.list_of_fields in
-        begin
-          match fields with
-          | [ { desc = Field {
-                  name = "i";
-                  qual_type = { desc = BuiltinType Int }}};
-              { desc = Field {
-                  name = "f";
-                  qual_type = { desc = BuiltinType Float }}}] -> ()
-          | _ ->
-              Format.eprintf "%a@." (Format.pp_print_list
-                ~pp_sep:Format.pp_print_newline
-                Clangml_show.pp_decl) fields;
-              assert false
-        end
-  | _ -> assert false
+      named_type = { desc = Record ({ name = IdentifierName "" }) }
+        as named_type }}}}]]
+  ~result:begin fun bindings ->
+    let fields = bindings#named_type |> Clang.Type.list_of_fields in
+    match test quote_decl_list fields [%pattern?
+      [ { desc = Field {
+            name = "i";
+            qual_type = { desc = BuiltinType Int }}};
+        { desc = Field {
+            name = "f";
+            qual_type = { desc = BuiltinType Float }}}]] with
+    | Ok () -> ()
+    | Error failure ->
+        Format.printf "@[failed:@ %a@]@." Pattern_runtime.format_failure
+          failure;
+        assert false
+  end
 
 let example = "union { int i; float f; } u;"
 
 let () =
-  check Clangml_show.pp_decl parse_declaration_list example @@
-  fun ast -> match ast with
-  | [{ desc = RecordDecl { keyword = Union }};
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = RecordDecl { keyword = Union }};
      { desc = Var { var_name = "u"; var_type = { desc = Elaborated {
       keyword = Union;
-      named_type = { desc = Record ({ name = IdentifierName "" }) } as named_type }}}}] ->
-        let fields = named_type |> Clang.Type.list_of_fields in
-        begin
-          match fields with
-          | [ { desc = Field {
-                  name = "i";
-                  qual_type = { desc = BuiltinType Int }}};
-              { desc = Field {
-                  name = "f";
-                  qual_type = { desc = BuiltinType Float }}}] -> ()
-          | _ ->
-              Format.eprintf "%a@." (Format.pp_print_list
-                ~pp_sep:Format.pp_print_newline
-                Clangml_show.pp_decl) fields;
-              assert false
-        end
-  | _ -> assert false
+      named_type = { desc = Record ({ name = IdentifierName "" })}
+        as named_type }}}}]]
+  ~result:begin fun bindings ->
+    let fields = bindings#named_type |> Clang.Type.list_of_fields in
+    match test quote_decl_list fields [%pattern?
+      [ { desc = Field {
+            name = "i";
+            qual_type = { desc = BuiltinType Int }}};
+        { desc = Field {
+            name = "f";
+            qual_type = { desc = BuiltinType Float }}}]] with
+    | Ok () -> ()
+    | Error failure ->
+        Format.printf "@[failed:@ %a@]@." Pattern_runtime.format_failure
+          failure;
+        assert false
+  end
     ]}*)
   | Typedef of ident_ref
 (** Typedef type.
@@ -500,29 +513,29 @@ let () =
 let example = "typedef struct { int i; float f; } struct_t; struct_t s;"
 
 let () =
-  check Clangml_show.pp_decl parse_declaration_list example @@
-  fun ast -> match ast with
-  | [{ desc = RecordDecl { keyword = Struct }}; { desc = TypedefDecl _ };
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = RecordDecl { keyword = Struct }}; { desc = TypedefDecl _ };
      { desc = Var { var_name = "s";
-       var_type = { desc = Typedef ({ name = IdentifierName "struct_t" }) } as var_type }}] ->
-        let fields = var_type |>
-          Clang.Type.get_typedef_underlying_type |>
-          Clang.Type.list_of_fields in
-        begin
-          match fields with
-          | [ { desc = Field {
-                  name = "i";
-                  qual_type = { desc = BuiltinType Int }}};
-              { desc = Field {
-                  name = "f";
-                  qual_type = { desc = BuiltinType Float }}}] -> ()
-          | _ ->
-              Format.eprintf "%a@." (Format.pp_print_list
-                ~pp_sep:Format.pp_print_newline
-                Clangml_show.pp_decl) fields;
-              assert false
-        end
-  | _ -> assert false
+       var_type = { desc =
+         Typedef ({ name = IdentifierName "struct_t" }) } as var_type }}]]
+  ~result:begin fun bindings ->
+    let fields = bindings#var_type |>
+      Clang.Type.get_typedef_underlying_type |>
+      Clang.Type.list_of_fields in
+    match test quote_decl_list fields [%pattern?
+      [ { desc = Field {
+            name = "i";
+            qual_type = { desc = BuiltinType Int }}};
+        { desc = Field {
+            name = "f";
+            qual_type = { desc = BuiltinType Float }}}]] with
+    | Ok () -> ()
+    | Error failure ->
+        Format.printf "@[failed:@ %a@]@." Pattern_runtime.format_failure
+          failure;
+        assert false
+  end
     ]}*)
   | Complex of qual_type
 (** Complex number type (C99).
@@ -564,14 +577,15 @@ let () =
     let clang_options = Clang.Cxtranslationunit_flags.(
       Clang.default_editing_translation_unit_options ()
       + Clang.include_attributed_types) in
-    check Clangml_show.pp_decl (parse_declaration_list ~clang_options) example @@
-    fun ast ->  match ast with
-    | [{ desc = Var { var_name = "ptr";
+    check_pattern quote_decl_list (parse_declaration_list ~clang_options)
+      example [%pattern?
+      [{ desc = Var { var_name = "ptr";
          var_type = { desc = Attributed {
            modified_type = { desc = Pointer { desc = BuiltinType Int }};
-           attribute_kind }}}}] ->
-             assert (attribute_kind = Clang.type_non_null)
-    | _ -> assert false
+           attribute_kind }}}}]]
+      ~result:begin fun bindings ->
+          assert (bindings#attribute_kind = Clang.type_non_null)
+        end
     ]} *)
   | ParenType of qual_type
 (** Parenthesized type.
@@ -646,7 +660,8 @@ let () =
 let example = "decltype(1) i = 1;"
 
 let () =
-  check_pattern quote_decl_list (parse_declaration_list ~language:CXX ~standard:Cxx11)
+  check_pattern quote_decl_list
+    (parse_declaration_list ~language:CXX ~standard:Cxx11)
     example
   [%pattern?
     [{ desc = Var {
@@ -918,8 +933,8 @@ and parameter_desc = {
 The following example declares the function [parse_statement_list]
 that returns the AST obtained from the parsing of [source] string as a
 statement list (by putting it in the context of a function):
-this function is used in the following examples to check Clangml_show.pp_decl the
-AST of various types.
+this function is used in the following examples to check Clangml_show.pp_decl
+the AST of various types.
     {[
 let parse_statement_list ?(return_type = "void") ?filename ?command_line_args
     ?language ?standard ?options source =
@@ -1152,9 +1167,9 @@ let () =
 let example = "switch (1) { case 1: f(); break; case 2: break; default:;}"
 
 let () =
-  check Clangml_show.pp_stmt parse_statement_list example
-  @@ fun ast -> match ast with
-  | [{ desc = Switch {
+  check_pattern quote_stmt_list parse_statement_list example
+  [%pattern?
+    [{ desc = Switch {
       init = None;
       condition_variable = None;
       cond = { desc = IntegerLiteral (Int 1)};
@@ -1162,22 +1177,22 @@ let () =
         { desc = Case {
           lhs = { desc = IntegerLiteral (Int 1)};
           body = { desc =
-            Expr { desc =
-              Call { callee = { desc = DeclRef ({ name = IdentifierName "f" }) }; args = [] }}}}};
+            Expr { desc = Call {
+              callee = { desc = DeclRef ({ name = IdentifierName "f" }) };
+              args = [] }}}}};
         { desc = Break };
         { desc = Case {
           lhs = { desc = IntegerLiteral (Int 2)};
           body = { desc = Break }}};
-        { desc = Default { desc = Null }}] }}}] -> ()
-  | _ -> assert false
+        { desc = Default { desc = Null }}] }}}]]
 
 let example =
   "switch (int i = 1) { case 1: f(); break; case 2: break; default:;}"
 
 let () =
-  check Clangml_show.pp_stmt (parse_statement_list ~language:CXX) example
-  @@ fun ast -> match ast with
-  | [{ desc = Switch {
+  check_pattern quote_stmt_list (parse_statement_list ~language:CXX) example
+  [%pattern?
+    [{ desc = Switch {
       init = None;
       condition_variable = Some ({ desc = {
          var_type = { desc = BuiltinType Int};
@@ -1188,14 +1203,14 @@ let () =
         { desc = Case {
           lhs = { desc = IntegerLiteral (Int 1)};
           body = { desc =
-            Expr { desc =
-              Call { callee = { desc = DeclRef ({ name = IdentifierName "f" }) }; args = [] }}}}};
+            Expr { desc = Call {
+              callee = { desc = DeclRef ({ name = IdentifierName "f" }) };
+              args = [] }}}}};
         { desc = Break };
         { desc = Case {
           lhs = { desc = IntegerLiteral (Int 2)};
           body = { desc = Break }}};
-        { desc = Default { desc = Null }}] }}}] -> ()
-  | _ -> assert false
+        { desc = Default { desc = Null }}] }}}]]
     ]}
 
 
@@ -1207,10 +1222,9 @@ let example =
 
 let () =
   if Clang.get_clang_version () >= "clang version 3.9.0" then
-    check Clangml_show.pp_stmt
-    (parse_statement_list ~language:CXX) example @@
-    fun ast -> match ast with
-    | [{ desc = Switch {
+    check_pattern quote_stmt_list (parse_statement_list ~language:CXX) example
+    [%pattern?
+      [{ desc = Switch {
         init = Some { desc = Decl [{ desc = Var {
            var_name = "i";
            var_type = { desc = BuiltinType Int };
@@ -1222,13 +1236,13 @@ let () =
             lhs = { desc = IntegerLiteral (Int 1)};
             body = { desc =
               Expr { desc = Call {
-                callee = { desc = DeclRef ({ name = IdentifierName "f" }) }; args = [] }}}}};
+                callee = { desc = DeclRef ({ name = IdentifierName "f" }) };
+                args = [] }}}}};
           { desc = Break };
           { desc = Case {
             lhs = { desc = IntegerLiteral (Int 2)};
             body = { desc = Break }}};
-          { desc = Default { desc = Null }}] }}}] -> ()
-    | _ -> assert false
+          { desc = Default { desc = Null }}] }}}]]
     ]}*)
   | Case of {
       lhs : expr;
@@ -1243,9 +1257,9 @@ let () =
 let example = "switch (1) { case 1: f(); break; case 2 ... 3: break; default:;}"
 
 let () =
-  check Clangml_show.pp_stmt parse_statement_list example
-  @@ fun ast -> match ast with
-  | [{ desc = Switch {
+  check_pattern quote_stmt_list parse_statement_list example
+  [%pattern?
+    [{ desc = Switch {
       init = None;
       condition_variable = None;
       cond = { desc = IntegerLiteral (Int 1)};
@@ -1255,14 +1269,14 @@ let () =
           rhs = None;
           body = { desc =
             Expr { desc = Call {
-              callee = { desc = DeclRef ({ name = IdentifierName "f" }) }; args = [] }}}}};
+              callee = { desc = DeclRef ({ name = IdentifierName "f" }) };
+              args = [] }}}}};
         { desc = Break };
         { desc = Case {
           lhs = { desc = IntegerLiteral (Int 2)};
           rhs = Some { desc = IntegerLiteral (Int 3)};
           body = { desc = Break }}};
-        { desc = Default { desc = Null }}] }}}] -> ()
-  | _ -> assert false
+        { desc = Default { desc = Null }}] }}}]]
 
 let example = "switch (1) { case 1: case 2: case 3: default: ;}"
 
@@ -1346,13 +1360,14 @@ let () =
 let example = "do { f(); } while (1);"
 
 let () =
-  check Clangml_show.pp_stmt parse_statement_list example
-  @@ fun ast -> match ast with
-  | [{ desc = Do {
+  check_pattern quote_stmt_list parse_statement_list example
+  [%pattern?
+    [{ desc = Do {
       body = { desc = Compound [{ desc =
-        Expr { desc = Call { callee = { desc = DeclRef ({ name = IdentifierName "f" }) }; args = [] }}}] };
-      cond = { desc = IntegerLiteral (Int 1)}}}] -> ()
-  | _ -> assert false
+        Expr { desc = Call {
+          callee = { desc = DeclRef ({ name = IdentifierName "f" }) };
+          args = [] }}}] };
+      cond = { desc = IntegerLiteral (Int 1)}}}]]
     ]}*)
   | Label of {
       label : label_ref;
@@ -1391,17 +1406,17 @@ let () =
 let example = "label: 1; void *ptr = &&label; goto *ptr;"
 
 let () =
-  check Clangml_show.pp_stmt parse_statement_list example
-  @@ fun ast -> match ast with
-  | [{ desc = Label {
+  check_pattern quote_stmt_list parse_statement_list example
+  [%pattern?
+    [{ desc = Label {
         label = "label";
         body = { desc = Expr { desc = IntegerLiteral (Int 1)}}}};
       { desc = Decl [{ desc = Var {
         var_name = "ptr";
         var_type = { desc = Pointer { desc = BuiltinType Void }};
         var_init = Some { desc = AddrLabel "label" }}}] };
-      { desc = IndirectGoto { desc = DeclRef ({ name = IdentifierName "ptr" })}}] -> ()
-  | _ -> assert false
+      { desc = IndirectGoto { desc =
+          DeclRef ({ name = IdentifierName "ptr" })}}]]
     ]}*)
   | Continue
 (** Continue statement.
@@ -1508,7 +1523,8 @@ let () =
 
 let () =
   check Clangml_show.pp_stmt (parse_statement_list
-    ~options:({ Clang.Ast.Options.default with convert_integer_literals = false }))
+    ~options:({ Clang.Ast.Options.default with
+       convert_integer_literals = false }))
     example @@ fun ast -> match ast with
   | [{ desc = Expr { desc = IntegerLiteral (CXInt _ as zero) }}] ->
       assert (Clang.Ast.int_of_literal zero = 0)
@@ -1728,7 +1744,8 @@ let example = "int i; i;"
 let () =
   check Clangml_show.pp_stmt parse_statement_list example
   @@ fun ast -> match ast with
-  | [{ desc = Decl _ }; { desc = Expr { desc = DeclRef ({ name = IdentifierName "i" }) }}] -> ()
+  | [{ desc = Decl _ };
+      { desc = Expr { desc = DeclRef ({ name = IdentifierName "i" }) }}] -> ()
   | _ -> assert false
     ]} *)
   | Call of {
@@ -2125,7 +2142,8 @@ let () =
       name = IdentifierName "f";
       body = Some { desc = Compound [
         { desc = Decl [{ desc = Var {
-          var_type = { desc = Pointer { desc = Record ({ name = IdentifierName "T" })}};
+          var_type = { desc = Pointer { desc =
+            Record ({ name = IdentifierName "T" })}};
           var_name = "t";
           var_init = Some { desc = New {
             placement_args = [];
@@ -2557,12 +2575,14 @@ let () =
           function_decl = {
             name = OperatorName Plus;
             function_type = {
-              result = { desc = LValueReference { desc = Record ({ name = IdentifierName "C" }) }};
+              result = { desc = LValueReference { desc =
+                Record ({ name = IdentifierName "C" }) }};
               parameters = Some {
                 non_variadic = [{ desc = {
                   name = "rhs";
                   qual_type = { desc =
-                    LValueReference { desc = Record ({ name = IdentifierName "C" }) }}}}] }};
+                    LValueReference { desc =
+                      Record ({ name = IdentifierName "C" }) }}}}] }};
             body = Some { desc = Compound [{
               desc = Return (Some {
                 desc = UnaryOperator {
@@ -2779,9 +2799,9 @@ let () =
 let example = {| typedef union u { int i; float f; } u_t; |}
 
 let () =
-  check Clangml_show.pp_decl parse_declaration_list example
-  @@ fun ast -> match ast with
-  | [{ desc = RecordDecl {
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = RecordDecl {
         keyword = Union;
         name = "u";
         fields = [
@@ -2793,15 +2813,14 @@ let () =
         name = "u_t";
         underlying_type = { desc = Elaborated {
           keyword = Union;
-          named_type = { desc = Record ({ name = IdentifierName "u" }) }}}}}] -> ()
-  | _ -> assert false
+          named_type = { desc = Record ({ name = IdentifierName "u" }) }}}}}]]
 
 let example = {| typedef union { int i; float f; } u_t; |}
 
 let () =
-  check Clangml_show.pp_decl parse_declaration_list example
-  @@ fun ast -> match ast with
-  | [{ desc = RecordDecl {
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = RecordDecl {
         keyword = Union;
         name = "";
         fields = [
@@ -2815,23 +2834,23 @@ let () =
         name = "u_t";
         underlying_type = { desc = Elaborated {
           keyword = Union;
-          named_type = { desc = Record ({ name = IdentifierName "" }) }}} as underlying_type }}] ->
-        let fields = underlying_type |> Clang.Type.list_of_fields in
-        begin
-          match fields with
-          | [ { desc = Field {
-                  name = "i";
-                  qual_type = { desc = BuiltinType Int}}};
-              { desc = Field {
-                  name = "f";
-                  qual_type = { desc = BuiltinType Float}}}] -> ()
-          | fields ->
-              Format.eprintf "%a@." (Format.pp_print_list
-                ~pp_sep:Format.pp_print_newline
-                Clangml_show.pp_decl) fields;
-              assert false
-        end
-  | _ -> assert false
+          named_type = { desc = Record ({ name = IdentifierName "" }) }}}
+            as underlying_type }}]]
+  ~result:begin fun bindings ->
+    let fields = bindings#underlying_type |> Clang.Type.list_of_fields in
+    match test quote_decl_list fields [%pattern?
+        [{ desc = Field {
+            name = "i";
+            qual_type = { desc = BuiltinType Int}}};
+        { desc = Field {
+            name = "f";
+            qual_type = { desc = BuiltinType Float}}}]] with
+    | Ok () -> ()
+    | Error failure ->
+        Format.printf "@[failed:@ %a@]@." Pattern_runtime.format_failure
+          failure;
+        assert false
+  end
     ]}*)
   | Field of  {
       name : string;
@@ -2842,7 +2861,9 @@ let () =
 (** Record (struct, union or class) field.
 
     {[
-let example = {| struct s { int label : 1; union u { int i; float f; } data;}; |}
+let example = {|
+  struct s { int label : 1; union u { int i; float f; } data;};
+|}
 
 let () =
   check Clangml_show.pp_decl parse_declaration_list example
@@ -3073,7 +3094,8 @@ let () =
                    qual_type = { desc = BuiltinType Int}}}];
                  variadic = false;
                };
-               initializer_list = ["i", { desc = DeclRef ({ name = IdentifierName "v" }) }];
+               initializer_list =
+                 ["i", { desc = DeclRef ({ name = IdentifierName "v" }) }];
                body = Some { desc = Compound [] };
                explicit = true;
                defaulted = false;
@@ -3245,7 +3267,8 @@ let () =
                body = None }})};
            { desc = Friend (FriendType { desc = Elaborated {
                keyword = Class;
-               named_type = { desc = Record ({ name = IdentifierName "B" }) }}})}] }}]]
+               named_type = {
+                 desc = Record ({ name = IdentifierName "B" }) }}})}] }}]]
    ]}
 
    {[

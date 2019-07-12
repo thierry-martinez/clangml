@@ -9549,3 +9549,19 @@ clang_ext_Attr_GetKind_wrapper(value arg_ocaml)
   }
 }
 
+CAMLprim value
+clang_ext_VarTemplateDecl_getTemplatedDecl_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  CXCursor result = clang_ext_VarTemplateDecl_getTemplatedDecl(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
