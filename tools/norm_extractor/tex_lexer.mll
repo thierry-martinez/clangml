@@ -22,7 +22,10 @@ rule main = parse
 }
 | "\\rSec" (['0' - '9']+ as level)
   '[' ([^ ']']* as ident) ']'
-  '{' ([^ '}']* as title) '}' {
+  '{' {
+  let title_buffer = Buffer.create 17 in
+  title title_buffer lexbuf;
+  let title = Buffer.contents title_buffer in
   Rsec { level = int_of_string level; ident; title }
 }
 | '\n' {
@@ -34,6 +37,23 @@ rule main = parse
 }
 | _ {
   main lexbuf
+}
+
+and title buffer = parse
+| '{' {
+  title buffer lexbuf;
+  title buffer lexbuf
+}
+| '}' { () }
+| '\\' (['a' - 'z' 'A' - 'Z']*) {
+  title buffer lexbuf
+}
+| eof {
+  failwith "Unterminated title"
+}
+| _ as c {
+  Buffer.add_char buffer c;
+  title buffer lexbuf
 }
 
 and code_block buffer = parse 
@@ -65,38 +85,18 @@ and code_block_latex_escape buffer = parse
   Buffer.add_char buffer '\n';
   code_block_latex_escape buffer lexbuf
 }
-| "\\textbackslash" {
-  Lexing.new_line lexbuf;
-  Buffer.add_char buffer '\\';
+| '\\' (['a' - 'z' 'A' - 'Z']* as command) {
+  begin
+    match command with
+    | "textbackslash" ->
+        Buffer.add_char buffer '\\';
+    | _ -> ()
+  end;
   code_block_latex_escape buffer lexbuf
-}
-| '\\' {
-  code_block_latex_escape_skip_command buffer lexbuf
 }
 | '{' | '}' | '$' {
   code_block_latex_escape buffer lexbuf
 }
-| _ as c {
-  Buffer.add_char buffer c;
-  code_block_latex_escape buffer lexbuf
-}
-| eof {
-  failwith "Missing @"
-}
-
-and code_block_latex_escape_skip_command buffer = parse
-| '@' {
-  code_block buffer lexbuf
-}
-| '\n' {
-  Lexing.new_line lexbuf;
-  Buffer.add_char buffer '\n';
-  code_block_latex_escape buffer lexbuf
-}
-| ['\\' 'a' - 'z' 'A' - 'Z'] {
-  code_block_latex_escape_skip_command buffer lexbuf
-}
-| ' ' | '{' {}
 | _ as c {
   Buffer.add_char buffer c;
   code_block_latex_escape buffer lexbuf
