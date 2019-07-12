@@ -1,1 +1,1 @@
-(@CPPFLAGS@)
+(@CXXFLAGS@)
