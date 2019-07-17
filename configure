@@ -3520,6 +3520,9 @@ else
   GENTOO_LLVM_CONFIG=/usr/lib64/llvm/$with_llvm/bin/llvm-config
 
                   if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  GENTOO_LLVM_CONFIG=/usr/lib/llvm/$with_llvm/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
   LLVM_CONFIG=$GENTOO_LLVM_CONFIG
 
 else
@@ -3531,6 +3534,7 @@ else
                        if test "x$BREW_LLVM_CONFIG" != "x"; then :
   LLVM_CONFIG=$BREW_LLVM_CONFIG
 
+fi
 fi
 fi
 fi
@@ -3565,6 +3569,9 @@ else
   GENTOO_LLVM_CONFIG=/usr/lib64/llvm/8/bin/llvm-config
 
                   if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  GENTOO_LLVM_CONFIG=/usr/lib/llvm/8/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
   LLVM_CONFIG=$GENTOO_LLVM_CONFIG
 
 else
@@ -3576,6 +3583,7 @@ else
                        if test "x$BREW_LLVM_CONFIG" != "x"; then :
   LLVM_CONFIG=$BREW_LLVM_CONFIG
 
+fi
 fi
 fi
 fi
@@ -3603,6 +3611,9 @@ fi
   GENTOO_LLVM_CONFIG=/usr/lib64/llvm/7/bin/llvm-config
 
                   if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  GENTOO_LLVM_CONFIG=/usr/lib/llvm/7/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
   LLVM_CONFIG=$GENTOO_LLVM_CONFIG
 
 else
@@ -3614,6 +3625,7 @@ else
                        if test "x$BREW_LLVM_CONFIG" != "x"; then :
   LLVM_CONFIG=$BREW_LLVM_CONFIG
 
+fi
 fi
 fi
 fi
@@ -3641,6 +3653,9 @@ fi
   GENTOO_LLVM_CONFIG=/usr/lib64/llvm/6/bin/llvm-config
 
                   if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  GENTOO_LLVM_CONFIG=/usr/lib/llvm/6/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
   LLVM_CONFIG=$GENTOO_LLVM_CONFIG
 
 else
@@ -3652,6 +3667,7 @@ else
                        if test "x$BREW_LLVM_CONFIG" != "x"; then :
   LLVM_CONFIG=$BREW_LLVM_CONFIG
 
+fi
 fi
 fi
 fi
@@ -3679,6 +3695,9 @@ fi
   GENTOO_LLVM_CONFIG=/usr/lib64/llvm/5/bin/llvm-config
 
                   if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  GENTOO_LLVM_CONFIG=/usr/lib/llvm/5/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
   LLVM_CONFIG=$GENTOO_LLVM_CONFIG
 
 else
@@ -3690,6 +3709,7 @@ else
                        if test "x$BREW_LLVM_CONFIG" != "x"; then :
   LLVM_CONFIG=$BREW_LLVM_CONFIG
 
+fi
 fi
 fi
 fi
@@ -3717,6 +3737,9 @@ fi
   GENTOO_LLVM_CONFIG=/usr/lib64/llvm/4/bin/llvm-config
 
                   if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  GENTOO_LLVM_CONFIG=/usr/lib/llvm/4/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
   LLVM_CONFIG=$GENTOO_LLVM_CONFIG
 
 else
@@ -3728,6 +3751,7 @@ else
                        if test "x$BREW_LLVM_CONFIG" != "x"; then :
   LLVM_CONFIG=$BREW_LLVM_CONFIG
 
+fi
 fi
 fi
 fi
@@ -3755,6 +3779,9 @@ fi
   GENTOO_LLVM_CONFIG=/usr/lib64/llvm/3.9/bin/llvm-config
 
                   if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  GENTOO_LLVM_CONFIG=/usr/lib/llvm/3.9/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
   LLVM_CONFIG=$GENTOO_LLVM_CONFIG
 
 else
@@ -3766,6 +3793,7 @@ else
                        if test "x$BREW_LLVM_CONFIG" != "x"; then :
   LLVM_CONFIG=$BREW_LLVM_CONFIG
 
+fi
 fi
 fi
 fi
@@ -3793,6 +3821,9 @@ fi
   GENTOO_LLVM_CONFIG=/usr/lib64/llvm/3.8/bin/llvm-config
 
                   if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  GENTOO_LLVM_CONFIG=/usr/lib/llvm/3.8/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
   LLVM_CONFIG=$GENTOO_LLVM_CONFIG
 
 else
@@ -3804,6 +3835,7 @@ else
                        if test "x$BREW_LLVM_CONFIG" != "x"; then :
   LLVM_CONFIG=$BREW_LLVM_CONFIG
 
+fi
 fi
 fi
 fi
@@ -3831,6 +3863,9 @@ fi
   GENTOO_LLVM_CONFIG=/usr/lib64/llvm/3.7/bin/llvm-config
 
                   if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  GENTOO_LLVM_CONFIG=/usr/lib/llvm/3.7/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
   LLVM_CONFIG=$GENTOO_LLVM_CONFIG
 
 else
@@ -3842,6 +3877,7 @@ else
                        if test "x$BREW_LLVM_CONFIG" != "x"; then :
   LLVM_CONFIG=$BREW_LLVM_CONFIG
 
+fi
 fi
 fi
 fi
@@ -3869,6 +3905,9 @@ fi
   GENTOO_LLVM_CONFIG=/usr/lib64/llvm/3.6/bin/llvm-config
 
                   if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  GENTOO_LLVM_CONFIG=/usr/lib/llvm/3.6/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
   LLVM_CONFIG=$GENTOO_LLVM_CONFIG
 
 else
@@ -3880,6 +3919,7 @@ else
                        if test "x$BREW_LLVM_CONFIG" != "x"; then :
   LLVM_CONFIG=$BREW_LLVM_CONFIG
 
+fi
 fi
 fi
 fi
@@ -3907,6 +3947,9 @@ fi
   GENTOO_LLVM_CONFIG=/usr/lib64/llvm/3.5/bin/llvm-config
 
                   if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  GENTOO_LLVM_CONFIG=/usr/lib/llvm/3.5/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
   LLVM_CONFIG=$GENTOO_LLVM_CONFIG
 
 else
@@ -3918,6 +3961,7 @@ else
                        if test "x$BREW_LLVM_CONFIG" != "x"; then :
   LLVM_CONFIG=$BREW_LLVM_CONFIG
 
+fi
 fi
 fi
 fi
@@ -3945,6 +3989,9 @@ fi
   GENTOO_LLVM_CONFIG=/usr/lib64/llvm/3.4/bin/llvm-config
 
                   if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  GENTOO_LLVM_CONFIG=/usr/lib/llvm/3.4/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
   LLVM_CONFIG=$GENTOO_LLVM_CONFIG
 
 else
@@ -3956,6 +4003,7 @@ else
                        if test "x$BREW_LLVM_CONFIG" != "x"; then :
   LLVM_CONFIG=$BREW_LLVM_CONFIG
 
+fi
 fi
 fi
 fi

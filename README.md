@@ -68,7 +68,7 @@ specify a path with `./configure --with-llvm-config=...`.
 
 clangml requires some dependencies:
 `opam install dune stdcompat ppxlib`.
-Additionnally, to run `make tests`: `opam install ocamlcodoc`.
+Additionnally, to run `make tests`: `opam install ocamlcodoc pattern`.
 
 `libclang` and other external dependencies can be installed with opam depext
 plugin:
