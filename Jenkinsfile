@@ -139,7 +139,7 @@ pipeline {
                 sh '''
                     docker run --rm -v $PWD:/clangml ocaml/opam2:4.07 \
                         /clangml/ci-scripts/opam-pin_and_install.sh \
-https://gitlab.inria.fr/tmartine/clangml/-/archive/snapshot/clangml-snapshot.tar.gz
+https://gitlab.inria.fr/memcad/clangml/-/archive/snapshot/clangml-snapshot.tar.gz
                    '''
             }
         }
