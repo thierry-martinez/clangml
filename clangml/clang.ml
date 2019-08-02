@@ -1187,7 +1187,17 @@ module Ast = struct
               | _ -> raise Invalid_structure in
             CompoundLiteral { qual_type; init }
         | UnaryExpr ->
-            unary_expr_of_cxcursor cursor
+            begin
+              match ext_stmt_get_kind cursor with
+              | CXXNoexceptExpr ->
+                  let sub =
+                    match list_of_children cursor with
+                    | [sub] -> sub |> expr_of_cxcursor
+                    | _ -> raise Invalid_structure in
+                  Noexcept sub
+              | _ ->
+                  unary_expr_of_cxcursor cursor
+            end
         | GenericSelectionExpr ->
             begin
               let controlling_expr, assocs =

@@ -2252,6 +2252,18 @@ let () =
       sub_expr : expr;
     }
   | ArrayInitIndex
+  | Noexcept of expr
+(** noexcept unary operator (C++11).
+  {[
+
+let example =
+  "noexcept(1);"
+
+let () =
+  check_pattern quote_stmt_list (parse_statement_list ~language:CXX) example
+  [%pattern?
+    [{ desc = Expr { desc = Noexcept { desc = IntegerLiteral (Int 1)}}}]]
+    ]}*)
   | UnknownExpr of cxcursorkind * clang_ext_stmtkind
 
 and field =
