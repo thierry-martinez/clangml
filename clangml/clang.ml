@@ -498,8 +498,7 @@ module Ast = struct
               | [] -> [] in
             let body =
               match List.rev children with
-              | body :: _ when get_cursor_kind body = CompoundStmt ->
-                  Some (stmt_of_cxcursor body)
+              | body :: _ -> function_body_of_cxcursor body
               | _ -> None in
             Constructor {
               class_name = get_cursor_spelling cursor;
@@ -515,8 +514,7 @@ module Ast = struct
             let children = list_of_children cursor in
             let body =
               match List.rev children with
-              | body :: _ when get_cursor_kind body = CompoundStmt ->
-                  Some (stmt_of_cxcursor body)
+              | body :: _ -> function_body_of_cxcursor body
               | _ -> None in
             let destructor_name = get_cursor_spelling cursor in
             Destructor {
@@ -607,6 +605,13 @@ module Ast = struct
       with Invalid_structure ->
         UnknownDecl (get_cursor_kind cursor, ext_decl_get_kind cursor)
 
+    and function_body_of_cxcursor cursor : stmt option =
+      match get_cursor_kind cursor with
+      | CompoundStmt
+      | CXXTryStmt ->
+          Some (stmt_of_cxcursor cursor)
+      | _ -> None
+
     and parameters_of_function_decl cursor =
       { non_variadic =
       List.init (ext_function_decl_get_num_params cursor) (fun i ->
@@ -651,8 +656,7 @@ module Ast = struct
       let name = extract_declaration_name cursor in
       let body : stmt option =
         match List.rev children with
-        | last :: _ when get_cursor_kind last = CompoundStmt ->
-            Some (stmt_of_cxcursor last)
+        | last :: _ -> function_body_of_cxcursor last
         | _ -> None in
       Clang__ast.Function { linkage; function_type;
         nested_name_specifier; name; body;
@@ -671,14 +675,9 @@ module Ast = struct
             Some (type_ref |> get_cursor_type |> of_cxtype)
         | _ -> None in
       let body : stmt option =
-        match children with
+        match List.rev children with
         | [] -> None
-        | _ ->
-            let last = List.hd (List.rev children) in
-            if get_cursor_kind last = CompoundStmt then
-              Some (stmt_of_cxcursor last)
-            else
-              None in
+        | body :: _ -> function_body_of_cxcursor body in
       let deleted = ext_function_decl_is_deleted cursor in
       let constexpr = ext_function_decl_is_constexpr cursor in
       let nested_name_specifier =
