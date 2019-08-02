@@ -2523,7 +2523,7 @@ extern "C" {
     #endif
       case clang::EST_Unevaluated: return CLANG_EXT_EST_Unevaluated;
       case clang::EST_Uninstantiated: return CLANG_EXT_EST_Uninstantiated;
-    #ifndef LLVM_VERSION_BEFORE_3_5_0
+    #ifndef LLVM_VERSION_BEFORE_3_6_0
       case clang::EST_Unparsed: return CLANG_EXT_EST_Unparsed;
     #endif
       }

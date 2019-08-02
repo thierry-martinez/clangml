@@ -849,7 +849,7 @@ enum clang_ext_ExceptionSpecificationType {
   CLANG_EXT_EST_NoexceptTrue,
   CLANG_EXT_EST_Unevaluated,
   CLANG_EXT_EST_Uninstantiated,
-  CLANG_EXT_EST_Unparsed /* Clang >=3.5.2 */
+  CLANG_EXT_EST_Unparsed /* Clang >=3.6.0 */
 };
 
 enum clang_ext_ExceptionSpecificationType
