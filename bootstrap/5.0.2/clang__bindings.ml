@@ -2906,3 +2906,25 @@ external ext_attr_get_kind :
   cxcursor -> clang_ext_attrkind = "clang_ext_Attr_GetKind_wrapper"
 external ext_var_template_decl_get_templated_decl :
   cxcursor -> cxcursor = "clang_ext_VarTemplateDecl_getTemplatedDecl_wrapper"
+type clang_ext_exceptionspecificationtype =
+  | None 
+  | DynamicNone 
+  | Dynamic 
+  | MSAny 
+  | BasicNoexcept 
+  | DependentNoexcept 
+  | NoexceptFalse 
+  | NoexceptTrue 
+  | Unevaluated 
+  | Uninstantiated 
+  | Unparsed 
+external ext_function_proto_type_get_exception_spec_type :
+  cxtype -> clang_ext_exceptionspecificationtype =
+    "clang_ext_FunctionProtoType_getExceptionSpecType_wrapper"
+external ext_function_proto_type_get_num_exceptions :
+  cxtype -> int = "clang_ext_FunctionProtoType_getNumExceptions_wrapper"
+external ext_function_proto_type_get_exception_type :
+  cxtype -> int -> cxtype =
+    "clang_ext_FunctionProtoType_getExceptionType_wrapper"
+external ext_function_proto_type_get_noexcept_expr :
+  cxtype -> cxcursor = "clang_ext_FunctionProtoType_getNoexceptExpr_wrapper"

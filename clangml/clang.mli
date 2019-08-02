@@ -63,7 +63,7 @@ module Ast : sig
     function_type -> declaration_name -> function_decl
 
   val function_type : ?calling_conv:calling_conv -> ?parameters:parameters ->
-    qual_type -> function_type
+    ?exception_spec:exception_spec -> qual_type -> function_type
 
   val parameters : ?variadic:bool -> parameter list -> parameters
 

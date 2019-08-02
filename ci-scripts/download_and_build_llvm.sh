@@ -29,17 +29,7 @@ else
     CC=gcc
     CXX=g++
 fi
-if [ "$version" "<" 8.0.1 ]; then
-    case "$version" in
-    *rc*)
-        base_version="${version%rc*}"
-        rc="${version#*rc}"
-        base_url="https://prereleases.llvm.org/$base_version/rc$rc"
-        ;;
-    *)
-        base_url="http://releases.llvm.org/$version"
-    esac
-else
+if [ "$version" "=" 8.0.1 ]; then
     case "$version" in
     *rc*)
         version_dash="${version%rc*}-rc${version#*rc}"
@@ -49,6 +39,16 @@ else
     esac
     base_url=\
 "https://github.com/llvm/llvm-project/releases/download/llvmorg-$version_dash"
+else
+    case "$version" in
+    *rc*)
+        base_version="${version%rc*}"
+        rc="${version#*rc}"
+        base_url="https://prereleases.llvm.org/$base_version/rc$rc"
+        ;;
+    *)
+        base_url="http://releases.llvm.org/$version"
+    esac
 fi
 if [ ! -d llvm-$version$dir_suffix ]; then
     if [ ! -f llvm-$version.src$suffix ]; then

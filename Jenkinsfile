@@ -60,7 +60,7 @@ pipeline {
                                 sh """
                                     cd $pwd && \
                                     mkdir -p $bootstrap_dir && \
-                                    build/_build/default/tools/stubgen/stubgen.exe \
+                                build/_build/default/tools/stubgen/stubgen.exe \
                                         --cc=-I,build,-I,$include_dir \
                                         --llvm-config=$llvm_config \
                                         $bootstrap_dir/
@@ -174,7 +174,11 @@ https://gitlab.inria.fr/memcad/clangml/-/archive/snapshot/clangml-snapshot.tar.g
                 sh 'cp build/norm_c++14.ml norms/'
                 sh 'cp build/norm_c++17.ml norms/'
                 sh 'git add norms/*'
-                sh 'git commit -m "generated files for commit `git rev-parse master`"'
+                sh '''
+                    git commit -m \
+                      "generated files for commit `git rev-parse master`" || \
+                    true
+                '''
                 sh 'git push'
             }
         }

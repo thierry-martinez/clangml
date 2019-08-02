@@ -34,7 +34,8 @@ module%import Clang = struct
       and clang_ext_typekind
       and clang_ext_stmtkind
       and cxcursorkind
-      and clang_ext_declkind = _
+      and clang_ext_declkind
+      and clang_ext_exceptionspecificationtype = _
    ][@@deriving equal, compare]
 
     let equal_cxcursor = ignore_equal

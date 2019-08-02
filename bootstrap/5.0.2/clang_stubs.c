@@ -9565,3 +9565,105 @@ clang_ext_VarTemplateDecl_getTemplatedDecl_wrapper(value arg_ocaml)
   }
 }
 
+enum clang_ext_ExceptionSpecificationType
+Clang_ext_exceptionspecificationtype_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CLANG_EXT_EST_None;
+  case 1: return CLANG_EXT_EST_DynamicNone;
+  case 2: return CLANG_EXT_EST_Dynamic;
+  case 3: return CLANG_EXT_EST_MSAny;
+  case 4: return CLANG_EXT_EST_BasicNoexcept;
+  case 5: return CLANG_EXT_EST_DependentNoexcept;
+  case 6: return CLANG_EXT_EST_NoexceptFalse;
+  case 7: return CLANG_EXT_EST_NoexceptTrue;
+  case 8: return CLANG_EXT_EST_Unevaluated;
+  case 9: return CLANG_EXT_EST_Uninstantiated;
+  case 10: return CLANG_EXT_EST_Unparsed;
+  }
+  failwith_fmt("invalid value for Clang_ext_exceptionspecificationtype_val: %d", Int_val(ocaml));
+  return CLANG_EXT_EST_None;
+}
+
+value
+Val_clang_ext_exceptionspecificationtype(enum clang_ext_ExceptionSpecificationType v)
+{
+  switch (v) {
+  case CLANG_EXT_EST_None: return Val_int(0);
+  case CLANG_EXT_EST_DynamicNone: return Val_int(1);
+  case CLANG_EXT_EST_Dynamic: return Val_int(2);
+  case CLANG_EXT_EST_MSAny: return Val_int(3);
+  case CLANG_EXT_EST_BasicNoexcept: return Val_int(4);
+  case CLANG_EXT_EST_DependentNoexcept: return Val_int(5);
+  case CLANG_EXT_EST_NoexceptFalse: return Val_int(6);
+  case CLANG_EXT_EST_NoexceptTrue: return Val_int(7);
+  case CLANG_EXT_EST_Unevaluated: return Val_int(8);
+  case CLANG_EXT_EST_Uninstantiated: return Val_int(9);
+  case CLANG_EXT_EST_Unparsed: return Val_int(10);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_exceptionspecificationtype: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_FunctionProtoType_getExceptionSpecType_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXType arg;
+  arg = Cxtype_val(Field(arg_ocaml, 0));
+  enum clang_ext_ExceptionSpecificationType result = clang_ext_FunctionProtoType_getExceptionSpecType(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_exceptionspecificationtype(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_FunctionProtoType_getNumExceptions_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXType arg;
+  arg = Cxtype_val(Field(arg_ocaml, 0));
+  unsigned int result = clang_ext_FunctionProtoType_getNumExceptions(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_FunctionProtoType_getExceptionType_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  CXType arg;
+  arg = Cxtype_val(Field(arg_ocaml, 0));
+  unsigned int arg2;
+  arg2 = Int_val(arg2_ocaml);
+  CXType result = clang_ext_FunctionProtoType_getExceptionType(arg, arg2);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxtype(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_FunctionProtoType_getNoexceptExpr_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXType arg;
+  arg = Cxtype_val(Field(arg_ocaml, 0));
+  CXCursor result = clang_ext_FunctionProtoType_getNoexceptExpr(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
