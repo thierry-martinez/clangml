@@ -7,8 +7,9 @@
 #include <clang/AST/ExprCXX.h>
 #include <clang/AST/Stmt.h>
 #include <clang/AST/Type.h>
-#include "clang/Basic/SourceLocation.h"
-#include "clang/Frontend/ASTUnit.h"
+#include <clang/Basic/SourceLocation.h>
+#include <clang/Basic/ExceptionSpecificationType.h>
+#include <clang/Frontend/ASTUnit.h>
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/ErrorHandling.h>
 
@@ -2501,5 +2502,59 @@ extern "C" {
       return MakeCXCursor(e->getTemplatedDecl(), getCursorTU(cursor));
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  enum clang_ext_ExceptionSpecificationType
+  clang_ext_FunctionProtoType_getExceptionSpecType(CXType t)
+  {
+    if (auto *fpt = GetQualType(t)->getAs<clang::FunctionProtoType>()) {
+      switch (fpt->getExceptionSpecType()) {
+      case clang::EST_None: return CLANG_EXT_EST_None;
+      case clang::EST_DynamicNone: return CLANG_EXT_EST_DynamicNone;
+      case clang::EST_Dynamic: return CLANG_EXT_EST_Dynamic;
+      case clang::EST_MSAny: return CLANG_EXT_EST_MSAny;
+      case clang::EST_BasicNoexcept: return CLANG_EXT_EST_BasicNoexcept;
+    #ifdef LLVM_VERSION_BEFORE_7_0_0
+      case clang::EST_ComputedNoexcept: return CLANG_EXT_EST_DependentNoexcept;
+    #else
+      case clang::EST_DependentNoexcept: return CLANG_EXT_EST_DependentNoexcept;
+      case clang::EST_NoexceptFalse: return CLANG_EXT_EST_NoexceptFalse;
+      case clang::EST_NoexceptTrue: return CLANG_EXT_EST_NoexceptTrue;
+    #endif
+      case clang::EST_Unevaluated: return CLANG_EXT_EST_Unevaluated;
+      case clang::EST_Uninstantiated: return CLANG_EXT_EST_Uninstantiated;
+    #ifndef LLVM_VERSION_BEFORE_3_5_0
+      case clang::EST_Unparsed: return CLANG_EXT_EST_Unparsed;
+    #endif
+      }
+    }
+    return CLANG_EXT_EST_None;
+  }
+
+  unsigned int
+  clang_ext_FunctionProtoType_getNumExceptions(CXType t)
+  {
+    if (auto *fpt = GetQualType(t)->getAs<clang::FunctionProtoType>()) {
+      return fpt->getNumExceptions();
+    }
+    return 0;
+  }
+
+  CXType
+  clang_ext_FunctionProtoType_getExceptionType(CXType t, unsigned int i)
+  {
+    if (auto *fpt = GetQualType(t)->getAs<clang::FunctionProtoType>()) {
+      return MakeCXType(fpt->getExceptionType(i), GetTU(t));
+    }
+    return MakeCXTypeInvalid(GetTU(t));
+  }
+
+  CXCursor
+  clang_ext_FunctionProtoType_getNoexceptExpr(CXType t)
+  {
+    if (auto *fpt = GetQualType(t)->getAs<clang::FunctionProtoType>()) {
+      return MakeCXCursor(fpt->getNoexceptExpr(), GetTU(t));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, GetTU(t));
   }
 }

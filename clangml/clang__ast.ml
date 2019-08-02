@@ -171,6 +171,8 @@ and overloaded_operator_kind = clang_ext_overloadedoperatorkind
 
 and string_kind = clang_ext_stringkind
 
+and exception_specification_type = clang_ext_exceptionspecificationtype
+
 and integer_literal =
   | Int of int
   | CXInt of cxint
@@ -821,9 +823,145 @@ let () =
       function_type = { parameters = None }}}] -> ()
   | _ -> assert false
 
-    ]}
- *)
+    ]}*)
+
+  exception_spec : exception_spec option; (** C++ *)
+(**
+  Exception specification (C++).
+
+    {[
+let example = "void f() noexcept;"
+
+let () =
+  check_pattern quote_decl_list
+    (parse_declaration_list ~language:CXX ~standard:Cxx11)
+    example
+  [%pattern?
+    [{ desc = Function {
+      name = IdentifierName "f";
+      function_type = { exception_spec = Some (Noexcept {
+        expr = None;
+        evaluated = None; })}}}]]
+
+let example = "void f() noexcept(true);"
+
+let () =
+  if Clang.get_clang_version () >= "clang version 7.0.0" then
+    begin
+      check_pattern quote_decl_list
+        (parse_declaration_list ~language:CXX ~standard:Cxx11)
+        example
+      [%pattern?
+        [{ desc = Function {
+          name = IdentifierName "f";
+          function_type = { exception_spec = Some (Noexcept {
+            expr = Some { desc = BoolLiteral true };
+            evaluated = Some true; })}}}]]
+    end
+  else
+    begin
+      check_pattern quote_decl_list
+        (parse_declaration_list ~language:CXX ~standard:Cxx11)
+        example
+      [%pattern?
+        [{ desc = Function {
+          name = IdentifierName "f";
+          function_type = { exception_spec = Some (Noexcept {
+            expr = Some { desc = BoolLiteral true };
+            evaluated = None; })}}}]]
+    end
+
+let example = "void f() noexcept(false);"
+
+let () =
+  if Clang.get_clang_version () >= "clang version 7.0.0" then
+    begin
+      check_pattern quote_decl_list
+        (parse_declaration_list ~language:CXX ~standard:Cxx11)
+        example
+      [%pattern?
+        [{ desc = Function {
+          name = IdentifierName "f";
+          function_type = { exception_spec = Some (Noexcept {
+            expr = Some { desc = BoolLiteral false };
+            evaluated = Some false; })}}}]]
+    end
+  else
+    begin
+      check_pattern quote_decl_list
+        (parse_declaration_list ~language:CXX ~standard:Cxx11)
+        example
+      [%pattern?
+        [{ desc = Function {
+          name = IdentifierName "f";
+          function_type = { exception_spec = Some (Noexcept {
+            expr = Some { desc = BoolLiteral false };
+            evaluated = None; })}}}]]
+    end
+
+let example = {|
+  template <bool b> void f() noexcept(b);
+|}
+
+let () =
+  check_pattern quote_decl_list
+    (parse_declaration_list ~language:CXX ~standard:Cxx11)
+    example
+  [%pattern? [
+    { desc = TemplateDecl {
+      parameters = [{ desc = {
+        parameter_name = "b";
+        parameter_kind = NonType { parameter_type = {
+          desc = BuiltinType Bool }}}}];
+      decl = { desc = Function {
+        name = IdentifierName "f";
+        function_type = { exception_spec = Some (Noexcept {
+          expr = Some { desc = DeclRef ({ name = IdentifierName "b" })};
+          evaluated = None; })}}}}}]]
+
+let example = "void f() throw();"
+
+let () =
+  check_pattern quote_decl_list
+    (parse_declaration_list ~language:CXX ~standard:Cxx11)
+    example
+  [%pattern?
+    [{ desc = Function {
+      name = IdentifierName "f";
+      function_type = { exception_spec = Some (Throw [])}}}]]
+
+let example = "void f() throw(int);"
+
+let () =
+  check_pattern quote_decl_list
+    (parse_declaration_list ~language:CXX ~standard:Cxx11)
+    example
+  [%pattern?
+    [{ desc = Function {
+      name = IdentifierName "f";
+      function_type = { exception_spec = Some (Throw [
+        { desc = BuiltinType Int }])}}}]]
+
+let example = "void f() throw(...);"
+
+let () =
+  check_pattern quote_decl_list
+    (parse_declaration_list ~language:CXX)
+    example
+  [%pattern?
+    [{ desc = Function {
+      name = IdentifierName "f";
+      function_type = { exception_spec = Some (Other MSAny)}}}]]
+    ]}*)
 }
+
+and exception_spec =
+  | Noexcept of {
+      expr : expr option;
+      evaluated : bool option; (** Clang >=7.0.0 only *)
+    }
+  | Throw of qual_type list
+  | Other of exception_specification_type
 
 (** Function parameters. *)
 and parameters = {
@@ -2260,7 +2398,8 @@ let example =
   "noexcept(1);"
 
 let () =
-  check_pattern quote_stmt_list (parse_statement_list ~language:CXX) example
+  check_pattern quote_stmt_list
+    (parse_statement_list ~language:CXX ~standard:Cxx11) example
   [%pattern?
     [{ desc = Expr { desc = Noexcept { desc = IntegerLiteral (Int 1)}}}]]
     ]}*)

@@ -80,8 +80,9 @@ module Ast = struct
     { linkage; body; deleted; constexpr; function_type; nested_name_specifier;
       name }
 
-  let function_type ?(calling_conv = (C : cxcallingconv)) ?parameters result =
-    { calling_conv; parameters; result }
+  let function_type ?(calling_conv = (C : cxcallingconv)) ?parameters
+        ?exception_spec result =
+    { calling_conv; parameters; result; exception_spec; }
 
   let parameters ?(variadic = false) non_variadic =
     { variadic; non_variadic }
@@ -719,7 +720,34 @@ module Ast = struct
     and function_type_of_cxtype parameters cxtype =
       let calling_conv = cxtype |> get_function_type_calling_conv in
       let result = cxtype |> get_result_type |> of_cxtype in
-      { calling_conv; result; parameters; }
+      let exception_spec : exception_spec option =
+        match ext_function_proto_type_get_exception_spec_type cxtype with
+        | None -> None
+        | DynamicNone -> Some (Throw [])
+        | Dynamic ->
+            let throws =
+              List.init (ext_function_proto_type_get_num_exceptions cxtype)
+                begin fun index ->
+                  ext_function_proto_type_get_exception_type cxtype index |>
+                  of_cxtype
+                end in
+            Some (Throw throws)
+        | BasicNoexcept -> Some (Noexcept { expr = None; evaluated = None })
+        | DependentNoexcept ->
+            let expr =
+              ext_function_proto_type_get_noexcept_expr cxtype |>
+              expr_of_cxcursor in
+            Some (Noexcept { expr = Some expr; evaluated = None })
+        | NoexceptFalse ->
+            let expr = ext_function_proto_type_get_noexcept_expr cxtype |>
+              expr_of_cxcursor in
+            Some (Noexcept { expr = Some expr; evaluated = Some false })
+        | NoexceptTrue ->
+            let expr = ext_function_proto_type_get_noexcept_expr cxtype |>
+              expr_of_cxcursor in
+            Some (Noexcept { expr = Some expr; evaluated = Some true })
+        | other -> Some (Other other) in
+      { calling_conv; result; parameters; exception_spec; }
 
     and var_decl_of_cxcursor cursor =
       node ~cursor (var_decl_desc_of_cxcursor cursor)

@@ -834,3 +834,32 @@ clang_ext_Attr_GetKind(CXCursor);
 
 CXCursor
 clang_ext_VarTemplateDecl_getTemplatedDecl(CXCursor);
+
+/* From clang/Basic/ExceptionSpecificationType.h */
+enum clang_ext_ExceptionSpecificationType {
+  CLANG_EXT_EST_None,
+  CLANG_EXT_EST_DynamicNone,
+  CLANG_EXT_EST_Dynamic,
+  CLANG_EXT_EST_MSAny,
+  CLANG_EXT_EST_BasicNoexcept,
+  CLANG_EXT_EST_DependentNoexcept,
+  /* EST_ComputedNoexcept (Clang <7.0.0) is mapped to
+     CLANG_EXT_EST_DependentNoexcept */
+  CLANG_EXT_EST_NoexceptFalse,
+  CLANG_EXT_EST_NoexceptTrue,
+  CLANG_EXT_EST_Unevaluated,
+  CLANG_EXT_EST_Uninstantiated,
+  CLANG_EXT_EST_Unparsed /* Clang >=3.5.2 */
+};
+
+enum clang_ext_ExceptionSpecificationType
+clang_ext_FunctionProtoType_getExceptionSpecType(CXType);
+
+unsigned int
+clang_ext_FunctionProtoType_getNumExceptions(CXType);
+
+CXType
+clang_ext_FunctionProtoType_getExceptionType(CXType, unsigned int);
+
+CXCursor
+clang_ext_FunctionProtoType_getNoexceptExpr(CXType);
