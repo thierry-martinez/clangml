@@ -1,5 +1,6 @@
 FROM gentoo/stage3-amd64
 RUN emerge --sync
+RUN emerge --oneshot portage
 RUN emerge sudo dev-vcs/git
 RUN emerge opam --autounmask-write || ( \
       etc-update --automode -3 && \

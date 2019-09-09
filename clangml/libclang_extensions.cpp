@@ -1456,10 +1456,19 @@ extern "C" {
   {
     if (auto e =
       llvm::dyn_cast_or_null<clang::GenericSelectionExpr>(GetCursorStmt(c))) {
+      #ifdef LLVM_VERSION_BEFORE_9_0_0
       auto ty = e->getAssocType(i);
       if (ty.getTypePtrOrNull()) {
         return MakeCXType(ty, getCursorTU(c));
       }
+      #else
+      if (auto type_infos = e->getAssocTypeSourceInfos()[i]) {
+        auto ty = type_infos->getType();
+        if (ty.getTypePtrOrNull())
+          return MakeCXType(ty, getCursorTU(c)); {
+        }
+      }
+      #endif
     }
     return MakeCXTypeInvalid(getCursorTU(c));
   }
@@ -1735,8 +1744,12 @@ extern "C" {
   {
     if (auto e =
       llvm::dyn_cast_or_null<clang::CXXNewExpr>(GetCursorStmt(c))) {
-      if (auto *s = e->getArraySize()) {
-        return MakeCXCursor(s, getCursorTU(c));
+      if (auto sz = e->getArraySize()) {
+        #ifdef LLVM_VERSION_BEFORE_9_0_0
+        return MakeCXCursor(sz, getCursorTU(c));
+        #else
+        return MakeCXCursor(*sz, getCursorTU(c));
+        #endif
       }
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
