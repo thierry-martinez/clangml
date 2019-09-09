@@ -1,4 +1,1 @@
-- In C++ 14, 8.1 Type names:
-  `void f(int(C)) { }` should be parsed as `void f(int(*)(C)) { }`
-  whereas clang parses it as `void f(int C) { }`.
 
