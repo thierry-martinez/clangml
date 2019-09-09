@@ -1458,12 +1458,17 @@ extern "C" {
       llvm::dyn_cast_or_null<clang::GenericSelectionExpr>(GetCursorStmt(c))) {
       #ifdef LLVM_VERSION_BEFORE_9_0_0
       auto ty = e->getAssocType(i);
-      #else
-      auto ty = e->getAssocTypeSourceInfos()[i]->getType();
-      #endif
       if (ty.getTypePtrOrNull()) {
         return MakeCXType(ty, getCursorTU(c));
       }
+      #else
+      if (auto type_infos = e->getAssocTypeSourceInfos()[i]) {
+        auto ty = type_infos->getType();
+        if (ty.getTypePtrOrNull())
+          return MakeCXType(ty, getCursorTU(c)); {
+        }
+      }
+      #endif
     }
     return MakeCXTypeInvalid(getCursorTU(c));
   }
