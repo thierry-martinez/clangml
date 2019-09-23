@@ -1074,8 +1074,10 @@ extern "C" {
         return clang_ext_StringKind_Ascii;
       case clang::CharacterLiteral::Wide:
         return clang_ext_StringKind_Wide;
+      #ifndef LLVM_VERSION_BEFORE_3_8_0
       case clang::CharacterLiteral::UTF8:
         return clang_ext_StringKind_UTF8;
+      #endif
       case clang::CharacterLiteral::UTF16:
         return clang_ext_StringKind_UTF16;
       case clang::CharacterLiteral::UTF32:
