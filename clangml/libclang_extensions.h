@@ -453,7 +453,7 @@ enum CXTemplateArgumentKind {
   CXTemplateArgumentKind_TemplateExpansion,
   CXTemplateArgumentKind_Expression,
   CXTemplateArgumentKind_Pack,
-  CXTemplateArgumentKind_InvalidTemplateArgument
+  CXTemplateArgumentKind_Invalid
 };
 #endif
 
