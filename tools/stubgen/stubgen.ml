@@ -76,26 +76,20 @@ let module_declaration ?(pmd_attributes = []) ?(pmd_loc = Location.none) pmd_nam
 let module_binding ?(pmb_attributes = []) ?(pmb_loc = Location.none) pmb_name pmb_expr =
   { Parsetree.pmb_name; pmb_expr; pmb_attributes; pmb_loc }
 
-let pexp_constant ?(pexp_loc = Location.none) ?(pexp_attributes = []) constant =
-  { Parsetree.pexp_desc = Pexp_constant constant; pexp_attributes; pexp_loc }
+let pexp_constant = Ast_helper.Exp.constant
 
-let pexp_construct ?(pexp_loc = Location.none) ?(pexp_attributes = []) ?argument ident =
-  { Parsetree.pexp_desc = Pexp_construct (ident, argument); pexp_attributes; pexp_loc }
+let pexp_construct = Ast_helper.Exp.construct
 
-let pexp_ident ?(pexp_loc = Location.none) ?(pexp_attributes = []) ident =
-  { Parsetree.pexp_desc = Pexp_ident ident; pexp_attributes; pexp_loc }
+let pexp_ident = Ast_helper.Exp.ident
 
-let pexp_apply ?(pexp_loc = Location.none) ?(pexp_attributes = []) f args =
-  { Parsetree.pexp_desc = Pexp_apply (f, args); pexp_attributes; pexp_loc }
+let pexp_apply = Ast_helper.Exp.apply
 
-let pexp_tuple ?(pexp_loc = Location.none) ?(pexp_attributes = []) items =
-  { Parsetree.pexp_desc = Pexp_tuple items; pexp_attributes; pexp_loc }
+let pexp_tuple = Ast_helper.Exp.tuple
 
-let pexp_fun ?(pexp_loc = Location.none) ?(pexp_attributes = []) ?(arg_label = Asttypes.Nolabel) ?default pat body =
-  { Parsetree.pexp_desc = Pexp_fun (arg_label, default, pat, body); pexp_attributes; pexp_loc }
+let pexp_fun ?(label = Nolabel) ?default pattern body =
+  Ast_helper.Exp.fun_ label default pattern body
 
-let pexp_record ?(pexp_loc = Location.none) ?(pexp_attributes = []) ?source fields =
-  { Parsetree.pexp_desc = Pexp_record (fields, source); pexp_attributes; pexp_loc }
+let pexp_record = Ast_helper.Exp.record
 
 let value_description ?(pval_attributes = []) ?(pval_loc = Location.none)
     ?(pval_prim = []) pval_name pval_type =
@@ -124,25 +118,17 @@ let label_declaration ?(pld_mutable = Asttypes.Immutable)
 let loc txt =
   { Location.txt; loc = Location.none }
 
-let ptyp_constr ?(ptyp_attributes = []) ?(ptyp_loc = Location.none) ?(args = [])
-    ident =
-  { Parsetree.ptyp_desc = Ptyp_constr (ident, args);
-    ptyp_attributes; ptyp_loc }
+let ptyp_constr ?(args = []) lid =
+  Ast_helper.Typ.constr lid args
 
-let ptyp_arrow ?(ptyp_attributes = []) ?(ptyp_loc = Location.none)
-    ?(label = Asttypes.Nolabel) t1 t2 =
-  { Parsetree.ptyp_desc = Ptyp_arrow (label, t1, t2);
-    ptyp_attributes; ptyp_loc }
+let ptyp_arrow ?(label = Nolabel) argument result =
+  Ast_helper.Typ.arrow label argument result
 
-let ptyp_tuple ?(ptyp_attributes = []) ?(ptyp_loc = Location.none) list =
-  { Parsetree.ptyp_desc = Ptyp_tuple list;
-    ptyp_attributes; ptyp_loc }
+let ptyp_tuple = Ast_helper.Typ.tuple
 
-let pattern ?(ppat_attributes = []) ?(ppat_loc = Location.none) ppat_desc =
-  { Parsetree.ppat_desc; ppat_attributes; ppat_loc }
+let pattern = Ast_helper.Pat.mk
 
-let ppat_var ?(ppat_attributes = []) ?(ppat_loc = Location.none) var =
-  { Parsetree.ppat_desc = Ppat_var var; ppat_attributes; ppat_loc }
+let ppat_var = Ast_helper.Pat.var
 
 let make_ocaml_type_name s =
   let buffer = Buffer.create 17 in
@@ -581,7 +567,9 @@ let make_doc_attributes cur =
   match Clang.cursor_get_brief_comment_text cur with
   | None -> []
   | Some doc ->
-      [loc "ocaml.doc", Parsetree.PStr [pstr_eval (pexp_constant (pconst_string (escape_doc doc)))]]
+      [Ast_helper.Attr.mk (loc "ocaml.doc")
+         (Parsetree.PStr [pstr_eval
+           (pexp_constant (pconst_string (escape_doc doc)))])]
 
 let rec find_type_info ?(declare_abstract = true) ?parameters context type_interface ty =
   let find_enum_info type_name =

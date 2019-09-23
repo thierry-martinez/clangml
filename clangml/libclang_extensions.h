@@ -161,21 +161,22 @@ enum clang_ext_StringKind {
   clang_ext_StringKind_UTF8,
   clang_ext_StringKind_UTF16,
   clang_ext_StringKind_UTF32,
-  clang_ext_StringKind_Invalid
+  clang_ext_StringKind_InvalidStringKind
 };
 
 enum clang_ext_StringKind
 clang_ext_StringLiteral_getKind(CXCursor c);
 
 #ifdef LLVM_VERSION_BEFORE_3_9_0
-#define CLANG_EXT_UNARY_OPERATOR_Invalid CLANG_EXT_UNARY_OPERATOR_UO_Invalid
+#define CLANG_EXT_UNARY_OPERATOR_InvalidUnaryOperator \
+  CLANG_EXT_UNARY_OPERATOR_UO_Invalid
 #endif
 
 enum clang_ext_UnaryOperatorKind {
   #define UNARY_OPERATION(Name, Spelling) CLANG_EXT_UNARY_OPERATOR_##Name,
   #include "clangml_OperationKinds.def"
 
-  CLANG_EXT_UNARY_OPERATOR_Invalid
+  CLANG_EXT_UNARY_OPERATOR_InvalidUnaryOperator
 };
 
 enum clang_ext_UnaryOperatorKind
@@ -186,13 +187,14 @@ clang_ext_UnaryOperator_getOpcodeSpelling(
   enum clang_ext_UnaryOperatorKind Kind);
 
 #ifdef LLVM_VERSION_BEFORE_3_9_0
-#define CLANG_EXT_BINARY_OPERATOR_Invalid CLANG_EXT_BINARY_OPERATOR_BO_Invalid
+#define CLANG_EXT_BINARY_OPERATOR_InvalidBinaryOperator \
+  CLANG_EXT_BINARY_OPERATOR_BO_Invalid
 #endif
 
 enum clang_ext_BinaryOperatorKind {
   #define BINARY_OPERATION(Name, Spelling) CLANG_EXT_BINARY_OPERATOR_##Name,
   #include "clangml_OperationKinds.def"
-  CLANG_EXT_BINARY_OPERATOR_Invalid
+  CLANG_EXT_BINARY_OPERATOR_InvalidBinaryOperator
 };
 
 enum clang_ext_BinaryOperatorKind
@@ -251,7 +253,7 @@ enum clang_ext_ElaboratedTypeKeyword {
   ETK_Class,
   ETK_Enum,
   ETK_Typename,
-  ETK_None
+  ETK_NoKeyword
 };
 
 enum clang_ext_ElaboratedTypeKeyword
@@ -289,33 +291,33 @@ enum clang_ext_CursorKind
 clang_ext_GetCursorKind(CXCursor c);
 
 enum clang_ext_DeclKind {
-  CLANG_EXT_DECL_Invalid,
+  CLANG_EXT_DECL_InvalidDecl,
   #define DECL(Class, _Base) CLANG_EXT_DECL_##Class,
   #define ABSTRACT_DECL(_Decl)
   #include <clang/AST/DeclNodes.inc>
-  CLANG_EXT_DECL_Unknown
+  CLANG_EXT_DECL_UnknownDecl
 };
 
 enum clang_ext_DeclKind
 clang_ext_Decl_GetKind(CXCursor);
 
 enum clang_ext_StmtKind {
-  CLANG_EXT_STMT_Invalid,
+  CLANG_EXT_STMT_InvalidStmt,
   #define STMT(Class, _Base) CLANG_EXT_STMT_##Class,
   #define ABSTRACT_STMT(_Stmt)
   #include <clang/AST/StmtNodes.inc>
-  CLANG_EXT_STMT_Unknown
+  CLANG_EXT_STMT_UnknownStmt
 };
 
 enum clang_ext_StmtKind
 clang_ext_Stmt_GetKind(CXCursor);
 
 enum clang_ext_TypeKind {
-  CLANG_EXT_TYPE_Invalid,
+  CLANG_EXT_TYPE_InvalidType,
   #define TYPE(Class, _Base) CLANG_EXT_TYPE_##Class,
   #define ABSTRACT_TYPE(_Class, _Base)
   #include <clang/AST/TypeNodes.def>
-  CLANG_EXT_TYPE_Unknown
+  CLANG_EXT_TYPE_UnknownType
 };
 
 enum clang_ext_TypeKind
@@ -333,15 +335,7 @@ clang_ext_VariableArrayType_GetSizeExpr(CXType c);
 CXString
 clang_ext_AsmStmt_GetAsmString(CXCursor c);
 
-enum clang_ext_CharacterKind {
-  ECK_Ascii,
-  ECK_Wide,
-  ECK_UTF8,
-  ECK_UTF16,
-  ECK_UTF32
-};
-
-enum clang_ext_CharacterKind
+enum clang_ext_StringKind
 clang_ext_CharacterLiteral_GetCharacterKind(CXCursor c);
 
 unsigned
@@ -456,7 +450,7 @@ enum CXTemplateArgumentKind {
   CXTemplateArgumentKind_TemplateExpansion,
   CXTemplateArgumentKind_Expression,
   CXTemplateArgumentKind_Pack,
-  CXTemplateArgumentKind_Invalid
+  CXTemplateArgumentKind_InvalidTemplateArgument
 };
 #endif
 
@@ -533,7 +527,7 @@ enum clang_ext_PredefinedExpr_IdentKind {
   clang_ext_PredefinedExpr_LFuncSig,
   clang_ext_PredefinedExpr_PrettyFunction,
   clang_ext_PredefinedExpr_PrettyFunctionNoVirtual,
-  clang_ext_PredefinedExpr_Invalid
+  clang_ext_PredefinedExpr_InvalidPredefinedExpr
 };
 
 enum clang_ext_PredefinedExpr_IdentKind
@@ -649,7 +643,7 @@ enum clang_ext_langstandards {
   #endif
   #include <clang/Frontend/LangStandards.def>
   #undef FOREACH_STANDARD
-  CLANG_EXT_LANGSTANDARDS_Invalid
+  CLANG_EXT_LANGSTANDARDS_InvalidLang
 };
 
 const char *
@@ -692,7 +686,7 @@ typedef enum CXVisitorResult (*CXDeclContextVisitor)(
   CXCursor , CXClientData client_data);
 
 enum clang_ext_OverloadedOperatorKind {
-  CLANG_EXT_OVERLOADED_OPERATOR_None,
+  CLANG_EXT_OVERLOADED_OPERATOR_InvalidOverloadedOperator,
   #define OVERLOADED_OPERATOR(Name,Spelling,Token,Unary,Binary,MemberOnly) \
     CLANG_EXT_OVERLOADED_OPERATOR_##Name,
   #include <clang/Basic/OperatorKinds.def>
@@ -723,7 +717,7 @@ enum clang_ext_DeclarationNameKind {
   CLANG_EXT_DECLARATION_NAME_CXXOperatorName,
   CLANG_EXT_DECLARATION_NAME_CXXLiteralOperatorName,
   CLANG_EXT_DECLARATION_NAME_CXXUsingDirective,
-  CLANG_EXT_DECLARATION_NAME_Invalid
+  CLANG_EXT_DECLARATION_NAME_InvalidDeclarationName
 };
 
 enum clang_ext_DeclarationNameKind
@@ -763,7 +757,7 @@ struct clang_ext_NestedNameSpecifier {
 
 /* Copied from clang/AST/NestedNameSpecifier.h */
 enum clang_ext_NestedNameSpecifierKind {
-  CLANG_EXT_NESTED_NAME_SPECIFIER_Invalid,
+  CLANG_EXT_NESTED_NAME_SPECIFIER_InvalidNestedNameSpecifier,
   CLANG_EXT_NESTED_NAME_SPECIFIER_Identifier,
   CLANG_EXT_NESTED_NAME_SPECIFIER_Namespace,
   CLANG_EXT_NESTED_NAME_SPECIFIER_NamespaceAlias,
@@ -843,7 +837,7 @@ clang_ext_VarTemplateDecl_getTemplatedDecl(CXCursor);
 
 /* From clang/Basic/ExceptionSpecificationType.h */
 enum clang_ext_ExceptionSpecificationType {
-  CLANG_EXT_EST_None,
+  CLANG_EXT_EST_NoExceptionSpecification,
   CLANG_EXT_EST_DynamicNone,
   CLANG_EXT_EST_Dynamic,
   CLANG_EXT_EST_MSAny,

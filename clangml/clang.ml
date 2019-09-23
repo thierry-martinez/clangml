@@ -216,7 +216,7 @@ module Ast = struct
               let ty = ext_nested_name_specifier_get_as_type name in
               Some (TypeSpecWithTemplate (ty |> of_cxtype))
           | Global -> Some Global
-          | Invalid -> None
+          | InvalidNestedNameSpecifier -> None
           | Super -> raise Invalid_structure in
         match component with
         | None -> accu
@@ -225,7 +225,7 @@ module Ast = struct
             enumerate (component :: accu) name
               (ext_nested_name_specifier_get_kind name) in
       match ext_nested_name_specifier_get_kind name with
-      | Invalid -> None
+      | InvalidNestedNameSpecifier -> None
       | kind -> Some (enumerate [] name kind)
 
     and extract_declaration_name cursor =
@@ -722,7 +722,7 @@ module Ast = struct
       let result = cxtype |> get_result_type |> of_cxtype in
       let exception_spec : exception_spec option =
         match ext_function_proto_type_get_exception_spec_type cxtype with
-        | None -> None
+        | NoExceptionSpecification -> None
         | DynamicNone -> Some (Throw [])
         | Dynamic ->
             let throws =
@@ -1222,7 +1222,7 @@ module Ast = struct
                     match list_of_children cursor with
                     | [sub] -> sub |> expr_of_cxcursor
                     | _ -> raise Invalid_structure in
-                  Noexcept sub
+                  NoexceptExpr sub
               | _ ->
                   unary_expr_of_cxcursor cursor
             end
@@ -1387,7 +1387,7 @@ module Ast = struct
               | [sub] -> Some (expr_of_cxcursor sub)
               | [] -> None
               | _ -> raise Invalid_structure in
-            Throw sub
+            ThrowExpr sub
         | TemplateRef ->
             TemplateRef (ident_ref_of_cxcursor cursor)
         | OverloadedDeclRef ->

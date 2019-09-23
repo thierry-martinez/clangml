@@ -135,7 +135,7 @@ type elaborated_type_keyword = clang_ext_elaboratedtypekeyword
 (** Keyword associated to an elaborated type: [struct], [union],
     [enum], ... *)
 
-and character_kind = clang_ext_characterkind
+and character_kind = clang_ext_stringkind
 (** Character kind: ASCII, UTF8, UTF16, ... *)
 
 and unary_expr_kind = clang_ext_unaryexpr
@@ -2378,7 +2378,7 @@ let () =
       qual_type : qual_type;
       args : expr list;
     }
-  | Throw of expr option
+  | ThrowExpr of expr option
   | TemplateRef of ident_ref
   | OverloadedDeclRef of ident_ref
   | StdInitializerList of expr list
@@ -2390,7 +2390,7 @@ let () =
       sub_expr : expr;
     }
   | ArrayInitIndex
-  | Noexcept of expr
+  | NoexceptExpr of expr
 (** noexcept unary operator (C++11).
   {[
 
@@ -2401,7 +2401,7 @@ let () =
   check_pattern quote_stmt_list
     (parse_statement_list ~language:CXX ~standard:Cxx11) example
   [%pattern?
-    [{ desc = Expr { desc = Noexcept { desc = IntegerLiteral (Int 1)}}}]]
+    [{ desc = Expr { desc = NoexceptExpr { desc = IntegerLiteral (Int 1)}}}]]
     ]}*)
   | UnknownExpr of cxcursorkind * clang_ext_stmtkind
 
