@@ -1920,7 +1920,7 @@ type clang_ext_stringkind =
   | UTF8 
   | UTF16 
   | UTF32 
-  | Invalid 
+  | InvalidStringKind 
 external ext_string_literal_get_kind :
   cxcursor -> clang_ext_stringkind =
     "clang_ext_StringLiteral_getKind_wrapper"
@@ -1939,7 +1939,7 @@ type clang_ext_unaryoperatorkind =
   | Imag 
   | Extension 
   | Coawait 
-  | Invalid 
+  | InvalidUnaryOperator 
 external ext_unary_operator_get_opcode :
   cxcursor -> clang_ext_unaryoperatorkind =
     "clang_ext_UnaryOperator_getOpcode_wrapper"
@@ -1980,7 +1980,7 @@ type clang_ext_binaryoperatorkind =
   | XorAssign 
   | OrAssign 
   | Comma 
-  | Invalid 
+  | InvalidBinaryOperator 
 external ext_binary_operator_get_opcode :
   cxcursor -> clang_ext_binaryoperatorkind =
     "clang_ext_BinaryOperator_getOpcode_wrapper"
@@ -2006,7 +2006,7 @@ type clang_ext_elaboratedtypekeyword =
   | Class 
   | Enum 
   | Typename 
-  | None 
+  | NoKeyword 
 external ext_elaborated_type_get_keyword :
   cxtype -> clang_ext_elaboratedtypekeyword =
     "clang_ext_ElaboratedType_getKeyword_wrapper"
@@ -2033,7 +2033,7 @@ type clang_ext_cursorkind =
 external ext_get_cursor_kind :
   cxcursor -> clang_ext_cursorkind = "clang_ext_GetCursorKind_wrapper"
 type clang_ext_declkind =
-  | Invalid 
+  | InvalidDecl 
   | AccessSpec 
   | Block 
   | Captured 
@@ -2107,11 +2107,11 @@ type clang_ext_declkind =
   | PragmaDetectMismatch 
   | StaticAssert 
   | TranslationUnit 
-  | Unknown 
+  | UnknownDecl 
 external ext_decl_get_kind :
   cxcursor -> clang_ext_declkind = "clang_ext_Decl_GetKind_wrapper"
 type clang_ext_stmtkind =
-  | Invalid 
+  | InvalidStmt 
   | GCCAsmStmt 
   | MSAsmStmt 
   | AttributedStmt 
@@ -2307,11 +2307,11 @@ type clang_ext_stmtkind =
   | DefaultStmt 
   | SwitchStmt 
   | WhileStmt 
-  | Unknown 
+  | UnknownStmt 
 external ext_stmt_get_kind :
   cxcursor -> clang_ext_stmtkind = "clang_ext_Stmt_GetKind_wrapper"
 type clang_ext_typekind =
-  | Invalid 
+  | InvalidType 
   | Builtin 
   | Complex 
   | Pointer 
@@ -2359,7 +2359,7 @@ type clang_ext_typekind =
   | ObjCObjectPointer 
   | Pipe 
   | Atomic 
-  | Unknown 
+  | UnknownType 
 external ext_type_get_kind :
   cxtype -> clang_ext_typekind = "clang_ext_Type_GetKind_wrapper"
 external ext_get_type_kind :
@@ -2370,14 +2370,8 @@ external ext_variable_array_type_get_size_expr :
   cxtype -> cxcursor = "clang_ext_VariableArrayType_GetSizeExpr_wrapper"
 external ext_asm_stmt_get_asm_string :
   cxcursor -> string = "clang_ext_AsmStmt_GetAsmString_wrapper"
-type clang_ext_characterkind =
-  | Ascii 
-  | Wide 
-  | UTF8 
-  | UTF16 
-  | UTF32 
 external ext_character_literal_get_character_kind :
-  cxcursor -> clang_ext_characterkind =
+  cxcursor -> clang_ext_stringkind =
     "clang_ext_CharacterLiteral_GetCharacterKind_wrapper"
 external ext_character_literal_get_value :
   cxcursor -> int = "clang_ext_CharacterLiteral_GetValue_wrapper"
@@ -2749,7 +2743,7 @@ type clang_ext_predefinedexpr_identkind =
   | LFuncSig 
   | PrettyFunction 
   | PrettyFunctionNoVirtual 
-  | Invalid 
+  | InvalidPredefinedExpr 
 external ext_predefined_expr_get_ident_kind :
   cxcursor -> clang_ext_predefinedexpr_identkind =
     "clang_ext_PredefinedExpr_getIdentKind_wrapper"
@@ -2845,7 +2839,7 @@ type clang_ext_langstandards =
   | Openclcpp 
   | Cuda 
   | Hip 
-  | Invalid 
+  | InvalidLang 
 external ext_lang_standard_get_name :
   clang_ext_langstandards -> string =
     "clang_ext_LangStandard_getName_wrapper"
@@ -2873,7 +2867,7 @@ external ext_decltype_type_get_underlying_expr :
 external ext_namespace_decl_is_inline :
   cxcursor -> bool = "clang_ext_NamespaceDecl_isInline_wrapper"
 type clang_ext_overloadedoperatorkind =
-  | None 
+  | InvalidOverloadedOperator 
   | New 
   | Delete 
   | Array_New 
@@ -2934,7 +2928,7 @@ type clang_ext_declarationnamekind =
   | CXXOperatorName 
   | CXXLiteralOperatorName 
   | CXXUsingDirective 
-  | Invalid 
+  | InvalidDeclarationName 
 type clang_ext_declarationname
 external ext_declaration_name_get_kind :
   clang_ext_declarationname -> clang_ext_declarationnamekind =
@@ -2960,7 +2954,7 @@ external ext_using_directive_decl_get_nominated_namespace :
   cxcursor -> cxcursor =
     "clang_ext_UsingDirectiveDecl_getNominatedNamespace_wrapper"
 type clang_ext_nestednamespecifierkind =
-  | Invalid 
+  | InvalidNestedNameSpecifier 
   | Identifier 
   | Namespace 
   | NamespaceAlias 
@@ -3025,7 +3019,7 @@ external ext_attr_get_kind :
 external ext_var_template_decl_get_templated_decl :
   cxcursor -> cxcursor = "clang_ext_VarTemplateDecl_getTemplatedDecl_wrapper"
 type clang_ext_exceptionspecificationtype =
-  | None 
+  | NoExceptionSpecification 
   | DynamicNone 
   | Dynamic 
   | MSAny 
