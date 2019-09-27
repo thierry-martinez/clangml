@@ -1762,9 +1762,9 @@ let () =
     @@ fun ast -> match ast with
     | [{ desc = Expr { desc =
           CharacterLiteral { kind = UTF16; value = 0x61 } }}]
-      -> assert (Clang.get_clang_version () >= "clang version 3.8.0")
+      -> assert (Clang.get_clang_version () >= "clang version 3.6.0")
     | [{ desc = Expr { desc = CharacterLiteral { kind = UTF8; value = 0x61 } }}]
-      -> assert (Clang.get_clang_version () < "clang version 3.8.0")
+      -> assert (Clang.get_clang_version () < "clang version 3.6.0")
     | _ -> assert false
     ]}*)
   | ImaginaryLiteral of expr
