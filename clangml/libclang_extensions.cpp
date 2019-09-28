@@ -1048,22 +1048,6 @@ extern "C" {
     return MakeCXCursorInvalid(CXCursor_InvalidCode, GetTU(c));
   }
 
-  CXString
-  clang_ext_AsmStmt_GetAsmString(CXCursor c)
-  {
-    const clang::Stmt *s = GetCursorStmt(c);
-    switch (s->getStmtClass()) {
-    case clang::Stmt::GCCAsmStmtClass:;
-      return cxstring_createDup(
-        clang::cast<clang::GCCAsmStmt>(s)->getAsmString()->getString());
-    case clang::Stmt::MSAsmStmtClass:
-      return cxstring_createDup(
-        clang::cast<clang::MSAsmStmt>(s)->getAsmString());
-    default:
-      return cxstring_createRef("");
-    }
-  }
-//
   enum clang_ext_StringKind
   clang_ext_CharacterLiteral_GetCharacterKind(CXCursor c)
   {
@@ -2584,5 +2568,83 @@ extern "C" {
       return MakeCXCursor(fpt->getNoexceptExpr(), GetTU(t));
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, GetTU(t));
+  }
+
+  CXString
+  clang_ext_AsmStmt_GetAsmString(CXCursor c)
+  {
+    const clang::Stmt *s = GetCursorStmt(c);
+    switch (s->getStmtClass()) {
+    case clang::Stmt::GCCAsmStmtClass:;
+      return cxstring_createDup(
+        clang::cast<clang::GCCAsmStmt>(s)->getAsmString()->getString());
+    case clang::Stmt::MSAsmStmtClass:
+      return cxstring_createDup(
+        clang::cast<clang::MSAsmStmt>(s)->getAsmString());
+    default:
+      return cxstring_createRef("");
+    }
+  }
+
+  unsigned int
+  clang_ext_AsmStmt_getNumOutputs(CXCursor c)
+  {
+    auto s = GetCursorStmt(c);
+    if (auto a = llvm::dyn_cast_or_null<clang::AsmStmt>(s)) {
+      return a->getNumOutputs();
+    }
+    return 0;
+  }
+
+  CXString
+  clang_ext_AsmStmt_getOutputConstraint(CXCursor c, unsigned i)
+  {
+    auto s = GetCursorStmt(c);
+    if (auto a = llvm::dyn_cast_or_null<clang::AsmStmt>(s)) {
+      return cxstring_createDup(a->getOutputConstraint(i));
+    }
+    return cxstring_createRef("");
+  }
+
+
+  CXCursor
+  clang_ext_AsmStmt_getOutputExpr(CXCursor c, unsigned i)
+  {
+    auto s = GetCursorStmt(c);
+    if (auto a = llvm::dyn_cast_or_null<clang::AsmStmt>(s)) {
+      return MakeCXCursor(a->getOutputExpr(i), getCursorTU(c));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  unsigned int
+  clang_ext_AsmStmt_getNumInputs(CXCursor c)
+  {
+    auto s = GetCursorStmt(c);
+    if (auto a = llvm::dyn_cast_or_null<clang::AsmStmt>(s)) {
+      return a->getNumInputs();
+    }
+    return 0;
+  }
+
+  CXString
+  clang_ext_AsmStmt_getInputConstraint(CXCursor c, unsigned i)
+  {
+    auto s = GetCursorStmt(c);
+    if (auto a = llvm::dyn_cast_or_null<clang::AsmStmt>(s)) {
+      return cxstring_createDup(a->getInputConstraint(i));
+    }
+    return cxstring_createRef("");
+  }
+
+
+  CXCursor
+  clang_ext_AsmStmt_getInputExpr(CXCursor c, unsigned i)
+  {
+    auto s = GetCursorStmt(c);
+    if (auto a = llvm::dyn_cast_or_null<clang::AsmStmt>(s)) {
+      return MakeCXCursor(a->getInputExpr(i), getCursorTU(c));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
   }
 }

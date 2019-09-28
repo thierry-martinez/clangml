@@ -335,9 +335,6 @@ clang_ext_GetInnerType(CXType c);
 CXCursor
 clang_ext_VariableArrayType_GetSizeExpr(CXType c);
 
-CXString
-clang_ext_AsmStmt_GetAsmString(CXCursor c);
-
 enum clang_ext_StringKind
 clang_ext_CharacterLiteral_GetCharacterKind(CXCursor c);
 
@@ -866,3 +863,24 @@ clang_ext_FunctionProtoType_getExceptionType(CXType, unsigned int);
 
 CXCursor
 clang_ext_FunctionProtoType_getNoexceptExpr(CXType);
+
+CXString
+clang_ext_AsmStmt_GetAsmString(CXCursor c);
+
+unsigned int
+clang_ext_AsmStmt_getNumOutputs(CXCursor);
+
+CXString
+clang_ext_AsmStmt_getOutputConstraint(CXCursor, unsigned);
+
+CXCursor
+clang_ext_AsmStmt_getOutputExpr(CXCursor, unsigned);
+
+unsigned int
+clang_ext_AsmStmt_getNumInputs(CXCursor);
+
+CXString
+clang_ext_AsmStmt_getInputConstraint(CXCursor, unsigned);
+
+CXCursor
+clang_ext_AsmStmt_getInputExpr(CXCursor, unsigned);

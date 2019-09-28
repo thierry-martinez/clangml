@@ -995,13 +995,9 @@ module Ast = struct
                 | _ -> raise Invalid_structure in
               Return value
           | GCCAsmStmt ->
-              let code = ext_asm_stmt_get_asm_string cursor in
-              let parameters =
-                list_of_children cursor |> List.map @@ fun cursor ->
-                  node ~cursor (get_cursor_spelling cursor) in
-              GCCAsm (code, parameters)
+              Asm (asm_of_cxcursor GCC cursor)
           | MSAsmStmt ->
-              MSAsm (ext_asm_stmt_get_asm_string cursor)
+              Asm (asm_of_cxcursor MS cursor)
           | CXXForRangeStmt ->
               let var, range, body =
                 match list_of_children cursor with
@@ -1053,6 +1049,21 @@ module Ast = struct
             block = block |> stmt_of_cxcursor;
           }
       | _ -> raise Invalid_structure
+
+    and asm_of_cxcursor asm_compiler_extension cursor =
+      let asm_outputs =
+        List.init (ext_asm_stmt_get_num_outputs cursor) (fun i -> {
+          asm_constraint = ext_asm_stmt_get_output_constraint cursor i;
+          asm_expr = ext_asm_stmt_get_output_expr cursor i |> expr_of_cxcursor;
+        }) in
+      let asm_inputs =
+        List.init (ext_asm_stmt_get_num_inputs cursor) (fun i -> {
+          asm_constraint = ext_asm_stmt_get_input_constraint cursor i;
+          asm_expr = ext_asm_stmt_get_input_expr cursor i |> expr_of_cxcursor;
+        }) in {
+      asm_compiler_extension; asm_inputs; asm_outputs;
+      asm_string = ext_asm_stmt_get_asm_string cursor;
+    }
 
     and expr_of_cxcursor cursor =
       match expr_desc_of_cxcursor cursor with
