@@ -1953,8 +1953,6 @@ external ext_get_inner_type :
   cxtype -> cxtype = "clang_ext_GetInnerType_wrapper"
 external ext_variable_array_type_get_size_expr :
   cxtype -> cxcursor = "clang_ext_VariableArrayType_GetSizeExpr_wrapper"
-external ext_asm_stmt_get_asm_string :
-  cxcursor -> string = "clang_ext_AsmStmt_GetAsmString_wrapper"
 external ext_character_literal_get_character_kind :
   cxcursor -> clang_ext_stringkind =
     "clang_ext_CharacterLiteral_GetCharacterKind_wrapper"
@@ -2577,3 +2575,17 @@ external ext_function_proto_type_get_exception_type :
     "clang_ext_FunctionProtoType_getExceptionType_wrapper"
 external ext_function_proto_type_get_noexcept_expr :
   cxtype -> cxcursor = "clang_ext_FunctionProtoType_getNoexceptExpr_wrapper"
+external ext_asm_stmt_get_asm_string :
+  cxcursor -> string = "clang_ext_AsmStmt_GetAsmString_wrapper"
+external ext_asm_stmt_get_num_outputs :
+  cxcursor -> int = "clang_ext_AsmStmt_getNumOutputs_wrapper"
+external ext_asm_stmt_get_output_constraint :
+  cxcursor -> int -> string = "clang_ext_AsmStmt_getOutputConstraint_wrapper"
+external ext_asm_stmt_get_output_expr :
+  cxcursor -> int -> cxcursor = "clang_ext_AsmStmt_getOutputExpr_wrapper"
+external ext_asm_stmt_get_num_inputs :
+  cxcursor -> int = "clang_ext_AsmStmt_getNumInputs_wrapper"
+external ext_asm_stmt_get_input_constraint :
+  cxcursor -> int -> string = "clang_ext_AsmStmt_getInputConstraint_wrapper"
+external ext_asm_stmt_get_input_expr :
+  cxcursor -> int -> cxcursor = "clang_ext_AsmStmt_getInputExpr_wrapper"

@@ -7581,21 +7581,6 @@ clang_ext_VariableArrayType_GetSizeExpr_wrapper(value c_ocaml)
 }
 
 CAMLprim value
-clang_ext_AsmStmt_GetAsmString_wrapper(value c_ocaml)
-{
-  CAMLparam1(c_ocaml);
-  CXCursor c;
-  c = Cxcursor_val(Field(c_ocaml, 0));
-  CXString result = clang_ext_AsmStmt_GetAsmString(c);
-  {
-    CAMLlocal1(data);
-    data = caml_copy_string(safe_string(clang_getCString(result)));
-                    clang_disposeString(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
 clang_ext_CharacterLiteral_GetCharacterKind_wrapper(value c_ocaml)
 {
   CAMLparam1(c_ocaml);
@@ -10280,6 +10265,119 @@ clang_ext_FunctionProtoType_getNoexceptExpr_wrapper(value arg_ocaml)
   CXType arg;
   arg = Cxtype_val(Field(arg_ocaml, 0));
   CXCursor result = clang_ext_FunctionProtoType_getNoexceptExpr(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_AsmStmt_GetAsmString_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  CXString result = clang_ext_AsmStmt_GetAsmString(c);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(safe_string(clang_getCString(result)));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_AsmStmt_getNumOutputs_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int result = clang_ext_AsmStmt_getNumOutputs(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_AsmStmt_getOutputConstraint_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int arg2;
+  arg2 = Int_val(arg2_ocaml);
+  CXString result = clang_ext_AsmStmt_getOutputConstraint(arg, arg2);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(safe_string(clang_getCString(result)));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_AsmStmt_getOutputExpr_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int arg2;
+  arg2 = Int_val(arg2_ocaml);
+  CXCursor result = clang_ext_AsmStmt_getOutputExpr(arg, arg2);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_AsmStmt_getNumInputs_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int result = clang_ext_AsmStmt_getNumInputs(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_AsmStmt_getInputConstraint_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int arg2;
+  arg2 = Int_val(arg2_ocaml);
+  CXString result = clang_ext_AsmStmt_getInputConstraint(arg, arg2);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(safe_string(clang_getCString(result)));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_AsmStmt_getInputExpr_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int arg2;
+  arg2 = Int_val(arg2_ocaml);
+  CXCursor result = clang_ext_AsmStmt_getInputExpr(arg, arg2);
   {
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
