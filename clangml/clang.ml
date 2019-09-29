@@ -216,7 +216,7 @@ module Ast = struct
               let ty = ext_nested_name_specifier_get_as_type name in
               Some (TypeSpecWithTemplate (ty |> of_cxtype))
           | Global -> Some Global
-          | Invalid -> None
+          | InvalidNestedNameSpecifier -> None
           | Super -> raise Invalid_structure in
         match component with
         | None -> accu
@@ -225,7 +225,7 @@ module Ast = struct
             enumerate (component :: accu) name
               (ext_nested_name_specifier_get_kind name) in
       match ext_nested_name_specifier_get_kind name with
-      | Invalid -> None
+      | InvalidNestedNameSpecifier -> None
       | kind -> Some (enumerate [] name kind)
 
     and extract_declaration_name cursor =
@@ -722,7 +722,7 @@ module Ast = struct
       let result = cxtype |> get_result_type |> of_cxtype in
       let exception_spec : exception_spec option =
         match ext_function_proto_type_get_exception_spec_type cxtype with
-        | None -> None
+        | NoExceptionSpecification -> None
         | DynamicNone -> Some (Throw [])
         | Dynamic ->
             let throws =
@@ -995,13 +995,9 @@ module Ast = struct
                 | _ -> raise Invalid_structure in
               Return value
           | GCCAsmStmt ->
-              let code = ext_asm_stmt_get_asm_string cursor in
-              let parameters =
-                list_of_children cursor |> List.map @@ fun cursor ->
-                  node ~cursor (get_cursor_spelling cursor) in
-              GCCAsm (code, parameters)
+              Asm (asm_of_cxcursor GCC cursor)
           | MSAsmStmt ->
-              MSAsm (ext_asm_stmt_get_asm_string cursor)
+              Asm (asm_of_cxcursor MS cursor)
           | CXXForRangeStmt ->
               let var, range, body =
                 match list_of_children cursor with
@@ -1053,6 +1049,21 @@ module Ast = struct
             block = block |> stmt_of_cxcursor;
           }
       | _ -> raise Invalid_structure
+
+    and asm_of_cxcursor asm_compiler_extension cursor =
+      let asm_outputs =
+        List.init (ext_asm_stmt_get_num_outputs cursor) (fun i -> {
+          asm_constraint = ext_asm_stmt_get_output_constraint cursor i;
+          asm_expr = ext_asm_stmt_get_output_expr cursor i |> expr_of_cxcursor;
+        }) in
+      let asm_inputs =
+        List.init (ext_asm_stmt_get_num_inputs cursor) (fun i -> {
+          asm_constraint = ext_asm_stmt_get_input_constraint cursor i;
+          asm_expr = ext_asm_stmt_get_input_expr cursor i |> expr_of_cxcursor;
+        }) in {
+      asm_compiler_extension; asm_inputs; asm_outputs;
+      asm_string = ext_asm_stmt_get_asm_string cursor;
+    }
 
     and expr_of_cxcursor cursor =
       match expr_desc_of_cxcursor cursor with
@@ -1222,7 +1233,7 @@ module Ast = struct
                     match list_of_children cursor with
                     | [sub] -> sub |> expr_of_cxcursor
                     | _ -> raise Invalid_structure in
-                  Noexcept sub
+                  NoexceptExpr sub
               | _ ->
                   unary_expr_of_cxcursor cursor
             end
@@ -1387,7 +1398,7 @@ module Ast = struct
               | [sub] -> Some (expr_of_cxcursor sub)
               | [] -> None
               | _ -> raise Invalid_structure in
-            Throw sub
+            ThrowExpr sub
         | TemplateRef ->
             TemplateRef (ident_ref_of_cxcursor cursor)
         | OverloadedDeclRef ->

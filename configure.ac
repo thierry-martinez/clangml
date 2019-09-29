@@ -113,7 +113,9 @@ AC_MSG_CHECKING([for llvm-config])
 AC_ARG_WITH([llvm-config],
   AS_HELP_STRING([--with-llvm-config[=PATH]],
     [Set the path to the llvm-config tool.]),
-  [AC_SUBST([LLVM_CONFIG], [$with_llvm_config])],
+  [AC_SUBST([LLVM_CONFIG], [$with_llvm_config])])
+
+AS_IF([test "x$LLVM_CONFIG" = "x"],
   [AS_IF([test "x$with_llvm" != "x"],
     [AC_CHECK_LLVM_VERSION([$with_llvm])
      AS_IF([test "x$LLVM_CONFIG" = "x"],

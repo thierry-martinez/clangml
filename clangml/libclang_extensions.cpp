@@ -111,6 +111,7 @@ GetCursorStmt(CXCursor cursor)
   assert(is_valid_stmt(cursor.kind));
   return static_cast<const clang::Stmt *>(cursor.data[1]);
 }
+
 static const clang::Attr *
 GetCursorAttr(CXCursor cursor)
 {
@@ -701,7 +702,7 @@ extern "C" {
         return clang_ext_StringKind_UTF32;
       }
     }
-    return clang_ext_StringKind_Invalid;
+    return clang_ext_StringKind_InvalidStringKind;
   }
 
   enum clang_ext_UnaryOperatorKind
@@ -711,7 +712,7 @@ extern "C" {
         llvm::dyn_cast_or_null<clang::UnaryOperator>(GetCursorStmt(c))) {
       return static_cast<clang_ext_UnaryOperatorKind>(Op->getOpcode());
     }
-    return CLANG_EXT_UNARY_OPERATOR_Invalid;
+    return CLANG_EXT_UNARY_OPERATOR_InvalidUnaryOperator;
   }
 
   CXString
@@ -735,7 +736,7 @@ extern "C" {
         llvm::dyn_cast_or_null<clang::BinaryOperator>(GetCursorStmt(c))) {
       return static_cast<clang_ext_BinaryOperatorKind>(Op->getOpcode());
     }
-    return CLANG_EXT_BINARY_OPERATOR_Invalid;
+    return CLANG_EXT_BINARY_OPERATOR_InvalidBinaryOperator;
   }
 
   CXString
@@ -968,7 +969,7 @@ extern "C" {
   clang_ext_Decl_GetKind(CXCursor cursor)
   {
     if (!is_valid_decl(cursor.kind)) {
-      return CLANG_EXT_DECL_Invalid;
+      return CLANG_EXT_DECL_InvalidDecl;
     }
     auto *d = GetCursorDecl(cursor);
     switch (d->getKind()) {
@@ -977,7 +978,7 @@ extern "C" {
     #define ABSTRACT_DECL(_Decl)
     #include <clang/AST/DeclNodes.inc>
     default:
-      return CLANG_EXT_DECL_Unknown;
+      return CLANG_EXT_DECL_UnknownDecl;
     }
   }
 
@@ -985,7 +986,7 @@ extern "C" {
   clang_ext_Stmt_GetKind(CXCursor cursor)
   {
     if (!is_valid_stmt(cursor.kind)) {
-      return CLANG_EXT_STMT_Invalid;
+      return CLANG_EXT_STMT_InvalidStmt;
     }
     auto *d = GetCursorStmt(cursor);
     switch (d->getStmtClass()) {
@@ -994,7 +995,7 @@ extern "C" {
     #define ABSTRACT_STMT(_Stmt)
     #include <clang/AST/StmtNodes.inc>
     default:
-      return CLANG_EXT_STMT_Unknown;
+      return CLANG_EXT_STMT_UnknownStmt;
     }
   }
 
@@ -1009,10 +1010,10 @@ extern "C" {
       #define ABSTRACT_TYPE(Class, Base)
       #include <clang/AST/TypeNodes.def>
       default:
-        return CLANG_EXT_TYPE_Unknown;
+        return CLANG_EXT_TYPE_UnknownType;
       }
     }
-    return CLANG_EXT_TYPE_Invalid;
+    return CLANG_EXT_TYPE_InvalidType;
   }
 
   enum clang_ext_TypeKind
@@ -1047,30 +1048,28 @@ extern "C" {
     return MakeCXCursorInvalid(CXCursor_InvalidCode, GetTU(c));
   }
 
-  CXString
-  clang_ext_AsmStmt_GetAsmString(CXCursor c)
-  {
-    const clang::Stmt *s = GetCursorStmt(c);
-    switch (s->getStmtClass()) {
-    case clang::Stmt::GCCAsmStmtClass:;
-      return cxstring_createDup(
-        clang::cast<clang::GCCAsmStmt>(s)->getAsmString()->getString());
-    case clang::Stmt::MSAsmStmtClass:
-      return cxstring_createDup(
-        clang::cast<clang::MSAsmStmt>(s)->getAsmString());
-    default:
-      return cxstring_createRef("");
-    }
-  }
-
-  enum clang_ext_CharacterKind
+  enum clang_ext_StringKind
   clang_ext_CharacterLiteral_GetCharacterKind(CXCursor c)
   {
     if (auto e =
       llvm::dyn_cast_or_null<clang::CharacterLiteral>(GetCursorStmt(c))) {
-      return static_cast<enum clang_ext_CharacterKind>(e->getKind());
+      switch (e->getKind()) {
+      case clang::CharacterLiteral::Ascii:
+        return clang_ext_StringKind_Ascii;
+      case clang::CharacterLiteral::Wide:
+        return clang_ext_StringKind_Wide;
+      #ifndef LLVM_VERSION_BEFORE_3_8_0
+      case clang::CharacterLiteral::UTF8:
+        return clang_ext_StringKind_UTF8;
+      #endif
+      case clang::CharacterLiteral::UTF16:
+        return clang_ext_StringKind_UTF16;
+      case clang::CharacterLiteral::UTF32:
+        return clang_ext_StringKind_UTF32;
+      default:;
+      }
     }
-    return ECK_Ascii;
+    return clang_ext_StringKind_InvalidStringKind;
   }
 
   unsigned
@@ -1539,7 +1538,7 @@ extern "C" {
         return clang_ext_PredefinedExpr_PrettyFunctionNoVirtual;
       }
     }
-    return clang_ext_PredefinedExpr_Invalid;
+    return clang_ext_PredefinedExpr_InvalidPredefinedExpr;
   }
 
 #ifndef LLVM_VERSION_BEFORE_3_6_0
@@ -1874,7 +1873,7 @@ extern "C" {
     #endif
     #include <clang/Frontend/LangStandards.def>
     #undef FOREACH_STANDARD
-    return CLANG_EXT_LANGSTANDARDS_Invalid;
+    return CLANG_EXT_LANGSTANDARDS_InvalidLang;
   }
 
   CXType
@@ -1907,7 +1906,7 @@ extern "C" {
       return static_cast<clang_ext_BinaryOperatorKind>(e->getOperator());
     }
     #endif
-    return CLANG_EXT_BINARY_OPERATOR_Invalid;
+    return CLANG_EXT_BINARY_OPERATOR_InvalidBinaryOperator;
   }
 
   bool
@@ -2016,7 +2015,7 @@ extern "C" {
         return CLANG_EXT_DECLARATION_NAME_CXXUsingDirective;
       }
     }
-    return CLANG_EXT_DECLARATION_NAME_Invalid;
+    return CLANG_EXT_DECLARATION_NAME_InvalidDeclarationName;
   }
 
   const char *
@@ -2039,14 +2038,14 @@ extern "C" {
     if (auto d = GetDeclarationName(name)) {
       switch (d->getCXXOverloadedOperator()) {
       case clang::OO_None:
-        return CLANG_EXT_OVERLOADED_OPERATOR_None;
+        return CLANG_EXT_OVERLOADED_OPERATOR_InvalidOverloadedOperator;
       #define OVERLOADED_OPERATOR(Name,Spelling,Token,Unary,Binary,MemberOnly) \
         case clang::OO_##Name: return CLANG_EXT_OVERLOADED_OPERATOR_##Name;
       #include <clang/Basic/OperatorKinds.def>
       default:;
       }
     }
-    return CLANG_EXT_OVERLOADED_OPERATOR_None;
+    return CLANG_EXT_OVERLOADED_OPERATOR_InvalidOverloadedOperator;
   }
 
   CXType
@@ -2181,7 +2180,7 @@ extern "C" {
       default:;
       }
     }
-    return CLANG_EXT_NESTED_NAME_SPECIFIER_Invalid;
+    return CLANG_EXT_NESTED_NAME_SPECIFIER_InvalidNestedNameSpecifier;
   }
 
   struct clang_ext_NestedNameSpecifier
@@ -2522,7 +2521,7 @@ extern "C" {
   {
     if (auto *fpt = GetQualType(t)->getAs<clang::FunctionProtoType>()) {
       switch (fpt->getExceptionSpecType()) {
-      case clang::EST_None: return CLANG_EXT_EST_None;
+      case clang::EST_None: return CLANG_EXT_EST_NoExceptionSpecification;
       case clang::EST_DynamicNone: return CLANG_EXT_EST_DynamicNone;
       case clang::EST_Dynamic: return CLANG_EXT_EST_Dynamic;
       case clang::EST_MSAny: return CLANG_EXT_EST_MSAny;
@@ -2541,7 +2540,7 @@ extern "C" {
     #endif
       }
     }
-    return CLANG_EXT_EST_None;
+    return CLANG_EXT_EST_NoExceptionSpecification;
   }
 
   unsigned int
@@ -2569,5 +2568,83 @@ extern "C" {
       return MakeCXCursor(fpt->getNoexceptExpr(), GetTU(t));
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, GetTU(t));
+  }
+
+  CXString
+  clang_ext_AsmStmt_GetAsmString(CXCursor c)
+  {
+    const clang::Stmt *s = GetCursorStmt(c);
+    switch (s->getStmtClass()) {
+    case clang::Stmt::GCCAsmStmtClass:;
+      return cxstring_createDup(
+        clang::cast<clang::GCCAsmStmt>(s)->getAsmString()->getString());
+    case clang::Stmt::MSAsmStmtClass:
+      return cxstring_createDup(
+        clang::cast<clang::MSAsmStmt>(s)->getAsmString());
+    default:
+      return cxstring_createRef("");
+    }
+  }
+
+  unsigned int
+  clang_ext_AsmStmt_getNumOutputs(CXCursor c)
+  {
+    auto s = GetCursorStmt(c);
+    if (auto a = llvm::dyn_cast_or_null<clang::AsmStmt>(s)) {
+      return a->getNumOutputs();
+    }
+    return 0;
+  }
+
+  CXString
+  clang_ext_AsmStmt_getOutputConstraint(CXCursor c, unsigned i)
+  {
+    auto s = GetCursorStmt(c);
+    if (auto a = llvm::dyn_cast_or_null<clang::AsmStmt>(s)) {
+      return cxstring_createDup(a->getOutputConstraint(i));
+    }
+    return cxstring_createRef("");
+  }
+
+
+  CXCursor
+  clang_ext_AsmStmt_getOutputExpr(CXCursor c, unsigned i)
+  {
+    auto s = GetCursorStmt(c);
+    if (auto a = llvm::dyn_cast_or_null<clang::AsmStmt>(s)) {
+      return MakeCXCursor(a->getOutputExpr(i), getCursorTU(c));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  unsigned int
+  clang_ext_AsmStmt_getNumInputs(CXCursor c)
+  {
+    auto s = GetCursorStmt(c);
+    if (auto a = llvm::dyn_cast_or_null<clang::AsmStmt>(s)) {
+      return a->getNumInputs();
+    }
+    return 0;
+  }
+
+  CXString
+  clang_ext_AsmStmt_getInputConstraint(CXCursor c, unsigned i)
+  {
+    auto s = GetCursorStmt(c);
+    if (auto a = llvm::dyn_cast_or_null<clang::AsmStmt>(s)) {
+      return cxstring_createDup(a->getInputConstraint(i));
+    }
+    return cxstring_createRef("");
+  }
+
+
+  CXCursor
+  clang_ext_AsmStmt_getInputExpr(CXCursor c, unsigned i)
+  {
+    auto s = GetCursorStmt(c);
+    if (auto a = llvm::dyn_cast_or_null<clang::AsmStmt>(s)) {
+      return MakeCXCursor(a->getInputExpr(i), getCursorTU(c));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
   }
 }

@@ -1,5 +1,3 @@
-open Ppx_compare_lib.Builtin
-
 let ignore_equal _ _ = true
 
 let ignore_compare _ _ = 0
@@ -14,29 +12,26 @@ end
 
 module%import Clang = struct
   module%override Bindings = struct
-    [%%recursive
-      type clang_ext_langstandards
-      and clang_ext_elaboratedtypekeyword
-      and clang_ext_characterkind
-      and clang_ext_unaryexpr
-      and clang_ext_unaryoperatorkind
-      and clang_ext_binaryoperatorkind
-      and clang_ext_attrkind
-      and clang_ext_overloadedoperatorkind
-      and clang_ext_stringkind
-      and cxtypekind
-      and cx_cxxaccessspecifier
-      and cxcallingconv
-      and cxlinkagekind
-      and clang_ext_predefinedexpr_identkind
-      and clang_ext_lambdacapturedefault
-      and clang_ext_lambdacapturekind
-      and clang_ext_typekind
-      and clang_ext_stmtkind
-      and cxcursorkind
-      and clang_ext_declkind
-      and clang_ext_exceptionspecificationtype = _
-   ][@@deriving equal, compare]
+    type clang_ext_langstandards = _ [@@deriving eq, ord]
+    type clang_ext_elaboratedtypekeyword = _ [@@deriving eq, ord]
+    type clang_ext_unaryexpr = _ [@@deriving eq, ord]
+    type clang_ext_unaryoperatorkind = _ [@@deriving eq, ord]
+    type clang_ext_binaryoperatorkind = _ [@@deriving eq, ord]
+    type clang_ext_attrkind = _ [@@deriving eq, ord]
+    type clang_ext_overloadedoperatorkind = _ [@@deriving eq, ord]
+    type clang_ext_stringkind = _ [@@deriving eq, ord]
+    type cxtypekind = _ [@@deriving eq, ord]
+    type cx_cxxaccessspecifier = _ [@@deriving eq, ord]
+    type cxcallingconv = _ [@@deriving eq, ord]
+    type cxlinkagekind = _ [@@deriving eq, ord]
+    type clang_ext_predefinedexpr_identkind = _ [@@deriving eq, ord]
+    type clang_ext_lambdacapturedefault = _ [@@deriving eq, ord]
+    type clang_ext_lambdacapturekind = _ [@@deriving eq, ord]
+    type clang_ext_typekind = _ [@@deriving eq, ord]
+    type clang_ext_stmtkind = _ [@@deriving eq, ord]
+    type cxcursorkind = _ [@@deriving eq, ord]
+    type clang_ext_declkind = _ [@@deriving eq, ord]
+    type clang_ext_exceptionspecificationtype = _ [@@deriving eq, ord]
 
     let equal_cxcursor = ignore_equal
 
@@ -56,14 +51,14 @@ module%import Clang = struct
       module Clang__bindings = struct
         include Bindings
       end
-  
+
       module Clang__types = struct
         include Clang.Types
       end
     end
 
     [%%recursive [%%types]]
-      [@@deriving equal, compare]
+      [@@deriving eq, ord]
   end
 
   module%override Ast = struct
@@ -71,7 +66,7 @@ module%import Clang = struct
       module Clang__bindings = struct
         include Bindings
       end
-  
+
       module Clang__types = struct
         include Types
       end
@@ -82,7 +77,7 @@ module%import Clang = struct
     end
 
     [%%recursive [%%types]]
-      [@@deriving equal, compare]
+      [@@deriving eq, ord]
   end
 end
 

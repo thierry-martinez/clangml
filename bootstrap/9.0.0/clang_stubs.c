@@ -6341,7 +6341,7 @@ Clang_ext_stringkind_val(value ocaml)
   case 2: return clang_ext_StringKind_UTF8;
   case 3: return clang_ext_StringKind_UTF16;
   case 4: return clang_ext_StringKind_UTF32;
-  case 5: return clang_ext_StringKind_Invalid;
+  case 5: return clang_ext_StringKind_InvalidStringKind;
   }
   failwith_fmt("invalid value for Clang_ext_stringkind_val: %d", Int_val(ocaml));
   return clang_ext_StringKind_Ascii;
@@ -6356,7 +6356,7 @@ Val_clang_ext_stringkind(enum clang_ext_StringKind v)
   case clang_ext_StringKind_UTF8: return Val_int(2);
   case clang_ext_StringKind_UTF16: return Val_int(3);
   case clang_ext_StringKind_UTF32: return Val_int(4);
-  case clang_ext_StringKind_Invalid: return Val_int(5);
+  case clang_ext_StringKind_InvalidStringKind: return Val_int(5);
   }
   failwith_fmt("invalid value for Val_clang_ext_stringkind: %d", v);
   return Val_int(0);
@@ -6394,7 +6394,7 @@ Clang_ext_unaryoperatorkind_val(value ocaml)
   case 11: return CLANG_EXT_UNARY_OPERATOR_Imag;
   case 12: return CLANG_EXT_UNARY_OPERATOR_Extension;
   case 13: return CLANG_EXT_UNARY_OPERATOR_Coawait;
-  case 14: return CLANG_EXT_UNARY_OPERATOR_Invalid;
+  case 14: return CLANG_EXT_UNARY_OPERATOR_InvalidUnaryOperator;
   }
   failwith_fmt("invalid value for Clang_ext_unaryoperatorkind_val: %d", Int_val(ocaml));
   return CLANG_EXT_UNARY_OPERATOR_PostInc;
@@ -6418,7 +6418,7 @@ Val_clang_ext_unaryoperatorkind(enum clang_ext_UnaryOperatorKind v)
   case CLANG_EXT_UNARY_OPERATOR_Imag: return Val_int(11);
   case CLANG_EXT_UNARY_OPERATOR_Extension: return Val_int(12);
   case CLANG_EXT_UNARY_OPERATOR_Coawait: return Val_int(13);
-  case CLANG_EXT_UNARY_OPERATOR_Invalid: return Val_int(14);
+  case CLANG_EXT_UNARY_OPERATOR_InvalidUnaryOperator: return Val_int(14);
   }
   failwith_fmt("invalid value for Val_clang_ext_unaryoperatorkind: %d", v);
   return Val_int(0);
@@ -6490,7 +6490,7 @@ Clang_ext_binaryoperatorkind_val(value ocaml)
   case 30: return CLANG_EXT_BINARY_OPERATOR_XorAssign;
   case 31: return CLANG_EXT_BINARY_OPERATOR_OrAssign;
   case 32: return CLANG_EXT_BINARY_OPERATOR_Comma;
-  case 33: return CLANG_EXT_BINARY_OPERATOR_Invalid;
+  case 33: return CLANG_EXT_BINARY_OPERATOR_InvalidBinaryOperator;
   }
   failwith_fmt("invalid value for Clang_ext_binaryoperatorkind_val: %d", Int_val(ocaml));
   return CLANG_EXT_BINARY_OPERATOR_PtrMemD;
@@ -6533,7 +6533,7 @@ Val_clang_ext_binaryoperatorkind(enum clang_ext_BinaryOperatorKind v)
   case CLANG_EXT_BINARY_OPERATOR_XorAssign: return Val_int(30);
   case CLANG_EXT_BINARY_OPERATOR_OrAssign: return Val_int(31);
   case CLANG_EXT_BINARY_OPERATOR_Comma: return Val_int(32);
-  case CLANG_EXT_BINARY_OPERATOR_Invalid: return Val_int(33);
+  case CLANG_EXT_BINARY_OPERATOR_InvalidBinaryOperator: return Val_int(33);
   }
   failwith_fmt("invalid value for Val_clang_ext_binaryoperatorkind: %d", v);
   return Val_int(0);
@@ -6666,7 +6666,7 @@ Clang_ext_elaboratedtypekeyword_val(value ocaml)
   case 3: return ETK_Class;
   case 4: return ETK_Enum;
   case 5: return ETK_Typename;
-  case 6: return ETK_None;
+  case 6: return ETK_NoKeyword;
   }
   failwith_fmt("invalid value for Clang_ext_elaboratedtypekeyword_val: %d", Int_val(ocaml));
   return ETK_Struct;
@@ -6682,7 +6682,7 @@ Val_clang_ext_elaboratedtypekeyword(enum clang_ext_ElaboratedTypeKeyword v)
   case ETK_Class: return Val_int(3);
   case ETK_Enum: return Val_int(4);
   case ETK_Typename: return Val_int(5);
-  case ETK_None: return Val_int(6);
+  case ETK_NoKeyword: return Val_int(6);
   }
   failwith_fmt("invalid value for Val_clang_ext_elaboratedtypekeyword: %d", v);
   return Val_int(0);
@@ -6836,7 +6836,7 @@ enum clang_ext_DeclKind
 Clang_ext_declkind_val(value ocaml)
 {
   switch (Int_val(ocaml)) {
-  case 0: return CLANG_EXT_DECL_Invalid;
+  case 0: return CLANG_EXT_DECL_InvalidDecl;
   case 1: return CLANG_EXT_DECL_AccessSpec;
   case 2: return CLANG_EXT_DECL_Block;
   case 3: return CLANG_EXT_DECL_Captured;
@@ -6914,17 +6914,17 @@ Clang_ext_declkind_val(value ocaml)
   case 75: return CLANG_EXT_DECL_PragmaDetectMismatch;
   case 76: return CLANG_EXT_DECL_StaticAssert;
   case 77: return CLANG_EXT_DECL_TranslationUnit;
-  case 78: return CLANG_EXT_DECL_Unknown;
+  case 78: return CLANG_EXT_DECL_UnknownDecl;
   }
   failwith_fmt("invalid value for Clang_ext_declkind_val: %d", Int_val(ocaml));
-  return CLANG_EXT_DECL_Invalid;
+  return CLANG_EXT_DECL_InvalidDecl;
 }
 
 value
 Val_clang_ext_declkind(enum clang_ext_DeclKind v)
 {
   switch (v) {
-  case CLANG_EXT_DECL_Invalid: return Val_int(0);
+  case CLANG_EXT_DECL_InvalidDecl: return Val_int(0);
   case CLANG_EXT_DECL_AccessSpec: return Val_int(1);
   case CLANG_EXT_DECL_Block: return Val_int(2);
   case CLANG_EXT_DECL_Captured: return Val_int(3);
@@ -7002,7 +7002,7 @@ Val_clang_ext_declkind(enum clang_ext_DeclKind v)
   case CLANG_EXT_DECL_PragmaDetectMismatch: return Val_int(75);
   case CLANG_EXT_DECL_StaticAssert: return Val_int(76);
   case CLANG_EXT_DECL_TranslationUnit: return Val_int(77);
-  case CLANG_EXT_DECL_Unknown: return Val_int(78);
+  case CLANG_EXT_DECL_UnknownDecl: return Val_int(78);
   }
   failwith_fmt("invalid value for Val_clang_ext_declkind: %d", v);
   return Val_int(0);
@@ -7026,7 +7026,7 @@ enum clang_ext_StmtKind
 Clang_ext_stmtkind_val(value ocaml)
 {
   switch (Int_val(ocaml)) {
-  case 0: return CLANG_EXT_STMT_Invalid;
+  case 0: return CLANG_EXT_STMT_InvalidStmt;
   case 1: return CLANG_EXT_STMT_GCCAsmStmt;
   case 2: return CLANG_EXT_STMT_MSAsmStmt;
   case 3: return CLANG_EXT_STMT_BreakStmt;
@@ -7225,17 +7225,17 @@ Clang_ext_stmtkind_val(value ocaml)
   case 196: return CLANG_EXT_STMT_VAArgExpr;
   case 197: return CLANG_EXT_STMT_LabelStmt;
   case 198: return CLANG_EXT_STMT_WhileStmt;
-  case 199: return CLANG_EXT_STMT_Unknown;
+  case 199: return CLANG_EXT_STMT_UnknownStmt;
   }
   failwith_fmt("invalid value for Clang_ext_stmtkind_val: %d", Int_val(ocaml));
-  return CLANG_EXT_STMT_Invalid;
+  return CLANG_EXT_STMT_InvalidStmt;
 }
 
 value
 Val_clang_ext_stmtkind(enum clang_ext_StmtKind v)
 {
   switch (v) {
-  case CLANG_EXT_STMT_Invalid: return Val_int(0);
+  case CLANG_EXT_STMT_InvalidStmt: return Val_int(0);
   case CLANG_EXT_STMT_GCCAsmStmt: return Val_int(1);
   case CLANG_EXT_STMT_MSAsmStmt: return Val_int(2);
   case CLANG_EXT_STMT_BreakStmt: return Val_int(3);
@@ -7434,7 +7434,7 @@ Val_clang_ext_stmtkind(enum clang_ext_StmtKind v)
   case CLANG_EXT_STMT_VAArgExpr: return Val_int(196);
   case CLANG_EXT_STMT_LabelStmt: return Val_int(197);
   case CLANG_EXT_STMT_WhileStmt: return Val_int(198);
-  case CLANG_EXT_STMT_Unknown: return Val_int(199);
+  case CLANG_EXT_STMT_UnknownStmt: return Val_int(199);
   }
   failwith_fmt("invalid value for Val_clang_ext_stmtkind: %d", v);
   return Val_int(0);
@@ -7458,7 +7458,7 @@ enum clang_ext_TypeKind
 Clang_ext_typekind_val(value ocaml)
 {
   switch (Int_val(ocaml)) {
-  case 0: return CLANG_EXT_TYPE_Invalid;
+  case 0: return CLANG_EXT_TYPE_InvalidType;
   case 1: return CLANG_EXT_TYPE_Builtin;
   case 2: return CLANG_EXT_TYPE_Complex;
   case 3: return CLANG_EXT_TYPE_Pointer;
@@ -7507,17 +7507,17 @@ Clang_ext_typekind_val(value ocaml)
   case 46: return CLANG_EXT_TYPE_ObjCObjectPointer;
   case 47: return CLANG_EXT_TYPE_Pipe;
   case 48: return CLANG_EXT_TYPE_Atomic;
-  case 49: return CLANG_EXT_TYPE_Unknown;
+  case 49: return CLANG_EXT_TYPE_UnknownType;
   }
   failwith_fmt("invalid value for Clang_ext_typekind_val: %d", Int_val(ocaml));
-  return CLANG_EXT_TYPE_Invalid;
+  return CLANG_EXT_TYPE_InvalidType;
 }
 
 value
 Val_clang_ext_typekind(enum clang_ext_TypeKind v)
 {
   switch (v) {
-  case CLANG_EXT_TYPE_Invalid: return Val_int(0);
+  case CLANG_EXT_TYPE_InvalidType: return Val_int(0);
   case CLANG_EXT_TYPE_Builtin: return Val_int(1);
   case CLANG_EXT_TYPE_Complex: return Val_int(2);
   case CLANG_EXT_TYPE_Pointer: return Val_int(3);
@@ -7566,7 +7566,7 @@ Val_clang_ext_typekind(enum clang_ext_TypeKind v)
   case CLANG_EXT_TYPE_ObjCObjectPointer: return Val_int(46);
   case CLANG_EXT_TYPE_Pipe: return Val_int(47);
   case CLANG_EXT_TYPE_Atomic: return Val_int(48);
-  case CLANG_EXT_TYPE_Unknown: return Val_int(49);
+  case CLANG_EXT_TYPE_UnknownType: return Val_int(49);
   }
   failwith_fmt("invalid value for Val_clang_ext_typekind: %d", v);
   return Val_int(0);
@@ -7633,58 +7633,15 @@ clang_ext_VariableArrayType_GetSizeExpr_wrapper(value c_ocaml)
 }
 
 CAMLprim value
-clang_ext_AsmStmt_GetAsmString_wrapper(value c_ocaml)
-{
-  CAMLparam1(c_ocaml);
-  CXCursor c;
-  c = Cxcursor_val(Field(c_ocaml, 0));
-  CXString result = clang_ext_AsmStmt_GetAsmString(c);
-  {
-    CAMLlocal1(data);
-    data = caml_copy_string(safe_string(clang_getCString(result)));
-                    clang_disposeString(result);
-    CAMLreturn(data);
-  }
-}
-
-enum clang_ext_CharacterKind
-Clang_ext_characterkind_val(value ocaml)
-{
-  switch (Int_val(ocaml)) {
-  case 0: return ECK_Ascii;
-  case 1: return ECK_Wide;
-  case 2: return ECK_UTF8;
-  case 3: return ECK_UTF16;
-  case 4: return ECK_UTF32;
-  }
-  failwith_fmt("invalid value for Clang_ext_characterkind_val: %d", Int_val(ocaml));
-  return ECK_Ascii;
-}
-
-value
-Val_clang_ext_characterkind(enum clang_ext_CharacterKind v)
-{
-  switch (v) {
-  case ECK_Ascii: return Val_int(0);
-  case ECK_Wide: return Val_int(1);
-  case ECK_UTF8: return Val_int(2);
-  case ECK_UTF16: return Val_int(3);
-  case ECK_UTF32: return Val_int(4);
-  }
-  failwith_fmt("invalid value for Val_clang_ext_characterkind: %d", v);
-  return Val_int(0);
-}
-
-CAMLprim value
 clang_ext_CharacterLiteral_GetCharacterKind_wrapper(value c_ocaml)
 {
   CAMLparam1(c_ocaml);
   CXCursor c;
   c = Cxcursor_val(Field(c_ocaml, 0));
-  enum clang_ext_CharacterKind result = clang_ext_CharacterLiteral_GetCharacterKind(c);
+  enum clang_ext_StringKind result = clang_ext_CharacterLiteral_GetCharacterKind(c);
   {
     CAMLlocal1(data);
-    data = Val_clang_ext_characterkind(result);
+    data = Val_clang_ext_stringkind(result);
     CAMLreturn(data);
   }
 }
@@ -8934,7 +8891,7 @@ Clang_ext_predefinedexpr_identkind_val(value ocaml)
   case 5: return clang_ext_PredefinedExpr_LFuncSig;
   case 6: return clang_ext_PredefinedExpr_PrettyFunction;
   case 7: return clang_ext_PredefinedExpr_PrettyFunctionNoVirtual;
-  case 8: return clang_ext_PredefinedExpr_Invalid;
+  case 8: return clang_ext_PredefinedExpr_InvalidPredefinedExpr;
   }
   failwith_fmt("invalid value for Clang_ext_predefinedexpr_identkind_val: %d", Int_val(ocaml));
   return clang_ext_PredefinedExpr_Func;
@@ -8952,7 +8909,7 @@ Val_clang_ext_predefinedexpr_identkind(enum clang_ext_PredefinedExpr_IdentKind v
   case clang_ext_PredefinedExpr_LFuncSig: return Val_int(5);
   case clang_ext_PredefinedExpr_PrettyFunction: return Val_int(6);
   case clang_ext_PredefinedExpr_PrettyFunctionNoVirtual: return Val_int(7);
-  case clang_ext_PredefinedExpr_Invalid: return Val_int(8);
+  case clang_ext_PredefinedExpr_InvalidPredefinedExpr: return Val_int(8);
   }
   failwith_fmt("invalid value for Val_clang_ext_predefinedexpr_identkind: %d", v);
   return Val_int(0);
@@ -9409,7 +9366,7 @@ Clang_ext_langstandards_val(value ocaml)
   case 25: return CLANG_EXT_LANGSTANDARDS_openclcpp;
   case 26: return CLANG_EXT_LANGSTANDARDS_cuda;
   case 27: return CLANG_EXT_LANGSTANDARDS_hip;
-  case 28: return CLANG_EXT_LANGSTANDARDS_Invalid;
+  case 28: return CLANG_EXT_LANGSTANDARDS_InvalidLang;
   }
   failwith_fmt("invalid value for Clang_ext_langstandards_val: %d", Int_val(ocaml));
   return CLANG_EXT_LANGSTANDARDS_c89;
@@ -9447,7 +9404,7 @@ Val_clang_ext_langstandards(enum clang_ext_langstandards v)
   case CLANG_EXT_LANGSTANDARDS_openclcpp: return Val_int(25);
   case CLANG_EXT_LANGSTANDARDS_cuda: return Val_int(26);
   case CLANG_EXT_LANGSTANDARDS_hip: return Val_int(27);
-  case CLANG_EXT_LANGSTANDARDS_Invalid: return Val_int(28);
+  case CLANG_EXT_LANGSTANDARDS_InvalidLang: return Val_int(28);
   }
   failwith_fmt("invalid value for Val_clang_ext_langstandards: %d", v);
   return Val_int(0);
@@ -9637,7 +9594,7 @@ enum clang_ext_OverloadedOperatorKind
 Clang_ext_overloadedoperatorkind_val(value ocaml)
 {
   switch (Int_val(ocaml)) {
-  case 0: return CLANG_EXT_OVERLOADED_OPERATOR_None;
+  case 0: return CLANG_EXT_OVERLOADED_OPERATOR_InvalidOverloadedOperator;
   case 1: return CLANG_EXT_OVERLOADED_OPERATOR_New;
   case 2: return CLANG_EXT_OVERLOADED_OPERATOR_Delete;
   case 3: return CLANG_EXT_OVERLOADED_OPERATOR_Array_New;
@@ -9685,14 +9642,14 @@ Clang_ext_overloadedoperatorkind_val(value ocaml)
   case 45: return CLANG_EXT_OVERLOADED_OPERATOR_Coawait;
   }
   failwith_fmt("invalid value for Clang_ext_overloadedoperatorkind_val: %d", Int_val(ocaml));
-  return CLANG_EXT_OVERLOADED_OPERATOR_None;
+  return CLANG_EXT_OVERLOADED_OPERATOR_InvalidOverloadedOperator;
 }
 
 value
 Val_clang_ext_overloadedoperatorkind(enum clang_ext_OverloadedOperatorKind v)
 {
   switch (v) {
-  case CLANG_EXT_OVERLOADED_OPERATOR_None: return Val_int(0);
+  case CLANG_EXT_OVERLOADED_OPERATOR_InvalidOverloadedOperator: return Val_int(0);
   case CLANG_EXT_OVERLOADED_OPERATOR_New: return Val_int(1);
   case CLANG_EXT_OVERLOADED_OPERATOR_Delete: return Val_int(2);
   case CLANG_EXT_OVERLOADED_OPERATOR_Array_New: return Val_int(3);
@@ -9772,7 +9729,7 @@ Clang_ext_declarationnamekind_val(value ocaml)
   case 8: return CLANG_EXT_DECLARATION_NAME_CXXOperatorName;
   case 9: return CLANG_EXT_DECLARATION_NAME_CXXLiteralOperatorName;
   case 10: return CLANG_EXT_DECLARATION_NAME_CXXUsingDirective;
-  case 11: return CLANG_EXT_DECLARATION_NAME_Invalid;
+  case 11: return CLANG_EXT_DECLARATION_NAME_InvalidDeclarationName;
   }
   failwith_fmt("invalid value for Clang_ext_declarationnamekind_val: %d", Int_val(ocaml));
   return CLANG_EXT_DECLARATION_NAME_Identifier;
@@ -9793,7 +9750,7 @@ Val_clang_ext_declarationnamekind(enum clang_ext_DeclarationNameKind v)
   case CLANG_EXT_DECLARATION_NAME_CXXOperatorName: return Val_int(8);
   case CLANG_EXT_DECLARATION_NAME_CXXLiteralOperatorName: return Val_int(9);
   case CLANG_EXT_DECLARATION_NAME_CXXUsingDirective: return Val_int(10);
-  case CLANG_EXT_DECLARATION_NAME_Invalid: return Val_int(11);
+  case CLANG_EXT_DECLARATION_NAME_InvalidDeclarationName: return Val_int(11);
   }
   failwith_fmt("invalid value for Val_clang_ext_declarationnamekind: %d", v);
   return Val_int(0);
@@ -9930,7 +9887,7 @@ enum clang_ext_NestedNameSpecifierKind
 Clang_ext_nestednamespecifierkind_val(value ocaml)
 {
   switch (Int_val(ocaml)) {
-  case 0: return CLANG_EXT_NESTED_NAME_SPECIFIER_Invalid;
+  case 0: return CLANG_EXT_NESTED_NAME_SPECIFIER_InvalidNestedNameSpecifier;
   case 1: return CLANG_EXT_NESTED_NAME_SPECIFIER_Identifier;
   case 2: return CLANG_EXT_NESTED_NAME_SPECIFIER_Namespace;
   case 3: return CLANG_EXT_NESTED_NAME_SPECIFIER_NamespaceAlias;
@@ -9940,14 +9897,14 @@ Clang_ext_nestednamespecifierkind_val(value ocaml)
   case 7: return CLANG_EXT_NESTED_NAME_SPECIFIER_Super;
   }
   failwith_fmt("invalid value for Clang_ext_nestednamespecifierkind_val: %d", Int_val(ocaml));
-  return CLANG_EXT_NESTED_NAME_SPECIFIER_Invalid;
+  return CLANG_EXT_NESTED_NAME_SPECIFIER_InvalidNestedNameSpecifier;
 }
 
 value
 Val_clang_ext_nestednamespecifierkind(enum clang_ext_NestedNameSpecifierKind v)
 {
   switch (v) {
-  case CLANG_EXT_NESTED_NAME_SPECIFIER_Invalid: return Val_int(0);
+  case CLANG_EXT_NESTED_NAME_SPECIFIER_InvalidNestedNameSpecifier: return Val_int(0);
   case CLANG_EXT_NESTED_NAME_SPECIFIER_Identifier: return Val_int(1);
   case CLANG_EXT_NESTED_NAME_SPECIFIER_Namespace: return Val_int(2);
   case CLANG_EXT_NESTED_NAME_SPECIFIER_NamespaceAlias: return Val_int(3);
@@ -10293,7 +10250,7 @@ enum clang_ext_ExceptionSpecificationType
 Clang_ext_exceptionspecificationtype_val(value ocaml)
 {
   switch (Int_val(ocaml)) {
-  case 0: return CLANG_EXT_EST_None;
+  case 0: return CLANG_EXT_EST_NoExceptionSpecification;
   case 1: return CLANG_EXT_EST_DynamicNone;
   case 2: return CLANG_EXT_EST_Dynamic;
   case 3: return CLANG_EXT_EST_MSAny;
@@ -10306,14 +10263,14 @@ Clang_ext_exceptionspecificationtype_val(value ocaml)
   case 10: return CLANG_EXT_EST_Unparsed;
   }
   failwith_fmt("invalid value for Clang_ext_exceptionspecificationtype_val: %d", Int_val(ocaml));
-  return CLANG_EXT_EST_None;
+  return CLANG_EXT_EST_NoExceptionSpecification;
 }
 
 value
 Val_clang_ext_exceptionspecificationtype(enum clang_ext_ExceptionSpecificationType v)
 {
   switch (v) {
-  case CLANG_EXT_EST_None: return Val_int(0);
+  case CLANG_EXT_EST_NoExceptionSpecification: return Val_int(0);
   case CLANG_EXT_EST_DynamicNone: return Val_int(1);
   case CLANG_EXT_EST_Dynamic: return Val_int(2);
   case CLANG_EXT_EST_MSAny: return Val_int(3);
@@ -10382,6 +10339,119 @@ clang_ext_FunctionProtoType_getNoexceptExpr_wrapper(value arg_ocaml)
   CXType arg;
   arg = Cxtype_val(Field(arg_ocaml, 0));
   CXCursor result = clang_ext_FunctionProtoType_getNoexceptExpr(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_AsmStmt_GetAsmString_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  CXString result = clang_ext_AsmStmt_GetAsmString(c);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(safe_string(clang_getCString(result)));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_AsmStmt_getNumOutputs_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int result = clang_ext_AsmStmt_getNumOutputs(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_AsmStmt_getOutputConstraint_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int arg2;
+  arg2 = Int_val(arg2_ocaml);
+  CXString result = clang_ext_AsmStmt_getOutputConstraint(arg, arg2);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(safe_string(clang_getCString(result)));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_AsmStmt_getOutputExpr_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int arg2;
+  arg2 = Int_val(arg2_ocaml);
+  CXCursor result = clang_ext_AsmStmt_getOutputExpr(arg, arg2);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_AsmStmt_getNumInputs_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int result = clang_ext_AsmStmt_getNumInputs(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_AsmStmt_getInputConstraint_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int arg2;
+  arg2 = Int_val(arg2_ocaml);
+  CXString result = clang_ext_AsmStmt_getInputConstraint(arg, arg2);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(safe_string(clang_getCString(result)));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_AsmStmt_getInputExpr_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int arg2;
+  arg2 = Int_val(arg2_ocaml);
+  CXCursor result = clang_ext_AsmStmt_getInputExpr(arg, arg2);
   {
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);

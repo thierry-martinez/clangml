@@ -135,7 +135,7 @@ type elaborated_type_keyword = clang_ext_elaboratedtypekeyword
 (** Keyword associated to an elaborated type: [struct], [union],
     [enum], ... *)
 
-and character_kind = clang_ext_characterkind
+and character_kind = clang_ext_stringkind
 (** Character kind: ASCII, UTF8, UTF16, ... *)
 
 and unary_expr_kind = clang_ext_unaryexpr
@@ -185,6 +185,8 @@ and languages = {
     c : bool;
     cxx : bool;
   }
+
+type asm_compiler_extension = GCC | MS
 
 (** {2 Types and nodes} *)
 
@@ -1578,7 +1580,7 @@ let () =
   | [{ desc = For { body = { desc = Break } }}] -> ()
   | _ -> assert false
    ]}*)
-  | GCCAsm of string * (string, qual_type) open_node list
+  | Asm of asm
 (** GCC assembler statement.
     {[
 let example = {|
@@ -1592,16 +1594,19 @@ let example = {|
 |}
 
 let () =
-  check Clangml_show.pp_stmt parse_statement_list example
-  @@ fun ast -> match ast with
-  | [{ desc = Decl _ }; { desc = Decl _ };
-     { desc = GCCAsm (
-       "mov %1, %0\n\tadd $1, %0",
-       [{ desc = "dst" }; { desc = "src" }])}] -> ()
-  | _ -> assert false
+  check_pattern quote_stmt_list parse_statement_list example
+  [%pattern?
+    [{ desc = Decl _ }; { desc = Decl _ };
+     { desc = Asm {
+       asm_compiler_extension = GCC;
+       asm_string = "mov %1, %0\n\tadd $1, %0";
+       asm_inputs =
+         [{ asm_constraint = "r";
+            asm_expr = { desc = DeclRef { name = IdentifierName "src"}}}];
+       asm_outputs =
+         [{ asm_constraint = "=r";
+            asm_expr = { desc = DeclRef { name = IdentifierName "dst"}}}] }}]]
    ]}*)
-  | MSAsm of string
-(** MS assembler statement. *)
   | Return of expr option
 (** Return statement.
     {[
@@ -1637,6 +1642,18 @@ let () =
 and catch = {
   parameter : (string * qual_type) option;
   block : stmt
+}
+
+and asm = {
+  asm_compiler_extension : asm_compiler_extension;
+  asm_string : string;
+  asm_inputs : asm_operand list;
+  asm_outputs : asm_operand list;
+}
+
+and asm_operand = {
+  asm_constraint : string;
+  asm_expr : expr;
 }
 
 (** {3 Expressions} *)
@@ -1762,9 +1779,9 @@ let () =
     @@ fun ast -> match ast with
     | [{ desc = Expr { desc =
           CharacterLiteral { kind = UTF16; value = 0x61 } }}]
-      -> assert (Clang.get_clang_version () >= "clang version 3.8.0")
+      -> assert (Clang.get_clang_version () >= "clang version 3.6.0")
     | [{ desc = Expr { desc = CharacterLiteral { kind = UTF8; value = 0x61 } }}]
-      -> assert (Clang.get_clang_version () < "clang version 3.8.0")
+      -> assert (Clang.get_clang_version () < "clang version 3.6.0")
     | _ -> assert false
     ]}*)
   | ImaginaryLiteral of expr
@@ -2378,7 +2395,7 @@ let () =
       qual_type : qual_type;
       args : expr list;
     }
-  | Throw of expr option
+  | ThrowExpr of expr option
   | TemplateRef of ident_ref
   | OverloadedDeclRef of ident_ref
   | StdInitializerList of expr list
@@ -2390,7 +2407,7 @@ let () =
       sub_expr : expr;
     }
   | ArrayInitIndex
-  | Noexcept of expr
+  | NoexceptExpr of expr
 (** noexcept unary operator (C++11).
   {[
 
@@ -2401,7 +2418,7 @@ let () =
   check_pattern quote_stmt_list
     (parse_statement_list ~language:CXX ~standard:Cxx11) example
   [%pattern?
-    [{ desc = Expr { desc = Noexcept { desc = IntegerLiteral (Int 1)}}}]]
+    [{ desc = Expr { desc = NoexceptExpr { desc = IntegerLiteral (Int 1)}}}]]
     ]}*)
   | UnknownExpr of cxcursorkind * clang_ext_stmtkind
 

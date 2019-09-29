@@ -1,4 +1,4 @@
-module Versioned = Migrate_parsetree.OCaml_407
+module Versioned = Migrate_parsetree.OCaml_408
 
 module From =
   Migrate_parsetree.Convert (Versioned) (Migrate_parsetree.OCaml_current)
@@ -181,7 +181,7 @@ let extract_payload language (mapper : Versioned.Ast.Ast_mapper.mapper) ~loc
                     "Standard already given";
                 let arg = arg |> string_of_expression in
                 let standard = arg |> Clang.ext_lang_standard_of_name in
-                if standard = Invalid then
+                if standard = InvalidLang then
                   Location.raise_errorf ~loc
                     "Unknown standard: %s" arg;
                 { arguments with standard = Some standard }
@@ -430,12 +430,13 @@ let rec expr_mapper (mapper : Versioned.Ast.Ast_mapper.mapper) (expr : Ppxlib.ex
       assert (is_empty placeholder_table);
       expr
   | Some (If_standard { name; expr; loc }) ->
-      if name |> Clang.ext_lang_standard_of_name = Invalid then
+      if name |> Clang.ext_lang_standard_of_name = InvalidLang then
         [%expr ()]
       else
         Versioned.Ast.Ast_mapper.default_mapper.expr mapper expr
 
-and pat_mapper (mapper : Versioned.Ast.Ast_mapper.mapper) (pat : Ppxlib.pattern) =
+and pat_mapper (mapper : Versioned.Ast.Ast_mapper.mapper)
+    (pat : Ppxlib.pattern) =
   match
     match pat.ppat_desc with
     | Ppat_extension ({ loc; txt }, payload) ->

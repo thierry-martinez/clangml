@@ -10,7 +10,6 @@ module%import Clang = struct
     [%%recursive
       type clang_ext_langstandards
       and clang_ext_elaboratedtypekeyword
-      and clang_ext_characterkind
       and clang_ext_unaryexpr
       and clang_ext_unaryoperatorkind
       and clang_ext_binaryoperatorkind

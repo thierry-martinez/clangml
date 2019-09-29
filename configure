@@ -3504,7 +3504,10 @@ $as_echo_n "checking for llvm-config... " >&6; }
 if test "${with_llvm_config+set}" = set; then :
   withval=$with_llvm_config; LLVM_CONFIG=$with_llvm_config
 
-else
+fi
+
+
+if test "x$LLVM_CONFIG" = "x"; then :
   if test "x$with_llvm" != "x"; then :
   LLVM_CONFIG=`which llvm-config-"$with_llvm"`
 
@@ -4029,7 +4032,6 @@ fi
 fi
 fi
 fi
-
 
 if test "x$LLVM_CONFIG" = "x"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found in PATH" >&5
