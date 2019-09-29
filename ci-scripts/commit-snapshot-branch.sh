@@ -6,8 +6,8 @@ git reset --hard master
 git reset --soft origin/snapshot
 grep -q AM_MAINTAINER_MODE configure.ac || \
 sed -i /AC_OUTPUT/iAM_MAINTAINER_MODE configure.ac
-rm src/clangml.opam build/clangml.opam
-./bootstrap.sh
+( cd src && ./bootstrap.sh )
+cp src/Makefile.in src/aclocal.m4 src/configure src/bootstrap src/clangml.opam .
 git add -f configure.ac Makefile.in aclocal.m4 configure bootstrap clangml.opam
 if git commit -m "bootstrapped repository for commit $commit"; then
   git push origin snapshot
