@@ -139,6 +139,10 @@ pipeline {
         stage('opam installation from snapshot') {
             steps {
                 script {
+                    def pwd = sh (
+                        script: 'echo $PWD',
+                        returnStdout: true
+                    ).trim()
                     def ocamlversions =
                         ["4.04", "4.05", "4.06", "4.07", "4.08", "4.09"]
                     def branches = [:]
@@ -146,12 +150,12 @@ pipeline {
                         def ocamlversion = i
                         branches[ocamlversion] = {
                             node {
-                                sh '''
-                                    docker run --rm -v $PWD:/clangml \
+                                sh """
+                                    docker run --rm -v $pwd:/clangml \
                                         ocaml/opam2:$ocamlversion \
                                    /clangml/ci-scripts/opam-pin_and_install.sh \
 https://gitlab.inria.fr/memcad/clangml/-/archive/snapshot/clangml-snapshot.tar.gz
-                                   '''
+                                   """
                             }
                         }
                     }
