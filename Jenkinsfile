@@ -3,6 +3,7 @@ pipeline {
         label 'slave'
     }
     stages {
+/*
         stage('Prepare') {
             steps {
                 sh 'mkdir src'
@@ -134,15 +135,31 @@ pipeline {
                 sh 'src/ci-scripts/commit-snapshot-branch.sh'
             }
         }
+*/
         stage('opam installation from snapshot') {
             steps {
-                sh '''
-                    docker run --rm -v $PWD:/clangml ocaml/opam2:4.07 \
-                        /clangml/ci-scripts/opam-pin_and_install.sh \
+                script {
+                    def ocamlversions =
+                        ["4.04", "4.05", "4.06", "4.07", "4.08", "4.09"]
+                    def branches = [:]
+                    for (i in ocamlversions) {
+                        def ocamlversion = i
+                        branches[ocamlversion] = {
+                            node {
+                                sh '''
+                                    docker run --rm -v $PWD:/clangml \
+                                        ocaml/opam2:$ocamlversion \
+                                   /clangml/ci-scripts/opam-pin_and_install.sh \
 https://gitlab.inria.fr/memcad/clangml/-/archive/snapshot/clangml-snapshot.tar.gz
-                   '''
+                                   '''
+                            }
+                        }
+                    }
+                    parallel branches
+                }
             }
         }
+/*
         stage('Extract norms') {
             parallel {
                 stage('c++14') {
@@ -182,6 +199,7 @@ https://gitlab.inria.fr/memcad/clangml/-/archive/snapshot/clangml-snapshot.tar.g
                 sh 'git push'
             }
         }
+*/
     }
     post {
         failure {
