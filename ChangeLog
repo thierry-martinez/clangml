@@ -1,3 +1,19 @@
+# 2019-09-30, 4.0.1
+
+- Support for Clang/LLVM 9.0
+
+- Compatible with OCaml 4.09
+
+- Better representation for input and outputs in assembler statements
+
+- u'c' syntax is now correctly supported with Clang 3.6 and 3.7
+
+- Support for C++ exception specification, function try block
+
+- Better support for Gentoo
+
+- Bug fixes
+
 # 2019-07-11, 4.0.0
 
 - C++ support: all the code examples from C++14 and C++17 norms are covered
