@@ -11,7 +11,7 @@ def opam_installations(ocamlversions, url) {
                 sh """
                     docker run --rm -v $pwd/src:/clangml \
                         ocaml/opam2:$ocamlversion \
-                        /Clangml/ci-scripts/opam-pin_and_install.sh $url
+                        /clangml/ci-scripts/opam-pin_and_install.sh $url
                     """
             }
         }
@@ -36,6 +36,7 @@ pipeline {
                    '''
             }
         }
+/*
         stage('Configure') {
             steps {
                 sh '''
@@ -139,6 +140,7 @@ pipeline {
                 }
             }
         }
+*/
         stage('opam installation') {
             when { branch 'master' }
             steps {
@@ -154,6 +156,7 @@ pipeline {
                    '''
             }
         }
+/*
         stage('Commit to snapshot branch') {
             when { branch 'master' }
             steps {
@@ -208,6 +211,7 @@ pipeline {
                 sh 'git push'
             }
         }
+*/
     }
     post {
         failure {
