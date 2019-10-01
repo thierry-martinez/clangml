@@ -1,9 +1,28 @@
+def opam_installations(ocamlversions, url) {
+    def pwd = sh (
+        script: 'echo $PWD',
+        returnStdout: true
+    ).trim()
+    def branches = [:]
+    for (i in ocamlversions) {
+        def ocamlversion = i
+        branches[ocamlversion] = {
+            node {
+                sh """
+                    docker run --rm -v $pwd:/clangml ocaml/opam2:$ocamlversion \
+                    /clangml/ci-scripts/opam-pin_and_install.sh $url
+                    """
+            }
+        }
+    }
+    parallel branches
+}
+
 pipeline {
     agent {
         label 'slave'
     }
     stages {
-/*
         stage('Prepare') {
             steps {
                 sh 'mkdir src'
@@ -122,6 +141,11 @@ pipeline {
         stage('opam installation') {
             when { branch 'master' }
             steps {
+                script {
+                    opam_installations(
+                        ["4.04", "4.05", "4.06", "4.07", "4.08", "4.09"],
+                        "file:///clangml/")
+                }
                 sh '''
                     docker run --rm -v $PWD/src:/clangml ocaml/opam2:4.07 \
                         /clangml/ci-scripts/opam-pin_and_install.sh \
@@ -135,35 +159,15 @@ pipeline {
                 sh 'src/ci-scripts/commit-snapshot-branch.sh'
             }
         }
-*/
         stage('opam installation from snapshot') {
             steps {
                 script {
-                    def pwd = sh (
-                        script: 'echo $PWD',
-                        returnStdout: true
-                    ).trim()
-                    def ocamlversions =
-                        ["4.04", "4.05", "4.06", "4.07", "4.08", "4.09"]
-                    def branches = [:]
-                    for (i in ocamlversions) {
-                        def ocamlversion = i
-                        branches[ocamlversion] = {
-                            node {
-                                sh """
-                                    docker run --rm -v $pwd:/clangml \
-                                        ocaml/opam2:$ocamlversion \
-                                   /clangml/ci-scripts/opam-pin_and_install.sh \
-https://gitlab.inria.fr/memcad/clangml/-/archive/snapshot/clangml-snapshot.tar.gz
-                                   """
-                            }
-                        }
-                    }
-                    parallel branches
+                    opam_installations(
+                        ["4.09"],
+"https://gitlab.inria.fr/memcad/clangml/-/archive/snapshot/clangml-snapshot.tar.gz")
                 }
             }
         }
-/*
         stage('Extract norms') {
             parallel {
                 stage('c++14') {
@@ -203,7 +207,6 @@ https://gitlab.inria.fr/memcad/clangml/-/archive/snapshot/clangml-snapshot.tar.g
                 sh 'git push'
             }
         }
-*/
     }
     post {
         failure {
