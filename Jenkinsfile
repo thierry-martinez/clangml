@@ -9,8 +9,9 @@ def opam_installations(ocamlversions, url) {
         branches[ocamlversion] = {
             node {
                 sh """
-                    docker run --rm -v $pwd/src:/clangml ocaml/opam2:$ocamlversion \
-                    /clangml/ci-scripts/opam-pin_and_install.sh $url
+                    docker run --rm -v $pwd/src:/clangml \
+                        ocaml/opam2:$ocamlversion \
+                        /Clangml/ci-scripts/opam-pin_and_install.sh $url
                     """
             }
         }
