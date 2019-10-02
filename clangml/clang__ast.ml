@@ -186,7 +186,7 @@ and languages = {
     cxx : bool;
   }
 
-type asm_compiler_extension = GCC | MS
+and asm_compiler_extension = GCC | MS
 
 (** {2 Types and nodes} *)
 

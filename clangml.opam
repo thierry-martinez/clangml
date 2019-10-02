@@ -21,9 +21,10 @@ depends: [
   "override" {>= "0.1.0"}
   "ocaml" {>= "4.04.0"}
   "ocamlfind" {build & >= "1.8.0"}
-  "ocamlcodoc" {with_test}
-  "pattern" {with_test}
+  "ocamlcodoc" {with-test}
+  "pattern" {with-test}
 ]
 build: [
   ["./configure" "--prefix=%{prefix}%" "--with-llvm-config=%{conf-libclang:config}%"]
   ["dune" "build" "-p" name "-j" jobs]]
+run-test: [["dune" "build" "@runtest"]]
