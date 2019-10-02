@@ -37,7 +37,6 @@ pipeline {
                    '''
             }
         }
-/*
         stage('Configure') {
             steps {
                 sh '''
@@ -141,7 +140,6 @@ pipeline {
                 }
             }
         }
-*/
         stage('opam installation') {
             when { branch 'master' }
             steps {
@@ -150,14 +148,8 @@ pipeline {
                         ["4.04", "4.05", "4.06", "4.07", "4.08", "4.09"],
                         "file:///clangml/")
                 }
-                sh '''
-                    docker run --rm -v $PWD/src:/clangml ocaml/opam2:4.07 \
-                        /clangml/ci-scripts/opam-pin_and_install.sh \
-                        file:///clangml/
-                   '''
             }
         }
-/*
         stage('Commit to snapshot branch') {
             when { branch 'master' }
             steps {
@@ -212,7 +204,6 @@ pipeline {
                 sh 'git push'
             }
         }
-*/
     }
     post {
         failure {
