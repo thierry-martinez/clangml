@@ -2527,6 +2527,9 @@ extern "C" {
       case clang::EST_DynamicNone: return CLANG_EXT_EST_DynamicNone;
       case clang::EST_Dynamic: return CLANG_EXT_EST_Dynamic;
       case clang::EST_MSAny: return CLANG_EXT_EST_MSAny;
+    #ifndef LLVM_VERSION_BEFORE_9_0_0
+      case clang::EST_NoThrow: return CLANG_EXT_EST_NoThrow;
+    #endif
       case clang::EST_BasicNoexcept: return CLANG_EXT_EST_BasicNoexcept;
     #ifdef LLVM_VERSION_BEFORE_7_0_0
       case clang::EST_ComputedNoexcept: return CLANG_EXT_EST_DependentNoexcept;

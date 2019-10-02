@@ -841,6 +841,7 @@ enum clang_ext_ExceptionSpecificationType {
   CLANG_EXT_EST_DynamicNone,
   CLANG_EXT_EST_Dynamic,
   CLANG_EXT_EST_MSAny,
+  CLANG_EXT_EST_NoThrow, /* Clang >=9.0.0 */
   CLANG_EXT_EST_BasicNoexcept,
   CLANG_EXT_EST_DependentNoexcept,
   /* EST_ComputedNoexcept (Clang <7.0.0) is mapped to
