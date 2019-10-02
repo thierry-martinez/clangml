@@ -47,6 +47,7 @@ let rec extract_prefix_from_list'
 let extract_prefix_from_list p list =
   extract_prefix_from_list' p [] list
 
+(*
 let string_chop_prefix_opt prefix s =
   let prefix_length = String.length prefix in
   let length = String.length s in
@@ -57,6 +58,7 @@ let string_chop_prefix_opt prefix s =
       None
   else
     None
+*)
 
 module Ast = struct
   include Clang__ast
