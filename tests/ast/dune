@@ -1,4 +1,4 @@
-(executable
+(test
   (name ast)
   (preprocess (pps pattern.ppx))
   (link_flags -linkall)
