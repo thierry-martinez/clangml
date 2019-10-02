@@ -12,6 +12,7 @@
 #include <clang/Frontend/ASTUnit.h>
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/ErrorHandling.h>
+#include <caml/fail.h>
 
 extern "C" {
   #include "libclang_extensions.h"
@@ -68,9 +69,6 @@ static CXString cxstring_createDupFromString(std::string &s) {
 }
 */
 
-extern "C" void
-failwith_fmt(const char* format, ...);
-
 static bool
 is_valid_decl(enum CXCursorKind kind)
 {
@@ -99,7 +97,7 @@ static const clang::Decl *
 GetCursorDecl(CXCursor cursor)
 {
   if (!is_valid_decl(cursor.kind)) {
-    failwith_fmt("GetCursorDecl");
+    failwith("GetCursorDecl");
   }
   return static_cast<const clang::Decl *>(cursor.data[0]);
 }
@@ -108,14 +106,18 @@ GetCursorDecl(CXCursor cursor)
 static const clang::Stmt *
 GetCursorStmt(CXCursor cursor)
 {
-  assert(is_valid_stmt(cursor.kind));
+  if (!is_valid_stmt(cursor.kind)) {
+    failwith("GetCursorStmt");
+  }
   return static_cast<const clang::Stmt *>(cursor.data[1]);
 }
 
 static const clang::Attr *
 GetCursorAttr(CXCursor cursor)
 {
-  assert(is_valid_attr(cursor.kind));
+  if (!is_valid_attr(cursor.kind)) {
+    failwith("GetCursorAttr");
+  }
   return static_cast<const clang::Attr *>(cursor.data[1]);
 }
 

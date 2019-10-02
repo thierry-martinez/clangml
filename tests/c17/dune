@@ -1,4 +1,4 @@
-(executable
+(test
   (name c17)
   (preprocess (pps clangml.ppx pattern.ppx))
 ; -warning 9: the following labels are not bound in this record pattern

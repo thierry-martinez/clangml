@@ -1,3 +1,24 @@
+def opam_installations(ocamlversions, url) {
+    def pwd = sh (
+        script: 'echo $PWD',
+        returnStdout: true
+    ).trim()
+    def branches = [:]
+    for (i in ocamlversions) {
+        def ocamlversion = i
+        branches[ocamlversion] = {
+            node {
+                sh """
+                    docker run --rm -v $pwd/src:/clangml \
+                        ocaml/opam2:$ocamlversion \
+                        /clangml/ci-scripts/opam-pin_and_install.sh $url
+                    """
+            }
+        }
+    }
+    parallel branches
+}
+
 pipeline {
     agent {
         label 'slave'
@@ -11,7 +32,8 @@ pipeline {
                     cd src && \
                     rm -rf bootstrap/ && \
                     tar -xf ~/bootstrap.tar.xz && \
-                    aclocal && automake --add-missing && autoreconf
+                    aclocal && automake --add-missing && autoreconf &&
+                    dune build clangml.opam
                    '''
             }
         }
@@ -121,11 +143,11 @@ pipeline {
         stage('opam installation') {
             when { branch 'master' }
             steps {
-                sh '''
-                    docker run --rm -v $PWD/src:/clangml ocaml/opam2:4.07 \
-                        /clangml/ci-scripts/opam-pin_and_install.sh \
-                        file:///clangml/
-                   '''
+                script {
+                    opam_installations(
+                        ["4.04", "4.05", "4.06", "4.07", "4.08", "4.09"],
+                        "file:///clangml/")
+                }
             }
         }
         stage('Commit to snapshot branch') {
@@ -136,11 +158,11 @@ pipeline {
         }
         stage('opam installation from snapshot') {
             steps {
-                sh '''
-                    docker run --rm -v $PWD:/clangml ocaml/opam2:4.07 \
-                        /clangml/ci-scripts/opam-pin_and_install.sh \
-https://gitlab.inria.fr/memcad/clangml/-/archive/snapshot/clangml-snapshot.tar.gz
-                   '''
+                script {
+                    opam_installations(
+                        ["4.09"],
+"https://gitlab.inria.fr/memcad/clangml/-/archive/snapshot/clangml-snapshot.tar.gz")
+                }
             }
         }
         stage('Extract norms') {
