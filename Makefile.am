@@ -13,9 +13,9 @@ NORM_PREFIX = $(error NORM_PREFIX should be set)
 
 norm_files = $(shell sed -n -e 's/^\\include{\([^}]*\)}/\1/p' $(NORM_PREFIX)/std.tex)
 
-libraries ::= lift ppx show printer compare
+libraries = lift ppx show printer compare
 
-tools ::= stubgen norm_extractor print_tree
+tools = stubgen norm_extractor print_tree
 
 # This variable is expanded for each $(library)
 library_cmxa = $(library)/clangml_$(library).cmxa
@@ -23,14 +23,14 @@ library_cmxa = $(library)/clangml_$(library).cmxa
 # This variable is expanded for each $(tool)
 tool_exe = tools/$(tool)/$(tool).exe
 
-tools_exe ::= $(foreach tool,$(tools),$(tool_exe))
+tools_exe = $(foreach tool,$(tools),$(tool_exe))
 
-dune_files ::= \
+dune_files = \
 	$(CLANGML_CMXA) \
 	$(LIBCLANGML_STUBS_A) \
 	$(foreach library,$(libraries),$(library_cmxa))
 
-mypkg_SCRIPTS ::= $(addprefix $(DUNE_PREFIX)/, $(dune_files))
+mypkg_SCRIPTS = $(addprefix $(DUNE_PREFIX)/, $(dune_files))
 
 # Entry targets: all, clangml, doc, tests, install, uninstall, clean,
 # and one by library and one by tool.
