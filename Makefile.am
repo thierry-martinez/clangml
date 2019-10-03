@@ -53,7 +53,7 @@ doc :
 
 .PHONY : tests
 tests :
-	dune build @runtest
+	dune runtest
 
 .PHONY : install
 install :
