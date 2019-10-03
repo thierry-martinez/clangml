@@ -1599,6 +1599,19 @@ external type_visit_fields :
   cxtype -> (cxcursor -> cxvisitorresult) -> bool =
     "clang_Type_visitFields_wrapper"[@@ocaml.doc
                                       "Visit the fields of a particular type."]
+type cxversion =
+  {
+  major: int
+    [@ocaml.doc
+      "The major version number, e.g., the '10' in '10.7.3'. A negative value indicates that there is no version number at all."];
+  minor: int
+    [@ocaml.doc
+      "The minor version number, e.g., the '7' in '10.7.3'. This value will be negative if no minor version number was provided, e.g., for version '10'."];
+  subminor: int
+    [@ocaml.doc
+      "The subminor version number, e.g., the '3' in '10.7.3'. This value will be negative if no minor or subminor version number was provided, e.g., in version '10' or '10.7'."]}
+[@@ocaml.doc "Describes a version number of the form major.minor.subminor."]
+external ext_get_version : unit -> cxversion = "clang_ext_getVersion_wrapper"
 type cxint
 external equal_cxint : cxint -> cxint -> bool = "clang_equal_cxint_wrapper"
 external compare_cxint :
@@ -2737,6 +2750,7 @@ type clang_ext_exceptionspecificationtype =
   | DynamicNone 
   | Dynamic 
   | MSAny 
+  | NoThrow 
   | BasicNoexcept 
   | DependentNoexcept 
   | NoexceptFalse 
