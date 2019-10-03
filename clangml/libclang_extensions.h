@@ -57,6 +57,9 @@
 #define LLVM_VERSION_BEFORE_9_0_0
 #endif
 
+CXVersion
+clang_ext_getVersion();
+
 typedef struct {
   void *data;
 } CXInt;

@@ -577,7 +577,7 @@ let () =
 let example = "int * _Nonnull ptr;"
 
 let () =
-  if Clang.get_clang_version () >= "clang version 8.0.0" then
+  if Clang.version () >= { major = 8; minor = 0; subminor = 0 } then
     let clang_options = Clang.Cxtranslationunit_flags.(
       Clang.default_editing_translation_unit_options ()
       + Clang.include_attributed_types) in
@@ -611,12 +611,12 @@ let () =
       Pointer { desc = FunctionType {
         result = { desc = BuiltinType Int };
         parameters = Some { non_variadic = []; variadic = false}}}}}}] ->
-      assert (Clang.get_clang_version () >= "clang version 7.0.0")
+      assert (Clang.version () >= { major = 7; minor = 0; subminor = 0 })
   | [{ desc = Var { var_name = "p"; var_type = { desc =
       Pointer { desc = ParenType { desc = FunctionType {
         result = { desc = BuiltinType Int };
         parameters = Some { non_variadic = []; variadic = false}}}}}}}] ->
-      assert (Clang.get_clang_version () < "clang version 7.0.0")
+      assert (Clang.version () < { major = 7; minor = 0; subminor = 0 })
   | _ -> assert false
     ]}
 
@@ -765,14 +765,14 @@ let () =
       name = IdentifierName "f";
       function_type = { calling_conv = AAPCS }}}] ->
       assert (
-        Clang.get_clang_version () < "clang version 3.8.0" ||
-        Clang.get_clang_version () >= "clang version 3.9.0")
+        Clang.version () < { major = 3; minor = 8; subminor = 0 } ||
+        Clang.version () >= { major = 3; minor = 9; subminor = 0 })
   | [{ desc = Function {
       name = IdentifierName "f";
       function_type = { calling_conv = C }}}] ->
       assert (
-        Clang.get_clang_version () >= "clang version 3.8.0" &&
-        Clang.get_clang_version () < "clang version 3.9.0")
+        Clang.version () >= { major = 3; minor = 8; subminor = 0 } &&
+        Clang.version () < { major = 3; minor = 9; subminor = 0 })
   | _ -> assert false
     ]}
  *)
@@ -848,7 +848,7 @@ let () =
 let example = "void f() noexcept(true);"
 
 let () =
-  if Clang.get_clang_version () >= "clang version 7.0.0" then
+  if Clang.version () >= { major = 7; minor = 0; subminor = 0 } then
     begin
       check_pattern quote_decl_list
         (parse_declaration_list ~language:CXX ~standard:Cxx11)
@@ -876,7 +876,7 @@ let () =
 let example = "void f() noexcept(false);"
 
 let () =
-  if Clang.get_clang_version () >= "clang version 7.0.0" then
+  if Clang.version () >= { major = 7; minor = 0; subminor = 0 } then
     begin
       check_pattern quote_decl_list
         (parse_declaration_list ~language:CXX ~standard:Cxx11)
@@ -1282,7 +1282,7 @@ let () =
 let example = "if (int i = 1; i) { i; }"
 
 let () =
-  if Clang.get_clang_version () >= "clang version 3.9.0" then
+  if Clang.version () >= { major = 3; minor = 9; subminor = 0 } then
     check Clangml_show.pp_stmt (parse_statement_list ~language:CXX) example
     @@ fun ast -> match ast with
     | [{ desc = If {
@@ -1361,7 +1361,7 @@ let example =
   "switch (int i = 1; i) { case 1: f(); break; case 2: break; default:;}"
 
 let () =
-  if Clang.get_clang_version () >= "clang version 3.9.0" then
+  if Clang.version () >= { major = 3; minor = 9; subminor = 0 } then
     check_pattern quote_stmt_list (parse_statement_list ~language:CXX) example
     [%pattern?
       [{ desc = Switch {
@@ -1760,28 +1760,28 @@ let () =
 let example = "u8'a';"
 
 let () =
-  if Clang.get_clang_version () >= "clang version 3.6" then
+  if Clang.version () >= { major = 3; minor = 6; subminor = 0 } then
     check Clangml_show.pp_stmt (parse_statement_list ~language:CXX
         ~command_line_args:["-std=c++1z"]) example @@
     fun ast -> match ast with
     | [{ desc = Expr { desc = CharacterLiteral { kind = UTF8; value = 0x61 } }}]
-      -> assert (Clang.get_clang_version () >= "clang version 3.8.0")
+      -> assert (Clang.version () >= { major = 3; minor = 8; subminor = 0 })
     | [{ desc = Expr { desc =
           CharacterLiteral { kind = Ascii; value = 0x61 } }}]
-      -> assert (Clang.get_clang_version () < "clang version 3.8.0")
+      -> assert (Clang.version () < { major = 3; minor = 8; subminor = 0 })
     | _ -> assert false
 
 let example = "u'a';"
 
 let () =
-  if Clang.get_clang_version () >= "clang version 3.6" then
+  if Clang.version () >= { major = 3; minor = 6; subminor = 0 } then
     check Clangml_show.pp_stmt parse_statement_list example
     @@ fun ast -> match ast with
     | [{ desc = Expr { desc =
           CharacterLiteral { kind = UTF16; value = 0x61 } }}]
-      -> assert (Clang.get_clang_version () >= "clang version 3.6.0")
+      -> assert (Clang.version () >= { major = 3; minor = 6; subminor = 0 })
     | [{ desc = Expr { desc = CharacterLiteral { kind = UTF8; value = 0x61 } }}]
-      -> assert (Clang.get_clang_version () < "clang version 3.6.0")
+      -> assert (Clang.version () < { major = 3; minor = 6; subminor = 0 })
     | _ -> assert false
     ]}*)
   | ImaginaryLiteral of expr
@@ -2174,7 +2174,7 @@ let () =
 
     {[
 let () =
-  if Clang.get_clang_version () >= "clang version 6.0.0" then
+  if Clang.version () >= { major = 6; minor = 0; subminor = 0 } then
     check Clangml_show.pp_stmt (parse_statement_list ~language:CXX)
     example @@ fun ast -> match ast with
     | [ { desc = Expr { desc = UnaryExpr {
@@ -3085,7 +3085,7 @@ let () =
 let example = {| class C { int i : 3 = 2; }; |}
 
 let () =
-  if Clang.get_clang_version () >= "clang version 6.0.0" then
+  if Clang.version () >= { major = 6; minor = 0; subminor = 0 } then
     check Clangml_show.pp_decl (parse_declaration_list ~language:CXX
       ~command_line_args:["-std=c++2a"]) example
     @@ fun ast -> match ast with
@@ -3594,7 +3594,7 @@ let example = {|
 |}
 
 let () =
-  if Clang.get_clang_version () >= "clang version 3.7.0" then
+  if Clang.version () >= { major = 3; minor = 7; subminor = 0 } then
     check_pattern quote_decl_list
       (parse_declaration_list ~command_line_args:[
          Clang.Command_line.language CXX; "-std=c++11"]) example

@@ -12,6 +12,9 @@ include Clang__utils
 
 module Command_line = Clang__command_line
 
+let version () =
+  ext_get_version ()
+
 let includedir =
   List.fold_left Filename.concat Clangml_config.includedir
     [".."; "lib"; "clang"; Clangml_config.version; "include"]

@@ -7,8 +7,9 @@
 #include <clang/AST/ExprCXX.h>
 #include <clang/AST/Stmt.h>
 #include <clang/AST/Type.h>
-#include <clang/Basic/SourceLocation.h>
 #include <clang/Basic/ExceptionSpecificationType.h>
+#include <clang/Basic/SourceLocation.h>
+#include <clang/Basic/Version.h>
 #include <clang/Frontend/ASTUnit.h>
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/ErrorHandling.h>
@@ -397,6 +398,17 @@ GetNestedNameSpecifier(struct clang_ext_NestedNameSpecifier specifier)
 }
 
 extern "C" {
+  CXVersion
+  clang_ext_getVersion()
+  {
+    CXVersion result = {
+      CLANG_VERSION_MAJOR,
+      CLANG_VERSION_MINOR,
+      CLANG_VERSION_PATCHLEVEL,
+    };
+    return result;
+  }
+
   bool
   clang_equal_cxint(CXInt a, CXInt b)
   {

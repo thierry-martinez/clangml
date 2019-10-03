@@ -29,6 +29,9 @@ end
 
 module Command_line = Clang__command_line
 
+val version : unit -> cxversion
+(** [version ()] is the Clang version. *)
+
 val includedir : string
 (** [includedir] is equal to the path to Clang [include/] directory, i.e.,
     [`llvm-config --includedir`/../lib/clang/`llvm-config --version`/include],
