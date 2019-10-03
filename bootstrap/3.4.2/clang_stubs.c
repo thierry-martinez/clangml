@@ -4419,6 +4419,49 @@ clang_IndexAction_create_wrapper(value CIdx_ocaml)
   }
 }
 
+static value __attribute__((unused))
+Val_cxversion(struct CXVersion v)
+{
+  CAMLparam0();
+  CAMLlocal1(ocaml);
+  ocaml = caml_alloc_tuple(3);
+{
+     CAMLlocal1(data);
+     data = Val_int(v.Major);
+     Store_field(ocaml, 0, data);
+  }
+{
+     CAMLlocal1(data);
+     data = Val_int(v.Minor);
+     Store_field(ocaml, 1, data);
+  }
+{
+     CAMLlocal1(data);
+     data = Val_int(v.Subminor);
+     Store_field(ocaml, 2, data);
+  }
+CAMLreturn(ocaml);
+}
+
+static struct CXVersion __attribute__((unused))
+Cxversion_val(value ocaml)
+{
+  CAMLparam1(ocaml);
+  struct CXVersion v;
+v.Major = Int_val(Field(ocaml, 0));v.Minor = Int_val(Field(ocaml, 1));v.Subminor = Int_val(Field(ocaml, 2));CAMLreturnT(struct CXVersion, v);
+}
+CAMLprim value
+clang_ext_getVersion_wrapper()
+{
+  CAMLparam0();
+  CXVersion result = clang_ext_getVersion();
+  {
+    CAMLlocal1(data);
+    data = Val_cxversion(result);
+    CAMLreturn(data);
+  }
+}
+
 static void finalize_cxint(value v) {
   clang_ext_Int_dispose(*((CXInt *) Data_custom_val(v)));;
 }
@@ -8344,13 +8387,14 @@ Clang_ext_exceptionspecificationtype_val(value ocaml)
   case 1: return CLANG_EXT_EST_DynamicNone;
   case 2: return CLANG_EXT_EST_Dynamic;
   case 3: return CLANG_EXT_EST_MSAny;
-  case 4: return CLANG_EXT_EST_BasicNoexcept;
-  case 5: return CLANG_EXT_EST_DependentNoexcept;
-  case 6: return CLANG_EXT_EST_NoexceptFalse;
-  case 7: return CLANG_EXT_EST_NoexceptTrue;
-  case 8: return CLANG_EXT_EST_Unevaluated;
-  case 9: return CLANG_EXT_EST_Uninstantiated;
-  case 10: return CLANG_EXT_EST_Unparsed;
+  case 4: return CLANG_EXT_EST_NoThrow;
+  case 5: return CLANG_EXT_EST_BasicNoexcept;
+  case 6: return CLANG_EXT_EST_DependentNoexcept;
+  case 7: return CLANG_EXT_EST_NoexceptFalse;
+  case 8: return CLANG_EXT_EST_NoexceptTrue;
+  case 9: return CLANG_EXT_EST_Unevaluated;
+  case 10: return CLANG_EXT_EST_Uninstantiated;
+  case 11: return CLANG_EXT_EST_Unparsed;
   }
   failwith_fmt("invalid value for Clang_ext_exceptionspecificationtype_val: %d", Int_val(ocaml));
   return CLANG_EXT_EST_NoExceptionSpecification;
@@ -8364,13 +8408,14 @@ Val_clang_ext_exceptionspecificationtype(enum clang_ext_ExceptionSpecificationTy
   case CLANG_EXT_EST_DynamicNone: return Val_int(1);
   case CLANG_EXT_EST_Dynamic: return Val_int(2);
   case CLANG_EXT_EST_MSAny: return Val_int(3);
-  case CLANG_EXT_EST_BasicNoexcept: return Val_int(4);
-  case CLANG_EXT_EST_DependentNoexcept: return Val_int(5);
-  case CLANG_EXT_EST_NoexceptFalse: return Val_int(6);
-  case CLANG_EXT_EST_NoexceptTrue: return Val_int(7);
-  case CLANG_EXT_EST_Unevaluated: return Val_int(8);
-  case CLANG_EXT_EST_Uninstantiated: return Val_int(9);
-  case CLANG_EXT_EST_Unparsed: return Val_int(10);
+  case CLANG_EXT_EST_NoThrow: return Val_int(4);
+  case CLANG_EXT_EST_BasicNoexcept: return Val_int(5);
+  case CLANG_EXT_EST_DependentNoexcept: return Val_int(6);
+  case CLANG_EXT_EST_NoexceptFalse: return Val_int(7);
+  case CLANG_EXT_EST_NoexceptTrue: return Val_int(8);
+  case CLANG_EXT_EST_Unevaluated: return Val_int(9);
+  case CLANG_EXT_EST_Uninstantiated: return Val_int(10);
+  case CLANG_EXT_EST_Unparsed: return Val_int(11);
   }
   failwith_fmt("invalid value for Val_clang_ext_exceptionspecificationtype: %d", v);
   return Val_int(0);
