@@ -1,5 +1,11 @@
-module type S = sig
+module type OrderedType = sig
   include Set.OrderedType
+
+  val equal : t -> t -> bool
+end
+
+module type S = sig
+  include OrderedType
 
   module Set : Set.S with type elt = t
 

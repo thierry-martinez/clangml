@@ -2,8 +2,14 @@ let ignore_equal _ _ = true
 
 let ignore_compare _ _ = 0
 
-module type S = sig
+module type OrderedType = sig
   include Set.OrderedType
+
+  val equal : t -> t -> bool
+end
+
+module type S = sig
+  include OrderedType
 
   module Set : Set.S with type elt = t
 
@@ -81,7 +87,7 @@ module%import Clang = struct
   end
 end
 
-module Make (X : Set.OrderedType) : S with type t = X.t = struct
+module Make (X : OrderedType) : S with type t = X.t = struct
   include X
 
   module Set = Set.Make (X)
