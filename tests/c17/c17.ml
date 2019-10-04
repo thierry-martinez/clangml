@@ -19,7 +19,8 @@ let run_llvm_config llvm_config arguments =
 
 let parse_string s =
   let command_line_args =
-    [Clang.Command_line.include_directory Clang.includedir] in
+    List.map Clang.Command_line.include_directory
+      (Clang.default_include_directories ()) in
   Clang.Ast.parse_string ~command_line_args s
 
 (* 6.4.2.2 Predefined identifiers *)
