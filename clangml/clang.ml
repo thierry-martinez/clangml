@@ -15,9 +15,19 @@ module Command_line = Clang__command_line
 let version () =
   ext_get_version ()
 
+let make_include_dir path =
+  List.fold_left Filename.concat Clangml_config.includedir path
+
 let includedir =
-  List.fold_left Filename.concat Clangml_config.includedir
-    [".."; "lib"; "clang"; Clangml_config.version; "include"]
+  make_include_dir
+    [Filename.parent_dir_name; "lib"; "clang"; Clangml_config.version;
+     "include"]
+
+let default_include_directories () =
+  let cpp_lib = make_include_dir ["c++"; "v1"] in
+  let macos_sdk =
+    "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/" in
+  [macos_sdk; cpp_lib; includedir]
 
 let option_cursor_bind f cursor : 'a option =
   if get_cursor_kind cursor = InvalidCode then
