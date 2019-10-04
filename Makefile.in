@@ -13,6 +13,7 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
+
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -100,6 +101,35 @@ CONFIG_CLEAN_FILES = config/cflags.sexp config/cxxflags.sexp \
 	config/libs.sexp config/libs_quoted.sexp \
 	config/clangml_config.ml clangml/clang__compat.ml
 CONFIG_CLEAN_VPATH_FILES =
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
+am__installdirs = "$(DESTDIR)$(mypkgdir)"
+SCRIPTS = $(mypkg_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -300,12 +330,21 @@ CLANGML_CMXA = clangml/clang.cmxa
 LIBCLANGML_STUBS_A = clangml/libclang_stubs.a
 NORM_PREFIX = $(error NORM_PREFIX should be set)
 norm_files = $(shell sed -n -e 's/^\\include{\([^}]*\)}/\1/p' $(NORM_PREFIX)/std.tex)
+libraries = lift ppx show printer compare
+tools = stubgen norm_extractor print_tree
 
 # This variable is expanded for each $(library)
 library_cmxa = $(library)/clangml_$(library).cmxa
 
 # This variable is expanded for each $(tool)
 tool_exe = tools/$(tool)/$(tool).exe
+tools_exe = $(foreach tool,$(tools),$(tool_exe))
+dune_files = \
+	$(CLANGML_CMXA) \
+	$(LIBCLANGML_STUBS_A) \
+	$(foreach library,$(libraries),$(library_cmxa))
+
+mypkg_SCRIPTS = $(addprefix $(DUNE_PREFIX)/, $(dune_files))
 all: all-am
 
 .SUFFIXES:
@@ -358,6 +397,41 @@ config/clangml_config.ml: $(top_builddir)/config.status $(top_srcdir)/config/cla
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 clangml/clang__compat.ml: $(top_builddir)/config.status $(top_srcdir)/clangml/clang__compat.ml.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
+install-mypkgSCRIPTS: $(mypkg_SCRIPTS)
+	@$(NORMAL_INSTALL)
+	@list='$(mypkg_SCRIPTS)'; test -n "$(mypkgdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(mypkgdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(mypkgdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  if test -f "$$d$$p"; then echo "$$d$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n' \
+	    -e 'h;s|.*|.|' \
+	    -e 'p;x;s,.*/,,;$(transform)' | sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1; } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) { files[d] = files[d] " " $$1; \
+	      if (++n[d] == $(am__install_max)) { \
+		print "f", d, files[d]; n[d] = 0; files[d] = "" } } \
+	    else { print "f", d "/" $$4, $$1 } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	     if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	     test -z "$$files" || { \
+	       echo " $(INSTALL_SCRIPT) $$files '$(DESTDIR)$(mypkgdir)$$dir'"; \
+	       $(INSTALL_SCRIPT) $$files "$(DESTDIR)$(mypkgdir)$$dir" || exit $$?; \
+	     } \
+	; done
+
+uninstall-mypkgSCRIPTS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(mypkg_SCRIPTS)'; test -n "$(mypkgdir)" || exit 0; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	       sed -e 's,.*/,,;$(transform)'`; \
+	dir='$(DESTDIR)$(mypkgdir)'; $(am__uninstall_files_from_dir)
 tags TAGS:
 
 ctags CTAGS:
@@ -530,8 +604,11 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: check-am
-all-am: Makefile
+all-am: Makefile $(SCRIPTS)
 installdirs:
+	for dir in "$(DESTDIR)$(mypkgdir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
 install-exec: install-exec-am
 install-data: install-data-am
 
@@ -581,7 +658,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-mypkgSCRIPTS
 
 install-dvi: install-dvi-am
 
@@ -627,7 +704,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-mypkgSCRIPTS
 
 .MAKE: install-am install-strip
 
@@ -639,27 +716,14 @@ uninstall-am:
 	install install-am install-data install-data-am install-dvi \
 	install-dvi-am install-exec install-exec-am install-html \
 	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic pdf pdf-am ps ps-am tags-am uninstall \
-	uninstall-am
+	install-mypkgSCRIPTS install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic pdf pdf-am ps ps-am tags-am \
+	uninstall uninstall-am uninstall-mypkgSCRIPTS
 
 .PRECIOUS: Makefile
 
-
-libraries ::= lift ppx show printer compare
-
-tools ::= stubgen norm_extractor print_tree
-
-tools_exe ::= $(foreach tool,$(tools),$(tool_exe))
-
-dune_files ::= \
-	$(CLANGML_CMXA) \
-	$(LIBCLANGML_STUBS_A) \
-	$(foreach library,$(libraries),$(library_cmxa))
-
-mypkg_SCRIPTS ::= $(addprefix $(DUNE_PREFIX)/, $(dune_files))
 
 # Entry targets: all, clangml, doc, tests, install, uninstall, clean,
 # and one by library and one by tool.
@@ -682,7 +746,7 @@ doc :
 
 .PHONY : tests
 tests :
-	dune build @runtest
+	dune runtest
 
 .PHONY : install
 install :
