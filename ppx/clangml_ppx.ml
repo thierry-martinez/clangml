@@ -286,10 +286,9 @@ let extract_payload language (mapper : Versioned.Ast.Ast_mapper.mapper) ~loc
     | Some standard ->
         Clang.Command_line.standard standard :: command_line_args in
   let command_line_args =
-    Clang.Command_line.include_directory Clang.includedir ::
-    Clang.Command_line.include_directory
-      (List.fold_left Filename.concat Clangml_config.includedir ["c++"; "v1"])
-    :: command_line_args in
+    List.map Clang.Command_line.include_directory
+      (Clang.default_include_directories ())
+    @ command_line_args in
   let ast = Clang.Ast.parse_string ~command_line_args code in
   Clang.Ast.format_diagnostics Clang.error Format.err_formatter ast
     ~pp:begin fun pp fmt () ->

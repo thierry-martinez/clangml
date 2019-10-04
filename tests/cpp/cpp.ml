@@ -17,8 +17,9 @@ let check_pattern_tu expr tu = check_pattern lift_expr#translation_unit expr tu
 
 let parse_string ?(command_line_args = []) ?options s =
   let command_line_args =
-    Clang.Command_line.include_directory Clang.includedir ::
     Clang.Command_line.language CXX ::
+    List.map Clang.Command_line.include_directory
+      (Clang.default_include_directories ()) @
     command_line_args in
   let ast = Clang.Ast.parse_string ~command_line_args ?options s in
   let tu = Clang.Ast.cursor_of_node ast |> Clang.cursor_get_translation_unit in

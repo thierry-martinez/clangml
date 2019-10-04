@@ -82,9 +82,9 @@ asks `opam depext` to install clangml once dependencies are installed.)
 ## Usage
 
 The module [`Clang`][1] provides direct bindings to most of the [symbols
-defined by libclang][2] to match OCaml conventions, camel-case symbols
-have been renamed to lower-case symbols with underscores, and `clang_`
-prefixes have been removed. Additional bindings have been defined in
+defined by libclang][2]. To match OCaml conventions, camel-case symbols
+have been renamed to snake case (lower-case symbols with underscores), and
+`clang_` prefixes have been removed. Additional bindings have been defined in
 [`libclang_extensions.h`][3] for some parts of clang's API that have
 not been covered by libclang.
 

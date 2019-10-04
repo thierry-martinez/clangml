@@ -42,6 +42,11 @@ val includedir : string
     [Clang.Command_line.include_directory Clang.includedir]
     to Clang command-line. *)
 
+val default_include_directories : unit -> string list
+(** [default_include_directories ()] is a list of include directories that are
+    common to pass to Clang command-line. The list contains {!val:includedir}.
+ *)
+
 (** {2 Abstract syntax tree} *)
 
 module Ast : sig

@@ -17,3 +17,4 @@
 /config/*.sexp
 /clangml/clang__compat.ml
 /config/clangml_config.ml
+/clangml.opam
