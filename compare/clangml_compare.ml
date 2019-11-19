@@ -82,6 +82,16 @@ module%import Clang = struct
       end
     end
 
+    type concrete_location = _
+
+    type source_location = _
+
+    type 'qual_type open_decoration = _
+
+    let equal_open_decoration _ = ignore_equal
+
+    let compare_open_decoration _ = ignore_compare
+
     [%%recursive [%%types]]
       [@@deriving eq, ord]
   end
