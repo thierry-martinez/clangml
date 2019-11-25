@@ -32,7 +32,8 @@ pipeline {
                     cd src && \
                     rm -rf bootstrap/ && \
                     tar -xf ~/bootstrap.tar.xz && \
-                    aclocal && automake --add-missing && autoreconf &&
+                    autoreconf &&
+                    touch config/clangml_config.ml &&
                     dune build clangml.opam
                    '''
             }
