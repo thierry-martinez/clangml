@@ -217,6 +217,14 @@ and expr_prec prec fmt (e : Clang.Expr.t) =
       Format.fprintf fmt "new@ %a%a" qual_type ty format_init init
   | Delete { argument; _ } ->
       Format.fprintf fmt "delete@ %a" expr argument
+  | ConditionalOperator { cond; then_branch; else_branch } ->
+      begin match then_branch with
+      | Some then_branch ->
+          Format.fprintf fmt "%a ? %a : %a" expr cond expr then_branch expr
+            else_branch
+      | None ->
+          Format.fprintf fmt "%a ?: %a" expr cond expr else_branch
+      end
   | _ -> failwith (Format.asprintf "Not implemented expr %a" Clangml_show.pp_expr e)
 
 and stmt fmt (s : Clang.Stmt.t) =

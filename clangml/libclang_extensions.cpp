@@ -233,6 +233,12 @@ MakeCXType(clang::QualType T, CXTranslationUnit TU)
   return clang_getPointeeType(CT);
 }
 
+static const clang::DeclaratorDecl *
+getDeclaratorDecl(CXCursor cursor)
+{
+  return llvm::dyn_cast_or_null<clang::DeclaratorDecl>(GetCursorDecl(cursor));
+}
+
 static const clang::FunctionDecl *
 getFunctionDecl(CXCursor cursor)
 {
@@ -1044,6 +1050,18 @@ extern "C" {
       return MakeCXType(PTT->getInnerType(), GetTU(c));
     }
     return c;
+  }
+
+  CXCursor
+  clang_ext_DeclaratorDecl_GetSizeExpr(CXCursor c)
+  {
+    if (auto d = getDeclaratorDecl(c)) {
+      if (auto a =
+          d->getTypeSourceInfo()->getTypeLoc().getAs<clang::ArrayTypeLoc>()) {
+        return MakeCXCursor(a.getSizeExpr(), getCursorTU(c));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
   }
 
   CXCursor

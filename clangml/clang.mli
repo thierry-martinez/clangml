@@ -208,7 +208,7 @@ module Ast : sig
   end
 end
 
-(** AST types as ordered types. *)
+(** AST types. *)
 module Type : sig
   type t = Ast.qual_type
 
@@ -287,7 +287,7 @@ module Expr : sig
       representation, supposing that [cu] points to an expression. *)
 end
 
-(** AST statements as ordered types. *)
+(** AST statements. *)
 module Stmt : sig
   type t = Ast.stmt
 
@@ -296,7 +296,7 @@ module Stmt : sig
       representation, supposing that [cu] points to a statement. *)
 end
 
-(** AST declarations as ordered types. *)
+(** AST declarations. *)
 module Decl : sig
   type t = Ast.decl
 
@@ -313,9 +313,24 @@ module Decl : sig
   val get_field_bit_width : t -> int
   (** [get_field_bit_width d] returns the bit width of the field
       declaration [d]. *)
+
+  val get_size_expr : ?options:Ast.Options.t -> t -> Expr.t
+  (** [get_size_expr ?options d] returns the expression specifying the size
+      of the array declared by [d], and fails if [d] is not an array
+      declaration. *)
 end
 
-(** AST enumeration constants as ordered types. *)
+(** AST parameters. *)
+module Parameter : sig
+  type t = Ast.parameter
+
+  val get_size_expr : ?options:Ast.Options.t -> t -> Expr.t
+  (** [get_size_expr ?options p] returns the expression specifying the size
+      of the array declared by [p], and fails if [p] is not an array
+      parameter. *)
+end
+
+(** AST enumeration constants. *)
 module Enum_constant : sig
   type t = Ast.enum_constant
 
@@ -327,6 +342,7 @@ module Enum_constant : sig
   (** [get_value c] returns the value associated to the constant [c].*)
 end
 
+(** AST translation units. *)
 module Translation_unit : sig
   type t = Ast.translation_unit
 

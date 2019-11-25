@@ -336,6 +336,9 @@ CXType
 clang_ext_GetInnerType(CXType c);
 
 CXCursor
+clang_ext_DeclaratorDecl_GetSizeExpr(CXCursor c);
+
+CXCursor
 clang_ext_VariableArrayType_GetSizeExpr(CXType c);
 
 enum clang_ext_StringKind

@@ -1,4 +1,4 @@
-(lang dune 1.10)
+(lang dune 1.11)
 
 (generate_opam_files true)
 
@@ -6,9 +6,9 @@
 (maintainers "Thierry Martinez <thierry.martinez@inria.fr>")
 (authors "Thierry Martinez <thierry.martinez@inria.fr>")
 (source (uri "git+https://gitlab.inria.fr/memcad/clangml"))
-(homepage "https://gitlab.inria.fr/memcad/clangml")
-(bug_reports "https://gitlab.inria.fr/memcad/clangml")
-(documentation "https://gitlab.inria.fr/memcad/clangml")
+(homepage "https://memcad.gitlabpages.inria.fr/clangml/")
+(bug_reports "https://gitlab.inria.fr/memcad/clangml/issues")
+(documentation "https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/index.html")
 
 (package
  (name clangml)

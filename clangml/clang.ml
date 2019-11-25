@@ -653,9 +653,14 @@ module Ast = struct
           name = cursor |> get_cursor_spelling;
           qual_type;
           default =
-            match List.rev others with
-            | [] -> None
-            | default :: _ -> Some (default |> expr_of_cxcursor) }
+            if ext_var_decl_has_init cursor then
+              let default =
+                match List.rev others with
+                | [] -> assert false
+                | default :: _ -> default in
+              Some (default |> expr_of_cxcursor)
+            else
+              None }
 
     and function_type_of_decl cursor =
       (* Hack for Clang 3.4 and 3.5! See current_decl declaration. *)
@@ -1657,6 +1662,14 @@ module Ast = struct
     | Concrete location -> location
 end
 
+module Expr = struct
+  type t = Ast.expr
+
+  let of_cxcursor ?(options = Ast.Options.default) cur =
+    let module Convert = Ast.Converter (struct let options = options end) in
+    Convert.expr_of_cxcursor cur
+end
+
 module Decl = struct
   type t = Ast.decl
 
@@ -1670,6 +1683,18 @@ module Decl = struct
 
   let get_field_bit_width field =
     field |> Ast.cursor_of_node |> get_field_decl_bit_width
+
+  let get_size_expr ?options decl =
+    decl |> Ast.cursor_of_node |>
+    ext_declarator_decl_get_size_expr |> Expr.of_cxcursor ?options
+end
+
+module Parameter = struct
+  type t = Ast.parameter
+
+  let get_size_expr ?options param =
+    param |> Ast.cursor_of_node |>
+    ext_declarator_decl_get_size_expr |> Expr.of_cxcursor ?options
 end
 
 module Type = struct
@@ -1714,14 +1739,6 @@ module Type = struct
   let list_of_fields ?options (qual_type : t) =
     qual_type.cxtype |> list_of_type_fields |> List.map @@
       Decl.of_cxcursor ?options
-end
-
-module Expr = struct
-  type t = Ast.expr
-
-  let of_cxcursor ?(options = Ast.Options.default) cur =
-    let module Convert = Ast.Converter (struct let options = options end) in
-    Convert.expr_of_cxcursor cur
 end
 
 module Stmt = struct

@@ -66,12 +66,11 @@ let quote_decl_list = lift_expr#list lift_expr#decl
 
 let quote_stmt_list = lift_expr#list lift_expr#stmt
 
-let check_pattern ?(result = fun (_ : 'b) -> ()) quoter (parser : string -> 'a)
-      (source : string) (pattern : ('a, 'b) Pattern_runtime.matcher) =
-  prerr_endline source;
-  let ast = parser source in
+let quote_expr = lift_expr#expr
+
+let check_result ?(result = fun (_ : 'b) -> ()) value =
   if
-    match pattern ~quoted:(quoter ast) ast with
+    match value with
     | Ok bindings ->
         begin try
           result bindings;
@@ -88,6 +87,12 @@ let check_pattern ?(result = fun (_ : 'b) -> ()) quoter (parser : string -> 'a)
     incr success_count
   else
     incr failure_count
+
+let check_pattern ?result quoter (parser : string -> 'a)
+      (source : string) (pattern : ('a, 'b) Pattern_runtime.matcher) =
+  prerr_endline source;
+  let ast = parser source in
+  check_result ?result (pattern ~quoted:(quoter ast) ast)
 ]}*)
 
 (** {2 Nodes and decorations} *)
@@ -323,16 +328,49 @@ let () =
       size : int;
     }
 (** Constant-sized array.
+
+    Note: The "qual_type" contains the canonical type where the size has already
+    been computed. If you need to get the original expression of the size, you
+    may use {!val:Clang.Decl.get_size_expr} or
+    {!val:Clang.Parameter.get_size_expr}.
     {[
-let example = "char s[42];"
+let example = "char s[21 * 2];"
 
 let () =
-  check Clangml_show.pp_decl parse_declaration_list example @@
-  fun ast -> match ast with
-  | [{ desc = Var { var_name = "s"; var_type = { desc = ConstantArray {
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = Var { var_name = "s"; var_type = { desc = ConstantArray {
       element = { desc = BuiltinType Char_S };
-      size = 42 }}}}] -> ()
-  | _ -> assert false
+      size = 42 }}}} as decl]]
+  ~result:begin fun bindings ->
+    check_result (Pattern_runtime.check quote_expr
+      (Clang.Decl.get_size_expr bindings#decl)
+      [%pattern? { desc = BinaryOperator {
+        lhs = { desc = IntegerLiteral (Int 21)};
+        kind = Mul;
+        rhs = { desc = IntegerLiteral (Int 2)}}}])
+  end
+
+let example = "void f(char s[21 * 2]);"
+
+let () =
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = Function { function_type = {
+      parameters = Some { non_variadic = [{ desc = {
+        qual_type = { desc = ConstantArray {
+          element = { desc = BuiltinType Char_S };
+          size = 42; }};
+        name = "s";
+        default = None; }} as parameter] }}}}]]
+  ~result:begin fun bindings ->
+    check_result (Pattern_runtime.check quote_expr
+      (Clang.Parameter.get_size_expr bindings#parameter)
+      [%pattern? { desc = BinaryOperator {
+        lhs = { desc = IntegerLiteral (Int 21)};
+        kind = Mul;
+        rhs = { desc = IntegerLiteral (Int 2)}}}])
+  end
     ]}*)
   | Vector of {
       element : qual_type;
