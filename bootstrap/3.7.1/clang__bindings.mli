@@ -1904,6 +1904,8 @@ external ext_get_type_kind :
   cxtype -> clang_ext_typekind = "clang_ext_GetTypeKind_wrapper"
 external ext_get_inner_type :
   cxtype -> cxtype = "clang_ext_GetInnerType_wrapper"
+external ext_declarator_decl_get_size_expr :
+  cxcursor -> cxcursor = "clang_ext_DeclaratorDecl_GetSizeExpr_wrapper"
 external ext_variable_array_type_get_size_expr :
   cxtype -> cxcursor = "clang_ext_VariableArrayType_GetSizeExpr_wrapper"
 external ext_character_literal_get_character_kind :

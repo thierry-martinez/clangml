@@ -6674,6 +6674,22 @@ clang_ext_GetInnerType_wrapper(value c_ocaml)
 }
 
 CAMLprim value
+clang_ext_DeclaratorDecl_GetSizeExpr_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXCursor c;
+  c = Cxcursor_val(Field(c_ocaml, 0));
+  CXCursor result = clang_ext_DeclaratorDecl_GetSizeExpr(c);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(c_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
 clang_ext_VariableArrayType_GetSizeExpr_wrapper(value c_ocaml)
 {
   CAMLparam1(c_ocaml);
