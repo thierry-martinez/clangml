@@ -365,6 +365,7 @@ AS_IF([test -d clangml],
      AC_CP([$srcdir/clangml/clang__ast_options.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang__ast_utils.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang__command_line.ml], [clangml/])
+     AC_CP([$srcdir/clangml/clang__custom.c], [clangml/])
      AC_CP([$srcdir/clangml/dune], [clangml/])
      AC_CP([$srcdir/clangml/stubgen.h], [clangml/])
      AC_CP([$srcdir/clangml/libclang_extensions.cpp], [clangml/])
