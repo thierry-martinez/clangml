@@ -73,6 +73,9 @@ let string_chop_prefix_opt prefix s =
     None
 *)
 
+external compare_cursors :
+  cxcursor -> cxcursor -> int = "clang_ext_compare_cursor_boxed"
+
 module Ast = struct
   include Clang__ast
 
@@ -1668,6 +1671,9 @@ module Expr = struct
   let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
     Convert.expr_of_cxcursor cur
+
+  let get_definition e =
+    e |> Ast.cursor_of_node |> get_cursor_definition
 end
 
 module Decl = struct
@@ -1687,6 +1693,9 @@ module Decl = struct
   let get_size_expr ?options decl =
     decl |> Ast.cursor_of_node |>
     ext_declarator_decl_get_size_expr |> Expr.of_cxcursor ?options
+
+  let get_canonical decl =
+    decl |> Ast.cursor_of_node |> get_canonical_cursor
 end
 
 module Parameter = struct

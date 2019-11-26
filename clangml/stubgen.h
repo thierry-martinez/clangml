@@ -42,18 +42,19 @@ failwith_fmt(const char* format, ...)
     failwith(buffer);
 }
 
-#define DECLARE_OPAQUE(C_TYPE, OCAML_TYPE, C_OF_OCAML, OCAML_OF_C, DESTRUCTOR) \
+#define DECLARE_OPAQUE_EX(C_TYPE, OCAML_TYPE, C_OF_OCAML, OCAML_OF_C,   \
+    DESTRUCTOR, COMPARE, HASH) \
   struct custom_operations OCAML_TYPE##_ops = {                         \
     (char *) #C_TYPE,                                                   \
     DESTRUCTOR,                                                         \
-    custom_compare_default,                                             \
-    custom_compare_ext_default,                                         \
-    custom_hash_default,                                                \
+    COMPARE,                                                            \
+    HASH,                                                               \
     custom_serialize_default,                                           \
-    custom_deserialize_default                                          \
+    custom_deserialize_default,                                         \
+    custom_compare_ext_default,                                         \
   };                                                                    \
                                                                         \
-  static value __attribute__((unused))                                  \
+  value __attribute__((unused))                                  \
   OCAML_OF_C(C_TYPE v)                                                  \
   {                                                                     \
     CAMLparam0();                                                       \
@@ -64,12 +65,16 @@ failwith_fmt(const char* format, ...)
     CAMLreturn(ocaml);                                                  \
   }                                                                     \
                                                                         \
-  static C_TYPE __attribute__((unused))                                 \
+  C_TYPE __attribute__((unused))                                 \
   C_OF_OCAML(value ocaml)                                               \
   {                                                                     \
     CAMLparam1(ocaml);                                                  \
     CAMLreturnT(C_TYPE, *((C_TYPE *) Data_custom_val(ocaml)));          \
   }
+
+#define DECLARE_OPAQUE(C_TYPE, OCAML_TYPE, C_OF_OCAML, OCAML_OF_C, DESTRUCTOR) \
+  DECLARE_OPAQUE_EX(C_TYPE, OCAML_TYPE, C_OF_OCAML, OCAML_OF_C, DESTRUCTOR, \
+    custom_compare_default, custom_hash_default)
 
 #define Not_bool_val(X) (!Bool_val(X))
 

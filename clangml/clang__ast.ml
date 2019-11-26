@@ -1931,16 +1931,45 @@ let () =
     ]} *)
   | DeclRef of ident_ref
 (** Declaration reference.
+
+    Note: you may use {!val:Clang.Expr.get_definition} to get a cursor
+    to the declaration site. Cursors can be hashed with {!val:Clang.hash_cursor}
+    and compared with {!val:Clang.compare_cursors}
+    and {!val:Clang.equal_cursors}.
+
     {[
 let example = "int i; i;"
 
 let () =
-  check Clangml_show.pp_stmt parse_statement_list example
-  @@ fun ast -> match ast with
-  | [{ desc = Decl _ };
-      { desc = Expr { desc = DeclRef ({ name = IdentifierName "i" }) }}] -> ()
-  | _ -> assert false
-    ]} *)
+  check_pattern quote_stmt_list parse_statement_list example
+  [%pattern? [
+    { desc = Decl _ };
+    { desc = Expr { desc = DeclRef ({ name = IdentifierName "i" }) }}]]
+
+let example = "{ int i; i; } { int i; i; }"
+
+let () =
+  check_pattern quote_stmt_list parse_statement_list example
+  [%pattern? [
+    { desc = Compound [
+      { desc = Decl [d1] };
+      { desc = Expr ({ desc = DeclRef ({ name = IdentifierName "i" })} as e1)}]
+    };
+    { desc = Compound [
+      { desc = Decl [d2] };
+      { desc = Expr ({ desc = DeclRef ({ name = IdentifierName "i" })} as e2)}]
+    }]]
+  ~result:begin fun b ->
+    assert (Clang.equal_cursors
+      (Clang.Expr.get_definition b#e1)
+      (Clang.get_cursor_definition (Clang.Ast.cursor_of_node b#d1)));
+    assert (Clang.equal_cursors
+      (Clang.Expr.get_definition b#e2) (Clang.Ast.cursor_of_node b#d2));
+    assert (not (Clang.equal_cursors
+      (Clang.Expr.get_definition b#e1) (Clang.Ast.cursor_of_node b#d2)));
+    assert (not (Clang.equal_cursors
+      (Clang.Expr.get_definition b#e2) (Clang.Ast.cursor_of_node b#d1)));
+  end ]} *)
   | Call of {
       callee : expr;
       args : expr list;
