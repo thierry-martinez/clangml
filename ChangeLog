@@ -4,6 +4,11 @@
   Clang.Decl.get_size_expr and Clang.Parameter.get_size_expr.
   (suggested by Damien Rouhling)
 
+- Clang.Expr.get_definition and Clang.Decl.get_canonical to retrieve the cursors
+  to the declaration site of identifiers, and Clang.compare_cursors for
+  comparing cursors.
+  (suggested by Arthur Charguéraud)
+
 - Bug-fix: Constant array sizes are no longer reported as default values for
   parameters.
 

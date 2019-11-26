@@ -181,10 +181,15 @@ type type_interface = {
     destructor : (string -> string) option;
     carry_reference : string option;
     null_is_none : bool;
+    compare : string option;
+    hash : string option;
   }
 
 let empty_type_interface =
-  { reinterpret_as = None; destructor = None; carry_reference = None; null_is_none = false }
+  { reinterpret_as = None; destructor = None; carry_reference = None;
+    null_is_none = false;
+    compare = None;
+    hash = None; }
 
 let union_option a b =
   match a, b with
@@ -196,7 +201,9 @@ let union_type_interfaces a b =
   { reinterpret_as = union_option a.reinterpret_as b.reinterpret_as;
     destructor = union_option a.destructor b.destructor;
     carry_reference = union_option a.carry_reference b.carry_reference;
-    null_is_none = a.null_is_none || b.null_is_none }
+    null_is_none = a.null_is_none || b.null_is_none;
+    compare = union_option a.compare b.compare;
+    hash = union_option a.hash b.hash; }
 
 let reinterpret_as type_spec type_interface =
   { type_interface with reinterpret_as = union_option type_interface.reinterpret_as (Some type_spec) }
@@ -215,6 +222,12 @@ let integer_zero_is_true = integer_enum "not bool"
 
 let null_is_none type_interface =
   { type_interface with null_is_none = true }
+
+let compare_value compare type_interface =
+  { type_interface with compare = Some compare }
+
+let hash_value hash type_interface =
+  { type_interface with hash = Some hash }
 
 type argument_interface =
   | Array of { length : argument; contents : argument }
@@ -1078,6 +1091,22 @@ static void %s(value v) {
 " finalizer (destructor (Printf.sprintf "*((%s *) Data_custom_val(v))" type_name));
       finalizer
 
+let declare_opaque context type_name ocaml_type_name type_interface =
+  let destructor = make_destructor context type_name ocaml_type_name type_interface in
+  let compare =
+    match type_interface.compare with
+    | None -> "custom_compare_default"
+    | Some compare -> compare in
+  let hash =
+    match type_interface.hash with
+    | None -> "custom_hash_default"
+    | Some hash -> hash in
+  Printf.fprintf context.chan_stubs
+    "DECLARE_OPAQUE_EX(%s, %s, %s, %s, %s, %s, %s)\n\n"
+    type_name ocaml_type_name (name_of_c_of_ocaml ocaml_type_name)
+    (name_of_ocaml_of_c ocaml_type_name)
+    destructor compare hash
+
 let translate_struct_decl' context cur typedef name =
   let interface = get_struct name context.module_interface in
   let type_interface = get_type name context.module_interface in
@@ -1128,12 +1157,7 @@ let translate_struct_decl' context cur typedef name =
     let (ptype_kind : Parsetree.type_kind), ptype_manifest =
       match Lazy.force record_fields with
       | None ->
-          let destructor = make_destructor context type_name ocaml_type_name type_interface in
-          Printf.fprintf context.chan_stubs
-            "DECLARE_OPAQUE(%s, %s, %s, %s, %s)\n\n"
-            type_name ocaml_type_name (name_of_c_of_ocaml ocaml_type_name)
-            (name_of_ocaml_of_c ocaml_type_name)
-            destructor;
+          declare_opaque context type_name ocaml_type_name type_interface;
           Parsetree.Ptype_abstract, None
       | Some fields ->
           let nb_fields = List.length fields in
@@ -1454,16 +1478,10 @@ let translate_typedef_decl context cur =
     if not (String_hashtbl.mem context.type_table name) then
     begin
       let type_interface = get_type name context.module_interface in
-
       let ocaml_type_name = make_ocaml_type_name name in
       let common_info = make_common_type_info ~type_interface ocaml_type_name in
       let make_decl () =
-        let destructor = make_destructor context name ocaml_type_name type_interface in
-        Printf.fprintf context.chan_stubs
-          "DECLARE_OPAQUE(%s, %s, %s, %s, %s)\n\n"
-          name ocaml_type_name (name_of_c_of_ocaml ocaml_type_name)
-          (name_of_ocaml_of_c ocaml_type_name)
-          destructor;
+        declare_opaque context name ocaml_type_name type_interface;
         let type_decl = type_declaration (loc ocaml_type_name) in
         add_type_declaration context [type_decl] in
       String_hashtbl.add context.type_table name
@@ -1999,7 +2017,7 @@ let main cflags llvm_config prefix =
     | _ -> "clang_free" in
   let module_interface =
     empty_module_interface |>
-    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|^clang_free$|constructUSR|^clang_executeOnThread$|^clang_getDiagnosticCategoryName$|^clang_getDefinitionSpellingAndExtent$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_annotateTokens$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$|^clang_Cursor_getTranslationUnit$") hidden_function_interface |>
+    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|^clang_free$|constructUSR|^clang_executeOnThread$|^clang_getDiagnosticCategoryName$|^clang_getDefinitionSpellingAndExtent$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_annotateTokens$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$|^clang_Cursor_getTranslationUnit$|^clang_ext_hash_cursor$|^clang_ext_compare_cursor$") hidden_function_interface |>
     add_type (Pcre.regexp "^CXString$")
       (empty_type_interface |>
        reinterpret_as (Type_info ({ ocamltype = ocaml_string;
@@ -2034,6 +2052,10 @@ let main cflags llvm_config prefix =
        carry_reference "CXIndex") |>
     add_type (Pcre.regexp "^CXCursor$|^CXType$|^CXFile$|^CXModule$|^CXSourceRange$|^CXSourceLocation$|^CXComment$|^clang_ext_TemplateName$|^clang_ext_TemplateArgument$|^clang_ext_LambdaCapture$|^clang_ext_DeclarationName$|^clang_ext_NestedNameSpecifier$")
       (empty_type_interface |> carry_reference "CXTranslationUnit") |>
+    add_type (Pcre.regexp "^CXCursor$")
+      (empty_type_interface |>
+       compare_value "clang_ext_compare_cursor" |>
+       hash_value "clang_ext_hash_cursor") |>
     add_type (Pcre.regexp "^CXVirtualFileOverlay$")
       (empty_type_interface |>
        make_destructor "clang_VirtualFileOverlay_dispose") |>
@@ -2273,6 +2295,7 @@ let main cflags llvm_config prefix =
         (Array.of_list clang_options)
         [| { filename = "source.c"; contents = "\
 #include <clang-c/Index.h>
+#include \"clangml/clang__custom.h\"
 #include \"clangml/libclang_extensions.h\"" } |]
         Clang.Cxtranslationunit_flags.none with
     | Error _ -> failwith "Error!"
@@ -2286,6 +2309,7 @@ let main cflags llvm_config prefix =
     output_string chan_stubs "\
 #include \"stubgen.h\"
 #include <clang-c/Index.h>
+#include \"clang__custom.h\"
 #include \"libclang_extensions.h\"
 #include <stdio.h>
 ";

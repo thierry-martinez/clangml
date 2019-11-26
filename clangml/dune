@@ -1,7 +1,7 @@
 (library
   (name clang)
   (public_name clangml)
-  (c_names clang_stubs)
+  (c_names clang_stubs clang__custom)
   (c_flags (:include "../config/cflags.sexp") -I %{project_root}/../../clangml)
   (cxx_flags --std=c++11 (:include "../config/cxxflags.sexp")
     -I %{project_root}/../../clangml)

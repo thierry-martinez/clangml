@@ -47,6 +47,9 @@ val default_include_directories : unit -> string list
     common to pass to Clang command-line. The list contains {!val:includedir}.
  *)
 
+val compare_cursors : cxcursor -> cxcursor -> int
+(** [compare_cursors c1 c2] provides a total order over cursors. *)
+
 (** {2 Abstract syntax tree} *)
 
 module Ast : sig
@@ -285,6 +288,11 @@ module Expr : sig
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
   (** [of_cxcursor ?options cu] translates [cu] into its high-level
       representation, supposing that [cu] points to an expression. *)
+
+  val get_definition : t -> cxcursor
+  (** [get_definition e] retrieves a cursor that describes the definition of
+      the entity referenced by [e]. Returns a [NULL] cursor of [e] has no
+      corresponding definition. *)
 end
 
 (** AST statements. *)
@@ -318,6 +326,9 @@ module Decl : sig
   (** [get_size_expr ?options d] returns the expression specifying the size
       of the array declared by [d], and fails if [d] is not an array
       declaration. *)
+
+  val get_canonical : t -> cxcursor
+  (** [get_canonical d] retrieves the canonical cursor declaring an entity. *)
 end
 
 (** AST parameters. *)

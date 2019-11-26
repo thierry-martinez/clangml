@@ -6423,6 +6423,16 @@ fi
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
+     if cp $srcdir/clangml/clang__custom.c clangml/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/clangml/clang__custom.h clangml/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
      if cp $srcdir/clangml/dune clangml/; then :
   true
 else

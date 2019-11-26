@@ -3,6 +3,7 @@
  * (except by continuous integration on the dedicated bootstrap branch). */
 #include "stubgen.h"
 #include <clang-c/Index.h>
+#include "clang__custom.h"
 #include "libclang_extensions.h"
 #include <stdio.h>
 CAMLprim value
@@ -20,7 +21,7 @@ clang_getBuildSessionTimestamp_wrapper()
 static void finalize_cxvirtualfileoverlay(value v) {
   clang_VirtualFileOverlay_dispose(*((CXVirtualFileOverlay *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(CXVirtualFileOverlay, cxvirtualfileoverlay, Cxvirtualfileoverlay_val, Val_cxvirtualfileoverlay, finalize_cxvirtualfileoverlay)
+DECLARE_OPAQUE_EX(CXVirtualFileOverlay, cxvirtualfileoverlay, Cxvirtualfileoverlay_val, Val_cxvirtualfileoverlay, finalize_cxvirtualfileoverlay, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_VirtualFileOverlay_create_wrapper(value options_ocaml)
@@ -146,7 +147,7 @@ free(out_buffer_ptr);
 static void finalize_cxmodulemapdescriptor(value v) {
   clang_ModuleMapDescriptor_dispose(*((CXModuleMapDescriptor *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(CXModuleMapDescriptor, cxmodulemapdescriptor, Cxmodulemapdescriptor_val, Val_cxmodulemapdescriptor, finalize_cxmodulemapdescriptor)
+DECLARE_OPAQUE_EX(CXModuleMapDescriptor, cxmodulemapdescriptor, Cxmodulemapdescriptor_val, Val_cxmodulemapdescriptor, finalize_cxmodulemapdescriptor, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_ModuleMapDescriptor_create_wrapper(value options_ocaml)
@@ -243,7 +244,7 @@ free(out_buffer_ptr);
 static void finalize_cxindex(value v) {
   clang_disposeIndex(*((CXIndex *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(CXIndex, cxindex, Cxindex_val, Val_cxindex, finalize_cxindex)
+DECLARE_OPAQUE_EX(CXIndex, cxindex, Cxindex_val, Val_cxindex, finalize_cxindex, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_createIndex_wrapper(value excludeDeclarationsFromPCH_ocaml, value displayDiagnostics_ocaml)
@@ -287,7 +288,7 @@ clang_CXIndex_getGlobalOptions_wrapper(value arg_ocaml)
   }
 }
 
-DECLARE_OPAQUE(CXFile, cxfile, Cxfile_val, Val_cxfile, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXFile, cxfile, Cxfile_val, Val_cxfile, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getFileName_wrapper(value SFile_ocaml)
@@ -373,7 +374,7 @@ clang_getFileUniqueID_wrapper(value file_ocaml)
 static void finalize_cxtranslationunit(value v) {
   clang_disposeTranslationUnit(*((CXTranslationUnit *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(CXTranslationUnit, cxtranslationunit, Cxtranslationunit_val, Val_cxtranslationunit, finalize_cxtranslationunit)
+DECLARE_OPAQUE_EX(CXTranslationUnit, cxtranslationunit, Cxtranslationunit_val, Val_cxtranslationunit, finalize_cxtranslationunit, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_isFileMultipleIncludeGuarded_wrapper(value tu_ocaml, value file_ocaml)
@@ -409,7 +410,7 @@ clang_getFile_wrapper(value tu_ocaml, value file_name_ocaml)
   }
 }
 
-DECLARE_OPAQUE(CXSourceLocation, cxsourcelocation, Cxsourcelocation_val, Val_cxsourcelocation, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXSourceLocation, cxsourcelocation, Cxsourcelocation_val, Val_cxsourcelocation, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getNullLocation_wrapper()
@@ -510,7 +511,7 @@ clang_Location_isFromMainFile_wrapper(value location_ocaml)
   }
 }
 
-DECLARE_OPAQUE(CXSourceRange, cxsourcerange, Cxsourcerange_val, Val_cxsourcerange, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXSourceRange, cxsourcerange, Cxsourcerange_val, Val_cxsourcerange, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getNullRange_wrapper()
@@ -826,7 +827,7 @@ clang_disposeSourceRangeList(result);
 static void finalize_cxdiagnosticset(value v) {
   clang_disposeDiagnosticSet(*((CXDiagnosticSet *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(CXDiagnosticSet, cxdiagnosticset, Cxdiagnosticset_val, Val_cxdiagnosticset, finalize_cxdiagnosticset)
+DECLARE_OPAQUE_EX(CXDiagnosticSet, cxdiagnosticset, Cxdiagnosticset_val, Val_cxdiagnosticset, finalize_cxdiagnosticset, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getNumDiagnosticsInSet_wrapper(value Diags_ocaml)
@@ -842,7 +843,7 @@ clang_getNumDiagnosticsInSet_wrapper(value Diags_ocaml)
   }
 }
 
-DECLARE_OPAQUE(CXDiagnostic, cxdiagnostic, Cxdiagnostic_val, Val_cxdiagnostic, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXDiagnostic, cxdiagnostic, Cxdiagnostic_val, Val_cxdiagnostic, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getDiagnosticInSet_wrapper(value Diags_ocaml, value Index_ocaml)
@@ -1593,7 +1594,7 @@ clang_getTUResourceUsageName_wrapper(value kind_ocaml)
 static void finalize_cxturesourceusage(value v) {
   clang_disposeCXTUResourceUsage(*((struct CXTUResourceUsage *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(struct CXTUResourceUsage, cxturesourceusage, Cxturesourceusage_val, Val_cxturesourceusage, finalize_cxturesourceusage)
+DECLARE_OPAQUE_EX(struct CXTUResourceUsage, cxturesourceusage, Cxturesourceusage_val, Val_cxturesourceusage, finalize_cxturesourceusage, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getCXTUResourceUsage_wrapper(value TU_ocaml)
@@ -1969,7 +1970,7 @@ Val_cxcursorkind(enum CXCursorKind v)
   return Val_int(0);
 }
 
-DECLARE_OPAQUE(CXCursor, cxcursor, Cxcursor_val, Val_cxcursor, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXCursor, cxcursor, Cxcursor_val, Val_cxcursor, custom_finalize_default, clang_ext_compare_cursor, clang_ext_hash_cursor)
 
 CAMLprim value
 clang_getNullCursor_wrapper()
@@ -2306,7 +2307,7 @@ clang_getCursorLanguage_wrapper(value cursor_ocaml)
   }
 }
 
-DECLARE_OPAQUE(CXCursorSet, cxcursorset, Cxcursorset_val, Val_cxcursorset, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXCursorSet, cxcursorset, Cxcursorset_val, Val_cxcursorset, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_createCXCursorSet_wrapper()
@@ -2587,7 +2588,7 @@ Val_cxtypekind(enum CXTypeKind v)
   return Val_int(0);
 }
 
-DECLARE_OPAQUE(CXType, cxtype, Cxtype_val, Val_cxtype, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXType, cxtype, Cxtype_val, Val_cxtype, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getTypeKind_wrapper(value arg_ocaml)
@@ -3667,7 +3668,7 @@ clang_Cursor_getBriefCommentText_wrapper(value C_ocaml)
   }
 }
 
-DECLARE_OPAQUE(CXModule, cxmodule, Cxmodule_val, Val_cxmodule, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXModule, cxmodule, Cxmodule_val, Val_cxmodule, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_Cursor_getModule_wrapper(value C_ocaml)
@@ -4004,7 +4005,7 @@ Val_cxcompletionchunkkind(enum CXCompletionChunkKind v)
   return Val_int(0);
 }
 
-DECLARE_OPAQUE(CXCompletionString, cxcompletionstring, Cxcompletionstring_val, Val_cxcompletionstring, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXCompletionString, cxcompletionstring, Cxcompletionstring_val, Val_cxcompletionstring, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getCompletionChunkKind_wrapper(value completion_string_ocaml, value chunk_number_ocaml)
@@ -4207,7 +4208,7 @@ clang_toggleCrashRecovery_wrapper(value isEnabled_ocaml)
   CAMLreturn(Val_unit);
 }
 
-DECLARE_OPAQUE(CXRemapping, cxremapping, Cxremapping_val, Val_cxremapping, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXRemapping, cxremapping, Cxremapping_val, Val_cxremapping, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getRemappings_wrapper(value path_ocaml)
@@ -4254,7 +4255,7 @@ clang_remap_getNumFiles_wrapper(value arg_ocaml)
   }
 }
 
-DECLARE_OPAQUE(CXIndexAction, cxindexaction, Cxindexaction_val, Val_cxindexaction, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXIndexAction, cxindexaction, Cxindexaction_val, Val_cxindexaction, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_IndexAction_create_wrapper(value CIdx_ocaml)
@@ -4270,7 +4271,7 @@ clang_IndexAction_create_wrapper(value CIdx_ocaml)
   }
 }
 
-DECLARE_OPAQUE(CXComment, cxcomment, Cxcomment_val, Val_cxcomment, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXComment, cxcomment, Cxcomment_val, Val_cxcomment, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_Cursor_getParsedComment_wrapper(value C_ocaml)
@@ -4921,7 +4922,7 @@ clang_ext_getVersion_wrapper()
 static void finalize_cxint(value v) {
   clang_ext_Int_dispose(*((CXInt *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(CXInt, cxint, Cxint_val, Val_cxint, finalize_cxint)
+DECLARE_OPAQUE_EX(CXInt, cxint, Cxint_val, Val_cxint, finalize_cxint, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_equal_cxint_wrapper(value a_ocaml, value b_ocaml)
@@ -5119,7 +5120,7 @@ clang_ext_Int_getSExtValue64_wrapper(value c_ocaml)
 static void finalize_cxfloat(value v) {
   clang_ext_Float_dispose(*((CXFloat *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(CXFloat, cxfloat, Cxfloat_val, Val_cxfloat, finalize_cxfloat)
+DECLARE_OPAQUE_EX(CXFloat, cxfloat, Cxfloat_val, Val_cxfloat, finalize_cxfloat, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_equal_cxfloat_wrapper(value a_ocaml, value b_ocaml)
@@ -7152,7 +7153,7 @@ Val_clang_ext_templatename_namekind(enum clang_ext_TemplateName_NameKind v)
 static void finalize_clang_ext_templatename(value v) {
   clang_ext_TemplateName_dispose(*((struct clang_ext_TemplateName *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(struct clang_ext_TemplateName, clang_ext_templatename, Clang_ext_templatename_val, Val_clang_ext_templatename, finalize_clang_ext_templatename)
+DECLARE_OPAQUE_EX(struct clang_ext_TemplateName, clang_ext_templatename, Clang_ext_templatename_val, Val_clang_ext_templatename, finalize_clang_ext_templatename, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_ext_TemplateName_getKind_wrapper(value arg_ocaml)
@@ -7225,7 +7226,7 @@ Val_cxtemplateargumentkind(enum CXTemplateArgumentKind v)
 static void finalize_clang_ext_templateargument(value v) {
   clang_ext_TemplateArgument_dispose(*((struct clang_ext_TemplateArgument *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(struct clang_ext_TemplateArgument, clang_ext_templateargument, Clang_ext_templateargument_val, Val_clang_ext_templateargument, finalize_clang_ext_templateargument)
+DECLARE_OPAQUE_EX(struct clang_ext_TemplateArgument, clang_ext_templateargument, Clang_ext_templateargument_val, Val_clang_ext_templateargument, finalize_clang_ext_templateargument, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_ext_TemplateArgument_getKind_wrapper(value arg_ocaml)
@@ -7707,7 +7708,7 @@ clang_ext_LambdaExpr_getCaptureCount_wrapper(value c_ocaml)
 static void finalize_clang_ext_lambdacapture(value v) {
   clang_ext_LambdaCapture_dispose(*((struct clang_ext_LambdaCapture *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(struct clang_ext_LambdaCapture, clang_ext_lambdacapture, Clang_ext_lambdacapture_val, Val_clang_ext_lambdacapture, finalize_clang_ext_lambdacapture)
+DECLARE_OPAQUE_EX(struct clang_ext_LambdaCapture, clang_ext_lambdacapture, Clang_ext_lambdacapture_val, Val_clang_ext_lambdacapture, finalize_clang_ext_lambdacapture, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_ext_LambdaExpr_getCapture_wrapper(value c_ocaml, value index_ocaml)
@@ -8418,7 +8419,7 @@ Val_clang_ext_declarationnamekind(enum clang_ext_DeclarationNameKind v)
 static void finalize_clang_ext_declarationname(value v) {
   clang_ext_DeclarationName_dispose(*((struct clang_ext_DeclarationName *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(struct clang_ext_DeclarationName, clang_ext_declarationname, Clang_ext_declarationname_val, Val_clang_ext_declarationname, finalize_clang_ext_declarationname)
+DECLARE_OPAQUE_EX(struct clang_ext_DeclarationName, clang_ext_declarationname, Clang_ext_declarationname_val, Val_clang_ext_declarationname, finalize_clang_ext_declarationname, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_ext_DeclarationName_getKind_wrapper(value arg_ocaml)
@@ -8576,7 +8577,7 @@ Val_clang_ext_nestednamespecifierkind(enum clang_ext_NestedNameSpecifierKind v)
   return Val_int(0);
 }
 
-DECLARE_OPAQUE(struct clang_ext_NestedNameSpecifier, clang_ext_nestednamespecifier, Clang_ext_nestednamespecifier_val, Val_clang_ext_nestednamespecifier, custom_finalize_default)
+DECLARE_OPAQUE_EX(struct clang_ext_NestedNameSpecifier, clang_ext_nestednamespecifier, Clang_ext_nestednamespecifier_val, Val_clang_ext_nestednamespecifier, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_ext_NestedNameSpecifier_getKind_wrapper(value arg_ocaml)
