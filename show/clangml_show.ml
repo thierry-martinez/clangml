@@ -34,6 +34,8 @@ module%import Clang = struct
 
     let pp_cxtype = opaque
 
+    let pp_clang_ext_typeloc = opaque
+
     let pp_cxint fmt i =
       Format.pp_print_string fmt (Clang.string_of_cxint i)
 

@@ -50,6 +50,10 @@ module%import Clang = struct
     let equal_cxsourcelocation = ignore_equal
 
     let compare_cxsourcelocation = ignore_compare
+
+    let equal_clang_ext_typeloc = ignore_equal
+
+    let compare_clang_ext_typeloc = ignore_compare
   end
 
   module%override Types = struct

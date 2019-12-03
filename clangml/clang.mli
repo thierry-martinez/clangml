@@ -304,6 +304,13 @@ module Stmt : sig
       representation, supposing that [cu] points to a statement. *)
 end
 
+(** AST not-transformed types. *)
+module Type_loc : sig
+  type t = Ast.type_loc
+
+  val to_qual_type : ?options:Ast.Options.t -> t -> Type.t
+end
+
 (** AST declarations. *)
 module Decl : sig
   type t = Ast.decl
@@ -327,6 +334,8 @@ module Decl : sig
       of the array declared by [d], and fails if [d] is not an array
       declaration. *)
 
+  val get_type_loc : ?options:Ast.Options.t -> t -> Type_loc.t
+
   val get_canonical : t -> cxcursor
   (** [get_canonical d] retrieves the canonical cursor declaring an entity. *)
 end
@@ -339,6 +348,8 @@ module Parameter : sig
   (** [get_size_expr ?options p] returns the expression specifying the size
       of the array declared by [p], and fails if [p] is not an array
       parameter. *)
+
+  val get_type_loc : ?options:Ast.Options.t -> t -> Type_loc.t
 end
 
 (** AST enumeration constants. *)

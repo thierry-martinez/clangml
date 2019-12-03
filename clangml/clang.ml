@@ -1604,6 +1604,44 @@ module Ast = struct
 
     let of_cxtranslationunit tu =
       translation_unit_of_cxcursor (get_translation_unit_cursor tu)
+
+    let rec type_loc_of_typeloc typeloc =
+      let desc =
+        match ext_type_loc_get_class typeloc with
+        | Builtin -> Builtin
+        | Pointer ->
+            let pointee =
+              ext_pointer_like_type_loc_get_pointee_loc typeloc |>
+              type_loc_of_typeloc in
+            Pointer { pointee }
+        | BlockPointer ->
+            let pointee =
+              ext_pointer_like_type_loc_get_pointee_loc typeloc |>
+              type_loc_of_typeloc in
+            BlockPointer { pointee }
+        | ConstantArray ->
+            let size =
+              ext_array_type_loc_get_size_expr typeloc |>
+              expr_of_cxcursor in
+            let element =
+              ext_array_type_loc_get_element_loc typeloc |>
+              type_loc_of_typeloc in
+            ConstantArray { size; element }
+        | VariableArray ->
+            let size =
+              ext_array_type_loc_get_size_expr typeloc |>
+              expr_of_cxcursor in
+            let element =
+              ext_array_type_loc_get_element_loc typeloc |>
+              type_loc_of_typeloc in
+            VariableArray { size; element }
+        | IncompleteArray ->
+            let element =
+              ext_array_type_loc_get_element_loc typeloc |>
+              type_loc_of_typeloc in
+            IncompleteArray { element }
+        | _ -> UnknownTypeLoc in
+      { typeloc = Some typeloc; desc }
   end
 
   let of_cxtype ?(options = Options.default) tu =
@@ -1676,6 +1714,19 @@ module Expr = struct
     e |> Ast.cursor_of_node |> get_cursor_definition
 end
 
+module Type_loc = struct
+  type t = Ast.type_loc
+
+  let to_qual_type ?options (t : t) =
+    match t.typeloc with
+    | Some tl -> tl |> ext_type_loc_get_type |> Ast.of_cxtype ?options
+    | None -> get_cursor_type (get_null_cursor ()) |> Ast.of_cxtype ?options
+
+  let of_typeloc ?(options = Ast.Options.default) typeloc =
+    let module Convert = Ast.Converter (struct let options = options end) in
+    Convert.type_loc_of_typeloc typeloc
+end
+
 module Decl = struct
   type t = Ast.decl
 
@@ -1694,6 +1745,10 @@ module Decl = struct
     decl |> Ast.cursor_of_node |>
     ext_declarator_decl_get_size_expr |> Expr.of_cxcursor ?options
 
+  let get_type_loc ?options decl =
+    decl |> Ast.cursor_of_node |>
+    ext_declarator_decl_get_type_loc |> Type_loc.of_typeloc ?options
+
   let get_canonical decl =
     decl |> Ast.cursor_of_node |> get_canonical_cursor
 end
@@ -1704,6 +1759,10 @@ module Parameter = struct
   let get_size_expr ?options param =
     param |> Ast.cursor_of_node |>
     ext_declarator_decl_get_size_expr |> Expr.of_cxcursor ?options
+
+  let get_type_loc ?options param =
+    param |> Ast.cursor_of_node |>
+    ext_declarator_decl_get_type_loc |> Type_loc.of_typeloc ?options
 end
 
 module Type = struct

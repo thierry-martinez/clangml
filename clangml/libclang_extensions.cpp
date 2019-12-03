@@ -403,6 +403,26 @@ GetNestedNameSpecifier(struct clang_ext_NestedNameSpecifier specifier)
   return static_cast<const clang::NestedNameSpecifier *>(specifier.data);
 }
 
+static struct clang_ext_TypeLoc
+MakeTypeLoc(const clang::TypeLoc &t, CXTranslationUnit tu)
+{
+  struct clang_ext_TypeLoc tl = { new clang::TypeLoc(t), tu };
+  return tl;
+}
+
+static struct clang_ext_TypeLoc
+MakeTypeLocInvalid(CXTranslationUnit tu)
+{
+  struct clang_ext_TypeLoc tl = { nullptr, tu };
+  return tl;
+}
+
+static const clang::TypeLoc *
+GetTypeLoc(struct clang_ext_TypeLoc tl)
+{
+  return static_cast<const clang::TypeLoc *>(tl.data);
+}
+
 extern "C" {
   CXVersion
   clang_ext_getVersion()
@@ -2681,5 +2701,111 @@ extern "C" {
       return MakeCXCursor(a->getInputExpr(i), getCursorTU(c));
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  struct clang_ext_TypeLoc
+  clang_ext_DeclaratorDecl_getTypeLoc(CXCursor c)
+  {
+    if (auto d = getDeclaratorDecl(c)) {
+      if (auto t = d->getTypeSourceInfo()->getTypeLoc()) {
+        return MakeTypeLoc(t, getCursorTU(c));
+      }
+    }
+    return MakeTypeLocInvalid(getCursorTU(c));
+  }
+
+  void
+  clang_ext_TypeLoc_dispose(struct clang_ext_TypeLoc tl)
+  {
+    if (auto *t = GetTypeLoc(tl)) {
+      delete t;
+    }
+  }
+
+  enum clang_ext_TypeLoc_Class
+  clang_ext_TypeLoc_getClass(struct clang_ext_TypeLoc tl)
+  {
+    if (auto *t = GetTypeLoc(tl)) {
+      switch (t->getTypeLocClass()) {
+      #define TYPELOC(Class, Base) \
+      case clang::TypeLoc::Class: \
+        return CLANG_EXT_TYPELOC_##Class;
+      #define ABSTRACT_TYPELOC(Class, Base)
+      #include <clang/AST/TypeLocNodes.def>
+      default:
+        return CLANG_EXT_TYPELOC_InvalidTypeLoc;
+      }
+    }
+    return CLANG_EXT_TYPELOC_InvalidTypeLoc;
+  }
+
+  CXType
+  clang_ext_TypeLoc_getType(struct clang_ext_TypeLoc tl)
+  {
+    if (auto *t = GetTypeLoc(tl)) {
+      return MakeCXType(t->getType(), tl.tu);
+    }
+    return MakeCXTypeInvalid(tl.tu);
+  }
+
+  CXCursor
+  clang_ext_ArrayTypeLoc_getSizeExpr(struct clang_ext_TypeLoc tl)
+  {
+    if (auto *t = GetTypeLoc(tl)) {
+      if (auto at = t->getAs<clang::ArrayTypeLoc>()) {
+        return MakeCXCursor(at.getSizeExpr(), tl.tu);
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, tl.tu);
+  }
+
+  struct clang_ext_TypeLoc
+  clang_ext_ArrayTypeLoc_getElementLoc(struct clang_ext_TypeLoc tl)
+  {
+    if (auto *t = GetTypeLoc(tl)) {
+      if (auto at = t->getAs<clang::ArrayTypeLoc>()) {
+        return MakeTypeLoc(at.getElementLoc(), tl.tu);
+      }
+    }
+    return MakeTypeLocInvalid(tl.tu);
+  }
+
+  struct clang_ext_TypeLoc
+  clang_ext_ParenTypeLoc_getInnerLoc(struct clang_ext_TypeLoc tl)
+  {
+    if (auto *t = GetTypeLoc(tl)) {
+      if (auto pt = t->getAs<clang::ParenTypeLoc>()) {
+        return MakeTypeLoc(pt.getInnerLoc(), tl.tu);
+      }
+    }
+    return MakeTypeLocInvalid(tl.tu);
+  }
+
+  struct clang_ext_TypeLoc
+  clang_ext_PointerLikeTypeLoc_getPointeeLoc(struct clang_ext_TypeLoc tl)
+  {
+    if (auto *t = GetTypeLoc(tl)) {
+      if (auto pt = t->getAs<clang::PointerTypeLoc>()) {
+        return MakeTypeLoc(pt.getPointeeLoc(), tl.tu);
+      }
+      if (auto pt = t->getAs<clang::BlockPointerTypeLoc>()) {
+        return MakeTypeLoc(pt.getPointeeLoc(), tl.tu);
+      }
+      if (auto pt = t->getAs<clang::MemberPointerTypeLoc>()) {
+        return MakeTypeLoc(pt.getPointeeLoc(), tl.tu);
+      }
+    }
+    return MakeTypeLocInvalid(tl.tu);
+  }
+
+  struct clang_ext_TypeLoc
+  clang_ext_MemberPointerTypeLoc_getClassLoc(struct clang_ext_TypeLoc tl)
+  {
+    if (auto *t = GetTypeLoc(tl)) {
+      if (auto pt = t->getAs<clang::MemberPointerTypeLoc>()) {
+        return MakeTypeLoc(pt.getClassTInfo()->getTypeLoc(), tl.tu);
+      }
+    }
+    return MakeTypeLocInvalid(tl.tu);
   }
 }

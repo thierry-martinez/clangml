@@ -891,3 +891,39 @@ clang_ext_AsmStmt_getInputConstraint(CXCursor, unsigned);
 
 CXCursor
 clang_ext_AsmStmt_getInputExpr(CXCursor, unsigned);
+
+struct clang_ext_TypeLoc {
+  const void *data;
+  CXTranslationUnit tu;
+};
+
+enum clang_ext_TypeLoc_Class {
+  #define TYPELOC(Class, Base) CLANG_EXT_TYPELOC_##Class,
+  #define ABSTRACT_TYPELOC(Class, Base)
+  #include <clang/AST/TypeLocNodes.def>
+  CLANG_EXT_TYPELOC_InvalidTypeLoc
+};
+
+struct clang_ext_TypeLoc
+clang_ext_DeclaratorDecl_getTypeLoc(CXCursor);
+
+void
+clang_ext_TypeLoc_dispose(struct clang_ext_TypeLoc);
+
+enum clang_ext_TypeLoc_Class
+clang_ext_TypeLoc_getClass(struct clang_ext_TypeLoc);
+
+CXType
+clang_ext_TypeLoc_getType(struct clang_ext_TypeLoc);
+
+CXCursor
+clang_ext_ArrayTypeLoc_getSizeExpr(struct clang_ext_TypeLoc);
+
+struct clang_ext_TypeLoc
+clang_ext_ArrayTypeLoc_getElementLoc(struct clang_ext_TypeLoc);
+
+struct clang_ext_TypeLoc
+clang_ext_ParenTypeLoc_getInnerLoc(struct clang_ext_TypeLoc);
+
+struct clang_ext_TypeLoc
+clang_ext_PointerLikeTypeLoc_getPointeeLoc(struct clang_ext_TypeLoc);

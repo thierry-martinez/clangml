@@ -1,7 +1,9 @@
 # Next version
 
-- The original expressions for constant array sizes can be obtained with
-  Clang.Decl.get_size_expr and Clang.Parameter.get_size_expr.
+- Typeloc structures which contains non-transformed type informations can be
+  obtained with Clang.Decl.get_type_loc and Clang.Parameter.get_type_loc.
+  In particular, typeloc structures can be obtained to get the original size
+  expression from constant arrays.
   (suggested by Damien Rouhling)
 
 - Clang.Expr.get_definition and Clang.Decl.get_canonical to retrieve the cursors

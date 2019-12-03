@@ -68,6 +68,8 @@ let quote_stmt_list = lift_expr#list lift_expr#stmt
 
 let quote_expr = lift_expr#expr
 
+let quote_type_loc = lift_expr#type_loc
+
 let check_result ?(result = fun (_ : 'b) -> ()) value =
   if
     match value with
@@ -331,8 +333,8 @@ let () =
 
     Note: The "qual_type" contains the canonical type where the size has already
     been computed. If you need to get the original expression of the size, you
-    may use {!val:Clang.Decl.get_size_expr} or
-    {!val:Clang.Parameter.get_size_expr}.
+    may use {!val:Clang.Decl.get_type_loc} or
+    {!val:Clang.Parameter.get_type_loc}.
     {[
 let example = "char s[21 * 2];"
 
@@ -343,14 +345,15 @@ let () =
       element = { desc = BuiltinType Char_S };
       size = 42 }}}} as decl]]
   ~result:begin fun bindings ->
-    check_result (Pattern_runtime.check quote_expr
-      (Clang.Decl.get_size_expr bindings#decl)
-      [%pattern? { desc = BinaryOperator {
+    check_result (Pattern_runtime.check quote_type_loc
+      (Clang.Decl.get_type_loc bindings#decl)
+      [%pattern? { desc = ConstantArray { size = { desc = BinaryOperator {
         lhs = { desc = IntegerLiteral (Int 21)};
         kind = Mul;
-        rhs = { desc = IntegerLiteral (Int 2)}}}])
+        rhs = { desc = IntegerLiteral (Int 2)}}}}}])
   end
 
+(*
 let example = "void f(char s[21 * 2]);"
 
 let () =
@@ -364,13 +367,14 @@ let () =
         name = "s";
         default = None; }} as parameter] }}}}]]
   ~result:begin fun bindings ->
-    check_result (Pattern_runtime.check quote_expr
-      (Clang.Parameter.get_size_expr bindings#parameter)
-      [%pattern? { desc = BinaryOperator {
+    check_result (Pattern_runtime.check quote_type_loc
+      (Clang.Parameter.get_type_loc bindings#parameter)
+      [%pattern? { desc = ConstantArray { size = { desc = BinaryOperator {
         lhs = { desc = IntegerLiteral (Int 21)};
         kind = Mul;
-        rhs = { desc = IntegerLiteral (Int 2)}}}])
+        rhs = { desc = IntegerLiteral (Int 2)}}}}}])
   end
+*)
     ]}*)
   | Vector of {
       element : qual_type;
@@ -3885,6 +3889,36 @@ and translation_unit_desc = {
 type 'a node = ('a, qual_type) open_node
 
 type decoration = qual_type open_decoration
+
+type type_loc = {
+    typeloc : clang_ext_typeloc option;
+    desc : type_loc_desc;
+  }
+and type_loc_desc =
+  | Builtin
+  | Typedef
+  | ConstantArray of {
+      size : expr;
+      element : type_loc;
+    }
+  | VariableArray of {
+      size : expr;
+      element : type_loc;
+    }
+  | IncompleteArray of {
+      element : type_loc;
+    }
+  | Pointer of {
+      pointee : type_loc;
+    }
+  | BlockPointer of {
+      pointee : type_loc;
+    }
+  | MemberPointer of {
+      class_ : type_loc;
+      pointee : type_loc;
+    }
+  | UnknownTypeLoc
 
 (*{[
 let () =
