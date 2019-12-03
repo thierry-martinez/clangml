@@ -1609,21 +1609,21 @@ module Ast = struct
       let desc =
         match ext_type_loc_get_class typeloc with
         | Builtin ->
-            BuiltinType (ext_type_loc_get_type typeloc |> get_type_kind)
+            BuiltinTypeLoc (ext_type_loc_get_type typeloc |> get_type_kind)
         | Typedef ->
-            Typedef (
+            TypedefTypeLoc (
               ext_type_loc_get_type typeloc |> get_type_declaration |>
               ident_ref_of_cxcursor)
         | Pointer ->
             let pointee =
               ext_pointer_like_type_loc_get_pointee_loc typeloc |>
               type_loc_of_typeloc in
-            Pointer { pointee }
+            PointerTypeLoc { pointee }
         | BlockPointer ->
             let pointee =
               ext_pointer_like_type_loc_get_pointee_loc typeloc |>
               type_loc_of_typeloc in
-            BlockPointer { pointee }
+            BlockPointerTypeLoc { pointee }
         | MemberPointer ->
             let class_ =
               ext_member_pointer_type_loc_get_class_loc typeloc |>
@@ -1631,7 +1631,7 @@ module Ast = struct
             let pointee =
               ext_pointer_like_type_loc_get_pointee_loc typeloc |>
               type_loc_of_typeloc in
-            MemberPointer { class_; pointee }
+            MemberPointerTypeLoc { class_; pointee }
         | ConstantArray ->
             let size =
               ext_array_type_loc_get_size_expr typeloc |>
@@ -1639,7 +1639,7 @@ module Ast = struct
             let element =
               ext_array_type_loc_get_element_loc typeloc |>
               type_loc_of_typeloc in
-            ConstantArray { size; element }
+            ConstantArrayTypeLoc { size; element }
         | VariableArray ->
             let size =
               ext_array_type_loc_get_size_expr typeloc |>
@@ -1647,12 +1647,12 @@ module Ast = struct
             let element =
               ext_array_type_loc_get_element_loc typeloc |>
               type_loc_of_typeloc in
-            VariableArray { size; element }
+            VariableArrayTypeLoc { size; element }
         | IncompleteArray ->
             let element =
               ext_array_type_loc_get_element_loc typeloc |>
               type_loc_of_typeloc in
-            IncompleteArray { element }
+            IncompleteArrayTypeLoc { element }
         | FunctionProto
         | FunctionNoProto ->
             let result =
@@ -1664,20 +1664,20 @@ module Ast = struct
                 (fun i ->
                   ext_function_type_loc_get_param typeloc i |>
                   parameter_of_cxcursor) in
-            Function { result; parameters }
+            FunctionTypeLoc { result; parameters }
         | Paren ->
             (ext_paren_type_loc_get_inner_loc typeloc |>
             type_loc_of_typeloc).desc
         | Elaborated ->
-            Elaborated (
+            ElaboratedTypeLoc (
               ext_type_loc_get_type typeloc |> ext_type_get_named_type |>
               of_cxtype)
         | Record ->
-            Record (
+            RecordTypeLoc (
               ext_type_loc_get_type typeloc |> get_type_declaration |>
               ident_ref_of_cxcursor)
         | Enum ->
-            Enum (
+            EnumTypeLoc (
               ext_type_loc_get_type typeloc |> get_type_declaration |>
               ident_ref_of_cxcursor)
         | c -> UnknownTypeLoc c in
