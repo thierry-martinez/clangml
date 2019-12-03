@@ -8613,3 +8613,270 @@ clang_ext_AsmStmt_getInputExpr_wrapper(value arg_ocaml, value arg2_ocaml)
   }
 }
 
+static void finalize_clang_ext_typeloc(value v) {
+  clang_ext_TypeLoc_dispose(*((struct clang_ext_TypeLoc *) Data_custom_val(v)));;
+}
+DECLARE_OPAQUE_EX(struct clang_ext_TypeLoc, clang_ext_typeloc, Clang_ext_typeloc_val, Val_clang_ext_typeloc, finalize_clang_ext_typeloc, custom_compare_default, custom_hash_default)
+
+CAMLprim value
+clang_ext_DeclaratorDecl_getTypeLoc_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  struct clang_ext_TypeLoc result = clang_ext_DeclaratorDecl_getTypeLoc(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_typeloc(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_TypeLoc_Class
+Clang_ext_typeloc_class_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CLANG_EXT_TYPELOC_Qualified;
+  case 1: return CLANG_EXT_TYPELOC_Builtin;
+  case 2: return CLANG_EXT_TYPELOC_Complex;
+  case 3: return CLANG_EXT_TYPELOC_Pointer;
+  case 4: return CLANG_EXT_TYPELOC_BlockPointer;
+  case 5: return CLANG_EXT_TYPELOC_LValueReference;
+  case 6: return CLANG_EXT_TYPELOC_RValueReference;
+  case 7: return CLANG_EXT_TYPELOC_MemberPointer;
+  case 8: return CLANG_EXT_TYPELOC_ConstantArray;
+  case 9: return CLANG_EXT_TYPELOC_IncompleteArray;
+  case 10: return CLANG_EXT_TYPELOC_VariableArray;
+  case 11: return CLANG_EXT_TYPELOC_DependentSizedArray;
+  case 12: return CLANG_EXT_TYPELOC_DependentSizedExtVector;
+  case 13: return CLANG_EXT_TYPELOC_Vector;
+  case 14: return CLANG_EXT_TYPELOC_ExtVector;
+  case 15: return CLANG_EXT_TYPELOC_FunctionProto;
+  case 16: return CLANG_EXT_TYPELOC_FunctionNoProto;
+  case 17: return CLANG_EXT_TYPELOC_UnresolvedUsing;
+  case 18: return CLANG_EXT_TYPELOC_Paren;
+  case 19: return CLANG_EXT_TYPELOC_Typedef;
+  case 20: return CLANG_EXT_TYPELOC_Decayed;
+  case 21: return CLANG_EXT_TYPELOC_TypeOfExpr;
+  case 22: return CLANG_EXT_TYPELOC_TypeOf;
+  case 23: return CLANG_EXT_TYPELOC_Decltype;
+  case 24: return CLANG_EXT_TYPELOC_UnaryTransform;
+  case 25: return CLANG_EXT_TYPELOC_Record;
+  case 26: return CLANG_EXT_TYPELOC_Enum;
+  case 27: return CLANG_EXT_TYPELOC_Elaborated;
+  case 28: return CLANG_EXT_TYPELOC_Attributed;
+  case 29: return CLANG_EXT_TYPELOC_TemplateTypeParm;
+  case 30: return CLANG_EXT_TYPELOC_SubstTemplateTypeParm;
+  case 31: return CLANG_EXT_TYPELOC_SubstTemplateTypeParmPack;
+  case 32: return CLANG_EXT_TYPELOC_TemplateSpecialization;
+  case 33: return CLANG_EXT_TYPELOC_Auto;
+  case 34: return CLANG_EXT_TYPELOC_InjectedClassName;
+  case 35: return CLANG_EXT_TYPELOC_DependentName;
+  case 36: return CLANG_EXT_TYPELOC_DependentTemplateSpecialization;
+  case 37: return CLANG_EXT_TYPELOC_PackExpansion;
+  case 38: return CLANG_EXT_TYPELOC_ObjCObject;
+  case 39: return CLANG_EXT_TYPELOC_ObjCInterface;
+  case 40: return CLANG_EXT_TYPELOC_ObjCObjectPointer;
+  case 41: return CLANG_EXT_TYPELOC_Atomic;
+  case 42: return CLANG_EXT_TYPELOC_InvalidTypeLoc;
+  }
+  failwith_fmt("invalid value for Clang_ext_typeloc_class_val: %d", Int_val(ocaml));
+  return CLANG_EXT_TYPELOC_Qualified;
+}
+
+value
+Val_clang_ext_typeloc_class(enum clang_ext_TypeLoc_Class v)
+{
+  switch (v) {
+  case CLANG_EXT_TYPELOC_Qualified: return Val_int(0);
+  case CLANG_EXT_TYPELOC_Builtin: return Val_int(1);
+  case CLANG_EXT_TYPELOC_Complex: return Val_int(2);
+  case CLANG_EXT_TYPELOC_Pointer: return Val_int(3);
+  case CLANG_EXT_TYPELOC_BlockPointer: return Val_int(4);
+  case CLANG_EXT_TYPELOC_LValueReference: return Val_int(5);
+  case CLANG_EXT_TYPELOC_RValueReference: return Val_int(6);
+  case CLANG_EXT_TYPELOC_MemberPointer: return Val_int(7);
+  case CLANG_EXT_TYPELOC_ConstantArray: return Val_int(8);
+  case CLANG_EXT_TYPELOC_IncompleteArray: return Val_int(9);
+  case CLANG_EXT_TYPELOC_VariableArray: return Val_int(10);
+  case CLANG_EXT_TYPELOC_DependentSizedArray: return Val_int(11);
+  case CLANG_EXT_TYPELOC_DependentSizedExtVector: return Val_int(12);
+  case CLANG_EXT_TYPELOC_Vector: return Val_int(13);
+  case CLANG_EXT_TYPELOC_ExtVector: return Val_int(14);
+  case CLANG_EXT_TYPELOC_FunctionProto: return Val_int(15);
+  case CLANG_EXT_TYPELOC_FunctionNoProto: return Val_int(16);
+  case CLANG_EXT_TYPELOC_UnresolvedUsing: return Val_int(17);
+  case CLANG_EXT_TYPELOC_Paren: return Val_int(18);
+  case CLANG_EXT_TYPELOC_Typedef: return Val_int(19);
+  case CLANG_EXT_TYPELOC_Decayed: return Val_int(20);
+  case CLANG_EXT_TYPELOC_TypeOfExpr: return Val_int(21);
+  case CLANG_EXT_TYPELOC_TypeOf: return Val_int(22);
+  case CLANG_EXT_TYPELOC_Decltype: return Val_int(23);
+  case CLANG_EXT_TYPELOC_UnaryTransform: return Val_int(24);
+  case CLANG_EXT_TYPELOC_Record: return Val_int(25);
+  case CLANG_EXT_TYPELOC_Enum: return Val_int(26);
+  case CLANG_EXT_TYPELOC_Elaborated: return Val_int(27);
+  case CLANG_EXT_TYPELOC_Attributed: return Val_int(28);
+  case CLANG_EXT_TYPELOC_TemplateTypeParm: return Val_int(29);
+  case CLANG_EXT_TYPELOC_SubstTemplateTypeParm: return Val_int(30);
+  case CLANG_EXT_TYPELOC_SubstTemplateTypeParmPack: return Val_int(31);
+  case CLANG_EXT_TYPELOC_TemplateSpecialization: return Val_int(32);
+  case CLANG_EXT_TYPELOC_Auto: return Val_int(33);
+  case CLANG_EXT_TYPELOC_InjectedClassName: return Val_int(34);
+  case CLANG_EXT_TYPELOC_DependentName: return Val_int(35);
+  case CLANG_EXT_TYPELOC_DependentTemplateSpecialization: return Val_int(36);
+  case CLANG_EXT_TYPELOC_PackExpansion: return Val_int(37);
+  case CLANG_EXT_TYPELOC_ObjCObject: return Val_int(38);
+  case CLANG_EXT_TYPELOC_ObjCInterface: return Val_int(39);
+  case CLANG_EXT_TYPELOC_ObjCObjectPointer: return Val_int(40);
+  case CLANG_EXT_TYPELOC_Atomic: return Val_int(41);
+  case CLANG_EXT_TYPELOC_InvalidTypeLoc: return Val_int(42);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_typeloc_class: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_TypeLoc_getClass_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  enum clang_ext_TypeLoc_Class result = clang_ext_TypeLoc_getClass(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_typeloc_class(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TypeLoc_getType_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  CXType result = clang_ext_TypeLoc_getType(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxtype(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_ArrayTypeLoc_getSizeExpr_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  CXCursor result = clang_ext_ArrayTypeLoc_getSizeExpr(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_ArrayTypeLoc_getElementLoc_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  struct clang_ext_TypeLoc result = clang_ext_ArrayTypeLoc_getElementLoc(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_typeloc(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_ParenTypeLoc_getInnerLoc_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  struct clang_ext_TypeLoc result = clang_ext_ParenTypeLoc_getInnerLoc(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_typeloc(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_PointerLikeTypeLoc_getPointeeLoc_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  struct clang_ext_TypeLoc result = clang_ext_PointerLikeTypeLoc_getPointeeLoc(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_typeloc(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_FunctionTypeLoc_getReturnLoc_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  struct clang_ext_TypeLoc result = clang_ext_FunctionTypeLoc_getReturnLoc(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_typeloc(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_FunctionTypeLoc_getNumParams_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  unsigned int result = clang_ext_FunctionTypeLoc_getNumParams(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_FunctionTypeLoc_getParam_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  unsigned int arg2;
+  arg2 = Int_val(arg2_ocaml);
+  CXCursor result = clang_ext_FunctionTypeLoc_getParam(arg, arg2);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
