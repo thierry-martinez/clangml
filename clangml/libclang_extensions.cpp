@@ -2814,7 +2814,11 @@ extern "C" {
   {
     if (auto *t = GetTypeLoc(tl)) {
       if (auto ft = t->getAs<clang::FunctionTypeLoc>()) {
+#ifdef LLVM_VERSION_BEFORE_3_5_0
+        return MakeTypeLoc(ft.getResultLoc(), tl.tu);
+#else
         return MakeTypeLoc(ft.getReturnLoc(), tl.tu);
+#endif
       }
     }
     return MakeTypeLocInvalid(tl.tu);
@@ -2825,7 +2829,11 @@ extern "C" {
   {
     if (auto *t = GetTypeLoc(tl)) {
       if (auto ft = t->getAs<clang::FunctionTypeLoc>()) {
+#ifdef LLVM_VERSION_BEFORE_3_5_0
+        return ft.getNumArgs()
+#else
         return ft.getNumParams();
+#endif
       }
     }
     return 0;
@@ -2837,7 +2845,11 @@ extern "C" {
   {
     if (auto *t = GetTypeLoc(tl)) {
       if (auto ft = t->getAs<clang::FunctionTypeLoc>()) {
+#ifdef LLVM_VERSION_BEFORE_3_5_0
+        return MakeCXCursor(ft.getArg(i), tl.tu);
+#else
         return MakeCXCursor(ft.getParam(i), tl.tu);
+#endif
       }
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, tl.tu);
