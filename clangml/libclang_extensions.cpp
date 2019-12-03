@@ -2830,7 +2830,7 @@ extern "C" {
     if (auto *t = GetTypeLoc(tl)) {
       if (auto ft = t->getAs<clang::FunctionTypeLoc>()) {
 #ifdef LLVM_VERSION_BEFORE_3_5_0
-        return ft.getNumArgs()
+        return ft.getNumArgs();
 #else
         return ft.getNumParams();
 #endif
