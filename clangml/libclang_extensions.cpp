@@ -2711,6 +2711,12 @@ extern "C" {
         return MakeTypeLoc(t, getCursorTU(c));
       }
     }
+    else if (auto d =
+        llvm::dyn_cast_or_null<clang::TypedefNameDecl>(GetCursorDecl(c))) {
+      if (auto t = d->getTypeSourceInfo()->getTypeLoc()) {
+        return MakeTypeLoc(t, getCursorTU(c));
+      }
+    }
     return MakeTypeLocInvalid(getCursorTU(c));
   }
 

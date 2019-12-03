@@ -27,7 +27,8 @@ module%import Clang = struct
       and clang_ext_stmtkind
       and cxcursorkind
       and clang_ext_declkind
-      and clang_ext_exceptionspecificationtype = _
+      and clang_ext_exceptionspecificationtype
+      and clang_ext_typeloc_class = _
    ][@@deriving show]
 
     let pp_cxcursor = opaque

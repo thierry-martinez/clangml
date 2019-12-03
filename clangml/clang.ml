@@ -1608,7 +1608,12 @@ module Ast = struct
     let rec type_loc_of_typeloc typeloc =
       let desc =
         match ext_type_loc_get_class typeloc with
-        | Builtin -> Builtin
+        | Builtin ->
+            BuiltinType (ext_type_loc_get_type typeloc |> get_type_kind)
+        | Typedef ->
+            Typedef (
+              ext_type_loc_get_type typeloc |> get_type_declaration |>
+              ident_ref_of_cxcursor)
         | Pointer ->
             let pointee =
               ext_pointer_like_type_loc_get_pointee_loc typeloc |>
@@ -1619,6 +1624,14 @@ module Ast = struct
               ext_pointer_like_type_loc_get_pointee_loc typeloc |>
               type_loc_of_typeloc in
             BlockPointer { pointee }
+        | MemberPointer ->
+            let class_ =
+              ext_member_pointer_type_loc_get_class_loc typeloc |>
+              type_loc_of_typeloc in
+            let pointee =
+              ext_pointer_like_type_loc_get_pointee_loc typeloc |>
+              type_loc_of_typeloc in
+            MemberPointer { class_; pointee }
         | ConstantArray ->
             let size =
               ext_array_type_loc_get_size_expr typeloc |>
@@ -1655,7 +1668,19 @@ module Ast = struct
         | Paren ->
             (ext_paren_type_loc_get_inner_loc typeloc |>
             type_loc_of_typeloc).desc
-        | _ -> UnknownTypeLoc in
+        | Elaborated ->
+            Elaborated (
+              ext_type_loc_get_type typeloc |> ext_type_get_named_type |>
+              of_cxtype)
+        | Record ->
+            Record (
+              ext_type_loc_get_type typeloc |> get_type_declaration |>
+              ident_ref_of_cxcursor)
+        | Enum ->
+            Enum (
+              ext_type_loc_get_type typeloc |> get_type_declaration |>
+              ident_ref_of_cxcursor)
+        | c -> UnknownTypeLoc c in
       { typeloc = Some typeloc; desc }
   end
 

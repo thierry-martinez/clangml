@@ -334,7 +334,7 @@ let () =
     Note: The "qual_type" contains the canonical type where the size has already
     been computed. If you need to get the original expression of the size, you
     may use {!val:Clang.Decl.get_type_loc} or
-    {!val:Clang.Parameter.get_type_loc}.
+    {!val:Clang.Parameter.get_type_loc} (See {!type:type_loc}).
     {[
 let example = "char s[21 * 2];"
 
@@ -353,7 +353,6 @@ let () =
         rhs = { desc = IntegerLiteral (Int 2)}}}}}])
   end
 
-(*
 let example = "void f(char s[21 * 2]);"
 
 let () =
@@ -374,7 +373,6 @@ let () =
         kind = Mul;
         rhs = { desc = IntegerLiteral (Int 2)}}}}}])
   end
-*)
     ]}*)
   | Vector of {
       element : qual_type;
@@ -483,17 +481,30 @@ let () =
     ]}*)
   | FunctionType of function_type
 (** Function type.
+    Warning: parameter names are not preserved in canonical types.
+    (See {!type:type_loc}.)
+
     {[
 let example = "int (*p)(void);"
 
 let () =
-  check Clangml_show.pp_decl parse_declaration_list example @@
-  fun ast -> match ast with
-  | [{ desc = Var { var_name = "p"; var_type = { desc =
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = Var { var_name = "p"; var_type = { desc =
       Pointer { desc = FunctionType {
         result = { desc = BuiltinType Int };
-        parameters = Some { non_variadic = []; variadic = false}}}}}}] -> ()
-  | _ -> assert false
+        parameters = Some { non_variadic = []; variadic = false}}}}}}]]
+
+let example = "int (*p)(int x);"
+
+let () =
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = Var { var_name = "p"; var_type = { desc =
+      Pointer { desc = FunctionType {
+        result = { desc = BuiltinType Int };
+        parameters = Some { non_variadic = [{ desc = {
+          name = ""; qual_type = { desc = BuiltinType Int }}}] }}}}}}]]
     ]}*)
   | Record of ident_ref
 (** Record type (either struct or union).
@@ -3890,39 +3901,227 @@ type 'a node = ('a, qual_type) open_node
 
 type decoration = qual_type open_decoration
 
+(** {3 Type loc: source representation of types} *)
+
 type type_loc = {
     typeloc : clang_ext_typeloc option;
     desc : type_loc_desc;
   }
 and type_loc_desc =
-  | Builtin
-  | Typedef
+  | BuiltinType of builtin_type
+(** Built-in type. *)
+  | Typedef of ident_ref
+(** Typedef. *)
   | ConstantArray of {
       size : expr;
       element : type_loc;
     }
+(** Constant array type.
+    [size] contains the original expression.
+    By contrast, in the type  {!type:qual_type}, the [size] of [ConstantArray]
+    is computed.
+
+    {[
+let example = {| const int i = 1; int a[i + 1]; |}
+
+let () =
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [_; { desc = Var { var_name = "a"; var_type = { desc = ConstantArray {
+      element = { desc = BuiltinType Int };
+      size = 2 }}}} as decl]]
+  ~result:begin fun bindings ->
+    check_result (Pattern_runtime.check quote_type_loc
+      (Clang.Decl.get_type_loc bindings#decl)
+      [%pattern? { desc = ConstantArray {
+        size = { desc = BinaryOperator {
+          lhs = { desc = DeclRef { name = IdentifierName "i" }};
+          kind = Add;
+          rhs = { desc = IntegerLiteral (Int 1)}}};
+        element = { desc = BuiltinType Int }}}])
+  end
+    ]} *)
   | VariableArray of {
       size : expr;
       element : type_loc;
     }
+(** Variable array type.
+
+    {[
+let example = "void f(int i, int a[i + 1]);"
+
+let () =
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = Function { name = IdentifierName "f"; function_type =
+      { result = { desc = BuiltinType Void };
+        parameters = Some {
+          non_variadic = [
+            { desc = { name = "i"; qual_type = { desc = BuiltinType Int }}};
+            array];
+          variadic = false }}}}]]
+  ~result:begin fun bindings ->
+    check_result (Pattern_runtime.check quote_type_loc
+      (Clang.Parameter.get_type_loc bindings#array)
+      [%pattern? { desc = VariableArray {
+        size = { desc = BinaryOperator {
+          lhs = { desc = DeclRef { name = IdentifierName "i" }};
+          kind = Add;
+          rhs = { desc = IntegerLiteral (Int 1)}}};
+        element = { desc = BuiltinType Int }}}])
+  end
+    ]}*)
   | IncompleteArray of {
       element : type_loc;
     }
+(** Incomplete array type.
+
+    {[
+let example = "const int i = 1; void f(int a[][i + 1]);"
+
+let () =
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [_; { desc = Function { name = IdentifierName "f"; function_type =
+      { result = { desc = BuiltinType Void };
+        parameters = Some {
+          non_variadic = [array];
+          variadic = false }}}}]]
+  ~result:begin fun bindings ->
+    check_result (Pattern_runtime.check quote_type_loc
+      (Clang.Parameter.get_type_loc bindings#array)
+      [%pattern? { desc = IncompleteArray {
+        element = { desc = ConstantArray {
+          size = { desc = BinaryOperator {
+            lhs = { desc = DeclRef { name = IdentifierName "i" }};
+            kind = Add;
+            rhs = { desc = IntegerLiteral (Int 1)}}};
+          element = { desc = BuiltinType Int }}}}}])
+  end
+    ]}*)
   | Pointer of {
       pointee : type_loc;
     }
+(** Pointer type.
+
+    {[
+let example = "void f(int **a);"
+
+let () =
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = Function { name = IdentifierName "f"; function_type =
+      { result = { desc = BuiltinType Void };
+        parameters = Some {
+          non_variadic = [array];
+          variadic = false }}}}]]
+  ~result:begin fun bindings ->
+    check_result (Pattern_runtime.check quote_type_loc
+      (Clang.Parameter.get_type_loc bindings#array)
+      [%pattern? { desc = Pointer {
+        pointee = { desc = Pointer { pointee = { desc = BuiltinType Int }}}}}])
+  end
+    ]}*)
   | BlockPointer of {
       pointee : type_loc;
     }
+(** Block pointer type (Clang's C language extension).
+
+    {[
+let example = {|
+  typedef int (^IntBlock)();
+|}
+
+let () =
+  check_pattern quote_decl_list
+    (parse_declaration_list ~command_line_args:["-fblocks"]) example
+  [%pattern?
+    [{ desc = TypedefDecl { name = "IntBlock"; _ }} as decl]]
+  ~result:begin fun bindings ->
+    check_result (Pattern_runtime.check quote_type_loc
+      (Clang.Decl.get_type_loc bindings#decl)
+      [%pattern? { desc = BlockPointer {
+        pointee = { desc = Function {
+          result = { desc = BuiltinType Int };
+          parameters = [] }}}}])
+  end
+    ]}*)
   | MemberPointer of {
       class_ : type_loc;
       pointee : type_loc;
     }
+(** Member pointer type (C++).
+
+    {[
+let example = {|
+  struct S {
+    int i;
+  };
+  int S::*p;
+|}
+
+let () =
+  check_pattern quote_decl_list
+    (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [_; { desc = Var { var_name = "p"; var_type = { desc = MemberPointer {
+      class_ = { desc = Record { name = IdentifierName "S" } };
+      pointee = { desc = BuiltinType Int }}}}} as decl]]
+  ~result:begin fun bindings ->
+    check_result (Pattern_runtime.check quote_type_loc
+      (Clang.Decl.get_type_loc bindings#decl)
+      [%pattern? { desc = MemberPointer {
+        class_ = { desc = Record { name = IdentifierName "S"}};
+        pointee = { desc = BuiltinType Int }}}])
+  end
+    ]}*)
   | Function of {
       result : type_loc;
       parameters : parameter list;
     }
-  | UnknownTypeLoc
+(** Function type.
+    Parameter names are preserved.
+
+    {[
+let example = "int (*p)(int x[1 + 1]);"
+
+let () =
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = Var { var_name = "p"; var_type = { desc =
+      Pointer { desc = FunctionType {
+        result = { desc = BuiltinType Int };
+        parameters = Some { non_variadic = [
+          { desc = { name = ""; qual_type = { desc =
+            ConstantArray {
+              element = { desc = BuiltinType Int };
+              size = 2; }}}}] }}}}}} as decl]]
+  ~result:begin fun bindings ->
+    check_result (Pattern_runtime.check quote_type_loc
+      (Clang.Decl.get_type_loc bindings#decl)
+      [%pattern? { desc = Pointer {
+        pointee = { desc = Function {
+          result = { desc = BuiltinType Int };
+          parameters = [
+            { desc = { name = "x"; qual_type = { desc = ConstantArray {
+              element = { desc = BuiltinType Int };
+              size = 2; }}}} as parameter] }}}}])
+      ~result:begin fun bindings ->
+        check_result (Pattern_runtime.check quote_type_loc
+          (Clang.Parameter.get_type_loc bindings#parameter)
+          [%pattern? { desc = ConstantArray {
+            size = { desc = BinaryOperator {
+              lhs = { desc = IntegerLiteral (Int 1)};
+              kind = Add;
+              rhs = { desc = IntegerLiteral (Int 1)}}};
+            element = { desc = BuiltinType Int }}}])
+      end
+  end
+    ]}*)
+  | Record of ident_ref
+  | Enum of ident_ref
+  | Elaborated of qual_type
+  | UnknownTypeLoc of clang_ext_typeloc_class
 
 (*{[
 let () =

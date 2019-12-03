@@ -38,6 +38,7 @@ module%import Clang = struct
     type cxcursorkind = _ [@@deriving eq, ord]
     type clang_ext_declkind = _ [@@deriving eq, ord]
     type clang_ext_exceptionspecificationtype = _ [@@deriving eq, ord]
+    type clang_ext_typeloc_class = _ [@@deriving eq, ord]
 
     let equal_cxcursor = ignore_equal
 
