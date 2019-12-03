@@ -927,3 +927,12 @@ clang_ext_ParenTypeLoc_getInnerLoc(struct clang_ext_TypeLoc);
 
 struct clang_ext_TypeLoc
 clang_ext_PointerLikeTypeLoc_getPointeeLoc(struct clang_ext_TypeLoc);
+
+struct clang_ext_TypeLoc
+clang_ext_FunctionTypeLoc_getReturnLoc(struct clang_ext_TypeLoc);
+
+unsigned
+clang_ext_FunctionTypeLoc_getNumParams(struct clang_ext_TypeLoc);
+
+CXCursor
+clang_ext_FunctionTypeLoc_getParam(struct clang_ext_TypeLoc, unsigned int);

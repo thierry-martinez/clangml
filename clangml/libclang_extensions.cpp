@@ -2808,4 +2808,38 @@ extern "C" {
     }
     return MakeTypeLocInvalid(tl.tu);
   }
+
+  struct clang_ext_TypeLoc
+  clang_ext_FunctionTypeLoc_getReturnLoc(struct clang_ext_TypeLoc tl)
+  {
+    if (auto *t = GetTypeLoc(tl)) {
+      if (auto ft = t->getAs<clang::FunctionTypeLoc>()) {
+        return MakeTypeLoc(ft.getReturnLoc(), tl.tu);
+      }
+    }
+    return MakeTypeLocInvalid(tl.tu);
+  }
+
+  unsigned
+  clang_ext_FunctionTypeLoc_getNumParams(struct clang_ext_TypeLoc tl)
+  {
+    if (auto *t = GetTypeLoc(tl)) {
+      if (auto ft = t->getAs<clang::FunctionTypeLoc>()) {
+        return ft.getNumParams();
+      }
+    }
+    return 0;
+  }
+
+  CXCursor
+  clang_ext_FunctionTypeLoc_getParam(
+    struct clang_ext_TypeLoc tl, unsigned int i)
+  {
+    if (auto *t = GetTypeLoc(tl)) {
+      if (auto ft = t->getAs<clang::FunctionTypeLoc>()) {
+        return MakeCXCursor(ft.getParam(i), tl.tu);
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, tl.tu);
+  }
 }

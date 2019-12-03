@@ -3918,6 +3918,10 @@ and type_loc_desc =
       class_ : type_loc;
       pointee : type_loc;
     }
+  | Function of {
+      result : type_loc;
+      parameters : parameter list;
+    }
   | UnknownTypeLoc
 
 (*{[

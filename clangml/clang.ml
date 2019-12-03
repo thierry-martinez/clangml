@@ -1640,6 +1640,21 @@ module Ast = struct
               ext_array_type_loc_get_element_loc typeloc |>
               type_loc_of_typeloc in
             IncompleteArray { element }
+        | FunctionProto
+        | FunctionNoProto ->
+            let result =
+              ext_function_type_loc_get_return_loc typeloc |>
+              type_loc_of_typeloc in
+            let parameters =
+              List.init
+                (ext_function_type_loc_get_num_params typeloc)
+                (fun i ->
+                  ext_function_type_loc_get_param typeloc i |>
+                  parameter_of_cxcursor) in
+            Function { result; parameters }
+        | Paren ->
+            (ext_paren_type_loc_get_inner_loc typeloc |>
+            type_loc_of_typeloc).desc
         | _ -> UnknownTypeLoc in
       { typeloc = Some typeloc; desc }
   end
