@@ -141,6 +141,7 @@ pipeline {
                 }
             }
         }
+/*
         stage('opam installation') {
             when { branch 'master' }
             steps {
@@ -151,6 +152,7 @@ pipeline {
                 }
             }
         }
+*/
         stage('Commit to snapshot branch') {
             when { branch 'master' }
             steps {
