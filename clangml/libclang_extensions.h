@@ -932,6 +932,9 @@ struct clang_ext_TypeLoc
 clang_ext_MemberPointerTypeLoc_getClassLoc(struct clang_ext_TypeLoc);
 
 struct clang_ext_TypeLoc
+clang_ext_QualifiedTypeLoc_getUnqualifiedLoc(struct clang_ext_TypeLoc tl);
+
+struct clang_ext_TypeLoc
 clang_ext_FunctionTypeLoc_getReturnLoc(struct clang_ext_TypeLoc);
 
 unsigned
