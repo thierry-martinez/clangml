@@ -4121,6 +4121,23 @@ let () =
       end
   end
     ]}*)
+  | QualifiedTypeLoc of type_loc
+(** Qualified type.
+
+    {[
+let example = "const int i = 1;"
+
+let () =
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = Var { var_name = "i";
+      var_type = { const = true; desc = BuiltinType Int }}} as decl]]
+  ~result:begin fun bindings ->
+    check_result (Pattern_runtime.check quote_type_loc
+      (Clang.Decl.get_type_loc bindings#decl)
+      [%pattern? { desc = QualifiedTypeLoc { desc = BuiltinTypeLoc Int }}])
+  end
+    ]}*)
   | RecordTypeLoc of ident_ref
   | EnumTypeLoc of ident_ref
   | ElaboratedTypeLoc of qual_type

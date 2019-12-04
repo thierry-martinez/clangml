@@ -2816,6 +2816,17 @@ extern "C" {
   }
 
   struct clang_ext_TypeLoc
+  clang_ext_QualifiedTypeLoc_getUnqualifiedLoc(struct clang_ext_TypeLoc tl)
+  {
+    if (auto *t = GetTypeLoc(tl)) {
+      if (auto qt = t->getAs<clang::QualifiedTypeLoc>()) {
+        return MakeTypeLoc(qt.getUnqualifiedLoc(), tl.tu);
+      }
+    }
+    return MakeTypeLocInvalid(tl.tu);
+  }
+
+  struct clang_ext_TypeLoc
   clang_ext_FunctionTypeLoc_getReturnLoc(struct clang_ext_TypeLoc tl)
   {
     if (auto *t = GetTypeLoc(tl)) {

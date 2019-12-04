@@ -1680,6 +1680,10 @@ module Ast = struct
             EnumTypeLoc (
               ext_type_loc_get_type typeloc |> get_type_declaration |>
               ident_ref_of_cxcursor)
+        | Qualified ->
+            QualifiedTypeLoc (
+              ext_qualified_type_loc_get_unqualified_loc typeloc |>
+              type_loc_of_typeloc)
         | c -> UnknownTypeLoc c in
       { typeloc = Some typeloc; desc }
   end
