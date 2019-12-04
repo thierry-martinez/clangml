@@ -27,12 +27,15 @@ module%import Clang = struct
       and clang_ext_stmtkind
       and cxcursorkind
       and clang_ext_declkind
-      and clang_ext_exceptionspecificationtype = _
+      and clang_ext_exceptionspecificationtype
+      and clang_ext_typeloc_class = _
    ][@@deriving show]
 
     let pp_cxcursor = opaque
 
     let pp_cxtype = opaque
+
+    let pp_clang_ext_typeloc = opaque
 
     let pp_cxint fmt i =
       Format.pp_print_string fmt (Clang.string_of_cxint i)

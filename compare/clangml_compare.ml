@@ -38,6 +38,7 @@ module%import Clang = struct
     type cxcursorkind = _ [@@deriving eq, ord]
     type clang_ext_declkind = _ [@@deriving eq, ord]
     type clang_ext_exceptionspecificationtype = _ [@@deriving eq, ord]
+    type clang_ext_typeloc_class = _ [@@deriving eq, ord]
 
     let equal_cxcursor = ignore_equal
 
@@ -50,6 +51,10 @@ module%import Clang = struct
     let equal_cxsourcelocation = ignore_equal
 
     let compare_cxsourcelocation = ignore_compare
+
+    let equal_clang_ext_typeloc = ignore_equal
+
+    let compare_clang_ext_typeloc = ignore_compare
   end
 
   module%override Types = struct

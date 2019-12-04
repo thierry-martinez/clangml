@@ -49,6 +49,11 @@ class lift_expr loc = object(self)
         (Clang.Bindings.get_null_cursor ());
       const = [%e const]; volatile = [%e volatile]; restrict = [%e restrict];
       desc = [%e self#type_desc qual_type.desc ] }]
+
+  method! type_loc (type_loc : Clang.Ast.type_loc) =
+    [%expr {
+      typeloc = None;
+      desc = [%e self#type_loc_desc type_loc.desc] }]
 end
 
 class lift_pattern loc = object(self)
@@ -72,4 +77,9 @@ class lift_pattern loc = object(self)
       cxtype = _; const = [%p const];
       volatile = [%p volatile]; restrict = [%p restrict];
       desc = [%p self#type_desc qual_type.desc ] }]
+
+  method! type_loc (type_loc : Clang.Ast.type_loc) =
+    [%pat? {
+      typeloc = None;
+      desc = [%p self#type_loc_desc type_loc.desc] }]
 end

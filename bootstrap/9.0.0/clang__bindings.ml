@@ -3285,3 +3285,86 @@ external ext_asm_stmt_get_input_constraint :
   cxcursor -> int -> string = "clang_ext_AsmStmt_getInputConstraint_wrapper"
 external ext_asm_stmt_get_input_expr :
   cxcursor -> int -> cxcursor = "clang_ext_AsmStmt_getInputExpr_wrapper"
+type clang_ext_typeloc
+external ext_declarator_decl_get_type_loc :
+  cxcursor -> clang_ext_typeloc =
+    "clang_ext_DeclaratorDecl_getTypeLoc_wrapper"
+type clang_ext_typeloc_class =
+  | Qualified 
+  | Builtin 
+  | Complex 
+  | Pointer 
+  | BlockPointer 
+  | LValueReference 
+  | RValueReference 
+  | MemberPointer 
+  | ConstantArray 
+  | IncompleteArray 
+  | VariableArray 
+  | DependentSizedArray 
+  | DependentSizedExtVector 
+  | DependentAddressSpace 
+  | Vector 
+  | DependentVector 
+  | ExtVector 
+  | FunctionProto 
+  | FunctionNoProto 
+  | UnresolvedUsing 
+  | Paren 
+  | Typedef 
+  | MacroQualified 
+  | Adjusted 
+  | Decayed 
+  | TypeOfExpr 
+  | TypeOf 
+  | Decltype 
+  | UnaryTransform 
+  | Record 
+  | Enum 
+  | Elaborated 
+  | Attributed 
+  | TemplateTypeParm 
+  | SubstTemplateTypeParm 
+  | SubstTemplateTypeParmPack 
+  | TemplateSpecialization 
+  | Auto 
+  | DeducedTemplateSpecialization 
+  | InjectedClassName 
+  | DependentName 
+  | DependentTemplateSpecialization 
+  | PackExpansion 
+  | ObjCTypeParam 
+  | ObjCObject 
+  | ObjCInterface 
+  | ObjCObjectPointer 
+  | Pipe 
+  | Atomic 
+  | InvalidTypeLoc 
+external ext_type_loc_get_class :
+  clang_ext_typeloc -> clang_ext_typeloc_class =
+    "clang_ext_TypeLoc_getClass_wrapper"
+external ext_type_loc_get_type :
+  clang_ext_typeloc -> cxtype = "clang_ext_TypeLoc_getType_wrapper"
+external ext_array_type_loc_get_size_expr :
+  clang_ext_typeloc -> cxcursor =
+    "clang_ext_ArrayTypeLoc_getSizeExpr_wrapper"
+external ext_array_type_loc_get_element_loc :
+  clang_ext_typeloc -> clang_ext_typeloc =
+    "clang_ext_ArrayTypeLoc_getElementLoc_wrapper"
+external ext_paren_type_loc_get_inner_loc :
+  clang_ext_typeloc -> clang_ext_typeloc =
+    "clang_ext_ParenTypeLoc_getInnerLoc_wrapper"
+external ext_pointer_like_type_loc_get_pointee_loc :
+  clang_ext_typeloc -> clang_ext_typeloc =
+    "clang_ext_PointerLikeTypeLoc_getPointeeLoc_wrapper"
+external ext_member_pointer_type_loc_get_class_loc :
+  clang_ext_typeloc -> clang_ext_typeloc =
+    "clang_ext_MemberPointerTypeLoc_getClassLoc_wrapper"
+external ext_function_type_loc_get_return_loc :
+  clang_ext_typeloc -> clang_ext_typeloc =
+    "clang_ext_FunctionTypeLoc_getReturnLoc_wrapper"
+external ext_function_type_loc_get_num_params :
+  clang_ext_typeloc -> int = "clang_ext_FunctionTypeLoc_getNumParams_wrapper"
+external ext_function_type_loc_get_param :
+  clang_ext_typeloc -> int -> cxcursor =
+    "clang_ext_FunctionTypeLoc_getParam_wrapper"
