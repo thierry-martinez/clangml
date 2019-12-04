@@ -2676,6 +2676,9 @@ external ext_paren_type_loc_get_inner_loc :
 external ext_pointer_like_type_loc_get_pointee_loc :
   clang_ext_typeloc -> clang_ext_typeloc =
     "clang_ext_PointerLikeTypeLoc_getPointeeLoc_wrapper"
+external ext_member_pointer_type_loc_get_class_loc :
+  clang_ext_typeloc -> clang_ext_typeloc =
+    "clang_ext_MemberPointerTypeLoc_getClassLoc_wrapper"
 external ext_function_type_loc_get_return_loc :
   clang_ext_typeloc -> clang_ext_typeloc =
     "clang_ext_FunctionTypeLoc_getReturnLoc_wrapper"
