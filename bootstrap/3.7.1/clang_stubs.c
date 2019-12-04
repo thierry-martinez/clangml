@@ -9085,6 +9085,22 @@ clang_ext_MemberPointerTypeLoc_getClassLoc_wrapper(value arg_ocaml)
 }
 
 CAMLprim value
+clang_ext_QualifiedTypeLoc_getUnqualifiedLoc_wrapper(value tl_ocaml)
+{
+  CAMLparam1(tl_ocaml);
+  struct clang_ext_TypeLoc tl;
+  tl = Clang_ext_typeloc_val(Field(tl_ocaml, 0));
+  struct clang_ext_TypeLoc result = clang_ext_QualifiedTypeLoc_getUnqualifiedLoc(tl);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_typeloc(result));
+  Store_field(data, 1, safe_field(tl_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
 clang_ext_FunctionTypeLoc_getReturnLoc_wrapper(value arg_ocaml)
 {
   CAMLparam1(arg_ocaml);

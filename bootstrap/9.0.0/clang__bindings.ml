@@ -3360,6 +3360,9 @@ external ext_pointer_like_type_loc_get_pointee_loc :
 external ext_member_pointer_type_loc_get_class_loc :
   clang_ext_typeloc -> clang_ext_typeloc =
     "clang_ext_MemberPointerTypeLoc_getClassLoc_wrapper"
+external ext_qualified_type_loc_get_unqualified_loc :
+  clang_ext_typeloc -> clang_ext_typeloc =
+    "clang_ext_QualifiedTypeLoc_getUnqualifiedLoc_wrapper"
 external ext_function_type_loc_get_return_loc :
   clang_ext_typeloc -> clang_ext_typeloc =
     "clang_ext_FunctionTypeLoc_getReturnLoc_wrapper"
