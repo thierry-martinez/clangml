@@ -47,6 +47,7 @@ class lift_expr loc = object(self)
     [%expr {
       cxtype = Clang.Bindings.get_cursor_type
         (Clang.Bindings.get_null_cursor ());
+      type_loc = None;
       const = [%e const]; volatile = [%e volatile]; restrict = [%e restrict];
       desc = [%e self#type_desc qual_type.desc ] }]
 
@@ -74,7 +75,7 @@ class lift_pattern loc = object(self)
     let volatile = lift#bool qual_type.volatile in
     let restrict = lift#bool qual_type.restrict in
     [%pat? {
-      cxtype = _; const = [%p const];
+      cxtype = _; type_loc = _; const = [%p const];
       volatile = [%p volatile]; restrict = [%p restrict];
       desc = [%p self#type_desc qual_type.desc ] }]
 

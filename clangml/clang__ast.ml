@@ -232,6 +232,7 @@ let parse_declaration_list_last ?filename ?command_line_args ?language ?options
 
 and qual_type = {
     cxtype : cxtype;
+    type_loc : clang_ext_typeloc option;
     const : bool;
 (** [true] if the type is const-qualified.
       {[
@@ -328,6 +329,7 @@ let () =
   | ConstantArray of {
       element : qual_type;
       size : int;
+      size_as_expr : expr option;
     }
 (** Constant-sized array.
 
@@ -343,16 +345,11 @@ let () =
   [%pattern?
     [{ desc = Var { var_name = "s"; var_type = { desc = ConstantArray {
       element = { desc = BuiltinType Char_S };
-      size = 42 }}}} as decl]]
-  ~result:begin fun bindings ->
-    check_result (Pattern_runtime.check quote_type_loc
-      (Clang.Decl.get_type_loc bindings#decl)
-      [%pattern? { desc = ConstantArrayTypeLoc {
-        size = { desc = BinaryOperator {
-          lhs = { desc = IntegerLiteral (Int 21)};
-          kind = Mul;
-          rhs = { desc = IntegerLiteral (Int 2)}}}}}])
-  end
+      size = 42;
+      size_as_expr = Some { desc = BinaryOperator {
+        lhs = { desc = IntegerLiteral (Int 21)};
+        kind = Mul;
+        rhs = { desc = IntegerLiteral (Int 2)}}}}}}}]]
 
 let example = "void f(char s[21 * 2]);"
 
@@ -363,18 +360,13 @@ let () =
       parameters = Some { non_variadic = [{ desc = {
         qual_type = { desc = ConstantArray {
           element = { desc = BuiltinType Char_S };
-          size = 42; }};
+          size = 42;
+          size_as_expr = Some { desc = BinaryOperator {
+            lhs = { desc = IntegerLiteral (Int 21)};
+            kind = Mul;
+            rhs = { desc = IntegerLiteral (Int 2)}}}}};
         name = "s";
-        default = None; }} as parameter] }}}}]]
-  ~result:begin fun bindings ->
-    check_result (Pattern_runtime.check quote_type_loc
-      (Clang.Parameter.get_type_loc bindings#parameter)
-      [%pattern? { desc = ConstantArrayTypeLoc {
-        size = { desc = BinaryOperator {
-          lhs = { desc = IntegerLiteral (Int 21)};
-          kind = Mul;
-          rhs = { desc = IntegerLiteral (Int 2)}}}}}])
-  end
+        default = None; }}] }}}}]]
     ]}*)
   | Vector of {
       element : qual_type;
@@ -2186,7 +2178,8 @@ let () =
   | [{ desc = Var { var_name = "a"; var_type = {
       desc = ConstantArray {
         element = { desc = BuiltinType Int };
-        size = 2 }};
+        size = 2;
+        size_as_expr = Some { desc = IntegerLiteral (Int 2) }}};
       var_init = Some { desc = InitList [
         { desc = IntegerLiteral (Int 1)};
         { desc = IntegerLiteral (Int 2)}] }}}] -> ()

@@ -33,7 +33,7 @@ let () =
 
 let () =
   Format.printf "%a@." Clangml_printer.qual_type [%c-t {a|
-    [%typename Clang.Type.make (ConstantArray { element = [%c-t {| int |}]; size = 2 })] *
+    [%typename Clang.Type.make (ConstantArray { element = [%c-t {| int |}]; size = 2; size_as_expr = None })] *
   |a}]
 
 let () =

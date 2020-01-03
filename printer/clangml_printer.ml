@@ -325,8 +325,14 @@ and typed_value fmt_value fmt t =
       Format.fprintf fmt "@[int@ %t@]" fmt_value
   | BuiltinType SChar ->
       Format.fprintf fmt "@[char@ %t@]" fmt_value
-  | ConstantArray { element; size } ->
-      typed_value (fun fmt -> Format.fprintf fmt "@[%t[%d]@]" fmt_value size) fmt element
+  | ConstantArray { element; size_as_expr = Some size_as_expr; _ } ->
+      typed_value
+        (fun fmt -> Format.fprintf fmt "@[%t[%a]@]" fmt_value expr size_as_expr)
+        fmt element
+  | ConstantArray { element; size_as_expr = None; size } ->
+      typed_value
+        (fun fmt -> Format.fprintf fmt "@[%t[%d]@]" fmt_value size) fmt
+        element
   | Elaborated { keyword; named_type } ->
       Format.fprintf fmt "@[%s@ %a@]"
         (Clang.ext_elaborated_type_get_keyword_spelling keyword)

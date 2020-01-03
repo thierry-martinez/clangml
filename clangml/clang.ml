@@ -114,6 +114,9 @@ module Ast = struct
   let identifier_name ?nested_name_specifier name =
     ident_ref ?nested_name_specifier (IdentifierName name)
 
+  let constant_array ?size_as_expr element size =
+    ConstantArray { element; size; size_as_expr }
+
   let new_instance ?(placement_args = []) ?array_size ?init ?args qual_type =
     let init =
       match init, args with
@@ -337,6 +340,130 @@ module Ast = struct
           )
       | _ -> raise Invalid_structure
 
+    and of_type_loc qualified_type_loc =
+      let cxtype = ext_type_loc_get_type qualified_type_loc in
+      let type_loc =
+        match ext_type_loc_get_class qualified_type_loc with
+        | Qualified ->
+            ext_qualified_type_loc_get_unqualified_loc qualified_type_loc
+        | _ -> qualified_type_loc in
+      let desc =
+        match get_type_kind cxtype with
+        | Invalid -> InvalidType
+        | ConstantArray ->
+            let element =
+              ext_array_type_loc_get_element_loc type_loc |> of_type_loc in
+            let size = cxtype |> get_array_size in
+            let size_as_expr =
+              ext_array_type_loc_get_size_expr type_loc |>
+              expr_of_cxcursor in
+            constant_array element size ~size_as_expr
+        | Vector ->
+            let element = cxtype |> get_element_type |> of_cxtype in
+            let size = cxtype |> get_num_elements in
+            Vector { element; size }
+        | IncompleteArray ->
+            let element =
+              ext_array_type_loc_get_element_loc type_loc |> of_type_loc in
+            IncompleteArray element
+        | VariableArray ->
+            let element =
+              ext_array_type_loc_get_element_loc type_loc |> of_type_loc in
+            let size =
+              cxtype |> ext_variable_array_type_get_size_expr |>
+              expr_of_cxcursor in
+            VariableArray { element; size }
+        | Pointer ->
+            let pointee =
+              ext_pointer_like_type_loc_get_pointee_loc type_loc |>
+              of_type_loc in
+            Pointer pointee
+        | LValueReference ->
+            let pointee = cxtype |> get_pointee_type |> of_cxtype in
+            LValueReference pointee
+        | RValueReference ->
+            let pointee = cxtype |> get_pointee_type |> of_cxtype in
+            RValueReference pointee
+        | Enum ->
+            Enum (cxtype |> get_type_declaration |> ident_ref_of_cxcursor)
+        | Record ->
+            Record (cxtype |> get_type_declaration |> ident_ref_of_cxcursor)
+        | Typedef ->
+            Typedef (cxtype |> get_type_declaration |> ident_ref_of_cxcursor)
+        | FunctionProto
+        | FunctionNoProto ->
+            let function_type =
+              cxtype |> function_type_of_cxtype (parameters_of_cxtype cxtype) in
+            FunctionType function_type
+        | Complex ->
+            let element_type = cxtype |> get_element_type |> of_cxtype in
+            Complex element_type
+        | MemberPointer ->
+            let class_ =
+              ext_member_pointer_type_loc_get_class_loc type_loc |>
+              of_type_loc in
+            let pointee =
+              ext_pointer_like_type_loc_get_pointee_loc type_loc |>
+              of_type_loc in
+            MemberPointer { pointee; class_ }
+        | _ ->
+            begin
+              match ext_type_get_kind cxtype with
+              | Paren ->
+                  ParenType (ext_paren_type_loc_get_inner_loc type_loc |>
+                    of_type_loc)
+              | Elaborated -> (* Here for Clang <3.9.0 *)
+                  let nested_name_specifier =
+                    ext_type_get_qualifier cxtype |>
+                    convert_nested_name_specifier in
+                  Elaborated {
+                    keyword = ext_elaborated_type_get_keyword cxtype;
+                    nested_name_specifier;
+                    named_type = ext_type_get_named_type cxtype |> of_cxtype;
+                  }
+              | Attributed -> (* Here for Clang <8.0.0 *)
+                  Attributed {
+                    modified_type = type_get_modified_type cxtype |> of_cxtype;
+                    attribute_kind = ext_type_get_attribute_kind cxtype;
+                  }
+              | TemplateTypeParm->
+                  TemplateTypeParm (get_type_spelling cxtype);
+              | SubstTemplateTypeParm->
+                  SubstTemplateTypeParm (get_type_spelling cxtype);
+              | TemplateSpecialization ->
+                  let name =
+                    cxtype |>
+                    ext_template_specialization_type_get_template_name |>
+                    make_template_name in
+                  let args =
+                    List.init
+                      (ext_template_specialization_type_get_num_args cxtype)
+                    @@ fun i ->
+                      ext_template_specialization_type_get_argument cxtype i |>
+                      make_template_argument in
+                  TemplateSpecialization { name; args }
+              | Builtin -> BuiltinType (get_type_kind cxtype)
+              | Auto -> Auto
+              | PackExpansion ->
+                  let pattern =
+                    ext_pack_expansion_get_pattern cxtype |> of_cxtype in
+                  PackExpansion pattern
+              | Decltype ->
+                  let sub =
+                    ext_decltype_type_get_underlying_expr cxtype |>
+                    expr_of_cxcursor in
+                  Decltype sub
+              | kind -> UnexposedType kind
+            end in
+      match desc with
+      | ParenType inner when options.ignore_paren_in_types ->
+          { inner with cxtype; type_loc = Some qualified_type_loc }
+      | _ ->
+          { cxtype; type_loc = Some qualified_type_loc; desc;
+            const = is_const_qualified_type cxtype;
+            volatile = is_volatile_qualified_type cxtype;
+            restrict = is_restrict_qualified_type cxtype; }
+
     and of_cxtype cxtype =
       let desc =
         match get_type_kind cxtype with
@@ -344,7 +471,7 @@ module Ast = struct
         | ConstantArray ->
             let element = cxtype |> get_array_element_type |> of_cxtype in
             let size = cxtype |> get_array_size in
-            ConstantArray { element; size }
+            constant_array element size
         | Vector ->
             let element = cxtype |> get_element_type |> of_cxtype in
             let size = cxtype |> get_num_elements in
@@ -436,7 +563,7 @@ module Ast = struct
       | ParenType inner when options.ignore_paren_in_types ->
           { inner with cxtype }
       | _ ->
-          { cxtype; desc;
+          { cxtype; type_loc = None; desc;
             const = is_const_qualified_type cxtype;
             volatile = is_volatile_qualified_type cxtype;
             restrict = is_restrict_qualified_type cxtype; }
@@ -480,7 +607,8 @@ module Ast = struct
             TypedefDecl { name; underlying_type }
         | FieldDecl ->
             let name = get_cursor_spelling cursor in
-            let qual_type = get_cursor_type cursor |> of_cxtype in
+            let qual_type =
+              ext_declarator_decl_get_type_loc cursor |> of_type_loc in
             let bitwidth =
               if cursor_is_bit_field cursor then
                 match List.rev (list_of_children cursor) with
@@ -651,7 +779,8 @@ module Ast = struct
           | _ -> None
         end in
       let others = others |> filter_out_ref in
-      let qual_type = cursor |> get_cursor_type |> of_cxtype in
+      let qual_type =
+        cursor |> ext_declarator_decl_get_type_loc |> of_type_loc in
       node ~cursor {
           name = cursor |> get_cursor_spelling;
           qual_type;
@@ -781,7 +910,7 @@ module Ast = struct
         filter_out_prefix_from_list is_template_parameter in
       let linkage = cursor |> get_cursor_linkage in
       let var_name = get_cursor_spelling cursor in
-      let var_type = of_cxtype (get_cursor_type cursor) in
+      let var_type = of_type_loc (ext_declarator_decl_get_type_loc cursor) in
       let var_init : 'a option =
         if ext_var_decl_has_init cursor then
           begin
@@ -1813,7 +1942,7 @@ module Type = struct
   type t = Ast.qual_type
 
   let make ?(const = false) ?(volatile = false) ?(restrict = false) desc : t =
-    { cxtype = get_cursor_type (get_null_cursor ());
+    { cxtype = get_cursor_type (get_null_cursor ()); type_loc = None;
       const; volatile; restrict; desc }
 
   let of_cxtype = Ast.of_cxtype
