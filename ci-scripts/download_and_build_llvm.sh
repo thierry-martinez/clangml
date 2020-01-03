@@ -5,7 +5,10 @@ if [ -z "$version" ]; then
     echo Missing version argument. >/dev/fd/2
     exit 1
 fi
-if [ "$version" "<" 3.4.1 ]; then
+if [ "$version" = 9.0.1 ]; then
+    cfe=clang
+    dir_suffix=.src
+elif [ "$version" "<" 3.4.1 ]; then
     cfe=clang
     dir_suffix=
 else
@@ -29,7 +32,7 @@ else
     CC=gcc
     CXX=g++
 fi
-if [ "$version" "=" 8.0.1 ]; then
+if [ "$version" "=" 8.0.1 -o "$version" = 9.0.1 ]; then
     case "$version" in
     *rc*)
         version_dash="${version%rc*}-rc${version#*rc}"
