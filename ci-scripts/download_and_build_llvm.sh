@@ -5,22 +5,28 @@ if [ -z "$version" ]; then
     echo Missing version argument. >/dev/fd/2
     exit 1
 fi
-if [ "$version" = 9.0.1 ]; then
-    cfe=clang
-    dir_suffix=.src
-elif [ "$version" "<" 3.4.1 ]; then
+major="${version%%.*}"
+if [ "$major" "<" 10 ]; then
+    padded_version="0$version"
+else
+    padded_version="$version"
+fi
+if [ "$padded_version" "<" 03.4.1 ]; then
     cfe=clang
     dir_suffix=
-else
+elif [ "$padded_version" "<" 09.0.1 ]; then
     cfe=cfe
     dir_suffix=.src
+else
+    cfe=clang
+    dir_suffix=.src
 fi
-if [ "$version" "<" 3.5 ]; then
+if [ "$padded_version" "<" 03.5 ]; then
     suffix=.tar.gz
 else
     suffix=.tar.xz
 fi
-if [ "$version" "<" 3.6 ]; then
+if [ "$padded_version" "<" 03.6 ]; then
     if which gcc-4.9 >/dev/null 2>/dev/null; then
         CC=gcc-4.9
         CXX+=g++-4.9
