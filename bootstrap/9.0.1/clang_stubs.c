@@ -3,6 +3,7 @@
  * (except by continuous integration on the dedicated bootstrap branch). */
 #include "stubgen.h"
 #include <clang-c/Index.h>
+#include "clang__custom.h"
 #include "libclang_extensions.h"
 #include <stdio.h>
 CAMLprim value
@@ -20,7 +21,7 @@ clang_getBuildSessionTimestamp_wrapper()
 static void finalize_cxvirtualfileoverlay(value v) {
   clang_VirtualFileOverlay_dispose(*((CXVirtualFileOverlay *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(CXVirtualFileOverlay, cxvirtualfileoverlay, Cxvirtualfileoverlay_val, Val_cxvirtualfileoverlay, finalize_cxvirtualfileoverlay)
+DECLARE_OPAQUE_EX(CXVirtualFileOverlay, cxvirtualfileoverlay, Cxvirtualfileoverlay_val, Val_cxvirtualfileoverlay, finalize_cxvirtualfileoverlay, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_VirtualFileOverlay_create_wrapper(value options_ocaml)
@@ -146,7 +147,7 @@ clang_free(out_buffer_ptr);
 static void finalize_cxmodulemapdescriptor(value v) {
   clang_ModuleMapDescriptor_dispose(*((CXModuleMapDescriptor *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(CXModuleMapDescriptor, cxmodulemapdescriptor, Cxmodulemapdescriptor_val, Val_cxmodulemapdescriptor, finalize_cxmodulemapdescriptor)
+DECLARE_OPAQUE_EX(CXModuleMapDescriptor, cxmodulemapdescriptor, Cxmodulemapdescriptor_val, Val_cxmodulemapdescriptor, finalize_cxmodulemapdescriptor, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_ModuleMapDescriptor_create_wrapper(value options_ocaml)
@@ -243,7 +244,7 @@ clang_free(out_buffer_ptr);
 static void finalize_cxindex(value v) {
   clang_disposeIndex(*((CXIndex *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(CXIndex, cxindex, Cxindex_val, Val_cxindex, finalize_cxindex)
+DECLARE_OPAQUE_EX(CXIndex, cxindex, Cxindex_val, Val_cxindex, finalize_cxindex, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_createIndex_wrapper(value excludeDeclarationsFromPCH_ocaml, value displayDiagnostics_ocaml)
@@ -299,7 +300,7 @@ clang_CXIndex_setInvocationEmissionPathOption_wrapper(value arg_ocaml, value Pat
   CAMLreturn(Val_unit);
 }
 
-DECLARE_OPAQUE(CXFile, cxfile, Cxfile_val, Val_cxfile, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXFile, cxfile, Cxfile_val, Val_cxfile, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getFileName_wrapper(value SFile_ocaml)
@@ -385,7 +386,7 @@ clang_getFileUniqueID_wrapper(value file_ocaml)
 static void finalize_cxtranslationunit(value v) {
   clang_disposeTranslationUnit(*((CXTranslationUnit *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(CXTranslationUnit, cxtranslationunit, Cxtranslationunit_val, Val_cxtranslationunit, finalize_cxtranslationunit)
+DECLARE_OPAQUE_EX(CXTranslationUnit, cxtranslationunit, Cxtranslationunit_val, Val_cxtranslationunit, finalize_cxtranslationunit, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_isFileMultipleIncludeGuarded_wrapper(value tu_ocaml, value file_ocaml)
@@ -480,7 +481,7 @@ clang_File_tryGetRealPathName_wrapper(value file_ocaml)
   }
 }
 
-DECLARE_OPAQUE(CXSourceLocation, cxsourcelocation, Cxsourcelocation_val, Val_cxsourcelocation, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXSourceLocation, cxsourcelocation, Cxsourcelocation_val, Val_cxsourcelocation, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getNullLocation_wrapper()
@@ -581,7 +582,7 @@ clang_Location_isFromMainFile_wrapper(value location_ocaml)
   }
 }
 
-DECLARE_OPAQUE(CXSourceRange, cxsourcerange, Cxsourcerange_val, Val_cxsourcerange, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXSourceRange, cxsourcerange, Cxsourcerange_val, Val_cxsourcerange, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getNullRange_wrapper()
@@ -919,7 +920,7 @@ clang_disposeSourceRangeList(result);
 static void finalize_cxdiagnosticset(value v) {
   clang_disposeDiagnosticSet(*((CXDiagnosticSet *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(CXDiagnosticSet, cxdiagnosticset, Cxdiagnosticset_val, Val_cxdiagnosticset, finalize_cxdiagnosticset)
+DECLARE_OPAQUE_EX(CXDiagnosticSet, cxdiagnosticset, Cxdiagnosticset_val, Val_cxdiagnosticset, finalize_cxdiagnosticset, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getNumDiagnosticsInSet_wrapper(value Diags_ocaml)
@@ -935,7 +936,7 @@ clang_getNumDiagnosticsInSet_wrapper(value Diags_ocaml)
   }
 }
 
-DECLARE_OPAQUE(CXDiagnostic, cxdiagnostic, Cxdiagnostic_val, Val_cxdiagnostic, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXDiagnostic, cxdiagnostic, Cxdiagnostic_val, Val_cxdiagnostic, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getDiagnosticInSet_wrapper(value Diags_ocaml, value Index_ocaml)
@@ -1739,7 +1740,7 @@ clang_getTUResourceUsageName_wrapper(value kind_ocaml)
 static void finalize_cxturesourceusage(value v) {
   clang_disposeCXTUResourceUsage(*((struct CXTUResourceUsage *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(struct CXTUResourceUsage, cxturesourceusage, Cxturesourceusage_val, Val_cxturesourceusage, finalize_cxturesourceusage)
+DECLARE_OPAQUE_EX(struct CXTUResourceUsage, cxturesourceusage, Cxturesourceusage_val, Val_cxturesourceusage, finalize_cxturesourceusage, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getCXTUResourceUsage_wrapper(value TU_ocaml)
@@ -1755,7 +1756,7 @@ clang_getCXTUResourceUsage_wrapper(value TU_ocaml)
   }
 }
 
-DECLARE_OPAQUE(CXTargetInfo, cxtargetinfo, Cxtargetinfo_val, Val_cxtargetinfo, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXTargetInfo, cxtargetinfo, Cxtargetinfo_val, Val_cxtargetinfo, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getTranslationUnitTargetInfo_wrapper(value CTUnit_ocaml)
@@ -2292,7 +2293,7 @@ Val_cxcursorkind(enum CXCursorKind v)
   return Val_int(0);
 }
 
-DECLARE_OPAQUE(CXCursor, cxcursor, Cxcursor_val, Val_cxcursor, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXCursor, cxcursor, Cxcursor_val, Val_cxcursor, custom_finalize_default, clang_ext_compare_cursor, clang_ext_hash_cursor)
 
 CAMLprim value
 clang_getNullCursor_wrapper()
@@ -2735,7 +2736,7 @@ clang_getCursorTLSKind_wrapper(value cursor_ocaml)
   }
 }
 
-DECLARE_OPAQUE(CXCursorSet, cxcursorset, Cxcursorset_val, Val_cxcursorset, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXCursorSet, cxcursorset, Cxcursorset_val, Val_cxcursorset, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_createCXCursorSet_wrapper()
@@ -3152,7 +3153,7 @@ Val_cxtypekind(enum CXTypeKind v)
   return Val_int(0);
 }
 
-DECLARE_OPAQUE(CXType, cxtype, Cxtype_val, Val_cxtype, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXType, cxtype, Cxtype_val, Val_cxtype, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getTypeKind_wrapper(value arg_ocaml)
@@ -4519,7 +4520,7 @@ clang_Cursor_getSpellingNameRange_wrapper(value arg_ocaml, value pieceIndex_ocam
   }
 }
 
-DECLARE_OPAQUE(CXPrintingPolicy, cxprintingpolicy, Cxprintingpolicy_val, Val_cxprintingpolicy, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXPrintingPolicy, cxprintingpolicy, Cxprintingpolicy_val, Val_cxprintingpolicy, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 enum CXPrintingPolicyProperty
 Cxprintingpolicyproperty_val(value ocaml)
@@ -5006,7 +5007,7 @@ clang_disposeStringSet(result);
   }
 }
 
-DECLARE_OPAQUE(CXModule, cxmodule, Cxmodule_val, Val_cxmodule, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXModule, cxmodule, Cxmodule_val, Val_cxmodule, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_Cursor_getModule_wrapper(value C_ocaml)
@@ -5455,7 +5456,7 @@ Val_cxcompletionchunkkind(enum CXCompletionChunkKind v)
   return Val_int(0);
 }
 
-DECLARE_OPAQUE(CXCompletionString, cxcompletionstring, Cxcompletionstring_val, Val_cxcompletionstring, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXCompletionString, cxcompletionstring, Cxcompletionstring_val, Val_cxcompletionstring, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getCompletionChunkKind_wrapper(value completion_string_ocaml, value chunk_number_ocaml)
@@ -5658,7 +5659,7 @@ clang_toggleCrashRecovery_wrapper(value isEnabled_ocaml)
   CAMLreturn(Val_unit);
 }
 
-DECLARE_OPAQUE(CXEvalResult, cxevalresult, Cxevalresult_val, Val_cxevalresult, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXEvalResult, cxevalresult, Cxevalresult_val, Val_cxevalresult, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_Cursor_Evaluate_wrapper(value C_ocaml)
@@ -5804,7 +5805,7 @@ clang_EvalResult_getAsStr_wrapper(value E_ocaml)
   }
 }
 
-DECLARE_OPAQUE(CXRemapping, cxremapping, Cxremapping_val, Val_cxremapping, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXRemapping, cxremapping, Cxremapping_val, Val_cxremapping, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_getRemappings_wrapper(value path_ocaml)
@@ -5851,7 +5852,7 @@ clang_remap_getNumFiles_wrapper(value arg_ocaml)
   }
 }
 
-DECLARE_OPAQUE(CXIndexAction, cxindexaction, Cxindexaction_val, Val_cxindexaction, custom_finalize_default)
+DECLARE_OPAQUE_EX(CXIndexAction, cxindexaction, Cxindexaction_val, Val_cxindexaction, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_IndexAction_create_wrapper(value CIdx_ocaml)
@@ -5966,7 +5967,7 @@ clang_ext_getVersion_wrapper()
 static void finalize_cxint(value v) {
   clang_ext_Int_dispose(*((CXInt *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(CXInt, cxint, Cxint_val, Val_cxint, finalize_cxint)
+DECLARE_OPAQUE_EX(CXInt, cxint, Cxint_val, Val_cxint, finalize_cxint, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_equal_cxint_wrapper(value a_ocaml, value b_ocaml)
@@ -6164,7 +6165,7 @@ clang_ext_Int_getSExtValue64_wrapper(value c_ocaml)
 static void finalize_cxfloat(value v) {
   clang_ext_Float_dispose(*((CXFloat *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(CXFloat, cxfloat, Cxfloat_val, Val_cxfloat, finalize_cxfloat)
+DECLARE_OPAQUE_EX(CXFloat, cxfloat, Cxfloat_val, Val_cxfloat, finalize_cxfloat, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_equal_cxfloat_wrapper(value a_ocaml, value b_ocaml)
@@ -8585,7 +8586,7 @@ Val_clang_ext_templatename_namekind(enum clang_ext_TemplateName_NameKind v)
 static void finalize_clang_ext_templatename(value v) {
   clang_ext_TemplateName_dispose(*((struct clang_ext_TemplateName *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(struct clang_ext_TemplateName, clang_ext_templatename, Clang_ext_templatename_val, Val_clang_ext_templatename, finalize_clang_ext_templatename)
+DECLARE_OPAQUE_EX(struct clang_ext_TemplateName, clang_ext_templatename, Clang_ext_templatename_val, Val_clang_ext_templatename, finalize_clang_ext_templatename, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_ext_TemplateName_getKind_wrapper(value arg_ocaml)
@@ -8620,7 +8621,7 @@ clang_ext_TemplateName_getAsTemplateDecl_wrapper(value arg_ocaml)
 static void finalize_clang_ext_templateargument(value v) {
   clang_ext_TemplateArgument_dispose(*((struct clang_ext_TemplateArgument *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(struct clang_ext_TemplateArgument, clang_ext_templateargument, Clang_ext_templateargument_val, Val_clang_ext_templateargument, finalize_clang_ext_templateargument)
+DECLARE_OPAQUE_EX(struct clang_ext_TemplateArgument, clang_ext_templateargument, Clang_ext_templateargument_val, Val_clang_ext_templateargument, finalize_clang_ext_templateargument, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_ext_TemplateArgument_getKind_wrapper(value arg_ocaml)
@@ -9117,7 +9118,7 @@ clang_ext_LambdaExpr_getCaptureCount_wrapper(value c_ocaml)
 static void finalize_clang_ext_lambdacapture(value v) {
   clang_ext_LambdaCapture_dispose(*((struct clang_ext_LambdaCapture *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(struct clang_ext_LambdaCapture, clang_ext_lambdacapture, Clang_ext_lambdacapture_val, Val_clang_ext_lambdacapture, finalize_clang_ext_lambdacapture)
+DECLARE_OPAQUE_EX(struct clang_ext_LambdaCapture, clang_ext_lambdacapture, Clang_ext_lambdacapture_val, Val_clang_ext_lambdacapture, finalize_clang_ext_lambdacapture, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_ext_LambdaExpr_getCapture_wrapper(value c_ocaml, value index_ocaml)
@@ -9818,7 +9819,7 @@ Val_clang_ext_declarationnamekind(enum clang_ext_DeclarationNameKind v)
 static void finalize_clang_ext_declarationname(value v) {
   clang_ext_DeclarationName_dispose(*((struct clang_ext_DeclarationName *) Data_custom_val(v)));;
 }
-DECLARE_OPAQUE(struct clang_ext_DeclarationName, clang_ext_declarationname, Clang_ext_declarationname_val, Val_clang_ext_declarationname, finalize_clang_ext_declarationname)
+DECLARE_OPAQUE_EX(struct clang_ext_DeclarationName, clang_ext_declarationname, Clang_ext_declarationname_val, Val_clang_ext_declarationname, finalize_clang_ext_declarationname, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_ext_DeclarationName_getKind_wrapper(value arg_ocaml)
@@ -9976,7 +9977,7 @@ Val_clang_ext_nestednamespecifierkind(enum clang_ext_NestedNameSpecifierKind v)
   return Val_int(0);
 }
 
-DECLARE_OPAQUE(struct clang_ext_NestedNameSpecifier, clang_ext_nestednamespecifier, Clang_ext_nestednamespecifier_val, Val_clang_ext_nestednamespecifier, custom_finalize_default)
+DECLARE_OPAQUE_EX(struct clang_ext_NestedNameSpecifier, clang_ext_nestednamespecifier, Clang_ext_nestednamespecifier_val, Val_clang_ext_nestednamespecifier, custom_finalize_default, custom_compare_default, custom_hash_default)
 
 CAMLprim value
 clang_ext_NestedNameSpecifier_getKind_wrapper(value arg_ocaml)
@@ -10513,6 +10514,319 @@ clang_ext_AsmStmt_getInputExpr_wrapper(value arg_ocaml, value arg2_ocaml)
   unsigned int arg2;
   arg2 = Int_val(arg2_ocaml);
   CXCursor result = clang_ext_AsmStmt_getInputExpr(arg, arg2);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+static void finalize_clang_ext_typeloc(value v) {
+  clang_ext_TypeLoc_dispose(*((struct clang_ext_TypeLoc *) Data_custom_val(v)));;
+}
+DECLARE_OPAQUE_EX(struct clang_ext_TypeLoc, clang_ext_typeloc, Clang_ext_typeloc_val, Val_clang_ext_typeloc, finalize_clang_ext_typeloc, custom_compare_default, custom_hash_default)
+
+CAMLprim value
+clang_ext_DeclaratorDecl_getTypeLoc_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  struct clang_ext_TypeLoc result = clang_ext_DeclaratorDecl_getTypeLoc(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_typeloc(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_TypeLoc_Class
+Clang_ext_typeloc_class_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CLANG_EXT_TYPELOC_Qualified;
+  case 1: return CLANG_EXT_TYPELOC_Builtin;
+  case 2: return CLANG_EXT_TYPELOC_Complex;
+  case 3: return CLANG_EXT_TYPELOC_Pointer;
+  case 4: return CLANG_EXT_TYPELOC_BlockPointer;
+  case 5: return CLANG_EXT_TYPELOC_LValueReference;
+  case 6: return CLANG_EXT_TYPELOC_RValueReference;
+  case 7: return CLANG_EXT_TYPELOC_MemberPointer;
+  case 8: return CLANG_EXT_TYPELOC_ConstantArray;
+  case 9: return CLANG_EXT_TYPELOC_IncompleteArray;
+  case 10: return CLANG_EXT_TYPELOC_VariableArray;
+  case 11: return CLANG_EXT_TYPELOC_DependentSizedArray;
+  case 12: return CLANG_EXT_TYPELOC_DependentSizedExtVector;
+  case 13: return CLANG_EXT_TYPELOC_DependentAddressSpace;
+  case 14: return CLANG_EXT_TYPELOC_Vector;
+  case 15: return CLANG_EXT_TYPELOC_DependentVector;
+  case 16: return CLANG_EXT_TYPELOC_ExtVector;
+  case 17: return CLANG_EXT_TYPELOC_FunctionProto;
+  case 18: return CLANG_EXT_TYPELOC_FunctionNoProto;
+  case 19: return CLANG_EXT_TYPELOC_UnresolvedUsing;
+  case 20: return CLANG_EXT_TYPELOC_Paren;
+  case 21: return CLANG_EXT_TYPELOC_Typedef;
+  case 22: return CLANG_EXT_TYPELOC_MacroQualified;
+  case 23: return CLANG_EXT_TYPELOC_Adjusted;
+  case 24: return CLANG_EXT_TYPELOC_Decayed;
+  case 25: return CLANG_EXT_TYPELOC_TypeOfExpr;
+  case 26: return CLANG_EXT_TYPELOC_TypeOf;
+  case 27: return CLANG_EXT_TYPELOC_Decltype;
+  case 28: return CLANG_EXT_TYPELOC_UnaryTransform;
+  case 29: return CLANG_EXT_TYPELOC_Record;
+  case 30: return CLANG_EXT_TYPELOC_Enum;
+  case 31: return CLANG_EXT_TYPELOC_Elaborated;
+  case 32: return CLANG_EXT_TYPELOC_Attributed;
+  case 33: return CLANG_EXT_TYPELOC_TemplateTypeParm;
+  case 34: return CLANG_EXT_TYPELOC_SubstTemplateTypeParm;
+  case 35: return CLANG_EXT_TYPELOC_SubstTemplateTypeParmPack;
+  case 36: return CLANG_EXT_TYPELOC_TemplateSpecialization;
+  case 37: return CLANG_EXT_TYPELOC_Auto;
+  case 38: return CLANG_EXT_TYPELOC_DeducedTemplateSpecialization;
+  case 39: return CLANG_EXT_TYPELOC_InjectedClassName;
+  case 40: return CLANG_EXT_TYPELOC_DependentName;
+  case 41: return CLANG_EXT_TYPELOC_DependentTemplateSpecialization;
+  case 42: return CLANG_EXT_TYPELOC_PackExpansion;
+  case 43: return CLANG_EXT_TYPELOC_ObjCTypeParam;
+  case 44: return CLANG_EXT_TYPELOC_ObjCObject;
+  case 45: return CLANG_EXT_TYPELOC_ObjCInterface;
+  case 46: return CLANG_EXT_TYPELOC_ObjCObjectPointer;
+  case 47: return CLANG_EXT_TYPELOC_Pipe;
+  case 48: return CLANG_EXT_TYPELOC_Atomic;
+  case 49: return CLANG_EXT_TYPELOC_InvalidTypeLoc;
+  }
+  failwith_fmt("invalid value for Clang_ext_typeloc_class_val: %d", Int_val(ocaml));
+  return CLANG_EXT_TYPELOC_Qualified;
+}
+
+value
+Val_clang_ext_typeloc_class(enum clang_ext_TypeLoc_Class v)
+{
+  switch (v) {
+  case CLANG_EXT_TYPELOC_Qualified: return Val_int(0);
+  case CLANG_EXT_TYPELOC_Builtin: return Val_int(1);
+  case CLANG_EXT_TYPELOC_Complex: return Val_int(2);
+  case CLANG_EXT_TYPELOC_Pointer: return Val_int(3);
+  case CLANG_EXT_TYPELOC_BlockPointer: return Val_int(4);
+  case CLANG_EXT_TYPELOC_LValueReference: return Val_int(5);
+  case CLANG_EXT_TYPELOC_RValueReference: return Val_int(6);
+  case CLANG_EXT_TYPELOC_MemberPointer: return Val_int(7);
+  case CLANG_EXT_TYPELOC_ConstantArray: return Val_int(8);
+  case CLANG_EXT_TYPELOC_IncompleteArray: return Val_int(9);
+  case CLANG_EXT_TYPELOC_VariableArray: return Val_int(10);
+  case CLANG_EXT_TYPELOC_DependentSizedArray: return Val_int(11);
+  case CLANG_EXT_TYPELOC_DependentSizedExtVector: return Val_int(12);
+  case CLANG_EXT_TYPELOC_DependentAddressSpace: return Val_int(13);
+  case CLANG_EXT_TYPELOC_Vector: return Val_int(14);
+  case CLANG_EXT_TYPELOC_DependentVector: return Val_int(15);
+  case CLANG_EXT_TYPELOC_ExtVector: return Val_int(16);
+  case CLANG_EXT_TYPELOC_FunctionProto: return Val_int(17);
+  case CLANG_EXT_TYPELOC_FunctionNoProto: return Val_int(18);
+  case CLANG_EXT_TYPELOC_UnresolvedUsing: return Val_int(19);
+  case CLANG_EXT_TYPELOC_Paren: return Val_int(20);
+  case CLANG_EXT_TYPELOC_Typedef: return Val_int(21);
+  case CLANG_EXT_TYPELOC_MacroQualified: return Val_int(22);
+  case CLANG_EXT_TYPELOC_Adjusted: return Val_int(23);
+  case CLANG_EXT_TYPELOC_Decayed: return Val_int(24);
+  case CLANG_EXT_TYPELOC_TypeOfExpr: return Val_int(25);
+  case CLANG_EXT_TYPELOC_TypeOf: return Val_int(26);
+  case CLANG_EXT_TYPELOC_Decltype: return Val_int(27);
+  case CLANG_EXT_TYPELOC_UnaryTransform: return Val_int(28);
+  case CLANG_EXT_TYPELOC_Record: return Val_int(29);
+  case CLANG_EXT_TYPELOC_Enum: return Val_int(30);
+  case CLANG_EXT_TYPELOC_Elaborated: return Val_int(31);
+  case CLANG_EXT_TYPELOC_Attributed: return Val_int(32);
+  case CLANG_EXT_TYPELOC_TemplateTypeParm: return Val_int(33);
+  case CLANG_EXT_TYPELOC_SubstTemplateTypeParm: return Val_int(34);
+  case CLANG_EXT_TYPELOC_SubstTemplateTypeParmPack: return Val_int(35);
+  case CLANG_EXT_TYPELOC_TemplateSpecialization: return Val_int(36);
+  case CLANG_EXT_TYPELOC_Auto: return Val_int(37);
+  case CLANG_EXT_TYPELOC_DeducedTemplateSpecialization: return Val_int(38);
+  case CLANG_EXT_TYPELOC_InjectedClassName: return Val_int(39);
+  case CLANG_EXT_TYPELOC_DependentName: return Val_int(40);
+  case CLANG_EXT_TYPELOC_DependentTemplateSpecialization: return Val_int(41);
+  case CLANG_EXT_TYPELOC_PackExpansion: return Val_int(42);
+  case CLANG_EXT_TYPELOC_ObjCTypeParam: return Val_int(43);
+  case CLANG_EXT_TYPELOC_ObjCObject: return Val_int(44);
+  case CLANG_EXT_TYPELOC_ObjCInterface: return Val_int(45);
+  case CLANG_EXT_TYPELOC_ObjCObjectPointer: return Val_int(46);
+  case CLANG_EXT_TYPELOC_Pipe: return Val_int(47);
+  case CLANG_EXT_TYPELOC_Atomic: return Val_int(48);
+  case CLANG_EXT_TYPELOC_InvalidTypeLoc: return Val_int(49);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_typeloc_class: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_TypeLoc_getClass_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  enum clang_ext_TypeLoc_Class result = clang_ext_TypeLoc_getClass(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_typeloc_class(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TypeLoc_getType_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  CXType result = clang_ext_TypeLoc_getType(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxtype(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_ArrayTypeLoc_getSizeExpr_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  CXCursor result = clang_ext_ArrayTypeLoc_getSizeExpr(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_ArrayTypeLoc_getElementLoc_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  struct clang_ext_TypeLoc result = clang_ext_ArrayTypeLoc_getElementLoc(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_typeloc(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_ParenTypeLoc_getInnerLoc_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  struct clang_ext_TypeLoc result = clang_ext_ParenTypeLoc_getInnerLoc(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_typeloc(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_PointerLikeTypeLoc_getPointeeLoc_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  struct clang_ext_TypeLoc result = clang_ext_PointerLikeTypeLoc_getPointeeLoc(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_typeloc(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_MemberPointerTypeLoc_getClassLoc_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  struct clang_ext_TypeLoc result = clang_ext_MemberPointerTypeLoc_getClassLoc(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_typeloc(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_QualifiedTypeLoc_getUnqualifiedLoc_wrapper(value tl_ocaml)
+{
+  CAMLparam1(tl_ocaml);
+  struct clang_ext_TypeLoc tl;
+  tl = Clang_ext_typeloc_val(Field(tl_ocaml, 0));
+  struct clang_ext_TypeLoc result = clang_ext_QualifiedTypeLoc_getUnqualifiedLoc(tl);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_typeloc(result));
+  Store_field(data, 1, safe_field(tl_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_FunctionTypeLoc_getReturnLoc_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  struct clang_ext_TypeLoc result = clang_ext_FunctionTypeLoc_getReturnLoc(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_typeloc(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_FunctionTypeLoc_getNumParams_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  unsigned int result = clang_ext_FunctionTypeLoc_getNumParams(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_FunctionTypeLoc_getParam_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  unsigned int arg2;
+  arg2 = Int_val(arg2_ocaml);
+  CXCursor result = clang_ext_FunctionTypeLoc_getParam(arg, arg2);
   {
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
