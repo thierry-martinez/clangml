@@ -41,3 +41,15 @@ val show_ext_typekind : Clang.clang_ext_typekind show
 val pp_ext_declkind : Clang.clang_ext_declkind pp
 
 val show_ext_declkind : Clang.clang_ext_declkind show
+
+val pp_unary_operator_kind : Clang.Ast.unary_operator_kind pp
+
+val show_unary_operator_kind : Clang.Ast.unary_operator_kind show
+
+val pp_binary_operator_kind : Clang.Ast.binary_operator_kind pp
+
+val show_binary_operator_kind : Clang.Ast.binary_operator_kind show
+
+val pp_builtin_type : Clang.Ast.builtin_type pp
+
+val show_builtin_type : Clang.Ast.builtin_type show
