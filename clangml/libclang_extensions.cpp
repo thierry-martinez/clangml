@@ -1048,7 +1048,7 @@ extern "C" {
       #define TYPE(Class, Base) \
         case clang::Type::Class: return CLANG_EXT_TYPE_##Class;
       #define ABSTRACT_TYPE(Class, Base)
-      #include <clang/AST/TypeNodes.def>
+      #include TYPENODES_INC
       default:
         return CLANG_EXT_TYPE_UnknownType;
       }
@@ -1903,7 +1903,7 @@ extern "C" {
     #define LANGSTANDARD(Ident, Name, _Lang, _Desc, _Features) \
       FOREACH_STANDARD(Ident, Name)
     #endif
-    #include <clang/Frontend/LangStandards.def>
+    #include LANGSTANDARDS_DEF
     #undef FOREACH_STANDARD
     default:
       return "";
@@ -1923,7 +1923,7 @@ extern "C" {
     #define LANGSTANDARD(Ident, Name, _Lang, _Desc, _Features) \
       FOREACH_STANDARD(Ident, Name)
     #endif
-    #include <clang/Frontend/LangStandards.def>
+    #include LANGSTANDARDS_DEF
     #undef FOREACH_STANDARD
     return CLANG_EXT_LANGSTANDARDS_InvalidLang;
   }

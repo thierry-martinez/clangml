@@ -56,6 +56,12 @@
 #ifdef LLVM_VERSION_8_0_1
 #define LLVM_VERSION_BEFORE_9_0_0
 #endif
+#ifdef LLVM_VERSION_BEFORE_9_0_0
+#define LLVM_VERSION_BEFORE_10_0_0
+#endif
+#ifdef LLVM_VERSION_9_0_1
+#define LLVM_VERSION_BEFORE_10_0_0
+#endif
 
 CXVersion
 clang_ext_getVersion();
@@ -318,11 +324,17 @@ enum clang_ext_StmtKind {
 enum clang_ext_StmtKind
 clang_ext_Stmt_GetKind(CXCursor);
 
+#ifdef LLVM_VERSION_BEFORE_10_0_0
+  #define TYPENODES_INC <clang/AST/TypeNodes.def>
+#else
+  #define TYPENODES_INC <clang/AST/TypeNodes.inc>
+#endif
+
 enum clang_ext_TypeKind {
   CLANG_EXT_TYPE_InvalidType,
   #define TYPE(Class, _Base) CLANG_EXT_TYPE_##Class,
   #define ABSTRACT_TYPE(_Class, _Base)
-  #include <clang/AST/TypeNodes.def>
+  #include TYPENODES_INC
   CLANG_EXT_TYPE_UnknownType
 };
 
@@ -402,10 +414,17 @@ bool
 clang_ext_FunctionDecl_isConstexpr(CXCursor c);
 
 /* Adapted from DeclCXX.h:LinkageSpecDecl:LanguageIDs */
+#ifdef LLVM_VERSION_BEFORE_10_0_0
 enum clang_ext_LanguageIDs {
   CLANG_EXT_LANG_C = 0x0002,
   CLANG_EXT_LANG_CXX = 0x0004
 };
+#else
+enum clang_ext_LanguageIDs {
+  CLANG_EXT_LANG_C = 0x0001,
+  CLANG_EXT_LANG_CXX = 0x0002
+};
+#endif
 
 unsigned
 clang_ext_LinkageSpecDecl_getLanguageIDs(CXCursor C);
@@ -637,6 +656,12 @@ clang_ext_CXXTypeidExpr_getTypeOperand(CXCursor c);
 CXCursor
 clang_ext_CXXTypeidExpr_getExprOperand(CXCursor c);
 
+#ifdef LLVM_VERSION_BEFORE_10_0_0
+  #define LANGSTANDARDS_DEF <clang/Frontend/LangStandards.def>
+#else
+  #define LANGSTANDARDS_DEF <clang/Basic/LangStandards.def>
+#endif
+
 enum clang_ext_langstandards {
   #define FOREACH_STANDARD(Ident, Name) \
     CLANG_EXT_LANGSTANDARDS_##Ident,
@@ -647,7 +672,7 @@ enum clang_ext_langstandards {
   #define LANGSTANDARD(Ident, Name, _Lang, _Desc, _Features) \
     FOREACH_STANDARD(Ident, Name)
   #endif
-  #include <clang/Frontend/LangStandards.def>
+  #include LANGSTANDARDS_DEF
   #undef FOREACH_STANDARD
   CLANG_EXT_LANGSTANDARDS_InvalidLang
 };
