@@ -18,3 +18,9 @@
 /clangml/clang__compat.ml
 /config/clangml_config.ml
 /clangml.opam
+/bootstrap.tar.xz
+/clangml.install
+/current
+/norms
+
+/m4/ax_compare_version.m4
