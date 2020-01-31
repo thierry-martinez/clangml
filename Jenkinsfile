@@ -32,8 +32,8 @@ pipeline {
                     cd src && \
                     rm -rf bootstrap/ && \
                     tar -xf ~/bootstrap.tar.xz && \
-                    ./autogen.sh && \
-                    m4/download.sh
+                    m4/download.sh && \
+                    ./autogen.sh
                    '''
             }
         }

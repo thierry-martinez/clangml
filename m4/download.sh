@@ -14,6 +14,7 @@ elif which wget >/dev/null; then
     }
 else
     function download {
+        set +x
         >&2 echo "Please install curl or wget to download $2"
         exit 1
     }
