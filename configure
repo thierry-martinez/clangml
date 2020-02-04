@@ -661,6 +661,10 @@ LLVM_LIBDIR
 LLVM_LIBS
 LLVM_LDFLAGS
 LLVM_CFLAGS
+ENDIF_CLANG_FROM_10_0
+IF_CLANG_FROM_10_0
+ENDIF_CLANG_BEFORE_10_0
+IF_CLANG_BEFORE_10_0
 ENDIF_CLANG_FROM_9_0
 IF_CLANG_FROM_9_0
 ENDIF_CLANG_BEFORE_9_0
@@ -673,6 +677,8 @@ ENDIF_CLANG_FROM_4_0
 IF_CLANG_FROM_4_0
 ENDIF_CLANG_BEFORE_4_0
 IF_CLANG_BEFORE_4_0
+ENDIF_CLANG_FROM_3_7
+IF_CLANG_FROM_3_7
 ENDIF_CLANG_BEFORE_3_7
 IF_CLANG_BEFORE_3_7
 ENDIF_CLANG_FROM_3_6
@@ -2863,6 +2869,7 @@ END
   fi
 fi
 
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ln -s works" >&5
 $as_echo_n "checking whether ln -s works... " >&6; }
 LN_S=$as_ln_s
@@ -4060,7 +4067,7 @@ else
 fi
 fi
 
-LLVM_VERSION=`echo $LLVM_VERSION | sed 's/svn$//'`
+LLVM_VERSION=`echo $LLVM_VERSION | sed 's/\(svn\|git\)$//'`
 
 
 EQUIVALENT_LLVM_VERSION="$LLVM_VERSION"
@@ -4144,117 +4151,358 @@ else
   as_fn_error $? "LLVM version $EQUIVALENT_LLVM_VERSION not supported. Please report: thierry.martinez@inria.fr . You may try to force another bindings version with ./configure --with-llvm-version= (to obtain the list of supported versions: ls $srcdir/bootstrap)." "$LINENO" 5
 fi
 
-if test `printf "$EQUIVALENT_LLVM_VERSION\n3.5" | sort | head -n1` = "3.5"; then :
-  IF_CLANG_BEFORE_3_5="(*"
 
-   ENDIF_CLANG_BEFORE_3_5="*)"
 
-   IF_CLANG_FROM_3_5=""
 
-   ENDIF_CLANG_FROM_3_5=""
 
-else
-  IF_CLANG_BEFORE_3_5=""
 
-   ENDIF_CLANG_BEFORE_3_5=""
+  # Used to indicate true or false condition
+  ax_compare_version=false
 
-   IF_CLANG_FROM_3_5="(*"
+  # Convert the two version strings to be compared into a format that
+  # allows a simple string comparison.  The end result is that a version
+  # string of the form 1.12.5-r617 will be converted to the form
+  # 0001001200050617.  In other words, each number is zero padded to four
+  # digits, and non digits are removed.
 
-   ENDIF_CLANG_FROM_3_5="*)"
+  ax_compare_version_A=`echo "$EQUIVALENT_LLVM_VERSION" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
 
-fi
 
-if test `printf "$EQUIVALENT_LLVM_VERSION\n3.6" | sort | head -n1` = "3.6"; then :
-  IF_CLANG_BEFORE_3_6="(*"
+  ax_compare_version_B=`echo "3.5" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
 
-   ENDIF_CLANG_BEFORE_3_6="*)"
 
-   IF_CLANG_FROM_3_6=""
+    ax_compare_version=`echo "x$ax_compare_version_A
+x$ax_compare_version_B" | sed 's/^ *//' | sort -r | sed "s/x${ax_compare_version_A}/true/;s/x${ax_compare_version_B}/false/;1q"`
 
-   ENDIF_CLANG_FROM_3_6=""
 
-else
-  IF_CLANG_BEFORE_3_6=""
 
-   ENDIF_CLANG_BEFORE_3_6=""
+    if test "$ax_compare_version" = "true" ; then
+    IF_CLANG_BEFORE_3_5="(*"
 
-   IF_CLANG_FROM_3_6="(*"
+     ENDIF_CLANG_BEFORE_3_5="*)"
 
-   ENDIF_CLANG_FROM_3_6="*)"
+     IF_CLANG_FROM_3_5=""
 
-fi
+     ENDIF_CLANG_FROM_3_5=""
 
-if test `printf "$EQUIVALENT_LLVM_VERSION\n3.7" | sort | head -n1` = "3.7"; then :
-  IF_CLANG_BEFORE_3_7="(*"
+    else IF_CLANG_BEFORE_3_5=""
 
-   ENDIF_CLANG_BEFORE_3_7="*)"
+     ENDIF_CLANG_BEFORE_3_5=""
 
-else
-  IF_CLANG_BEFORE_3_7=""
+     IF_CLANG_FROM_3_5="(*"
 
-   ENDIF_CLANG_BEFORE_3_7=""
+     ENDIF_CLANG_FROM_3_5="*)"
 
-fi
+  fi
 
-if test `printf "$EQUIVALENT_LLVM_VERSION\n4.0" | sort | head -n1` = "4.0"; then :
-  IF_CLANG_BEFORE_4_0="(*"
 
-   ENDIF_CLANG_BEFORE_4_0="*)"
 
-   IF_CLANG_FROM_4_0=""
 
-   ENDIF_CLANG_FROM_4_0=""
+  # Used to indicate true or false condition
+  ax_compare_version=false
 
-else
-  IF_CLANG_BEFORE_4_0=""
+  # Convert the two version strings to be compared into a format that
+  # allows a simple string comparison.  The end result is that a version
+  # string of the form 1.12.5-r617 will be converted to the form
+  # 0001001200050617.  In other words, each number is zero padded to four
+  # digits, and non digits are removed.
 
-   ENDIF_CLANG_BEFORE_4_0=""
+  ax_compare_version_A=`echo "$EQUIVALENT_LLVM_VERSION" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
 
-   IF_CLANG_FROM_4_0="(*"
 
-   ENDIF_CLANG_FROM_4_0="*)"
+  ax_compare_version_B=`echo "3.6" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
 
-fi
 
-if test `printf "$EQUIVALENT_LLVM_VERSION\n8.0" | sort | head -n1` = "8.0"; then :
-  IF_CLANG_BEFORE_8_0="(*"
+    ax_compare_version=`echo "x$ax_compare_version_A
+x$ax_compare_version_B" | sed 's/^ *//' | sort -r | sed "s/x${ax_compare_version_A}/true/;s/x${ax_compare_version_B}/false/;1q"`
 
-   ENDIF_CLANG_BEFORE_8_0="*)"
 
-   IF_CLANG_FROM_8_0=""
 
-   ENDIF_CLANG_FROM_8_0=""
+    if test "$ax_compare_version" = "true" ; then
+    IF_CLANG_BEFORE_3_6="(*"
 
-else
-  IF_CLANG_BEFORE_8_0=""
+     ENDIF_CLANG_BEFORE_3_6="*)"
 
-   ENDIF_CLANG_BEFORE_8_0=""
+     IF_CLANG_FROM_3_6=""
 
-   IF_CLANG_FROM_8_0="(*"
+     ENDIF_CLANG_FROM_3_6=""
 
-   ENDIF_CLANG_FROM_8_0="*)"
+    else IF_CLANG_BEFORE_3_6=""
 
-fi
+     ENDIF_CLANG_BEFORE_3_6=""
 
-if test `printf "$EQUIVALENT_LLVM_VERSION\n9.0" | sort | head -n1` = "9.0"; then :
-  IF_CLANG_BEFORE_9_0="(*"
+     IF_CLANG_FROM_3_6="(*"
 
-   ENDIF_CLANG_BEFORE_9_0="*)"
+     ENDIF_CLANG_FROM_3_6="*)"
 
-   IF_CLANG_FROM_9_0=""
+  fi
 
-   ENDIF_CLANG_FROM_9_0=""
 
-else
-  IF_CLANG_BEFORE_9_0=""
 
-   ENDIF_CLANG_BEFORE_9_0=""
 
-   IF_CLANG_FROM_9_0="(*"
+  # Used to indicate true or false condition
+  ax_compare_version=false
 
-   ENDIF_CLANG_FROM_9_0="*)"
+  # Convert the two version strings to be compared into a format that
+  # allows a simple string comparison.  The end result is that a version
+  # string of the form 1.12.5-r617 will be converted to the form
+  # 0001001200050617.  In other words, each number is zero padded to four
+  # digits, and non digits are removed.
 
-fi
+  ax_compare_version_A=`echo "$EQUIVALENT_LLVM_VERSION" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
+
+
+  ax_compare_version_B=`echo "3.7" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
+
+
+    ax_compare_version=`echo "x$ax_compare_version_A
+x$ax_compare_version_B" | sed 's/^ *//' | sort -r | sed "s/x${ax_compare_version_A}/true/;s/x${ax_compare_version_B}/false/;1q"`
+
+
+
+    if test "$ax_compare_version" = "true" ; then
+    IF_CLANG_BEFORE_3_7="(*"
+
+     ENDIF_CLANG_BEFORE_3_7="*)"
+
+     IF_CLANG_FROM_3_7=""
+
+     ENDIF_CLANG_FROM_3_7=""
+
+    else IF_CLANG_BEFORE_3_7=""
+
+     ENDIF_CLANG_BEFORE_3_7=""
+
+     IF_CLANG_FROM_3_7="(*"
+
+     ENDIF_CLANG_FROM_3_7="*)"
+
+  fi
+
+
+
+
+  # Used to indicate true or false condition
+  ax_compare_version=false
+
+  # Convert the two version strings to be compared into a format that
+  # allows a simple string comparison.  The end result is that a version
+  # string of the form 1.12.5-r617 will be converted to the form
+  # 0001001200050617.  In other words, each number is zero padded to four
+  # digits, and non digits are removed.
+
+  ax_compare_version_A=`echo "$EQUIVALENT_LLVM_VERSION" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
+
+
+  ax_compare_version_B=`echo "4.0" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
+
+
+    ax_compare_version=`echo "x$ax_compare_version_A
+x$ax_compare_version_B" | sed 's/^ *//' | sort -r | sed "s/x${ax_compare_version_A}/true/;s/x${ax_compare_version_B}/false/;1q"`
+
+
+
+    if test "$ax_compare_version" = "true" ; then
+    IF_CLANG_BEFORE_4_0="(*"
+
+     ENDIF_CLANG_BEFORE_4_0="*)"
+
+     IF_CLANG_FROM_4_0=""
+
+     ENDIF_CLANG_FROM_4_0=""
+
+    else IF_CLANG_BEFORE_4_0=""
+
+     ENDIF_CLANG_BEFORE_4_0=""
+
+     IF_CLANG_FROM_4_0="(*"
+
+     ENDIF_CLANG_FROM_4_0="*)"
+
+  fi
+
+
+
+
+  # Used to indicate true or false condition
+  ax_compare_version=false
+
+  # Convert the two version strings to be compared into a format that
+  # allows a simple string comparison.  The end result is that a version
+  # string of the form 1.12.5-r617 will be converted to the form
+  # 0001001200050617.  In other words, each number is zero padded to four
+  # digits, and non digits are removed.
+
+  ax_compare_version_A=`echo "$EQUIVALENT_LLVM_VERSION" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
+
+
+  ax_compare_version_B=`echo "8.0" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
+
+
+    ax_compare_version=`echo "x$ax_compare_version_A
+x$ax_compare_version_B" | sed 's/^ *//' | sort -r | sed "s/x${ax_compare_version_A}/true/;s/x${ax_compare_version_B}/false/;1q"`
+
+
+
+    if test "$ax_compare_version" = "true" ; then
+    IF_CLANG_BEFORE_8_0="(*"
+
+     ENDIF_CLANG_BEFORE_8_0="*)"
+
+     IF_CLANG_FROM_8_0=""
+
+     ENDIF_CLANG_FROM_8_0=""
+
+    else IF_CLANG_BEFORE_8_0=""
+
+     ENDIF_CLANG_BEFORE_8_0=""
+
+     IF_CLANG_FROM_8_0="(*"
+
+     ENDIF_CLANG_FROM_8_0="*)"
+
+  fi
+
+
+
+
+  # Used to indicate true or false condition
+  ax_compare_version=false
+
+  # Convert the two version strings to be compared into a format that
+  # allows a simple string comparison.  The end result is that a version
+  # string of the form 1.12.5-r617 will be converted to the form
+  # 0001001200050617.  In other words, each number is zero padded to four
+  # digits, and non digits are removed.
+
+  ax_compare_version_A=`echo "$EQUIVALENT_LLVM_VERSION" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
+
+
+  ax_compare_version_B=`echo "9.0" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
+
+
+    ax_compare_version=`echo "x$ax_compare_version_A
+x$ax_compare_version_B" | sed 's/^ *//' | sort -r | sed "s/x${ax_compare_version_A}/true/;s/x${ax_compare_version_B}/false/;1q"`
+
+
+
+    if test "$ax_compare_version" = "true" ; then
+    IF_CLANG_BEFORE_9_0="(*"
+
+     ENDIF_CLANG_BEFORE_9_0="*)"
+
+     IF_CLANG_FROM_9_0=""
+
+     ENDIF_CLANG_FROM_9_0=""
+
+    else IF_CLANG_BEFORE_9_0=""
+
+     ENDIF_CLANG_BEFORE_9_0=""
+
+     IF_CLANG_FROM_9_0="(*"
+
+     ENDIF_CLANG_FROM_9_0="*)"
+
+  fi
+
+
+
+
+  # Used to indicate true or false condition
+  ax_compare_version=false
+
+  # Convert the two version strings to be compared into a format that
+  # allows a simple string comparison.  The end result is that a version
+  # string of the form 1.12.5-r617 will be converted to the form
+  # 0001001200050617.  In other words, each number is zero padded to four
+  # digits, and non digits are removed.
+
+  ax_compare_version_A=`echo "$EQUIVALENT_LLVM_VERSION" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
+
+
+  ax_compare_version_B=`echo "10.0" | sed -e 's/\([0-9]*\)/Z\1Z/g' \
+                     -e 's/Z\([0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/Z\([0-9][0-9][0-9]\)Z/Z0\1Z/g' \
+                     -e 's/[^0-9]//g'`
+
+
+    ax_compare_version=`echo "x$ax_compare_version_A
+x$ax_compare_version_B" | sed 's/^ *//' | sort -r | sed "s/x${ax_compare_version_A}/true/;s/x${ax_compare_version_B}/false/;1q"`
+
+
+
+    if test "$ax_compare_version" = "true" ; then
+    IF_CLANG_BEFORE_10_0="(*"
+
+     ENDIF_CLANG_BEFORE_10_0="*)"
+
+     IF_CLANG_FROM_10_0=""
+
+     ENDIF_CLANG_FROM_10_0=""
+
+    else IF_CLANG_BEFORE_10_0=""
+
+     ENDIF_CLANG_BEFORE_10_0=""
+
+     IF_CLANG_FROM_10_0="(*"
+
+     ENDIF_CLANG_FROM_10_0="*)"
+
+  fi
+
 
 LLVM_CFLAGS=`$LLVM_CONFIG --cflags `
 
@@ -4289,7 +4537,7 @@ LLVM_CFLAGS="`echo $LLVM_CFLAGS \
 CFLAGS="$LLVM_CFLAGS -D$LLVM_VERSION_MACRO -I$srcdir/clangml"
 
 
-CXXFLAGS="$CFLAGS --std=c++11"
+CXXFLAGS="$CFLAGS --std=c++14"
 
 
 DEPDIR="${am__leading_dot}deps"

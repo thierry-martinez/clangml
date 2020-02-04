@@ -2,6 +2,7 @@ AC_INIT([[clangml]], [m4_esyscmd([cat VERSION])],
   [[Thierry.Martinez@inria.fr]], [[clangml]],
   [[https://github.com/thierry.martinez/clangml/]])
 AM_INIT_AUTOMAKE([foreign]) dnl to allow README.md
+AC_CONFIG_MACRO_DIR([m4])
 
 AC_PROG_LN_S
 
@@ -161,7 +162,7 @@ AS_IF([test "x$with_llvm" != "x"],
     [true],
     [AC_MSG_ERROR([[LLVM version $LLVM_VERSION found but $with_llvm expected]])]))
 
-AC_SUBST([LLVM_VERSION], [[`echo $LLVM_VERSION | sed 's/svn$//'`]])
+AC_SUBST([LLVM_VERSION], [[`echo $LLVM_VERSION | sed 's/\(svn\|git\)$//'`]])
 
 AC_SUBST([EQUIVALENT_LLVM_VERSION], [["$LLVM_VERSION"]])
 
@@ -207,61 +208,24 @@ AS_IF([test -d $srcdir/bootstrap/$EQUIVALENT_LLVM_VERSION],
   [true],
   [AC_MSG_ERROR([LLVM version $EQUIVALENT_LLVM_VERSION not supported. Please report: thierry.martinez@inria.fr . You may try to force another bindings version with ./configure --with-llvm-version= (to obtain the list of supported versions: ls $srcdir/bootstrap).])])
 
-AS_IF([test `printf "$EQUIVALENT_LLVM_VERSION\n3.5" | sort | head -n1` = "3.5"],
-  [AC_SUBST([IF_CLANG_BEFORE_3_5], ["(*"])
-   AC_SUBST([ENDIF_CLANG_BEFORE_3_5], ["*)"])
-   AC_SUBST([IF_CLANG_FROM_3_5], [""])
-   AC_SUBST([ENDIF_CLANG_FROM_3_5], [""])],
-  [AC_SUBST([IF_CLANG_BEFORE_3_5], [""])
-   AC_SUBST([ENDIF_CLANG_BEFORE_3_5], [""])
-   AC_SUBST([IF_CLANG_FROM_3_5], ["(*"])
-   AC_SUBST([ENDIF_CLANG_FROM_3_5], ["*)"])])
+AC_DEFUN([AC_VERSION_BLOCK],
+  [AX_COMPARE_VERSION([$EQUIVALENT_LLVM_VERSION], [ge], [$1.$2],
+    [AC_SUBST(IF_CLANG_BEFORE_[$1]_[$2], ["(*"])
+     AC_SUBST(ENDIF_CLANG_BEFORE_[$1]_[$2], ["*)"])
+     AC_SUBST(IF_CLANG_FROM_[$1]_[$2], [""])
+     AC_SUBST(ENDIF_CLANG_FROM_[$1]_[$2], [""])],
+    [AC_SUBST(IF_CLANG_BEFORE_[$1]_[$2], [""])
+     AC_SUBST(ENDIF_CLANG_BEFORE_[$1]_[$2], [""])
+     AC_SUBST(IF_CLANG_FROM_[$1]_[$2], ["(*"])
+     AC_SUBST(ENDIF_CLANG_FROM_[$1]_[$2], ["*)"])])])
 
-AS_IF([test `printf "$EQUIVALENT_LLVM_VERSION\n3.6" | sort | head -n1` = "3.6"],
-  [AC_SUBST([IF_CLANG_BEFORE_3_6], ["(*"])
-   AC_SUBST([ENDIF_CLANG_BEFORE_3_6], ["*)"])
-   AC_SUBST([IF_CLANG_FROM_3_6], [""])
-   AC_SUBST([ENDIF_CLANG_FROM_3_6], [""])],
-  [AC_SUBST([IF_CLANG_BEFORE_3_6], [""])
-   AC_SUBST([ENDIF_CLANG_BEFORE_3_6], [""])
-   AC_SUBST([IF_CLANG_FROM_3_6], ["(*"])
-   AC_SUBST([ENDIF_CLANG_FROM_3_6], ["*)"])])
-
-AS_IF([test `printf "$EQUIVALENT_LLVM_VERSION\n3.7" | sort | head -n1` = "3.7"],
-  [AC_SUBST([IF_CLANG_BEFORE_3_7], ["(*"])
-   AC_SUBST([ENDIF_CLANG_BEFORE_3_7], ["*)"])],
-  [AC_SUBST([IF_CLANG_BEFORE_3_7], [""])
-   AC_SUBST([ENDIF_CLANG_BEFORE_3_7], [""])])
-
-AS_IF([test `printf "$EQUIVALENT_LLVM_VERSION\n4.0" | sort | head -n1` = "4.0"],
-  [AC_SUBST([IF_CLANG_BEFORE_4_0], ["(*"])
-   AC_SUBST([ENDIF_CLANG_BEFORE_4_0], ["*)"])
-   AC_SUBST([IF_CLANG_FROM_4_0], [""])
-   AC_SUBST([ENDIF_CLANG_FROM_4_0], [""])],
-  [AC_SUBST([IF_CLANG_BEFORE_4_0], [""])
-   AC_SUBST([ENDIF_CLANG_BEFORE_4_0], [""])
-   AC_SUBST([IF_CLANG_FROM_4_0], ["(*"])
-   AC_SUBST([ENDIF_CLANG_FROM_4_0], ["*)"])])
-
-AS_IF([test `printf "$EQUIVALENT_LLVM_VERSION\n8.0" | sort | head -n1` = "8.0"],
-  [AC_SUBST([IF_CLANG_BEFORE_8_0], ["(*"])
-   AC_SUBST([ENDIF_CLANG_BEFORE_8_0], ["*)"])
-   AC_SUBST([IF_CLANG_FROM_8_0], [""])
-   AC_SUBST([ENDIF_CLANG_FROM_8_0], [""])],
-  [AC_SUBST([IF_CLANG_BEFORE_8_0], [""])
-   AC_SUBST([ENDIF_CLANG_BEFORE_8_0], [""])
-   AC_SUBST([IF_CLANG_FROM_8_0], ["(*"])
-   AC_SUBST([ENDIF_CLANG_FROM_8_0], ["*)"])])
-
-AS_IF([test `printf "$EQUIVALENT_LLVM_VERSION\n9.0" | sort | head -n1` = "9.0"],
-  [AC_SUBST([IF_CLANG_BEFORE_9_0], ["(*"])
-   AC_SUBST([ENDIF_CLANG_BEFORE_9_0], ["*)"])
-   AC_SUBST([IF_CLANG_FROM_9_0], [""])
-   AC_SUBST([ENDIF_CLANG_FROM_9_0], [""])],
-  [AC_SUBST([IF_CLANG_BEFORE_9_0], [""])
-   AC_SUBST([ENDIF_CLANG_BEFORE_9_0], [""])
-   AC_SUBST([IF_CLANG_FROM_9_0], ["(*"])
-   AC_SUBST([ENDIF_CLANG_FROM_9_0], ["*)"])])
+AC_VERSION_BLOCK(3, 5)
+AC_VERSION_BLOCK(3, 6)
+AC_VERSION_BLOCK(3, 7)
+AC_VERSION_BLOCK(4, 0)
+AC_VERSION_BLOCK(8, 0)
+AC_VERSION_BLOCK(9, 0)
+AC_VERSION_BLOCK(10, 0)
 
 AC_SUBST([LLVM_CFLAGS], [[`$LLVM_CONFIG --cflags `]])
 
@@ -289,7 +253,7 @@ AC_SUBST([LLVM_CFLAGS], [["`echo $LLVM_CFLAGS \
 
 AC_SUBST([CFLAGS], [["$LLVM_CFLAGS -D$LLVM_VERSION_MACRO -I$srcdir/clangml"]])
 
-AC_SUBST([CXXFLAGS], [["$CFLAGS --std=c++11"]])
+AC_SUBST([CXXFLAGS], [["$CFLAGS --std=c++14"]])
 
 AC_CHECK_HEADERS([clang-c/Index.h], [],
   [AC_MSG_ERROR([[Header clang-c/Index.h not found]])])

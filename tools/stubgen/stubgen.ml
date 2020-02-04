@@ -1979,6 +1979,7 @@ let main cflags llvm_config prefix =
         let llvm_prefix = run_llvm_config llvm_config ["--prefix"] in
         let llvm_cflags = run_llvm_config llvm_config ["--cflags"] in
         let llvm_version = string_remove_suffix ~suffix:"svn" llvm_version in
+        let llvm_version = string_remove_suffix ~suffix:"git" llvm_version in
         let equivalent_llvm_version =
           match llvm_version with
           | "3.4"
