@@ -20,5 +20,6 @@ opam update
 #opam pin add --yes --no-action https://gitlab.inria.fr/tmartine/pattern.git
 
 opam pin add --yes --no-action "$URL"
+sudo apt-get update
 opam depext --yes --verbose clangml
 opam install --yes --with-test clangml
