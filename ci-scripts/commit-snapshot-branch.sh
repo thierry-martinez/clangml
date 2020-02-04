@@ -6,6 +6,7 @@ git reset --hard master
 git reset --soft origin/snapshot
 grep -q AM_MAINTAINER_MODE configure.ac || \
 sed -i /AC_OUTPUT/iAM_MAINTAINER_MODE configure.ac
+cp src/m4/ax_compare_version.m4 m4
 autoreconf
 rm -rf bootstrap
 git checkout origin/bootstrap bootstrap
