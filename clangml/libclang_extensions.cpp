@@ -204,11 +204,11 @@ MakeCXCursor_visitor(CXCursor cursor, CXCursor parent, CXClientData client_data)
 static CXCursor
 MakeCXCursor(const clang::Stmt *S, CXTranslationUnit TU)
 {
-  clang::DefaultStmt CS(
+  clang::DefaultStmt DS(
     clang::SourceLocation::getFromRawEncoding(0),
     clang::SourceLocation::getFromRawEncoding(0), const_cast<clang::Stmt *>(S));
-  CXCursor C = { CXCursor_CompoundStmt, 0, { nullptr, &CS, TU }};
-  CXCursor Result;
+  CXCursor C = { CXCursor_DefaultStmt, 0, { nullptr, &DS, TU }};
+  CXCursor Result = { CXCursor_InvalidCode, 0, { nullptr, nullptr, TU }};
   clang_visitChildren(C, MakeCXCursor_visitor, &Result);
   return Result;
 }
@@ -2759,7 +2759,9 @@ extern "C" {
   {
     if (auto *t = GetTypeLoc(tl)) {
       if (auto at = t->getAs<clang::ArrayTypeLoc>()) {
-        return MakeCXCursor(at.getSizeExpr(), tl.tu);
+        if (auto e = at.getSizeExpr()) {
+          return MakeCXCursor(e, tl.tu);
+        }
       }
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, tl.tu);
