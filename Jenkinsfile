@@ -140,7 +140,7 @@ pipeline {
                 }
             }
         }
-/*
+
         stage('opam installation') {
             when { branch 'master' }
             steps {
@@ -151,13 +151,14 @@ pipeline {
                 }
             }
         }
-*/
+
         stage('Commit to snapshot branch') {
             when { branch 'master' }
             steps {
                 sh 'src/ci-scripts/commit-snapshot-branch.sh'
             }
         }
+
         stage('opam installation from snapshot') {
             steps {
                 script {
@@ -167,6 +168,7 @@ pipeline {
                 }
             }
         }
+
         stage('Extract norms') {
             parallel {
                 stage('c++14') {
@@ -191,6 +193,7 @@ pipeline {
                 }
             }
         }
+
         stage('Commit to norms branch') {
             when { branch 'master' }
             steps {

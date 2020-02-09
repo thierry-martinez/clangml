@@ -3025,42 +3025,8 @@ else
 
 fi
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ocamlfind package ppxlib" >&5
-$as_echo_n "checking for ocamlfind package ppxlib... " >&6; }
-   if $OCAMLFIND query ppxlib >/dev/null 2>&1; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-      missing_packages="$missing_packages ppxlib"
-
-      if test "x$has_missing_packages" = "xno"; then :
-  has_missing_packages=single
-
-else
-  has_missing_packages=multiple
-
-fi
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ocamlfind package override" >&5
-$as_echo_n "checking for ocamlfind package override... " >&6; }
-   if $OCAMLFIND query override >/dev/null 2>&1; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-      missing_packages="$missing_packages override"
-
-      if test "x$has_missing_packages" = "xno"; then :
-  has_missing_packages=single
-
-else
-  has_missing_packages=multiple
-
-fi
-fi
+#AC_CHECK_OCAMLFIND_PKG([ppxlib])
+#AC_CHECK_OCAMLFIND_PKG([override])
 
 if test "x$has_missing_packages" = "xsingle"; then :
   as_fn_error $? "Package$missing_packages not found. Hint: opam install$missing_packages." "$LINENO" 5
@@ -4132,6 +4098,10 @@ if test "x$EQUIVALENT_LLVM_VERSION" = "x7.0.1"; then :
 fi
 if test "x$EQUIVALENT_LLVM_VERSION" = "x8.0.0"; then :
   EQUIVALENT_LLVM_VERSION=8.0.1
+
+fi
+if test "x$EQUIVALENT_LLVM_VERSION" = "x9.0.0"; then :
+  EQUIVALENT_LLVM_VERSION=9.0.1
 
 fi
 

@@ -43,8 +43,8 @@ AC_SUBST([OCAMLDOC], [["$OCAMLFIND ocamldoc"]])
 AC_SUBST([OCAMLDEP], [["$OCAMLFIND ocamldep"]])
 AC_SUBST([OCAMLMKLIB], [["$OCAMLFIND ocamlmklib"]])
 AC_CHECK_OCAMLFIND_PKG([stdcompat])
-AC_CHECK_OCAMLFIND_PKG([ppxlib])
-AC_CHECK_OCAMLFIND_PKG([override])
+#AC_CHECK_OCAMLFIND_PKG([ppxlib])
+#AC_CHECK_OCAMLFIND_PKG([override])
 
 AS_IF([test "x$has_missing_packages" = "xsingle"],
   [AC_MSG_ERROR([Package$missing_packages not found. Hint: opam install$missing_packages.])],
@@ -197,6 +197,8 @@ AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x7.0.1"],
   [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[7.1.0]])])
 AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x8.0.0"],
   [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[8.0.1]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x9.0.0"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[9.0.1]])])
 
 AC_ARG_WITH([llvm-version],
   AS_HELP_STRING([--with-llvm-version=VERSION],
