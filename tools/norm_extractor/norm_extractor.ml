@@ -351,7 +351,7 @@ let options =
   Clangml_tools_common.options Cmdliner.Term.(const main $ files $ target)
 
 let info =
-  let doc = "Extract code from doc comments" in
+  let doc = "Extract code from norms" in
   let man = [
       `S Cmdliner.Manpage.s_bugs;
       `P "Email bug reports to <thierry.martinez@inria.fr>.";
