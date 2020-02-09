@@ -36,7 +36,7 @@ mypkg_SCRIPTS = $(addprefix $(DUNE_PREFIX)/, $(dune_files))
 # and one by library and one by tool.
 
 .PHONY : all
-all : clangml clangml.opam $(libraries) $(foreach tool,$(tools),tools/$(tool))
+all : clangml clangml.opam $(libraries)
 
 .PHONY : clangml
 clangml : $(DUNE_PREFIX)/$(CLANGML_CMXA) $(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A)
