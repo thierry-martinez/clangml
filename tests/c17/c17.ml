@@ -1,12 +1,9 @@
-let lift_expr = new Clangml_lift.lift_expr Location.none
-
 let check_pattern_expr (e : Clang.Ast.expr)
-    (pattern : (Clang.Ast.expr, 'a) Pattern_runtime.matcher) =
-  match pattern ~quoted:(lift_expr#expr e) e with
+    (pattern : (Clang.Ast.expr, 'a) Pattern.matcher) =
+  match pattern ~quoted:(Refl.Lift.Exp.lift [%refl: Clang.Ast.expr] [] e) e with
   | Ok result -> result
   | Error failure ->
-      Format.fprintf Format.err_formatter "%a@."
-        Pattern_runtime.pp_failure failure;
+      Format.fprintf Format.err_formatter "%a@." Pattern.pp_failure failure;
       failwith "check_pattern_expr"
 
 let run_llvm_config llvm_config arguments =

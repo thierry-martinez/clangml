@@ -43,8 +43,7 @@ AC_SUBST([OCAMLDOC], [["$OCAMLFIND ocamldoc"]])
 AC_SUBST([OCAMLDEP], [["$OCAMLFIND ocamldep"]])
 AC_SUBST([OCAMLMKLIB], [["$OCAMLFIND ocamlmklib"]])
 AC_CHECK_OCAMLFIND_PKG([stdcompat])
-#AC_CHECK_OCAMLFIND_PKG([ppxlib])
-#AC_CHECK_OCAMLFIND_PKG([override])
+AC_CHECK_OCAMLFIND_PKG([refl])
 
 AS_IF([test "x$has_missing_packages" = "xsingle"],
   [AC_MSG_ERROR([Package$missing_packages not found. Hint: opam install$missing_packages.])],
@@ -340,30 +339,12 @@ AS_IF([test -d clangml],
      AC_CP([$srcdir/clangml/clangml_OperationKinds.def], [clangml/])],
     [AC_MSG_ERROR([[cannot create directory clangml/]])])])
 
-AS_IF([test -d lift],
-  [true],
-  [AS_IF([mkdir lift],
-     AC_CP([$srcdir/lift/clangml_lift.ml], [lift/])
-     AC_CP([$srcdir/lift/dune], [lift/]))])
-
 AS_IF([test -d ppx],
   [true],
   [AS_IF([mkdir ppx],
      AC_CP([$srcdir/ppx/clangml_ppx.ml], [ppx/])
      AC_CP([$srcdir/ppx/ppx_lexer.mll], [ppx/])
      AC_CP([$srcdir/ppx/dune], [ppx/]))])
-
-AS_IF([test -d show],
-  [true],
-  [AS_IF([mkdir show],
-     AC_CP([$srcdir/show/clangml_show.ml], [show/])
-     AC_CP([$srcdir/show/dune], [show/]))])
-
-AS_IF([test -d compare],
-  [true],
-  [AS_IF([mkdir compare],
-     AC_CP([$srcdir/compare/clangml_compare.ml], [compare/])
-     AC_CP([$srcdir/compare/dune], [compare/]))])
 
 AS_IF([test -d printer],
   [true],

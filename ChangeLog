@@ -1,5 +1,7 @@
 # Next version
 
+- Compatible with OCaml 4.10.0
+
 - Typeloc structures which contains non-transformed type informations can be
   obtained with Clang.Decl.get_type_loc and Clang.Parameter.get_type_loc.
   In particular, typeloc structures can be obtained to get the original size
@@ -15,6 +17,9 @@
   parameters.
 
 - Ignore decorations in Clangml__compare
+
+- Relies on `metaquot` and `refl`.
+  `ppxlib` and `override` are not dependencies anymore.
 
 # 2019-09-30, 4.0.1
 

@@ -1,19 +1,21 @@
-let lift_expr = new Clangml_lift.lift_expr Location.none
-
-let check_pattern (quoter : 'obj -> Ppxlib.expression) (x : 'obj)
-    (pattern : ('obj, 'a) Pattern_runtime.matcher) =
+let check_pattern (quoter : 'obj -> Parsetree.expression) (x : 'obj)
+    (pattern : ('obj, 'a) Pattern.matcher) =
   match pattern ~quoted:(quoter x) x with
   | Ok result -> result
   | Error failure ->
       Format.fprintf Format.err_formatter "%a@."
-        Pattern_runtime.pp_failure failure;
+        Pattern.pp_failure failure;
       failwith "check_pattern_expr"
 
-let check_pattern_expr expr pattern = check_pattern lift_expr#expr expr pattern
+let check_pattern_expr expr pattern =
+  check_pattern (Refl.Lift.Exp.lift [%refl: Clang.Ast.expr] []) expr pattern
 
-let check_pattern_decl decl pattern = check_pattern lift_expr#decl decl pattern
+let check_pattern_decl decl pattern =
+  check_pattern (Refl.Lift.Exp.lift [%refl: Clang.Ast.decl] []) decl pattern
 
-let check_pattern_tu expr tu = check_pattern lift_expr#translation_unit expr tu
+let check_pattern_tu tu pattern =
+  check_pattern (Refl.Lift.Exp.lift [%refl: Clang.Ast.translation_unit] []) tu
+    pattern
 
 let parse_string ?(command_line_args = []) ?options s =
   let command_line_args =
