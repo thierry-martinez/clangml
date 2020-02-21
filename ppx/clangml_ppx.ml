@@ -378,7 +378,7 @@ module Make (Target : Metapp.ValueS) = struct
             end)
     with
     | None ->
-        Target.mapper Ast_mapper.default_mapper mapper t
+        Target.mapper.get Ast_mapper.default_mapper mapper t
     | Some (Quotation { language; loc; payload }) ->
         extract_payload language mapper ~loc payload
     | Some (If_standard { name; expr; loc }) ->
@@ -388,7 +388,7 @@ module Make (Target : Metapp.ValueS) = struct
           let t =
             Target.choice (fun () -> expr) (fun () ->
               failwith "\"if standard\" not available in patterns") in
-          Target.mapper Ast_mapper.default_mapper mapper t
+          Target.mapper.get Ast_mapper.default_mapper mapper t
 end
 
 (*
