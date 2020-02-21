@@ -1,4 +1,3 @@
-
 open Clang__bindings
 
 open Clang__compat
@@ -17,7 +16,7 @@ let iter_visitor f visitor =
   end;
   match !exn_ref with
   | None -> ()
-  | Some exn -> raise exn 
+  | Some exn -> raise exn
 
 let list_of_iter iter =
   let children_ref = ref [] in
@@ -87,14 +86,15 @@ let not_ignored_diagnostics = Note :: warning_or_error
 let all_diagnostics = Ignored :: not_ignored_diagnostics
 
 let seq_exists pred seq =
-  let exception Exists in
+  (* "let exception" is OCaml >=4.04.0 only *)
+  let module M = struct exception Exists end in
   try
     seq |> Seq.iter begin fun d ->
       if pred d then
-        raise Exists
+        raise M.Exists
     end;
     false
-  with Exists ->
+  with M.Exists ->
     true
 
 let has_severity l tu =
