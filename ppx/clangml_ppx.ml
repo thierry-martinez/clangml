@@ -240,9 +240,14 @@ module Make (Target : Metapp.ValueS) = struct
                   name = ident;
                   qual_type = { desc = BuiltinType Int }}}) ->
               find_and_remove placeholder_hashtbl ident
-          | Clang.Ast.Name_qual_type,
-            { desc = Typedef { name = IdentifierName ident }} ->
-              find_and_remove placeholder_hashtbl ident
+          | Clang.Ast.Name_qual_type, _
+            (* { desc = Typedef { name = IdentifierName ident }} *) ->
+              (* Circumvent OCaml <4.06 bug *)
+              begin match x with
+              | { desc = Typedef { name = IdentifierName ident }} ->
+                  find_and_remove placeholder_hashtbl ident
+              | _ -> None
+              end
           | _ -> None
         with
         | Some loc_payload ->
@@ -390,58 +395,6 @@ module Make (Target : Metapp.ValueS) = struct
               failwith "\"if standard\" not available in patterns") in
           Target.mapper.get Ast_mapper.default_mapper mapper t
 end
-
-(*
-module Remove_placeholder (X : Lifter) = struct
-  type t = X.t
-
-  class lifter subst_payload table = object
-    inherit X.lifter as super
-
-    method expr (expr : Clang.Ast.expr) =
-      match
-        match expr with
-        | { desc = BinaryOperator {
-              lhs = { desc = StringLiteral { bytes } };
-              kind = Comma;
-              rhs = { desc = Cast { operand =
-                { desc = IntegerLiteral (Int 0); _ }; _ }; _ }}; _} ->
-            find_and_remove table bytes
-        | _ -> None
-      with
-      | Some payload ->
-          subst_payload payload
-      | None -> super#expr expr
-
-    method decl (decl : Clang.Ast.decl) =
-      match
-        match decl with
-        | { desc = Var {
-            var_name = ident;
-            var_type = { desc = BuiltinType Int }}}
-        | { desc = Field {
-            name = ident;
-            qual_type = { desc = BuiltinType Int }}} ->
-            find_and_remove table ident
-        | _ -> None
-      with
-      | Some payload ->
-          subst_payload payload
-      | None -> super#decl decl
-
-    method qual_type (qual_type : Clang.Ast.qual_type) =
-      match
-        match qual_type with
-        | { desc = Typedef { name = IdentifierName ident }} ->
-            find_and_remove table ident
-        | _ -> None
-      with
-      | Some payload ->
-          subst_payload payload
-      | None -> super#qual_type qual_type
-  end
-end
-*)
 
 module MapperExp = Make (Metapp.Exp)
 
