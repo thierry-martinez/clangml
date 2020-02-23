@@ -213,7 +213,7 @@ end
 
 (** AST types. *)
 module Type : sig
-  type t = Ast.qual_type
+  type t = Ast.qual_type [@@deriving refl]
 
   val of_node : ?options:Ast.Options.t -> 'a Ast.node -> t
   (** [of_node ?options node] returns the type associated to [node].
@@ -283,7 +283,7 @@ end
 
 (** AST expressions as ordered types. *)
 module Expr : sig
-  type t = Ast.expr
+  type t = Ast.expr [@@deriving refl]
 
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
   (** [of_cxcursor ?options cu] translates [cu] into its high-level
@@ -297,7 +297,7 @@ end
 
 (** AST statements. *)
 module Stmt : sig
-  type t = Ast.stmt
+  type t = Ast.stmt [@@deriving refl]
 
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
   (** [of_cxcursor ?options cu] translates [cu] into its high-level
@@ -306,14 +306,14 @@ end
 
 (** AST not-transformed types. *)
 module Type_loc : sig
-  type t = Ast.type_loc
+  type t = Ast.type_loc [@@deriving refl]
 
   val to_qual_type : ?options:Ast.Options.t -> t -> Type.t
 end
 
 (** AST declarations. *)
 module Decl : sig
-  type t = Ast.decl
+  type t = Ast.decl [@@deriving refl]
 
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
   (** [of_cxcursor ?options cu] translates [cu] into its high-level
@@ -342,7 +342,7 @@ end
 
 (** AST parameters. *)
 module Parameter : sig
-  type t = Ast.parameter
+  type t = Ast.parameter [@@deriving refl]
 
   val get_size_expr : ?options:Ast.Options.t -> t -> Expr.t
   (** [get_size_expr ?options p] returns the expression specifying the size
@@ -354,7 +354,7 @@ end
 
 (** AST enumeration constants. *)
 module Enum_constant : sig
-  type t = Ast.enum_constant
+  type t = Ast.enum_constant [@@deriving refl]
 
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
   (** [of_cxcursor ?options cu] translates [cu] into its high-level
@@ -366,7 +366,7 @@ end
 
 (** AST translation units. *)
 module Translation_unit : sig
-  type t = Ast.translation_unit
+  type t = Ast.translation_unit [@@deriving refl]
 
   val make : ?filename:string -> Ast.decl list -> Ast.translation_unit_desc
 end

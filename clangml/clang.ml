@@ -1877,7 +1877,7 @@ module Ast = struct
 end
 
 module Expr = struct
-  type t = Ast.expr
+  type t = Ast.expr [@@deriving refl]
 
   let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
@@ -1888,7 +1888,7 @@ module Expr = struct
 end
 
 module Type_loc = struct
-  type t = Ast.type_loc
+  type t = Ast.type_loc [@@deriving refl]
 
   let to_qual_type ?options (t : t) =
     match t.typeloc with
@@ -1901,7 +1901,7 @@ module Type_loc = struct
 end
 
 module Decl = struct
-  type t = Ast.decl
+  type t = Ast.decl [@@deriving refl]
 
   let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
@@ -1927,7 +1927,7 @@ module Decl = struct
 end
 
 module Parameter = struct
-  type t = Ast.parameter
+  type t = Ast.parameter [@@deriving refl]
 
   let get_size_expr ?options param =
     param |> Ast.cursor_of_node |>
@@ -1939,7 +1939,7 @@ module Parameter = struct
 end
 
 module Type = struct
-  type t = Ast.qual_type
+  type t = Ast.qual_type [@@deriving refl]
 
   let make ?(const = false) ?(volatile = false) ?(restrict = false) desc : t =
     { cxtype = get_cursor_type (get_null_cursor ()); type_loc = None;
@@ -1983,7 +1983,7 @@ module Type = struct
 end
 
 module Stmt = struct
-  type t = Ast.stmt
+  type t = Ast.stmt [@@deriving refl]
 
   let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
@@ -1991,7 +1991,7 @@ module Stmt = struct
 end
 
 module Enum_constant = struct
-  type t = Ast.enum_constant
+  type t = Ast.enum_constant [@@deriving refl]
 
   let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
@@ -2002,7 +2002,7 @@ module Enum_constant = struct
 end
 
 module Translation_unit = struct
-  type t = Ast.translation_unit
+  type t = Ast.translation_unit [@@deriving refl]
 
   let make ?(filename = "") items : Ast.translation_unit_desc =
     { filename; items }

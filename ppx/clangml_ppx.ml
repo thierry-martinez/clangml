@@ -222,17 +222,17 @@ module Make (Target : Metapp.ValueS) = struct
     let function_declaration =
       Printf.sprintf "%s f(void) {" return_type in
     let placeholder_hashtbl = String_hashtbl.create placeholder_hashtbl_sz in
-    let hook : type a . a Refl.type_name -> (a -> Target.t) -> a -> Target.t =
-      fun name lifter x ->
+    let hook : type a . a Refl.refl -> (a -> Target.t) -> a -> Target.t =
+      fun refl lifter x ->
         match
-          match name, x with
-          | Clang.Ast.Name_expr, { desc = BinaryOperator {
+          match refl, x with
+          | Clang.Ast.Refl_expr, { desc = BinaryOperator {
               lhs = { desc = StringLiteral { bytes } };
               kind = Comma;
               rhs = { desc = Cast { operand =
                 { desc = IntegerLiteral (Int 0); _ }; _ }; _ }}; _} ->
               find_and_remove placeholder_hashtbl bytes
-          | Clang.Ast.Name_decl, (
+          | Clang.Ast.Refl_decl, (
                 { desc = Var {
                   var_name = ident;
                   var_type = { desc = BuiltinType Int }}}
@@ -240,9 +240,9 @@ module Make (Target : Metapp.ValueS) = struct
                   name = ident;
                   qual_type = { desc = BuiltinType Int }}}) ->
               find_and_remove placeholder_hashtbl ident
-          | Clang.Ast.Name_qual_type, _
+          | Clang.Ast.Refl_qual_type, _
             (* { desc = Typedef { name = IdentifierName ident }} *) ->
-              (* Circumvent OCaml <4.06 bug *)
+              (* Circumvent OCaml <4.06.1 bug: #7661, #1459 *)
               begin match x with
               | { desc = Typedef { name = IdentifierName ident }} ->
                   find_and_remove placeholder_hashtbl ident
@@ -253,16 +253,16 @@ module Make (Target : Metapp.ValueS) = struct
         | Some loc_payload ->
             Metapp.with_loc Target.of_payload loc_payload
         | None ->
-            match name with
-            | Clang.Ast.Name_opaque_type_loc ->
+            match refl with
+            | Clang.Ast.Refl_opaque_type_loc ->
                 Target.choice
                   (fun () -> [%expr None])
                   (fun () -> [%pat? _])
-            | Clang.Ast.Name_opaque_cxtype ->
+            | Clang.Ast.Refl_opaque_cxtype ->
                 Target.choice
                   (fun () -> [%expr get_cursor_type (get_null_cursor ())])
                   (fun () -> [%pat? _])
-            | Clang.Ast.Name_open_decoration ->
+            | Clang.Ast.Refl_opaque_open_decoration ->
                 Target.choice
                   (fun () ->
                     [%expr Custom { location = None; qual_type = None }])

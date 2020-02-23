@@ -138,8 +138,11 @@ type 'qual_type open_decoration =
       qual_type : 'qual_type option;
     } [@@deriving refl]
 
+type 'qual_type opaque_open_decoration = 'qual_type open_decoration [@opaque]
+       [@@deriving refl]
+
 type ('a, 'qual_type) open_node = {
-    decoration : 'qual_type open_decoration;
+    decoration : 'qual_type opaque_open_decoration;
     desc : 'a;
   } [@@deriving refl]
 
@@ -242,7 +245,7 @@ let parse_declaration_list_last ?filename ?command_line_args ?language ?options
 
 and opaque_cxtype = cxtype [@mapopaque]
 
-and opaque_type_loc = (clang_ext_typeloc [@mapopaque]) option
+and opaque_type_loc = clang_ext_typeloc option [@mapopaque]
 
 and qual_type = {
     cxtype : opaque_cxtype;
