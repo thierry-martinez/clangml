@@ -9,9 +9,9 @@
     (:include "../config/libs.sexp"))
   (cxx_names libclang_extensions)
   (library_flags -linkall)
-  (preprocess (pps refl.ppx))
+  (preprocess (pps refl.ppx metapp.ppx))
 ; +warning 32: Unused value declaration.
 ; +warning 34: Unused type declaration.
 ; -warning 40: Constructor or label name used out of scope. (OCaml <=4.06.0)
   (flags -open Stdcompat -w +32+34-40)
-  (libraries unix stdcompat refl clangml_config))
+  (libraries unix stdcompat refl metapp clangml_config))

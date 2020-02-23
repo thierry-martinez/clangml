@@ -16,10 +16,14 @@
 - Bug-fix: Constant array sizes are no longer reported as default values for
   parameters.
 
-- Ignore decorations in Clangml__compare
-
-- Relies on `metaquot` and `refl`.
+- Relies on `metapp`, `metaquot` and `refl`. All AST types are `reflexive` in
+  the sense of the `refl` package.
   `ppxlib` and `override` are not dependencies anymore.
+
+- `clangml.show` and `clangml.compare` packages don't exist anymore.
+  Every AST node module (Clang.Expr, Clang.Stmt, ...) exposes a common
+  signature (Clang.S) with `compare`, `equal`, `pp` and `show` functions, and
+  `Set` and `Map` module.
 
 # 2019-09-30, 4.0.1
 

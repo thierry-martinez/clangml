@@ -1,3 +1,43 @@
+[%%metapackage "metapp"]
+
+(** Common part of AST node signatures *)
+module type S = sig
+  type t
+
+  val compare : t -> t -> int
+
+  val equal : t -> t -> bool
+
+  val pp : Format.formatter -> t -> unit
+
+  val show : t -> string
+
+  module Set : Set.S with type elt = t
+
+  module Map : Map.S with type key = t
+end
+
+[%%metadef
+let node_module s = Ast_helper.Mod.structure [%str
+  module Self = struct
+    [%%meta Metapp.Stri.of_list s]
+
+    let compare = Refl.compare [%refl: t] []
+
+    let equal = Refl.equal [%refl: t] []
+
+    let pp = Refl.pp [%refl: t] []
+
+    let show = Refl.show [%refl: t] []
+  end
+
+  include Self
+
+  module Set = Set.Make (Self)
+
+  module Map = Map.Make (Self)
+]]
+
 module Bindings = Clang__bindings
 
 include Bindings
@@ -1876,7 +1916,7 @@ module Ast = struct
     | Concrete location -> location
 end
 
-module Expr = struct
+module Expr = [%meta node_module [%str
   type t = Ast.expr [@@deriving refl]
 
   let of_cxcursor ?(options = Ast.Options.default) cur =
@@ -1885,9 +1925,9 @@ module Expr = struct
 
   let get_definition e =
     e |> Ast.cursor_of_node |> get_cursor_definition
-end
+]]
 
-module Type_loc = struct
+module Type_loc = [%meta node_module [%str
   type t = Ast.type_loc [@@deriving refl]
 
   let to_qual_type ?options (t : t) =
@@ -1898,9 +1938,9 @@ module Type_loc = struct
   let of_typeloc ?(options = Ast.Options.default) typeloc =
     let module Convert = Ast.Converter (struct let options = options end) in
     Convert.type_loc_of_typeloc typeloc
-end
+]]
 
-module Decl = struct
+module Decl = [%meta node_module [%str
   type t = Ast.decl [@@deriving refl]
 
   let of_cxcursor ?(options = Ast.Options.default) cur =
@@ -1924,9 +1964,9 @@ module Decl = struct
 
   let get_canonical decl =
     decl |> Ast.cursor_of_node |> get_canonical_cursor
-end
+]]
 
-module Parameter = struct
+module Parameter = [%meta node_module [%str
   type t = Ast.parameter [@@deriving refl]
 
   let get_size_expr ?options param =
@@ -1936,9 +1976,9 @@ module Parameter = struct
   let get_type_loc ?options param =
     param |> Ast.cursor_of_node |>
     ext_declarator_decl_get_type_loc |> Type_loc.of_typeloc ?options
-end
+]]
 
-module Type = struct
+module Type = [%meta node_module [%str
   type t = Ast.qual_type [@@deriving refl]
 
   let make ?(const = false) ?(volatile = false) ?(restrict = false) desc : t =
@@ -1980,17 +2020,17 @@ module Type = struct
   let list_of_fields ?options (qual_type : t) =
     qual_type.cxtype |> list_of_type_fields |> List.map @@
       Decl.of_cxcursor ?options
-end
+]]
 
-module Stmt = struct
+module Stmt = [%meta node_module [%str
   type t = Ast.stmt [@@deriving refl]
 
   let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
     Convert.stmt_of_cxcursor cur
-end
+]]
 
-module Enum_constant = struct
+module Enum_constant = [%meta node_module [%str
   type t = Ast.enum_constant [@@deriving refl]
 
   let of_cxcursor ?(options = Ast.Options.default) cur =
@@ -1999,12 +2039,11 @@ module Enum_constant = struct
 
   let get_value enum_constant =
     enum_constant |> Ast.cursor_of_node |> get_enum_constant_decl_value
-end
+]]
 
-module Translation_unit = struct
+module Translation_unit = [%meta node_module [%str
   type t = Ast.translation_unit [@@deriving refl]
 
   let make ?(filename = "") items : Ast.translation_unit_desc =
     { filename; items }
-end
-
+]]

@@ -281,6 +281,23 @@ module Type : sig
       It is equivalent to [Clang.type_get_size_of ty.cxtype]. *)
 end
 
+(** Common part of AST node signatures *)
+module type S = sig
+  type t
+
+  val compare : t -> t -> int
+
+  val equal : t -> t -> bool
+
+  val pp : Format.formatter -> t -> unit
+
+  val show : t -> string
+
+  module Set : Set.S with type elt = t
+
+  module Map : Map.S with type key = t
+end
+
 (** AST expressions as ordered types. *)
 module Expr : sig
   type t = Ast.expr [@@deriving refl]
@@ -293,6 +310,8 @@ module Expr : sig
   (** [get_definition e] retrieves a cursor that describes the definition of
       the entity referenced by [e]. Returns a [NULL] cursor of [e] has no
       corresponding definition. *)
+
+  include S with type t := t
 end
 
 (** AST statements. *)
@@ -302,6 +321,8 @@ module Stmt : sig
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
   (** [of_cxcursor ?options cu] translates [cu] into its high-level
       representation, supposing that [cu] points to a statement. *)
+
+  include S with type t := t
 end
 
 (** AST not-transformed types. *)
@@ -309,6 +330,8 @@ module Type_loc : sig
   type t = Ast.type_loc [@@deriving refl]
 
   val to_qual_type : ?options:Ast.Options.t -> t -> Type.t
+
+  include S with type t := t
 end
 
 (** AST declarations. *)
@@ -338,6 +361,8 @@ module Decl : sig
 
   val get_canonical : t -> cxcursor
   (** [get_canonical d] retrieves the canonical cursor declaring an entity. *)
+
+  include S with type t := t
 end
 
 (** AST parameters. *)
@@ -350,6 +375,8 @@ module Parameter : sig
       parameter. *)
 
   val get_type_loc : ?options:Ast.Options.t -> t -> Type_loc.t
+
+  include S with type t := t
 end
 
 (** AST enumeration constants. *)
@@ -362,6 +389,8 @@ module Enum_constant : sig
 
   val get_value : t -> int
   (** [get_value c] returns the value associated to the constant [c].*)
+
+  include S with type t := t
 end
 
 (** AST translation units. *)
@@ -369,4 +398,6 @@ module Translation_unit : sig
   type t = Ast.translation_unit [@@deriving refl]
 
   val make : ?filename:string -> Ast.decl list -> Ast.translation_unit_desc
+
+  include S with type t := t
 end
