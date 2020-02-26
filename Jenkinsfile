@@ -212,6 +212,8 @@ pipeline {
     }
     post {
         failure {
+            archiveArtifacts artifacts: 'src/configure.ac',
+                fingerprint: true
             mail to: 'Thierry.Martinez@inria.fr',
                 subject: "ClangML CI failure: ${currentBuild.fullDisplayName}",
                 body: "Something is wrong with ${env.BUILD_URL}"
