@@ -211,6 +211,23 @@ module Ast : sig
   end
 end
 
+(** Common part of AST node signatures *)
+module type S = sig
+  type t
+
+  val compare : t -> t -> int
+
+  val equal : t -> t -> bool
+
+  val pp : Format.formatter -> t -> unit
+
+  val show : t -> string
+
+  module Set : Set.S with type elt = t
+
+  module Map : Map.S with type key = t
+end
+
 (** AST types. *)
 module Type : sig
   type t = Ast.qual_type [@@deriving refl]
@@ -279,23 +296,8 @@ module Type : sig
   val get_size_of : t -> int
   (** [get_align_of ty] returns the size of [ty] in bytes.
       It is equivalent to [Clang.type_get_size_of ty.cxtype]. *)
-end
 
-(** Common part of AST node signatures *)
-module type S = sig
-  type t
-
-  val compare : t -> t -> int
-
-  val equal : t -> t -> bool
-
-  val pp : Format.formatter -> t -> unit
-
-  val show : t -> string
-
-  module Set : Set.S with type elt = t
-
-  module Map : Map.S with type key = t
+  include S with type t := t
 end
 
 (** AST expressions as ordered types. *)

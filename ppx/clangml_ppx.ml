@@ -222,7 +222,7 @@ module Make (Target : Metapp.ValueS) = struct
     let function_declaration =
       Printf.sprintf "%s f(void) {" return_type in
     let placeholder_hashtbl = String_hashtbl.create placeholder_hashtbl_sz in
-    let hook : type a . a Refl.refl -> (a -> Target.t) -> a -> Target.t =
+    let hook : type a . a Lift.hook_fun =
       fun refl lifter x ->
         match
           match refl, x with
