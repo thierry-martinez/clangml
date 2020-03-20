@@ -13,8 +13,11 @@
   comparing cursors.
   (suggested by Arthur Charguéraud)
 
-- Bug-fix: Constant array sizes are no longer reported as default values for
+- Fix: Constant array sizes are no longer reported as default values for
   parameters.
+
+- Fix: Correct representation of integer literal from 32 to 64 bits
+  (reported by Hyunsoo Shin)
 
 - Relies on `metapp`, `metaquot` and `refl`. All AST types are `reflexive` in
   the sense of the `refl` package.

@@ -232,10 +232,10 @@ module Ast = struct
         | _ -> true
       end
 
-    let make_integer_literal i =
+    let make_integer_literal (i : cxint) (ty : cxtypekind) =
       match
         if options.convert_integer_literals then
-          int_of_cxint_opt i
+          int_of_cxint_opt ~signed:(is_signed_integer ty) i
         else
           None
       with
@@ -350,13 +350,14 @@ module Ast = struct
             ext_template_argument_get_null_ptr_type argument |>
             of_cxtype)
       | Integral ->
+          let qual_type =
+            of_cxtype (ext_template_argument_get_integral_type argument) in
           Integral {
             value =
-              ext_template_argument_get_as_integral argument |>
-              make_integer_literal;
-            qual_type =
-              ext_template_argument_get_integral_type argument |>
-              of_cxtype }
+              make_integer_literal
+                (ext_template_argument_get_as_integral argument)
+                (get_type_kind qual_type.cxtype);
+            qual_type }
       | Template ->
           TemplateTemplateArgument (
             ext_template_argument_get_as_template_or_template_pattern
@@ -1274,7 +1275,8 @@ module Ast = struct
         match kind with
         | IntegerLiteral ->
             let i = ext_integer_literal_get_value cursor in
-            let literal = make_integer_literal i in
+            let literal =
+              make_integer_literal i (get_type_kind (get_cursor_type cursor)) in
             IntegerLiteral literal
         | FloatingLiteral ->
             let f = ext_floating_literal_get_value cursor in

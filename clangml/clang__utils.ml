@@ -102,32 +102,56 @@ let has_severity l tu =
     List.mem (get_diagnostic_severity d) l
   end
 
-let int64_of_cxint_opt cxint =
-  if ext_int_get_min_signed_bits cxint <= 64 then
+(* is_integer, is_unsigned_integer, is_signed_integer and is_floating_point
+   are implemented as Type::{isInteger, isUnsignedInteger, isSignedInteger,
+   isFloatingPoint} in Type.h. *)
+let is_integer (ty : cxtypekind) =
+  ty >= Bool && ty <= Int128
+
+let is_unsigned_integer (ty : cxtypekind) =
+  ty >= Bool && ty <= UInt128
+
+let is_signed_integer (ty : cxtypekind) =
+  ty >= Char_S && ty <= Int128
+
+let is_floating_point (ty : cxtypekind) =
+  ty >= Half && ty <= Float128
+
+let get_bits ~signed =
+  if signed then
+    ext_int_get_min_signed_bits
+  else
+    ext_int_get_active_bits
+
+let int64_of_cxint_opt ?(signed = true) cxint =
+  if get_bits ~signed cxint <= 64 then
     Some (ext_int_get_sext_value64 cxint)
   else
     None
 
-let int64_of_cxint cxint =
-  if ext_int_get_min_signed_bits cxint <= 64 then
+let int64_of_cxint ?(signed = true) cxint =
+  if get_bits ~signed cxint <= 64 then
     ext_int_get_sext_value64 cxint
   else
     invalid_arg "int64_of_cxint"
 
-let int_of_cxint_opt cxint =
-  if ext_int_get_min_signed_bits cxint <= Sys.int_size then
+let int_of_cxint_opt ?(signed = true) cxint =
+  let bits = get_bits ~signed cxint in
+  Printf.printf "%s %d\n" (string_of_bool signed) bits;
+  if bits <= 32 then
     Some (ext_int_get_sext_value cxint)
+  else if bits <= Sys.int_size then
+    Some (Int64.to_int (ext_int_get_sext_value64 cxint))
   else
     None
 
-let int_of_cxint cxint =
-  if ext_int_get_min_signed_bits cxint <= Sys.int_size then
-    ext_int_get_sext_value cxint
-  else
-    invalid_arg "int_of_cxint"
+let int_of_cxint ?(signed = true) cxint =
+  match int_of_cxint_opt ~signed cxint with
+  | Some result -> result
+  | None -> invalid_arg "int_of_cxint"
 
-let string_of_cxint cxint =
-  ext_int_to_string cxint 10 true
+let string_of_cxint ?(signed = true) cxint =
+  ext_int_to_string cxint 10 signed
 
 let float_of_cxfloat_opt cxfloat =
   match ext_float_get_semantics cxfloat with

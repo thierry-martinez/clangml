@@ -1749,6 +1749,15 @@ let () =
       assert (Clang.Ast.int_of_literal zero = 0)
   | _ -> assert false
 
+let example = Printf.sprintf "%d;" Int.max_int
+
+let () =
+  check Clangml_show.pp_stmt parse_statement_list example @@
+  fun ast -> match ast with
+  | [{ desc = Expr { desc = IntegerLiteral (Int max_int) }}] ->
+      assert (max_int = Int.max_int)
+  | _ -> assert false
+
 let large_int = Int64.add (Int64.of_int max_int) 1L
 let example = Printf.sprintf "%Ld;" large_int
 
