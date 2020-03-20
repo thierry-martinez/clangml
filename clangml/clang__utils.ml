@@ -137,7 +137,6 @@ let int64_of_cxint ?(signed = true) cxint =
 
 let int_of_cxint_opt ?(signed = true) cxint =
   let bits = get_bits ~signed cxint in
-  Printf.printf "%s %d\n" (string_of_bool signed) bits;
   if bits <= 32 then
     Some (ext_int_get_sext_value cxint)
   else if bits <= Sys.int_size then
