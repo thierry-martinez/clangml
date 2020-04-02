@@ -10846,3 +10846,67 @@ clang_ext_FunctionTypeLoc_getParam_wrapper(value arg_ocaml, value arg2_ocaml)
   }
 }
 
+CAMLprim value
+clang_ext_InitListExpr_getSyntacticForm_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  CXCursor result = clang_ext_InitListExpr_getSyntacticForm(cursor);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_InitListExpr_getSemanticForm_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  CXCursor result = clang_ext_InitListExpr_getSemanticForm(cursor);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_InitListExpr_getNumInits_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  unsigned int result = clang_ext_InitListExpr_getNumInits(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_InitListExpr_getInit_wrapper(value cursor_ocaml, value i_ocaml)
+{
+  CAMLparam2(cursor_ocaml, i_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  unsigned int i;
+  i = Int_val(i_ocaml);
+  CXCursor result = clang_ext_InitListExpr_getInit(cursor, i);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
