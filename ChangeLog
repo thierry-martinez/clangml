@@ -28,6 +28,9 @@
   signature (Clang.S) with `compare`, `equal`, `pp` and `show` functions, and
   `Set` and `Map` module.
 
+- Access to semantic form for initialization lists
+  (suggested by Hyunsoo Shin)
+
 # 2019-09-30, 4.0.1
 
 - Support for Clang/LLVM 9.0

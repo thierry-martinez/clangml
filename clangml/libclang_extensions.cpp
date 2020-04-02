@@ -2873,4 +2873,48 @@ extern "C" {
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, tl.tu);
   }
+
+  CXCursor
+  clang_ext_InitListExpr_getSyntacticForm(CXCursor cursor)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::InitListExpr>(s)) {
+      if (auto sf = e->getSyntacticForm()) {
+        return MakeCXCursor(sf, getCursorTU(cursor));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  CXCursor
+  clang_ext_InitListExpr_getSemanticForm(CXCursor cursor)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::InitListExpr>(s)) {
+      if (auto sf = e->getSemanticForm()) {
+        return MakeCXCursor(sf, getCursorTU(cursor));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  unsigned int
+  clang_ext_InitListExpr_getNumInits(CXCursor cursor)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::InitListExpr>(s)) {
+      return e->getNumInits();
+    }
+    return 0;
+  }
+
+  CXCursor
+  clang_ext_InitListExpr_getInit(CXCursor cursor, unsigned int i)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::InitListExpr>(s)) {
+      return MakeCXCursor(e->getInit(i), getCursorTU(cursor));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
 }

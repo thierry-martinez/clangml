@@ -967,3 +967,15 @@ clang_ext_FunctionTypeLoc_getNumParams(struct clang_ext_TypeLoc);
 
 CXCursor
 clang_ext_FunctionTypeLoc_getParam(struct clang_ext_TypeLoc, unsigned int);
+
+CXCursor
+clang_ext_InitListExpr_getSyntacticForm(CXCursor cursor);
+
+CXCursor
+clang_ext_InitListExpr_getSemanticForm(CXCursor cursor);
+
+unsigned int
+clang_ext_InitListExpr_getNumInits(CXCursor cursor);
+
+CXCursor
+clang_ext_InitListExpr_getInit(CXCursor cursor, unsigned int i);

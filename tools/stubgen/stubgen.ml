@@ -579,8 +579,8 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
                     (enum_info.constructors |> List.map @@ fun (_, ocaml_name, value) ->
                       bind_value ocaml_name value) in
                   let m, s = List.split items  in
-                  context.sig_accu <- Ast_helper.Sig.module_ (Metapp_utils.Md.mk (loc (Some mod_name)) (Ast_helper.Mty.signature s)) :: context.sig_accu;
-                  context.struct_accu <- Ast_helper.Str.module_ (Metapp_utils.Mb.mk (loc (Some mod_name)) (Ast_helper.Mod.structure m)) :: context.struct_accu
+                  context.sig_accu <- Ast_helper.Sig.module_ (Metapp.Md.mk (loc (Some mod_name)) (Ast_helper.Mty.signature s)) :: context.sig_accu;
+                  context.struct_accu <- Ast_helper.Str.module_ (Metapp.Mb.mk (loc (Some mod_name)) (Ast_helper.Mod.structure m)) :: context.struct_accu
                 end in
             type_info, Regular
         | None -> int_info, Regular
@@ -998,7 +998,7 @@ let declare_opaque context type_name ocaml_type_name type_interface =
     destructor compare hash
 
 let deriving_attr () =
-  Metapp_utils.Attr.mk (Metapp_utils.mkloc "deriving") (PStr [%str refl])
+  Metapp.Attr.mk (Metapp.mkloc "deriving") (PStr [%str refl])
 
 let translate_struct_decl' context cur typedef name =
   let interface = get_struct name context.module_interface in

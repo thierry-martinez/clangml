@@ -1752,7 +1752,7 @@ let () =
 let example = Printf.sprintf "%d;" Int.max_int
 
 let () =
-  check Clangml_show.pp_stmt parse_statement_list example @@
+  check pp_stmt parse_statement_list example @@
   fun ast -> match ast with
   | [{ desc = Expr { desc = IntegerLiteral (Int max_int) }}] ->
       assert (max_int = Int.max_int)
@@ -2523,6 +2523,27 @@ let () =
   [%pattern?
     [{ desc = Expr { desc = NoexceptExpr { desc = IntegerLiteral (Int 1)}}}]]
     ]}*)
+  | ImplicitValueInitExpr of qual_type
+(** Implicitly generated initialization value
+  {[
+let example = {|
+struct { int a; int b } x = { 1 };
+|}
+
+let () =
+  check_pattern quote_stmt_list (parse_statement_list
+    ~options:{ Clang.Ast.Options.default with init_list_form = Semantic })
+    example
+  [%pattern?
+    [{ desc = Decl [
+      { desc = RecordDecl _; _ };
+      { desc = Var {
+          var_name = "x";
+          var_init = Some { desc = InitList [
+            { desc = IntegerLiteral (Int 1); _ };
+            { desc = ImplicitValueInitExpr {
+                desc = (BuiltinType Int) }}] }}}] }]]
+ ]}*)
   | UnknownExpr of cxcursorkind * clang_ext_stmtkind
 
 and field =

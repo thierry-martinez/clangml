@@ -118,6 +118,25 @@ let string_chop_prefix_opt prefix s =
 external compare_cursors :
   cxcursor -> cxcursor -> int = "clang_ext_compare_cursor_boxed"
 
+module Init_list = struct
+  let syntactic_form cursor =
+    let result = ext_init_list_expr_get_syntactic_form cursor in
+    match get_cursor_kind result with
+    | InvalidCode -> cursor
+    | _ -> result
+
+  let semantic_form cursor =
+    let result = ext_init_list_expr_get_semantic_form cursor in
+    match get_cursor_kind result with
+    | InvalidCode -> cursor
+    | _ -> result
+
+  let get_form (form : Clang__ast_options.init_list_form) cursor =
+    match form with
+    | Syntactic -> syntactic_form cursor
+    | Semantic -> semantic_form cursor
+end
+
 module Ast = struct
   include Clang__ast
 
@@ -1413,7 +1432,11 @@ module Ast = struct
               | _ -> raise Invalid_structure in
             AddrLabel label
         | InitListExpr ->
-            InitList (list_of_children cursor |> List.map expr_of_cxcursor)
+            let cursor = Init_list.get_form options.init_list_form cursor in
+            let inits =
+              List.init (ext_init_list_expr_get_num_inits cursor)
+                (fun i -> ext_init_list_expr_get_init cursor i) in
+            InitList (inits |> List.map expr_of_cxcursor)
         | CompoundLiteralExpr ->
             let qual_type = cursor |> get_cursor_type |> of_cxtype in
             let init =
@@ -1542,6 +1565,9 @@ module Ast = struct
               | CXXStdInitializerListExpr ->
                   StdInitializerList
                     (cursor |> list_of_children |> List.map expr_of_cxcursor)
+              | ImplicitValueInitExpr ->
+                  ImplicitValueInitExpr
+                    (cursor |> get_cursor_type |> of_cxtype)
               | kind ->
                   match compat_stmt_kind kind with
                   | CXXFoldExpr ->
