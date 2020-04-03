@@ -1566,7 +1566,7 @@ module Ast = struct
                   StdInitializerList
                     (cursor |> list_of_children |> List.map expr_of_cxcursor)
               | ImplicitValueInitExpr ->
-                  ImplicitValueInitExpr
+                  ImplicitValueInit
                     (cursor |> get_cursor_type |> of_cxtype)
               | DesignatedInitExpr ->
                   let designators =

@@ -2522,7 +2522,7 @@ let () =
   [%pattern?
     [{ desc = Expr { desc = NoexceptExpr { desc = IntegerLiteral (Int 1)}}}]]
     ]}*)
-  | ImplicitValueInitExpr of qual_type
+  | ImplicitValueInit of qual_type
 (** Implicitly generated initialization value
   {[
 let example = {|
@@ -2540,7 +2540,7 @@ let () =
           var_name = "x";
           var_init = Some { desc = InitList [
             { desc = IntegerLiteral (Int 1); _ };
-            { desc = ImplicitValueInitExpr {
+            { desc = ImplicitValueInit {
                 desc = (BuiltinType Int) }}] }}}] }]]
  ]}*)
   | DesignatedInit of {
