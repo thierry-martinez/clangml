@@ -2513,7 +2513,6 @@ let () =
   | NoexceptExpr of expr
 (** noexcept unary operator (C++11).
   {[
-
 let example =
   "noexcept(1);"
 
@@ -2544,6 +2543,10 @@ let () =
             { desc = ImplicitValueInitExpr {
                 desc = (BuiltinType Int) }}] }}}] }]]
  ]}*)
+  | DesignatedInit of {
+      designators : designator list;
+      init : expr;
+    }
   | UnknownExpr of cxcursorkind * clang_ext_stmtkind
 
 and field =
@@ -2582,6 +2585,38 @@ and string_literal = {
   bytes : string;
   string_kind : string_kind;
 }
+
+and designator =
+  | FieldDesignator of string
+(** Designator for a field of a structure or an union in a designated
+    initialization list.
+  {[
+let example = {|
+  struct {
+    int a;
+    int b;
+  } s = { .a = 1, .b = 2 };
+|}
+
+let () =
+  check_pattern quote_stmt_list parse_statement_list example
+  [%pattern?
+    [{ desc = Decl [
+      { desc = RecordDecl _; _ };
+      { desc = Var {
+          var_name = "s";
+          var_init = Some { desc = InitList [
+             { desc = DesignatedInit {
+                designators = [FieldDesignator "a"];
+                init = { desc = IntegerLiteral (Int 1) }}};
+             { desc = DesignatedInit {
+                designators = [FieldDesignator "b"];
+                init = { desc = IntegerLiteral (Int 2) }}}] }}}] }]]
+    ]}*)
+
+
+  | ArrayDesignator of expr
+  | ArrayRangeDesignator of expr * expr
 
 (** {3 Declarations} *)
 
@@ -3144,7 +3179,7 @@ let () =
         assert false
   end
     ]}*)
-  | Field of  {
+  | Field of {
       name : string;
       qual_type : qual_type;
       bitwidth : expr option;

@@ -31,6 +31,9 @@
 - Access to semantic form for initialization lists
   (suggested by Hyunsoo Shin)
 
+- Representation for designated initialization expressions (C99)
+  (suggested by Hyunsoo Shin)
+
 # 2019-09-30, 4.0.1
 
 - Support for Clang/LLVM 9.0

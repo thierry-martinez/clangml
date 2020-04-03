@@ -2917,4 +2917,92 @@ extern "C" {
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
   }
+
+  unsigned int
+  clang_ext_DesignatedInitExpr_size(CXCursor cursor)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::DesignatedInitExpr>(s)) {
+      return e->size();
+    }
+    return 0;
+  }
+
+  enum clang_ext_DesignatedInitExpr_DesignatorKind
+  clang_ext_DesignatedInitExpr_getKind(CXCursor cursor, unsigned int index)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::DesignatedInitExpr>(s)) {
+      if (auto d = e->getDesignator(index)) {
+        if (d->isFieldDesignator()) {
+          return clang_ext_FieldDesignator;
+        }
+        else if (d->isArrayDesignator()) {
+          return clang_ext_ArrayDesignator;
+        }
+        else if (d->isArrayRangeDesignator()) {
+          return clang_ext_ArrayRangeDesignator;
+        }
+      }
+    }
+    return clang_ext_FieldDesignator;
+  }
+
+  CXCursor
+  clang_ext_DesignatedInitExpr_getField(CXCursor cursor, unsigned int index)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::DesignatedInitExpr>(s)) {
+      if (auto d = e->getDesignator(index)) {
+        return MakeCXCursor(d->getField(), getCursorTU(cursor));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  CXCursor
+  clang_ext_DesignatedInitExpr_getArrayIndex(CXCursor cursor, unsigned int index)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::DesignatedInitExpr>(s)) {
+      if (auto d = e->getDesignator(index)) {
+        return MakeCXCursor(e->getArrayIndex(*d), getCursorTU(cursor));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  CXCursor
+  clang_ext_DesignatedInitExpr_getArrayRangeStart(CXCursor cursor, unsigned int index)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::DesignatedInitExpr>(s)) {
+      if (auto d = e->getDesignator(index)) {
+        return MakeCXCursor(e->getArrayRangeStart(*d), getCursorTU(cursor));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  CXCursor
+  clang_ext_DesignatedInitExpr_getArrayRangeEnd(CXCursor cursor, unsigned int index)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::DesignatedInitExpr>(s)) {
+      if (auto d = e->getDesignator(index)) {
+        return MakeCXCursor(e->getArrayRangeEnd(*d), getCursorTU(cursor));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  CXCursor
+  clang_ext_DesignatedInitExpr_getInit(CXCursor cursor)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto e = llvm::dyn_cast_or_null<clang::DesignatedInitExpr>(s)) {
+      return MakeCXCursor(e->getInit(), getCursorTU(cursor));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
 }

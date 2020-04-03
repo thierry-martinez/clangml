@@ -979,3 +979,30 @@ clang_ext_InitListExpr_getNumInits(CXCursor cursor);
 
 CXCursor
 clang_ext_InitListExpr_getInit(CXCursor cursor, unsigned int i);
+
+enum clang_ext_DesignatedInitExpr_DesignatorKind {
+  clang_ext_FieldDesignator,
+  clang_ext_ArrayDesignator,
+  clang_ext_ArrayRangeDesignator
+};
+
+unsigned int
+clang_ext_DesignatedInitExpr_size(CXCursor cursor);
+
+enum clang_ext_DesignatedInitExpr_DesignatorKind
+clang_ext_DesignatedInitExpr_getKind(CXCursor cursor, unsigned int index);
+
+CXCursor
+clang_ext_DesignatedInitExpr_getField(CXCursor cursor, unsigned int index);
+
+CXCursor
+clang_ext_DesignatedInitExpr_getArrayIndex(CXCursor cursor, unsigned int index);
+
+CXCursor
+clang_ext_DesignatedInitExpr_getArrayRangeStart(CXCursor cursor, unsigned int index);
+
+CXCursor
+clang_ext_DesignatedInitExpr_getArrayRangeEnd(CXCursor cursor, unsigned int index);
+
+CXCursor
+clang_ext_DesignatedInitExpr_getInit(CXCursor cursor);

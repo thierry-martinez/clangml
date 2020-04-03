@@ -1568,6 +1568,32 @@ module Ast = struct
               | ImplicitValueInitExpr ->
                   ImplicitValueInitExpr
                     (cursor |> get_cursor_type |> of_cxtype)
+              | DesignatedInitExpr ->
+                  let designators =
+                    List.init (ext_designated_init_expr_size cursor) (fun i ->
+                      match ext_designated_init_expr_get_kind cursor i with
+                      | FieldDesignator ->
+                          let field =
+                            ext_designated_init_expr_get_field cursor i in
+                          FieldDesignator (get_cursor_spelling field)
+                      | ArrayDesignator ->
+                          let index =
+                            ext_designated_init_expr_get_array_index cursor i in
+                          ArrayDesignator (expr_of_cxcursor index)
+                      | ArrayRangeDesignator ->
+                          let range_start =
+                            ext_designated_init_expr_get_array_range_start
+                              cursor i in
+                          let range_end =
+                            ext_designated_init_expr_get_array_range_end
+                              cursor i in
+                          ArrayRangeDesignator (
+                            expr_of_cxcursor range_start,
+                            expr_of_cxcursor range_end)) in
+                  let init =
+                    ext_designated_init_expr_get_init cursor |>
+                    expr_of_cxcursor in
+                  DesignatedInit { designators; init }
               | kind ->
                   match compat_stmt_kind kind with
                   | CXXFoldExpr ->
