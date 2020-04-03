@@ -3389,3 +3389,26 @@ external ext_init_list_expr_get_num_inits :
   cxcursor -> int = "clang_ext_InitListExpr_getNumInits_wrapper"
 external ext_init_list_expr_get_init :
   cxcursor -> int -> cxcursor = "clang_ext_InitListExpr_getInit_wrapper"
+external ext_designated_init_expr_size :
+  cxcursor -> int = "clang_ext_DesignatedInitExpr_size_wrapper"
+type clang_ext_designatedinitexpr_designatorkind =
+  | FieldDesignator 
+  | ArrayDesignator 
+  | ArrayRangeDesignator [@@deriving refl]
+external ext_designated_init_expr_get_kind :
+  cxcursor -> int -> clang_ext_designatedinitexpr_designatorkind =
+    "clang_ext_DesignatedInitExpr_getKind_wrapper"
+external ext_designated_init_expr_get_field :
+  cxcursor -> int -> cxcursor =
+    "clang_ext_DesignatedInitExpr_getField_wrapper"
+external ext_designated_init_expr_get_array_index :
+  cxcursor -> int -> cxcursor =
+    "clang_ext_DesignatedInitExpr_getArrayIndex_wrapper"
+external ext_designated_init_expr_get_array_range_start :
+  cxcursor -> int -> cxcursor =
+    "clang_ext_DesignatedInitExpr_getArrayRangeStart_wrapper"
+external ext_designated_init_expr_get_array_range_end :
+  cxcursor -> int -> cxcursor =
+    "clang_ext_DesignatedInitExpr_getArrayRangeEnd_wrapper"
+external ext_designated_init_expr_get_init :
+  cxcursor -> cxcursor = "clang_ext_DesignatedInitExpr_getInit_wrapper"
