@@ -2613,8 +2613,6 @@ let () =
                 designators = [FieldDesignator "b"];
                 init = { desc = IntegerLiteral (Int 2) }}}] }}}] }]]
     ]}*)
-
-
   | ArrayDesignator of expr
   | ArrayRangeDesignator of expr * expr
 
