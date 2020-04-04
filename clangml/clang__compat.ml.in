@@ -96,8 +96,12 @@ let type_non_null = TypeNonNull
 
 let is_floating_point (ty : cxtypekind) =
   match ty with
+@IF_CLANG_BEFORE_3_9@
+  | Float | Double | LongDouble
+@ENDIF_CLANG_BEFORE_3_9@
+@IF_CLANG_FROM_3_9@
 @IF_CLANG_BEFORE_5_0@
-  | Float | Double | LongDouble | Float128
+  | Float128
 @ENDIF_CLANG_BEFORE_5_0@
 @IF_CLANG_FROM_5_0@
 @IF_CLANG_BEFORE_6_0@
@@ -107,5 +111,6 @@ let is_floating_point (ty : cxtypekind) =
   | Float16
 @ENDIF_CLANG_FROM_6_0@
 @ENDIF_CLANG_FROM_5_0@
+@ENDIF_CLANG_FROM_3_9@
        -> true
   | _ -> false
