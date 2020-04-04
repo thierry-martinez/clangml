@@ -1360,16 +1360,18 @@ clang_createTranslationUnitFromSourceFile_wrapper(value CIdx_ocaml, value source
   const char * source_filename;
   source_filename = String_val(source_filename_ocaml);
   int num_clang_command_line_args = Wosize_val(clang_command_line_args_ocaml);
-   char * * clang_command_line_args = xmalloc(num_clang_command_line_args * sizeof(const char *const));
+  char const ** clang_command_line_args = xmalloc(num_clang_command_line_args * sizeof(const char *const));
+
   int i; for (i = 0; i < num_clang_command_line_args; i++) {
     clang_command_line_args[i] = String_val(Field(clang_command_line_args_ocaml, i));
   }
   unsigned int num_unsaved_files = Wosize_val(unsaved_files_ocaml);
   struct CXUnsavedFile * unsaved_files = xmalloc(num_unsaved_files * sizeof(struct CXUnsavedFile));
+
   unsigned int i2; for (i2 = 0; i2 < num_unsaved_files; i2++) {
     unsaved_files[i2] = Cxunsavedfile_val(Field(unsaved_files_ocaml, i2));
   }
-  CXTranslationUnit result = clang_createTranslationUnitFromSourceFile(CIdx, source_filename, num_clang_command_line_args, (const char *const *) clang_command_line_args, num_unsaved_files, (struct CXUnsavedFile *) unsaved_files);
+  CXTranslationUnit result = clang_createTranslationUnitFromSourceFile(CIdx, source_filename, num_clang_command_line_args, clang_command_line_args, num_unsaved_files, unsaved_files);
   {
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
@@ -1445,18 +1447,20 @@ clang_parseTranslationUnit_wrapper(value CIdx_ocaml, value source_filename_ocaml
   const char * source_filename;
   source_filename = String_val(source_filename_ocaml);
   int num_command_line_args = Wosize_val(command_line_args_ocaml);
-   char * * command_line_args = xmalloc(num_command_line_args * sizeof(const char *const));
+  char const ** command_line_args = xmalloc(num_command_line_args * sizeof(const char *const));
+
   int i; for (i = 0; i < num_command_line_args; i++) {
     command_line_args[i] = String_val(Field(command_line_args_ocaml, i));
   }
   unsigned int num_unsaved_files = Wosize_val(unsaved_files_ocaml);
   struct CXUnsavedFile * unsaved_files = xmalloc(num_unsaved_files * sizeof(struct CXUnsavedFile));
+
   unsigned int i2; for (i2 = 0; i2 < num_unsaved_files; i2++) {
     unsaved_files[i2] = Cxunsavedfile_val(Field(unsaved_files_ocaml, i2));
   }
   unsigned int options;
   options = Int_val(options_ocaml);
-  CXTranslationUnit result = clang_parseTranslationUnit(CIdx, source_filename, (const char *const *) command_line_args, num_command_line_args, (struct CXUnsavedFile *) unsaved_files, num_unsaved_files, options);
+  CXTranslationUnit result = clang_parseTranslationUnit(CIdx, source_filename, command_line_args, num_command_line_args, unsaved_files, num_unsaved_files, options);
   {
     CAMLlocal1(data);
     if (result == NULL) {
@@ -1484,19 +1488,21 @@ clang_parseTranslationUnit2_wrapper(value CIdx_ocaml, value source_filename_ocam
   const char * source_filename;
   source_filename = String_val(source_filename_ocaml);
   int num_command_line_args = Wosize_val(command_line_args_ocaml);
-   char * * command_line_args = xmalloc(num_command_line_args * sizeof(const char *const));
+  char const ** command_line_args = xmalloc(num_command_line_args * sizeof(const char *const));
+
   int i; for (i = 0; i < num_command_line_args; i++) {
     command_line_args[i] = String_val(Field(command_line_args_ocaml, i));
   }
   unsigned int num_unsaved_files = Wosize_val(unsaved_files_ocaml);
   struct CXUnsavedFile * unsaved_files = xmalloc(num_unsaved_files * sizeof(struct CXUnsavedFile));
+
   unsigned int i2; for (i2 = 0; i2 < num_unsaved_files; i2++) {
     unsaved_files[i2] = Cxunsavedfile_val(Field(unsaved_files_ocaml, i2));
   }
   unsigned int options;
   options = Int_val(options_ocaml);
   CXTranslationUnit out_TU;
-  enum CXErrorCode result = clang_parseTranslationUnit2(CIdx, source_filename, (const char *const *) command_line_args, num_command_line_args, (struct CXUnsavedFile *) unsaved_files, num_unsaved_files, options, &out_TU);
+  enum CXErrorCode result = clang_parseTranslationUnit2(CIdx, source_filename, command_line_args, num_command_line_args, unsaved_files, num_unsaved_files, options, &out_TU);
   if (result == CXError_Success) {
     CAMLlocal2(ocaml_result, data);
     ocaml_result = caml_alloc(1, 0);
@@ -1523,19 +1529,21 @@ clang_parseTranslationUnit2FullArgv_wrapper(value CIdx_ocaml, value source_filen
   const char * source_filename;
   source_filename = String_val(source_filename_ocaml);
   int num_command_line_args = Wosize_val(command_line_args_ocaml);
-   char * * command_line_args = xmalloc(num_command_line_args * sizeof(const char *const));
+  char const ** command_line_args = xmalloc(num_command_line_args * sizeof(const char *const));
+
   int i; for (i = 0; i < num_command_line_args; i++) {
     command_line_args[i] = String_val(Field(command_line_args_ocaml, i));
   }
   unsigned int num_unsaved_files = Wosize_val(unsaved_files_ocaml);
   struct CXUnsavedFile * unsaved_files = xmalloc(num_unsaved_files * sizeof(struct CXUnsavedFile));
+
   unsigned int i2; for (i2 = 0; i2 < num_unsaved_files; i2++) {
     unsaved_files[i2] = Cxunsavedfile_val(Field(unsaved_files_ocaml, i2));
   }
   unsigned int options;
   options = Int_val(options_ocaml);
   CXTranslationUnit out_TU;
-  enum CXErrorCode result = clang_parseTranslationUnit2FullArgv(CIdx, source_filename, (const char *const *) command_line_args, num_command_line_args, (struct CXUnsavedFile *) unsaved_files, num_unsaved_files, options, &out_TU);
+  enum CXErrorCode result = clang_parseTranslationUnit2FullArgv(CIdx, source_filename, command_line_args, num_command_line_args, unsaved_files, num_unsaved_files, options, &out_TU);
   if (result == CXError_Success) {
     CAMLlocal2(ocaml_result, data);
     ocaml_result = caml_alloc(1, 0);
@@ -1655,12 +1663,13 @@ clang_reparseTranslationUnit_wrapper(value TU_ocaml, value unsaved_files_ocaml, 
   TU = Cxtranslationunit_val(Field(TU_ocaml, 0));
   unsigned int num_unsaved_files = Wosize_val(unsaved_files_ocaml);
   struct CXUnsavedFile * unsaved_files = xmalloc(num_unsaved_files * sizeof(struct CXUnsavedFile));
+
   unsigned int i; for (i = 0; i < num_unsaved_files; i++) {
     unsaved_files[i] = Cxunsavedfile_val(Field(unsaved_files_ocaml, i));
   }
   unsigned int options;
   options = Int_val(options_ocaml);
-  int result = clang_reparseTranslationUnit(TU, num_unsaved_files, (struct CXUnsavedFile *) unsaved_files, options);
+  int result = clang_reparseTranslationUnit(TU, num_unsaved_files, unsaved_files, options);
   if (result == CXError_Success) {
     CAMLlocal2(ocaml_result, data);
     ocaml_result = caml_alloc(1, 0);
@@ -5836,11 +5845,12 @@ clang_getRemappingsFromFileList_wrapper(value filePaths_ocaml)
 {
   CAMLparam1(filePaths_ocaml);
   unsigned int numFiles = Wosize_val(filePaths_ocaml);
-   char ** filePaths = xmalloc(numFiles * sizeof(const char *));
+  char const ** filePaths = xmalloc(numFiles * sizeof(const char *));
+
   unsigned int i; for (i = 0; i < numFiles; i++) {
     filePaths[i] = String_val(Field(filePaths_ocaml, i));
   }
-  CXRemapping result = clang_getRemappingsFromFileList((const char **) filePaths, numFiles);
+  CXRemapping result = clang_getRemappingsFromFileList(filePaths, numFiles);
   {
     CAMLlocal1(data);
     data = Val_cxremapping(result);
@@ -10896,6 +10906,212 @@ clang_ext_FunctionTypeLoc_getParam_wrapper(value arg_ocaml, value arg2_ocaml)
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
   Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_InitListExpr_getSyntacticForm_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  CXCursor result = clang_ext_InitListExpr_getSyntacticForm(cursor);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_InitListExpr_getSemanticForm_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  CXCursor result = clang_ext_InitListExpr_getSemanticForm(cursor);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_InitListExpr_getNumInits_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  unsigned int result = clang_ext_InitListExpr_getNumInits(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_InitListExpr_getInit_wrapper(value cursor_ocaml, value i_ocaml)
+{
+  CAMLparam2(cursor_ocaml, i_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  unsigned int i;
+  i = Int_val(i_ocaml);
+  CXCursor result = clang_ext_InitListExpr_getInit(cursor, i);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_DesignatedInitExpr_size_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  unsigned int result = clang_ext_DesignatedInitExpr_size(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_DesignatedInitExpr_DesignatorKind
+Clang_ext_designatedinitexpr_designatorkind_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_FieldDesignator;
+  case 1: return clang_ext_ArrayDesignator;
+  case 2: return clang_ext_ArrayRangeDesignator;
+  }
+  failwith_fmt("invalid value for Clang_ext_designatedinitexpr_designatorkind_val: %d", Int_val(ocaml));
+  return clang_ext_FieldDesignator;
+}
+
+value
+Val_clang_ext_designatedinitexpr_designatorkind(enum clang_ext_DesignatedInitExpr_DesignatorKind v)
+{
+  switch (v) {
+  case clang_ext_FieldDesignator: return Val_int(0);
+  case clang_ext_ArrayDesignator: return Val_int(1);
+  case clang_ext_ArrayRangeDesignator: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_designatedinitexpr_designatorkind: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_DesignatedInitExpr_getKind_wrapper(value cursor_ocaml, value index_ocaml)
+{
+  CAMLparam2(cursor_ocaml, index_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  unsigned int index;
+  index = Int_val(index_ocaml);
+  enum clang_ext_DesignatedInitExpr_DesignatorKind result = clang_ext_DesignatedInitExpr_getKind(cursor, index);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_designatedinitexpr_designatorkind(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_DesignatedInitExpr_getField_wrapper(value cursor_ocaml, value index_ocaml)
+{
+  CAMLparam2(cursor_ocaml, index_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  unsigned int index;
+  index = Int_val(index_ocaml);
+  CXCursor result = clang_ext_DesignatedInitExpr_getField(cursor, index);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_DesignatedInitExpr_getArrayIndex_wrapper(value cursor_ocaml, value index_ocaml)
+{
+  CAMLparam2(cursor_ocaml, index_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  unsigned int index;
+  index = Int_val(index_ocaml);
+  CXCursor result = clang_ext_DesignatedInitExpr_getArrayIndex(cursor, index);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_DesignatedInitExpr_getArrayRangeStart_wrapper(value cursor_ocaml, value index_ocaml)
+{
+  CAMLparam2(cursor_ocaml, index_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  unsigned int index;
+  index = Int_val(index_ocaml);
+  CXCursor result = clang_ext_DesignatedInitExpr_getArrayRangeStart(cursor, index);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_DesignatedInitExpr_getArrayRangeEnd_wrapper(value cursor_ocaml, value index_ocaml)
+{
+  CAMLparam2(cursor_ocaml, index_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  unsigned int index;
+  index = Int_val(index_ocaml);
+  CXCursor result = clang_ext_DesignatedInitExpr_getArrayRangeEnd(cursor, index);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_DesignatedInitExpr_getInit_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  CXCursor result = clang_ext_DesignatedInitExpr_getInit(cursor);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
     CAMLreturn(data);
   }
 }
