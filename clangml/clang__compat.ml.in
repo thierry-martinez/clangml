@@ -64,7 +64,7 @@ let predefined_expr_get_function_name cursor _decl =
 
 @IF_CLANG_BEFORE_3_7@
 type cxvisitorresult =
-  | Break 
+  | Break
   | Continue
 
 let type_visit_fields ty visitor =
@@ -93,3 +93,13 @@ let include_attributed_types = Cxtranslationunit_flags.include_attributed_types
 
 let type_non_null = TypeNonNull
 @ENDIF_CLANG_FROM_8_0@
+
+let is_floating_point (ty : cxtypekind) =
+  match ty with
+@IF_CLANG_BEFORE_5_0@
+  | Float | Double | LongDouble | Float128 -> true
+@ENDIF_CLANG_BEFORE_5_0@
+@IF_CLANG_FROM_5_0@
+  | Float | Double | LongDouble | Float128 | Half | Float16 -> true
+@ENDIF_CLANG_FROM_5_0@
+  | _ -> false

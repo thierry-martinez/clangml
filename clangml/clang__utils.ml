@@ -105,17 +105,21 @@ let has_severity l tu =
 (* is_integer, is_unsigned_integer, is_signed_integer and is_floating_point
    are implemented as Type::{isInteger, isUnsignedInteger, isSignedInteger,
    isFloatingPoint} in Type.h. *)
-let is_integer (ty : cxtypekind) =
-  ty >= Bool && ty <= Int128
-
 let is_unsigned_integer (ty : cxtypekind) =
-  ty >= Bool && ty <= UInt128
+  match ty with
+  | Bool | Char_U | UChar | Char16 | Char32 | UShort | UInt | ULong | ULongLong
+  | UInt128 -> true
+  | _ -> false
 
 let is_signed_integer (ty : cxtypekind) =
-  ty >= Char_S && ty <= Int128
+  match ty with
+  | Char_S | SChar | WChar | Short | Int | Long | LongLong | Int128 -> true
+  | _ -> false
 
-let is_floating_point (ty : cxtypekind) =
-  ty >= Half && ty <= Float128
+let is_integer (ty : cxtypekind) =
+  is_unsigned_integer ty || is_signed_integer ty
+
+let is_floating_point = is_floating_point (* Defined in compat *)
 
 let get_bits ~signed =
   if signed then
