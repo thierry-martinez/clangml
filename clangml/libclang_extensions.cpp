@@ -424,7 +424,7 @@ GetTypeLoc(struct clang_ext_TypeLoc tl)
 }
 
 static const clang::DesignatedInitExpr::Designator *
-getDesignator(const clang::DesignatedInitExpr *e, unsigned int i) const {
+getDesignator(const clang::DesignatedInitExpr *e, unsigned int i) {
 #ifdef LLVM_VERSION_BEFORE_5_0_0
   return e->getDesignator(i);
 #else
