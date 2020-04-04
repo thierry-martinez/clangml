@@ -2523,25 +2523,26 @@ let () =
     [{ desc = Expr { desc = NoexceptExpr { desc = IntegerLiteral (Int 1)}}}]]
     ]}*)
   | ImplicitValueInit of qual_type
-(** Implicitly generated initialization value
+(** Implicitly generated initialization value.
   {[
 let example = {|
 struct { int a; int b } x = { 1 };
 |}
 
 let () =
-  check_pattern quote_stmt_list (parse_statement_list
-    ~options:{ Clang.Ast.Options.default with init_list_form = Semantic })
-    example
-  [%pattern?
-    [{ desc = Decl [
-      { desc = RecordDecl _; _ };
-      { desc = Var {
-          var_name = "x";
-          var_init = Some { desc = InitList [
-            { desc = IntegerLiteral (Int 1); _ };
-            { desc = ImplicitValueInit {
-                desc = (BuiltinType Int) }}] }}}] }]]
+  if Clang.version () >= { major = 3; minor = 7; subminor = 0 } then
+    check_pattern quote_stmt_list (parse_statement_list
+      ~options:{ Clang.Ast.Options.default with init_list_form = Semantic })
+      example
+    [%pattern?
+      [{ desc = Decl [
+        { desc = RecordDecl _; _ };
+        { desc = Var {
+            var_name = "x";
+            var_init = Some { desc = InitList [
+              { desc = IntegerLiteral (Int 1); _ };
+              { desc = ImplicitValueInit {
+                  desc = (BuiltinType Int) }}] }}}] }]]
  ]}*)
   | DesignatedInit of {
       designators : designator list;
