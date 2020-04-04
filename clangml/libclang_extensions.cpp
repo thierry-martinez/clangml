@@ -423,6 +423,15 @@ GetTypeLoc(struct clang_ext_TypeLoc tl)
   return static_cast<const clang::TypeLoc *>(tl.data);
 }
 
+static const clang::DesignatedInitExpr::Designator *
+getDesignator(const clang::DesignatedInitExpr *e, unsigned int i) const {
+#ifdef LLVM_VERSION_BEFORE_5_0_0
+  return e->getDesignator(i);
+#else
+  return (const_cast<clang::DesignatedInitExpr *>(e))->getDesignator(i);
+#endif
+}
+
 extern "C" {
   CXVersion
   clang_ext_getVersion()
@@ -2933,7 +2942,7 @@ extern "C" {
   {
     auto s = GetCursorStmt(cursor);
     if (auto e = llvm::dyn_cast_or_null<clang::DesignatedInitExpr>(s)) {
-      if (auto d = e->getDesignator(index)) {
+      if (auto d = getDesignator(e, index)) {
         if (d->isFieldDesignator()) {
           return clang_ext_FieldDesignator;
         }
@@ -2953,7 +2962,7 @@ extern "C" {
   {
     auto s = GetCursorStmt(cursor);
     if (auto e = llvm::dyn_cast_or_null<clang::DesignatedInitExpr>(s)) {
-      if (auto d = e->getDesignator(index)) {
+      if (auto d = getDesignator(e, index)) {
         return MakeCXCursor(d->getField(), getCursorTU(cursor));
       }
     }
@@ -2965,7 +2974,7 @@ extern "C" {
   {
     auto s = GetCursorStmt(cursor);
     if (auto e = llvm::dyn_cast_or_null<clang::DesignatedInitExpr>(s)) {
-      if (auto d = e->getDesignator(index)) {
+      if (auto d = getDesignator(e, index)) {
         return MakeCXCursor(e->getArrayIndex(*d), getCursorTU(cursor));
       }
     }
@@ -2977,7 +2986,7 @@ extern "C" {
   {
     auto s = GetCursorStmt(cursor);
     if (auto e = llvm::dyn_cast_or_null<clang::DesignatedInitExpr>(s)) {
-      if (auto d = e->getDesignator(index)) {
+      if (auto d = getDesignator(e, index)) {
         return MakeCXCursor(e->getArrayRangeStart(*d), getCursorTU(cursor));
       }
     }
@@ -2989,7 +2998,7 @@ extern "C" {
   {
     auto s = GetCursorStmt(cursor);
     if (auto e = llvm::dyn_cast_or_null<clang::DesignatedInitExpr>(s)) {
-      if (auto d = e->getDesignator(index)) {
+      if (auto d = getDesignator(e, index)) {
         return MakeCXCursor(e->getArrayRangeEnd(*d), getCursorTU(cursor));
       }
     }
