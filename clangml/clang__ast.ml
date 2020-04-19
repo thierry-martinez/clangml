@@ -132,13 +132,14 @@ let check_pattern ?result quoter (parser : string -> 'a)
 *)
 
 type 'qual_type open_decoration =
-  | Cursor of (cxcursor [@mapopaque])
+  | Cursor of (cxcursor [@opaque])
   | Custom of {
-      location : (source_location option [@mapopaque]);
+      location : (source_location option [@opaque]);
       qual_type : 'qual_type option;
     } [@@deriving refl]
 
-type 'qual_type opaque_open_decoration = 'qual_type open_decoration [@opaque]
+type 'qual_type opaque_open_decoration =
+    ('qual_type open_decoration [@mapopaque])
        [@@deriving refl]
 
 type ('a, 'qual_type) open_node = {
@@ -195,11 +196,11 @@ and exception_specification_type = clang_ext_exceptionspecificationtype
 
 and integer_literal =
   | Int of int
-  | CXInt of (cxint [@mapopaque])
+  | CXInt of (cxint [@opaque])
 
 and floating_literal =
   | Float of float
-  | CXFloat of (cxfloat [@mapopaque])
+  | CXFloat of (cxfloat [@opaque])
 
 and languages = {
     c : bool;
@@ -243,9 +244,9 @@ let parse_declaration_list_last ?filename ?command_line_args ?language ?options
 
 (** {3 Qualified types } *)
 
-and opaque_cxtype = cxtype [@mapopaque]
+and opaque_cxtype = cxtype [@opaque]
 
-and opaque_type_loc = clang_ext_typeloc option [@mapopaque]
+and opaque_type_loc = clang_ext_typeloc option [@opaque]
 
 and qual_type = {
     cxtype : opaque_cxtype;
@@ -3981,7 +3982,7 @@ type decoration = qual_type open_decoration
 (** {3 Type loc: source representation of types} *)
 
 type type_loc = {
-    typeloc : (clang_ext_typeloc option [@mapopaque]);
+    typeloc : (clang_ext_typeloc option [@opaque]);
     desc : type_loc_desc;
   }
 and type_loc_desc =
