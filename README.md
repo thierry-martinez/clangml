@@ -67,7 +67,7 @@ By default, `llvm-config` is searched in `PATH`, and you may
 specify a path with `./configure --with-llvm-config=...`.
 
 clangml requires some dependencies:
-`opam install dune stdcompat ppxlib`.
+`opam install dune refl`.
 Additionnally, to run `make tests`: `opam install ocamlcodoc pattern`.
 
 `libclang` and other external dependencies can be installed with opam depext
@@ -141,7 +141,7 @@ In particular:
 
 Three files, `clang_stubs.c`, `clang__bindings.ml` and
 `clang__bindings.mli`, are generated for each version of LLVM by the
-`stubgen` tool (sub-directory stubgen).
+`stubgen` tool (sub-directory `tools/stubgen/`).
 
 To generate these files for a given version of LLVM, you may run:
 `stubgen --llvm-config=$PATH_TO_LLVM_CONFIG $TARGET_PATH`.
