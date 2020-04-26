@@ -9491,8 +9491,8 @@ Clang_ext_langstandards_val(value ocaml)
   case 16: return CLANG_EXT_LANGSTANDARDS_gnucxx14;
   case 17: return CLANG_EXT_LANGSTANDARDS_cxx17;
   case 18: return CLANG_EXT_LANGSTANDARDS_gnucxx17;
-  case 19: return CLANG_EXT_LANGSTANDARDS_cxx2a;
-  case 20: return CLANG_EXT_LANGSTANDARDS_gnucxx2a;
+  case 19: return CLANG_EXT_LANGSTANDARDS_cxx20;
+  case 20: return CLANG_EXT_LANGSTANDARDS_gnucxx20;
   case 21: return CLANG_EXT_LANGSTANDARDS_opencl10;
   case 22: return CLANG_EXT_LANGSTANDARDS_opencl11;
   case 23: return CLANG_EXT_LANGSTANDARDS_opencl12;
@@ -9529,8 +9529,8 @@ Val_clang_ext_langstandards(enum clang_ext_langstandards v)
   case CLANG_EXT_LANGSTANDARDS_gnucxx14: return Val_int(16);
   case CLANG_EXT_LANGSTANDARDS_cxx17: return Val_int(17);
   case CLANG_EXT_LANGSTANDARDS_gnucxx17: return Val_int(18);
-  case CLANG_EXT_LANGSTANDARDS_cxx2a: return Val_int(19);
-  case CLANG_EXT_LANGSTANDARDS_gnucxx2a: return Val_int(20);
+  case CLANG_EXT_LANGSTANDARDS_cxx20: return Val_int(19);
+  case CLANG_EXT_LANGSTANDARDS_gnucxx20: return Val_int(20);
   case CLANG_EXT_LANGSTANDARDS_opencl10: return Val_int(21);
   case CLANG_EXT_LANGSTANDARDS_opencl11: return Val_int(22);
   case CLANG_EXT_LANGSTANDARDS_opencl12: return Val_int(23);

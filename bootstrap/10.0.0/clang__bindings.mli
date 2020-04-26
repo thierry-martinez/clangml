@@ -3108,8 +3108,8 @@ type clang_ext_langstandards =
   | Gnucxx14 
   | Cxx17 
   | Gnucxx17 
-  | Cxx2a 
-  | Gnucxx2a 
+  | Cxx20 
+  | Gnucxx20 
   | Opencl10 
   | Opencl11 
   | Opencl12 
