@@ -6,27 +6,35 @@ if [ -z "$version" ]; then
     exit 1
 fi
 major="${version%%.*}"
-if [ "$major" "<" 10 ]; then
-    padded_version="0$version"
-else
+if [ "$major" -ge 10 ]; then
     padded_version="$version"
+else
+    padded_version="0$version"
 fi
-if [ "$padded_version" "<" 03.4.1 ]; then
+version_greater_than() {
+    reference=$1
+    minimum=`echo -e $padded_version'\n'$reference | sort | head -n 1`
+    [ $minimum = $reference ]
+}
+if version_greater_than 09.0.1; then
     cfe=clang
-    dir_suffix=
-elif [ "$padded_version" "<" 09.0.1 ]; then
+    dir_suffix=.src
+elif version_greater_than 03.4.1; then
     cfe=cfe
     dir_suffix=.src
 else
     cfe=clang
-    dir_suffix=.src
+    dir_suffix=
 fi
-if [ "$padded_version" "<" 03.5 ]; then
-    suffix=.tar.gz
-else
+if version_greater_than 03.5; then
     suffix=.tar.xz
+else
+    suffix=.tar.gz
 fi
-if [ "$padded_version" "<" 03.6 ]; then
+if version_greater_than 03.6; then
+    CC=gcc
+    CXX=g++
+else
     if which gcc-4.9 >/dev/null 2>/dev/null; then
         CC=gcc-4.9
         CXX+=g++-4.9
@@ -34,11 +42,8 @@ if [ "$padded_version" "<" 03.6 ]; then
         CC=gcc-4.8
         CXX=g++-4.8
     fi
-else
-    CC=gcc
-    CXX=g++
 fi
-if [ "$version" "=" 8.0.1 -o "$version" = 9.0.1 ]; then
+if version_greater_than 09.0.1 || [ "$version" "=" 8.0.1 ]; then
     case "$version" in
     *rc*)
         version_dash="${version%rc*}-rc${version#*rc}"
