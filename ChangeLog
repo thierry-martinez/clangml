@@ -34,6 +34,10 @@
 - Representation for designated initialization expressions (C99)
   (suggested by Hyunsoo Shin)
 
+- Fix: Some distributions such as ArchLinux now gather clang libraries in
+  -lclang-cpp
+  (reported by Armaël Guéneau)
+
 # 2019-09-30, 4.0.1
 
 - Support for Clang/LLVM 9.0
