@@ -146,7 +146,7 @@ pipeline {
             steps {
                 script {
                     opam_installations(
-                        ["4.04", "4.05", "4.06", "4.07", "4.08", "4.09"],
+                        ["4.04", "4.05", "4.06", "4.07", "4.08", "4.09" "4.10"],
                         "file:///clangml/")
                 }
             }
@@ -163,7 +163,7 @@ pipeline {
             steps {
                 script {
                     opam_installations(
-                        ["4.09"],
+                        ["4.10"],
 "https://gitlab.inria.fr/memcad/clangml/-/archive/snapshot/clangml-snapshot.tar.gz")
                 }
             }
