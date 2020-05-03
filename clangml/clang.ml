@@ -118,6 +118,16 @@ let string_chop_prefix_opt prefix s =
 external compare_cursors :
   cxcursor -> cxcursor -> int = "clang_ext_compare_cursor_boxed"
 
+let rec get_typedef_underlying_type ?(recursive = false) (t : cxtype) =
+  if get_type_kind t = Typedef then
+    let result = get_typedef_decl_underlying_type (get_type_declaration t) in
+    if recursive then
+      get_typedef_underlying_type ~recursive:true result
+    else
+      result
+  else
+    t
+
 module Init_list = struct
   let syntactic_form cursor =
     let result = ext_init_list_expr_get_syntactic_form cursor in
@@ -2003,9 +2013,15 @@ module Decl = [%meta node_module [%str
     let module Convert = Ast.Converter (struct let options = options end) in
     Convert.decl_of_cxcursor cur
 
-  let get_typedef_underlying_type ?options decl =
-    decl |> Ast.cursor_of_node |>
-    get_typedef_decl_underlying_type |> Ast.of_cxtype ?options
+  let get_typedef_underlying_type ?options ?(recursive = false) decl =
+    let result =
+      decl |> Ast.cursor_of_node |> get_typedef_decl_underlying_type in
+    let result =
+      if recursive then
+        get_typedef_underlying_type ~recursive:true result
+      else
+        result in
+    Ast.of_cxtype ?options result
 
   let get_field_bit_width field =
     field |> Ast.cursor_of_node |> get_field_decl_bit_width
@@ -2061,10 +2077,17 @@ module Type = [%meta node_module [%str
 
   let get_align_of (ty : t) = type_get_align_of ty.cxtype
 
-  let get_typedef_underlying_type ?options (qual_type : t) =
-    Clang__bindings.get_type_declaration qual_type.cxtype |>
-      Clang__bindings.get_typedef_decl_underlying_type |>
-      of_cxtype ?options
+  let get_offset_of (ty : t) (field_name : string) =
+    let cxtype = get_typedef_underlying_type ~recursive:true ty.cxtype in
+    let result = type_get_offset_of cxtype field_name in
+    if result = -1 then
+      invalid_arg "Clang.Type.get_offset_of"
+    else
+      result
+
+  let get_typedef_underlying_type ?options ?recursive (qual_type : t) =
+    get_typedef_underlying_type ?recursive qual_type.cxtype |>
+    of_cxtype ?options
 
   let get_declaration ?options (qual_type : t) =
     get_type_declaration qual_type.cxtype |> Decl.of_cxcursor ?options

@@ -50,6 +50,12 @@ val default_include_directories : unit -> string list
 val compare_cursors : cxcursor -> cxcursor -> int
 (** [compare_cursors c1 c2] provides a total order over cursors. *)
 
+val get_typedef_underlying_type : ?recursive:bool -> cxtype -> cxtype
+(** [get_typedef_underlying_type t] returns the underlying type of [t] if [t]
+    is a typedef, and [t] otherwise. If [recursive] is [true]
+    (default: [false]), typedefs are followed until the underlying type is not a
+    typedef. *)
+
 (** {2 Abstract syntax tree} *)
 
 module Ast : sig
@@ -283,11 +289,13 @@ module Type : sig
       [Clang.Decl.of_cxcursor ?options (Clang.get_type_declaration ty.cxtype)].
    *)
 
-  val get_typedef_underlying_type : ?options:Ast.Options.t -> t -> t
-  (** [get_declaration ?options ty] returns the underlying type of a typedef
-      [ty].
-      It is equivalent to
-      [Clang.Type.of_cxtype ?options (Clang.get_typedef_decl_underlying_type (Clang.get_type_declaration ty.cxtype))]. *)
+  val get_typedef_underlying_type :
+    ?options:Ast.Options.t -> ?recursive:bool -> t -> t
+  (** [get_typedef_underlying_type ?options ?recursive ty] returns the
+      underlying type of [ty] if [ty] is a typedef, and [ty] otherwise.
+      If [recursive] is [true]
+      (default: [false]), typedefs are followed until the underlying type is
+      not a typedef. *)
 
   val get_align_of : t -> int
   (** [get_align_of ty] returns the alignment of [ty] in bytes.
@@ -296,6 +304,10 @@ module Type : sig
   val get_size_of : t -> int
   (** [get_align_of ty] returns the size of [ty] in bytes.
       It is equivalent to [Clang.type_get_size_of ty.cxtype]. *)
+
+  val get_offset_of : t -> string -> int
+  (** [get_offset_of ty field] returns the offset of [field] in the elaborated
+      type [ty] in bits. *)
 
   include S with type t := t
 end
@@ -344,11 +356,12 @@ module Decl : sig
   (** [of_cxcursor ?options cu] translates [cu] into its high-level
       representation, supposing that [cu] points to a declaration. *)
 
-  val get_typedef_underlying_type : ?options:Ast.Options.t -> t -> Type.t
-  (** [get_declaration ?options decl] returns the underlying type of a
-      typedef [decl].
-      It is equivalent to
-      [Clang.Type.of_cxtype ?options (Clang.get_typedef_decl_underlying_type (Clang.Ast.cursor_of_node decl))]. *)
+  val get_typedef_underlying_type :
+    ?options:Ast.Options.t -> ?recursive:bool -> t -> Type.t
+  (** [get_typedef_underlying_type ?options ?recursive decl] returns the
+      underlying type of a typedef [decl].
+      If [recursive] is [true] (default: [false]), typedefs are followed until
+      the underlying type is not a typedef. *)
 
   val get_field_bit_width : t -> int
   (** [get_field_bit_width d] returns the bit width of the field
