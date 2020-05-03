@@ -177,6 +177,14 @@ module Ast : sig
   (** [location_of_node node] is equivalent to
       {!val:location_of_decoration}[ node.decoration]. *)
 
+  val token_of_location : source_location -> string option
+  (** [token_of_location location] returns the token at [source_location] if
+      available. *)
+
+  val token_of_node : 'a node -> string option
+  (** [token_of_node node] returns the token at the beginning of [node] if
+      available. *)
+
   val concrete_of_cxsourcelocation : location_kind -> cxsourcelocation -> concrete_location
   (** [concrete_of_cxsourcelocation kind location] returns the concrete location
       associated to [location]. [kind] selects whether
@@ -324,6 +332,12 @@ module Expr : sig
   (** [get_definition e] retrieves a cursor that describes the definition of
       the entity referenced by [e]. Returns a [NULL] cursor of [e] has no
       corresponding definition. *)
+
+  type radix = Decimal | Octal | Hexadecimal | Binary [@@deriving refl]
+
+  val radix_of_integer_literal : t -> radix option
+  (** [radix_of_integer_literal e] returns the radix of the integer literal [e]
+      if available. Note that, by convention, [0] is octal. *)
 
   include S with type t := t
 end

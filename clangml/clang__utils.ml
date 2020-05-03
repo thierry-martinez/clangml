@@ -268,6 +268,9 @@ let string_of_cxx_access_specifier specifier =
 let cursor_get_translation_unit cursor =
   Obj.obj (Obj.field (Obj.repr cursor) 1)
 
+let sourcelocation_get_translation_unit cursor =
+  Obj.obj (Obj.field (Obj.repr cursor) 1)
+
 let binary_of_overloaded_operator_kind kind =
   match kind with
   | Plus -> Add

@@ -58,9 +58,14 @@ type argument =
   | Index of int
   | Name of string
 
+type value =
+  | Fixed of int * string
+  | Argument of argument
+
 type type_spec =
   | Int
   | Enum of string
+  | Sized_array of { length : value }
   | Array_struct of { contents : string; length : string }
   | Sized_string of { length : argument }
   | Set_of of string
@@ -120,8 +125,8 @@ let hash_value hash type_interface =
   { type_interface with hash = Some hash }
 
 type argument_interface =
-  | Array of { length : argument; contents : argument }
-  | Sized_string of { length : argument; contents : argument }
+  | Array of { length : value; contents : argument }
+  | Sized_string of { length : value; contents : argument }
   | Output of { argument : argument; on_success : bool; on_error : bool }
   | Update of argument
   | Fixed_value of { argument : argument; value : string }
@@ -516,7 +521,9 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
         add_sig_type context [Ast_helper.Type.mk (loc ocaml_type_name)];
         common_info, type_info
         end
-    | _ -> assert false in
+    | _ ->
+        prerr_endline (Clang.get_type_spelling ty);
+        assert false in
   let common_info, type_info =
   match Clang.get_type_kind ty with
   | Void ->
@@ -635,6 +642,22 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
   | Pointer ->
       begin
         match type_interface.reinterpret_as with
+        | Some (Sized_array { length }) ->
+            let length, length_ty =
+              match length with
+              | Fixed (length, length_ty) -> length, length_ty
+              | Argument _ -> assert false in
+            let contents_type_info, _ = find_type_info ~declare_abstract context empty_type_interface (Clang.get_pointee_type ty) in
+            if length = 1 then
+            { ocamltype = contents_type_info.ocamltype;
+              c_of_ocaml = simple_converter "";
+              ocaml_of_c = (fun channel ~src ~params ~references ~tgt ->
+                Printf.fprintf channel "
+%t;
+"
+(fun channel -> contents_type_info.ocaml_of_c channel ~src:(Printf.sprintf "%s[0]" src) ~params:[| |] ~references ~tgt)); }, Regular
+            else
+              assert false
         | Some (Array_struct { length; contents }) ->
             let pointee = Clang.get_canonical_type (Clang.get_pointee_type ty) in
             let field_types = pointee |> Clang.list_of_type_fields |> List.map @@ fun cur ->
@@ -820,11 +843,25 @@ let print_ocaml_primitive channel name args print_body =
  Printf.fprintf channel "CAMLprim value\n%s(%a)\n{%t}\n\n"
     name print_list args print_body
 
+type 'a argument_value =
+  | Fixed of string
+  | Variable of 'a
+
+let map_argument_value f x =
+  match x with
+  | Fixed s -> Fixed s
+  | Variable v -> Variable (f v)
+
+let reduce_argument_value f x =
+  match x with
+  | Fixed s -> s
+  | Variable v -> f v
+
 type output_desc =
   | Info of common_type_info * type_info * string array
   | Regular of Clang.cxtype
   | Sized_string of string
-  | Array of string * Clang.cxtype * Clang.cxtype
+  | Array of string * Clang.cxtype argument_value * Clang.cxtype
 
 let print_return_ocaml_of_c context used_arg_names print_expression
     result_type result_type_interface ?result_name (common_info, type_info) ~params ~references outputs =
@@ -849,7 +886,7 @@ for (%s i = 0; i < %s; i++) {
   %t
   Store_field(%s, i, cell);
 }
-" tgt length (Clang.get_type_spelling length_ty) length
+" tgt length (reduce_argument_value Clang.get_type_spelling length_ty) length
 (fun channel -> common_info.ocaml_of_c channel ~src:(Printf.sprintf "%s[i]" src) ~params:[| |] ~references ~tgt:"cell")
 tgt
  in
@@ -1389,8 +1426,8 @@ type argument_type =
   | Fixed_value of string
   | CXType of Clang.cxtype
   | Update of Clang.cxtype
-  | Array of int * Clang.cxtype * Clang.cxtype
-  | Sized_string of int * Clang.cxtype * Clang.cxtype
+  | Array of int argument_value * Clang.cxtype argument_value * Clang.cxtype
+  | Sized_string of int argument_value * Clang.cxtype argument_value * Clang.cxtype
   | Closure of {
       data_caller : int;
       data_caller_type : Clang.cxtype;
@@ -1400,7 +1437,7 @@ type argument_type =
       references : int list;
     }
 
-let find_argument argument index_args =
+let find_argument (argument : argument) index_args =
   match argument with
   | Index i -> i
   | Name name ->
@@ -1493,6 +1530,28 @@ let find_carried_reference name carry_reference args module_interface =
                 Printf.fprintf stderr "warning: reference not found in %s\n" name;
                 []
 
+let get_value (value : value) args index : int argument_value * Clang.cxtype argument_value =
+  match value with
+  | Fixed (value, ty) -> Fixed (string_of_int value), Fixed ty
+  | Argument argument ->
+      let value = find_argument argument index in
+      Variable value, Variable (get_argument_type args.(value))
+
+let remove_args args value =
+  match value with
+  | Variable value -> args.(value) <- Removed args.(value)
+  | Fixed _ -> ()
+
+let remove_output_args args value =
+  match value with
+  | Variable value -> args.(value) <- Removed_output args.(value)
+  | Fixed _ -> ()
+
+let get_arg args value =
+  match value with
+  | Variable index -> args.(index)
+  | Fixed value -> value
+
 let translate_function_decl context cur =
   let name = Clang.get_cursor_spelling cur in
   let function_interface = get_function name context.module_interface in
@@ -1510,19 +1569,17 @@ let translate_function_decl context cur =
   let apply_argument_rule (rule : argument_interface) =
     match rule with
     | Array { length; contents } ->
-        let length = find_argument length index in
+        let length, length_ty = get_value length args index in
         let contents = find_argument contents index in
-        let length_ty = get_argument_type args.(length) in
         let contents_ty = get_argument_type args.(contents) in
         args.(contents) <- Array (length, length_ty, contents_ty);
-        args.(length) <- Removed args.(length)
+        remove_args args length
     | Sized_string { length; contents } ->
-        let length = find_argument length index in
+        let length, length_ty = get_value length args index in
         let contents = find_argument contents index in
-        let length_ty = get_argument_type args.(length) in
         let contents_ty = get_argument_type args.(contents) in
         args.(contents) <- Sized_string (length, length_ty, contents_ty);
-        args.(length) <- Removed args.(length)
+        remove_args args length
     | Output { argument; on_success; on_error } ->
         let output = find_argument argument index in
         begin
@@ -1532,17 +1589,17 @@ let translate_function_decl context cur =
               outputs := { desc = (Some output, find_type_info context empty_type_interface ty); on_success; on_error } :: !outputs;
               args.(output) <- Output { output_type = CXType ty; on_success; on_error }
           | Sized_string (length, length_ty, contents_ty) ->
-              let length_ty = Clang.get_pointee_type length_ty in
+              let length_ty = map_argument_value Clang.get_pointee_type length_ty in
               let contents_ty = Clang.get_pointee_type contents_ty in
               outputs := { desc = (Some output, string_type_info); on_success; on_error } :: !outputs;
               args.(output) <- Output { output_type = Sized_string (length, length_ty, contents_ty); on_success = true; on_error = false };
-              args.(length) <- Removed_output args.(length)
-          | Array (length, length_ty, contents_ty) -> 
-              let length_ty = Clang.get_pointee_type length_ty in
+              remove_output_args args length
+          | Array (length, length_ty, contents_ty) ->
+              let length_ty = map_argument_value Clang.get_pointee_type length_ty in
               let contents_ty = Clang.get_pointee_type contents_ty in
               outputs := { desc = (Some output, string_type_info); on_success; on_error } :: !outputs;
               args.(output) <- Output { output_type = Array (length, length_ty, contents_ty); on_success = true; on_error = false };
-              args.(length) <- Removed_output args.(length)
+              remove_output_args args length
           | _ -> failwith "Argument expected (Output)"
         end
     | Update output ->
@@ -1747,11 +1804,11 @@ let translate_function_decl context cur =
             (Clang.get_type_spelling ty) wrapper_arg_names.(i)
       | Output { output_type = Sized_string (length, length_ty, contents_ty) } ->
           Printf.fprintf context.chan_stubs "\n  %s %s;\n  %s %s;"
-            (Clang.get_type_spelling length_ty) wrapper_arg_names.(length)
+            (reduce_argument_value Clang.get_type_spelling length_ty) (get_arg wrapper_arg_names length)
             (Clang.get_type_spelling contents_ty) wrapper_arg_names.(i)
       | Output { output_type = Array (length, length_ty, contents_ty) } ->
           Printf.fprintf context.chan_stubs "\n  %s %s;\n  %s %s;"
-            (Clang.get_type_spelling length_ty) wrapper_arg_names.(length)
+            (reduce_argument_value Clang.get_type_spelling length_ty) (get_arg wrapper_arg_names length)
             (Clang.get_type_spelling contents_ty) wrapper_arg_names.(i)
       | Output _ -> assert false
       | CXType ty | Update ty ->
@@ -1766,14 +1823,14 @@ let translate_function_decl context cur =
                 ~tgt:wrapper_arg_names.(i))
       | Sized_string (j, length_ty, contents_ty) ->
           Printf.fprintf context.chan_stubs "\n  %s %s = caml_string_length(%s_ocaml);"
-            (Clang.get_type_spelling length_ty) wrapper_arg_names.(j)
+            (reduce_argument_value Clang.get_type_spelling length_ty) (get_arg wrapper_arg_names j)
             wrapper_arg_names.(i);
           Printf.fprintf context.chan_stubs "\n  %s %s = String_val(%s_ocaml);"
             (Pcre.replace ~pat:"const" ~templ:"" (Clang.get_type_spelling contents_ty)) wrapper_arg_names.(i) wrapper_arg_names.(i)
       | Array (j, length_ty, contents_ty) ->
-          let c_length_ty = Clang.get_type_spelling length_ty in
+          let c_length_ty = reduce_argument_value Clang.get_type_spelling length_ty in
           Printf.fprintf context.chan_stubs "\n  %s %s = Wosize_val(%s_ocaml);"
-            c_length_ty wrapper_arg_names.(j)
+            c_length_ty (get_arg wrapper_arg_names j)
             wrapper_arg_names.(i);
           let cell_type = Clang.get_pointee_type contents_ty in
           let contents_ty_ast = Clang.Type.of_cxtype contents_ty in
@@ -1786,12 +1843,12 @@ let translate_function_decl context cur =
           Format.fprintf (Format.formatter_of_out_channel context.chan_stubs)
             "\n  %a %s = xmalloc(%s * sizeof(%s));@."
             Clangml_printer.qual_type nonconst_contents_ty_ast wrapper_arg_names.(i)
-            wrapper_arg_names.(j)
+            (get_arg wrapper_arg_names j)
             (Clang.get_type_spelling cell_type);
           let common_info, type_info = find_type_info context empty_type_interface cell_type in
           let index = make_name_unique used_arg_names "i" in
           Printf.fprintf context.chan_stubs "\n  %s %s; for (%s = 0; %s < %s; %s++) {\n    %t\n  }"
-            c_length_ty index index index wrapper_arg_names.(j) index (fun channel -> common_info.c_of_ocaml channel ~src:(Printf.sprintf "Field(%s_ocaml, %s)" wrapper_arg_names.(i) index) ~params:[| |] ~references:[| |] ~tgt:(Printf.sprintf "%s[%s]" wrapper_arg_names.(i) index))
+            c_length_ty index index index (get_arg wrapper_arg_names j) index (fun channel -> common_info.c_of_ocaml channel ~src:(Printf.sprintf "Field(%s_ocaml, %s)" wrapper_arg_names.(i) index) ~params:[| |] ~references:[| |] ~tgt:(Printf.sprintf "%s[%s]" wrapper_arg_names.(i) index))
       | Closure _ -> ());
     let wrapper_args = Array.map2 (fun arg arg_name ->
       match arg with
@@ -1806,7 +1863,7 @@ let translate_function_decl context cur =
       result_type function_interface.result result_type_info ?result_name
       ~params:(params |> Array.map @@ fun i -> wrapper_arg_names.(i))
       ~references:(references |> Array.map @@ fun (i, accessor) -> accessor (Option.get ocaml_arg_names.(i)))
-      (real_outputs |> List.map @@ fun { desc = (i, _) } -> match i with None -> "result", { desc = Regular result_type; on_success = true; on_error = false }, empty_type_interface | Some i -> wrapper_arg_names.(i), (match args.(i) with Output { output_type = CXType ty; on_success; on_error } -> { desc = Regular ty; on_success; on_error } | Update ty ->  { desc = Regular ty; on_success = true; on_error = false } | Output { output_type = Sized_string (length, _, _); on_success; on_error } -> { desc = Sized_string wrapper_arg_names.(length); on_success; on_error } | Output { output_type = Array (length, length_ty, contents_ty); on_success; on_error } -> { desc = Array (wrapper_arg_names.(length), length_ty, Clang.get_pointee_type contents_ty); on_success; on_error } | _ -> assert false), arg_interfaces.(i)) in
+      (real_outputs |> List.map @@ fun { desc = (i, _) } -> match i with None -> "result", { desc = Regular result_type; on_success = true; on_error = false }, empty_type_interface | Some i -> wrapper_arg_names.(i), (match args.(i) with Output { output_type = CXType ty; on_success; on_error } -> { desc = Regular ty; on_success; on_error } | Update ty ->  { desc = Regular ty; on_success = true; on_error = false } | Output { output_type = Sized_string (length, _, _); on_success; on_error } -> { desc = Sized_string (get_arg wrapper_arg_names length); on_success; on_error } | Output { output_type = Array (length, length_ty, contents_ty); on_success; on_error } -> { desc = Array (get_arg wrapper_arg_names length, length_ty, Clang.get_pointee_type contents_ty); on_success; on_error } | _ -> assert false), arg_interfaces.(i)) in
   let ocaml_args_decl =
     ocaml_args |> List.map (fun s -> Printf.sprintf "value %s" s) in
   print_ocaml_primitive context.chan_stubs wrapper_name ocaml_args_decl
@@ -1919,7 +1976,7 @@ let main cflags llvm_config prefix =
     | _ -> "clang_free" in
   let module_interface =
     empty_module_interface |>
-    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|^clang_free$|constructUSR|^clang_executeOnThread$|^clang_getDiagnosticCategoryName$|^clang_getDefinitionSpellingAndExtent$|^clang_getToken$|^clang_getTokenKind$|^clang_getTokenSpelling$|^clang_getTokenLocation$|^clang_getTokenExtent$|^clang_tokenize$|^clang_annotateTokens$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$|^clang_Cursor_getTranslationUnit$|^clang_ext_hash_cursor$|^clang_ext_compare_cursor$") hidden_function_interface |>
+    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|^clang_free$|constructUSR|^clang_executeOnThread$|^clang_getDiagnosticCategoryName$|^clang_getDefinitionSpellingAndExtent$|^clang_tokenize$|^clang_annotateTokens$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$|^clang_Cursor_getTranslationUnit$|^clang_ext_hash_cursor$|^clang_ext_compare_cursor$") hidden_function_interface |>
     add_type (Pcre.regexp "^CXString$")
       (empty_type_interface |>
        reinterpret_as (Type_info ({ ocamltype = ocaml_string;
@@ -1989,7 +2046,7 @@ let main cflags llvm_config prefix =
     add_function (Pcre.regexp "^clang_createTranslationUnitFromSourceFile$")
       (empty_function_interface |>
         add_argument (Array {
-          length = Name "num_clang_command_line_args";
+          length = Argument (Name "num_clang_command_line_args");
           contents = Name "clang_command_line_args" })) |>
     add_function (Pcre.regexp "^clang_parseTranslationUnit$")
       (empty_function_interface |>
@@ -1997,7 +2054,7 @@ let main cflags llvm_config prefix =
     add_function (Pcre.regexp "^clang_parseTranslationUnit|^clang_indexSourceFile")
       (empty_function_interface |>
         add_argument (Array {
-          length = Name "num_command_line_args";
+          length = Argument (Name "num_command_line_args");
           contents = Name "command_line_args" })) |>
     add_function (Pcre.regexp "^clang_CXIndex_setGlobalOptions$")
       (empty_function_interface |>
@@ -2031,7 +2088,7 @@ let main cflags llvm_config prefix =
                     clang_codeCompleteAt$|clang_indexSourceFile)")
       (empty_function_interface |>
         add_argument (Array {
-          length = Name "num_unsaved_files";
+          length = Argument (Name "num_unsaved_files");
           contents = Name "unsaved_files" })) |>
     add_function (Pcre.regexp "^clang_parseTranslationUnit2|^clang_createTranslationUnit2$")
       (empty_function_interface |>
@@ -2109,7 +2166,7 @@ let main cflags llvm_config prefix =
         add_argument (output_on_success (Name "indexFile"))) |>
     add_function (Pcre.regexp "^clang_(ModuleMapDescriptor|VirtualFileOverlay)_writeToBuffer$")
       (empty_function_interface |>
-        add_argument (Sized_string {length = Name "out_buffer_size"; contents = Name "out_buffer_ptr"}) |>
+        add_argument (Sized_string {length = Argument (Name "out_buffer_size"); contents = Name "out_buffer_ptr"}) |>
         add_argument (Type_interface {argument = Name "out_buffer_ptr"; interface = empty_type_interface |> make_destructor clang_free }) |>
         add_argument (output_on_success (Name "out_buffer_ptr"))) |>
     add_function (Pcre.regexp "^clang_getFileContents$")
@@ -2131,10 +2188,10 @@ let main cflags llvm_config prefix =
         add_argument (Fixed_value { argument = Name "kind"; value = "NULL" })) |>
     add_function (Pcre.regexp "^clang_getRemappingsFromFileList$")
       (empty_function_interface |>
-        add_argument (Array { contents = Name "filePaths"; length = Name "numFiles" })) |>
+        add_argument (Array { contents = Name "filePaths"; length = Argument (Name "numFiles") })) |>
     add_function (Pcre.regexp "^clang_getOverriddenCursors$")
       (empty_function_interface |>
-        add_argument (Array { contents = Name "overridden"; length = Name "num_overridden" }) |>
+        add_argument (Array { contents = Name "overridden"; length = Argument (Name "num_overridden") }) |>
         add_argument (Type_interface {argument = Name "overridden"; interface = empty_type_interface |> make_destructor "clang_disposeOverriddenCursors"}) |>
         add_argument (output_on_success (Name "overridden"))) |>
     add_function (Pcre.regexp "^clang_get(All)?SkippedRanges$")
@@ -2144,7 +2201,7 @@ let main cflags llvm_config prefix =
           make_destructor "clang_disposeSourceRangeList")) |>
     add_function (Pcre.regexp "^clang_tokenize$")
       (empty_function_interface |>
-        add_argument (Array { contents = Name "Tokens"; length = Name "NumTokens" }) |>
+        add_argument (Array { contents = Name "Tokens"; length = Argument (Name "NumTokens") }) |>
         add_argument (Type_interface {argument = Name "Tokens"; interface = empty_type_interface |> destructor (fun s -> Printf.sprintf "clang_disposeTokens(TU, %s, NumTokens);" s)}) |>
         add_argument (output_on_success (Name "Tokens"))) |>
     add_function (Pcre.regexp "^clang_getDiagnosticFixIt$")
@@ -2187,7 +2244,12 @@ let main cflags llvm_config prefix =
     add_function (Pcre.regexp "^clang_ext_LinkageSpecDecl_getLanguageIDs$")
       (empty_function_interface |>
         add_result (empty_type_interface |>
-          reinterpret_as (Set_of "clang_ext_LanguageIDs"))) in
+          reinterpret_as (Set_of "clang_ext_LanguageIDs"))) |>
+    add_function (Pcre.regexp "^clang_getToken$")
+      (empty_function_interface |>
+        add_result (empty_type_interface |>
+          reinterpret_as (Sized_array { length = Fixed (1, "size_t") }) |>
+          null_is_none)) in
   let idx = Clang.create_index true true in
   Format.printf "%a@." (Format.pp_print_list
     ~pp_sep:(fun fmt () -> Format.pp_print_string fmt " ")

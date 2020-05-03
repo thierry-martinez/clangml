@@ -221,6 +221,16 @@ module Ast = struct
   let location_of_node node =
     location_of_decoration node.decoration
 
+  let token_of_location location : string option =
+    match location with
+    | Concrete _ -> None
+    | Clang location ->
+        let tu = sourcelocation_get_translation_unit location in
+        Option.map (get_token_spelling tu) (get_token tu location)
+
+  let token_of_node node =
+    token_of_location (location_of_node node)
+
   include Clang__ast_utils
 
   module Options = Clang__ast_options
@@ -1991,6 +2001,23 @@ module Expr = [%meta node_module [%str
 
   let get_definition e =
     e |> Ast.cursor_of_node |> get_cursor_definition
+
+  type radix = Decimal | Octal | Hexadecimal | Binary [@@deriving refl]
+
+  let radix_of_string s =
+    if s.[0] = '0' then
+      if String.length s > 1 then
+        match s.[1] with
+        | 'x' | 'X' -> Hexadecimal
+        | 'b' | 'B' -> Binary
+        | _ -> Octal
+      else
+        Octal
+    else
+      Decimal
+
+  let radix_of_integer_literal (expr : t) : radix option =
+    Option.map radix_of_string (Ast.token_of_node expr)
 ]]
 
 module Type_loc = [%meta node_module [%str
