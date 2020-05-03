@@ -107,7 +107,13 @@ bool
 clang_ext_Int_getBoolValue(CXInt c);
 
 int
+clang_ext_Int_getZExtValue(CXInt c);
+
+int
 clang_ext_Int_getSExtValue(CXInt c);
+
+uint64_t
+clang_ext_Int_getZExtValue64(CXInt c);
 
 int64_t
 clang_ext_Int_getSExtValue64(CXInt c);

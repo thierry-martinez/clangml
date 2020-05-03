@@ -15,45 +15,45 @@ let string_of_binary_operator_kind = ext_binary_operator_get_opcode_spelling
 
 let literal_of_int i = Int i
 
-let int64_of_literal_opt i =
+let int64_of_literal_opt ?signed i =
   match i with
   | Int i -> Some (Int64.of_int i)
-  | CXInt i -> int64_of_cxint_opt i
+  | CXInt i -> int64_of_cxint_opt ?signed i
 
-let int64_of_literal i =
+let int64_of_literal ?signed i =
   match i with
   | Int i -> Int64.of_int i
-  | CXInt i -> int64_of_cxint i
+  | CXInt i -> int64_of_cxint ?signed i
 
-let int_of_literal_opt i =
+let int_of_literal_opt ?signed i =
   match i with
   | Int i -> Some i
-  | CXInt i -> int_of_cxint_opt i
+  | CXInt i -> int_of_cxint_opt ?signed i
 
-let int_of_literal i =
+let int_of_literal ?signed i =
   match i with
   | Int i -> i
-  | CXInt i -> int_of_cxint i
+  | CXInt i -> int_of_cxint ?signed i
 
-let string_of_integer_literal i =
+let string_of_integer_literal ?signed i =
   match i with
   | Int i -> string_of_int i
-  | CXInt i -> string_of_cxint i
+  | CXInt i -> string_of_cxint ?signed i
 
-let print_integer_literal i =
+let print_integer_literal ?signed i =
   match i with
   | Int i -> print_int i
-  | CXInt i -> print_string (string_of_cxint i)
+  | CXInt i -> print_string (string_of_cxint ?signed i)
 
-let output_integer_literal channel i =
+let output_integer_literal ?signed channel i =
   match i with
   | Int i -> output_string channel (string_of_int i)
-  | CXInt i -> output_string channel (string_of_cxint i)
+  | CXInt i -> output_string channel (string_of_cxint ?signed i)
 
-let pp_print_integer_literal fmt i =
+let pp_print_integer_literal ?signed fmt i =
   match i with
   | Int i -> Format.pp_print_int fmt i
-  | CXInt i -> Format.pp_print_string fmt (string_of_cxint i)
+  | CXInt i -> Format.pp_print_string fmt (string_of_cxint ?signed i)
 
 let literal_of_float f = Float f
 

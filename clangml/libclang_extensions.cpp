@@ -562,10 +562,28 @@ extern "C" {
   }
 
   int
+  clang_ext_Int_getZExtValue(CXInt c)
+  {
+    if (auto i = static_cast<llvm::APInt *>(c.data)) {
+      return i->getZExtValue();
+    }
+    return 0;
+  }
+
+  int
   clang_ext_Int_getSExtValue(CXInt c)
   {
     if (auto i = static_cast<llvm::APInt *>(c.data)) {
       return i->getSExtValue();
+    }
+    return 0;
+  }
+
+  uint64_t
+  clang_ext_Int_getZExtValue64(CXInt c)
+  {
+    if (auto i = static_cast<llvm::APInt *>(c.data)) {
+      return i->getZExtValue();
     }
     return 0;
   }
