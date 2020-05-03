@@ -24,7 +24,7 @@
   `ppxlib` and `override` are not dependencies anymore.
 
 - `clangml.show` and `clangml.compare` packages don't exist anymore.
-  Every AST node module (Clang.Expr, Clang.Stmt, ...) exposes a common
+  Every AST node module (`Clang.Expr`, `Clang.Stmt`, ...) exposes a common
   signature (Clang.S) with `compare`, `equal`, `pp` and `show` functions, and
   `Set` and `Map` module.
 
@@ -35,8 +35,11 @@
   (suggested by Hyunsoo Shin)
 
 - Fix: Some distributions such as ArchLinux now gather clang libraries in
-  -lclang-cpp
+  -lclang-cpp.
   (reported by Armaël Guéneau)
+
+- libclang's getToken and related functions are now accessible,
+  new utility function `Clang.Expr.radix_of_integer_literal`.
 
 # 2019-09-30, 4.0.1
 
