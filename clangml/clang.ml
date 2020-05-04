@@ -2012,9 +2012,13 @@ module Expr = [%meta node_module [%str
       Decimal
 
   let radix_of_integer_literal (expr : t) : radix option =
-    match Ast.tokens_of_node expr with
-    | [| token |] -> Some (radix_of_string token)
-    | _ -> None
+    let tokens = Ast.tokens_of_node expr in
+    (* [tokens] should be an array of length 1: however, with Clang <7,
+       [tokens] include the token next to the range. *)
+    if Array.length tokens >= 1 then
+      Some (radix_of_string tokens.(0))
+    else
+      None
 ]]
 
 module Type_loc = [%meta node_module [%str
