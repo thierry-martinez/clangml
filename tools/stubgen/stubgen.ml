@@ -657,7 +657,13 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
 "
 (fun channel -> contents_type_info.ocaml_of_c channel ~src:(Printf.sprintf "%s[0]" src) ~params:[| |] ~references ~tgt)); }, Regular
             else
-              assert false
+            { ocamltype = ocaml_array contents_type_info.ocamltype;
+              c_of_ocaml = simple_converter "";
+              ocaml_of_c = (fun channel ~src ~params ~references ~tgt ->
+                Printf.fprintf channel "
+%t;
+"
+(fun channel -> contents_type_info.ocaml_of_c channel ~src:(Printf.sprintf "%s[0]" src) ~params:[| |] ~references ~tgt)); }, Regular
         | Some (Array_struct { length; contents }) ->
             let pointee = Clang.get_canonical_type (Clang.get_pointee_type ty) in
             let field_types = pointee |> Clang.list_of_type_fields |> List.map @@ fun cur ->
@@ -1597,7 +1603,9 @@ let translate_function_decl context cur =
           | Array (length, length_ty, contents_ty) ->
               let length_ty = map_argument_value Clang.get_pointee_type length_ty in
               let contents_ty = Clang.get_pointee_type contents_ty in
-              outputs := { desc = (Some output, string_type_info); on_success; on_error } :: !outputs;
+              let type_interface =
+                empty_type_interface |> reinterpret_as (Sized_array { length = Fixed (2, "int") }) in
+              outputs := { desc = (Some output, find_type_info context type_interface contents_ty); on_success; on_error } :: !outputs;
               args.(output) <- Output { output_type = Array (length, length_ty, contents_ty); on_success = true; on_error = false };
               remove_output_args args length
           | _ -> failwith "Argument expected (Output)"
@@ -1976,7 +1984,7 @@ let main cflags llvm_config prefix =
     | _ -> "clang_free" in
   let module_interface =
     empty_module_interface |>
-    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|^clang_free$|constructUSR|^clang_executeOnThread$|^clang_getDiagnosticCategoryName$|^clang_getDefinitionSpellingAndExtent$|^clang_tokenize$|^clang_annotateTokens$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$|^clang_Cursor_getTranslationUnit$|^clang_ext_hash_cursor$|^clang_ext_compare_cursor$") hidden_function_interface |>
+    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|^clang_free$|constructUSR|^clang_executeOnThread$|^clang_getDiagnosticCategoryName$|^clang_getDefinitionSpellingAndExtent$|^clang_annotateTokens$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$|^clang_Cursor_getTranslationUnit$|^clang_ext_hash_cursor$|^clang_ext_compare_cursor$") hidden_function_interface |>
     add_type (Pcre.regexp "^CXString$")
       (empty_type_interface |>
        reinterpret_as (Type_info ({ ocamltype = ocaml_string;
@@ -2202,7 +2210,7 @@ let main cflags llvm_config prefix =
     add_function (Pcre.regexp "^clang_tokenize$")
       (empty_function_interface |>
         add_argument (Array { contents = Name "Tokens"; length = Argument (Name "NumTokens") }) |>
-        add_argument (Type_interface {argument = Name "Tokens"; interface = empty_type_interface |> destructor (fun s -> Printf.sprintf "clang_disposeTokens(TU, %s, NumTokens);" s)}) |>
+        (*add_argument (Type_interface {argument = Name "Tokens"; interface = empty_type_interface |> destructor (fun s -> Printf.sprintf "clang_disposeTokens(TU, %s, NumTokens);" s)}) |>*)
         add_argument (output_on_success (Name "Tokens"))) |>
     add_function (Pcre.regexp "^clang_getDiagnosticFixIt$")
       (empty_function_interface |>

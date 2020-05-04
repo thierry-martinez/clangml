@@ -228,9 +228,15 @@ module Ast = struct
         let tu = sourcelocation_get_translation_unit location in
         Option.map (get_token_spelling tu) (get_token tu location)
 
+  let tokens_of_node node =
+    let cursor = cursor_of_node node in
+    let tu = cursor_get_translation_unit cursor in
+    Array.map (get_token_spelling tu) (tokenize tu (get_cursor_extent cursor))
+
+(*
   let token_of_node node =
     token_of_location (location_of_node node)
-
+*)
   include Clang__ast_utils
 
   module Options = Clang__ast_options
@@ -2017,7 +2023,9 @@ module Expr = [%meta node_module [%str
       Decimal
 
   let radix_of_integer_literal (expr : t) : radix option =
-    Option.map radix_of_string (Ast.token_of_node expr)
+    match Ast.tokens_of_node expr with
+    | [| token |] -> Some (radix_of_string token)
+    | _ -> None
 ]]
 
 module Type_loc = [%meta node_module [%str

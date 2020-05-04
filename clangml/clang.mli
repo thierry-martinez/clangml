@@ -181,8 +181,8 @@ module Ast : sig
   (** [token_of_location location] returns the token at [source_location] if
       available. *)
 
-  val token_of_node : 'a node -> string option
-  (** [token_of_node node] returns the token at the beginning of [node] if
+  val tokens_of_node : 'a node -> string array
+  (** [tokens_of_node node] returns the token at the beginning of [node] if
       available. *)
 
   val concrete_of_cxsourcelocation : location_kind -> cxsourcelocation -> concrete_location

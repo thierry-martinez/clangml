@@ -38,7 +38,7 @@
   -lclang-cpp.
   (reported by Armaël Guéneau)
 
-- libclang's getToken and related functions are now accessible,
+- libclang's tokenize and related functions are now accessible,
   new utility function `Clang.Expr.radix_of_integer_literal`.
 
 # 2019-09-30, 4.0.1
