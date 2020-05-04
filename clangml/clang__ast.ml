@@ -1738,7 +1738,8 @@ let example = "0;"
 let () =
   check pp_stmt parse_statement_list example
   @@ fun ast -> match ast with
-  | [{ desc = Expr { desc = IntegerLiteral (Int 0) }}] -> ()
+  | [{ desc = Expr ({ desc = IntegerLiteral (Int 0) } as expr)}] ->
+      assert (Clang.Expr.radix_of_integer_literal expr = Some Octal)
   | _ -> assert false
 
 let () =
@@ -1767,6 +1768,24 @@ let () =
   fun ast -> match ast with
   | [{ desc = Expr { desc = IntegerLiteral (CXInt _ as large_int') }}] ->
       assert (Clang.Ast.int64_of_literal large_int' = large_int)
+  | _ -> assert false
+
+let example = "42;"
+
+let () =
+  check pp_stmt parse_statement_list example
+  @@ fun ast -> match ast with
+  | [{ desc = Expr ({ desc = IntegerLiteral (Int 42) } as expr)}] ->
+      assert (Clang.Expr.radix_of_integer_literal expr = Some Decimal)
+  | _ -> assert false
+
+let example = "0xFF;"
+
+let () =
+  check pp_stmt parse_statement_list example
+  @@ fun ast -> match ast with
+  | [{ desc = Expr ({ desc = IntegerLiteral (Int 255) } as expr)}] ->
+      assert (Clang.Expr.radix_of_integer_literal expr = Some Hexadecimal)
   | _ -> assert false
 
     ]}*)
