@@ -221,22 +221,11 @@ module Ast = struct
   let location_of_node node =
     location_of_decoration node.decoration
 
-  let token_of_location location : string option =
-    match location with
-    | Concrete _ -> None
-    | Clang location ->
-        let tu = sourcelocation_get_translation_unit location in
-        Option.map (get_token_spelling tu) (get_token tu location)
-
   let tokens_of_node node =
     let cursor = cursor_of_node node in
     let tu = cursor_get_translation_unit cursor in
     Array.map (get_token_spelling tu) (tokenize tu (get_cursor_extent cursor))
 
-(*
-  let token_of_node node =
-    token_of_location (location_of_node node)
-*)
   include Clang__ast_utils
 
   module Options = Clang__ast_options

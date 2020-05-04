@@ -177,10 +177,6 @@ module Ast : sig
   (** [location_of_node node] is equivalent to
       {!val:location_of_decoration}[ node.decoration]. *)
 
-  val token_of_location : source_location -> string option
-  (** [token_of_location location] returns the token at [source_location] if
-      available. *)
-
   val tokens_of_node : 'a node -> string array
   (** [tokens_of_node node] returns the token at the beginning of [node] if
       available. *)
