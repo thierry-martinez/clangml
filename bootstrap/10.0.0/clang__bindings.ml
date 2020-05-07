@@ -1037,8 +1037,8 @@ external get_cursor_lexical_parent :
   cxcursor -> cxcursor = "clang_getCursorLexicalParent_wrapper"[@@ocaml.doc
                                                                  "Determine the lexical parent of the given cursor."]
 external get_overridden_cursors :
-  cxcursor -> string = "clang_getOverriddenCursors_wrapper"[@@ocaml.doc
-                                                             "Determine the set of methods that are overridden by the given method."]
+  cxcursor -> cxcursor array = "clang_getOverriddenCursors_wrapper"[@@ocaml.doc
+                                                                    "Determine the set of methods that are overridden by the given method."]
 external get_included_file :
   cxcursor -> cxfile = "clang_getIncludedFile_wrapper"[@@ocaml.doc
                                                         "Retrieve the file that is included by the given inclusion directive cursor."]
@@ -1886,6 +1886,37 @@ external get_cursor_reference_name_range :
   cxcursor -> name_flags:int -> piece_index:int -> cxsourcerange =
     "clang_getCursorReferenceNameRange_wrapper"[@@ocaml.doc
                                                  "Given a cursor that references something else, return the source range covering that reference."]
+type cxtoken[@@ocaml.doc "Describes a single preprocessing token."]
+external get_token :
+  cxtranslationunit -> cxsourcelocation -> cxtoken option =
+    "clang_getToken_wrapper"[@@ocaml.doc
+                              "Get the raw lexical token starting with the given location."]
+type cxtokenkind =
+  | Punctuation
+  [@ocaml.doc "A token that contains some kind of punctuation."]
+  | Keyword [@ocaml.doc "A language keyword."]
+  | Identifier [@ocaml.doc "An identifier (that is not a keyword)."]
+  | Literal [@ocaml.doc "A numeric, string, or character literal."]
+  | Comment [@ocaml.doc "A comment."][@@deriving refl][@@ocaml.doc
+                                                        "Describes a kind of token."]
+external get_token_kind :
+  cxtoken -> cxtokenkind = "clang_getTokenKind_wrapper"[@@ocaml.doc
+                                                         "Determine the kind of the given token."]
+external get_token_spelling :
+  cxtranslationunit -> cxtoken -> string = "clang_getTokenSpelling_wrapper"
+[@@ocaml.doc "Determine the spelling of the given token."]
+external get_token_location :
+  cxtranslationunit -> cxtoken -> cxsourcelocation =
+    "clang_getTokenLocation_wrapper"[@@ocaml.doc
+                                      "Retrieve the source location of the given token."]
+external get_token_extent :
+  cxtranslationunit -> cxtoken -> cxsourcerange =
+    "clang_getTokenExtent_wrapper"[@@ocaml.doc
+                                    "Retrieve a source range that covers the given token."]
+external tokenize :
+  cxtranslationunit -> cxsourcerange -> cxtoken array =
+    "clang_tokenize_wrapper"[@@ocaml.doc
+                              "Tokenize the source code described by the given range into raw lexical tokens."]
 external get_cursor_kind_spelling :
   cxcursorkind -> string = "clang_getCursorKindSpelling_wrapper"[@@ocaml.doc
                                                                   "These routines are used for testing and debugging, only, and should not be relied upon."]
@@ -2072,8 +2103,12 @@ external ext_int_get_min_signed_bits :
   cxint -> int = "clang_ext_Int_getMinSignedBits_wrapper"
 external ext_int_get_bool_value :
   cxint -> bool = "clang_ext_Int_getBoolValue_wrapper"
+external ext_int_get_zext_value :
+  cxint -> int = "clang_ext_Int_getZExtValue_wrapper"
 external ext_int_get_sext_value :
   cxint -> int = "clang_ext_Int_getSExtValue_wrapper"
+external ext_int_get_zext_value64 :
+  cxint -> Int64.t = "clang_ext_Int_getZExtValue64_wrapper"
 external ext_int_get_sext_value64 :
   cxint -> Int64.t = "clang_ext_Int_getSExtValue64_wrapper"
 type cxfloat

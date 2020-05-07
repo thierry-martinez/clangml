@@ -3929,6 +3929,127 @@ clang_getCursorReferenceNameRange_wrapper(value C_ocaml, value NameFlags_ocaml, 
   }
 }
 
+enum CXTokenKind
+Cxtokenkind_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CXToken_Punctuation;
+  case 1: return CXToken_Keyword;
+  case 2: return CXToken_Identifier;
+  case 3: return CXToken_Literal;
+  case 4: return CXToken_Comment;
+  }
+  failwith_fmt("invalid value for Cxtokenkind_val: %d", Int_val(ocaml));
+  return CXToken_Punctuation;
+}
+
+value
+Val_cxtokenkind(enum CXTokenKind v)
+{
+  switch (v) {
+  case CXToken_Punctuation: return Val_int(0);
+  case CXToken_Keyword: return Val_int(1);
+  case CXToken_Identifier: return Val_int(2);
+  case CXToken_Literal: return Val_int(3);
+  case CXToken_Comment: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_cxtokenkind: %d", v);
+  return Val_int(0);
+}
+
+DECLARE_OPAQUE_EX(CXToken, cxtoken, Cxtoken_val, Val_cxtoken, custom_finalize_default, custom_compare_default, custom_hash_default)
+
+CAMLprim value
+clang_getTokenKind_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXToken arg;
+  arg = Cxtoken_val(arg_ocaml);
+  CXTokenKind result = clang_getTokenKind(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_cxtokenkind(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_getTokenSpelling_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  CXTranslationUnit arg;
+  arg = Cxtranslationunit_val(Field(arg_ocaml, 0));
+  CXToken arg2;
+  arg2 = Cxtoken_val(arg2_ocaml);
+  CXString result = clang_getTokenSpelling(arg, arg2);
+  {
+    CAMLlocal1(data);
+    data = caml_copy_string(safe_string(clang_getCString(result)));
+                    clang_disposeString(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_getTokenLocation_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  CXTranslationUnit arg;
+  arg = Cxtranslationunit_val(Field(arg_ocaml, 0));
+  CXToken arg2;
+  arg2 = Cxtoken_val(arg2_ocaml);
+  CXSourceLocation result = clang_getTokenLocation(arg, arg2);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxsourcelocation(result));
+  Store_field(data, 1, arg_ocaml);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_getTokenExtent_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  CXTranslationUnit arg;
+  arg = Cxtranslationunit_val(Field(arg_ocaml, 0));
+  CXToken arg2;
+  arg2 = Cxtoken_val(arg2_ocaml);
+  CXSourceRange result = clang_getTokenExtent(arg, arg2);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxsourcerange(result));
+  Store_field(data, 1, arg_ocaml);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_tokenize_wrapper(value TU_ocaml, value Range_ocaml)
+{
+  CAMLparam2(TU_ocaml, Range_ocaml);
+  CXTranslationUnit TU;
+  TU = Cxtranslationunit_val(Field(TU_ocaml, 0));
+  CXSourceRange Range;
+  Range = Cxsourcerange_val(Field(Range_ocaml, 0));
+  unsigned int NumTokens;
+  CXToken * Tokens;
+  clang_tokenize(TU, Range, &Tokens, &NumTokens);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc(NumTokens, 0);
+for (unsigned int i = 0; i < NumTokens; i++) {
+  CAMLlocal1(cell);
+  cell = Val_cxtoken(Tokens[i]);
+  Store_field(data, i, cell);
+}
+
+    CAMLreturn(data);
+  }
+}
+
 CAMLprim value
 clang_getCursorKindSpelling_wrapper(value Kind_ocaml)
 {
@@ -5098,6 +5219,20 @@ clang_ext_Int_getBoolValue_wrapper(value c_ocaml)
 }
 
 CAMLprim value
+clang_ext_Int_getZExtValue_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXInt c;
+  c = Cxint_val(c_ocaml);
+  int result = clang_ext_Int_getZExtValue(c);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
 clang_ext_Int_getSExtValue_wrapper(value c_ocaml)
 {
   CAMLparam1(c_ocaml);
@@ -5107,6 +5242,20 @@ clang_ext_Int_getSExtValue_wrapper(value c_ocaml)
   {
     CAMLlocal1(data);
     data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_Int_getZExtValue64_wrapper(value c_ocaml)
+{
+  CAMLparam1(c_ocaml);
+  CXInt c;
+  c = Cxint_val(c_ocaml);
+  uint64_t result = clang_ext_Int_getZExtValue64(c);
+  {
+    CAMLlocal1(data);
+    data = copy_int64(result);
     CAMLreturn(data);
   }
 }
