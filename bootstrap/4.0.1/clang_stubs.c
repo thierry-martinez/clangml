@@ -326,8 +326,8 @@ Val_cxfileuniqueid(CXFileUniqueID v)
   CAMLlocal1(data);
   
 data = caml_alloc_tuple(3);
+CAMLlocal1(field);
 for (size_t i = 0; i < 3; i++) {
-  CAMLlocal1(field);
   field = Val_int(v.data[i]);
   Store_field(data, i, field);
 }
@@ -341,8 +341,8 @@ Cxfileuniqueid_val(value ocaml)
   CAMLparam1(ocaml);
   CXFileUniqueID v;
   
+CAMLlocal1(ocaml_field);
 for (size_t i = 0; i < 3; i++) {
-  CAMLlocal1(ocaml_field);
   unsigned long long field;
   ocaml_field = Field(ocaml, i);
   field = Int_val(ocaml_field);
@@ -829,8 +829,8 @@ clang_getSkippedRanges_wrapper(value tu_ocaml, value file_ocaml)
     CAMLlocal1(data);
     
 data = caml_alloc(result->count, 0);
+CAMLlocal1(field);
 for (unsigned int i = 0; i < result->count; i++) {
-  CAMLlocal1(field);
   field = caml_alloc_tuple(1);
   Store_field(field, 0, Val_cxsourcerange(result->ranges[i]));
   Store_field(data, i, field);
@@ -851,8 +851,8 @@ clang_getAllSkippedRanges_wrapper(value tu_ocaml)
     CAMLlocal1(data);
     
 data = caml_alloc(result->count, 0);
+CAMLlocal1(field);
 for (unsigned int i = 0; i < result->count; i++) {
-  CAMLlocal1(field);
   field = caml_alloc_tuple(1);
   Store_field(field, 0, Val_cxsourcerange(result->ranges[i]));
   Store_field(data, i, field);
@@ -2621,8 +2621,8 @@ clang_getOverriddenCursors_wrapper(value cursor_ocaml)
   {
     CAMLlocal1(data);
     data = caml_alloc(num_overridden, 0);
+CAMLlocal1(cell);
 for (unsigned int i = 0; i < num_overridden; i++) {
-  CAMLlocal1(cell);
   cell = caml_alloc_tuple(1);
   Store_field(cell, 0, Val_cxcursor(overridden[i]));
   Store_field(data, i, cell);
@@ -4199,8 +4199,8 @@ clang_Cursor_getCXXManglings_wrapper(value arg_ocaml)
     CAMLlocal1(data);
     
 data = caml_alloc(result->Count, 0);
+CAMLlocal1(field);
 for (unsigned int i = 0; i < result->Count; i++) {
-  CAMLlocal1(field);
   field = caml_copy_string(safe_string(clang_getCString(result->Strings[i])));
                     clang_disposeString(result->Strings[i]);
   Store_field(data, i, field);
@@ -4659,8 +4659,8 @@ clang_tokenize_wrapper(value TU_ocaml, value Range_ocaml)
   {
     CAMLlocal1(data);
     data = caml_alloc(NumTokens, 0);
+CAMLlocal1(cell);
 for (unsigned int i = 0; i < NumTokens; i++) {
-  CAMLlocal1(cell);
   cell = Val_cxtoken(Tokens[i]);
   Store_field(data, i, cell);
 }
