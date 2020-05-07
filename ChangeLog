@@ -41,6 +41,10 @@
 - libclang's tokenize and related functions are now accessible,
   new utility function `Clang.Expr.radix_of_integer_literal`.
 
+- Fix: C stub generation used to declare CAMLlocal inside for loops, causing
+  infinite loops in the GC in some occasions.
+  (reported by Armaël Guéneau)
+
 # 2019-09-30, 4.0.1
 
 - Support for Clang/LLVM 9.0

@@ -679,8 +679,8 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
               ocaml_of_c = (fun channel ~src ~params ~references ~tgt ->
                 Printf.fprintf channel "
 %s = caml_alloc(%s->%s, 0);
+CAMLlocal1(field);
 for (%s i = 0; i < %s->%s; i++) {
-  CAMLlocal1(field);
   %t
   Store_field(%s, i, field);
 }
@@ -698,8 +698,8 @@ tgt); }, Regular
         { ocamltype = Ast_helper.Typ.tuple (List.init size (fun _ -> element_type_info.ocamltype));
           c_of_ocaml = (fun channel ~src ~params ~references ~tgt ->
                 Printf.fprintf channel "
+CAMLlocal1(ocaml_field);
 for (size_t i = 0; i < %d; i++) {
-  CAMLlocal1(ocaml_field);
   %s field;
   ocaml_field = Field(%s, i);
   %t
@@ -709,8 +709,8 @@ for (size_t i = 0; i < %d; i++) {
           ocaml_of_c = (fun channel ~src ~params ~references ~tgt ->
                 Printf.fprintf channel "
 %s = caml_alloc_tuple(%d);
+CAMLlocal1(field);
 for (size_t i = 0; i < %d; i++) {
-  CAMLlocal1(field);
   %t
   Store_field(%s, i, field);
 }
@@ -887,8 +887,8 @@ let print_return_ocaml_of_c context used_arg_names print_expression
           find_type_info context empty_type_interface cell_ty in
         Printf.fprintf channel
           "%s = caml_alloc(%s, 0);
+CAMLlocal1(cell);
 for (%s i = 0; i < %s; i++) {
-  CAMLlocal1(cell);
   %t
   Store_field(%s, i, cell);
 }
