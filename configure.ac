@@ -96,14 +96,15 @@ AC_DEFUN([AC_CHECK_LLVM_VERSION],
                AS_IF([test "x$LLVM_CONFIG" = "x"],
                  [AC_SUBST([GENTOO_LLVM_CONFIG], [[/usr/lib64/llvm/$1/bin/llvm-config]])
                   AS_IF([$GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null],
-                 [AC_SUBST([GENTOO_LLVM_CONFIG], [[/usr/lib/llvm/$1/bin/llvm-config]])
-                  AS_IF([$GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null],
                     [AC_SUBST([LLVM_CONFIG], [[$GENTOO_LLVM_CONFIG]])],
-                    [AS_IF([test "x$BREW" != "x"],
-                       AC_SUBST([BREW_CELLAR], [[`$BREW --cellar`]])
-                       AC_SUBST([BREW_LLVM_CONFIG], [$BREW_CELLAR/llvm*/$1*/bin/llvm-config])
-                       AS_IF([test "x$BREW_LLVM_CONFIG" != "x"],
-                         AC_SUBST([LLVM_CONFIG], [[$BREW_LLVM_CONFIG]])))])])])])])])])])
+                    [AC_SUBST([GENTOO_LLVM_CONFIG], [[/usr/lib/llvm/$1/bin/llvm-config]])
+                     AS_IF([$GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null],
+                       [AC_SUBST([LLVM_CONFIG], [[$GENTOO_LLVM_CONFIG]])],
+                       [AS_IF([test "x$BREW" != "x"],
+                         AC_SUBST([BREW_CELLAR], [[`$BREW --cellar`]])
+                         AC_SUBST([BREW_LLVM_CONFIG], [$BREW_CELLAR/llvm*/$1*/bin/llvm-config])
+                         AS_IF([test "x$BREW_LLVM_CONFIG" != "x"],
+                           AC_SUBST([LLVM_CONFIG], [[$BREW_LLVM_CONFIG]])))])])])])])])])])
 
 AC_ARG_WITH([llvm],
   AS_HELP_STRING([--with-llvm[=VERSION]],
