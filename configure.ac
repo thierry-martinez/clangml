@@ -317,21 +317,18 @@ AC_TRY_LINK(
 
 AC_SUBST([BASELIBS], [["$LIBS"]])
 
-AC_MSG_CHECKING([if -lclang-cpp is available])
-AC_SUBST([LIBS], [["-lclang-cpp $BASELIBS"]])
+AC_MSG_CHECKING([if -lclangAST -lclangLex -lclangBasic is available])
+AC_SUBST([LIBS], [["-lclangAST -lclangLex -lclangBasic $BASELIBS"]])
 AC_TRY_LINK(
   [#include <clang/AST/Decl.h>],
   [
     clang::FunctionDecl *d;
     d->getNumParams();
   ],
+  [AC_MSG_RESULT([yes])],
   [
-    AC_MSG_RESULT([yes])
-  ],
-  [
-    AC_MSG_RESULT([no])
-    AC_MSG_CHECKING([if -lclangAST -lclangLex -lclangBasic is available])
-    AC_SUBST([LIBS], [["-lclangAST -lclangLex -lclangBasic $BASELIBS"]])
+    AC_MSG_CHECKING([if -lclang-cpp is available])
+    AC_SUBST([LIBS], [["-lclang-cpp $BASELIBS"]])
     AC_TRY_LINK(
       [#include <clang/AST/Decl.h>],
       [
@@ -341,9 +338,7 @@ AC_TRY_LINK(
       [AC_MSG_RESULT([yes])],
       [
         AC_MSG_RESULT([no])
-        AC_MSG_ERROR([Neither -lclang-cpp nor -lclangAST is available])
-      ])
-  ])
+        AC_MSG_ERROR([Neither -lclang-cpp nor -lclangAST is available])])])
 
 AC_SUBST([CXXFLAGS], [["-fPIC $CXXFLAGS"]])
 
