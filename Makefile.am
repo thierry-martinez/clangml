@@ -51,8 +51,8 @@ stubgen : $(DUNE_PREFIX)/$(STUBGEN_EXE)
 doc :
 	$(DUNE) build @doc $(FLAGS)
 
-.PHONY : tests
-tests :
+.PHONY : test
+test :
 	$(DUNE) runtest $(FLAGS)
 
 .PHONY : install
