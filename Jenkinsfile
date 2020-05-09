@@ -95,7 +95,7 @@ pipeline {
                                         --with-llvm-config=$llvm_config && \
                                     make clangml
                                    """
-                                sh "cd $pwd/$llvm_version/ && make tests"
+                                sh "cd $pwd/$llvm_version/ && make test"
                                 sh """
                                     cd $pwd/$llvm_version/ && \
                                     make tools/stubgen && \
