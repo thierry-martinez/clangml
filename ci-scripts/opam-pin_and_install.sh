@@ -11,7 +11,7 @@ opam update
 
 ## Pin dependencies
 
-opam install --yes dune
+opam depext --yes --verbose --install dune
 
 for package in metapp metaquot traverse refl; do
     git clone https://github.com/thierry-martinez/"$package".git
