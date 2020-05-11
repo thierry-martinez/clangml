@@ -43,8 +43,7 @@ AC_SUBST([OCAMLDOC], [["$OCAMLFIND ocamldoc"]])
 AC_SUBST([OCAMLDEP], [["$OCAMLFIND ocamldep"]])
 AC_SUBST([OCAMLMKLIB], [["$OCAMLFIND ocamlmklib"]])
 AC_CHECK_OCAMLFIND_PKG([stdcompat])
-#AC_CHECK_OCAMLFIND_PKG([ppxlib])
-#AC_CHECK_OCAMLFIND_PKG([override])
+AC_CHECK_OCAMLFIND_PKG([refl])
 
 AS_IF([test "x$has_missing_packages" = "xsingle"],
   [AC_MSG_ERROR([Package$missing_packages not found. Hint: opam install$missing_packages.])],
@@ -97,14 +96,15 @@ AC_DEFUN([AC_CHECK_LLVM_VERSION],
                AS_IF([test "x$LLVM_CONFIG" = "x"],
                  [AC_SUBST([GENTOO_LLVM_CONFIG], [[/usr/lib64/llvm/$1/bin/llvm-config]])
                   AS_IF([$GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null],
-                 [AC_SUBST([GENTOO_LLVM_CONFIG], [[/usr/lib/llvm/$1/bin/llvm-config]])
-                  AS_IF([$GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null],
                     [AC_SUBST([LLVM_CONFIG], [[$GENTOO_LLVM_CONFIG]])],
-                    [AS_IF([test "x$BREW" != "x"],
-                       AC_SUBST([BREW_CELLAR], [[`$BREW --cellar`]])
-                       AC_SUBST([BREW_LLVM_CONFIG], [$BREW_CELLAR/llvm*/$1*/bin/llvm-config])
-                       AS_IF([test "x$BREW_LLVM_CONFIG" != "x"],
-                         AC_SUBST([LLVM_CONFIG], [[$BREW_LLVM_CONFIG]])))])])])])])])])])
+                    [AC_SUBST([GENTOO_LLVM_CONFIG], [[/usr/lib/llvm/$1/bin/llvm-config]])
+                     AS_IF([$GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null],
+                       [AC_SUBST([LLVM_CONFIG], [[$GENTOO_LLVM_CONFIG]])],
+                       [AS_IF([test "x$BREW" != "x"],
+                         AC_SUBST([BREW_CELLAR], [[`$BREW --cellar`]])
+                         AC_SUBST([BREW_LLVM_CONFIG], [$BREW_CELLAR/llvm*/$1*/bin/llvm-config])
+                         AS_IF([test "x$BREW_LLVM_CONFIG" != "x"],
+                           AC_SUBST([LLVM_CONFIG], [[$BREW_LLVM_CONFIG]])))])])])])])])])])
 
 AC_ARG_WITH([llvm],
   AS_HELP_STRING([--with-llvm[=VERSION]],
@@ -122,6 +122,10 @@ AS_IF([test "x$LLVM_CONFIG" = "x"],
      AS_IF([test "x$LLVM_CONFIG" = "x"],
        [AC_SUBST([LLVM_CONFIG], [[`which llvm-config`]])])],
     [AC_SUBST([LLVM_CONFIG], [[`which llvm-config`]])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([10])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([9])
      AS_IF([test "x$LLVM_CONFIG" = "x"],
        [AC_CHECK_LLVM_VERSION([8])
      AS_IF([test "x$LLVM_CONFIG" = "x"],
@@ -143,7 +147,7 @@ AS_IF([test "x$LLVM_CONFIG" = "x"],
      AS_IF([test "x$LLVM_CONFIG" = "x"],
        [AC_CHECK_LLVM_VERSION([3.5])
      AS_IF([test "x$LLVM_CONFIG" = "x"],
-       [AC_CHECK_LLVM_VERSION([3.4])])])])])])])])])])])])])])
+       [AC_CHECK_LLVM_VERSION([3.4])])])])])])])])])])])])])])])])
 
 AS_IF([test "x$LLVM_CONFIG" = "x"],
   [AC_MSG_RESULT([[not found in PATH]])
@@ -224,12 +228,17 @@ AC_DEFUN([AC_VERSION_BLOCK],
 AC_VERSION_BLOCK(3, 5)
 AC_VERSION_BLOCK(3, 6)
 AC_VERSION_BLOCK(3, 7)
+AC_VERSION_BLOCK(3, 8)
+AC_VERSION_BLOCK(3, 9)
 AC_VERSION_BLOCK(4, 0)
+AC_VERSION_BLOCK(5, 0)
+AC_VERSION_BLOCK(6, 0)
+AC_VERSION_BLOCK(7, 0)
 AC_VERSION_BLOCK(8, 0)
 AC_VERSION_BLOCK(9, 0)
 AC_VERSION_BLOCK(10, 0)
 
-AC_SUBST([LLVM_CFLAGS], [[`$LLVM_CONFIG --cflags `]])
+AC_SUBST([LLVM_CFLAGS], [[`$LLVM_CONFIG --cflags`]])
 
 AC_SUBST([LLVM_LDFLAGS], [[`$LLVM_CONFIG --ldflags`]])
 
@@ -275,11 +284,8 @@ AC_CHECK_LIB([clang], [clang_createIndex], [],
 AC_SEARCH_LIBS([del_curterm], [curses ncurses])
 
 AC_SUBST([LIBS],
-  [["-lclangAST -lclangLex -lclangBasic $LLVM_LIBS -lpthread \
+  [["$LLVM_LIBS -lpthread \
      -lstdc++ -ldl -lm -lz $LIBS"]])
-
-AC_CHECK_LIB([clang], [clang_createIndex], [],
-  [AC_MSG_ERROR([[libclang not found]])])
 
 AC_LANG_CPLUSPLUS
 
@@ -308,6 +314,31 @@ AC_TRY_LINK(
         AC_MSG_ERROR([Cannot compile test for APInt::toString])
       ])
   ])
+
+AC_SUBST([BASELIBS], [["$LIBS"]])
+
+AC_MSG_CHECKING([if -lclangAST -lclangLex -lclangBasic is available])
+AC_SUBST([LIBS], [["-lclangAST -lclangLex -lclangBasic $BASELIBS"]])
+AC_TRY_LINK(
+  [#include <clang/AST/Decl.h>],
+  [
+    clang::FunctionDecl *d;
+    d->getNumParams();
+  ],
+  [AC_MSG_RESULT([yes])],
+  [
+    AC_MSG_CHECKING([if -lclang-cpp is available])
+    AC_SUBST([LIBS], [["-lclang-cpp $BASELIBS"]])
+    AC_TRY_LINK(
+      [#include <clang/AST/Decl.h>],
+      [
+        clang::FunctionDecl *d;
+        d->getNumParams();
+      ],
+      [AC_MSG_RESULT([yes])],
+      [
+        AC_MSG_RESULT([no])
+        AC_MSG_ERROR([Neither -lclang-cpp nor -lclangAST is available])])])
 
 AC_SUBST([CXXFLAGS], [["-fPIC $CXXFLAGS"]])
 
@@ -340,30 +371,12 @@ AS_IF([test -d clangml],
      AC_CP([$srcdir/clangml/clangml_OperationKinds.def], [clangml/])],
     [AC_MSG_ERROR([[cannot create directory clangml/]])])])
 
-AS_IF([test -d lift],
-  [true],
-  [AS_IF([mkdir lift],
-     AC_CP([$srcdir/lift/clangml_lift.ml], [lift/])
-     AC_CP([$srcdir/lift/dune], [lift/]))])
-
 AS_IF([test -d ppx],
   [true],
   [AS_IF([mkdir ppx],
      AC_CP([$srcdir/ppx/clangml_ppx.ml], [ppx/])
      AC_CP([$srcdir/ppx/ppx_lexer.mll], [ppx/])
      AC_CP([$srcdir/ppx/dune], [ppx/]))])
-
-AS_IF([test -d show],
-  [true],
-  [AS_IF([mkdir show],
-     AC_CP([$srcdir/show/clangml_show.ml], [show/])
-     AC_CP([$srcdir/show/dune], [show/]))])
-
-AS_IF([test -d compare],
-  [true],
-  [AS_IF([mkdir compare],
-     AC_CP([$srcdir/compare/clangml_compare.ml], [compare/])
-     AC_CP([$srcdir/compare/dune], [compare/]))])
 
 AS_IF([test -d printer],
   [true],

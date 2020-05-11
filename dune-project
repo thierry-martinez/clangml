@@ -2,7 +2,7 @@
 
 (generate_opam_files true)
 
-(license BSD)
+(license "BSD-2-Clause")
 (maintainers "Thierry Martinez <thierry.martinez@inria.fr>")
 (authors "Thierry Martinez <thierry.martinez@inria.fr>")
 (source (uri "git+https://gitlab.inria.fr/memcad/clangml"))
@@ -21,10 +21,11 @@ clangml provides bindings to call the Clang API from OCaml.
   conf-ncurses
   conf-zlib
   (dune (>= 1.10.0))
-  (ppxlib (>= 0.9.0))
-  (stdcompat (>= 10))
-  (override (>= 0.1.0))
-  (ocaml (>= 4.04.0))
+  (stdcompat (>= 13))
+  (ocaml (and (>= 4.03.0) (< 4.12.0)))
   (ocamlfind (and :build (>= 1.8.0)))
-  (ocamlcodoc :with-test)
-  (pattern :with-test)))
+  (ocamlcodoc (and :with-test (>= 1.0.1)))
+  (pattern (and :with-test (>= 0.2.0)))
+  (metapp (>= 0.1.0))
+  (metaquot (>= 0.1.0))
+  (refl (>= 0.1.0))))

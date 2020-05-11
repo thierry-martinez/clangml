@@ -1,7 +1,7 @@
 # clangml: OCaml bindings for Clang.
 
 clangml provides bindings for all versions of Clang, from 3.4 to
-9.0.0.
+10.0.0.
 
 ## Introduction
 
@@ -13,7 +13,7 @@ Contrary to old clangml versions, the versions of clangml from 4.0.0 are
 independent from the version of the Clang library:
 any version of clangml from 4.0.0 can be built with any version of the
 Clang library in the supported interval.
-Currently, all versions of Clang, from 3.4 to 9.0.0, are supported.
+Currently, all versions of Clang, from 3.4 to 10.0.0, are supported.
 
 However, clangml is statically linked to libclang, and clangml needs
 to be rebuilt for every version of libclang to run with.
@@ -67,7 +67,7 @@ By default, `llvm-config` is searched in `PATH`, and you may
 specify a path with `./configure --with-llvm-config=...`.
 
 clangml requires some dependencies:
-`opam install dune stdcompat ppxlib`.
+`opam install dune refl`.
 Additionnally, to run `make tests`: `opam install ocamlcodoc pattern`.
 
 `libclang` and other external dependencies can be installed with opam depext
@@ -141,7 +141,7 @@ In particular:
 
 Three files, `clang_stubs.c`, `clang__bindings.ml` and
 `clang__bindings.mli`, are generated for each version of LLVM by the
-`stubgen` tool (sub-directory stubgen).
+`stubgen` tool (sub-directory `tools/stubgen/`).
 
 To generate these files for a given version of LLVM, you may run:
 `stubgen --llvm-config=$PATH_TO_LLVM_CONFIG $TARGET_PATH`.

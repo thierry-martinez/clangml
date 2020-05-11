@@ -107,7 +107,13 @@ bool
 clang_ext_Int_getBoolValue(CXInt c);
 
 int
+clang_ext_Int_getZExtValue(CXInt c);
+
+int
 clang_ext_Int_getSExtValue(CXInt c);
+
+uint64_t
+clang_ext_Int_getZExtValue64(CXInt c);
 
 int64_t
 clang_ext_Int_getSExtValue64(CXInt c);
@@ -967,3 +973,42 @@ clang_ext_FunctionTypeLoc_getNumParams(struct clang_ext_TypeLoc);
 
 CXCursor
 clang_ext_FunctionTypeLoc_getParam(struct clang_ext_TypeLoc, unsigned int);
+
+CXCursor
+clang_ext_InitListExpr_getSyntacticForm(CXCursor cursor);
+
+CXCursor
+clang_ext_InitListExpr_getSemanticForm(CXCursor cursor);
+
+unsigned int
+clang_ext_InitListExpr_getNumInits(CXCursor cursor);
+
+CXCursor
+clang_ext_InitListExpr_getInit(CXCursor cursor, unsigned int i);
+
+enum clang_ext_DesignatedInitExpr_DesignatorKind {
+  clang_ext_FieldDesignator,
+  clang_ext_ArrayDesignator,
+  clang_ext_ArrayRangeDesignator
+};
+
+unsigned int
+clang_ext_DesignatedInitExpr_size(CXCursor cursor);
+
+enum clang_ext_DesignatedInitExpr_DesignatorKind
+clang_ext_DesignatedInitExpr_getKind(CXCursor cursor, unsigned int index);
+
+CXCursor
+clang_ext_DesignatedInitExpr_getField(CXCursor cursor, unsigned int index);
+
+CXCursor
+clang_ext_DesignatedInitExpr_getArrayIndex(CXCursor cursor, unsigned int index);
+
+CXCursor
+clang_ext_DesignatedInitExpr_getArrayRangeStart(CXCursor cursor, unsigned int index);
+
+CXCursor
+clang_ext_DesignatedInitExpr_getArrayRangeEnd(CXCursor cursor, unsigned int index);
+
+CXCursor
+clang_ext_DesignatedInitExpr_getInit(CXCursor cursor);

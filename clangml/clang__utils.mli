@@ -85,27 +85,48 @@ val list_of_type_fields : cxtype -> cxcursor list
     of the fields belonging to the record type [ty] (either a struct or
     union). *)
 
+(** {2 Integer or floating point types} *)
+val is_integer : cxtypekind -> bool
+(** [is_integer ty] returns true if [ty] is a built-in integer type. *)
+
+val is_unsigned_integer : cxtypekind -> bool
+(** [is_unsigned_integer ty] returns true if [ty] is a built-in integer type
+    that is unsigned. *)
+
+val is_signed_integer : cxtypekind -> bool
+(** [is_signed_integer ty] returns true if [ty] is a built-in integer type
+    that is signed. *)
+
+val is_floating_point : cxtypekind -> bool
+(** [is_floating_point ty] returns true if [ty] is a built-in floating-point
+    type. *)
+
 (** {2 Integer conversions } *)
 
-val int64_of_cxint_opt : cxint -> Int64.t option
-(** [int64_of_cxint_opt x] returns [Some i] if [x] is representable as
-    a 64-bit integer value [i], or [None] otherwise. *)
+val int64_of_cxint_opt : ?signed:bool -> cxint -> Int64.t option
+(** [int64_of_cxint_opt ~signed x] returns [Some i] if [x] is representable as
+    a 64-bit integer value [i], or [None] otherwise.
+    [signed] specifies if [x] is signed (default: true). *)
 
-val int64_of_cxint : cxint -> Int64.t
+val int64_of_cxint : ?signed:bool -> cxint -> Int64.t
 (** [int64_of_cxint x] returns [i] if [x] is representable as
-    a 64-bit integer value [i], or raises [Invalid_argument _] otherwise. *)
+    a 64-bit integer value [i], or raises [Invalid_argument _] otherwise.
+    [signed] specifies if [x] is signed (default: true).*)
 
-val int_of_cxint_opt : cxint -> int option
+val int_of_cxint_opt : ?signed:bool -> cxint -> int option
 (** [int_of_cxint_opt x] returns [Some i] if [x] is representable as
-    an integer value [i], or [None] otherwise. *)
+    an integer value [i], or [None] otherwise.
+    [signed] specifies if [x] is signed (default: true). *)
 
-val int_of_cxint : cxint -> int
+val int_of_cxint : ?signed:bool -> cxint -> int
 (** [int_of_cxint x] returns [i] if [x] is representable as
-    an integer value [i], or raises [Invalid_argument _] otherwise. *)
+    an integer value [i], or raises [Invalid_argument _] otherwise.
+    [signed] specifies if [x] is signed (default: true). *)
 
-val string_of_cxint : cxint -> string
+val string_of_cxint : ?signed:bool -> cxint -> string
 (** [string_of_cxint f] is an alias for
-    {!val:Clang__bindings.ext_int_to_string}, radix 10 and signed. *)
+    {!val:Clang__bindings.ext_int_to_string}, radix 10.
+    [signed] specifies if [x] is signed (default: true). *)
 
 (** {2 Floating conversions } *)
 
@@ -167,6 +188,11 @@ val has_severity : cxdiagnosticseverity list -> cxtranslationunit -> bool
 val cursor_get_translation_unit : cxcursor -> cxtranslationunit
 (** [cursor_get_translation_unit cursor] returns the translation unit
     associated to [cursor]. *)
+
+val sourcelocation_get_translation_unit :
+    cxsourcelocation -> cxtranslationunit
+(** [sourcelocation_get_translation_unit location] returns the translation
+    unit associated to [location]. *)
 
 val binary_of_overloaded_operator_kind :
     clang_ext_overloadedoperatorkind -> clang_ext_binaryoperatorkind

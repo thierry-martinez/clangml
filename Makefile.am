@@ -13,7 +13,7 @@ NORM_PREFIX = $(error NORM_PREFIX should be set)
 
 norm_files = $(shell sed -n -e 's/^\\include{\([^}]*\)}/\1/p' $(NORM_PREFIX)/std.tex)
 
-libraries = lift ppx show printer compare
+libraries = ppx printer
 
 tools = stubgen norm_extractor print_tree
 
@@ -42,38 +42,38 @@ all : clangml clangml.opam $(libraries)
 clangml : $(DUNE_PREFIX)/$(CLANGML_CMXA) $(DUNE_PREFIX)/$(LIBCLANGML_STUBS_A)
 
 clangml.opam : dune-project
-	dune build clangml.opam
+	$(DUNE) build clangml.opam $(FLAGS)
 
 .PHONY : stubgen
 stubgen : $(DUNE_PREFIX)/$(STUBGEN_EXE)
 
 .PHONY : doc
 doc :
-	dune build @doc
+	$(DUNE) build @doc $(FLAGS)
 
-.PHONY : tests
-tests :
-	dune runtest
+.PHONY : test
+test :
+	$(DUNE) runtest $(FLAGS)
 
 .PHONY : install
 install :
-	dune build @install
+	$(DUNE) build @install $(FLAGS)
 # rpath required for dynamic link on Mac OS X
 	- test -z $(INSTALL_NAME_TOOL) || \
 		$(INSTALL_NAME_TOOL) -add_rpath $(LLVM_LIBDIR) \
 			$(DUNE_INSTALL_PREFIX)/lib/stublibs/dllclangml_stubs.so
-	dune install
+	$(DUNE) install $(FLAGS)
 
 
 .PHONY : uninstall
 uninstall :
-	dune uninstall
+	$(DUNE) uninstall $(FLAGS)
 
 clean-local : clean-local-dune
 
 .PHONY : clean-local-dune
 clean-local-dune :
-	dune clean
+	$(DUNE) clean $(FLAGS)
 
 define foreach_library
 .PHONY : ($library)
@@ -94,7 +94,7 @@ $(foreach tool, $(tools), $(eval $(foreach_tool)))
 define foreach_dune_file
 .PHONY : $(DUNE_PREFIX)/$(dune_file)
 $(DUNE_PREFIX)/$(dune_file) :
-	$(DUNE) build $(dune_file)
+	$(DUNE) build $(dune_file) $(FLAGS)
 endef
 $(foreach dune_file, $(dune_files) $(tools_exe), $(eval $(foreach_dune_file)))
 

@@ -43,7 +43,7 @@ pipeline {
                     eval $(opam env) && \
                     mkdir build && cd build && \
                     ../src/configure \
-                        --with-llvm-config=/media/llvms/8.0.1/bin/llvm-config
+                        --with-llvm-config=/media/llvms/10.0.0/bin/llvm-config
                    '''
             }
         }
@@ -95,7 +95,7 @@ pipeline {
                                         --with-llvm-config=$llvm_config && \
                                     make clangml
                                    """
-                                sh "cd $pwd/$llvm_version/ && make tests"
+                                sh "cd $pwd/$llvm_version/ && make test"
                                 sh """
                                     cd $pwd/$llvm_version/ && \
                                     make tools/stubgen && \
@@ -146,7 +146,7 @@ pipeline {
             steps {
                 script {
                     opam_installations(
-                        ["4.04", "4.05", "4.06", "4.07", "4.08", "4.09"],
+                        ["4.03", "4.04", "4.05", "4.06", "4.07", "4.08", "4.09", "4.10"],
                         "file:///clangml/")
                 }
             }
@@ -163,7 +163,7 @@ pipeline {
             steps {
                 script {
                     opam_installations(
-                        ["4.09"],
+                        ["4.10"],
 "https://gitlab.inria.fr/memcad/clangml/-/archive/snapshot/clangml-snapshot.tar.gz")
                 }
             }
@@ -191,6 +191,16 @@ pipeline {
                         '''
                     }
                 }
+                stage('c++20') {
+                    steps {
+                        sh '''
+                            path=$PWD &&
+                            cd $HOME/cplusplus/c++20 &&
+                            build_dir=$path/build target_dir=$path std=c++20 \
+                                $path/src/ci-scripts/extract_norm.sh
+                        '''
+                    }
+                }
             }
         }
 
@@ -200,6 +210,7 @@ pipeline {
                 sh 'git checkout norms'
                 sh 'cp build/norm_c++14.ml norms/'
                 sh 'cp build/norm_c++17.ml norms/'
+                sh 'cp build/norm_c++20.ml norms/'
                 sh 'git add norms/*'
                 sh '''
                     git commit -m \

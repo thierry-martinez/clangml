@@ -1,4 +1,6 @@
-# Next version
+# 2020-02-20, 4.1.0
+
+- Compatible with OCaml 4.10.0
 
 - Typeloc structures which contains non-transformed type informations can be
   obtained with Clang.Decl.get_type_loc and Clang.Parameter.get_type_loc.
@@ -11,10 +13,37 @@
   comparing cursors.
   (suggested by Arthur Charguéraud)
 
-- Bug-fix: Constant array sizes are no longer reported as default values for
+- Fix: Constant array sizes are no longer reported as default values for
   parameters.
 
-- Ignore decorations in Clangml__compare
+- Fix: Correct representation of integer literal from 32 to 64 bits
+  (reported by Hyunsoo Shin)
+
+- Relies on `metapp`, `metaquot` and `refl`. All AST types are `reflexive` in
+  the sense of the `refl` package.
+  `ppxlib` and `override` are not dependencies anymore.
+
+- `clangml.show` and `clangml.compare` packages don't exist anymore.
+  Every AST node module (`Clang.Expr`, `Clang.Stmt`, ...) exposes a common
+  signature (Clang.S) with `compare`, `equal`, `pp` and `show` functions, and
+  `Set` and `Map` module.
+
+- Access to semantic form for initialization lists
+  (suggested by Hyunsoo Shin)
+
+- Representation for designated initialization expressions (C99)
+  (suggested by Hyunsoo Shin)
+
+- Fix: Some distributions such as ArchLinux now gather clang libraries in
+  -lclang-cpp.
+  (reported by Armaël Guéneau)
+
+- libclang's tokenize and related functions are now accessible,
+  new utility function `Clang.Expr.radix_of_integer_literal`.
+
+- Fix: C stub generation used to declare CAMLlocal inside for loops, causing
+  infinite loops in the GC in some occasions.
+  (reported by Armaël Guéneau)
 
 # 2019-09-30, 4.0.1
 

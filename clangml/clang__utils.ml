@@ -1,4 +1,3 @@
-
 open Clang__bindings
 
 open Clang__compat
@@ -17,7 +16,7 @@ let iter_visitor f visitor =
   end;
   match !exn_ref with
   | None -> ()
-  | Some exn -> raise exn 
+  | Some exn -> raise exn
 
 let list_of_iter iter =
   let children_ref = ref [] in
@@ -87,14 +86,15 @@ let not_ignored_diagnostics = Note :: warning_or_error
 let all_diagnostics = Ignored :: not_ignored_diagnostics
 
 let seq_exists pred seq =
-  let exception Exists in
+  (* "let exception" is OCaml >=4.04.0 only *)
+  let module M = struct exception Exists end in
   try
     seq |> Seq.iter begin fun d ->
       if pred d then
-        raise Exists
+        raise M.Exists
     end;
     false
-  with Exists ->
+  with M.Exists ->
     true
 
 let has_severity l tu =
@@ -102,32 +102,77 @@ let has_severity l tu =
     List.mem (get_diagnostic_severity d) l
   end
 
-let int64_of_cxint_opt cxint =
-  if ext_int_get_min_signed_bits cxint <= 64 then
-    Some (ext_int_get_sext_value64 cxint)
+(* is_integer, is_unsigned_integer, is_signed_integer and is_floating_point
+   are implemented as Type::{isInteger, isUnsignedInteger, isSignedInteger,
+   isFloatingPoint} in Type.h. *)
+let is_unsigned_integer (ty : cxtypekind) =
+  match ty with
+  | Bool | Char_U | UChar | Char16 | Char32 | UShort | UInt | ULong | ULongLong
+  | UInt128 -> true
+  | _ -> false
+
+let is_signed_integer (ty : cxtypekind) =
+  match ty with
+  | Char_S | SChar | WChar | Short | Int | Long | LongLong | Int128 -> true
+  | _ -> false
+
+let is_integer (ty : cxtypekind) =
+  is_unsigned_integer ty || is_signed_integer ty
+
+let is_floating_point = is_floating_point (* Defined in compat *)
+
+let get_bits ~signed =
+  if signed then
+    ext_int_get_min_signed_bits
+  else
+    ext_int_get_active_bits
+
+let int64_of_cxint_opt ?(signed = true) cxint =
+  if get_bits ~signed cxint <= 64 then
+    let result =
+      if signed then
+        ext_int_get_sext_value64 cxint
+      else
+        ext_int_get_zext_value64 cxint in
+    Some result
   else
     None
 
-let int64_of_cxint cxint =
-  if ext_int_get_min_signed_bits cxint <= 64 then
-    ext_int_get_sext_value64 cxint
+let int64_of_cxint ?(signed = true) cxint =
+  if get_bits ~signed cxint <= 64 then
+    if signed then
+      ext_int_get_sext_value64 cxint
+    else
+      ext_int_get_zext_value64 cxint
   else
     invalid_arg "int64_of_cxint"
 
-let int_of_cxint_opt cxint =
-  if ext_int_get_min_signed_bits cxint <= Sys.int_size then
-    Some (ext_int_get_sext_value cxint)
+let int_of_cxint_opt ?(signed = true) cxint =
+  let bits = get_bits ~signed cxint in
+  if bits <= (if signed then 32 else 31) then
+    let result =
+      if signed then
+        ext_int_get_sext_value cxint
+      else
+        ext_int_get_zext_value cxint in
+    Some result
+  else if bits <= Sys.int_size then
+    let result =
+      if signed then
+        ext_int_get_sext_value64 cxint
+      else
+        ext_int_get_zext_value64 cxint in
+    Some (Int64.to_int result)
   else
     None
 
-let int_of_cxint cxint =
-  if ext_int_get_min_signed_bits cxint <= Sys.int_size then
-    ext_int_get_sext_value cxint
-  else
-    invalid_arg "int_of_cxint"
+let int_of_cxint ?(signed = true) cxint =
+  match int_of_cxint_opt ~signed cxint with
+  | Some result -> result
+  | None -> invalid_arg "int_of_cxint"
 
-let string_of_cxint cxint =
-  ext_int_to_string cxint 10 true
+let string_of_cxint ?(signed = true) cxint =
+  ext_int_to_string cxint 10 signed
 
 let float_of_cxfloat_opt cxfloat =
   match ext_float_get_semantics cxfloat with
@@ -241,6 +286,9 @@ let string_of_cxx_access_specifier specifier =
 let cursor_get_translation_unit cursor =
   Obj.obj (Obj.field (Obj.repr cursor) 1)
 
+let sourcelocation_get_translation_unit cursor =
+  Obj.obj (Obj.field (Obj.repr cursor) 1)
+
 let binary_of_overloaded_operator_kind kind =
   match kind with
   | Plus -> Add
@@ -249,7 +297,7 @@ let binary_of_overloaded_operator_kind kind =
   | Slash -> Div
   | Percent -> Rem
   | Amp -> And
-  | Pipe -> Or 
+  | Pipe -> Or
   | Equal  -> Assign
   | Less -> LT
   | Greater -> GT

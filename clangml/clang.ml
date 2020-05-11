@@ -1,3 +1,43 @@
+[%%metapackage "metapp"]
+
+(** Common part of AST node signatures *)
+module type S = sig
+  type t
+
+  val compare : t -> t -> int
+
+  val equal : t -> t -> bool
+
+  val pp : Format.formatter -> t -> unit
+
+  val show : t -> string
+
+  module Set : Set.S with type elt = t
+
+  module Map : Map.S with type key = t
+end
+
+[%%metadef
+let node_module s = Ast_helper.Mod.structure [%str
+  module Self = struct
+    [%%meta Metapp.Stri.of_list s]
+
+    let compare = Refl.compare [%refl: t] []
+
+    let equal = Refl.equal [%refl: t] []
+
+    let pp = Refl.pp [%refl: t] []
+
+    let show = Refl.show [%refl: t] []
+  end
+
+  include Self
+
+  module Set = Set.Make (Self)
+
+  module Map = Map.Make (Self)
+]]
+
 module Bindings = Clang__bindings
 
 include Bindings
@@ -27,7 +67,9 @@ let default_include_directories () =
   let cpp_lib = make_include_dir ["c++"; "v1"] in
   let macos_sdk =
     "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/" in
-  [macos_sdk; cpp_lib; includedir]
+  let gentoo_dir =
+    "/usr/lib/clang/" ^ Clangml_config.version ^ "/include/" in
+  [macos_sdk; cpp_lib; includedir; gentoo_dir]
 
 let option_cursor_bind f cursor : 'a option =
   if get_cursor_kind cursor = InvalidCode then
@@ -75,6 +117,35 @@ let string_chop_prefix_opt prefix s =
 
 external compare_cursors :
   cxcursor -> cxcursor -> int = "clang_ext_compare_cursor_boxed"
+
+let rec get_typedef_underlying_type ?(recursive = false) (t : cxtype) =
+  if get_type_kind t = Typedef then
+    let result = get_typedef_decl_underlying_type (get_type_declaration t) in
+    if recursive then
+      get_typedef_underlying_type ~recursive:true result
+    else
+      result
+  else
+    t
+
+module Init_list = struct
+  let syntactic_form cursor =
+    let result = ext_init_list_expr_get_syntactic_form cursor in
+    match get_cursor_kind result with
+    | InvalidCode -> cursor
+    | _ -> result
+
+  let semantic_form cursor =
+    let result = ext_init_list_expr_get_semantic_form cursor in
+    match get_cursor_kind result with
+    | InvalidCode -> cursor
+    | _ -> result
+
+  let get_form (form : Clang__ast_options.init_list_form) cursor =
+    match form with
+    | Syntactic -> syntactic_form cursor
+    | Semantic -> semantic_form cursor
+end
 
 module Ast = struct
   include Clang__ast
@@ -150,6 +221,11 @@ module Ast = struct
   let location_of_node node =
     location_of_decoration node.decoration
 
+  let tokens_of_node node =
+    let cursor = cursor_of_node node in
+    let tu = cursor_get_translation_unit cursor in
+    Array.map (get_token_spelling tu) (tokenize tu (get_cursor_extent cursor))
+
   include Clang__ast_utils
 
   module Options = Clang__ast_options
@@ -190,10 +266,10 @@ module Ast = struct
         | _ -> true
       end
 
-    let make_integer_literal i =
+    let make_integer_literal (i : cxint) (ty : cxtypekind) =
       match
         if options.convert_integer_literals then
-          int_of_cxint_opt i
+          int_of_cxint_opt ~signed:(is_signed_integer ty) i
         else
           None
       with
@@ -308,13 +384,14 @@ module Ast = struct
             ext_template_argument_get_null_ptr_type argument |>
             of_cxtype)
       | Integral ->
+          let qual_type =
+            of_cxtype (ext_template_argument_get_integral_type argument) in
           Integral {
             value =
-              ext_template_argument_get_as_integral argument |>
-              make_integer_literal;
-            qual_type =
-              ext_template_argument_get_integral_type argument |>
-              of_cxtype }
+              make_integer_literal
+                (ext_template_argument_get_as_integral argument)
+                (get_type_kind qual_type.cxtype);
+            qual_type }
       | Template ->
           TemplateTemplateArgument (
             ext_template_argument_get_as_template_or_template_pattern
@@ -1232,7 +1309,8 @@ module Ast = struct
         match kind with
         | IntegerLiteral ->
             let i = ext_integer_literal_get_value cursor in
-            let literal = make_integer_literal i in
+            let literal =
+              make_integer_literal i (get_type_kind (get_cursor_type cursor)) in
             IntegerLiteral literal
         | FloatingLiteral ->
             let f = ext_floating_literal_get_value cursor in
@@ -1369,7 +1447,11 @@ module Ast = struct
               | _ -> raise Invalid_structure in
             AddrLabel label
         | InitListExpr ->
-            InitList (list_of_children cursor |> List.map expr_of_cxcursor)
+            let cursor = Init_list.get_form options.init_list_form cursor in
+            let inits =
+              List.init (ext_init_list_expr_get_num_inits cursor)
+                (fun i -> ext_init_list_expr_get_init cursor i) in
+            InitList (inits |> List.map expr_of_cxcursor)
         | CompoundLiteralExpr ->
             let qual_type = cursor |> get_cursor_type |> of_cxtype in
             let init =
@@ -1498,6 +1580,35 @@ module Ast = struct
               | CXXStdInitializerListExpr ->
                   StdInitializerList
                     (cursor |> list_of_children |> List.map expr_of_cxcursor)
+              | ImplicitValueInitExpr ->
+                  ImplicitValueInit
+                    (cursor |> get_cursor_type |> of_cxtype)
+              | DesignatedInitExpr ->
+                  let designators =
+                    List.init (ext_designated_init_expr_size cursor) (fun i ->
+                      match ext_designated_init_expr_get_kind cursor i with
+                      | FieldDesignator ->
+                          let field =
+                            ext_designated_init_expr_get_field cursor i in
+                          FieldDesignator (get_cursor_spelling field)
+                      | ArrayDesignator ->
+                          let index =
+                            ext_designated_init_expr_get_array_index cursor i in
+                          ArrayDesignator (expr_of_cxcursor index)
+                      | ArrayRangeDesignator ->
+                          let range_start =
+                            ext_designated_init_expr_get_array_range_start
+                              cursor i in
+                          let range_end =
+                            ext_designated_init_expr_get_array_range_end
+                              cursor i in
+                          ArrayRangeDesignator (
+                            expr_of_cxcursor range_start,
+                            expr_of_cxcursor range_end)) in
+                  let init =
+                    ext_designated_init_expr_get_init cursor |>
+                    expr_of_cxcursor in
+                  DesignatedInit { designators; init }
               | kind ->
                   match compat_stmt_kind kind with
                   | CXXFoldExpr ->
@@ -1876,8 +1987,8 @@ module Ast = struct
     | Concrete location -> location
 end
 
-module Expr = struct
-  type t = Ast.expr
+module Expr = [%meta node_module [%str
+  type t = Ast.expr [@@deriving refl]
 
   let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
@@ -1885,10 +1996,33 @@ module Expr = struct
 
   let get_definition e =
     e |> Ast.cursor_of_node |> get_cursor_definition
-end
 
-module Type_loc = struct
-  type t = Ast.type_loc
+  type radix = Decimal | Octal | Hexadecimal | Binary [@@deriving refl]
+
+  let radix_of_string s =
+    if s.[0] = '0' then
+      if String.length s > 1 then
+        match s.[1] with
+        | 'x' | 'X' -> Hexadecimal
+        | 'b' | 'B' -> Binary
+        | _ -> Octal
+      else
+        Octal
+    else
+      Decimal
+
+  let radix_of_integer_literal (expr : t) : radix option =
+    let tokens = Ast.tokens_of_node expr in
+    (* [tokens] should be an array of length 1: however, with Clang <7,
+       [tokens] include the token next to the range. *)
+    if Array.length tokens >= 1 then
+      Some (radix_of_string tokens.(0))
+    else
+      None
+]]
+
+module Type_loc = [%meta node_module [%str
+  type t = Ast.type_loc [@@deriving refl]
 
   let to_qual_type ?options (t : t) =
     match t.typeloc with
@@ -1898,18 +2032,24 @@ module Type_loc = struct
   let of_typeloc ?(options = Ast.Options.default) typeloc =
     let module Convert = Ast.Converter (struct let options = options end) in
     Convert.type_loc_of_typeloc typeloc
-end
+]]
 
-module Decl = struct
-  type t = Ast.decl
+module Decl = [%meta node_module [%str
+  type t = Ast.decl [@@deriving refl]
 
   let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
     Convert.decl_of_cxcursor cur
 
-  let get_typedef_underlying_type ?options decl =
-    decl |> Ast.cursor_of_node |>
-    get_typedef_decl_underlying_type |> Ast.of_cxtype ?options
+  let get_typedef_underlying_type ?options ?(recursive = false) decl =
+    let result =
+      decl |> Ast.cursor_of_node |> get_typedef_decl_underlying_type in
+    let result =
+      if recursive then
+        get_typedef_underlying_type ~recursive:true result
+      else
+        result in
+    Ast.of_cxtype ?options result
 
   let get_field_bit_width field =
     field |> Ast.cursor_of_node |> get_field_decl_bit_width
@@ -1924,10 +2064,10 @@ module Decl = struct
 
   let get_canonical decl =
     decl |> Ast.cursor_of_node |> get_canonical_cursor
-end
+]]
 
-module Parameter = struct
-  type t = Ast.parameter
+module Parameter = [%meta node_module [%str
+  type t = Ast.parameter [@@deriving refl]
 
   let get_size_expr ?options param =
     param |> Ast.cursor_of_node |>
@@ -1936,10 +2076,10 @@ module Parameter = struct
   let get_type_loc ?options param =
     param |> Ast.cursor_of_node |>
     ext_declarator_decl_get_type_loc |> Type_loc.of_typeloc ?options
-end
+]]
 
-module Type = struct
-  type t = Ast.qual_type
+module Type = [%meta node_module [%str
+  type t = Ast.qual_type [@@deriving refl]
 
   let make ?(const = false) ?(volatile = false) ?(restrict = false) desc : t =
     { cxtype = get_cursor_type (get_null_cursor ()); type_loc = None;
@@ -1965,10 +2105,17 @@ module Type = struct
 
   let get_align_of (ty : t) = type_get_align_of ty.cxtype
 
-  let get_typedef_underlying_type ?options (qual_type : t) =
-    Clang__bindings.get_type_declaration qual_type.cxtype |>
-      Clang__bindings.get_typedef_decl_underlying_type |>
-      of_cxtype ?options
+  let get_offset_of (ty : t) (field_name : string) =
+    let cxtype = get_typedef_underlying_type ~recursive:true ty.cxtype in
+    let result = type_get_offset_of cxtype field_name in
+    if result = -1 then
+      invalid_arg "Clang.Type.get_offset_of"
+    else
+      result
+
+  let get_typedef_underlying_type ?options ?recursive (qual_type : t) =
+    get_typedef_underlying_type ?recursive qual_type.cxtype |>
+    of_cxtype ?options
 
   let get_declaration ?options (qual_type : t) =
     get_type_declaration qual_type.cxtype |> Decl.of_cxcursor ?options
@@ -1980,18 +2127,18 @@ module Type = struct
   let list_of_fields ?options (qual_type : t) =
     qual_type.cxtype |> list_of_type_fields |> List.map @@
       Decl.of_cxcursor ?options
-end
+]]
 
-module Stmt = struct
-  type t = Ast.stmt
+module Stmt = [%meta node_module [%str
+  type t = Ast.stmt [@@deriving refl]
 
   let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
     Convert.stmt_of_cxcursor cur
-end
+]]
 
-module Enum_constant = struct
-  type t = Ast.enum_constant
+module Enum_constant = [%meta node_module [%str
+  type t = Ast.enum_constant [@@deriving refl]
 
   let of_cxcursor ?(options = Ast.Options.default) cur =
     let module Convert = Ast.Converter (struct let options = options end) in
@@ -1999,12 +2146,11 @@ module Enum_constant = struct
 
   let get_value enum_constant =
     enum_constant |> Ast.cursor_of_node |> get_enum_constant_decl_value
-end
+]]
 
-module Translation_unit = struct
-  type t = Ast.translation_unit
+module Translation_unit = [%meta node_module [%str
+  type t = Ast.translation_unit [@@deriving refl]
 
   let make ?(filename = "") items : Ast.translation_unit_desc =
     { filename; items }
-end
-
+]]

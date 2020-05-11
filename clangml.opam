@@ -6,7 +6,7 @@ clangml provides bindings to call the Clang API from OCaml.
 """
 maintainer: ["Thierry Martinez <thierry.martinez@inria.fr>"]
 authors: ["Thierry Martinez <thierry.martinez@inria.fr>"]
-license: "BSD"
+license: "BSD-2-Clause"
 homepage: "https://memcad.gitlabpages.inria.fr/clangml/"
 doc: "https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/index.html"
 bug-reports: "https://gitlab.inria.fr/memcad/clangml/issues"
@@ -15,16 +15,18 @@ depends: [
   "conf-ncurses"
   "conf-zlib"
   "dune" {>= "1.10.0"}
-  "ppxlib" {>= "0.9.0"}
-  "stdcompat" {>= "10"}
-  "override" {>= "0.1.0"}
-  "ocaml" {>= "4.04.0"}
+  "stdcompat" {>= "13"}
+  "ocaml" {>= "4.03.0" & < "4.12.0"}
   "ocamlfind" {build & >= "1.8.0"}
-  "ocamlcodoc" {with-test}
-  "pattern" {with-test}
+  "ocamlcodoc" {with-test & >= "1.0.1"}
+  "pattern" {with-test & >= "0.2.0"}
+  "metapp" {>= "0.1.0"}
+  "metaquot" {>= "0.1.0"}
+  "refl" {>= "0.1.0"}
 ]
 dev-repo: "git+https://gitlab.inria.fr/memcad/clangml"
 build: [
   ["./configure" "--prefix=%{prefix}%" "--with-llvm-config=%{conf-libclang:config}%"]
   ["dune" "build" "-p" name "-j" jobs]]
 run-test: [["dune" "runtest" "-p" name "-j" jobs]]
+version: "4.1.0"

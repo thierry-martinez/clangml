@@ -124,7 +124,8 @@ let rec decl fmt (d : Clang.Decl.t) =
       Format.fprintf fmt "@[extern@ \"%s\"@ {@ @[%a@]@ }@]"
         (Clang.extern_of_language language)
         decls list
-  | _ -> failwith (Format.asprintf "Not implemented decl: %a" Clangml_show.pp_decl d)
+  | _ -> failwith (Format.asprintf "Not implemented decl: %a"
+           (Refl.pp [%refl: Clang.Ast.decl] []) d)
 
 and print_variable_init fmt init =
   match init with
@@ -213,7 +214,7 @@ and expr_prec prec fmt (e : Clang.Expr.t) =
         | Some expr ->
             failwith
               (Format.asprintf "Unexpected constructor argument %a"
-                 Clangml_show.pp_expr e) in
+                 (Refl.pp [%refl: Clang.Ast.expr] []) e) in
       Format.fprintf fmt "new@ %a%a" qual_type ty format_init init
   | Delete { argument; _ } ->
       Format.fprintf fmt "delete@ %a" expr argument
@@ -225,7 +226,9 @@ and expr_prec prec fmt (e : Clang.Expr.t) =
       | None ->
           Format.fprintf fmt "%a ?: %a" expr cond expr else_branch
       end
-  | _ -> failwith (Format.asprintf "Not implemented expr %a" Clangml_show.pp_expr e)
+  | _ ->
+      failwith (Format.asprintf "Not implemented expr %a"
+        (Refl.pp [%refl: Clang.Ast.expr] []) e)
 
 and stmt fmt (s : Clang.Stmt.t) =
   match s.desc with
@@ -246,7 +249,9 @@ and stmt fmt (s : Clang.Stmt.t) =
       Format.pp_print_list decl fmt d
   | Expr e ->
       Format.fprintf fmt "@[%a;@]" expr e
-  | _ -> failwith (Format.asprintf "Not implemented stmt: %a" Clangml_show.pp_stmt s)
+  | _ ->
+      failwith (Format.asprintf "Not implemented stmt: %a"
+        (Refl.pp [%refl: Clang.Ast.stmt] []) s)
 
 and print_else_branch fmt else_branch =
   match else_branch with
@@ -261,7 +266,7 @@ and print_linkage fmt linkage =
   | NoLinkage -> ()
   | _ ->
       failwith (Format.asprintf "Not implemented linkage: %a"
-        Clangml_show.pp_linkage_kind linkage)
+        (Refl.pp [%refl: Clang.Ast.linkage_kind] []) linkage)
 
 and print_parameters fmt parameters =
   let all_parameters = List.map Option.some parameters.non_variadic in
@@ -316,6 +321,11 @@ and print_declaration_name fmt (name : Clang.Ast.declaration_name) =
   | _ -> failwith "Not implemented print_ident_ref.declaration_name"
 
 and typed_value fmt_value fmt t =
+  let fmt_value =
+    if t.const then
+      (fun fmt -> Format.fprintf fmt "@[const %t@]" fmt_value)
+    else
+      fmt_value in
   match t.desc with
   | Pointer t ->
       typed_value (fun fmt -> Format.fprintf fmt "@[*%t@]" fmt_value) fmt t
@@ -323,7 +333,7 @@ and typed_value fmt_value fmt t =
       Format.fprintf fmt "@[void@ %t@]" fmt_value
   | BuiltinType Int ->
       Format.fprintf fmt "@[int@ %t@]" fmt_value
-  | BuiltinType SChar ->
+  | BuiltinType (SChar | Char_S) ->
       Format.fprintf fmt "@[char@ %t@]" fmt_value
   | ConstantArray { element; size_as_expr = Some size_as_expr; _ } ->
       typed_value
@@ -342,7 +352,8 @@ and typed_value fmt_value fmt t =
       Format.fprintf fmt "@[%a@ %t@]" print_ident_ref ident fmt_value
   | _ ->
       failwith (
-        Format.asprintf "Not implemented qual type: %a" Clangml_show.pp_type t)
+        Format.asprintf "Not implemented qual type: %a"
+        (Refl.pp [%refl: Clang.Ast.qual_type] []) t)
 
 and qual_type fmt t =
   typed_value (fun fmt -> ()) fmt t

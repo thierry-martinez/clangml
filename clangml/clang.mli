@@ -50,6 +50,12 @@ val default_include_directories : unit -> string list
 val compare_cursors : cxcursor -> cxcursor -> int
 (** [compare_cursors c1 c2] provides a total order over cursors. *)
 
+val get_typedef_underlying_type : ?recursive:bool -> cxtype -> cxtype
+(** [get_typedef_underlying_type t] returns the underlying type of [t] if [t]
+    is a typedef, and [t] otherwise. If [recursive] is [true]
+    (default: [false]), typedefs are followed until the underlying type is not a
+    typedef. *)
+
 (** {2 Abstract syntax tree} *)
 
 module Ast : sig
@@ -171,6 +177,10 @@ module Ast : sig
   (** [location_of_node node] is equivalent to
       {!val:location_of_decoration}[ node.decoration]. *)
 
+  val tokens_of_node : 'a node -> string array
+  (** [tokens_of_node node] returns the token at the beginning of [node] if
+      available. *)
+
   val concrete_of_cxsourcelocation : location_kind -> cxsourcelocation -> concrete_location
   (** [concrete_of_cxsourcelocation kind location] returns the concrete location
       associated to [location]. [kind] selects whether
@@ -211,9 +221,26 @@ module Ast : sig
   end
 end
 
+(** Common part of AST node signatures *)
+module type S = sig
+  type t
+
+  val compare : t -> t -> int
+
+  val equal : t -> t -> bool
+
+  val pp : Format.formatter -> t -> unit
+
+  val show : t -> string
+
+  module Set : Set.S with type elt = t
+
+  module Map : Map.S with type key = t
+end
+
 (** AST types. *)
 module Type : sig
-  type t = Ast.qual_type
+  type t = Ast.qual_type [@@deriving refl]
 
   val of_node : ?options:Ast.Options.t -> 'a Ast.node -> t
   (** [of_node ?options node] returns the type associated to [node].
@@ -266,11 +293,13 @@ module Type : sig
       [Clang.Decl.of_cxcursor ?options (Clang.get_type_declaration ty.cxtype)].
    *)
 
-  val get_typedef_underlying_type : ?options:Ast.Options.t -> t -> t
-  (** [get_declaration ?options ty] returns the underlying type of a typedef
-      [ty].
-      It is equivalent to
-      [Clang.Type.of_cxtype ?options (Clang.get_typedef_decl_underlying_type (Clang.get_type_declaration ty.cxtype))]. *)
+  val get_typedef_underlying_type :
+    ?options:Ast.Options.t -> ?recursive:bool -> t -> t
+  (** [get_typedef_underlying_type ?options ?recursive ty] returns the
+      underlying type of [ty] if [ty] is a typedef, and [ty] otherwise.
+      If [recursive] is [true]
+      (default: [false]), typedefs are followed until the underlying type is
+      not a typedef. *)
 
   val get_align_of : t -> int
   (** [get_align_of ty] returns the alignment of [ty] in bytes.
@@ -279,11 +308,17 @@ module Type : sig
   val get_size_of : t -> int
   (** [get_align_of ty] returns the size of [ty] in bytes.
       It is equivalent to [Clang.type_get_size_of ty.cxtype]. *)
+
+  val get_offset_of : t -> string -> int
+  (** [get_offset_of ty field] returns the offset of [field] in the elaborated
+      type [ty] in bits. *)
+
+  include S with type t := t
 end
 
 (** AST expressions as ordered types. *)
 module Expr : sig
-  type t = Ast.expr
+  type t = Ast.expr [@@deriving refl]
 
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
   (** [of_cxcursor ?options cu] translates [cu] into its high-level
@@ -293,37 +328,50 @@ module Expr : sig
   (** [get_definition e] retrieves a cursor that describes the definition of
       the entity referenced by [e]. Returns a [NULL] cursor of [e] has no
       corresponding definition. *)
+
+  type radix = Decimal | Octal | Hexadecimal | Binary [@@deriving refl]
+
+  val radix_of_integer_literal : t -> radix option
+  (** [radix_of_integer_literal e] returns the radix of the integer literal [e]
+      if available. Note that, by convention, [0] is octal. *)
+
+  include S with type t := t
 end
 
 (** AST statements. *)
 module Stmt : sig
-  type t = Ast.stmt
+  type t = Ast.stmt [@@deriving refl]
 
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
   (** [of_cxcursor ?options cu] translates [cu] into its high-level
       representation, supposing that [cu] points to a statement. *)
+
+  include S with type t := t
 end
 
 (** AST not-transformed types. *)
 module Type_loc : sig
-  type t = Ast.type_loc
+  type t = Ast.type_loc [@@deriving refl]
 
   val to_qual_type : ?options:Ast.Options.t -> t -> Type.t
+
+  include S with type t := t
 end
 
 (** AST declarations. *)
 module Decl : sig
-  type t = Ast.decl
+  type t = Ast.decl [@@deriving refl]
 
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
   (** [of_cxcursor ?options cu] translates [cu] into its high-level
       representation, supposing that [cu] points to a declaration. *)
 
-  val get_typedef_underlying_type : ?options:Ast.Options.t -> t -> Type.t
-  (** [get_declaration ?options decl] returns the underlying type of a
-      typedef [decl].
-      It is equivalent to
-      [Clang.Type.of_cxtype ?options (Clang.get_typedef_decl_underlying_type (Clang.Ast.cursor_of_node decl))]. *)
+  val get_typedef_underlying_type :
+    ?options:Ast.Options.t -> ?recursive:bool -> t -> Type.t
+  (** [get_typedef_underlying_type ?options ?recursive decl] returns the
+      underlying type of a typedef [decl].
+      If [recursive] is [true] (default: [false]), typedefs are followed until
+      the underlying type is not a typedef. *)
 
   val get_field_bit_width : t -> int
   (** [get_field_bit_width d] returns the bit width of the field
@@ -338,11 +386,13 @@ module Decl : sig
 
   val get_canonical : t -> cxcursor
   (** [get_canonical d] retrieves the canonical cursor declaring an entity. *)
+
+  include S with type t := t
 end
 
 (** AST parameters. *)
 module Parameter : sig
-  type t = Ast.parameter
+  type t = Ast.parameter [@@deriving refl]
 
   val get_size_expr : ?options:Ast.Options.t -> t -> Expr.t
   (** [get_size_expr ?options p] returns the expression specifying the size
@@ -350,11 +400,13 @@ module Parameter : sig
       parameter. *)
 
   val get_type_loc : ?options:Ast.Options.t -> t -> Type_loc.t
+
+  include S with type t := t
 end
 
 (** AST enumeration constants. *)
 module Enum_constant : sig
-  type t = Ast.enum_constant
+  type t = Ast.enum_constant [@@deriving refl]
 
   val of_cxcursor : ?options:Ast.Options.t -> cxcursor -> t
   (** [of_cxcursor ?options cu] translates [cu] into its high-level
@@ -362,11 +414,15 @@ module Enum_constant : sig
 
   val get_value : t -> int
   (** [get_value c] returns the value associated to the constant [c].*)
+
+  include S with type t := t
 end
 
 (** AST translation units. *)
 module Translation_unit : sig
-  type t = Ast.translation_unit
+  type t = Ast.translation_unit [@@deriving refl]
 
   val make : ?filename:string -> Ast.decl list -> Ast.translation_unit_desc
+
+  include S with type t := t
 end

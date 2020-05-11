@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdcompat.h>
 
 static void *
 xmalloc(size_t size)

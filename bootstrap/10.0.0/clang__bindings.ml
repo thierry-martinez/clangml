@@ -18,7 +18,7 @@ type cxerrorcode =
   [@ocaml.doc
     "The function detected that the arguments violate the function contract."]
   | ASTReadError [@ocaml.doc "An AST deserialization error has occurred."]
-[@@ocaml.doc "Error codes returned by libclang routines."]
+[@@deriving refl][@@ocaml.doc "Error codes returned by libclang routines."]
 external virtual_file_overlay_add_file_mapping :
   cxvirtualfileoverlay ->
     virtual_path:string -> real_path:string -> (unit, cxerrorcode) result =
@@ -197,8 +197,8 @@ type cxloaddiag_error =
   | InvalidFile
   [@ocaml.doc
     "Indicates that the serialized diagnostics file is invalid or corrupt."]
-[@@ocaml.doc
-  "Describes the kind of error that occurred (if any) in a call to clang_loadDiagnostics."]
+[@@deriving refl][@@ocaml.doc
+                   "Describes the kind of error that occurred (if any) in a call to clang_loadDiagnostics."]
 external load_diagnostics :
   string -> (cxdiagnosticset, (cxloaddiag_error * string)) result =
     "clang_loadDiagnostics_wrapper"[@@ocaml.doc
@@ -256,7 +256,8 @@ type cxdiagnosticseverity =
   | Fatal
   [@ocaml.doc
     "This diagnostic indicates that the code is ill-formed such that future parser recovery is unlikely to produce useful results."]
-[@@ocaml.doc "Describes the severity of a particular diagnostic."]
+[@@deriving refl][@@ocaml.doc
+                   "Describes the severity of a particular diagnostic."]
 external get_diagnostic_severity :
   cxdiagnostic -> cxdiagnosticseverity =
     "clang_getDiagnosticSeverity_wrapper"[@@ocaml.doc
@@ -296,9 +297,11 @@ external get_translation_unit_spelling :
 type cxunsavedfile =
   {
   filename: string
-    [@ocaml.doc "The file whose contents have not yet been saved."];
+    [@deriving refl][@ocaml.doc
+                      "The file whose contents have not yet been saved."];
   contents: string
-    [@ocaml.doc "A buffer containing the unsaved contents of this file."]}
+    [@deriving refl][@ocaml.doc
+                      "A buffer containing the unsaved contents of this file."]}
 [@@ocaml.doc
   "Provides the contents of a file that has not yet been saved to disk."]
 external create_translation_unit_from_source_file :
@@ -383,8 +386,8 @@ type cxsaveerror =
   | InvalidTU
   [@ocaml.doc
     "Indicates that the translation unit to be saved was somehow invalid (e.g., NULL)."]
-[@@ocaml.doc
-  "Describes the kind of error that occurred (if any) in a call to clang_saveTranslationUnit()."]
+[@@deriving refl][@@ocaml.doc
+                   "Describes the kind of error that occurred (if any) in a call to clang_saveTranslationUnit()."]
 module Cxsavetranslationunit_flags =
   struct
     type t = int
@@ -436,8 +439,8 @@ type cxturesourceusagekind =
   | Preprocessor 
   | PreprocessingRecord 
   | SourceManager_DataStructures 
-  | Preprocessor_HeaderSearch [@@ocaml.doc
-                                "Categorizes how memory is being used by a translation unit."]
+  | Preprocessor_HeaderSearch [@@deriving refl][@@ocaml.doc
+                                                 "Categorizes how memory is being used by a translation unit."]
 external get_turesource_usage_name :
   cxturesourceusagekind -> string = "clang_getTUResourceUsageName_wrapper"
 [@@ocaml.doc
@@ -896,7 +899,8 @@ type cxcursorkind =
   | StaticAssert [@ocaml.doc "A static_assert or _Static_assert node"]
   | FriendDecl [@ocaml.doc "a friend declaration."]
   | OverloadCandidate [@ocaml.doc "A code completion overload candidate."]
-[@@ocaml.doc "Describes the kind of entity that a cursor refers to."]
+[@@deriving refl][@@ocaml.doc
+                   "Describes the kind of entity that a cursor refers to."]
 type cxcursor[@@ocaml.doc
                "A cursor representing some element in the abstract syntax tree for a translation unit."]
 external get_null_cursor : unit -> cxcursor = "clang_getNullCursor_wrapper"
@@ -962,8 +966,9 @@ type cxlinkagekind =
     "This is the linkage for entities with external linkage that live in C++ anonymous namespaces."]
   | External
   [@ocaml.doc
-    "This is the linkage for entities with true, external linkage."][@@ocaml.doc
-                                                                    "Describe the linkage of the entity referred to by a cursor."]
+    "This is the linkage for entities with true, external linkage."][@@deriving
+                                                                    refl]
+[@@ocaml.doc "Describe the linkage of the entity referred to by a cursor."]
 external get_cursor_linkage :
   cxcursor -> cxlinkagekind = "clang_getCursorLinkage_wrapper"[@@ocaml.doc
                                                                 "Determine the linkage of the entity referred to by a given cursor."]
@@ -977,6 +982,7 @@ type cxvisibilitykind =
     "Symbol seen by the linker but resolves to a symbol inside this object."]
   | Default
   [@ocaml.doc "Symbol seen by the linker and acts like a normal symbol."]
+[@@deriving refl]
 external get_cursor_visibility :
   cxcursor -> cxvisibilitykind = "clang_getCursorVisibility_wrapper"[@@ocaml.doc
                                                                     "Describe the visibility of the entity referred to by a cursor."]
@@ -990,8 +996,8 @@ type cxavailabilitykind =
   | NotAccessible
   [@ocaml.doc
     "The entity is available, but not accessible; any use of it will be an error."]
-[@@ocaml.doc
-  "Describes the availability of a particular entity, which indicates whether the use of this entity will result in a warning or error due to it being deprecated or unavailable."]
+[@@deriving refl][@@ocaml.doc
+                   "Describes the availability of a particular entity, which indicates whether the use of this entity will result in a warning or error due to it being deprecated or unavailable."]
 external get_cursor_availability :
   cxcursor -> cxavailabilitykind = "clang_getCursorAvailability_wrapper"
 [@@ocaml.doc
@@ -1000,16 +1006,16 @@ type cxlanguagekind =
   | Invalid 
   | C 
   | ObjC 
-  | CPlusPlus [@@ocaml.doc
-                "Describe the \"language\" of the entity referred to by a cursor."]
+  | CPlusPlus [@@deriving refl][@@ocaml.doc
+                                 "Describe the \"language\" of the entity referred to by a cursor."]
 external get_cursor_language :
   cxcursor -> cxlanguagekind = "clang_getCursorLanguage_wrapper"[@@ocaml.doc
                                                                   "Determine the \"language\" of the entity referred to by a given cursor."]
 type cxtlskind =
   | None 
   | Dynamic 
-  | Static [@@ocaml.doc
-             "Describe the \"thread-local storage (TLS) kind\" of the declaration referred to by a cursor."]
+  | Static [@@deriving refl][@@ocaml.doc
+                              "Describe the \"thread-local storage (TLS) kind\" of the declaration referred to by a cursor."]
 external get_cursor_tlskind :
   cxcursor -> cxtlskind = "clang_getCursorTLSKind_wrapper"[@@ocaml.doc
                                                             "Determine the \"thread-local storage (TLS) kind\" of the declaration referred to by a cursor."]
@@ -1031,8 +1037,8 @@ external get_cursor_lexical_parent :
   cxcursor -> cxcursor = "clang_getCursorLexicalParent_wrapper"[@@ocaml.doc
                                                                  "Determine the lexical parent of the given cursor."]
 external get_overridden_cursors :
-  cxcursor -> string = "clang_getOverriddenCursors_wrapper"[@@ocaml.doc
-                                                             "Determine the set of methods that are overridden by the given method."]
+  cxcursor -> cxcursor array = "clang_getOverriddenCursors_wrapper"[@@ocaml.doc
+                                                                    "Determine the set of methods that are overridden by the given method."]
 external get_included_file :
   cxcursor -> cxfile = "clang_getIncludedFile_wrapper"[@@ocaml.doc
                                                         "Retrieve the file that is included by the given inclusion directive cursor."]
@@ -1395,7 +1401,7 @@ type cxtypekind =
   | ExtVector
   [@ocaml.doc
     "Represents a type that was referred to using an elaborated type keyword."]
-[@@ocaml.doc "Describes the kind of type"]
+[@@deriving refl][@@ocaml.doc "Describes the kind of type"]
 type cxtype[@@ocaml.doc
              "The type of an element in the abstract syntax tree."]
 external get_type_kind : cxtype -> cxtypekind = "clang_getTypeKind_wrapper"
@@ -1438,7 +1444,8 @@ type cxtemplateargumentkind =
   | TemplateExpansion 
   | Expression 
   | Pack 
-  | Invalid [@@ocaml.doc "Describes the kind of a template argument."]
+  | Invalid [@@deriving refl][@@ocaml.doc
+                               "Describes the kind of a template argument."]
 external cursor_get_template_argument_kind :
   cxcursor -> int -> cxtemplateargumentkind =
     "clang_Cursor_getTemplateArgumentKind_wrapper"[@@ocaml.doc
@@ -1515,8 +1522,8 @@ type cxcallingconv =
   | PreserveAll 
   | AArch64VectorCall 
   | Invalid 
-  | Unexposed [@@ocaml.doc
-                "Describes the calling convention of a function type"]
+  | Unexposed [@@deriving refl][@@ocaml.doc
+                                 "Describes the calling convention of a function type"]
 external get_function_type_calling_conv :
   cxtype -> cxcallingconv = "clang_getFunctionTypeCallingConv_wrapper"
 [@@ocaml.doc
@@ -1581,6 +1588,7 @@ type cxtypenullabilitykind =
   [@ocaml.doc
     "Whether values of this type can be null is (explicitly) unspecified. This captures a (fairly rare) case where we can't conclude anything about the nullability of the type even though it has been considered."]
   | Invalid [@ocaml.doc "Nullability is not applicable to this type."]
+[@@deriving refl]
 external type_get_nullability :
   cxtype -> cxtypenullabilitykind = "clang_Type_getNullability_wrapper"
 [@@ocaml.doc "Retrieve the nullability kind of a pointer type."]
@@ -1622,6 +1630,7 @@ type cxrefqualifierkind =
   | None [@ocaml.doc "No ref-qualifier was provided."]
   | LValue [@ocaml.doc "An lvalue ref-qualifier was provided ( &)."]
   | RValue [@ocaml.doc "An rvalue ref-qualifier was provided ( &&)."]
+[@@deriving refl]
 external type_get_cxxref_qualifier :
   cxtype -> cxrefqualifierkind = "clang_Type_getCXXRefQualifier_wrapper"
 [@@ocaml.doc "Retrieve the ref-qualifier kind of a function or method."]
@@ -1635,8 +1644,8 @@ type cx_cxxaccessspecifier =
   | CXXInvalidAccessSpecifier 
   | CXXPublic 
   | CXXProtected 
-  | CXXPrivate [@@ocaml.doc
-                 "Represents the C++ access control level to a base class for a cursor with kind CX_CXXBaseSpecifier."]
+  | CXXPrivate [@@deriving refl][@@ocaml.doc
+                                  "Represents the C++ access control level to a base class for a cursor with kind CX_CXXBaseSpecifier."]
 external get_cxxaccess_specifier :
   cxcursor -> cx_cxxaccessspecifier = "clang_getCXXAccessSpecifier_wrapper"
 [@@ocaml.doc "Returns the access control level for the referenced object."]
@@ -1648,8 +1657,8 @@ type cx_storageclass =
   | PrivateExtern 
   | OpenCLWorkGroupLocal 
   | Auto 
-  | Register [@@ocaml.doc
-               "Represents the storage classes as declared in the source. CX_SC_Invalid was added for the case that the passed cursor in not a declaration."]
+  | Register [@@deriving refl][@@ocaml.doc
+                                "Represents the storage classes as declared in the source. CX_SC_Invalid was added for the case that the passed cursor in not a declaration."]
 external cursor_get_storage_class :
   cxcursor -> cx_storageclass = "clang_Cursor_getStorageClass_wrapper"
 [@@ocaml.doc
@@ -1671,8 +1680,8 @@ type cxchildvisitresult =
   | Recurse
   [@ocaml.doc
     "Recursively traverse the children of this cursor, using the same visitor and client data."]
-[@@ocaml.doc
-  "Describes how the traversal of the children of a particular cursor should proceed after visiting a particular child cursor."]
+[@@deriving refl][@@ocaml.doc
+                   "Describes how the traversal of the children of a particular cursor should proceed after visiting a particular child cursor."]
 external visit_children :
   cxcursor -> (cxcursor -> cxcursor -> cxchildvisitresult) -> bool =
     "clang_visitChildren_wrapper"[@@ocaml.doc
@@ -1714,7 +1723,8 @@ type cxprintingpolicyproperty =
   | MSVCFormatting 
   | ConstantsAsWritten 
   | SuppressImplicitBase 
-  | FullyQualifiedName [@@ocaml.doc "Properties for the printing policy."]
+  | FullyQualifiedName [@@deriving refl][@@ocaml.doc
+                                          "Properties for the printing policy."]
 external printing_policy_get_property :
   cxprintingpolicy -> cxprintingpolicyproperty -> int =
     "clang_PrintingPolicy_getProperty_wrapper"[@@ocaml.doc
@@ -1876,6 +1886,37 @@ external get_cursor_reference_name_range :
   cxcursor -> name_flags:int -> piece_index:int -> cxsourcerange =
     "clang_getCursorReferenceNameRange_wrapper"[@@ocaml.doc
                                                  "Given a cursor that references something else, return the source range covering that reference."]
+type cxtoken[@@ocaml.doc "Describes a single preprocessing token."]
+external get_token :
+  cxtranslationunit -> cxsourcelocation -> cxtoken option =
+    "clang_getToken_wrapper"[@@ocaml.doc
+                              "Get the raw lexical token starting with the given location."]
+type cxtokenkind =
+  | Punctuation
+  [@ocaml.doc "A token that contains some kind of punctuation."]
+  | Keyword [@ocaml.doc "A language keyword."]
+  | Identifier [@ocaml.doc "An identifier (that is not a keyword)."]
+  | Literal [@ocaml.doc "A numeric, string, or character literal."]
+  | Comment [@ocaml.doc "A comment."][@@deriving refl][@@ocaml.doc
+                                                        "Describes a kind of token."]
+external get_token_kind :
+  cxtoken -> cxtokenkind = "clang_getTokenKind_wrapper"[@@ocaml.doc
+                                                         "Determine the kind of the given token."]
+external get_token_spelling :
+  cxtranslationunit -> cxtoken -> string = "clang_getTokenSpelling_wrapper"
+[@@ocaml.doc "Determine the spelling of the given token."]
+external get_token_location :
+  cxtranslationunit -> cxtoken -> cxsourcelocation =
+    "clang_getTokenLocation_wrapper"[@@ocaml.doc
+                                      "Retrieve the source location of the given token."]
+external get_token_extent :
+  cxtranslationunit -> cxtoken -> cxsourcerange =
+    "clang_getTokenExtent_wrapper"[@@ocaml.doc
+                                    "Retrieve a source range that covers the given token."]
+external tokenize :
+  cxtranslationunit -> cxsourcerange -> cxtoken array =
+    "clang_tokenize_wrapper"[@@ocaml.doc
+                              "Tokenize the source code described by the given range into raw lexical tokens."]
 external get_cursor_kind_spelling :
   cxcursorkind -> string = "clang_getCursorKindSpelling_wrapper"[@@ocaml.doc
                                                                   "These routines are used for testing and debugging, only, and should not be relied upon."]
@@ -1921,8 +1962,8 @@ type cxcompletionchunkkind =
   | VerticalSpace
   [@ocaml.doc
     "Vertical space ('\\n'), after which it is generally a good idea to perform indentation."]
-[@@ocaml.doc
-  "Describes a single piece of text within a code-completion string."]
+[@@deriving refl][@@ocaml.doc
+                   "Describes a single piece of text within a code-completion string."]
 type cxcompletionstring
 external get_completion_chunk_kind :
   cxcompletionstring -> int -> cxcompletionchunkkind =
@@ -1985,7 +2026,7 @@ type cxevalresultkind =
   | StrLiteral 
   | CFStr 
   | Other 
-  | UnExposed 
+  | UnExposed [@@deriving refl]
 external eval_result_get_kind :
   cxevalresult -> cxevalresultkind = "clang_EvalResult_getKind_wrapper"
 [@@ocaml.doc "Returns the kind of the evaluated result."]
@@ -2023,7 +2064,7 @@ external index_action_create :
                                                                  "An indexing action/session, to be applied to one or multiple translation units."]
 type cxvisitorresult =
   | Break 
-  | Continue [@@ocaml.doc "\\@\\{"]
+  | Continue [@@deriving refl][@@ocaml.doc "\\@\\{"]
 external type_visit_fields :
   cxtype -> (cxcursor -> cxvisitorresult) -> bool =
     "clang_Type_visitFields_wrapper"[@@ocaml.doc
@@ -2031,14 +2072,14 @@ external type_visit_fields :
 type cxversion =
   {
   major: int
-    [@ocaml.doc
-      "The major version number, e.g., the '10' in '10.7.3'. A negative value indicates that there is no version number at all."];
+    [@deriving refl][@ocaml.doc
+                      "The major version number, e.g., the '10' in '10.7.3'. A negative value indicates that there is no version number at all."];
   minor: int
-    [@ocaml.doc
-      "The minor version number, e.g., the '7' in '10.7.3'. This value will be negative if no minor version number was provided, e.g., for version '10'."];
+    [@deriving refl][@ocaml.doc
+                      "The minor version number, e.g., the '7' in '10.7.3'. This value will be negative if no minor version number was provided, e.g., for version '10'."];
   subminor: int
-    [@ocaml.doc
-      "The subminor version number, e.g., the '3' in '10.7.3'. This value will be negative if no minor or subminor version number was provided, e.g., in version '10' or '10.7'."]}
+    [@deriving refl][@ocaml.doc
+                      "The subminor version number, e.g., the '3' in '10.7.3'. This value will be negative if no minor or subminor version number was provided, e.g., in version '10' or '10.7'."]}
 [@@ocaml.doc "Describes a version number of the form major.minor.subminor."]
 external ext_get_version : unit -> cxversion = "clang_ext_getVersion_wrapper"
 type cxint
@@ -2062,8 +2103,12 @@ external ext_int_get_min_signed_bits :
   cxint -> int = "clang_ext_Int_getMinSignedBits_wrapper"
 external ext_int_get_bool_value :
   cxint -> bool = "clang_ext_Int_getBoolValue_wrapper"
+external ext_int_get_zext_value :
+  cxint -> int = "clang_ext_Int_getZExtValue_wrapper"
 external ext_int_get_sext_value :
   cxint -> int = "clang_ext_Int_getSExtValue_wrapper"
+external ext_int_get_zext_value64 :
+  cxint -> Int64.t = "clang_ext_Int_getZExtValue64_wrapper"
 external ext_int_get_sext_value64 :
   cxint -> Int64.t = "clang_ext_Int_getSExtValue64_wrapper"
 type cxfloat
@@ -2085,7 +2130,7 @@ type clang_ext_fltsemantics =
   | PPCDoubleDouble 
   | X87DoubleExtended 
   | Bogus 
-  | Invalid 
+  | Invalid [@@deriving refl]
 external ext_float_get_semantics :
   cxfloat -> clang_ext_fltsemantics = "clang_ext_Float_getSemantics_wrapper"
 external ext_float_convert_to_float :
@@ -2106,7 +2151,7 @@ type clang_ext_stringkind =
   | UTF8 
   | UTF16 
   | UTF32 
-  | InvalidStringKind 
+  | InvalidStringKind [@@deriving refl]
 external ext_string_literal_get_kind :
   cxcursor -> clang_ext_stringkind =
     "clang_ext_StringLiteral_getKind_wrapper"
@@ -2125,7 +2170,7 @@ type clang_ext_unaryoperatorkind =
   | Imag 
   | Extension 
   | Coawait 
-  | InvalidUnaryOperator 
+  | InvalidUnaryOperator [@@deriving refl]
 external ext_unary_operator_get_opcode :
   cxcursor -> clang_ext_unaryoperatorkind =
     "clang_ext_UnaryOperator_getOpcode_wrapper"
@@ -2166,7 +2211,7 @@ type clang_ext_binaryoperatorkind =
   | XorAssign 
   | OrAssign 
   | Comma 
-  | InvalidBinaryOperator 
+  | InvalidBinaryOperator [@@deriving refl]
 external ext_binary_operator_get_opcode :
   cxcursor -> clang_ext_binaryoperatorkind =
     "clang_ext_BinaryOperator_getOpcode_wrapper"
@@ -2192,7 +2237,7 @@ type clang_ext_elaboratedtypekeyword =
   | Class 
   | Enum 
   | Typename 
-  | NoKeyword 
+  | NoKeyword [@@deriving refl]
 external ext_elaborated_type_get_keyword :
   cxtype -> clang_ext_elaboratedtypekeyword =
     "clang_ext_ElaboratedType_getKeyword_wrapper"
@@ -2215,7 +2260,7 @@ type clang_ext_cursorkind =
   | UnaryExprOrTypeTraitExpr 
   | EmptyDecl 
   | LinkageSpecDecl 
-  | Unknown 
+  | Unknown [@@deriving refl]
 external ext_get_cursor_kind :
   cxcursor -> clang_ext_cursorkind = "clang_ext_GetCursorKind_wrapper"
 type clang_ext_declkind =
@@ -2299,7 +2344,7 @@ type clang_ext_declkind =
   | RequiresExprBody 
   | StaticAssert 
   | TranslationUnit 
-  | UnknownDecl 
+  | UnknownDecl [@@deriving refl]
 external ext_decl_get_kind :
   cxcursor -> clang_ext_declkind = "clang_ext_Decl_GetKind_wrapper"
 type clang_ext_stmtkind =
@@ -2510,7 +2555,7 @@ type clang_ext_stmtkind =
   | VAArgExpr 
   | LabelStmt 
   | WhileStmt 
-  | UnknownStmt 
+  | UnknownStmt [@@deriving refl]
 external ext_stmt_get_kind :
   cxcursor -> clang_ext_stmtkind = "clang_ext_Stmt_GetKind_wrapper"
 type clang_ext_typekind =
@@ -2563,7 +2608,7 @@ type clang_ext_typekind =
   | UnresolvedUsing 
   | Vector 
   | ExtVector 
-  | UnknownType 
+  | UnknownType [@@deriving refl]
 external ext_type_get_kind :
   cxtype -> clang_ext_typekind = "clang_ext_Type_GetKind_wrapper"
 external ext_get_type_kind :
@@ -2584,7 +2629,7 @@ type clang_ext_unaryexpr =
   | AlignOf 
   | VecStep 
   | OpenMPRequiredSimdAlign 
-  | PreferredAlignOf 
+  | PreferredAlignOf [@@deriving refl]
 external ext_unary_expr_get_kind :
   cxcursor -> clang_ext_unaryexpr = "clang_ext_UnaryExpr_GetKind_wrapper"
 external ext_unary_expr_is_argument_type :
@@ -2892,7 +2937,7 @@ type clang_ext_attrkind =
   | OpenCLAccess 
   | Overloadable 
   | RenderScriptKernel 
-  | Thread 
+  | Thread [@@deriving refl]
 external ext_type_get_attribute_kind :
   cxtype -> clang_ext_attrkind = "clang_ext_Type_GetAttributeKind_wrapper"
 external ext_attr_kind_get_spelling :
@@ -2936,7 +2981,7 @@ type clang_ext_templatename_namekind =
   | DependentTemplate 
   | SubstTemplateTemplateParm 
   | SubstTemplateTemplateParmPack 
-  | InvalidNameKind 
+  | InvalidNameKind [@@deriving refl]
 type clang_ext_templatename
 external ext_template_name_get_kind :
   clang_ext_templatename -> clang_ext_templatename_namekind =
@@ -3009,7 +3054,7 @@ type clang_ext_predefinedexpr_identkind =
   | LFuncSig 
   | PrettyFunction 
   | PrettyFunctionNoVirtual 
-  | InvalidPredefinedExpr 
+  | InvalidPredefinedExpr [@@deriving refl]
 external ext_predefined_expr_get_ident_kind :
   cxcursor -> clang_ext_predefinedexpr_identkind =
     "clang_ext_PredefinedExpr_getIdentKind_wrapper"
@@ -3027,7 +3072,7 @@ external ext_lambda_expr_has_explicit_result_type :
 type clang_ext_lambdacapturedefault =
   | CaptureNone 
   | ByCopy 
-  | ByRef 
+  | ByRef [@@deriving refl]
 external ext_lambda_expr_get_capture_default :
   cxcursor -> clang_ext_lambdacapturedefault =
     "clang_ext_LambdaExpr_getCaptureDefault_wrapper"
@@ -3044,7 +3089,7 @@ type clang_ext_lambdacapturekind =
   | StarThis 
   | ByCopy 
   | ByRef 
-  | VLAType 
+  | VLAType [@@deriving refl]
 external ext_lambda_capture_get_kind :
   clang_ext_lambdacapture -> clang_ext_lambdacapturekind =
     "clang_ext_LambdaCapture_getKind_wrapper"
@@ -3098,8 +3143,8 @@ type clang_ext_langstandards =
   | Gnucxx14 
   | Cxx17 
   | Gnucxx17 
-  | Cxx2a 
-  | Gnucxx2a 
+  | Cxx20 
+  | Gnucxx20 
   | Opencl10 
   | Opencl11 
   | Opencl12 
@@ -3107,7 +3152,7 @@ type clang_ext_langstandards =
   | Openclcpp 
   | Cuda 
   | Hip 
-  | InvalidLang 
+  | InvalidLang [@@deriving refl]
 external ext_lang_standard_get_name :
   clang_ext_langstandards -> string =
     "clang_ext_LangStandard_getName_wrapper"
@@ -3180,7 +3225,7 @@ type clang_ext_overloadedoperatorkind =
   | Call 
   | Subscript 
   | Conditional 
-  | Coawait 
+  | Coawait [@@deriving refl]
 external ext_overloaded_operator_get_spelling :
   clang_ext_overloadedoperatorkind -> string =
     "clang_ext_OverloadedOperator_getSpelling_wrapper"
@@ -3196,7 +3241,7 @@ type clang_ext_declarationnamekind =
   | CXXOperatorName 
   | CXXLiteralOperatorName 
   | CXXUsingDirective 
-  | InvalidDeclarationName 
+  | InvalidDeclarationName [@@deriving refl]
 type clang_ext_declarationname
 external ext_declaration_name_get_kind :
   clang_ext_declarationname -> clang_ext_declarationnamekind =
@@ -3229,7 +3274,7 @@ type clang_ext_nestednamespecifierkind =
   | TypeSpec 
   | TypeSpecWithTemplate 
   | Global 
-  | Super 
+  | Super [@@deriving refl]
 type clang_ext_nestednamespecifier
 external ext_nested_name_specifier_get_kind :
   clang_ext_nestednamespecifier -> clang_ext_nestednamespecifierkind =
@@ -3298,7 +3343,7 @@ type clang_ext_exceptionspecificationtype =
   | NoexceptTrue 
   | Unevaluated 
   | Uninstantiated 
-  | Unparsed 
+  | Unparsed [@@deriving refl]
 external ext_function_proto_type_get_exception_spec_type :
   cxtype -> clang_ext_exceptionspecificationtype =
     "clang_ext_FunctionProtoType_getExceptionSpecType_wrapper"
@@ -3377,7 +3422,7 @@ type clang_ext_typeloc_class =
   | UnresolvedUsing 
   | Vector 
   | ExtVector 
-  | InvalidTypeLoc 
+  | InvalidTypeLoc [@@deriving refl]
 external ext_type_loc_get_class :
   clang_ext_typeloc -> clang_ext_typeloc_class =
     "clang_ext_TypeLoc_getClass_wrapper"
@@ -3409,3 +3454,34 @@ external ext_function_type_loc_get_num_params :
 external ext_function_type_loc_get_param :
   clang_ext_typeloc -> int -> cxcursor =
     "clang_ext_FunctionTypeLoc_getParam_wrapper"
+external ext_init_list_expr_get_syntactic_form :
+  cxcursor -> cxcursor = "clang_ext_InitListExpr_getSyntacticForm_wrapper"
+external ext_init_list_expr_get_semantic_form :
+  cxcursor -> cxcursor = "clang_ext_InitListExpr_getSemanticForm_wrapper"
+external ext_init_list_expr_get_num_inits :
+  cxcursor -> int = "clang_ext_InitListExpr_getNumInits_wrapper"
+external ext_init_list_expr_get_init :
+  cxcursor -> int -> cxcursor = "clang_ext_InitListExpr_getInit_wrapper"
+external ext_designated_init_expr_size :
+  cxcursor -> int = "clang_ext_DesignatedInitExpr_size_wrapper"
+type clang_ext_designatedinitexpr_designatorkind =
+  | FieldDesignator 
+  | ArrayDesignator 
+  | ArrayRangeDesignator [@@deriving refl]
+external ext_designated_init_expr_get_kind :
+  cxcursor -> int -> clang_ext_designatedinitexpr_designatorkind =
+    "clang_ext_DesignatedInitExpr_getKind_wrapper"
+external ext_designated_init_expr_get_field :
+  cxcursor -> int -> cxcursor =
+    "clang_ext_DesignatedInitExpr_getField_wrapper"
+external ext_designated_init_expr_get_array_index :
+  cxcursor -> int -> cxcursor =
+    "clang_ext_DesignatedInitExpr_getArrayIndex_wrapper"
+external ext_designated_init_expr_get_array_range_start :
+  cxcursor -> int -> cxcursor =
+    "clang_ext_DesignatedInitExpr_getArrayRangeStart_wrapper"
+external ext_designated_init_expr_get_array_range_end :
+  cxcursor -> int -> cxcursor =
+    "clang_ext_DesignatedInitExpr_getArrayRangeEnd_wrapper"
+external ext_designated_init_expr_get_init :
+  cxcursor -> cxcursor = "clang_ext_DesignatedInitExpr_getInit_wrapper"

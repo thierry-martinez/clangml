@@ -19,31 +19,33 @@ val string_of_binary_operator_kind : binary_operator_kind -> string
 val literal_of_int : int -> integer_literal
 (** [literal_of_int i] returns the integer literal [i]. *)
 
-val int64_of_literal_opt : integer_literal -> Int64.t option
+val int64_of_literal_opt : ?signed:bool -> integer_literal -> Int64.t option
 (** [int64_of_literal_opt x] returns [Some i] if [x] is representable as
     a 64-bit integer value [i], or [None] otherwise. *)
 
-val int64_of_literal : integer_literal -> Int64.t
+val int64_of_literal : ?signed:bool -> integer_literal -> Int64.t
 (** [int64_of_literal x] returns [i] if [x] is representable as
     a 64-bit integer value [i], or raises [Failure _] otherwise. *)
 
-val int_of_literal_opt : integer_literal -> int option
+val int_of_literal_opt : ?signed:bool -> integer_literal -> int option
 (** [int_of_literal_opt x] returns [Some i] if [x] is representable as
     an integer value [i], or [None] otherwise. *)
 
-val int_of_literal : integer_literal -> int
+val int_of_literal : ?signed:bool -> integer_literal -> int
 (** [int_of_literal x] returns [i] if [x] is representable as
     an integer value [i], or raises [Failure _] otherwise. *)
 
-val string_of_integer_literal : integer_literal -> string
+val string_of_integer_literal : ?signed:bool -> integer_literal -> string
 (** [string_of_integer_literal f] is an alias for
     {!val:Clang__bindings.ext_int_to_string}, radix 10 and signed. *)
 
-val print_integer_literal : integer_literal -> unit
+val print_integer_literal : ?signed:bool -> integer_literal -> unit
 
-val output_integer_literal : out_channel -> integer_literal -> unit
+val output_integer_literal :
+    ?signed:bool -> out_channel -> integer_literal -> unit
 
-val pp_print_integer_literal : Format.formatter -> integer_literal -> unit
+val pp_print_integer_literal :
+    ?signed:bool -> Format.formatter -> integer_literal -> unit
 
 val literal_of_float : float -> floating_literal
 (** [literal_of_float f] returns the floating literal [f]. *)

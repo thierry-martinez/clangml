@@ -1,5 +1,3 @@
-open Ppxlib
-
 let search_ill_formed = Kmp.On_string.find "ill-formed"
 
 let section_table_sz = 17
@@ -145,15 +143,15 @@ let rec filter_outside list =
   | _ -> list
 
 let format_check_pattern fmt (ast : Clang.Ast.translation_unit) =
-  let lifter = object
-    inherit Clangml_lift.lift_pattern !Ast_helper.default_loc as super
-
-    method! cxint _ =
-      Ast_helper.Pat.any ()
-
-    method! cxfloat _ =
-      Ast_helper.Pat.any ()
-  end in
+  let hook : type a . a Refl.Lift.Pat.hook_fun =
+    fun refl lifter x ->
+      match refl, x with
+      | Clang.Ast.Refl_integer_literal, CXInt _
+      | Clang.Ast.Refl_floating_literal, CXFloat _ ->
+          Ast_helper.Pat.any ()
+      | _ ->
+          lifter x in
+  let hook = { Refl.Lift.Pat.hook } in
   let items = ast.desc.items |> List.filter inside_decl in
   let loc = !Ast_helper.default_loc in
   let decls = items |> List.mapi begin fun i decl ->
@@ -167,7 +165,8 @@ let format_check_pattern fmt (ast : Clang.Ast.translation_unit) =
     fun (binder, decl) : Parsetree.expression ->
       [%expr check_pattern_decl
          [%e Ast_helper.Exp.ident { loc; txt = Lident binder }]
-         [%pattern? [%p lifter#decl decl]]]
+         [%pattern? [%p Refl.Lift.Pat.lift ~hook [%refl: Clang.Ast.decl] []
+           decl]]]
   end in
   let checkers : Parsetree.expression =
     match List.rev checkers with
