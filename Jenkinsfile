@@ -191,6 +191,16 @@ pipeline {
                         '''
                     }
                 }
+                stage('c++20') {
+                    steps {
+                        sh '''
+                            path=$PWD &&
+                            cd $HOME/cplusplus/c++20 &&
+                            build_dir=$path/build target_dir=$path std=c++20 \
+                                $path/src/ci-scripts/extract_norm.sh
+                        '''
+                    }
+                }
             }
         }
 
