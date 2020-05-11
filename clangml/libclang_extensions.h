@@ -1012,3 +1012,6 @@ clang_ext_DesignatedInitExpr_getArrayRangeEnd(CXCursor cursor, unsigned int inde
 
 CXCursor
 clang_ext_DesignatedInitExpr_getInit(CXCursor cursor);
+
+CXCursor
+clang_ext_ConceptDecl_getConstraintExpr(CXCursor cursor);

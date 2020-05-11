@@ -3032,4 +3032,16 @@ extern "C" {
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
   }
+
+  CXCursor
+  clang_ext_ConceptDecl_getConstraintExpr(CXCursor cursor)
+  {
+    #ifdef LLVM_VERSION_BEFORE_9_0_0
+      auto s = GetCursorDecl(cursor);
+      if (auto e = llvm::dyn_cast_or_null<clang::ConceptDecl>(s)) {
+        return MakeCXCursor(e->getConstraintExpr(), getCursorTU(cursor));
+      }
+    #endif
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
 }
