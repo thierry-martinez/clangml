@@ -9,7 +9,14 @@ cd ~/opam-repository
 git pull
 opam update
 
-## Pin override
+## Pin dependencies
+
+for package in metapp metaquot traverse refl; do
+    git clone https://github.com/thierry-martinez/"$package".git
+    ( cd "$package" && dune build "$package".opam )
+    opam pin add --yes --no-action -k path "$package"
+done
+
 #cd ~
 #git clone https://gitlab.inria.fr/tmartine/override.git
 #cd ~/override
