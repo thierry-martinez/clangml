@@ -3706,6 +3706,12 @@ let () =
       init : expr option;
     }
 (** Structure decomposition. (C++ 17) *)
+  | ConceptDecl of {
+      parameters : template_parameter list;
+      name : declaration_name;
+      constraint_expr : expr;
+    }
+(** Concept declaration. (C++ 20) *)
   | UnknownDecl of cxcursorkind * clang_ext_declkind
 
 and directive =

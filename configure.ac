@@ -168,6 +168,13 @@ AS_IF([test "x$with_llvm" != "x"],
 
 AC_SUBST([LLVM_VERSION], [[`echo $LLVM_VERSION | sed 's/\(svn\|git\)$//'`]])
 
+AC_SUBST([LLVM_VERSION_MAJOR], [[`echo $LLVM_VERSION | \
+  sed 's/^\([[:digit:]]\+\)[.]\([[:digit:]]\+\)[.]\([[:digit:]]\+\)/\1/'`]])
+AC_SUBST([LLVM_VERSION_MINOR], [[`echo $LLVM_VERSION | \
+  sed 's/^\([[:digit:]]\+\)[.]\([[:digit:]]\+\)[.]\([[:digit:]]\+\)/\2/'`]])
+AC_SUBST([LLVM_VERSION_PATCH], [[`echo $LLVM_VERSION | \
+  sed 's/^\([[:digit:]]\+\)[.]\([[:digit:]]\+\)[.]\([[:digit:]]\+\)/\3/'`]])
+
 AC_SUBST([EQUIVALENT_LLVM_VERSION], [["$LLVM_VERSION"]])
 
 # Some version equivalences

@@ -1,4 +1,5 @@
 [%%metapackage "metapp"]
+[%%metadir "config/.clangml_config.objs/byte"]
 
 (** Common part of AST node signatures *)
 module type S = sig
@@ -60,7 +61,7 @@ let make_include_dir path =
 
 let includedir =
   make_include_dir
-    [Filename.parent_dir_name; "lib"; "clang"; Clangml_config.version;
+    [Filename.parent_dir_name; "lib"; "clang"; Clangml_config.version_string;
      "include"]
 
 let default_include_directories () =
@@ -68,7 +69,7 @@ let default_include_directories () =
   let macos_sdk =
     "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/" in
   let gentoo_dir =
-    "/usr/lib/clang/" ^ Clangml_config.version ^ "/include/" in
+    "/usr/lib/clang/" ^ Clangml_config.version_string ^ "/include/" in
   [macos_sdk; cpp_lib; includedir; gentoo_dir]
 
 let option_cursor_bind f cursor : 'a option =
@@ -147,6 +148,7 @@ module Init_list = struct
     | Semantic -> semantic_form cursor
 end
 
+[%%meta Metapp.filter.structure_item Metapp.filter [%stri
 module Ast = struct
   include Clang__ast
 
@@ -808,24 +810,24 @@ module Ast = struct
                   get_typedef_decl_underlying_type |> of_cxtype in
                   TypeAlias { ident_ref; qual_type }
                 end
-            | ext_kind ->
-                match compat_decl_kind ext_kind with
-                | Decomposition ->
-                    let init =
-                      match list_of_children cursor with
-                      | [sub] -> Some (sub |> expr_of_cxcursor)
-                      | [] -> None
-                      | _ -> raise Invalid_structure in
-                    Decomposition {
-                      bindings = List.init
-                        (ext_decomposition_decl_get_bindings_count cursor)
-                        begin fun i ->
-                          ext_decomposition_decl_get_bindings cursor i |>
-                          extract_declaration_name
-                        end;
-                      init;
-                    }
-                | _ -> UnknownDecl (kind, ext_kind)
+            | Decomposition
+                [@if [%meta Metapp.Exp.of_bool
+                  (Clangml_config.version.major >= 4)]] ->
+                let init =
+                  match list_of_children cursor with
+                  | [sub] -> Some (sub |> expr_of_cxcursor)
+                  | [] -> None
+                  | _ -> raise Invalid_structure in
+                Decomposition {
+                  bindings = List.init
+                    (ext_decomposition_decl_get_bindings_count cursor)
+                    begin fun i ->
+                      ext_decomposition_decl_get_bindings cursor i |>
+                      extract_declaration_name
+                    end;
+                  init;
+                }
+            | ext_kind -> UnknownDecl (kind, ext_kind)
       with Invalid_structure ->
         UnknownDecl (get_cursor_kind cursor, ext_decl_get_kind cursor)
 
@@ -1985,7 +1987,7 @@ module Ast = struct
     match location with
     | Clang location -> concrete_of_cxsourcelocation kind location
     | Concrete location -> location
-end
+end]]
 
 module Expr = [%meta node_module [%str
   type t = Ast.expr [@@deriving refl]
