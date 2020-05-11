@@ -13,7 +13,7 @@ opam update
 
 opam depext --yes --verbose --install dune
 
-for package in metapp metaquot traverse refl; do
+for package in metapp metaquot traverse refl pattern; do
     git clone https://github.com/thierry-martinez/"$package".git
     ( cd "$package" && dune build "$package".opam )
     opam pin add --yes --no-action -k path "$package"
