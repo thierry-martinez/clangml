@@ -146,7 +146,7 @@ pipeline {
             steps {
                 script {
                     opam_installations(
-                        ["4.04", "4.05", "4.06", "4.07", "4.08", "4.09", "4.10"],
+                        ["4.03", "4.04", "4.05", "4.06", "4.07", "4.08", "4.09", "4.10"],
                         "file:///clangml/")
                 }
             }
@@ -210,6 +210,7 @@ pipeline {
                 sh 'git checkout norms'
                 sh 'cp build/norm_c++14.ml norms/'
                 sh 'cp build/norm_c++17.ml norms/'
+                sh 'cp build/norm_c++20.ml norms/'
                 sh 'git add norms/*'
                 sh '''
                     git commit -m \
