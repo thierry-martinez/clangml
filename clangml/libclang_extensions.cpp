@@ -2585,9 +2585,11 @@ extern "C" {
   clang_ext_TemplateParameterList_getRequiresClause(
     struct clang_ext_TemplateParameterList tl)
   {
+    #ifndef LLVM_VERSION_BEFORE_4_0_0
     if (auto *t = GetTemplateParameterList(tl)) {
       return MakeCXCursor(t->getRequiresClause(), tl.tu);
     }
+    #endif
     return MakeCXCursorInvalid(CXCursor_InvalidCode, tl.tu);
   }
 
