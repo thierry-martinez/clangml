@@ -1,7 +1,7 @@
 type version = {
     major : int;
     minor : int;
-    patch : int;
+    subminor : int;
   }
 
 val llvm_config : string

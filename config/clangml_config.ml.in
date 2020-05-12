@@ -1,7 +1,7 @@
 type version = {
     major : int;
     minor : int;
-    patch : int;
+    subminor : int;
   }
 
 let llvm_config = "@LLVM_CONFIG@"
@@ -11,7 +11,7 @@ let version_string = "@LLVM_VERSION@"
 let version = {
   major = @LLVM_VERSION_MAJOR@;
   minor = @LLVM_VERSION_MINOR@;
-  patch = @LLVM_VERSION_PATCH@;
+  subminor = @LLVM_VERSION_SUBMINOR@;
 }
 
 let includedir = "@LLVM_INCLUDEDIR@"
