@@ -1,4 +1,7 @@
 #include <clang-c/Index.h>
+extern "C" {
+  #include "libclang_extensions.h"
+}
 #include <clang/AST/Attr.h>
 #include <clang/AST/DeclCXX.h>
 #include <clang/AST/DeclFriend.h>
@@ -17,10 +20,6 @@
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/ErrorHandling.h>
 #include <caml/fail.h>
-
-extern "C" {
-  #include "libclang_extensions.h"
-}
 
 // Copied from clang source tree: tools/libclang/CXString.cpp
 enum CXStringFlag {
