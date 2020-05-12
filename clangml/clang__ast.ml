@@ -3711,7 +3711,40 @@ let () =
       name : declaration_name;
       constraint_expr : expr;
     }
-(** Concept declaration. (C++ 20) *)
+(** Concept declaration. (C++ 20)
+
+    {[
+let example = "template<class T> concept C1 = true;"
+
+let () =
+  if Clang.version () >= { major = 9; minor = 0; subminor = 0 } then
+    check_pattern quote_decl_list (parse_declaration_list ~language:CXX
+      ~command_line_args:["-std=c++20"]) example
+    [%pattern?
+      [{ desc = ConceptDecl {
+         parameters = [{ desc = { parameter_name = "T" }}];
+         name = IdentifierName ("C1");
+         constraint_expr = { desc = BoolLiteral true }}}]]
+
+let example = "template<typename T> concept A = T::value || true;"
+
+let () =
+  if Clang.version () >= { major = 9; minor = 0; subminor = 0 } then
+    check_pattern quote_decl_list (parse_declaration_list ~language:CXX
+      ~command_line_args:["-std=c++20"]) example
+    [%pattern?
+      [{ desc = ConceptDecl {
+         parameters = [{ desc = { parameter_name = "T" }}];
+         name = IdentifierName ("A");
+         constraint_expr = {
+           desc = BinaryOperator {
+             lhs = { desc = DeclRef {
+               nested_name_specifier = Some [
+                 TypeSpec { desc = TemplateTypeParm "T" }];
+               name = IdentifierName "value" }};
+             kind = LOr;
+             rhs = { desc = BoolLiteral true }}}}}]]
+    ]} *)
   | UnknownDecl of cxcursorkind * clang_ext_declkind
 
 and directive =

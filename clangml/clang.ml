@@ -827,6 +827,15 @@ module Ast = struct
                     end;
                   init;
                 }
+            | Concept
+                [@if [%meta Metapp.Exp.of_bool
+                  (Clangml_config.version.major >= 9)]] ->
+                let parameters = extract_template_parameters cursor in
+                let name = extract_declaration_name cursor in
+                let constraint_expr =
+                  cursor |> ext_concept_decl_get_constraint_expr |>
+                  expr_of_cxcursor in
+                ConceptDecl { parameters; name; constraint_expr }
             | ext_kind -> UnknownDecl (kind, ext_kind)
       with Invalid_structure ->
         UnknownDecl (get_cursor_kind cursor, ext_decl_get_kind cursor)
