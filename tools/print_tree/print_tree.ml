@@ -4,9 +4,11 @@ let rec print_tree indent cursor history =
   let kind_spelling =
     match kind with
     | UnexposedExpr | UnexposedStmt ->
-        Clangml_show.show_ext_stmtkind (Clang.ext_stmt_get_kind cursor)
+        Refl.show [%refl: Clang.clang_ext_stmtkind] []
+          (Clang.ext_stmt_get_kind cursor)
     | UnexposedDecl | VarDecl ->
-        Clangml_show.show_ext_declkind (Clang.ext_decl_get_kind cursor)
+        Refl.show [%refl: Clang.clang_ext_declkind] []
+          (Clang.ext_decl_get_kind cursor)
     | kind -> Clang.get_cursor_kind_spelling kind in
   let spelling =
     match kind with
@@ -23,7 +25,8 @@ let rec print_tree indent cursor history =
   if type_kind <> Invalid then
     begin
       let type_kind =
-        Clangml_show.show_ext_typekind (Clang.ext_type_get_kind ty) in
+        Refl.show [%refl: Clang.clang_ext_typekind] []
+          (Clang.ext_type_get_kind ty) in
       Printf.printf "%s- \"%s\": %s\n" sub_indent
         (String.escaped (Clang.get_type_spelling ty))
         type_kind;
@@ -43,7 +46,7 @@ let rec print_tree indent cursor history =
 
 let print ast tu =
   if ast then
-    Format.printf "@[%a@]@." Clangml_show.pp_translation_unit
+    Format.printf "@[%a@]@." Clang.Translation_unit.pp
       (Clang.Ast.of_cxtranslationunit tu)
   else
     print_tree "" (Clang.get_translation_unit_cursor tu) []
