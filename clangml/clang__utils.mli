@@ -3,8 +3,6 @@
 
 open Clang__bindings
 
-open Clang__compat
-
 open Clang__types
 
 val string_of_language : language -> string

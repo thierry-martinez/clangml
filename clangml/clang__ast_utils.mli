@@ -1,7 +1,5 @@
 open Clang__bindings
 
-open Clang__compat
-
 open Clang__ast
 
 val string_of_elaborated_type_keyword : elaborated_type_keyword -> string
