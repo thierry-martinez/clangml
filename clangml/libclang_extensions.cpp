@@ -20,7 +20,6 @@ extern "C" {
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/ErrorHandling.h>
 #include <caml/fail.h>
-#include <iostream>
 
 // Copied from clang source tree: tools/libclang/CXString.cpp
 enum CXStringFlag {
@@ -3288,19 +3287,6 @@ extern "C" {
       if (auto e = llvm::dyn_cast_or_null<clang::RequiresExpr>(s)) {
         return MakeCXCursor(
           e->getLocalParameters()[index], getCursorTU(cursor));
-      }
-    #endif
-    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
-  }
-
-  CXCursor
-  clang_ext_RequiresExpr_getBody(CXCursor cursor)
-  {
-    #ifndef LLVM_VERSION_BEFORE_10_0_0
-      auto s = GetCursorStmt(cursor);
-      if (auto e = llvm::dyn_cast_or_null<clang::RequiresExpr>(s)) {
-        std::cerr << e->getBody() << std::endl;
-        return MakeCXCursor(e->getBody(), getCursorTU(cursor));
       }
     #endif
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
