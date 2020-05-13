@@ -465,7 +465,6 @@ AC_CONFIG_FILES([
   config/libs.sexp
   config/libs_quoted.sexp
   config/clangml_config.ml
-  clangml/clang__compat.ml
 ])
 
 AC_OUTPUT

@@ -43,8 +43,6 @@ module Bindings = Clang__bindings
 
 include Bindings
 
-include Clang__compat
-
 module Types = Clang__types
 
 include Types
@@ -52,6 +50,72 @@ include Types
 include Clang__utils
 
 module Command_line = Clang__command_line
+
+[%%meta Metapp.Stri.of_list (
+  if Clangml_config.version >= { major = 3; minor = 5; subminor = 0 } then
+    []
+  else [%str
+    type cxerrorcode =
+      | Failure
+      | Crashed
+      | InvalidArguments
+      | ASTReadError
+    (** Error codes introduced in clang 3.5, declared here for compatibility.
+        Only {!constr:Failure} will be used. *)
+
+    let parse_translation_unit2 index filename command_line_args unsaved_files
+        options : (cxtranslationunit, cxerrorcode) result =
+      match
+        parse_translation_unit index filename command_line_args unsaved_files
+          options
+      with
+      | None -> Error Failure
+      | Some tu -> Ok tu
+    (** Compatibility wrapper for [parse_translation_unit2].
+        In case of error, [Error Failure] will be returned. *)])]
+
+[%%meta Metapp.Stri.of_list (
+ if Clangml_config.version >= { major = 3; minor = 6; subminor = 0 } then [%str
+   let predefined_expr_get_function_name cursor _decl =
+     ext_predefined_expr_get_function_name cursor]
+ else [%str
+   let predefined_expr_get_function_name cursor decl =
+     ext_predefined_expr_compute_name
+       (ext_predefined_expr_get_ident_kind cursor) decl])]
+
+[%%meta Metapp.Stri.of_list (
+  if Clangml_config.version >= { major = 3; minor = 7; subminor = 0 } then
+    []
+  else [%str
+    type cxvisitorresult =
+      | Break
+      | Continue
+
+    let type_visit_fields ty visitor =
+      visit_children (ty |> get_type_declaration) (fun cur _parent ->
+        match get_cursor_kind cur with
+        | FieldDecl ->
+            begin
+              match visitor cur with
+              | Break -> Break
+              | Continue -> Continue
+            end
+        | _ -> Continue)])]
+
+[%%meta Metapp.Stri.of_list (
+  if Clangml_config.version.major >= 8 then [%str
+    let include_attributed_types =
+      Cxtranslationunit_flags.include_attributed_types
+
+    let type_non_null = TypeNonNull]
+  else [%str
+    let include_attributed_types =
+      Cxtranslationunit_flags.none
+
+    let type_get_modified_type ty =
+      ty
+
+    let type_non_null = NoAttr])]
 
 let version () =
   ext_get_version ()
@@ -148,7 +212,21 @@ module Init_list = struct
     | Semantic -> semantic_form cursor
 end
 
-[%%meta Metapp.filter.structure_item Metapp.filter [%stri
+[%%meta Metapp.Stri.of_list (Metapp.filter.structure Metapp.filter [%str
+let is_floating_point (ty : cxtypekind) =
+  match ty with
+  | Float | Double | LongDouble -> true
+  | Float128
+      [@if [%meta Metapp.Exp.of_bool
+        (Clangml_config.version >= { major = 3; minor = 9; subminor = 0 })]] ->
+      true
+  | Half [@if [%meta Metapp.Exp.of_bool (Clangml_config.version.major >= 5)]] ->
+      true
+  | Float16
+      [@if [%meta Metapp.Exp.of_bool (Clangml_config.version.major >= 6)]] ->
+      true
+  | _ -> false
+
 module Ast = struct
   include Clang__ast
 
@@ -1648,7 +1726,40 @@ module Ast = struct
                     ext_designated_init_expr_get_init cursor |>
                     expr_of_cxcursor in
                   DesignatedInit { designators; init }
-              | RequiresExpr ->
+              | CXXFoldExpr
+                [@if [%meta Metapp.Exp.of_bool
+                  (Clangml_config.version >=
+                    { major = 3; minor = 6; subminor = 0 })]] ->
+                  let lhs, rhs =
+                    match list_of_children cursor with
+                    | [lhs; rhs] ->
+                        Some (expr_of_cxcursor lhs),
+                        Some (expr_of_cxcursor rhs)
+                    | [sub] ->
+                        if ext_cxxfold_expr_is_right_fold cursor then
+                          Some (expr_of_cxcursor sub), None
+                        else
+                          None, Some (expr_of_cxcursor sub)
+                    | _ -> raise Invalid_structure in
+                  let operator = ext_cxxfold_expr_get_operator cursor in
+                  Fold { lhs; operator; rhs }
+              | ArrayInitLoopExpr
+                [@if [%meta Metapp.Exp.of_bool
+                  (Clangml_config.version.major >= 4)]] ->
+                  let common_expr, sub_expr =
+                    match list_of_children cursor with
+                    | [common_expr; sub_expr] ->
+                        common_expr |> expr_of_cxcursor,
+                        sub_expr |> expr_of_cxcursor
+                      | _ -> raise Invalid_structure in
+                  ArrayInitLoop { common_expr; sub_expr }
+              | ArrayInitIndexExpr
+                [@if [%meta Metapp.Exp.of_bool
+                  (Clangml_config.version.major >= 4)]] ->
+                  ArrayInitIndex
+              | RequiresExpr
+                [@if [%meta Metapp.Exp.of_bool
+                  (Clangml_config.version.major >= 10)]] ->
                   Requires {
                     local_parameters =
                       List.init
@@ -1663,34 +1774,7 @@ module Ast = struct
                           ext_requires_expr_get_requirement cursor i |>
                           extract_requirement);
                   }
-              | kind ->
-                  match compat_stmt_kind kind with
-                  | CXXFoldExpr ->
-                      let lhs, rhs =
-                        match list_of_children cursor with
-                        | [lhs; rhs] ->
-                            Some (expr_of_cxcursor lhs),
-                            Some (expr_of_cxcursor rhs)
-                        | [sub] ->
-                            if ext_cxxfold_expr_is_right_fold cursor then
-                              Some (expr_of_cxcursor sub), None
-                            else
-                              None, Some (expr_of_cxcursor sub)
-                        | _ -> raise Invalid_structure in
-                      let operator = ext_cxxfold_expr_get_operator cursor in
-                      Fold { lhs; operator; rhs }
-                  | ArrayInitLoopExpr ->
-                      let common_expr, sub_expr =
-                        match list_of_children cursor with
-                        | [common_expr; sub_expr] ->
-                            common_expr |> expr_of_cxcursor,
-                            sub_expr |> expr_of_cxcursor
-                          | _ -> raise Invalid_structure in
-                      ArrayInitLoop { common_expr; sub_expr }
-                  | ArrayInitIndexExpr ->
-                      ArrayInitIndex
-                  | _ ->
-                      UnexposedExpr kind
+              | kind -> UnexposedExpr kind
             end
         | _ ->
             UnknownExpr (kind, ext_stmt_get_kind cursor)
@@ -2043,7 +2127,7 @@ ext_expr_requirement_return_type_get_type_constraint_template_parameter_list
     match location with
     | Clang location -> concrete_of_cxsourcelocation kind location
     | Concrete location -> location
-end]]
+end])]
 
 module Expr = [%meta node_module [%str
   type t = Ast.expr [@@deriving refl]
