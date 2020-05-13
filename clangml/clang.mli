@@ -1,6 +1,3 @@
-[%%metapackage "metapp"]
-[%%metadir "config/.clangml_config.objs/byte"]
-
 (** {2 Low-level interface } *)
 
 (** The module includes {!module:Clang__bindings} which contains the
@@ -51,48 +48,6 @@ val get_typedef_underlying_type : ?recursive:bool -> cxtype -> cxtype
     is a typedef, and [t] otherwise. If [recursive] is [true]
     (default: [false]), typedefs are followed until the underlying type is not a
     typedef. *)
-
-(** {2 Compatibility layer} *)
-
-[%%meta Metapp.Sigi.of_list (
-  if Clangml_config.version >= { major = 3; minor = 5; subminor = 0 } then
-    []
-  else [%sig:
-    type cxerrorcode =
-      | Failure
-      | Crashed
-      | InvalidArguments
-      | ASTReadError
-    (** Error codes introduced in clang 3.5, declared here for compatibility.
-        Only {!constr:Failure} will be used. *)
-
-    val parse_translation_unit2 :
-      cxindex -> string -> string array -> cxunsavedfile array ->
-        Cxtranslationunit_flags.t -> (cxtranslationunit, cxerrorcode) result
-    (** Compatibility wrapper for [parse_translation_unit2].
-        In case of error, [Error Failure] will be returned. *)])]
-
-val predefined_expr_get_function_name : cxcursor -> cxcursor -> string
-
-[%%meta Metapp.Sigi.of_list (
-  if Clangml_config.version >= { major = 3; minor = 7; subminor = 0 } then
-    []
-  else [%sig:
-    type cxvisitorresult =
-      | Break
-      | Continue
-
-    val type_visit_fields : cxtype -> (cxcursor -> cxvisitorresult) -> bool])]
-
-val include_attributed_types : Cxtranslationunit_flags.t
-
-val type_non_null : clang_ext_attrkind
-
-[%%meta Metapp.Sigi.of_list (
-  if Clangml_config.version.major >= 8 then
-    []
-  else [%sig:
-    val type_get_modified_type : cxtype -> cxtype])]
 
 (** {2 Abstract syntax tree} *)
 

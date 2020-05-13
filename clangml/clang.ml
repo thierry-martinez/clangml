@@ -51,72 +51,6 @@ include Clang__utils
 
 module Command_line = Clang__command_line
 
-[%%meta Metapp.Stri.of_list (
-  if Clangml_config.version >= { major = 3; minor = 5; subminor = 0 } then
-    []
-  else [%str
-    type cxerrorcode =
-      | Failure
-      | Crashed
-      | InvalidArguments
-      | ASTReadError
-    (** Error codes introduced in clang 3.5, declared here for compatibility.
-        Only {!constr:Failure} will be used. *)
-
-    let parse_translation_unit2 index filename command_line_args unsaved_files
-        options : (cxtranslationunit, cxerrorcode) result =
-      match
-        parse_translation_unit index filename command_line_args unsaved_files
-          options
-      with
-      | None -> Error Failure
-      | Some tu -> Ok tu
-    (** Compatibility wrapper for [parse_translation_unit2].
-        In case of error, [Error Failure] will be returned. *)])]
-
-[%%meta Metapp.Stri.of_list (
- if Clangml_config.version >= { major = 3; minor = 6; subminor = 0 } then [%str
-   let predefined_expr_get_function_name cursor _decl =
-     ext_predefined_expr_get_function_name cursor]
- else [%str
-   let predefined_expr_get_function_name cursor decl =
-     ext_predefined_expr_compute_name
-       (ext_predefined_expr_get_ident_kind cursor) decl])]
-
-[%%meta Metapp.Stri.of_list (
-  if Clangml_config.version >= { major = 3; minor = 7; subminor = 0 } then
-    []
-  else [%str
-    type cxvisitorresult =
-      | Break
-      | Continue
-
-    let type_visit_fields ty visitor =
-      visit_children (ty |> get_type_declaration) (fun cur _parent ->
-        match get_cursor_kind cur with
-        | FieldDecl ->
-            begin
-              match visitor cur with
-              | Break -> Break
-              | Continue -> Continue
-            end
-        | _ -> Continue)])]
-
-[%%meta Metapp.Stri.of_list (
-  if Clangml_config.version.major >= 8 then [%str
-    let include_attributed_types =
-      Cxtranslationunit_flags.include_attributed_types
-
-    let type_non_null = TypeNonNull]
-  else [%str
-    let include_attributed_types =
-      Cxtranslationunit_flags.none
-
-    let type_get_modified_type ty =
-      ty
-
-    let type_non_null = NoAttr])]
-
 let version () =
   ext_get_version ()
 
@@ -213,20 +147,6 @@ module Init_list = struct
 end
 
 [%%meta Metapp.Stri.of_list (Metapp.filter.structure Metapp.filter [%str
-let is_floating_point (ty : cxtypekind) =
-  match ty with
-  | Float | Double | LongDouble -> true
-  | Float128
-      [@if [%meta Metapp.Exp.of_bool
-        (Clangml_config.version >= { major = 3; minor = 9; subminor = 0 })]] ->
-      true
-  | Half [@if [%meta Metapp.Exp.of_bool (Clangml_config.version.major >= 5)]] ->
-      true
-  | Float16
-      [@if [%meta Metapp.Exp.of_bool (Clangml_config.version.major >= 6)]] ->
-      true
-  | _ -> false
-
 module Ast = struct
   include Clang__ast
 
