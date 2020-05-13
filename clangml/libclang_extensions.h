@@ -1081,8 +1081,10 @@ clang_ext_RequiresExpr_getLocalParameterCount(CXCursor);
 CXCursor
 clang_ext_RequiresExpr_getLocalParameter(CXCursor, unsigned int);
 
+/*
 CXCursor
 clang_ext_RequiresExpr_getBody(CXCursor);
+*/
 
 unsigned int
 clang_ext_RequiresExpr_getRequirementCount(CXCursor);

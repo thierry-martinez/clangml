@@ -371,7 +371,7 @@ module Ast = struct
       | SubstTemplateTemplateParmPack -> SubstTemplateTemplateParmPack
       | InvalidNameKind -> InvalidNameKind
 
-    and make_template_argument argument =
+    and make_template_argument argument : template_argument =
       match ext_template_argument_get_kind argument with
       | Type ->
           Type (
@@ -1538,6 +1538,34 @@ module Ast = struct
                 ArgumentExpr (ext_cxxtypeid_expr_get_expr_operand cursor |>
                   expr_of_cxcursor) in
             Typeid argument
+        | PackExpansionExpr ->
+            let sub =
+              match list_of_children cursor with
+              | [sub] -> expr_of_cxcursor sub
+              | _ -> raise Invalid_structure in
+            PackExpansionExpr sub
+        | SizeOfPackExpr ->
+            SizeOfPack (
+              ext_size_of_pack_expr_get_pack cursor |> ident_ref_of_cxcursor)
+        | CXXFunctionalCastExpr ->
+            cast_of_cxcursor Functional cursor
+        | CXXStaticCastExpr ->
+            cast_of_cxcursor Static cursor
+        | CXXDynamicCastExpr ->
+            cast_of_cxcursor Dynamic cursor
+        | CXXConstCastExpr ->
+            cast_of_cxcursor Const cursor
+        | CXXThrowExpr ->
+            let sub =
+              match list_of_children cursor with
+              | [sub] -> Some (expr_of_cxcursor sub)
+              | [] -> None
+              | _ -> raise Invalid_structure in
+            ThrowExpr sub
+        | TemplateRef ->
+            TemplateRef (ident_ref_of_cxcursor cursor)
+        | OverloadedDeclRef ->
+            OverloadedDeclRef (ident_ref_of_cxcursor cursor)
         | UnexposedExpr ->
             begin
               match ext_stmt_get_kind cursor with
@@ -1620,6 +1648,21 @@ module Ast = struct
                     ext_designated_init_expr_get_init cursor |>
                     expr_of_cxcursor in
                   DesignatedInit { designators; init }
+              | RequiresExpr ->
+                  Requires {
+                    local_parameters =
+                      List.init
+                        (ext_requires_expr_get_local_parameter_count cursor)
+                        (fun i ->
+                          ext_requires_expr_get_local_parameter cursor i |>
+                          parameter_of_cxcursor);
+                    requirements =
+                      List.init
+                        (ext_requires_expr_get_requirement_count cursor)
+                        (fun i ->
+                          ext_requires_expr_get_requirement cursor i |>
+                          extract_requirement);
+                  }
               | kind ->
                   match compat_stmt_kind kind with
                   | CXXFoldExpr ->
@@ -1649,34 +1692,6 @@ module Ast = struct
                   | _ ->
                       UnexposedExpr kind
             end
-        | PackExpansionExpr ->
-            let sub =
-              match list_of_children cursor with
-              | [sub] -> expr_of_cxcursor sub
-              | _ -> raise Invalid_structure in
-            PackExpansionExpr sub
-        | SizeOfPackExpr ->
-            SizeOfPack (
-              ext_size_of_pack_expr_get_pack cursor |> ident_ref_of_cxcursor)
-        | CXXFunctionalCastExpr ->
-            cast_of_cxcursor Functional cursor
-        | CXXStaticCastExpr ->
-            cast_of_cxcursor Static cursor
-        | CXXDynamicCastExpr ->
-            cast_of_cxcursor Dynamic cursor
-        | CXXConstCastExpr ->
-            cast_of_cxcursor Const cursor
-        | CXXThrowExpr ->
-            let sub =
-              match list_of_children cursor with
-              | [sub] -> Some (expr_of_cxcursor sub)
-              | [] -> None
-              | _ -> raise Invalid_structure in
-            ThrowExpr sub
-        | TemplateRef ->
-            TemplateRef (ident_ref_of_cxcursor cursor)
-        | OverloadedDeclRef ->
-            OverloadedDeclRef (ident_ref_of_cxcursor cursor)
         | _ ->
             UnknownExpr (kind, ext_stmt_get_kind cursor)
       with Invalid_structure ->
@@ -1831,10 +1846,19 @@ module Ast = struct
             { parameter_name; parameter_kind; parameter_pack}
 
     and extract_template_parameters cursor =
-      List.init (ext_template_decl_get_parameter_count cursor) begin fun i ->
-        ext_template_decl_get_parameter cursor i |>
-        template_parameter_of_cxcursor
-      end
+      extract_template_parameter_list
+        (ext_template_decl_get_template_parameters cursor)
+
+    and extract_template_parameter_list list = {
+      list =
+        List.init (ext_template_parameter_list_size list) begin fun i ->
+          ext_template_parameter_list_get_param list i |>
+          template_parameter_of_cxcursor
+        end;
+      requires_clause =
+        ext_template_parameter_list_get_requires_clause list |>
+        option_cursor expr_of_cxcursor;
+    }
 
     and extract_template_arguments cursor =
       List.init (ext_cursor_get_num_template_args cursor) begin fun i ->
@@ -1842,10 +1866,33 @@ module Ast = struct
         make_template_argument
       end
 
+    and extract_requirement requirement : requirement =
+      match ext_requirement_get_kind requirement with
+      | Type -> Type (ext_type_requirement_get_type requirement |> of_type_loc)
+      | Simple -> Simple (extract_expr_requirement requirement)
+      | Compound -> Compound (extract_expr_requirement requirement)
+      | Nested ->
+          let expr =
+            ext_nested_requirement_get_constraint_expr requirement |>
+            expr_of_cxcursor in
+          Nested expr
+
+    and extract_expr_requirement requirement =
+      let return_type_type_constraint =
+        ext_expr_requirement_return_type_get_type_constraint requirement |>
+        option_cursor expr_of_cxcursor in
+      { expr = ext_expr_requirement_get_expr requirement |> expr_of_cxcursor;
+        return_type_type_constraint =
+          return_type_type_constraint |> Option.map (fun type_constraint ->
+            { type_constraint;
+              parameters =
+ext_expr_requirement_return_type_get_type_constraint_template_parameter_list
+                requirement |> extract_template_parameter_list; })}
+
     and make_template ?(optional = false) cursor body =
       let parameters = extract_template_parameters cursor in
       match parameters with
-      | [] when optional -> body
+      | { list = []; requires_clause = None } when optional -> body
       | _ -> TemplateDecl { parameters; decl = node ~cursor body }
 
     let translation_unit_of_cxcursor cursor =

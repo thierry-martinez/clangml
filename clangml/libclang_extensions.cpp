@@ -20,6 +20,7 @@ extern "C" {
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/ErrorHandling.h>
 #include <caml/fail.h>
+#include <iostream>
 
 // Copied from clang source tree: tools/libclang/CXString.cpp
 enum CXStringFlag {
@@ -432,11 +433,10 @@ GetTypeLoc(struct clang_ext_TypeLoc tl)
 }
 
 static struct clang_ext_TemplateParameterList
-MakeTemplateParameterList(const clang::TemplateParameterList &t,
+MakeTemplateParameterList(const clang::TemplateParameterList *t,
   CXTranslationUnit tu)
 {
-  struct clang_ext_TemplateParameterList tl = {
-    new clang::TemplateParameterList(t), tu };
+  struct clang_ext_TemplateParameterList tl = { t, tu };
   return tl;
 }
 
@@ -455,10 +455,9 @@ GetTemplateParameterList(struct clang_ext_TemplateParameterList tl)
 
 #ifndef LLVM_VERSION_BEFORE_10_0_0
 static struct clang_ext_Requirement
-MakeRequirement(const clang::concepts::Requirement &r, CXTranslationUnit tu)
+MakeRequirement(const clang::concepts::Requirement *r, CXTranslationUnit tu)
 {
-  struct clang_ext_Requirement req = {
-    new clang::concepts::Requirement(r), tu };
+  struct clang_ext_Requirement req = { r, tu };
   return req;
 }
 #endif
@@ -2557,7 +2556,7 @@ extern "C" {
     struct clang_ext_TemplateParameterList tl)
   {
     if (auto *t = GetTemplateParameterList(tl)) {
-      delete(t);
+      //delete(t);
     }
   }
 
@@ -2599,12 +2598,12 @@ extern "C" {
     if (auto d = GetCursorDecl(cursor)) {
       if (auto td = llvm::dyn_cast_or_null<clang::TemplateDecl>(d)) {
         return MakeTemplateParameterList(
-          *td->getTemplateParameters(), getCursorTU(cursor));
+          td->getTemplateParameters(), getCursorTU(cursor));
       }
       else if (auto tp =
      llvm::dyn_cast_or_null<clang::ClassTemplatePartialSpecializationDecl>(d)) {
         return MakeTemplateParameterList(
-          *tp->getTemplateParameters(), getCursorTU(cursor));
+          tp->getTemplateParameters(), getCursorTU(cursor));
       }
     }
     return MakeTemplateParameterListInvalid(getCursorTU(cursor));
@@ -3168,7 +3167,7 @@ extern "C" {
   clang_ext_Requirement_dispose(struct clang_ext_Requirement req)
   {
     if (auto *r = GetRequirement(req)) {
-      delete r;
+      //delete r;
     }
   }
 
@@ -3227,7 +3226,7 @@ extern "C" {
           llvm::dyn_cast_or_null<clang::concepts::ExprRequirement>(r)) {
         if (er->getReturnTypeRequirement().isTypeConstraint()) {
           return MakeTemplateParameterList(
-            *er->getReturnTypeRequirement().
+            er->getReturnTypeRequirement().
             getTypeConstraintTemplateParameterList(), req.tu);
         }
       }
@@ -3300,6 +3299,7 @@ extern "C" {
     #ifndef LLVM_VERSION_BEFORE_10_0_0
       auto s = GetCursorStmt(cursor);
       if (auto e = llvm::dyn_cast_or_null<clang::RequiresExpr>(s)) {
+        std::cerr << e->getBody() << std::endl;
         return MakeCXCursor(e->getBody(), getCursorTU(cursor));
       }
     #endif
@@ -3324,7 +3324,7 @@ extern "C" {
     #ifndef LLVM_VERSION_BEFORE_10_0_0
       auto s = GetCursorStmt(cursor);
       if (auto e = llvm::dyn_cast_or_null<clang::RequiresExpr>(s)) {
-        return MakeRequirement(*e->getRequirements()[index], getCursorTU(cursor));
+        return MakeRequirement(e->getRequirements()[index], getCursorTU(cursor));
       }
     #endif
     return MakeRequirementInvalid(getCursorTU(cursor));

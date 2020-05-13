@@ -762,6 +762,22 @@ and template_argument =
   | ExprTemplateArgument of expr
   | Pack of template_argument list
 
+and requirement =
+  | Type of qual_type
+  | Simple of expr_requirement
+  | Compound of expr_requirement
+  | Nested of expr
+
+and expr_requirement = {
+  expr : expr;
+  return_type_type_constraint : type_constraint option;
+}
+
+and type_constraint = {
+  parameters : template_parameter_list;
+  type_constraint : expr;
+}
+
 and nested_name_specifier = nested_name_specifier_component list
 
 and nested_name_specifier_component =
@@ -976,10 +992,10 @@ let () =
     example
   [%pattern? [
     { desc = TemplateDecl {
-      parameters = [{ desc = {
+      parameters = { list = [{ desc = {
         parameter_name = "b";
         parameter_kind = NonType { parameter_type = {
-          desc = BuiltinType Bool }}}}];
+          desc = BuiltinType Bool }}}}] };
       decl = { desc = Function {
         name = IdentifierName "f";
         function_type = { exception_spec = Some (Noexcept {
@@ -2568,6 +2584,34 @@ let () =
       designators : designator list;
       init : expr;
     }
+  | Requires of {
+      local_parameters : parameter list;
+      requirements : requirement list;
+    }
+(** Requires expression (C++ 20).
+    {[
+let example = {|
+  template<typename T> concept Addable = requires (T x) { x + x; };
+|}
+
+let () =
+  if Clang.version () >= { major = 10; minor = 0; subminor = 0 } then
+    check_pattern quote_decl_list (parse_declaration_list ~language:CXX
+      ~command_line_args:["-std=c++20"]) example
+    [%pattern?
+      [{ desc = ConceptDecl {
+         parameters = { list = [{ desc = { parameter_name = "T" }}] };
+         name = IdentifierName ("Addable");
+         constraint_expr = {
+           desc = Requires {
+             local_parameters =[ { desc = {
+               qual_type = { desc = TemplateTypeParm "T" };
+               name = "x" }}];
+             requirements = [Simple { expr = { desc = BinaryOperator {
+               lhs = { desc = DeclRef { name = IdentifierName "x" }};
+               kind = Add;
+               rhs = { desc = DeclRef { name = IdentifierName "x" }}}}}] }}}}]]
+    ]} *)
   | UnknownExpr of cxcursorkind * clang_ext_stmtkind
 
 and field =
@@ -2643,7 +2687,7 @@ and decl = (decl_desc, qual_type) open_node
 
 and decl_desc =
   | TemplateDecl of {
-      parameters : template_parameter list;
+      parameters : template_parameter_list;
       decl : decl;
     }
 (** Template declaration.
@@ -2655,13 +2699,13 @@ let () =
   check pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
-      parameters = [
+      parameters = { list = [
         { desc = {
             parameter_name = "X";
             parameter_kind = Class { default = None }}};
         { desc = { parameter_name = "i"; parameter_kind = NonType {
             parameter_type = { desc = BuiltinType Int };
-            default = None }}}];
+            default = None }}}] };
       decl = { desc = Function {
         function_type = {
           calling_conv = C;
@@ -2685,14 +2729,14 @@ let () =
   check pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
-      parameters = [
+      parameters = { list = [
         { desc = {
             parameter_name = "X";
             parameter_kind =
               Class { default = Some { desc = BuiltinType Bool }}}};
         { desc = { parameter_name = "i"; parameter_kind = NonType {
             parameter_type = { desc = BuiltinType Int };
-            default = Some { desc = IntegerLiteral (Int 4)}}}}];
+            default = Some { desc = IntegerLiteral (Int 4)}}}}] };
       decl = { desc = RecordDecl {
         keyword = Class;
         name = "C";
@@ -2725,10 +2769,10 @@ let () =
       name = "C";
       fields = [
         { desc = TemplateDecl {
-            parameters = [
+            parameters = { list = [
               { desc = { parameter_name = "X";
                 parameter_kind = Class { default = None };
-                parameter_pack = false; }}];
+                parameter_pack = false; }}] };
             decl = { desc = CXXMethod {
               type_ref = None;
               function_decl = {
@@ -2741,10 +2785,10 @@ let () =
                 name = IdentifierName "f";
                 body = None; }}}}}] }};
      { desc = TemplateDecl {
-         parameters = [{ desc = {
+         parameters = { list = [{ desc = {
            parameter_name = "X";
            parameter_kind = Class { default = None };
-           parameter_pack = false; }}];
+           parameter_pack = false; }}] };
          decl = { desc = CXXMethod {
            type_ref = Some { desc = Record ({ name = IdentifierName "C" }) };
            function_decl = {
@@ -2765,15 +2809,44 @@ let () =
   check pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
-        parameters = [
+        parameters = { list = [
           { desc = {
             parameter_name = "Types";
             parameter_kind = Class { default = None };
-            parameter_pack = true; }}];
+            parameter_pack = true; }}] };
         decl = { desc = RecordDecl {
           keyword = Struct;
           name = "Tuple"; }}}}] -> ()
   | _ -> assert false
+
+
+let example = {|
+  template<typename T> requires (sizeof(T) > 1)
+  void f(T);
+|}
+
+let () =
+  if Clang.version () >= { major = 9; minor = 0; subminor = 0 } then
+    check_pattern quote_decl_list (parse_declaration_list ~language:CXX
+      ~command_line_args:["-std=c++20"]) example
+    [%pattern?
+      [{ desc = TemplateDecl {
+         parameters = {
+           list = [{ desc = { parameter_name = "T" }}];
+           requires_clause = Some ({ desc = BinaryOperator {
+             lhs = { desc = UnaryExpr {
+               kind = SizeOf;
+               argument = ArgumentType { desc = TemplateTypeParm "T" }}};
+             kind = GT;
+             rhs =  { desc = IntegerLiteral (Int 1) }}})};
+         decl = { desc = Function {
+           function_type = {
+             result = { desc = BuiltinType Void };
+             parameters = Some {
+               non_variadic = [
+                 { desc = { qual_type = { desc = TemplateTypeParm "T" }}}] }};
+           name = IdentifierName "f";
+           body = None; }}}}]]
     ]}*)
   | Function of function_decl
 (** Function definition or forward declaration.
@@ -2817,7 +2890,7 @@ let () =
   | _ -> assert false
     ]}*)
   | TemplatePartialSpecialization of {
-      parameters : template_parameter list;
+      parameters : template_parameter_list;
       arguments : template_argument list;
       decl : decl;
     }
@@ -3628,9 +3701,9 @@ let () =
   check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
   [%pattern?
     [{ desc = TemplateDecl {
-         parameters = [{ desc = {
+         parameters = { list = [{ desc = {
            parameter_name = "T";
-           parameter_kind = Class { default = _ }}}];
+           parameter_kind = Class { default = _ }}}] };
          decl = { desc = RecordDecl {
            keyword = Class;
            name = "C";
@@ -3653,9 +3726,9 @@ let () =
          keyword = Class;
          name = "C";
          fields = [{ desc = Friend (FriendDecl { desc = TemplateDecl {
-           parameters = [{ desc = {
+           parameters = { list = [{ desc = {
              parameter_name = "T";
-             parameter_kind = Class { default = _ }}}];
+             parameter_kind = Class { default = _ }}}] };
            decl = { desc = RecordDecl {
              keyword = Class;
              name = "B";
@@ -3707,7 +3780,7 @@ let () =
     }
 (** Structure decomposition. (C++ 17) *)
   | ConceptDecl of {
-      parameters : template_parameter list;
+      parameters : template_parameter_list;
       name : declaration_name;
       constraint_expr : expr;
     }
@@ -3722,7 +3795,7 @@ let () =
       ~command_line_args:["-std=c++20"]) example
     [%pattern?
       [{ desc = ConceptDecl {
-         parameters = [{ desc = { parameter_name = "T" }}];
+         parameters = { list = [{ desc = { parameter_name = "T" }}] };
          name = IdentifierName ("C1");
          constraint_expr = { desc = BoolLiteral true }}}]]
 
@@ -3734,7 +3807,7 @@ let () =
       ~command_line_args:["-std=c++20"]) example
     [%pattern?
       [{ desc = ConceptDecl {
-         parameters = [{ desc = { parameter_name = "T" }}];
+         parameters = { list = [{ desc = { parameter_name = "T" }}] };
          name = IdentifierName ("A");
          constraint_expr = {
            desc = BinaryOperator {
@@ -3744,7 +3817,7 @@ let () =
                name = IdentifierName "value" }};
              kind = LOr;
              rhs = { desc = BoolLiteral true }}}}}]]
-    ]} *)
+    ]}*)
   | UnknownDecl of cxcursorkind * clang_ext_declkind
 
 and directive =
@@ -3858,6 +3931,11 @@ and var_decl_desc = {
 and cxx_method_binding_kind = NonVirtual | Virtual | PureVirtual
 (** C++ method binding kind *)
 
+and template_parameter_list = {
+    list : template_parameter list;
+    requires_clause : expr option;
+  }
+
 and template_parameter = (template_parameter_desc, qual_type) open_node
 (** C++ template parameter *)
 
@@ -3883,14 +3961,14 @@ let () =
   check pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
-      parameters = [
+      parameters = { list = [
         { desc = {
             parameter_name = "X";
             parameter_kind = Class { default = None }}};
         { desc = {
             parameter_name = "Y";
             parameter_kind =
-              Class { default = Some { desc = BuiltinType Bool }}}}];
+              Class { default = Some { desc = BuiltinType Bool }}}}] };
       decl = { desc = RecordDecl {
         keyword = Class;
         name = "C";
@@ -3919,10 +3997,10 @@ let () =
   check pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
-      parameters = [
+      parameters = { list = [
         { desc = { parameter_name = "i"; parameter_kind = NonType {
             parameter_type = { desc = BuiltinType Int };
-            default = Some { desc = IntegerLiteral (Int 4)}}}}];
+            default = Some { desc = IntegerLiteral (Int 4)}}}}] };
       decl = { desc = RecordDecl {
         keyword = Class;
         name = "C";
@@ -3933,7 +4011,7 @@ let () =
   | _ -> assert false
     ]}*)
   | Template of {
-      parameters : template_parameter list;
+      parameters : template_parameter_list;
       default : string option;
     }
 (** Template template parameter.
@@ -3953,24 +4031,24 @@ let () =
   check pp_decl (parse_declaration_list ~language:CXX) example @@
   fun ast -> match ast with
   | [{ desc = TemplateDecl {
-       parameters = [{ desc = {
+       parameters = { list = [{ desc = {
          parameter_name = "T";
          parameter_kind = Class { default = None };
-         parameter_pack = false; }}];
+         parameter_pack = false; }}] };
        decl = { desc = RecordDecl {
          keyword = Class;
          name = "Default";
          fields = [] }}}};
      { desc = TemplateDecl {
-       parameters = [{ desc = {
+       parameters = { list = [{ desc = {
          parameter_name = "T";
          parameter_kind = Template {
-           parameters = [{ desc = {
+           parameters = { list = [{ desc = {
              parameter_name = "";
              parameter_kind = Class { default = None };
-             parameter_pack = false; }}];
+             parameter_pack = false; }}] };
          default = Some "Default" };
-         parameter_pack = false; }}];
+         parameter_pack = false; }}] };
        decl = { desc = RecordDecl {
          keyword = Class;
          name = "C";
@@ -3998,17 +4076,17 @@ let () =
   check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
   [%pattern?
      [{ desc = TemplateDecl {
-       parameters = [{ desc = {
+       parameters = { list = [{ desc = {
          parameter_name = "T";
          parameter_kind = Template {
-           parameters = [{ desc = {
+           parameters = { list = [{ desc = {
              parameter_name = "";
              parameter_kind = NonType {
                parameter_type = { desc = BuiltinType Int };
                default = None };
-             parameter_pack = true }}];
+             parameter_pack = true }}] };
            default = None };
-         parameter_pack = false }}];
+         parameter_pack = false }}] };
        decl = { desc = RecordDecl {
          keyword = Class;
          name = "C";
