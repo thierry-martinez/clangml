@@ -2827,8 +2827,13 @@ let example = {|
 
 let () =
   if Clang.version () >= { major = 9; minor = 0; subminor = 0 } then
+    let command_line_args =
+      if Clang.version () >= { major = 10; minor = 0; subminor = 0 } then
+        ["-std=c++20"]
+      else
+        ["-std=c++2a"] in
     check_pattern quote_decl_list (parse_declaration_list ~language:CXX
-      ~command_line_args:["-std=c++20"]) example
+      ~command_line_args) example
     [%pattern?
       [{ desc = TemplateDecl {
          parameters = {
