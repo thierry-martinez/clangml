@@ -112,7 +112,11 @@ let to_clang : t -> Clang__bindings.clang_ext_langstandards = function
         Gnucxx2a]
       else [%expr
         raise (Unavailable Gnucxx20)]]
-  | Opencl10 -> Opencl10
+  | Opencl10 ->
+      [%meta if Clangml_config.version.major >= 5 then [%expr
+        Opencl10]
+      else [%expr
+        raise (Unavailable Opencl10)]]
   | Opencl11 -> Opencl11
   | Opencl12 -> Opencl12
   | Opencl20 ->

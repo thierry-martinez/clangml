@@ -118,7 +118,7 @@ let rec remove_placeholders antiquotations items =
 
 type arguments = {
     preamble : string list;
-    standard : Clang.standard option;
+    standard : Clang.clang_ext_langstandards option;
     return_type : string option;
   }
 
@@ -187,7 +187,12 @@ module Make (Target : Metapp.ValueS) = struct
                       "Standard already given";
                   let arg =
                     arg |> Metapp.string_of_arbitrary_expression in
-                  let standard = arg |> Clang.ext_lang_standard_of_name in
+                  let standard =
+                    match
+                      Refl.of_string_opt [%refl: Clang.Standard.t] arg
+                    with
+                    | None -> arg |> Clang.ext_lang_standard_of_name
+                    | Some standard -> Clang.Standard.to_clang standard in
                   if standard = InvalidLang then
                     Location.raise_errorf ~loc
                       "Unknown standard: %s" arg;
@@ -340,7 +345,7 @@ module Make (Target : Metapp.ValueS) = struct
       match arguments.standard with
       | None -> command_line_args
       | Some standard ->
-          Clang.Command_line.standard standard :: command_line_args in
+          Clang.Command_line.standard_of_clang standard :: command_line_args in
     let command_line_args =
       List.map Clang.Command_line.include_directory
         (Clang.default_include_directories ())

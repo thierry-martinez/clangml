@@ -20,6 +20,8 @@ include module type of struct
   include Clang__utils
 end
 
+module Standard = Standard
+
 module Command_line = Clang__command_line
 
 val version : unit -> cxversion

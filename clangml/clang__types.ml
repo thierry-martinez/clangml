@@ -11,8 +11,5 @@
 type language = C | CXX | ObjC | ObjCXX | OpenCL | CUDA | RenderScript | HIP
   [@@deriving refl]
 
-type standard = Clang__bindings.clang_ext_langstandards
-  [@@deriving refl]
-
 type location_kind = Presumed | Expansion
   [@@deriving refl]
