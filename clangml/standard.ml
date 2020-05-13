@@ -53,12 +53,12 @@ let to_clang : t -> Clang__bindings.clang_ext_langstandards = function
       else [%expr
         raise (Unavailable Gnu17)]]
   | C2x ->
-      [%meta if Clangml_config.version.major >= 8 then [%expr
+      [%meta if Clangml_config.version.major >= 9 then [%expr
         C2x]
       else [%expr
         raise (Unavailable C2x)]]
   | Gnu2x ->
-      [%meta if Clangml_config.version.major >= 8 then [%expr
+      [%meta if Clangml_config.version.major >= 9 then [%expr
         Gnu2x]
       else [%expr
         raise (Unavailable Gnu2x)]]
