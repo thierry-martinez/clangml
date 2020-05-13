@@ -49,6 +49,8 @@ include Types
 
 include Clang__utils
 
+module Standard = Standard
+
 module Command_line = Clang__command_line
 
 let version () =

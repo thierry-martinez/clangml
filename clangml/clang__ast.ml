@@ -2597,7 +2597,7 @@ let example = {|
 let () =
   if Clang.version () >= { major = 10; minor = 0; subminor = 0 } then
     check_pattern quote_decl_list (parse_declaration_list ~language:CXX
-      ~command_line_args:["-std=c++20"]) example
+      ~command_line_args:[Clang.Command_line.standard Cxx20]) example
     [%pattern?
       [{ desc = ConceptDecl {
          parameters = { list = [{ desc = { parameter_name = "T" }}] };
@@ -2827,13 +2827,8 @@ let example = {|
 
 let () =
   if Clang.version () >= { major = 9; minor = 0; subminor = 0 } then
-    let command_line_args =
-      if Clang.version () >= { major = 10; minor = 0; subminor = 0 } then
-        ["-std=c++20"]
-      else
-        ["-std=c++2a"] in
     check_pattern quote_decl_list (parse_declaration_list ~language:CXX
-      ~command_line_args) example
+      ~command_line_args:[Clang.Command_line.standard Cxx20]) example
     [%pattern?
       [{ desc = TemplateDecl {
          parameters = {
@@ -3797,7 +3792,7 @@ let example = "template<class T> concept C1 = true;"
 let () =
   if Clang.version () >= { major = 9; minor = 0; subminor = 0 } then
     check_pattern quote_decl_list (parse_declaration_list ~language:CXX
-      ~command_line_args:["-std=c++20"]) example
+      ~command_line_args:[Clang.Command_line.standard Cxx20]) example
     [%pattern?
       [{ desc = ConceptDecl {
          parameters = { list = [{ desc = { parameter_name = "T" }}] };
@@ -3809,7 +3804,7 @@ let example = "template<typename T> concept A = T::value || true;"
 let () =
   if Clang.version () >= { major = 9; minor = 0; subminor = 0 } then
     check_pattern quote_decl_list (parse_declaration_list ~language:CXX
-      ~command_line_args:["-std=c++20"]) example
+      ~command_line_args:[Clang.Command_line.standard Cxx20]) example
     [%pattern?
       [{ desc = ConceptDecl {
          parameters = { list = [{ desc = { parameter_name = "T" }}] };
