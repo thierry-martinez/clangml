@@ -746,7 +746,7 @@ let () =
     |}]] in
   check_pattern_decl bindings#f [%pattern? {
     desc = TemplateDecl {
-      parameters = [
+      parameters = { list = [
         { desc = {
             parameter_name = "T";
             parameter_kind = Class { default = None }}};
@@ -754,7 +754,7 @@ let () =
             parameter_name = "i";
             parameter_kind = NonType {
               parameter_type = { desc = TemplateTypeParm "T" };
-              default = None }}}];
+              default = None }}}]};
       decl = { desc = Function {
         function_type = {
           result = { desc = BuiltinType Void };
