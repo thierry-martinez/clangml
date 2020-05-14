@@ -410,20 +410,42 @@ module Ast = struct
           )
       | _ -> raise Invalid_structure
 
-    and of_type_loc qualified_type_loc =
-      let cxtype = ext_type_loc_get_type qualified_type_loc in
-      let type_loc =
-        match ext_type_loc_get_class qualified_type_loc with
-        | Qualified ->
-            ext_qualified_type_loc_get_unqualified_loc qualified_type_loc
-        | _ -> qualified_type_loc in
+    and of_type_loc type_loc =
+      let unqualify type_loc =
+        match ext_type_loc_get_class type_loc with
+        | Qualified -> ext_qualified_type_loc_get_unqualified_loc type_loc
+        | _ -> type_loc in
+      let cxtype = ext_type_loc_get_type type_loc in
+      let type_loc = unqualify type_loc in
+      let make_qual_type cxtype type_loc desc =
+        { cxtype; type_loc = Some type_loc; desc;
+          const = is_const_qualified_type cxtype;
+          volatile = is_volatile_qualified_type cxtype;
+          restrict = is_restrict_qualified_type cxtype; } in
+      let make_paren, type_loc, cxtype =
+        match ext_type_loc_get_class type_loc with
+        | Paren ->
+            let type_loc' = ext_paren_type_loc_get_inner_loc type_loc in
+            let cxtype' = ext_type_loc_get_type type_loc' in
+            let type_loc' = unqualify type_loc' in
+            let make_paren ty =
+              if options.ignore_paren_in_types then
+                ty
+              else
+                make_qual_type cxtype type_loc (ParenType ty) in
+            make_paren, type_loc', cxtype'
+        | _ -> Fun.id, type_loc, cxtype in
       let desc =
         match get_type_kind cxtype with
         | Invalid -> InvalidType
         | ConstantArray ->
+            let paren, type_loc =
+              match ext_type_loc_get_class type_loc with
+              | Paren -> true, ext_paren_type_loc_get_inner_loc type_loc
+              | _ -> false, type_loc in
+            let size = cxtype |> get_array_size in
             let element =
               ext_array_type_loc_get_element_loc type_loc |> of_type_loc in
-            let size = cxtype |> get_array_size in
             let size_as_expr =
               ext_array_type_loc_get_size_expr type_loc |>
               expr_of_cxcursor in
@@ -479,9 +501,6 @@ module Ast = struct
         | _ ->
             begin
               match ext_type_get_kind cxtype with
-              | Paren ->
-                  ParenType (ext_paren_type_loc_get_inner_loc type_loc |>
-                    of_type_loc)
               | Elaborated -> (* Here for Clang <3.9.0 *)
                   let nested_name_specifier =
                     ext_type_get_qualifier cxtype |>
@@ -525,14 +544,7 @@ module Ast = struct
                   Decltype sub
               | kind -> UnexposedType kind
             end in
-      match desc with
-      | ParenType inner when options.ignore_paren_in_types ->
-          { inner with cxtype; type_loc = Some qualified_type_loc }
-      | _ ->
-          { cxtype; type_loc = Some qualified_type_loc; desc;
-            const = is_const_qualified_type cxtype;
-            volatile = is_volatile_qualified_type cxtype;
-            restrict = is_restrict_qualified_type cxtype; }
+      make_paren (make_qual_type cxtype type_loc desc)
 
     and of_cxtype cxtype =
       let desc =

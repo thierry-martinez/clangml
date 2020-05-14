@@ -659,33 +659,39 @@ let () =
   | ParenType of qual_type
 (** Parenthesized type.
 
-    Warning: parenthesized type only occurs with Clang <7.0.0 and when
-    [ignore_paren_in_types = false] option is passed to the AST converting
-    function. From 7.0.0, Clang automatically passes through parentheses in
-    types.
+    Parenthesized type only occurs when [ignore_paren_in_types = false] option
+    is passed to the AST converting function.
 
     {[
+let example = "int f(char(*)[]);"
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list
+    ~options:{ Clang.Ast.Options.default with ignore_paren_in_types = false })
+    example
+  [%pattern?
+    [{ desc = Function {
+      function_type = {
+        result = { desc = BuiltinType Int };
+        parameters = Some {
+          non_variadic = [
+            { desc = { qual_type = { desc = Pointer { desc = ParenType
+              { desc = IncompleteArray { desc = BuiltinType Char_S }}}}}}] }};
+      name = IdentifierName "f";
+      body = None }}]]
+
 let example = "int (*p)(void);"
 
 let () =
-  check pp_decl (parse_declaration_list
-    ~options:({ Clang.Ast.Options.default with ignore_paren_in_types = false }))
-    example @@
-  fun ast -> match ast with
-  | [{ desc = Var { var_name = "p"; var_type = { desc =
-      Pointer { desc = FunctionType {
-        result = { desc = BuiltinType Int };
-        parameters = Some { non_variadic = []; variadic = false}}}}}}] ->
-      assert (Clang.version () >= { major = 7; minor = 0; subminor = 0 })
-  | [{ desc = Var { var_name = "p"; var_type = { desc =
+  check_pattern quote_decl_list (parse_declaration_list
+    ~options:{ Clang.Ast.Options.default with ignore_paren_in_types = false })
+    example
+  [%pattern?
+    [{ desc = Var { var_name = "p"; var_type = { desc =
       Pointer { desc = ParenType { desc = FunctionType {
         result = { desc = BuiltinType Int };
-        parameters = Some { non_variadic = []; variadic = false}}}}}}}] ->
-      assert (Clang.version () < { major = 7; minor = 0; subminor = 0 })
-  | _ -> assert false
-    ]}
-
-*)
+        parameters = Some { non_variadic = []; variadic = false}}}}}}}]]
+    ]}*)
   | TemplateTypeParm of string
   | SubstTemplateTypeParm of string
   | TemplateSpecialization of {
@@ -716,7 +722,7 @@ let () =
       var_name = "i";
       var_type = { desc = Auto };
       var_init = Some { desc = IntegerLiteral (Int 1)}}}]]
-    ]} *)
+    ]}*)
   | PackExpansion of qual_type
   | MemberPointer of {
       pointee : qual_type;
@@ -737,8 +743,7 @@ let () =
       var_name = "i";
       var_type = { desc = Decltype { desc = IntegerLiteral (Int 1)}};
       var_init = Some { desc = IntegerLiteral (Int 1)}}}]]
-    ]} *)
-
+    ]}*)
   | UnexposedType of clang_ext_typekind
   | InvalidType
 
