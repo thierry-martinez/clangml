@@ -2552,11 +2552,8 @@ extern "C" {
 
   void
   clang_ext_TemplateParameterList_dispose(
-    struct clang_ext_TemplateParameterList tl)
+    struct clang_ext_TemplateParameterList _tl)
   {
-    if (auto *t = GetTemplateParameterList(tl)) {
-      //delete(t);
-    }
   }
 
   unsigned int
@@ -3165,9 +3162,6 @@ extern "C" {
   void
   clang_ext_Requirement_dispose(struct clang_ext_Requirement req)
   {
-    if (auto *r = GetRequirement(req)) {
-      //delete r;
-    }
   }
 
   enum clang_ext_RequirementKind
@@ -3356,6 +3350,7 @@ extern "C" {
   clang_ext_DeclContext_visitDecls(
     CXCursor parent, CXCursorVisitor visitor, CXClientData client_data)
   {
+    #ifndef LLVM_VERSION_BEFORE_3_5_0
     auto d = GetCursorDecl(parent);
     if (auto dc = llvm::dyn_cast_or_null<clang::DeclContext>(d)) {
       CXTranslationUnit tu = getCursorTU(parent);
@@ -3366,6 +3361,7 @@ extern "C" {
         }
       }
     }
+    #endif
     return 0;
   }
 }
