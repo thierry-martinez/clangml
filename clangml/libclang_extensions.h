@@ -1048,6 +1048,7 @@ struct clang_ext_Requirement {
 void
 clang_ext_Requirement_dispose(struct clang_ext_Requirement);
 
+/* From clang/AST/ExprConcepts.h:Requirement::RequirementKind */
 enum clang_ext_RequirementKind {
   clang_ext_RK_Type,
   clang_ext_RK_Simple,
@@ -1081,14 +1082,28 @@ clang_ext_RequiresExpr_getLocalParameterCount(CXCursor);
 CXCursor
 clang_ext_RequiresExpr_getLocalParameter(CXCursor, unsigned int);
 
-/*
-CXCursor
-clang_ext_RequiresExpr_getBody(CXCursor);
-*/
-
 unsigned int
 clang_ext_RequiresExpr_getRequirementCount(CXCursor);
 
 struct clang_ext_Requirement
 clang_ext_RequiresExpr_getRequirement(CXCursor, unsigned int);
 
+/* From clang/AST/Attrs.inc:WarnUnusedResultAttr::Spelling */
+enum clang_ext_WarnUnusedResultAttr_Spelling {
+  clang_ext_CXX11_nodiscard,
+  clang_ext_C2x_nodiscard,
+  clang_ext_CXX11_clang_warn_unused_result,
+  clang_ext_GNU_warn_unused_result,
+  clang_ext_CXX11_gnu_warn_unused_result,
+  clang_ext_SpellingNotCalculated
+};
+
+enum clang_ext_WarnUnusedResultAttr_Spelling
+clang_ext_WarnUnusedResultAttr_getSemanticSpelling(CXCursor);
+
+CXString
+clang_ext_WarnUnusedResultAttr_getMessage(CXCursor);
+
+unsigned
+clang_ext_DeclContext_visitDecls(
+  CXCursor parent, CXCursorVisitor visitor, CXClientData client_data);

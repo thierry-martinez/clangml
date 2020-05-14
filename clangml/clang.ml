@@ -749,6 +749,7 @@ module Ast = struct
               body;
               defaulted = ext_cxxmethod_is_defaulted cursor;
               deleted = ext_function_decl_is_deleted cursor;
+              exception_spec = extract_exception_spec (get_cursor_type cursor);
           }
         | TemplateTemplateParameter ->
             TemplateTemplateParameter (get_cursor_spelling cursor)
@@ -835,7 +836,11 @@ module Ast = struct
                 let constraint_expr =
                   cursor |> ext_concept_decl_get_constraint_expr |>
                   expr_of_cxcursor in
-                ConceptDecl { parameters; name; constraint_expr }
+                Concept { parameters; name; constraint_expr }
+            | Export
+                [@if [%meta Metapp.Exp.of_bool
+                  (Clangml_config.version.major >= 4)]] ->
+                Export (List.map decl_of_cxcursor (list_of_decl_context cursor))
             | ext_kind -> UnknownDecl (kind, ext_kind)
       with Invalid_structure ->
         UnknownDecl (get_cursor_kind cursor, ext_decl_get_kind cursor)
@@ -961,33 +966,36 @@ module Ast = struct
       let calling_conv = cxtype |> get_function_type_calling_conv in
       let result = cxtype |> get_result_type |> of_cxtype in
       let exception_spec : exception_spec option =
-        match ext_function_proto_type_get_exception_spec_type cxtype with
-        | NoExceptionSpecification -> None
-        | DynamicNone -> Some (Throw [])
-        | Dynamic ->
-            let throws =
-              List.init (ext_function_proto_type_get_num_exceptions cxtype)
-                begin fun index ->
-                  ext_function_proto_type_get_exception_type cxtype index |>
-                  of_cxtype
-                end in
-            Some (Throw throws)
-        | BasicNoexcept -> Some (Noexcept { expr = None; evaluated = None })
-        | DependentNoexcept ->
-            let expr =
-              ext_function_proto_type_get_noexcept_expr cxtype |>
-              expr_of_cxcursor in
-            Some (Noexcept { expr = Some expr; evaluated = None })
-        | NoexceptFalse ->
-            let expr = ext_function_proto_type_get_noexcept_expr cxtype |>
-              expr_of_cxcursor in
-            Some (Noexcept { expr = Some expr; evaluated = Some false })
-        | NoexceptTrue ->
-            let expr = ext_function_proto_type_get_noexcept_expr cxtype |>
-              expr_of_cxcursor in
-            Some (Noexcept { expr = Some expr; evaluated = Some true })
-        | other -> Some (Other other) in
+        extract_exception_spec cxtype in
       { calling_conv; result; parameters; exception_spec; }
+
+    and extract_exception_spec cxtype =
+      match ext_function_proto_type_get_exception_spec_type cxtype with
+      | NoExceptionSpecification -> None
+      | DynamicNone -> Some (Throw [])
+      | Dynamic ->
+          let throws =
+            List.init (ext_function_proto_type_get_num_exceptions cxtype)
+              begin fun index ->
+                ext_function_proto_type_get_exception_type cxtype index |>
+                of_cxtype
+              end in
+          Some (Throw throws)
+      | BasicNoexcept -> Some (Noexcept { expr = None; evaluated = None })
+      | DependentNoexcept ->
+          let expr =
+            ext_function_proto_type_get_noexcept_expr cxtype |>
+            expr_of_cxcursor in
+          Some (Noexcept { expr = Some expr; evaluated = None })
+      | NoexceptFalse ->
+          let expr = ext_function_proto_type_get_noexcept_expr cxtype |>
+            expr_of_cxcursor in
+          Some (Noexcept { expr = Some expr; evaluated = Some false })
+      | NoexceptTrue ->
+          let expr = ext_function_proto_type_get_noexcept_expr cxtype |>
+            expr_of_cxcursor in
+          Some (Noexcept { expr = Some expr; evaluated = Some true })
+      | other -> Some (Other other)
 
     and var_decl_of_cxcursor cursor =
       node ~cursor (var_decl_desc_of_cxcursor cursor)
@@ -1040,16 +1048,24 @@ module Ast = struct
         access_specifier = get_cxxaccess_specifier cursor;
       }
 
+    and attribute_of_cxcursor_opt cursor : attribute option =
+      let kind = get_cursor_kind cursor in
+      let desc : attribute_desc option =
+        match kind with
+        | WarnUnusedResultAttr ->
+            Some (WarnUnusedResult {
+              spelling =
+                ext_warn_unused_result_attr_get_semantic_spelling cursor;
+              message = ext_warn_unused_result_attr_get_message cursor;
+            })
+        | UnexposedAttr -> Some (Other (ext_attr_get_kind cursor))
+        | _ -> None in
+      Option.map (node ~cursor) desc
+
     and record_decl_of_cxcursor keyword cursor =
       let attributes, children =
         list_of_children cursor |>
-        extract begin fun cursor ->
-          let kind = get_cursor_kind cursor in
-          if kind = UnexposedAttr then
-            Some (ext_attr_get_kind cursor)
-          else
-            None
-        end in
+        extract attribute_of_cxcursor_opt in
       let children =
         children |>
         filter_out_prefix_from_list is_template_parameter in

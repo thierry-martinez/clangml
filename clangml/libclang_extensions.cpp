@@ -3315,4 +3315,57 @@ extern "C" {
     #endif
     return MakeRequirementInvalid(getCursorTU(cursor));
   }
+
+  enum clang_ext_WarnUnusedResultAttr_Spelling
+  clang_ext_WarnUnusedResultAttr_getSemanticSpelling(CXCursor cursor)
+  {
+    #ifndef LLVM_VERSION_BEFORE_10_0_0
+      auto a = GetCursorAttr(cursor);
+      if (auto wura = llvm::dyn_cast_or_null<clang::WarnUnusedResultAttr>(a)) {
+        switch (wura->getSemanticSpelling()) {
+        case clang::WarnUnusedResultAttr::Spelling::CXX11_nodiscard:
+          return clang_ext_CXX11_nodiscard;
+        case clang::WarnUnusedResultAttr::Spelling::C2x_nodiscard:
+          return clang_ext_C2x_nodiscard;
+        case clang::WarnUnusedResultAttr::Spelling::CXX11_clang_warn_unused_result:
+          return clang_ext_CXX11_clang_warn_unused_result;
+        case clang::WarnUnusedResultAttr::Spelling::GNU_warn_unused_result:
+          return clang_ext_GNU_warn_unused_result;
+        case clang::WarnUnusedResultAttr::Spelling::CXX11_gnu_warn_unused_result:
+          return clang_ext_CXX11_gnu_warn_unused_result;
+        default:;
+        }
+      }
+    #endif
+    return clang_ext_SpellingNotCalculated;
+  }
+
+  CXString
+  clang_ext_WarnUnusedResultAttr_getMessage(CXCursor cursor)
+  {
+    #ifndef LLVM_VERSION_BEFORE_10_0_0
+      auto a = GetCursorAttr(cursor);
+      if (auto wura = llvm::dyn_cast_or_null<clang::WarnUnusedResultAttr>(a)) {
+        return cxstring_createDup(wura->getMessage());
+      }
+    #endif
+    return cxstring_createRef("");
+  }
+
+  unsigned
+  clang_ext_DeclContext_visitDecls(
+    CXCursor parent, CXCursorVisitor visitor, CXClientData client_data)
+  {
+    auto d = GetCursorDecl(parent);
+    if (auto dc = llvm::dyn_cast_or_null<clang::DeclContext>(d)) {
+      CXTranslationUnit tu = getCursorTU(parent);
+      for (auto sd : dc->decls()) {
+        if (visitor(MakeCXCursor(sd, tu), parent, client_data)
+            == CXChildVisit_Break) {
+          return 1;
+        }
+      }
+    }
+    return 0;
+  }
 }

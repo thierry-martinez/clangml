@@ -128,6 +128,14 @@ val list_of_type_fields : cxtype -> cxcursor list
     of the fields belonging to the record type [ty] (either a struct or
     union). *)
 
+val iter_decl_context : (cxcursor -> unit) -> cxcursor -> unit
+(** [iter_decl_context f c] calls [f] over all the declaration nodes of
+    declaration context [c]. *)
+
+val list_of_decl_context : cxcursor -> cxcursor list
+(** [list_of_decl_context f ty] returns the list of all the declaration nodes
+    of declaration context [c]. *)
+
 (** {2 Integer or floating point types} *)
 val is_integer : cxtypekind -> bool
 (** [is_integer ty] returns true if [ty] is a built-in integer type. *)

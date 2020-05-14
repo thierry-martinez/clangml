@@ -800,7 +800,7 @@ and declaration_name =
 
 and record_decl = {
     keyword : elaborated_type_keyword;
-    attributes : attribute_kind list;
+    attributes : attribute list;
     nested_name_specifier : nested_name_specifier option; (** C++ *)
     name : string;
     bases : base_specifier list; (** C++ *)
@@ -1737,6 +1737,15 @@ and asm_operand = {
   asm_expr : expr;
 }
 
+and attribute = (attribute_desc, qual_type) open_node
+
+and attribute_desc =
+  | WarnUnusedResult of {
+      spelling : clang_ext_warnunusedresultattr_spelling;
+      message : string;
+    }
+  | Other of attribute_kind
+
 (** {3 Expressions} *)
 
 and expr = (expr_desc, qual_type) open_node
@@ -2599,7 +2608,7 @@ let () =
     check_pattern quote_decl_list (parse_declaration_list ~language:CXX
       ~command_line_args:[Clang.Command_line.standard Cxx20]) example
     [%pattern?
-      [{ desc = ConceptDecl {
+      [{ desc = Concept {
          parameters = { list = [{ desc = { parameter_name = "T" }}] };
          name = IdentifierName ("Addable");
          constraint_expr = {
@@ -3552,6 +3561,7 @@ let () =
       body : stmt option;
       defaulted : bool;
       deleted : bool;
+      exception_spec : exception_spec option;
     }
 (**
   C++ class destructor.
@@ -3779,13 +3789,12 @@ let () =
       init : expr option;
     }
 (** Structure decomposition. (C++ 17) *)
-  | ConceptDecl of {
+  | Concept of {
       parameters : template_parameter_list;
       name : declaration_name;
       constraint_expr : expr;
     }
 (** Concept declaration. (C++ 20)
-
     {[
 let example = "template<class T> concept C1 = true;"
 
@@ -3794,7 +3803,7 @@ let () =
     check_pattern quote_decl_list (parse_declaration_list ~language:CXX
       ~command_line_args:[Clang.Command_line.standard Cxx20]) example
     [%pattern?
-      [{ desc = ConceptDecl {
+      [{ desc = Concept {
          parameters = { list = [{ desc = { parameter_name = "T" }}] };
          name = IdentifierName ("C1");
          constraint_expr = { desc = BoolLiteral true }}}]]
@@ -3806,7 +3815,7 @@ let () =
     check_pattern quote_decl_list (parse_declaration_list ~language:CXX
       ~command_line_args:[Clang.Command_line.standard Cxx20]) example
     [%pattern?
-      [{ desc = ConceptDecl {
+      [{ desc = Concept {
          parameters = { list = [{ desc = { parameter_name = "T" }}] };
          name = IdentifierName ("A");
          constraint_expr = {
@@ -3818,6 +3827,25 @@ let () =
              kind = LOr;
              rhs = { desc = BoolLiteral true }}}}}]]
     ]}*)
+  | Export of decl list
+(** Export declaration context. (C++ 20)
+    {[
+let example = {|
+  export module M;
+  export namespace NS {}
+|}
+
+let () =
+  if Clang.version () >= { major = 9; minor = 0; subminor = 0 } then
+    check_pattern quote_decl_list (parse_declaration_list ~language:CXX
+      ~command_line_args:[Clang.Command_line.standard Cxx20]) example
+    [%pattern?
+      [{ desc = Export [
+        { desc = Namespace {
+          name = "NS";
+          declarations = [] }}] }]]
+    ]}*)
+
   | UnknownDecl of cxcursorkind * clang_ext_declkind
 
 and directive =

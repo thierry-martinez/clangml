@@ -118,6 +118,19 @@ let iter_type_fields f ty =
 let list_of_type_fields ty =
   list_of_iter (fun f -> iter_type_fields f ty)
 
+let iter_decl_context f c =
+  iter_visitor f begin fun f ->
+    ignore (ext_decl_context_visit_decls c begin fun cur _par ->
+      if f cur then
+        Continue
+      else
+        Break
+    end)
+  end
+
+let list_of_decl_context c =
+  list_of_iter (fun f -> iter_decl_context f c)
+
 let seq_of_diagnostics tu =
   let count = get_num_diagnostics tu in
   let rec next i () =
