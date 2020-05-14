@@ -1,10 +1,16 @@
 #include <clang-c/Index.h>
+extern "C" {
+  #include "libclang_extensions.h"
+}
 #include <clang/AST/Attr.h>
 #include <clang/AST/DeclCXX.h>
 #include <clang/AST/DeclFriend.h>
 #include <clang/AST/DeclTemplate.h>
 #include <clang/AST/Expr.h>
 #include <clang/AST/ExprCXX.h>
+#ifndef LLVM_VERSION_BEFORE_10_0_0
+  #include <clang/AST/ExprConcepts.h>
+#endif
 #include <clang/AST/Stmt.h>
 #include <clang/AST/Type.h>
 #include <clang/Basic/ExceptionSpecificationType.h>
@@ -14,10 +20,6 @@
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/ErrorHandling.h>
 #include <caml/fail.h>
-
-extern "C" {
-  #include "libclang_extensions.h"
-}
 
 // Copied from clang source tree: tools/libclang/CXString.cpp
 enum CXStringFlag {
@@ -204,6 +206,9 @@ MakeCXCursor_visitor(CXCursor cursor, CXCursor parent, CXClientData client_data)
 static CXCursor
 MakeCXCursor(const clang::Stmt *S, CXTranslationUnit TU)
 {
+  if (S == nullptr) {
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, TU);
+  }
   clang::DefaultStmt DS(
     clang::SourceLocation::getFromRawEncoding(0),
     clang::SourceLocation::getFromRawEncoding(0), const_cast<clang::Stmt *>(S));
@@ -216,6 +221,9 @@ MakeCXCursor(const clang::Stmt *S, CXTranslationUnit TU)
 static CXCursor
 MakeCXCursor(const clang::Decl *T, CXTranslationUnit TU)
 {
+  if (T == nullptr) {
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, TU);
+  }
   CXCursor C = { CXCursor_UnexposedStmt, 0, { T, nullptr, TU }};
   return clang_getCursorSemanticParent(C);
 }
@@ -422,6 +430,57 @@ GetTypeLoc(struct clang_ext_TypeLoc tl)
 {
   return static_cast<const clang::TypeLoc *>(tl.data);
 }
+
+static struct clang_ext_TemplateParameterList
+MakeTemplateParameterList(const clang::TemplateParameterList *t,
+  CXTranslationUnit tu)
+{
+  struct clang_ext_TemplateParameterList tl = { t, tu };
+  return tl;
+}
+
+static struct clang_ext_TemplateParameterList
+MakeTemplateParameterListInvalid(CXTranslationUnit tu)
+{
+  struct clang_ext_TemplateParameterList tl = { nullptr, tu };
+  return tl;
+}
+
+static const clang::TemplateParameterList *
+GetTemplateParameterList(struct clang_ext_TemplateParameterList tl)
+{
+  return static_cast<const clang::TemplateParameterList *>(tl.data);
+}
+
+#ifndef LLVM_VERSION_BEFORE_10_0_0
+static struct clang_ext_Requirement
+MakeRequirement(const clang::concepts::Requirement *r, CXTranslationUnit tu)
+{
+  struct clang_ext_Requirement req = { r, tu };
+  return req;
+}
+#endif
+
+static struct clang_ext_Requirement
+MakeRequirementInvalid(CXTranslationUnit tu)
+{
+  struct clang_ext_Requirement req = { nullptr, tu };
+  return req;
+}
+
+#ifdef LLVM_VERSION_BEFORE_10_0_0
+void *
+GetRequirement(struct clang_ext_Requirement req)
+{
+  return nullptr;
+}
+#else
+static const clang::concepts::Requirement *
+GetRequirement(struct clang_ext_Requirement req)
+{
+  return static_cast<const clang::concepts::Requirement *>(req.data);
+}
+#endif
 
 static const clang::DesignatedInitExpr::Designator *
 getDesignator(const clang::DesignatedInitExpr *e, unsigned int i) {
@@ -2491,6 +2550,61 @@ extern "C" {
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
   }
 
+  void
+  clang_ext_TemplateParameterList_dispose(
+    struct clang_ext_TemplateParameterList _tl)
+  {
+  }
+
+  unsigned int
+  clang_ext_TemplateParameterList_size(
+    struct clang_ext_TemplateParameterList tl)
+  {
+    if (auto *t = GetTemplateParameterList(tl)) {
+      return t->size();
+    }
+    return 0;
+  }
+
+  CXCursor
+  clang_ext_TemplateParameterList_getParam(
+    struct clang_ext_TemplateParameterList tl, unsigned int index)
+  {
+    if (auto *t = GetTemplateParameterList(tl)) {
+      return MakeCXCursor(t->getParam(index), tl.tu);
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, tl.tu);
+  }
+
+  CXCursor
+  clang_ext_TemplateParameterList_getRequiresClause(
+    struct clang_ext_TemplateParameterList tl)
+  {
+    #ifndef LLVM_VERSION_BEFORE_4_0_0
+    if (auto *t = GetTemplateParameterList(tl)) {
+      return MakeCXCursor(t->getRequiresClause(), tl.tu);
+    }
+    #endif
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, tl.tu);
+  }
+
+  struct clang_ext_TemplateParameterList
+  clang_ext_TemplateDecl_getTemplateParameters(CXCursor cursor)
+  {
+    if (auto d = GetCursorDecl(cursor)) {
+      if (auto td = llvm::dyn_cast_or_null<clang::TemplateDecl>(d)) {
+        return MakeTemplateParameterList(
+          td->getTemplateParameters(), getCursorTU(cursor));
+      }
+      else if (auto tp =
+     llvm::dyn_cast_or_null<clang::ClassTemplatePartialSpecializationDecl>(d)) {
+        return MakeTemplateParameterList(
+          tp->getTemplateParameters(), getCursorTU(cursor));
+      }
+    }
+    return MakeTemplateParameterListInvalid(getCursorTU(cursor));
+  }
+
   unsigned int
   clang_ext_TemplateDecl_getParameterCount(CXCursor cursor)
   {
@@ -3031,5 +3145,223 @@ extern "C" {
       return MakeCXCursor(e->getInit(), getCursorTU(cursor));
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  CXCursor
+  clang_ext_ConceptDecl_getConstraintExpr(CXCursor cursor)
+  {
+    #ifndef LLVM_VERSION_BEFORE_9_0_0
+      auto s = GetCursorDecl(cursor);
+      if (auto e = llvm::dyn_cast_or_null<clang::ConceptDecl>(s)) {
+        return MakeCXCursor(e->getConstraintExpr(), getCursorTU(cursor));
+      }
+    #endif
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  void
+  clang_ext_Requirement_dispose(struct clang_ext_Requirement req)
+  {
+  }
+
+  enum clang_ext_RequirementKind
+  clang_ext_Requirement_getKind(struct clang_ext_Requirement req)
+  {
+    #ifndef LLVM_VERSION_BEFORE_10_0_0
+    if (auto *r = GetRequirement(req)) {
+      switch (r->getKind()) {
+      case clang::concepts::Requirement::RK_Type: return clang_ext_RK_Type;
+      case clang::concepts::Requirement::RK_Simple: return clang_ext_RK_Simple;
+      case clang::concepts::Requirement::RK_Compound:
+        return clang_ext_RK_Compound;
+      case clang::concepts::Requirement::RK_Nested: return clang_ext_RK_Nested;
+      }
+    }
+    #endif
+    return clang_ext_RK_Type;
+  }
+
+  struct clang_ext_TypeLoc
+  clang_ext_TypeRequirement_getType(struct clang_ext_Requirement req)
+  {
+    #ifndef LLVM_VERSION_BEFORE_10_0_0
+    if (auto *r = GetRequirement(req)) {
+      if (auto *tr =
+          llvm::dyn_cast_or_null<clang::concepts::TypeRequirement>(r)) {
+        return MakeTypeLoc(tr->getType()->getTypeLoc(), req.tu);
+      }
+    }
+    #endif
+    return MakeTypeLocInvalid(req.tu);
+  }
+
+  CXCursor
+  clang_ext_ExprRequirement_getExpr(struct clang_ext_Requirement req)
+  {
+    #ifndef LLVM_VERSION_BEFORE_10_0_0
+    if (auto *r = GetRequirement(req)) {
+      if (auto *er =
+          llvm::dyn_cast_or_null<clang::concepts::ExprRequirement>(r)) {
+        return MakeCXCursor(er->getExpr(), req.tu);
+      }
+    }
+    #endif
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, req.tu);
+  }
+
+  struct clang_ext_TemplateParameterList
+  clang_ext_ExprRequirement_ReturnType_getTypeConstraintTemplateParameterList(
+    struct clang_ext_Requirement req)
+  {
+    #ifndef LLVM_VERSION_BEFORE_10_0_0
+    if (auto *r = GetRequirement(req)) {
+      if (auto *er =
+          llvm::dyn_cast_or_null<clang::concepts::ExprRequirement>(r)) {
+        if (er->getReturnTypeRequirement().isTypeConstraint()) {
+          return MakeTemplateParameterList(
+            er->getReturnTypeRequirement().
+            getTypeConstraintTemplateParameterList(), req.tu);
+        }
+      }
+    }
+    #endif
+    return MakeTemplateParameterListInvalid(req.tu);
+  }
+
+  CXCursor
+  clang_ext_ExprRequirement_ReturnType_getTypeConstraint(
+    struct clang_ext_Requirement req)
+  {
+    #ifndef LLVM_VERSION_BEFORE_10_0_0
+    if (auto *r = GetRequirement(req)) {
+      if (auto *er =
+          llvm::dyn_cast_or_null<clang::concepts::ExprRequirement>(r)) {
+        if (er->getReturnTypeRequirement().isTypeConstraint()) {
+          return MakeCXCursor(er->getReturnTypeRequirement().
+            getTypeConstraint()->getImmediatelyDeclaredConstraint(), req.tu);
+        }
+      }
+    }
+    #endif
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, req.tu);
+  }
+
+  CXCursor
+  clang_ext_NestedRequirement_getConstraintExpr(
+    struct clang_ext_Requirement req)
+  {
+    #ifndef LLVM_VERSION_BEFORE_10_0_0
+    if (auto *r = GetRequirement(req)) {
+      if (auto *nr =
+          llvm::dyn_cast_or_null<clang::concepts::NestedRequirement>(r)) {
+        return MakeCXCursor(nr->getConstraintExpr(), req.tu);
+      }
+    }
+    #endif
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, req.tu);
+  }
+  
+  unsigned int
+  clang_ext_RequiresExpr_getLocalParameterCount(CXCursor cursor)
+  {
+    #ifndef LLVM_VERSION_BEFORE_10_0_0
+      auto s = GetCursorStmt(cursor);
+      if (auto e = llvm::dyn_cast_or_null<clang::RequiresExpr>(s)) {
+        return e->getLocalParameters().size();
+      }
+    #endif
+    return 0;
+  }
+
+  CXCursor
+  clang_ext_RequiresExpr_getLocalParameter(CXCursor cursor, unsigned int index)
+  {
+    #ifndef LLVM_VERSION_BEFORE_10_0_0
+      auto s = GetCursorStmt(cursor);
+      if (auto e = llvm::dyn_cast_or_null<clang::RequiresExpr>(s)) {
+        return MakeCXCursor(
+          e->getLocalParameters()[index], getCursorTU(cursor));
+      }
+    #endif
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  unsigned int
+  clang_ext_RequiresExpr_getRequirementCount(CXCursor cursor)
+  {
+    #ifndef LLVM_VERSION_BEFORE_10_0_0
+      auto s = GetCursorStmt(cursor);
+      if (auto e = llvm::dyn_cast_or_null<clang::RequiresExpr>(s)) {
+        return e->getRequirements().size();
+      }
+    #endif
+    return 0;
+  }
+
+  struct clang_ext_Requirement
+  clang_ext_RequiresExpr_getRequirement(CXCursor cursor, unsigned int index)
+  {
+    #ifndef LLVM_VERSION_BEFORE_10_0_0
+      auto s = GetCursorStmt(cursor);
+      if (auto e = llvm::dyn_cast_or_null<clang::RequiresExpr>(s)) {
+        return MakeRequirement(e->getRequirements()[index], getCursorTU(cursor));
+      }
+    #endif
+    return MakeRequirementInvalid(getCursorTU(cursor));
+  }
+
+  enum clang_ext_WarnUnusedResultAttr_Spelling
+  clang_ext_WarnUnusedResultAttr_getSemanticSpelling(CXCursor cursor)
+  {
+    #ifndef LLVM_VERSION_BEFORE_10_0_0
+      auto a = GetCursorAttr(cursor);
+      if (auto wura = llvm::dyn_cast_or_null<clang::WarnUnusedResultAttr>(a)) {
+        switch (wura->getSemanticSpelling()) {
+        case clang::WarnUnusedResultAttr::Spelling::CXX11_nodiscard:
+          return clang_ext_CXX11_nodiscard;
+        case clang::WarnUnusedResultAttr::Spelling::C2x_nodiscard:
+          return clang_ext_C2x_nodiscard;
+        case clang::WarnUnusedResultAttr::Spelling::CXX11_clang_warn_unused_result:
+          return clang_ext_CXX11_clang_warn_unused_result;
+        case clang::WarnUnusedResultAttr::Spelling::GNU_warn_unused_result:
+          return clang_ext_GNU_warn_unused_result;
+        case clang::WarnUnusedResultAttr::Spelling::CXX11_gnu_warn_unused_result:
+          return clang_ext_CXX11_gnu_warn_unused_result;
+        default:;
+        }
+      }
+    #endif
+    return clang_ext_SpellingNotCalculated;
+  }
+
+  CXString
+  clang_ext_WarnUnusedResultAttr_getMessage(CXCursor cursor)
+  {
+    #ifndef LLVM_VERSION_BEFORE_10_0_0
+      auto a = GetCursorAttr(cursor);
+      if (auto wura = llvm::dyn_cast_or_null<clang::WarnUnusedResultAttr>(a)) {
+        return cxstring_createDup(wura->getMessage());
+      }
+    #endif
+    return cxstring_createRef("");
+  }
+
+  unsigned
+  clang_ext_DeclContext_visitDecls(
+    CXCursor parent, CXCursorVisitor visitor, CXClientData client_data)
+  {
+    #ifndef LLVM_VERSION_BEFORE_3_5_0
+    auto d = GetCursorDecl(parent);
+    if (auto dc = llvm::dyn_cast_or_null<clang::DeclContext>(d)) {
+      CXTranslationUnit tu = getCursorTU(parent);
+      for (auto sd : dc->decls()) {
+        if (visitor(MakeCXCursor(sd, tu), parent, client_data)
+            == CXChildVisit_Break) {
+          return 1;
+        }
+      }
+    }
+    #endif
+    return 0;
   }
 }

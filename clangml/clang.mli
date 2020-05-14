@@ -10,13 +10,6 @@ include module type of struct
   include Bindings
 end
 
-(** The module includes {!module:Clang__compat} which contains
-    compatibility implementations for some functions and type
-    definitions that are missing in old versions of Clang API. *)
-include module type of struct
-  include Clang__compat
-end
-
 module Types = Clang__types
 
 include module type of struct
@@ -26,6 +19,8 @@ end
 include module type of struct
   include Clang__utils
 end
+
+module Standard = Standard
 
 module Command_line = Clang__command_line
 

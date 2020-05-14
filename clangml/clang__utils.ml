@@ -1,8 +1,75 @@
+[%%metapackage "metapp"]
+[%%metadir "config/.clangml_config.objs/byte"]
+
 open Clang__bindings
 
-open Clang__compat
-
 open Clang__types
+
+[%%meta Metapp.Stri.of_list (
+  if Clangml_config.version >= { major = 3; minor = 5; subminor = 0 } then
+    []
+  else [%str
+    type cxerrorcode =
+      | Failure
+      | Crashed
+      | InvalidArguments
+      | ASTReadError
+    (** Error codes introduced in clang 3.5, declared here for compatibility.
+        Only {!constr:Failure} will be used. *)
+
+    let parse_translation_unit2 index filename command_line_args unsaved_files
+        options : (cxtranslationunit, cxerrorcode) result =
+      match
+        parse_translation_unit index filename command_line_args unsaved_files
+          options
+      with
+      | None -> Error Failure
+      | Some tu -> Ok tu
+    (** Compatibility wrapper for [parse_translation_unit2].
+        In case of error, [Error Failure] will be returned. *)])]
+
+[%%meta Metapp.Stri.of_list (
+ if Clangml_config.version >= { major = 3; minor = 6; subminor = 0 } then [%str
+   let predefined_expr_get_function_name cursor _decl =
+     ext_predefined_expr_get_function_name cursor]
+ else [%str
+   let predefined_expr_get_function_name cursor decl =
+     ext_predefined_expr_compute_name
+       (ext_predefined_expr_get_ident_kind cursor) decl])]
+
+[%%meta Metapp.Stri.of_list (
+  if Clangml_config.version >= { major = 3; minor = 7; subminor = 0 } then
+    []
+  else [%str
+    type cxvisitorresult =
+      | Break
+      | Continue
+
+    let type_visit_fields ty visitor =
+      visit_children (ty |> get_type_declaration) (fun cur _parent ->
+        match get_cursor_kind cur with
+        | FieldDecl ->
+            begin
+              match visitor cur with
+              | Break -> Break
+              | Continue -> Continue
+            end
+        | _ -> Continue)])]
+
+[%%meta Metapp.Stri.of_list (
+  if Clangml_config.version.major >= 8 then [%str
+    let include_attributed_types =
+      Cxtranslationunit_flags.include_attributed_types
+
+    let type_non_null = TypeNonNull]
+  else [%str
+    let include_attributed_types =
+      Cxtranslationunit_flags.none
+
+    let type_get_modified_type ty =
+      ty
+
+    let type_non_null = NoAttr])]
 
 let iter_visitor f visitor =
   let exn_ref = ref (None : exn option) in
@@ -50,6 +117,19 @@ let iter_type_fields f ty =
 
 let list_of_type_fields ty =
   list_of_iter (fun f -> iter_type_fields f ty)
+
+let iter_decl_context f c =
+  iter_visitor f begin fun f ->
+    ignore (ext_decl_context_visit_decls c begin fun cur _par ->
+      if f cur then
+        Continue
+      else
+        Break
+    end)
+  end
+
+let list_of_decl_context c =
+  list_of_iter (fun f -> iter_decl_context f c)
 
 let seq_of_diagnostics tu =
   let count = get_num_diagnostics tu in
@@ -119,7 +199,20 @@ let is_signed_integer (ty : cxtypekind) =
 let is_integer (ty : cxtypekind) =
   is_unsigned_integer ty || is_signed_integer ty
 
-let is_floating_point = is_floating_point (* Defined in compat *)
+[%%meta Metapp.Stri.of_list (Metapp.filter.structure Metapp.filter [%str
+let is_floating_point (ty : cxtypekind) =
+  match ty with
+  | Float | Double | LongDouble -> true
+  | Float128
+      [@if [%meta Metapp.Exp.of_bool
+        (Clangml_config.version >= { major = 3; minor = 9; subminor = 0 })]] ->
+      true
+  | Half [@if [%meta Metapp.Exp.of_bool (Clangml_config.version.major >= 5)]] ->
+      true
+  | Float16
+      [@if [%meta Metapp.Exp.of_bool (Clangml_config.version.major >= 6)]] ->
+      true
+  | _ -> false])]
 
 let get_bits ~signed =
   if signed then

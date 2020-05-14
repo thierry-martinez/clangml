@@ -845,6 +845,30 @@ clang_ext_Cursor_getTemplateArg(CXCursor, unsigned int);
 CXCursor
 clang_ext_TypeAliasTemplateDecl_getTemplatedDecl(CXCursor);
 
+struct clang_ext_TemplateParameterList {
+  const void *data;
+  CXTranslationUnit tu;
+};
+
+void
+clang_ext_TemplateParameterList_dispose(
+  struct clang_ext_TemplateParameterList);
+
+unsigned int
+clang_ext_TemplateParameterList_size(
+  struct clang_ext_TemplateParameterList);
+
+CXCursor
+clang_ext_TemplateParameterList_getParam(
+  struct clang_ext_TemplateParameterList, unsigned int);
+
+CXCursor
+clang_ext_TemplateParameterList_getRequiresClause(
+  struct clang_ext_TemplateParameterList);
+
+struct clang_ext_TemplateParameterList
+clang_ext_TemplateDecl_getTemplateParameters(CXCursor);
+
 unsigned int
 clang_ext_TemplateDecl_getParameterCount(CXCursor);
 
@@ -975,16 +999,16 @@ CXCursor
 clang_ext_FunctionTypeLoc_getParam(struct clang_ext_TypeLoc, unsigned int);
 
 CXCursor
-clang_ext_InitListExpr_getSyntacticForm(CXCursor cursor);
+clang_ext_InitListExpr_getSyntacticForm(CXCursor);
 
 CXCursor
-clang_ext_InitListExpr_getSemanticForm(CXCursor cursor);
+clang_ext_InitListExpr_getSemanticForm(CXCursor);
 
 unsigned int
-clang_ext_InitListExpr_getNumInits(CXCursor cursor);
+clang_ext_InitListExpr_getNumInits(CXCursor);
 
 CXCursor
-clang_ext_InitListExpr_getInit(CXCursor cursor, unsigned int i);
+clang_ext_InitListExpr_getInit(CXCursor, unsigned int);
 
 enum clang_ext_DesignatedInitExpr_DesignatorKind {
   clang_ext_FieldDesignator,
@@ -993,22 +1017,93 @@ enum clang_ext_DesignatedInitExpr_DesignatorKind {
 };
 
 unsigned int
-clang_ext_DesignatedInitExpr_size(CXCursor cursor);
+clang_ext_DesignatedInitExpr_size(CXCursor);
 
 enum clang_ext_DesignatedInitExpr_DesignatorKind
-clang_ext_DesignatedInitExpr_getKind(CXCursor cursor, unsigned int index);
+clang_ext_DesignatedInitExpr_getKind(CXCursor, unsigned int);
 
 CXCursor
-clang_ext_DesignatedInitExpr_getField(CXCursor cursor, unsigned int index);
+clang_ext_DesignatedInitExpr_getField(CXCursor, unsigned int);
 
 CXCursor
-clang_ext_DesignatedInitExpr_getArrayIndex(CXCursor cursor, unsigned int index);
+clang_ext_DesignatedInitExpr_getArrayIndex(CXCursor, unsigned int);
 
 CXCursor
-clang_ext_DesignatedInitExpr_getArrayRangeStart(CXCursor cursor, unsigned int index);
+clang_ext_DesignatedInitExpr_getArrayRangeStart(CXCursor, unsigned int);
 
 CXCursor
-clang_ext_DesignatedInitExpr_getArrayRangeEnd(CXCursor cursor, unsigned int index);
+clang_ext_DesignatedInitExpr_getArrayRangeEnd(CXCursor, unsigned int);
 
 CXCursor
-clang_ext_DesignatedInitExpr_getInit(CXCursor cursor);
+clang_ext_DesignatedInitExpr_getInit(CXCursor);
+
+CXCursor
+clang_ext_ConceptDecl_getConstraintExpr(CXCursor);
+
+struct clang_ext_Requirement {
+  const void *data;
+  CXTranslationUnit tu;
+};
+
+void
+clang_ext_Requirement_dispose(struct clang_ext_Requirement);
+
+/* From clang/AST/ExprConcepts.h:Requirement::RequirementKind */
+enum clang_ext_RequirementKind {
+  clang_ext_RK_Type,
+  clang_ext_RK_Simple,
+  clang_ext_RK_Compound,
+  clang_ext_RK_Nested
+};
+
+enum clang_ext_RequirementKind
+clang_ext_Requirement_getKind(struct clang_ext_Requirement);
+
+struct clang_ext_TypeLoc
+clang_ext_TypeRequirement_getType(struct clang_ext_Requirement);
+
+CXCursor
+clang_ext_ExprRequirement_getExpr(struct clang_ext_Requirement);
+
+struct clang_ext_TemplateParameterList
+clang_ext_ExprRequirement_ReturnType_getTypeConstraintTemplateParameterList(
+  struct clang_ext_Requirement);
+
+CXCursor
+clang_ext_ExprRequirement_ReturnType_getTypeConstraint(
+  struct clang_ext_Requirement);
+
+CXCursor
+clang_ext_NestedRequirement_getConstraintExpr(struct clang_ext_Requirement);
+
+unsigned int
+clang_ext_RequiresExpr_getLocalParameterCount(CXCursor);
+
+CXCursor
+clang_ext_RequiresExpr_getLocalParameter(CXCursor, unsigned int);
+
+unsigned int
+clang_ext_RequiresExpr_getRequirementCount(CXCursor);
+
+struct clang_ext_Requirement
+clang_ext_RequiresExpr_getRequirement(CXCursor, unsigned int);
+
+/* From clang/AST/Attrs.inc:WarnUnusedResultAttr::Spelling */
+enum clang_ext_WarnUnusedResultAttr_Spelling {
+  clang_ext_CXX11_nodiscard,
+  clang_ext_C2x_nodiscard,
+  clang_ext_CXX11_clang_warn_unused_result,
+  clang_ext_GNU_warn_unused_result,
+  clang_ext_CXX11_gnu_warn_unused_result,
+  clang_ext_SpellingNotCalculated
+};
+
+enum clang_ext_WarnUnusedResultAttr_Spelling
+clang_ext_WarnUnusedResultAttr_getSemanticSpelling(CXCursor);
+
+CXString
+clang_ext_WarnUnusedResultAttr_getMessage(CXCursor);
+
+unsigned
+clang_ext_DeclContext_visitDecls(
+  CXCursor parent, CXCursorVisitor visitor, CXClientData client_data);

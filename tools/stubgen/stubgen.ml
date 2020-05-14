@@ -2013,6 +2013,12 @@ let main cflags llvm_config prefix =
     add_type (Pcre.regexp "^clang_ext_TypeLoc$")
       (empty_type_interface |>
        make_destructor "clang_ext_TypeLoc_dispose") |>
+    add_type (Pcre.regexp "^clang_ext_TemplateParameterList$")
+      (empty_type_interface |>
+       make_destructor "clang_ext_TemplateParameterList_dispose") |>
+    add_type (Pcre.regexp "^clang_ext_Requirement$")
+      (empty_type_interface |>
+       make_destructor "clang_ext_Requirement_dispose") |>
     add_type (Pcre.regexp "^CXIndex$")
       (empty_type_interface |>
        make_destructor "clang_disposeIndex") |>
@@ -2020,7 +2026,7 @@ let main cflags llvm_config prefix =
       (empty_type_interface |>
        make_destructor "clang_disposeTranslationUnit" |>
        carry_reference "CXIndex") |>
-    add_type (Pcre.regexp "^CXCursor$|^CXType$|^CXFile$|^CXModule$|^CXSourceRange$|^CXSourceLocation$|^CXComment$|^clang_ext_TemplateName$|^clang_ext_TemplateArgument$|^clang_ext_LambdaCapture$|^clang_ext_DeclarationName$|^clang_ext_NestedNameSpecifier$|^clang_ext_TypeLoc$")
+    add_type (Pcre.regexp "^CXCursor$|^CXType$|^CXFile$|^CXModule$|^CXSourceRange$|^CXSourceLocation$|^CXComment$|^clang_ext_TemplateName$|^clang_ext_TemplateArgument$|^clang_ext_LambdaCapture$|^clang_ext_DeclarationName$|^clang_ext_NestedNameSpecifier$|^clang_ext_TypeLoc$|^clang_ext_TemplateParameterList$|^clang_ext_Requirement$")
       (empty_type_interface |> carry_reference "CXTranslationUnit") |>
     add_type (Pcre.regexp "^CXCursor$")
       (empty_type_interface |>
@@ -2102,6 +2108,14 @@ let main cflags llvm_config prefix =
       (empty_function_interface |>
         add_argument (output_on_success (Name "out_TU"))) |>
     add_function (Pcre.regexp "^clang_visitChildren$")
+      (empty_function_interface |>
+        add_result (empty_type_interface |> integer_zero_is_true) |>
+        add_argument (Closure {
+          pointer = Name "visitor";
+          data_caller = Name "client_data";
+          data_callee = Index 2;
+          references = [Name "parent"] })) |>
+    add_function (Pcre.regexp "^clang_ext_DeclContext_visitDecls$")
       (empty_function_interface |>
         add_result (empty_type_interface |> integer_zero_is_true) |>
         add_argument (Closure {

@@ -711,6 +711,9 @@ IF_CLANG_FROM_3_5
 ENDIF_CLANG_BEFORE_3_5
 IF_CLANG_BEFORE_3_5
 EQUIVALENT_LLVM_VERSION
+LLVM_VERSION_SUBMINOR
+LLVM_VERSION_MINOR
+LLVM_VERSION_MAJOR
 LLVM_VERSION
 BREW_LLVM_CONFIG
 BREW_CELLAR
@@ -4201,6 +4204,16 @@ fi
 LLVM_VERSION=`echo $LLVM_VERSION | sed 's/\(svn\|git\)$//'`
 
 
+LLVM_VERSION_MAJOR=`echo $LLVM_VERSION | \
+  sed 's/^\([[:digit:]]\+\)[.]\([[:digit:]]\+\)[.]\([[:digit:]]\+\)/\1/'`
+
+LLVM_VERSION_MINOR=`echo $LLVM_VERSION | \
+  sed 's/^\([[:digit:]]\+\)[.]\([[:digit:]]\+\)[.]\([[:digit:]]\+\)/\2/'`
+
+LLVM_VERSION_SUBMINOR=`echo $LLVM_VERSION | \
+  sed 's/^\([[:digit:]]\+\)[.]\([[:digit:]]\+\)[.]\([[:digit:]]\+\)/\3/'`
+
+
 EQUIVALENT_LLVM_VERSION="$LLVM_VERSION"
 
 
@@ -7077,6 +7090,11 @@ fi
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
+     if cp $srcdir/clangml/standard.ml clangml/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
      if cp $srcdir/clangml/dune clangml/; then :
   true
 else
@@ -7337,7 +7355,7 @@ else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
 
-ac_config_files="$ac_config_files Makefile config/cflags.sexp config/cxxflags.sexp config/ldflags.sexp config/ldflags_quoted.sexp config/libs.sexp config/libs_quoted.sexp config/clangml_config.ml clangml/clang__compat.ml"
+ac_config_files="$ac_config_files Makefile config/cflags.sexp config/cxxflags.sexp config/ldflags.sexp config/ldflags_quoted.sexp config/libs.sexp config/libs_quoted.sexp config/clangml_config.ml"
 
 
 
@@ -8130,7 +8148,6 @@ do
     "config/libs.sexp") CONFIG_FILES="$CONFIG_FILES config/libs.sexp" ;;
     "config/libs_quoted.sexp") CONFIG_FILES="$CONFIG_FILES config/libs_quoted.sexp" ;;
     "config/clangml_config.ml") CONFIG_FILES="$CONFIG_FILES config/clangml_config.ml" ;;
-    "clangml/clang__compat.ml") CONFIG_FILES="$CONFIG_FILES clangml/clang__compat.ml" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

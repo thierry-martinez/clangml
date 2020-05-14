@@ -100,7 +100,7 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES = config/cflags.sexp config/cxxflags.sexp \
 	config/ldflags.sexp config/ldflags_quoted.sexp \
 	config/libs.sexp config/libs_quoted.sexp \
-	config/clangml_config.ml clangml/clang__compat.ml
+	config/clangml_config.ml
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -152,7 +152,6 @@ am__can_run_installinfo = \
   esac
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 am__DIST_COMMON = $(srcdir)/Makefile.in \
-	$(top_srcdir)/clangml/clang__compat.ml.in \
 	$(top_srcdir)/config/cflags.sexp.in \
 	$(top_srcdir)/config/clangml_config.ml.in \
 	$(top_srcdir)/config/cxxflags.sexp.in \
@@ -276,6 +275,9 @@ LLVM_LIBDIR = @LLVM_LIBDIR@
 LLVM_LIBS = @LLVM_LIBS@
 LLVM_VERSION = @LLVM_VERSION@
 LLVM_VERSION_MACRO = @LLVM_VERSION_MACRO@
+LLVM_VERSION_MAJOR = @LLVM_VERSION_MAJOR@
+LLVM_VERSION_MINOR = @LLVM_VERSION_MINOR@
+LLVM_VERSION_SUBMINOR = @LLVM_VERSION_SUBMINOR@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
@@ -422,8 +424,6 @@ config/libs.sexp: $(top_builddir)/config.status $(top_srcdir)/config/libs.sexp.i
 config/libs_quoted.sexp: $(top_builddir)/config.status $(top_srcdir)/config/libs_quoted.sexp.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 config/clangml_config.ml: $(top_builddir)/config.status $(top_srcdir)/config/clangml_config.ml.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-clangml/clang__compat.ml: $(top_builddir)/config.status $(top_srcdir)/clangml/clang__compat.ml.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 install-mypkgSCRIPTS: $(mypkg_SCRIPTS)
 	@$(NORMAL_INSTALL)

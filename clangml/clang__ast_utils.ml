@@ -1,7 +1,5 @@
 open Clang__bindings
 
-open Clang__compat
-
 open Clang__ast
 
 open Clang__utils

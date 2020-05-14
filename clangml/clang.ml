@@ -1,4 +1,5 @@
 [%%metapackage "metapp"]
+[%%metadir "config/.clangml_config.objs/byte"]
 
 (** Common part of AST node signatures *)
 module type S = sig
@@ -42,13 +43,13 @@ module Bindings = Clang__bindings
 
 include Bindings
 
-include Clang__compat
-
 module Types = Clang__types
 
 include Types
 
 include Clang__utils
+
+module Standard = Standard
 
 module Command_line = Clang__command_line
 
@@ -60,7 +61,7 @@ let make_include_dir path =
 
 let includedir =
   make_include_dir
-    [Filename.parent_dir_name; "lib"; "clang"; Clangml_config.version;
+    [Filename.parent_dir_name; "lib"; "clang"; Clangml_config.version_string;
      "include"]
 
 let default_include_directories () =
@@ -68,7 +69,7 @@ let default_include_directories () =
   let macos_sdk =
     "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/" in
   let gentoo_dir =
-    "/usr/lib/clang/" ^ Clangml_config.version ^ "/include/" in
+    "/usr/lib/clang/" ^ Clangml_config.version_string ^ "/include/" in
   [macos_sdk; cpp_lib; includedir; gentoo_dir]
 
 let option_cursor_bind f cursor : 'a option =
@@ -147,6 +148,7 @@ module Init_list = struct
     | Semantic -> semantic_form cursor
 end
 
+[%%meta Metapp.Stri.of_list (Metapp.filter.structure Metapp.filter [%str
 module Ast = struct
   include Clang__ast
 
@@ -369,7 +371,7 @@ module Ast = struct
       | SubstTemplateTemplateParmPack -> SubstTemplateTemplateParmPack
       | InvalidNameKind -> InvalidNameKind
 
-    and make_template_argument argument =
+    and make_template_argument argument : template_argument =
       match ext_template_argument_get_kind argument with
       | Type ->
           Type (
@@ -747,6 +749,7 @@ module Ast = struct
               body;
               defaulted = ext_cxxmethod_is_defaulted cursor;
               deleted = ext_function_decl_is_deleted cursor;
+              exception_spec = extract_exception_spec (get_cursor_type cursor);
           }
         | TemplateTemplateParameter ->
             TemplateTemplateParameter (get_cursor_spelling cursor)
@@ -808,24 +811,37 @@ module Ast = struct
                   get_typedef_decl_underlying_type |> of_cxtype in
                   TypeAlias { ident_ref; qual_type }
                 end
-            | ext_kind ->
-                match compat_decl_kind ext_kind with
-                | Decomposition ->
-                    let init =
-                      match list_of_children cursor with
-                      | [sub] -> Some (sub |> expr_of_cxcursor)
-                      | [] -> None
-                      | _ -> raise Invalid_structure in
-                    Decomposition {
-                      bindings = List.init
-                        (ext_decomposition_decl_get_bindings_count cursor)
-                        begin fun i ->
-                          ext_decomposition_decl_get_bindings cursor i |>
-                          extract_declaration_name
-                        end;
-                      init;
-                    }
-                | _ -> UnknownDecl (kind, ext_kind)
+            | Decomposition
+                [@if [%meta Metapp.Exp.of_bool
+                  (Clangml_config.version.major >= 4)]] ->
+                let init =
+                  match list_of_children cursor with
+                  | [sub] -> Some (sub |> expr_of_cxcursor)
+                  | [] -> None
+                  | _ -> raise Invalid_structure in
+                Decomposition {
+                  bindings = List.init
+                    (ext_decomposition_decl_get_bindings_count cursor)
+                    begin fun i ->
+                      ext_decomposition_decl_get_bindings cursor i |>
+                      extract_declaration_name
+                    end;
+                  init;
+                }
+            | Concept
+                [@if [%meta Metapp.Exp.of_bool
+                  (Clangml_config.version.major >= 9)]] ->
+                let parameters = extract_template_parameters cursor in
+                let name = extract_declaration_name cursor in
+                let constraint_expr =
+                  cursor |> ext_concept_decl_get_constraint_expr |>
+                  expr_of_cxcursor in
+                Concept { parameters; name; constraint_expr }
+            | Export
+                [@if [%meta Metapp.Exp.of_bool
+                  (Clangml_config.version.major >= 4)]] ->
+                Export (List.map decl_of_cxcursor (list_of_decl_context cursor))
+            | ext_kind -> UnknownDecl (kind, ext_kind)
       with Invalid_structure ->
         UnknownDecl (get_cursor_kind cursor, ext_decl_get_kind cursor)
 
@@ -950,33 +966,36 @@ module Ast = struct
       let calling_conv = cxtype |> get_function_type_calling_conv in
       let result = cxtype |> get_result_type |> of_cxtype in
       let exception_spec : exception_spec option =
-        match ext_function_proto_type_get_exception_spec_type cxtype with
-        | NoExceptionSpecification -> None
-        | DynamicNone -> Some (Throw [])
-        | Dynamic ->
-            let throws =
-              List.init (ext_function_proto_type_get_num_exceptions cxtype)
-                begin fun index ->
-                  ext_function_proto_type_get_exception_type cxtype index |>
-                  of_cxtype
-                end in
-            Some (Throw throws)
-        | BasicNoexcept -> Some (Noexcept { expr = None; evaluated = None })
-        | DependentNoexcept ->
-            let expr =
-              ext_function_proto_type_get_noexcept_expr cxtype |>
-              expr_of_cxcursor in
-            Some (Noexcept { expr = Some expr; evaluated = None })
-        | NoexceptFalse ->
-            let expr = ext_function_proto_type_get_noexcept_expr cxtype |>
-              expr_of_cxcursor in
-            Some (Noexcept { expr = Some expr; evaluated = Some false })
-        | NoexceptTrue ->
-            let expr = ext_function_proto_type_get_noexcept_expr cxtype |>
-              expr_of_cxcursor in
-            Some (Noexcept { expr = Some expr; evaluated = Some true })
-        | other -> Some (Other other) in
+        extract_exception_spec cxtype in
       { calling_conv; result; parameters; exception_spec; }
+
+    and extract_exception_spec cxtype =
+      match ext_function_proto_type_get_exception_spec_type cxtype with
+      | NoExceptionSpecification -> None
+      | DynamicNone -> Some (Throw [])
+      | Dynamic ->
+          let throws =
+            List.init (ext_function_proto_type_get_num_exceptions cxtype)
+              begin fun index ->
+                ext_function_proto_type_get_exception_type cxtype index |>
+                of_cxtype
+              end in
+          Some (Throw throws)
+      | BasicNoexcept -> Some (Noexcept { expr = None; evaluated = None })
+      | DependentNoexcept ->
+          let expr =
+            ext_function_proto_type_get_noexcept_expr cxtype |>
+            expr_of_cxcursor in
+          Some (Noexcept { expr = Some expr; evaluated = None })
+      | NoexceptFalse ->
+          let expr = ext_function_proto_type_get_noexcept_expr cxtype |>
+            expr_of_cxcursor in
+          Some (Noexcept { expr = Some expr; evaluated = Some false })
+      | NoexceptTrue ->
+          let expr = ext_function_proto_type_get_noexcept_expr cxtype |>
+            expr_of_cxcursor in
+          Some (Noexcept { expr = Some expr; evaluated = Some true })
+      | other -> Some (Other other)
 
     and var_decl_of_cxcursor cursor =
       node ~cursor (var_decl_desc_of_cxcursor cursor)
@@ -1029,16 +1048,31 @@ module Ast = struct
         access_specifier = get_cxxaccess_specifier cursor;
       }
 
+    and attribute_of_cxcursor_opt cursor : attribute option =
+      let kind = get_cursor_kind cursor in
+      let make_unused () : attribute_desc =
+        WarnUnusedResult {
+          spelling = ext_warn_unused_result_attr_get_semantic_spelling cursor;
+          message = ext_warn_unused_result_attr_get_message cursor;
+        } in
+      let desc : attribute_desc option =
+        match kind with
+        | WarnUnusedResultAttr
+            [@if [%meta Metapp.Exp.of_bool
+              (Clangml_config.version.major >= 9)]] ->
+            Some (make_unused ())
+        | UnexposedAttr ->
+            begin match ext_attr_get_kind cursor with
+            | WarnUnusedResult -> Some (make_unused ())
+            | other -> Some (Other other)
+            end
+        | _ -> None in
+      Option.map (node ~cursor) desc
+
     and record_decl_of_cxcursor keyword cursor =
       let attributes, children =
         list_of_children cursor |>
-        extract begin fun cursor ->
-          let kind = get_cursor_kind cursor in
-          if kind = UnexposedAttr then
-            Some (ext_attr_get_kind cursor)
-          else
-            None
-        end in
+        extract attribute_of_cxcursor_opt in
       let children =
         children |>
         filter_out_prefix_from_list is_template_parameter in
@@ -1527,6 +1561,34 @@ module Ast = struct
                 ArgumentExpr (ext_cxxtypeid_expr_get_expr_operand cursor |>
                   expr_of_cxcursor) in
             Typeid argument
+        | PackExpansionExpr ->
+            let sub =
+              match list_of_children cursor with
+              | [sub] -> expr_of_cxcursor sub
+              | _ -> raise Invalid_structure in
+            PackExpansionExpr sub
+        | SizeOfPackExpr ->
+            SizeOfPack (
+              ext_size_of_pack_expr_get_pack cursor |> ident_ref_of_cxcursor)
+        | CXXFunctionalCastExpr ->
+            cast_of_cxcursor Functional cursor
+        | CXXStaticCastExpr ->
+            cast_of_cxcursor Static cursor
+        | CXXDynamicCastExpr ->
+            cast_of_cxcursor Dynamic cursor
+        | CXXConstCastExpr ->
+            cast_of_cxcursor Const cursor
+        | CXXThrowExpr ->
+            let sub =
+              match list_of_children cursor with
+              | [sub] -> Some (expr_of_cxcursor sub)
+              | [] -> None
+              | _ -> raise Invalid_structure in
+            ThrowExpr sub
+        | TemplateRef ->
+            TemplateRef (ident_ref_of_cxcursor cursor)
+        | OverloadedDeclRef ->
+            OverloadedDeclRef (ident_ref_of_cxcursor cursor)
         | UnexposedExpr ->
             begin
               match ext_stmt_get_kind cursor with
@@ -1609,63 +1671,56 @@ module Ast = struct
                     ext_designated_init_expr_get_init cursor |>
                     expr_of_cxcursor in
                   DesignatedInit { designators; init }
-              | kind ->
-                  match compat_stmt_kind kind with
-                  | CXXFoldExpr ->
-                      let lhs, rhs =
-                        match list_of_children cursor with
-                        | [lhs; rhs] ->
-                            Some (expr_of_cxcursor lhs),
-                            Some (expr_of_cxcursor rhs)
-                        | [sub] ->
-                            if ext_cxxfold_expr_is_right_fold cursor then
-                              Some (expr_of_cxcursor sub), None
-                            else
-                              None, Some (expr_of_cxcursor sub)
-                        | _ -> raise Invalid_structure in
-                      let operator = ext_cxxfold_expr_get_operator cursor in
-                      Fold { lhs; operator; rhs }
-                  | ArrayInitLoopExpr ->
-                      let common_expr, sub_expr =
-                        match list_of_children cursor with
-                        | [common_expr; sub_expr] ->
-                            common_expr |> expr_of_cxcursor,
-                            sub_expr |> expr_of_cxcursor
-                          | _ -> raise Invalid_structure in
-                      ArrayInitLoop { common_expr; sub_expr }
-                  | ArrayInitIndexExpr ->
-                      ArrayInitIndex
-                  | _ ->
-                      UnexposedExpr kind
+              | CXXFoldExpr
+                [@if [%meta Metapp.Exp.of_bool
+                  (Clangml_config.version >=
+                    { major = 3; minor = 6; subminor = 0 })]] ->
+                  let lhs, rhs =
+                    match list_of_children cursor with
+                    | [lhs; rhs] ->
+                        Some (expr_of_cxcursor lhs),
+                        Some (expr_of_cxcursor rhs)
+                    | [sub] ->
+                        if ext_cxxfold_expr_is_right_fold cursor then
+                          Some (expr_of_cxcursor sub), None
+                        else
+                          None, Some (expr_of_cxcursor sub)
+                    | _ -> raise Invalid_structure in
+                  let operator = ext_cxxfold_expr_get_operator cursor in
+                  Fold { lhs; operator; rhs }
+              | ArrayInitLoopExpr
+                [@if [%meta Metapp.Exp.of_bool
+                  (Clangml_config.version.major >= 4)]] ->
+                  let common_expr, sub_expr =
+                    match list_of_children cursor with
+                    | [common_expr; sub_expr] ->
+                        common_expr |> expr_of_cxcursor,
+                        sub_expr |> expr_of_cxcursor
+                      | _ -> raise Invalid_structure in
+                  ArrayInitLoop { common_expr; sub_expr }
+              | ArrayInitIndexExpr
+                [@if [%meta Metapp.Exp.of_bool
+                  (Clangml_config.version.major >= 4)]] ->
+                  ArrayInitIndex
+              | RequiresExpr
+                [@if [%meta Metapp.Exp.of_bool
+                  (Clangml_config.version.major >= 10)]] ->
+                  Requires {
+                    local_parameters =
+                      List.init
+                        (ext_requires_expr_get_local_parameter_count cursor)
+                        (fun i ->
+                          ext_requires_expr_get_local_parameter cursor i |>
+                          parameter_of_cxcursor);
+                    requirements =
+                      List.init
+                        (ext_requires_expr_get_requirement_count cursor)
+                        (fun i ->
+                          ext_requires_expr_get_requirement cursor i |>
+                          extract_requirement);
+                  }
+              | kind -> UnexposedExpr kind
             end
-        | PackExpansionExpr ->
-            let sub =
-              match list_of_children cursor with
-              | [sub] -> expr_of_cxcursor sub
-              | _ -> raise Invalid_structure in
-            PackExpansionExpr sub
-        | SizeOfPackExpr ->
-            SizeOfPack (
-              ext_size_of_pack_expr_get_pack cursor |> ident_ref_of_cxcursor)
-        | CXXFunctionalCastExpr ->
-            cast_of_cxcursor Functional cursor
-        | CXXStaticCastExpr ->
-            cast_of_cxcursor Static cursor
-        | CXXDynamicCastExpr ->
-            cast_of_cxcursor Dynamic cursor
-        | CXXConstCastExpr ->
-            cast_of_cxcursor Const cursor
-        | CXXThrowExpr ->
-            let sub =
-              match list_of_children cursor with
-              | [sub] -> Some (expr_of_cxcursor sub)
-              | [] -> None
-              | _ -> raise Invalid_structure in
-            ThrowExpr sub
-        | TemplateRef ->
-            TemplateRef (ident_ref_of_cxcursor cursor)
-        | OverloadedDeclRef ->
-            OverloadedDeclRef (ident_ref_of_cxcursor cursor)
         | _ ->
             UnknownExpr (kind, ext_stmt_get_kind cursor)
       with Invalid_structure ->
@@ -1820,10 +1875,19 @@ module Ast = struct
             { parameter_name; parameter_kind; parameter_pack}
 
     and extract_template_parameters cursor =
-      List.init (ext_template_decl_get_parameter_count cursor) begin fun i ->
-        ext_template_decl_get_parameter cursor i |>
-        template_parameter_of_cxcursor
-      end
+      extract_template_parameter_list
+        (ext_template_decl_get_template_parameters cursor)
+
+    and extract_template_parameter_list list = {
+      list =
+        List.init (ext_template_parameter_list_size list) begin fun i ->
+          ext_template_parameter_list_get_param list i |>
+          template_parameter_of_cxcursor
+        end;
+      requires_clause =
+        ext_template_parameter_list_get_requires_clause list |>
+        option_cursor expr_of_cxcursor;
+    }
 
     and extract_template_arguments cursor =
       List.init (ext_cursor_get_num_template_args cursor) begin fun i ->
@@ -1831,10 +1895,33 @@ module Ast = struct
         make_template_argument
       end
 
+    and extract_requirement requirement : requirement =
+      match ext_requirement_get_kind requirement with
+      | Type -> Type (ext_type_requirement_get_type requirement |> of_type_loc)
+      | Simple -> Simple (extract_expr_requirement requirement)
+      | Compound -> Compound (extract_expr_requirement requirement)
+      | Nested ->
+          let expr =
+            ext_nested_requirement_get_constraint_expr requirement |>
+            expr_of_cxcursor in
+          Nested expr
+
+    and extract_expr_requirement requirement =
+      let return_type_type_constraint =
+        ext_expr_requirement_return_type_get_type_constraint requirement |>
+        option_cursor expr_of_cxcursor in
+      { expr = ext_expr_requirement_get_expr requirement |> expr_of_cxcursor;
+        return_type_type_constraint =
+          return_type_type_constraint |> Option.map (fun type_constraint ->
+            { type_constraint;
+              parameters =
+ext_expr_requirement_return_type_get_type_constraint_template_parameter_list
+                requirement |> extract_template_parameter_list; })}
+
     and make_template ?(optional = false) cursor body =
       let parameters = extract_template_parameters cursor in
       match parameters with
-      | [] when optional -> body
+      | { list = []; requires_clause = None } when optional -> body
       | _ -> TemplateDecl { parameters; decl = node ~cursor body }
 
     let translation_unit_of_cxcursor cursor =
@@ -1985,7 +2072,7 @@ module Ast = struct
     match location with
     | Clang location -> concrete_of_cxsourcelocation kind location
     | Concrete location -> location
-end
+end])]
 
 module Expr = [%meta node_module [%str
   type t = Ast.expr [@@deriving refl]
