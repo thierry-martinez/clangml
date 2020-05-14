@@ -2913,40 +2913,41 @@ template<typename T, T n> struct C<A<n>> {
 };
 |}
 let () =
-  check_pattern quote_decl_list (parse_declaration_list ~language:CXX
-    ~command_line_args:[Clang.Command_line.standard Cxx20]) example
-  [%pattern? [
-    { desc = TemplateDecl {
-      parameters = { list = [
-        { desc = {
-          parameter_name = "n";
-          parameter_kind = NonType {
-            parameter_type = { desc = BuiltinType Long }}}}] };
-      decl = { desc = RecordDecl {
-        keyword = Struct; name = "A"; fields = [] }}}};
-    { desc = TemplateDecl {
-      parameters = { list = [
-        { desc = { parameter_name = "T"; parameter_kind = Class _ }}] };
-      decl = { desc = RecordDecl {
-        keyword = Struct; name = "C"; fields = [] }}}};
-    { desc = TemplatePartialSpecialization {
-      parameters = { list = [
-        { desc = { parameter_name = "T"; parameter_kind = Class _ }};
-        { desc = {
-          parameter_name = "n";
-          parameter_kind = NonType {
-            parameter_type = { desc = TemplateTypeParm "T" }}}}] };
-      arguments = [
-        Type { desc = TemplateSpecialization {
-          name = NameTemplate "A";
-          args = [
-            ExprTemplateArgument { desc = DeclRef {
-              name = IdentifierName "n" }}] }}];
-      decl = { desc = RecordDecl {
-        keyword = Struct; name = "C"; fields = [
-          { desc = TypeAlias {
-            ident_ref = { name = IdentifierName "Q" };
-            qual_type = { desc = TemplateTypeParm "T" }}}] }}}}]]
+  if Clang.version () >= { major = 3; minor = 5; subminor = 0 } then
+    check_pattern quote_decl_list (parse_declaration_list ~language:CXX
+      ~command_line_args:[Clang.Command_line.standard Cxx17]) example
+    [%pattern? [
+      { desc = TemplateDecl {
+        parameters = { list = [
+          { desc = {
+            parameter_name = "n";
+            parameter_kind = NonType {
+              parameter_type = { desc = BuiltinType Long }}}}] };
+        decl = { desc = RecordDecl {
+          keyword = Struct; name = "A"; fields = [] }}}};
+      { desc = TemplateDecl {
+        parameters = { list = [
+          { desc = { parameter_name = "T"; parameter_kind = Class _ }}] };
+        decl = { desc = RecordDecl {
+          keyword = Struct; name = "C"; fields = [] }}}};
+      { desc = TemplatePartialSpecialization {
+        parameters = { list = [
+          { desc = { parameter_name = "T"; parameter_kind = Class _ }};
+          { desc = {
+            parameter_name = "n";
+            parameter_kind = NonType {
+              parameter_type = { desc = TemplateTypeParm "T" }}}}] };
+        arguments = [
+          Type { desc = TemplateSpecialization {
+            name = NameTemplate "A";
+            args = [
+              ExprTemplateArgument { desc = DeclRef {
+                name = IdentifierName "n" }}] }}];
+        decl = { desc = RecordDecl {
+          keyword = Struct; name = "C"; fields = [
+            { desc = TypeAlias {
+              ident_ref = { name = IdentifierName "Q" };
+              qual_type = { desc = TemplateTypeParm "T" }}}] }}}}]]
     ]}*)
   | CXXMethod of {
       function_decl : function_decl;
