@@ -241,15 +241,6 @@ module Ast = struct
 
     exception Invalid_structure
 
-    let keyword_of_template cursor =
-      let decl_cursor =
-        ext_class_template_decl_get_templated_decl cursor in
-      match get_cursor_kind decl_cursor with
-      | StructDecl -> Struct
-      | UnionDecl -> Union
-      | ClassDecl -> Class
-      | kind -> raise Invalid_structure
-
     (* Hack for having current function declaration to provide function name
        for predefined identifiers on Clang 3.4 and Clang 3.5. *)
     let current_decl = ref (get_null_cursor ())
@@ -667,11 +658,14 @@ module Ast = struct
         | UnionDecl -> record_decl_of_cxcursor Union cursor
         | ClassDecl -> record_decl_of_cxcursor Class cursor
         | ClassTemplate ->
-            let keyword = keyword_of_template cursor in
+            let keyword =
+              ext_class_template_decl_get_templated_decl cursor |>
+              ext_tag_decl_get_tag_kind in
             make_template cursor
               (record_decl_of_cxcursor keyword cursor)
         | ClassTemplatePartialSpecialization ->
-            let decl = record_decl_of_cxcursor Class cursor in
+            let keyword = ext_tag_decl_get_tag_kind cursor in
+            let decl = record_decl_of_cxcursor keyword cursor in
             let result =
             TemplatePartialSpecialization
               { parameters = extract_template_parameters cursor;
@@ -1091,7 +1085,8 @@ module Ast = struct
              | TypeRef | ClassTemplate | TemplateRef | ParmDecl | DeclRefExpr
              | NamespaceRef
              | IntegerLiteral | FloatingLiteral | CharacterLiteral
-             | StringLiteral ->
+             | StringLiteral
+             | UnexposedExpr ->
                  true
              | _ ->
                  match ext_decl_get_kind cursor with

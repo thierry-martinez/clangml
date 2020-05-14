@@ -3364,4 +3364,20 @@ extern "C" {
     #endif
     return 0;
   }
+
+  enum clang_ext_ElaboratedTypeKeyword
+  clang_ext_TagDecl_getTagKind(CXCursor cursor)
+  {
+    auto d = GetCursorDecl(cursor);
+    if (auto td = llvm::dyn_cast_or_null<clang::TagDecl>(d)) {
+      switch (td->getTagKind()) {
+      case clang::TTK_Struct: return ETK_Struct;
+      case clang::TTK_Interface: return ETK_Interface;
+      case clang::TTK_Union: return ETK_Union;
+      case clang::TTK_Class: return ETK_Class;
+      case clang::TTK_Enum: return ETK_Enum;
+      }
+    }
+    return ETK_NoKeyword;
+  }
 }

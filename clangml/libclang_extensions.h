@@ -1107,3 +1107,6 @@ clang_ext_WarnUnusedResultAttr_getMessage(CXCursor);
 unsigned
 clang_ext_DeclContext_visitDecls(
   CXCursor parent, CXCursorVisitor visitor, CXClientData client_data);
+
+enum clang_ext_ElaboratedTypeKeyword
+clang_ext_TagDecl_getTagKind(CXCursor);
