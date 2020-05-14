@@ -2519,6 +2519,19 @@ external ext_cursor_get_template_arg :
 external ext_type_alias_template_decl_get_templated_decl :
   cxcursor -> cxcursor =
     "clang_ext_TypeAliasTemplateDecl_getTemplatedDecl_wrapper"
+type clang_ext_templateparameterlist
+external ext_template_parameter_list_size :
+  clang_ext_templateparameterlist -> int =
+    "clang_ext_TemplateParameterList_size_wrapper"
+external ext_template_parameter_list_get_param :
+  clang_ext_templateparameterlist -> int -> cxcursor =
+    "clang_ext_TemplateParameterList_getParam_wrapper"
+external ext_template_parameter_list_get_requires_clause :
+  clang_ext_templateparameterlist -> cxcursor =
+    "clang_ext_TemplateParameterList_getRequiresClause_wrapper"
+external ext_template_decl_get_template_parameters :
+  cxcursor -> clang_ext_templateparameterlist =
+    "clang_ext_TemplateDecl_getTemplateParameters_wrapper"
 external ext_template_decl_get_parameter_count :
   cxcursor -> int = "clang_ext_TemplateDecl_getParameterCount_wrapper"
 external ext_template_decl_get_parameter :
@@ -2688,3 +2701,56 @@ external ext_designated_init_expr_get_array_range_end :
     "clang_ext_DesignatedInitExpr_getArrayRangeEnd_wrapper"
 external ext_designated_init_expr_get_init :
   cxcursor -> cxcursor = "clang_ext_DesignatedInitExpr_getInit_wrapper"
+external ext_concept_decl_get_constraint_expr :
+  cxcursor -> cxcursor = "clang_ext_ConceptDecl_getConstraintExpr_wrapper"
+type clang_ext_requirementkind =
+  | Type 
+  | Simple 
+  | Compound 
+  | Nested [@@deriving refl]
+type clang_ext_requirement
+external ext_requirement_get_kind :
+  clang_ext_requirement -> clang_ext_requirementkind =
+    "clang_ext_Requirement_getKind_wrapper"
+external ext_type_requirement_get_type :
+  clang_ext_requirement -> clang_ext_typeloc =
+    "clang_ext_TypeRequirement_getType_wrapper"
+external ext_expr_requirement_get_expr :
+  clang_ext_requirement -> cxcursor =
+    "clang_ext_ExprRequirement_getExpr_wrapper"
+external
+  ext_expr_requirement_return_type_get_type_constraint_template_parameter_list
+  :
+  clang_ext_requirement -> clang_ext_templateparameterlist =
+    "clang_ext_ExprRequirement_ReturnType_getTypeConstraintTemplateParameterList_wrapper"
+external ext_expr_requirement_return_type_get_type_constraint :
+  clang_ext_requirement -> cxcursor =
+    "clang_ext_ExprRequirement_ReturnType_getTypeConstraint_wrapper"
+external ext_nested_requirement_get_constraint_expr :
+  clang_ext_requirement -> cxcursor =
+    "clang_ext_NestedRequirement_getConstraintExpr_wrapper"
+external ext_requires_expr_get_local_parameter_count :
+  cxcursor -> int = "clang_ext_RequiresExpr_getLocalParameterCount_wrapper"
+external ext_requires_expr_get_local_parameter :
+  cxcursor -> int -> cxcursor =
+    "clang_ext_RequiresExpr_getLocalParameter_wrapper"
+external ext_requires_expr_get_requirement_count :
+  cxcursor -> int = "clang_ext_RequiresExpr_getRequirementCount_wrapper"
+external ext_requires_expr_get_requirement :
+  cxcursor -> int -> clang_ext_requirement =
+    "clang_ext_RequiresExpr_getRequirement_wrapper"
+type clang_ext_warnunusedresultattr_spelling =
+  | CXX11_nodiscard 
+  | C2x_nodiscard 
+  | CXX11_clang_warn_unused_result 
+  | GNU_warn_unused_result 
+  | CXX11_gnu_warn_unused_result 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_warn_unused_result_attr_get_semantic_spelling :
+  cxcursor -> clang_ext_warnunusedresultattr_spelling =
+    "clang_ext_WarnUnusedResultAttr_getSemanticSpelling_wrapper"
+external ext_warn_unused_result_attr_get_message :
+  cxcursor -> string = "clang_ext_WarnUnusedResultAttr_getMessage_wrapper"
+external ext_decl_context_visit_decls :
+  cxcursor -> (cxcursor -> cxcursor -> cxchildvisitresult) -> bool =
+    "clang_ext_DeclContext_visitDecls_wrapper"
