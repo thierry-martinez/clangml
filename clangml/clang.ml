@@ -1050,15 +1050,22 @@ module Ast = struct
 
     and attribute_of_cxcursor_opt cursor : attribute option =
       let kind = get_cursor_kind cursor in
+      let make_unused () : attribute_desc =
+        WarnUnusedResult {
+          spelling = ext_warn_unused_result_attr_get_semantic_spelling cursor;
+          message = ext_warn_unused_result_attr_get_message cursor;
+        } in
       let desc : attribute_desc option =
         match kind with
-        | WarnUnusedResultAttr ->
-            Some (WarnUnusedResult {
-              spelling =
-                ext_warn_unused_result_attr_get_semantic_spelling cursor;
-              message = ext_warn_unused_result_attr_get_message cursor;
-            })
-        | UnexposedAttr -> Some (Other (ext_attr_get_kind cursor))
+        | WarnUnusedResultAttr
+            [@if [%meta Metapp.Exp.of_bool
+              (Clangml_config.version.major >= 9)]] ->
+            Some (make_unused ())
+        | UnexposedAttr ->
+            begin match ext_attr_get_kind cursor with
+            | WarnUnusedResult -> Some (make_unused ())
+            | other -> Some (Other other)
+            end
         | _ -> None in
       Option.map (node ~cursor) desc
 
