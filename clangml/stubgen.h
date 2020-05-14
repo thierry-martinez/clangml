@@ -5,7 +5,6 @@
 #include <caml/custom.h>
 #include <caml/alloc.h>
 #include <stdarg.h>
-#include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <string.h>
@@ -83,7 +82,7 @@ failwith_fmt(const char* format, ...)
 
 static inline value
  __attribute__((unused))
-Safe_field(value V, mlsize_t I)
+safe_field(value V, mlsize_t I)
 {
   if (Is_block(V) && I < Wosize_val(V)) {
     return Field(V, I);
@@ -91,13 +90,6 @@ Safe_field(value V, mlsize_t I)
   else {
     return Val_int(0);
   }
-}
-
-static inline value
- __attribute__((unused))
-safe_field(value V, mlsize_t I)
-{
-  return Safe_field(V, I);
 }
 
 static inline const char *

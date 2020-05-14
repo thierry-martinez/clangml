@@ -1984,7 +1984,7 @@ let main cflags llvm_config prefix =
     | _ -> "clang_free" in
   let module_interface =
     empty_module_interface |>
-    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|^clang_free$|constructUSR|^clang_executeOnThread$|^clang_getDiagnosticCategoryName$|^clang_getDefinitionSpellingAndExtent$|^clang_annotateTokens$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$|^clang_Cursor_getTranslationUnit$|^clang_ext_hash_cursor$|^clang_ext_compare_cursor$") hidden_function_interface |>
+    add_function (Pcre.regexp "^(?!clang_)|clang_getCString|^clang.*_dispose|^clang_free$|constructUSR|^clang_executeOnThread$|^clang_getDiagnosticCategoryName$|^clang_getDefinitionSpellingAndExtent$|^clang_getToken$|^clang_tokenize$|^clang_annotateTokens$|^clang_.*WithBlock$|^clang_getCursorPlatformAvailability$|^clang_codeComplete|^clang_sortCodeCompletionResults$|^clang_getCompletion(NumFixIts|FixIt)$|^clang_getInclusions$|^clang_remap_getFilenames$|^clang_index.*$|^clang_find(References|Includes)InFile$|^clang_Cursor_getTranslationUnit$|^clang_ext_hash_cursor$|^clang_ext_compare_cursor$") hidden_function_interface |>
     add_type (Pcre.regexp "^CXString$")
       (empty_type_interface |>
        reinterpret_as (Type_info ({ ocamltype = ocaml_string;
@@ -2028,6 +2028,8 @@ let main cflags llvm_config prefix =
        carry_reference "CXIndex") |>
     add_type (Pcre.regexp "^CXCursor$|^CXType$|^CXFile$|^CXModule$|^CXSourceRange$|^CXSourceLocation$|^CXComment$|^clang_ext_TemplateName$|^clang_ext_TemplateArgument$|^clang_ext_LambdaCapture$|^clang_ext_DeclarationName$|^clang_ext_NestedNameSpecifier$|^clang_ext_TypeLoc$|^clang_ext_TemplateParameterList$|^clang_ext_Requirement$")
       (empty_type_interface |> carry_reference "CXTranslationUnit") |>
+    add_type (Pcre.regexp "^CXToken$")
+      (empty_type_interface |> carry_reference "tokens") |>
     add_type (Pcre.regexp "^CXCursor$")
       (empty_type_interface |>
        compare_value "clang_ext_compare_cursor" |>
@@ -2266,12 +2268,7 @@ let main cflags llvm_config prefix =
     add_function (Pcre.regexp "^clang_ext_LinkageSpecDecl_getLanguageIDs$")
       (empty_function_interface |>
         add_result (empty_type_interface |>
-          reinterpret_as (Set_of "clang_ext_LanguageIDs"))) |>
-    add_function (Pcre.regexp "^clang_getToken$")
-      (empty_function_interface |>
-        add_result (empty_type_interface |>
-          reinterpret_as (Sized_array { length = Fixed (1, "size_t") }) |>
-          null_is_none)) in
+          reinterpret_as (Set_of "clang_ext_LanguageIDs"))) in
   let idx = Clang.create_index true true in
   Format.printf "%a@." (Format.pp_print_list
     ~pp_sep:(fun fmt () -> Format.pp_print_string fmt " ")
@@ -2300,7 +2297,6 @@ let main cflags llvm_config prefix =
 #include <clang-c/Index.h>
 #include \"clang__custom.h\"
 #include \"libclang_extensions.h\"
-#include <stdio.h>
 ";
     let context =
       create_translation_context module_interface chan_stubs in

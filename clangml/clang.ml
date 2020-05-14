@@ -39,7 +39,11 @@ let node_module s = Ast_helper.Mod.structure [%str
   module Map = Map.Make (Self)
 ]]
 
-module Bindings = Clang__bindings
+module Bindings = struct
+  include Clang__bindings
+
+  include Special_bindings
+end
 
 include Bindings
 
