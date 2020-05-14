@@ -207,7 +207,7 @@ pipeline {
         stage('Commit to norms branch') {
             when { branch 'master' }
             steps {
-                sh 'git checkout norms'
+                sh 'git checkout origin/norms'
                 sh 'cp build/norm_c++14.ml norms/'
                 sh 'cp build/norm_c++17.ml norms/'
                 sh 'cp build/norm_c++20.ml norms/'
@@ -217,7 +217,7 @@ pipeline {
                       "generated files for commit `git rev-parse master`" || \
                     true
                 '''
-                sh 'git push'
+                sh 'git push origin HEAD:norms'
             }
         }
     }
