@@ -26,7 +26,7 @@
 - `clangml.show` and `clangml.compare` packages don't exist anymore.
   Every AST node module (`Clang.Expr`, `Clang.Stmt`, ...) exposes a common
   signature (Clang.S) with `compare`, `equal`, `pp` and `show` functions, and
-  `Set` and `Map` module.
+  `Set` and `Map` modules.
 
 - Access to semantic form for initialization lists
   (suggested by Hyunsoo Shin)
