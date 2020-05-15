@@ -1345,10 +1345,6 @@ external get_token_extent :
   cxtranslationunit -> cxtoken -> cxsourcerange =
     "clang_getTokenExtent_wrapper"[@@ocaml.doc
                                     "Retrieve a source range that covers the given token."]
-external tokenize :
-  cxtranslationunit -> cxsourcerange -> cxtoken array =
-    "clang_tokenize_wrapper"[@@ocaml.doc
-                              "Tokenize the source code described by the given range into raw lexical tokens."]
 external get_cursor_kind_spelling :
   cxcursorkind -> string = "clang_getCursorKindSpelling_wrapper"[@@ocaml.doc
                                                                   "These routines are used for testing and debugging, only, and should not be relied upon."]
@@ -2754,3 +2750,6 @@ external ext_warn_unused_result_attr_get_message :
 external ext_decl_context_visit_decls :
   cxcursor -> (cxcursor -> cxcursor -> cxchildvisitresult) -> bool =
     "clang_ext_DeclContext_visitDecls_wrapper"
+external ext_tag_decl_get_tag_kind :
+  cxcursor -> clang_ext_elaboratedtypekeyword =
+    "clang_ext_TagDecl_getTagKind_wrapper"

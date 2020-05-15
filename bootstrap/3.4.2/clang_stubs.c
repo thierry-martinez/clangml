@@ -5,7 +5,6 @@
 #include <clang-c/Index.h>
 #include "clang__custom.h"
 #include "libclang_extensions.h"
-#include <stdio.h>
 static void finalize_cxindex(value v) {
   clang_disposeIndex(*((CXIndex *) Data_custom_val(v)));;
 }
@@ -4111,7 +4110,7 @@ clang_getTokenKind_wrapper(value arg_ocaml)
 {
   CAMLparam1(arg_ocaml);
   CXToken arg;
-  arg = Cxtoken_val(arg_ocaml);
+  arg = Cxtoken_val(Field(arg_ocaml, 0));
   CXTokenKind result = clang_getTokenKind(arg);
   {
     CAMLlocal1(data);
@@ -4127,7 +4126,7 @@ clang_getTokenSpelling_wrapper(value arg_ocaml, value arg2_ocaml)
   CXTranslationUnit arg;
   arg = Cxtranslationunit_val(Field(arg_ocaml, 0));
   CXToken arg2;
-  arg2 = Cxtoken_val(arg2_ocaml);
+  arg2 = Cxtoken_val(Field(arg2_ocaml, 0));
   CXString result = clang_getTokenSpelling(arg, arg2);
   {
     CAMLlocal1(data);
@@ -4144,7 +4143,7 @@ clang_getTokenLocation_wrapper(value arg_ocaml, value arg2_ocaml)
   CXTranslationUnit arg;
   arg = Cxtranslationunit_val(Field(arg_ocaml, 0));
   CXToken arg2;
-  arg2 = Cxtoken_val(arg2_ocaml);
+  arg2 = Cxtoken_val(Field(arg2_ocaml, 0));
   CXSourceLocation result = clang_getTokenLocation(arg, arg2);
   {
     CAMLlocal1(data);
@@ -4162,37 +4161,13 @@ clang_getTokenExtent_wrapper(value arg_ocaml, value arg2_ocaml)
   CXTranslationUnit arg;
   arg = Cxtranslationunit_val(Field(arg_ocaml, 0));
   CXToken arg2;
-  arg2 = Cxtoken_val(arg2_ocaml);
+  arg2 = Cxtoken_val(Field(arg2_ocaml, 0));
   CXSourceRange result = clang_getTokenExtent(arg, arg2);
   {
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxsourcerange(result));
   Store_field(data, 1, arg_ocaml);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_tokenize_wrapper(value TU_ocaml, value Range_ocaml)
-{
-  CAMLparam2(TU_ocaml, Range_ocaml);
-  CXTranslationUnit TU;
-  TU = Cxtranslationunit_val(Field(TU_ocaml, 0));
-  CXSourceRange Range;
-  Range = Cxsourcerange_val(Field(Range_ocaml, 0));
-  unsigned int NumTokens;
-  CXToken * Tokens;
-  clang_tokenize(TU, Range, &Tokens, &NumTokens);
-  {
-    CAMLlocal1(data);
-    data = caml_alloc(NumTokens, 0);
-CAMLlocal1(cell);
-for (unsigned int i = 0; i < NumTokens; i++) {
-  cell = Val_cxtoken(Tokens[i]);
-  Store_field(data, i, cell);
-}
-
     CAMLreturn(data);
   }
 }
@@ -9635,6 +9610,20 @@ clang_ext_DeclContext_visitDecls_wrapper(value parent_ocaml, value visitor_ocaml
   {
     CAMLlocal1(data);
     data = Val_not_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TagDecl_getTagKind_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  enum clang_ext_ElaboratedTypeKeyword result = clang_ext_TagDecl_getTagKind(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_elaboratedtypekeyword(result);
     CAMLreturn(data);
   }
 }
