@@ -1,4 +1,4 @@
-# 2020-02-20, 4.1.0
+# 2020-05-15, 4.1.0
 
 - Compatible with OCaml 4.10.0
 
@@ -26,7 +26,7 @@
 - `clangml.show` and `clangml.compare` packages don't exist anymore.
   Every AST node module (`Clang.Expr`, `Clang.Stmt`, ...) exposes a common
   signature (Clang.S) with `compare`, `equal`, `pp` and `show` functions, and
-  `Set` and `Map` module.
+  `Set` and `Map` modules.
 
 - Access to semantic form for initialization lists
   (suggested by Hyunsoo Shin)

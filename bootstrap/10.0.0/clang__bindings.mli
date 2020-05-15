@@ -1886,11 +1886,6 @@ external get_cursor_reference_name_range :
   cxcursor -> name_flags:int -> piece_index:int -> cxsourcerange =
     "clang_getCursorReferenceNameRange_wrapper"[@@ocaml.doc
                                                  "Given a cursor that references something else, return the source range covering that reference."]
-type cxtoken[@@ocaml.doc "Describes a single preprocessing token."]
-external get_token :
-  cxtranslationunit -> cxsourcelocation -> cxtoken option =
-    "clang_getToken_wrapper"[@@ocaml.doc
-                              "Get the raw lexical token starting with the given location."]
 type cxtokenkind =
   | Punctuation
   [@ocaml.doc "A token that contains some kind of punctuation."]
@@ -1899,6 +1894,7 @@ type cxtokenkind =
   | Literal [@ocaml.doc "A numeric, string, or character literal."]
   | Comment [@ocaml.doc "A comment."][@@deriving refl][@@ocaml.doc
                                                         "Describes a kind of token."]
+type cxtoken[@@ocaml.doc "Describes a single preprocessing token."]
 external get_token_kind :
   cxtoken -> cxtokenkind = "clang_getTokenKind_wrapper"[@@ocaml.doc
                                                          "Determine the kind of the given token."]
@@ -1913,10 +1909,6 @@ external get_token_extent :
   cxtranslationunit -> cxtoken -> cxsourcerange =
     "clang_getTokenExtent_wrapper"[@@ocaml.doc
                                     "Retrieve a source range that covers the given token."]
-external tokenize :
-  cxtranslationunit -> cxsourcerange -> cxtoken array =
-    "clang_tokenize_wrapper"[@@ocaml.doc
-                              "Tokenize the source code described by the given range into raw lexical tokens."]
 external get_cursor_kind_spelling :
   cxcursorkind -> string = "clang_getCursorKindSpelling_wrapper"[@@ocaml.doc
                                                                   "These routines are used for testing and debugging, only, and should not be relied upon."]
@@ -3551,3 +3543,6 @@ external ext_warn_unused_result_attr_get_message :
 external ext_decl_context_visit_decls :
   cxcursor -> (cxcursor -> cxcursor -> cxchildvisitresult) -> bool =
     "clang_ext_DeclContext_visitDecls_wrapper"
+external ext_tag_decl_get_tag_kind :
+  cxcursor -> clang_ext_elaboratedtypekeyword =
+    "clang_ext_TagDecl_getTagKind_wrapper"

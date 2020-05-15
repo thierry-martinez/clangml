@@ -159,7 +159,7 @@ am__DIST_COMMON = $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/ldflags_quoted.sexp.in \
 	$(top_srcdir)/config/libs.sexp.in \
 	$(top_srcdir)/config/libs_quoted.sexp.in AUTHORS COPYING \
-	ChangeLog INSTALL NEWS compile install-sh missing
+	INSTALL NEWS compile install-sh missing
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)

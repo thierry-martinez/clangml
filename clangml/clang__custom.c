@@ -1,5 +1,6 @@
-#include <caml/memory.h>
 #include "clang__custom.h"
+#include <clang-c/Index.h>
+#include <caml/memory.h>
 
 extern CXCursor
 Cxcursor_val(value);

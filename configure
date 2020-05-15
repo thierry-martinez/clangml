@@ -4205,13 +4205,13 @@ LLVM_VERSION=`echo $LLVM_VERSION | sed 's/\(svn\|git\)$//'`
 
 
 LLVM_VERSION_MAJOR=`echo $LLVM_VERSION | \
-  sed 's/^\([[:digit:]]\+\)[.]\([[:digit:]]\+\)[.]\([[:digit:]]\+\)/\1/'`
+  sed 's/^\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)/\1/'`
 
 LLVM_VERSION_MINOR=`echo $LLVM_VERSION | \
-  sed 's/^\([[:digit:]]\+\)[.]\([[:digit:]]\+\)[.]\([[:digit:]]\+\)/\2/'`
+  sed 's/^\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)/\2/'`
 
 LLVM_VERSION_SUBMINOR=`echo $LLVM_VERSION | \
-  sed 's/^\([[:digit:]]\+\)[.]\([[:digit:]]\+\)[.]\([[:digit:]]\+\)/\3/'`
+  sed 's/^\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)/\3/'`
 
 
 EQUIVALENT_LLVM_VERSION="$LLVM_VERSION"
@@ -7086,6 +7086,16 @@ else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
      if cp $srcdir/clangml/clang__custom.h clangml/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/clangml/clang_specials.c clangml/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/clangml/special_bindings.ml clangml/; then :
   true
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5

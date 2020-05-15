@@ -4,7 +4,13 @@
 auto-generated wrappers over [libclang] and some extensions defined in
 [libclang_extensions.h]. *)
 
-module Bindings = Clang__bindings
+module Bindings : sig
+  include module type of struct
+    include Clang__bindings
+
+    include Special_bindings
+  end
+end
 
 include module type of struct
   include Bindings

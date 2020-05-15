@@ -659,33 +659,39 @@ let () =
   | ParenType of qual_type
 (** Parenthesized type.
 
-    Warning: parenthesized type only occurs with Clang <7.0.0 and when
-    [ignore_paren_in_types = false] option is passed to the AST converting
-    function. From 7.0.0, Clang automatically passes through parentheses in
-    types.
+    Parenthesized type only occurs when [ignore_paren_in_types = false] option
+    is passed to the AST converting function.
 
     {[
+let example = "int f(char(*)[]);"
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list
+    ~options:{ Clang.Ast.Options.default with ignore_paren_in_types = false })
+    example
+  [%pattern?
+    [{ desc = Function {
+      function_type = {
+        result = { desc = BuiltinType Int };
+        parameters = Some {
+          non_variadic = [
+            { desc = { qual_type = { desc = Pointer { desc = ParenType
+              { desc = IncompleteArray { desc = BuiltinType Char_S }}}}}}] }};
+      name = IdentifierName "f";
+      body = None }}]]
+
 let example = "int (*p)(void);"
 
 let () =
-  check pp_decl (parse_declaration_list
-    ~options:({ Clang.Ast.Options.default with ignore_paren_in_types = false }))
-    example @@
-  fun ast -> match ast with
-  | [{ desc = Var { var_name = "p"; var_type = { desc =
-      Pointer { desc = FunctionType {
-        result = { desc = BuiltinType Int };
-        parameters = Some { non_variadic = []; variadic = false}}}}}}] ->
-      assert (Clang.version () >= { major = 7; minor = 0; subminor = 0 })
-  | [{ desc = Var { var_name = "p"; var_type = { desc =
+  check_pattern quote_decl_list (parse_declaration_list
+    ~options:{ Clang.Ast.Options.default with ignore_paren_in_types = false })
+    example
+  [%pattern?
+    [{ desc = Var { var_name = "p"; var_type = { desc =
       Pointer { desc = ParenType { desc = FunctionType {
         result = { desc = BuiltinType Int };
-        parameters = Some { non_variadic = []; variadic = false}}}}}}}] ->
-      assert (Clang.version () < { major = 7; minor = 0; subminor = 0 })
-  | _ -> assert false
-    ]}
-
-*)
+        parameters = Some { non_variadic = []; variadic = false}}}}}}}]]
+    ]}*)
   | TemplateTypeParm of string
   | SubstTemplateTypeParm of string
   | TemplateSpecialization of {
@@ -716,7 +722,7 @@ let () =
       var_name = "i";
       var_type = { desc = Auto };
       var_init = Some { desc = IntegerLiteral (Int 1)}}}]]
-    ]} *)
+    ]}*)
   | PackExpansion of qual_type
   | MemberPointer of {
       pointee : qual_type;
@@ -737,8 +743,7 @@ let () =
       var_name = "i";
       var_type = { desc = Decltype { desc = IntegerLiteral (Int 1)}};
       var_init = Some { desc = IntegerLiteral (Int 1)}}}]]
-    ]} *)
-
+    ]}*)
   | UnexposedType of clang_ext_typekind
   | InvalidType
 
@@ -2903,6 +2908,52 @@ let () =
       arguments : template_argument list;
       decl : decl;
     }
+(** Template partial specialization.
+    {[
+let example = {|
+template<long n> struct A { };
+template<typename T> struct C;
+template<typename T, T n> struct C<A<n>> {
+  using Q = T;
+};
+|}
+let () =
+  if Clang.version () >= { major = 3; minor = 5; subminor = 0 } then
+    check_pattern quote_decl_list (parse_declaration_list ~language:CXX
+      ~command_line_args:[Clang.Command_line.standard Cxx17]) example
+    [%pattern? [
+      { desc = TemplateDecl {
+        parameters = { list = [
+          { desc = {
+            parameter_name = "n";
+            parameter_kind = NonType {
+              parameter_type = { desc = BuiltinType Long }}}}] };
+        decl = { desc = RecordDecl {
+          keyword = Struct; name = "A"; fields = [] }}}};
+      { desc = TemplateDecl {
+        parameters = { list = [
+          { desc = { parameter_name = "T"; parameter_kind = Class _ }}] };
+        decl = { desc = RecordDecl {
+          keyword = Struct; name = "C"; fields = [] }}}};
+      { desc = TemplatePartialSpecialization {
+        parameters = { list = [
+          { desc = { parameter_name = "T"; parameter_kind = Class _ }};
+          { desc = {
+            parameter_name = "n";
+            parameter_kind = NonType {
+              parameter_type = { desc = TemplateTypeParm "T" }}}}] };
+        arguments = [
+          Type { desc = TemplateSpecialization {
+            name = NameTemplate "A";
+            args = [
+              ExprTemplateArgument { desc = DeclRef {
+                name = IdentifierName "n" }}] }}];
+        decl = { desc = RecordDecl {
+          keyword = Struct; name = "C"; fields = [
+            { desc = TypeAlias {
+              ident_ref = { name = IdentifierName "Q" };
+              qual_type = { desc = TemplateTypeParm "T" }}}] }}}}]]
+    ]}*)
   | CXXMethod of {
       function_decl : function_decl;
       type_ref : qual_type option;

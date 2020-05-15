@@ -39,7 +39,11 @@ let node_module s = Ast_helper.Mod.structure [%str
   module Map = Map.Make (Self)
 ]]
 
-module Bindings = Clang__bindings
+module Bindings = struct
+  include Clang__bindings
+
+  include Special_bindings
+end
 
 include Bindings
 
@@ -241,15 +245,6 @@ module Ast = struct
 
     exception Invalid_structure
 
-    let keyword_of_template cursor =
-      let decl_cursor =
-        ext_class_template_decl_get_templated_decl cursor in
-      match get_cursor_kind decl_cursor with
-      | StructDecl -> Struct
-      | UnionDecl -> Union
-      | ClassDecl -> Class
-      | kind -> raise Invalid_structure
-
     (* Hack for having current function declaration to provide function name
        for predefined identifiers on Clang 3.4 and Clang 3.5. *)
     let current_decl = ref (get_null_cursor ())
@@ -419,20 +414,42 @@ module Ast = struct
           )
       | _ -> raise Invalid_structure
 
-    and of_type_loc qualified_type_loc =
-      let cxtype = ext_type_loc_get_type qualified_type_loc in
-      let type_loc =
-        match ext_type_loc_get_class qualified_type_loc with
-        | Qualified ->
-            ext_qualified_type_loc_get_unqualified_loc qualified_type_loc
-        | _ -> qualified_type_loc in
+    and of_type_loc type_loc =
+      let unqualify type_loc =
+        match ext_type_loc_get_class type_loc with
+        | Qualified -> ext_qualified_type_loc_get_unqualified_loc type_loc
+        | _ -> type_loc in
+      let cxtype = ext_type_loc_get_type type_loc in
+      let type_loc = unqualify type_loc in
+      let make_qual_type cxtype type_loc desc =
+        { cxtype; type_loc = Some type_loc; desc;
+          const = is_const_qualified_type cxtype;
+          volatile = is_volatile_qualified_type cxtype;
+          restrict = is_restrict_qualified_type cxtype; } in
+      let make_paren, type_loc, cxtype =
+        match ext_type_loc_get_class type_loc with
+        | Paren ->
+            let type_loc' = ext_paren_type_loc_get_inner_loc type_loc in
+            let cxtype' = ext_type_loc_get_type type_loc' in
+            let type_loc' = unqualify type_loc' in
+            let make_paren ty =
+              if options.ignore_paren_in_types then
+                ty
+              else
+                make_qual_type cxtype type_loc (ParenType ty) in
+            make_paren, type_loc', cxtype'
+        | _ -> Fun.id, type_loc, cxtype in
       let desc =
         match get_type_kind cxtype with
         | Invalid -> InvalidType
         | ConstantArray ->
+            let paren, type_loc =
+              match ext_type_loc_get_class type_loc with
+              | Paren -> true, ext_paren_type_loc_get_inner_loc type_loc
+              | _ -> false, type_loc in
+            let size = cxtype |> get_array_size in
             let element =
               ext_array_type_loc_get_element_loc type_loc |> of_type_loc in
-            let size = cxtype |> get_array_size in
             let size_as_expr =
               ext_array_type_loc_get_size_expr type_loc |>
               expr_of_cxcursor in
@@ -488,9 +505,6 @@ module Ast = struct
         | _ ->
             begin
               match ext_type_get_kind cxtype with
-              | Paren ->
-                  ParenType (ext_paren_type_loc_get_inner_loc type_loc |>
-                    of_type_loc)
               | Elaborated -> (* Here for Clang <3.9.0 *)
                   let nested_name_specifier =
                     ext_type_get_qualifier cxtype |>
@@ -534,14 +548,7 @@ module Ast = struct
                   Decltype sub
               | kind -> UnexposedType kind
             end in
-      match desc with
-      | ParenType inner when options.ignore_paren_in_types ->
-          { inner with cxtype; type_loc = Some qualified_type_loc }
-      | _ ->
-          { cxtype; type_loc = Some qualified_type_loc; desc;
-            const = is_const_qualified_type cxtype;
-            volatile = is_volatile_qualified_type cxtype;
-            restrict = is_restrict_qualified_type cxtype; }
+      make_paren (make_qual_type cxtype type_loc desc)
 
     and of_cxtype cxtype =
       let desc =
@@ -667,11 +674,14 @@ module Ast = struct
         | UnionDecl -> record_decl_of_cxcursor Union cursor
         | ClassDecl -> record_decl_of_cxcursor Class cursor
         | ClassTemplate ->
-            let keyword = keyword_of_template cursor in
+            let keyword =
+              ext_class_template_decl_get_templated_decl cursor |>
+              ext_tag_decl_get_tag_kind in
             make_template cursor
               (record_decl_of_cxcursor keyword cursor)
         | ClassTemplatePartialSpecialization ->
-            let decl = record_decl_of_cxcursor Class cursor in
+            let keyword = ext_tag_decl_get_tag_kind cursor in
+            let decl = record_decl_of_cxcursor keyword cursor in
             let result =
             TemplatePartialSpecialization
               { parameters = extract_template_parameters cursor;
@@ -1091,7 +1101,8 @@ module Ast = struct
              | TypeRef | ClassTemplate | TemplateRef | ParmDecl | DeclRefExpr
              | NamespaceRef
              | IntegerLiteral | FloatingLiteral | CharacterLiteral
-             | StringLiteral ->
+             | StringLiteral
+             | UnexposedExpr ->
                  true
              | _ ->
                  match ext_decl_get_kind cursor with
