@@ -365,7 +365,13 @@ module Make (Target : Metapp.ValueS) = struct
           txt = mapper.payload mapper antiquotation.payload.txt }
     end;
     let result = extraction ast in
-    assert (is_empty placeholder_hashtbl);
+    if not (is_empty placeholder_hashtbl) then
+      Format.eprintf
+        "Warning:@ in@ \"%s\",@ the@ following@ placeholder@ remains:@ %s"
+        code
+        (String.concat ", "
+           (placeholder_hashtbl |> String_hashtbl.to_seq |> Seq.map fst |>
+           List.of_seq));
     result
 
   let mapper (mapper : Ast_mapper.mapper) (t : Target.t) =
