@@ -1,15 +1,15 @@
 # 2020-05-15, 4.1.0
 
-- Compatible with OCaml 4.10.0
+- Compatible with LLVM from 3.4.2 to 10.0.0, OCaml from 4.03.0 to 4.11.0
 
 - Typeloc structures which contains non-transformed type informations can be
-  obtained with Clang.Decl.get_type_loc and Clang.Parameter.get_type_loc.
+  obtained with `Clang.Decl.get_type_loc` and `Clang.Parameter.get_type_loc`.
   In particular, typeloc structures can be obtained to get the original size
   expression from constant arrays.
   (suggested by Damien Rouhling)
 
-- Clang.Expr.get_definition and Clang.Decl.get_canonical to retrieve the cursors
-  to the declaration site of identifiers, and Clang.compare_cursors for
+- `Clang.Expr.get_definition` and `Clang.Decl.get_canonical` to retrieve the cursors
+  to the declaration site of identifiers, and `Clang.compare_cursors` for
   comparing cursors.
   (suggested by Arthur Charguéraud)
 
@@ -35,7 +35,7 @@
   (suggested by Hyunsoo Shin)
 
 - Fix: Some distributions such as ArchLinux now gather clang libraries in
-  -lclang-cpp.
+  `-lclang-cpp`.
   (reported by Armaël Guéneau)
 
 - libclang's tokenize and related functions are now accessible,
