@@ -27,11 +27,12 @@ let option_trigraphs =
     value & flag & info ["trigraphs"] ~doc)
 
 let options term =
-  Cmdliner.Term.(term $ option_language $ option_standard $ option_include_path $
-    option_include_clang $ option_trigraphs)
+  Cmdliner.Term.(term $ option_language $ option_standard $
+    option_include_path $ option_include_clang $ option_trigraphs)
 
 let command_line k language standard include_paths include_clang trigraphs =
-  let command_line_args = List.map Clang.Command_line.include_directory include_paths in
+  let command_line_args =
+    List.map Clang.Command_line.include_directory include_paths in
   let command_line_args =
     match language with
     | None -> command_line_args
@@ -44,7 +45,8 @@ let command_line k language standard include_paths include_clang trigraphs =
         Clang.Command_line.standard_of_string standard :: command_line_args in
   let command_line_args =
     if include_clang then
-      Clang.Command_line.include_directory Clang.includedir :: command_line_args
+      List.map Clang.Command_line.include_directory
+        (Clang.default_include_directories ()) @ command_line_args
     else
       command_line_args in
   let command_line_args =
