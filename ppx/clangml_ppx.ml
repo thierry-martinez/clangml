@@ -106,16 +106,6 @@ module String_hashtbl = Hashtbl.Make (struct
   let hash = Hashtbl.hash
 end)
 
-let rec remove_placeholders antiquotations items =
-  match antiquotations, items with
-  | [], _ -> items
-  | { antiquotation_type = Typename; _ } :: antiquotations, _ :: items ->
-      remove_placeholders antiquotations items
-  | { antiquotation_type = (Decl | Expression _); _ } :: antiquotations,
-    items ->
-      remove_placeholders antiquotations items
-  | _ -> assert false
-
 type arguments = {
     preamble : string list;
     standard : Clang.clang_ext_langstandards option;
@@ -148,6 +138,27 @@ type extension =
       expr : Parsetree.expression;
       loc : Location.t;
     }
+
+let begin_ppx_code = "__begin_ppx_code"
+
+let end_ppx_code = "__end_ppx_code"
+
+let rec extract_items_aux (accu : Clang.Decl.t list) (items : Clang.Decl.t list)
+    : Clang.Decl.t list =
+  match items with
+  | [] -> assert false
+  | { desc = Function { name = IdentifierName name; _ }; _ } :: tl
+    when name = end_ppx_code ->
+      List.rev accu
+  | hd :: tl -> extract_items_aux (hd :: accu) tl
+
+let rec extract_items (items : Clang.Decl.t list) : Clang.Decl.t list =
+  match items with
+  | [] -> assert false
+  | { desc = Function { name = IdentifierName name; _ }; _ } :: tl
+    when name = begin_ppx_code ->
+      extract_items_aux [] tl
+  | _ :: tl -> extract_items tl
 
 module Make (Target : Metapp.ValueS) = struct
   module Lift = Refl.Lift.Make (Target)
@@ -274,11 +285,11 @@ module Make (Target : Metapp.ValueS) = struct
                   (fun () -> [%pat? _])
             | _ -> lifter x in
     let hook = { Lift.hook } in
-    let prelude, prelude', postlude,
+    let prelude, postlude,
       (extraction : Clang.Ast.translation_unit -> Target.t) =
       match kind with
       | Expr ->
-          function_declaration, "", ";}",
+          function_declaration, ";}",
           begin fun ast ->
             match List.rev ast.desc.items with
             | { desc = Function
@@ -292,7 +303,7 @@ module Make (Target : Metapp.ValueS) = struct
             | _ -> assert false
           end
       | Stmt ->
-          function_declaration, "", "}",
+          function_declaration, "}",
           begin fun ast ->
             match List.rev ast.desc.items with
             | { desc = Function
@@ -302,7 +313,7 @@ module Make (Target : Metapp.ValueS) = struct
             | _ -> assert false
           end
       | Qual_type ->
-          "void f(void) {", "void *x; (", ") x; }",
+          "void f(void) { void *x; (", ") x; }",
           begin fun ast ->
             match List.rev ast.desc.items with
             | { desc = Function
@@ -316,29 +327,25 @@ module Make (Target : Metapp.ValueS) = struct
             | _ -> assert false
           end
       | Decl ->
-          "", "", "", begin fun ast ->
+          "", "", begin fun ast ->
             Lift.lift ~hook [%refl: Clang.Ast.decl] []
-              begin match
-                List.rev (remove_placeholders antiquotations ast.desc.items)
-              with
+              begin match ast.desc.items with
               | result :: _ -> result
               | _ -> assert false
               end
           end
       | Translation_unit ->
-          "", "", "", begin fun ast ->
-            Lift.lift ~hook [%refl: Clang.Ast.translation_unit] []
-              { ast with desc =
-                { ast.desc with items =
-                  remove_placeholders antiquotations ast.desc.items }}
+          "", "", begin fun ast ->
+            Lift.lift ~hook [%refl: Clang.Ast.translation_unit] [] ast
           end in
-    Buffer.add_string buffer prelude;
     arguments.preamble |> List.iter (fun s ->
       Buffer.add_string buffer s;
       Buffer.add_char buffer ';');
-    Buffer.add_string buffer prelude';
+    Buffer.add_string buffer (Printf.sprintf "void %s();" begin_ppx_code);
+    Buffer.add_string buffer prelude;
     Buffer.add_string buffer code;
     Buffer.add_string buffer postlude;
+    Buffer.add_string buffer (Printf.sprintf "void %s();" end_ppx_code);
     let code = Buffer.contents buffer in
     let command_line_args = [Clang.Command_line.language language] in
     let command_line_args =
@@ -351,6 +358,8 @@ module Make (Target : Metapp.ValueS) = struct
         (Clang.default_include_directories ())
       @ command_line_args in
     let ast = Clang.Ast.parse_string ~command_line_args code in
+    let ast = { ast with desc = { ast.desc with
+      items = extract_items ast.desc.items }} in
     Clang.Ast.format_diagnostics Clang.error Format.err_formatter ast
       ~pp:begin fun pp fmt () ->
         Format.fprintf fmt
