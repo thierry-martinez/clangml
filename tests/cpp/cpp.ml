@@ -207,6 +207,12 @@ let () =
 
 (* 5.2.8 Type identification *)
 
+let filter_code (ast : Clang.Translation_unit.t) : Clang.Decl.t list =
+  ast.desc.items |> List.filter
+    (fun (decl : Clang.Decl.t) ->
+      (Clang.Ast.concrete_of_source_location Presumed
+        (Clang.Ast.location_of_node decl)).filename = "<string>.c")
+
 let () =
   let ast = parse_string {|
     #include <typeinfo>
@@ -221,7 +227,7 @@ let () =
       typeid(D) == typeid(const D&);
     }
   |} in
-  match List.rev ast.desc.items with
+  match List.rev (filter_code ast) with
   | f :: _ ->
     let bindings =
       check_pattern_decl f [%pattern? [%cpp-decl {|
@@ -261,7 +267,7 @@ let () =
 (* 5.3.3 Sizeof *)
 
 let () =
-  let ast = parse_string 
+  let ast = parse_string
       ~command_line_args:[Clang.Command_line.standard Cxx11] {|
     #include <cstdlib>
 
@@ -270,7 +276,7 @@ let () =
       static const std::size_t value = sizeof...(Types);
     };
   |} in
-  match List.rev ast.desc.items with
+  match List.rev (filter_code ast) with
   | d :: _ ->
     let bindings =
       check_pattern_decl d [%pattern? [%cpp-decl (standard "c++11")
