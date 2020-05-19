@@ -20,7 +20,7 @@ clangml provides bindings to call the Clang API from OCaml.
   conf-libclang
   conf-ncurses
   conf-zlib
-  (dune (>= 1.10.0))
+  (dune (>= 1.11.0))
   (stdcompat (>= 13))
   (ocaml (and (>= 4.03.0) (< 4.12.0)))
   (ocamlfind (and :build (>= 1.8.0)))
