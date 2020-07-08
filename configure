@@ -4282,6 +4282,10 @@ if test "x$EQUIVALENT_LLVM_VERSION" = "x9.0.0"; then :
   EQUIVALENT_LLVM_VERSION=9.0.1
 
 fi
+if test "x$EQUIVALENT_LLVM_VERSION" = "x10.0.0"; then :
+  EQUIVALENT_LLVM_VERSION=10.0.1
+
+fi
 
 
 # Check whether --with-llvm-version was given.
@@ -7065,12 +7069,32 @@ fi
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
+     if cp $srcdir/clangml/clang__utils.mli clangml/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
      if cp $srcdir/clangml/clang__ast_options.ml clangml/; then :
   true
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
      if cp $srcdir/clangml/clang__ast_utils.ml clangml/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/clangml/clang__ast_utils.mli clangml/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/clangml/printer.ml clangml/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/clangml/printer.mli clangml/; then :
   true
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5

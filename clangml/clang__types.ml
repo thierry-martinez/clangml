@@ -11,5 +11,42 @@
 type language = C | CXX | ObjC | ObjCXX | OpenCL | CUDA | RenderScript | HIP
   [@@deriving refl]
 
-type location_kind = Presumed | Expansion
+type location_kind = Expansion | Presumed | Instantiation | Spelling | File
   [@@deriving refl]
+
+type concrete_location = {
+    filename : string;
+    line : int;
+    column : int
+  }
+
+(** Use by {!val:Clang__utils.pp_diagnostic} *)
+module Display_source_location = struct
+  type t = {
+      kind : location_kind;
+      column : bool;
+      ranges : bool;
+    }
+
+  let default = {
+    kind = Presumed;
+    column = false;
+    ranges = false;
+  }
+end
+
+module Diagnostic_display_options = struct
+  type t = {
+      source_location : Display_source_location.t option;
+      option : bool;
+      category_id : bool;
+      category_name : bool;
+    }
+
+  let default = {
+    source_location = Some Display_source_location.default;
+    option = false;
+    category_id = false;
+    category_name = false;
+  }
+end

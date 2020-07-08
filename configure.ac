@@ -210,6 +210,8 @@ AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x8.0.0"],
   [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[8.0.1]])])
 AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x9.0.0"],
   [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[9.0.1]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x10.0.0"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[10.0.1]])])
 
 AC_ARG_WITH([llvm-version],
   AS_HELP_STRING([--with-llvm-version=VERSION],
@@ -366,8 +368,12 @@ AS_IF([test -d clangml],
      AC_CP([$srcdir/clangml/clang__ast.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang__types.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang__utils.ml], [clangml/])
+     AC_CP([$srcdir/clangml/clang__utils.mli], [clangml/])
      AC_CP([$srcdir/clangml/clang__ast_options.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang__ast_utils.ml], [clangml/])
+     AC_CP([$srcdir/clangml/clang__ast_utils.mli], [clangml/])
+     AC_CP([$srcdir/clangml/printer.ml], [clangml/])
+     AC_CP([$srcdir/clangml/printer.mli], [clangml/])
      AC_CP([$srcdir/clangml/clang__command_line.ml], [clangml/])
      AC_CP([$srcdir/clangml/clang__custom.c], [clangml/])
      AC_CP([$srcdir/clangml/clang__custom.h], [clangml/])

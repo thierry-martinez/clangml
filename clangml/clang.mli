@@ -30,6 +30,8 @@ module Standard = Standard
 
 module Command_line = Clang__command_line
 
+module Printer = Printer
+
 val version : unit -> cxversion
 (** [version ()] is the Clang version. *)
 
@@ -182,13 +184,6 @@ module Ast : sig
   (** [tokens_of_node node] returns the token at the beginning of [node] if
       available. *)
 
-  val concrete_of_cxsourcelocation : location_kind -> cxsourcelocation -> concrete_location
-  (** [concrete_of_cxsourcelocation kind location] returns the concrete location
-      associated to [location]. [kind] selects whether
-      {!val:Clang.get_presumed_location} (which ignores [#] line directive)
-      or {!val:Clang.get_expansion_location} (which honors [#] line directive)
-      is called. *)
-
   val concrete_of_source_location : location_kind -> source_location -> concrete_location
   (** [concrete_of_source_location kind location] returns the concrete location
       associated to [location].
@@ -335,6 +330,19 @@ module Expr : sig
   val radix_of_integer_literal : t -> radix option
   (** [radix_of_integer_literal e] returns the radix of the integer literal [e]
       if available. Note that, by convention, [0] is octal. *)
+
+  val parse_string :
+      ?index:cxindex -> ?clang_options:Cxtranslationunit_flags.t ->
+        ?options:Ast.Options.t -> ?filename:string -> ?line:int ->
+          ?context:Ast.decl list -> string -> t option * Ast.translation_unit
+  (** [parse_string ?index ?clang_options ?options ?filename ?line ?context
+      contents] parses string [contents] as a C expression and returns
+      [(o, tu)] where [o] is [Some e] if [contents] has been successfully parsed
+      as the expression [e], and [tu] is the translation unit created for
+      parsing. [tu] can be used to retrieve diagnostics if any.
+      [context] provides some declaration context.
+      [filename] and [line] specifies respectively the file name and the line
+      number to use in diagnostics. *)
 
   include S with type t := t
 end

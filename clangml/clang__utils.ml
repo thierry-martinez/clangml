@@ -140,22 +140,118 @@ let seq_of_diagnostics tu =
       Seq.Nil in
   next 0
 
-let format_diagnostics ?pp severities fmt tu =
+let concrete_of_cxsourcelocation kind location =
+  let concrete_location_of_triple (filename, line, column) =
+    { filename; line; column } in
+  let concrete_location_of_quadruple (file, line, column, _offset) =
+    { filename = get_file_name file; line; column } in
+  match kind with
+  | Expansion ->
+      concrete_location_of_quadruple (get_expansion_location location)
+  | Presumed ->
+      concrete_location_of_triple (get_presumed_location location)
+  | Instantiation ->
+      concrete_location_of_quadruple (get_instantiation_location location)
+  | Spelling ->
+      concrete_location_of_quadruple (get_spelling_location location)
+  | File ->
+      concrete_location_of_quadruple (get_file_location location)
+
+let string_of_severity (severity : cxdiagnosticseverity) : string =
+  match severity with
+  | Ignored -> "ignored"
+  | Note -> "note"
+  | Warning -> "warning"
+  | Error -> "error"
+  | Fatal -> "fatal error"
+
+let pp_diagnostic ?(options = Diagnostic_display_options.default) fmt
+    diagnostic =
+  begin match options.source_location with
+  | None -> ()
+  | Some { kind; column = display_column; ranges = display_ranges } ->
+      let location = get_diagnostic_location diagnostic in
+      let { filename; line; column } =
+        concrete_of_cxsourcelocation kind location in
+      Format.fprintf fmt "@[%s:%d:" filename line;
+      if display_column then
+        Format.fprintf fmt "%d:" column;
+      if display_ranges then
+        begin
+          let get_range i =
+            let range = get_diagnostic_range diagnostic i in
+            let start =
+              concrete_of_cxsourcelocation kind (get_range_start range) in
+            let end_ =
+              concrete_of_cxsourcelocation kind (get_range_end range) in
+            (start, end_) in
+          let keep_range (start, end_) =
+            start.filename = end_.filename && start.filename = filename in
+          let ranges =
+            List.init (get_diagnostic_num_ranges diagnostic) get_range |>
+            List.filter keep_range in
+          if ranges <> [] then
+            begin
+              ranges |> List.iter (fun (start, end_) ->
+                Format.fprintf fmt "@[{%d:%d-%d:%d}@]"
+                  start.line start.column end_.line end_.column);
+              Format.fprintf fmt ":"
+            end;
+        end;
+      Format.fprintf fmt "@]@ "
+  end;
+  let severity =
+    string_of_severity (get_diagnostic_severity diagnostic) in
+  let text = get_diagnostic_spelling diagnostic in
+  let text =
+    if text = "" then
+      "<no diagnostic text>"
+    else
+      text in
+  Format.fprintf fmt "%s:@ %s" severity text;
+  let notes =
+    if options.option then
+      let option_name, _disable = get_diagnostic_option diagnostic in
+      if option_name = "" then
+        []
+      else
+        [option_name]
+    else
+      [] in
+  let notes =
+    if options.category_id then
+      let category_id = get_diagnostic_category diagnostic in
+      notes @ [string_of_int category_id]
+    else
+      notes in
+  let notes =
+    if options.category_name then
+      let category_name = get_diagnostic_category_text diagnostic in
+      notes @ [category_name]
+    else
+      notes in
+  if notes <> [] then
+    Format.fprintf fmt "[%a]"
+      (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ")
+         Format.pp_print_string)
+      notes
+
+let format_diagnostics ?pp ?(options = Diagnostic_display_options.default)
+    severities fmt tu =
   let filter diagnostics =
     List.mem (get_diagnostic_severity diagnostics) severities in
-  match (seq_of_diagnostics tu |> Seq.filter filter) () with
+  let sequence = Seq.filter filter (seq_of_diagnostics tu) in
+  match sequence () with
   | Nil -> ()
   | Cons (hd, tl) ->
-      let print_all_diagnostics fmt () =
-        let print_diagnostics diagnostics =
-          Format.fprintf fmt "@[%s@]@ "
-            (format_diagnostic diagnostics
-               Cxdiagnosticdisplayoptions.display_source_location) in
-        print_diagnostics hd;
-        tl |> Seq.iter print_diagnostics in
+      let format_all_diagnostics fmt () =
+        let format_diagnostic diagnostic =
+          Format.fprintf fmt "@[%a@]@ " (pp_diagnostic ~options) diagnostic in
+        format_diagnostic hd;
+        tl |> Seq.iter format_diagnostic in
       match pp with
-      | None -> Format.fprintf fmt "@[<v>%a@]" print_all_diagnostics ()
-      | Some pp -> pp print_all_diagnostics fmt ()
+      | None -> Format.fprintf fmt "@[<v>%a@]" format_all_diagnostics ()
+      | Some pp -> pp format_all_diagnostics fmt ()
 
 let error = [Error; Fatal]
 
