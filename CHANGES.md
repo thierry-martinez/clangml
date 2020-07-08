@@ -2,10 +2,11 @@
 
 - Support for Clang/LLVM 10.0.1
 
-- `Clang.format_diagnostics` now use presumed locations by default and the
-  behavior can be changed through the optional `?options` argument. The
-  implementation now relies on the new `Clang.pp_diagnostic` which is an
-  OCaml reimplementation of `clang_formatDiagnostic` from libclang.
+- `Clang.format_diagnostics` now prints presumed locations by default
+  and the behavior can be changed through the optional `?options`
+  argument. The implementation now relies on the new
+  `Clang.pp_diagnostic` which is an OCaml reimplementation of
+  `clang_formatDiagnostic` from libclang.
 
 - `Clangml_printer` has now moved to `Clang.Printer`. The package
   `clangml.printer` still exists for compatibility and reexposes the
