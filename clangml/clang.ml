@@ -57,6 +57,8 @@ module Standard = Standard
 
 module Command_line = Clang__command_line
 
+module Printer = Printer
+
 let version () =
   ext_get_version ()
 
@@ -2070,15 +2072,6 @@ ext_expr_requirement_return_type_get_type_constraint_template_parameter_list
   let has_severity filter tu =
     has_severity filter (tu |> to_cxtranslationunit)
 
-  let concrete_of_cxsourcelocation kind location =
-    match kind with
-    | Presumed ->
-        let filename, line, column = get_presumed_location location in
-        { filename; line; column }
-    | Expansion ->
-        let file, line, column, _offset = get_expansion_location location in
-        { filename = get_file_name file; line; column }
-
   let concrete_of_source_location kind location =
     match location with
     | Clang location -> concrete_of_cxsourcelocation kind location
@@ -2117,6 +2110,28 @@ module Expr = [%meta node_module [%str
       Some (radix_of_string tokens.(0))
     else
       None
+
+  let parse_string ?index ?clang_options ?options ?(filename = "<string>")
+      ?(line = 1) ?(context = [])
+      (s : string) : t option * Ast.translation_unit =
+    let code = Format.asprintf {|
+void f(void) {
+  %a
+#pragma clang diagnostic ignored "-Wunused-value"
+#line %d "%s"
+%s;
+}
+      |} (Format.pp_print_list Printer.decl) context line filename s in
+    let ast = Ast.parse_string ?index ?clang_options ?options code in
+    let expr =
+      match ast.desc.items with
+      | [{ desc = Function { body = Some { desc = Compound stmts; _}; _}; _}] ->
+          begin match List.rev stmts with
+          | { desc = Expr e; _} :: _ -> Some e
+          | _ -> None
+          end
+      | _ -> None in
+    (expr, ast)
 ]]
 
 module Type_loc = [%meta node_module [%str
@@ -2252,3 +2267,4 @@ module Translation_unit = [%meta node_module [%str
   let make ?(filename = "") items : Ast.translation_unit_desc =
     { filename; items }
 ]]
+

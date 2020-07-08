@@ -1,3 +1,19 @@
+# Next release, 4.1.1
+
+- Support for Clang/LLVM 10.0.1
+
+- `Clang.format_diagnostics` now use presumed locations by default and the
+  behavior can be changed through the optional `?options` argument. The
+  implementation now relies on the new `Clang.pp_diagnostic` which is an
+  OCaml reimplementation of `clang_formatDiagnostic` from libclang.
+
+- `Clangml_printer` has now moved to `Clang.Printer`. The package
+  `clangml.printer` still exists for compatibility and reexposes the
+  `Clang.Printer` interface.
+
+- `Clang.Expr.parse_string` parses strings as C expressions.
+  (suggested by Damien Rouhling)
+
 # 2020-05-15, 4.1.0
 
 - Compatible with LLVM from 3.4.2 to 10.0.0, OCaml from 4.03.0 to 4.11.0

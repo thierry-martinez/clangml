@@ -1,6 +1,7 @@
 [@@@ocaml.warning "-30"]
 
 open Clang__bindings
+open Clang__types
 
 let pp_cxint fmt cxint =
   Format.pp_print_string fmt (ext_int_to_string cxint 10 true)
@@ -25,11 +26,6 @@ let pp_cxfloat fmt cxfloat =
     {!type:concrete_location}, and call {!val:Clang.get_presumed_location}
     and {!val:Clang.get_expansion_location} for libclang's locations.
  *)
-type concrete_location = {
-  filename : string;
-  line : int;
-  column : int
-  }
 
 type source_location =
   | Clang of cxsourcelocation

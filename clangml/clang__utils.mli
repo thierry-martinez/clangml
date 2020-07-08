@@ -90,7 +90,8 @@ val parse_string : ?index:cxindex -> ?filename:string ->
     ?unsaved_files:cxunsavedfile list ->
       ?options:Cxtranslationunit_flags.t ->
         string -> cxtranslationunit
-(** [parse_string ?index ?filename ?command_line_args ?unsaved_files ?options contents]
+(** [parse_string ?index ?filename ?command_line_args ?unsaved_files ?options
+    contents]
   parses string [contents] and returns its translation unit.
     This function calls {!val:Clang.parse_file} with an unsaved file called
     [filename] (by default, [<string>.c]) with [contents]: this unsaved file
@@ -205,24 +206,46 @@ val seq_of_diagnostics : cxtranslationunit -> cxdiagnostic Seq.t
     (notes, warnings, errors, ...)
     produced for the given translation unit *)
 
+val concrete_of_cxsourcelocation :
+    location_kind -> cxsourcelocation -> concrete_location
+(** [concrete_of_cxsourcelocation kind location] returns the concrete location
+    associated to [location]. [kind] selects whether
+    {!val:Clang.get_presumed_location} (which ignores [#] line directive)
+    or {!val:Clang.get_expansion_location} (which honors [#] line directive)
+    is called. *)
+
+val string_of_severity : cxdiagnosticseverity -> string
+(** [string_of_severity severity] returns a string describing the severity:
+    this string is used as prefix for the diagnostic in {!val:pp_diagnostic}. *)
+
+val pp_diagnostic : ?options:Diagnostic_display_options.t -> Format.formatter ->
+  cxdiagnostic -> unit
+(** [pp_diagnostic ?options fmt diag] formats diagnostic [diag], mimicking
+    {!val: Clang__bindings.format_diagnostic} behavior.
+    {!Clang__types.Display_source_location.kind} supports various location kinds
+    whereas {!val: Clang__bindings.format_diagnostic} only displays spelling
+    locations. *)
+
 val format_diagnostics :
   ?pp:((Format.formatter -> unit -> unit)
        -> Format.formatter -> unit -> unit) ->
+  ?options:Diagnostic_display_options.t ->
   cxdiagnosticseverity list -> Format.formatter ->
   cxtranslationunit -> unit
 (** [format_diagnostics ?pp severities fmt tu] formats the
     diagnostics produced for the given translation unit. Only the diagnostics,
     the severity of which is listed in [severities] are displayed.
     If there is a printer given in [pp], then this printer is called once if
-    and only if there is at least one diagnostic to display, and [pp] should call
-    the printer passed in its first argument to display the diagnostics.
+    and only if there is at least one diagnostic to display, and [pp] should
+    call the printer passed in its first argument to display the diagnostics.
     In the case there is no diagnostic to display, nothing is printed. *)
 
 val error : cxdiagnosticseverity list
 (** [error] contains the severities [Error] and [Fatal]. *)
 
 val warning_or_error : cxdiagnosticseverity list
-(** [warning_or_error] contains the severities [Warning], [Error] and [Fatal]. *)
+(** [warning_or_error] contains the severities [Warning], [Error] and
+    [Fatal]. *)
 
 val not_ignored_diagnostics : cxdiagnosticseverity list
 (** [not_ignored_diagnostics] contains the severities [Note], [Warning],
