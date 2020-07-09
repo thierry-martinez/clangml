@@ -1111,6 +1111,9 @@ clang_ext_DeclContext_visitDecls(
 enum clang_ext_ElaboratedTypeKeyword
 clang_ext_TagDecl_getTagKind(CXCursor);
 
+bool
+clang_ext_Decl_hasAttrs(CXCursor);
+
 unsigned
 clang_ext_Decl_getAttrCount(CXCursor);
 

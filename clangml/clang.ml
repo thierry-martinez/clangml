@@ -711,8 +711,12 @@ module Ast = struct
               ext_field_decl_get_in_class_initializer cursor |>
               option_cursor expr_of_cxcursor in
             let attributes =
-              List.init (ext_decl_get_attr_count cursor)
-                (fun i -> attribute_of_cxcursor (ext_decl_get_attr cursor i)) in
+              if ext_decl_has_attrs cursor then
+                List.init (ext_decl_get_attr_count cursor)
+                  (fun i -> attribute_of_cxcursor
+                     (ext_decl_get_attr cursor i))
+              else
+                [] in
             Field { name; qual_type; bitwidth; init; attributes }
         | CXXAccessSpecifier ->
             AccessSpecifier (cursor |> get_cxxaccess_specifier)

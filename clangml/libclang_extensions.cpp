@@ -3391,6 +3391,13 @@ extern "C" {
     return ETK_NoKeyword;
   }
 
+  bool
+  clang_ext_Decl_hasAttrs(CXCursor cursor)
+  {
+    auto d = GetCursorDecl(cursor);
+    return d->hasAttrs();
+  }
+
   unsigned
   clang_ext_Decl_getAttrCount(CXCursor cursor)
   {
