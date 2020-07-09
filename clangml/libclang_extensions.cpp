@@ -192,7 +192,17 @@ MakeCXTypeInvalid(CXTranslationUnit TU)
 }
 
 /* MakeCXCursor is not exported in libclang.
-   The following implementation makes a (not well-formed) cursor on a
+   The following implementation declares all attributes as unexposed.
+   Use clang_ext_Attr_GetKind to get the actual kind. */
+static CXCursor
+MakeCXCursor(
+      const clang::Attr *A, const clang::Decl *Parent,
+      CXTranslationUnit TU) {
+  CXCursor C = { CXCursor_UnexposedAttr, 0, { Parent, A, TU } };
+  return C;
+}
+
+/* The following implementation makes a (not well-formed) cursor on a
    default statement with S as substatement. Visiting the (single) child of
    this cursor calls libclang's MakeCXCursor on S.
 */
@@ -3379,5 +3389,56 @@ extern "C" {
       }
     }
     return ETK_NoKeyword;
+  }
+
+  unsigned
+  clang_ext_Decl_getAttrCount(CXCursor cursor)
+  {
+    auto d = GetCursorDecl(cursor);
+    return d->getAttrs().size();
+  }
+
+  CXCursor
+  clang_ext_Decl_getAttr(CXCursor cursor, unsigned index)
+  {
+    auto d = GetCursorDecl(cursor);
+    return MakeCXCursor(d->getAttrs()[index], d, getCursorTU(cursor));
+  }
+
+  bool
+  clang_ext_AlignedAttr_isAlignmentExpr(CXCursor cursor)
+  {
+    auto a = GetCursorAttr(cursor);
+    if (auto aa = llvm::dyn_cast_or_null<clang::AlignedAttr>(a)) {
+      return aa->isAlignmentExpr();
+    }
+    return false;
+  }
+
+  CXCursor
+  clang_ext_AlignedAttr_getAlignmentExpr(CXCursor cursor)
+  {
+    auto a = GetCursorAttr(cursor);
+    if (auto aa = llvm::dyn_cast_or_null<clang::AlignedAttr>(a)) {
+      return MakeCXCursor(aa->getAlignmentExpr(), getCursorTU(cursor));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  struct clang_ext_TypeLoc
+  clang_ext_AlignedAttr_getAlignmentType(CXCursor cursor)
+  {
+    auto a = GetCursorAttr(cursor);
+    if (auto aa = llvm::dyn_cast_or_null<clang::AlignedAttr>(a)) {
+      return MakeTypeLoc(
+        aa->getAlignmentType()->getTypeLoc(), getCursorTU(cursor));
+    }
+    return MakeTypeLocInvalid(getCursorTU(cursor));
+  }
+
+  bool
+  clang_ext_CursorKind_isAttr(enum CXCursorKind kind)
+  {
+    return CXCursor_FirstAttr <= kind && kind <= CXCursor_LastAttr;
   }
 }

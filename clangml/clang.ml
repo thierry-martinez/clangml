@@ -710,7 +710,10 @@ module Ast = struct
             let init =
               ext_field_decl_get_in_class_initializer cursor |>
               option_cursor expr_of_cxcursor in
-            Field { name; qual_type; bitwidth; init }
+            let attributes =
+              List.init (ext_decl_get_attr_count cursor)
+                (fun i -> attribute_of_cxcursor (ext_decl_get_attr cursor i)) in
+            Field { name; qual_type; bitwidth; init; attributes }
         | CXXAccessSpecifier ->
             AccessSpecifier (cursor |> get_cxxaccess_specifier)
         | UsingDirective ->
@@ -1060,26 +1063,32 @@ module Ast = struct
         access_specifier = get_cxxaccess_specifier cursor;
       }
 
+    and attribute_of_cxcursor (cursor : cxcursor) : attribute =
+      let desc =
+        match ext_attr_get_kind cursor with
+        | Aligned ->
+            let argument =
+              if ext_aligned_attr_is_alignment_expr cursor then
+                let expr = ext_aligned_attr_get_alignment_expr cursor in
+                expr_of_cxcursor expr
+              else
+                failwith "attribute_of_cxcursor" in
+            Aligned argument
+        | WarnUnusedResult ->
+            WarnUnusedResult {
+              spelling =
+                ext_warn_unused_result_attr_get_semantic_spelling cursor;
+              message = ext_warn_unused_result_attr_get_message cursor;
+            }
+        | other -> Other other in
+      node ~cursor desc
+
     and attribute_of_cxcursor_opt cursor : attribute option =
       let kind = get_cursor_kind cursor in
-      let make_unused () : attribute_desc =
-        WarnUnusedResult {
-          spelling = ext_warn_unused_result_attr_get_semantic_spelling cursor;
-          message = ext_warn_unused_result_attr_get_message cursor;
-        } in
-      let desc : attribute_desc option =
-        match kind with
-        | WarnUnusedResultAttr
-            [@if [%meta Metapp.Exp.of_bool
-              (Clangml_config.version.major >= 9)]] ->
-            Some (make_unused ())
-        | UnexposedAttr ->
-            begin match ext_attr_get_kind cursor with
-            | WarnUnusedResult -> Some (make_unused ())
-            | other -> Some (Other other)
-            end
-        | _ -> None in
-      Option.map (node ~cursor) desc
+      if ext_cursor_kind_is_attr kind then
+        Some (attribute_of_cxcursor cursor)
+      else
+        None
 
     and record_decl_of_cxcursor keyword cursor =
       let attributes, children =

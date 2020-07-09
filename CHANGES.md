@@ -15,6 +15,9 @@
 - `Clang.Expr.parse_string` parses strings as C expressions.
   (suggested by Damien Rouhling)
 
+- Support for `_Alignas` (C) and `alignas` (C++) attributes.
+  (reported by Damien Rouhling)
+
 # 2020-05-15, 4.1.0
 
 - Compatible with LLVM from 3.4.2 to 10.0.0, OCaml from 4.03.0 to 4.11.0
