@@ -168,14 +168,17 @@ module Ast = struct
     { decoration; desc }
 
   let var
-      ?(linkage = NoLinkage) ?var_init ?(constexpr = false) var_name var_type =
-    { linkage; var_name; var_type; var_init; constexpr }
+      ?(linkage = NoLinkage) ?var_init ?(constexpr = false)
+      ?(attributes = []) var_name var_type =
+    { linkage; var_name; var_type; var_init; constexpr; attributes }
 
   let function_decl
       ?(linkage = NoLinkage) ?body ?(deleted = false) ?(constexpr = false)
-      ?nested_name_specifier function_type name =
-    { linkage; body; deleted; constexpr; function_type; nested_name_specifier;
-      name }
+      ?(inline_specified = false) ?(inlined = false) ?nested_name_specifier
+      ?(attributes = [])
+      function_type name =
+    { linkage; body; deleted; constexpr; inline_specified; inlined;
+      function_type; nested_name_specifier; name; attributes }
 
   let function_type ?(calling_conv = (C : cxcallingconv)) ?parameters
         ?exception_spec result =
@@ -663,7 +666,8 @@ module Ast = struct
       try
         match get_cursor_kind cursor with
         | FunctionDecl ->
-            function_decl_of_cxcursor cursor (list_of_children cursor)
+            Function
+              (function_decl_of_cxcursor cursor (list_of_children cursor))
         | FunctionTemplate ->
             make_template cursor begin
               cxxmethod_decl_of_cxcursor ~can_be_function:(not in_record)
@@ -710,13 +714,7 @@ module Ast = struct
             let init =
               ext_field_decl_get_in_class_initializer cursor |>
               option_cursor expr_of_cxcursor in
-            let attributes =
-              if ext_decl_has_attrs cursor then
-                List.init (ext_decl_get_attr_count cursor)
-                  (fun i -> attribute_of_cxcursor
-                     (ext_decl_get_attr cursor i))
-              else
-                [] in
+            let attributes = attributes_of_decl cursor in
             Field { name; qual_type; bitwidth; init; attributes }
         | CXXAccessSpecifier ->
             AccessSpecifier (cursor |> get_cxxaccess_specifier)
@@ -913,24 +911,33 @@ module Ast = struct
         function_type_of_cxtype (parameters_of_function_decl_or_proto cursor)
 
     and function_decl_of_cxcursor cursor children =
-      let linkage = cursor |> get_cursor_linkage in
       let nested_name_specifier =
         cursor |> ext_decl_get_nested_name_specifier |>
         convert_nested_name_specifier in
-      let function_type = function_type_of_decl cursor in
       let name = extract_declaration_name cursor in
       let body : stmt option =
         match List.rev children with
         | last :: _ -> function_body_of_cxcursor last
         | _ -> None in
-      Clang__ast.Function { linkage; function_type;
+      {
+        linkage = get_cursor_linkage cursor;
+        function_type = function_type_of_decl cursor;
         nested_name_specifier; name; body;
         deleted = ext_function_decl_is_deleted cursor;
-        constexpr = ext_function_decl_is_constexpr cursor; }
+        constexpr = ext_function_decl_is_constexpr cursor;
+        attributes = attributes_of_decl cursor;
+        inline_specified = ext_function_decl_is_inline_specified cursor;
+        inlined = ext_function_decl_is_inlined cursor;
+      }
+
+    and attributes_of_decl cursor =
+      if ext_decl_has_attrs cursor then
+        List.init (ext_decl_get_attr_count cursor)
+          (fun i -> attribute_of_cxcursor (ext_decl_get_attr cursor i))
+      else
+        []
 
     and cxxmethod_decl_of_cxcursor ?(can_be_function = false) cursor =
-      let function_type = function_type_of_decl cursor in
-      let name = extract_declaration_name cursor in
       let children =
         list_of_children cursor |>
         filter_out_prefix_from_list is_template_parameter in
@@ -939,19 +946,7 @@ module Ast = struct
         | type_ref :: _ when get_cursor_kind type_ref = TypeRef ->
             Some (type_ref |> get_cursor_type |> of_cxtype)
         | _ -> None in
-      let body : stmt option =
-        match List.rev children with
-        | [] -> None
-        | body :: _ -> function_body_of_cxcursor body in
-      let deleted = ext_function_decl_is_deleted cursor in
-      let constexpr = ext_function_decl_is_constexpr cursor in
-      let nested_name_specifier =
-        cursor |> ext_decl_get_nested_name_specifier |>
-        convert_nested_name_specifier in
-      let linkage = cursor |> get_cursor_linkage in
-      let function_decl = {
-        linkage; function_type; nested_name_specifier; name; body; deleted;
-        constexpr } in
+      let function_decl = function_decl_of_cxcursor cursor children in
       if can_be_function && type_ref = None then
         Function function_decl
       else
@@ -1035,7 +1030,8 @@ module Ast = struct
         else
           None in
       { linkage; var_name; var_type; var_init;
-        constexpr = ext_var_decl_is_constexpr cursor }
+        constexpr = ext_var_decl_is_constexpr cursor;
+        attributes = attributes_of_decl cursor; }
 
     and enum_decl_of_cxcursor cursor =
       let name = get_cursor_spelling cursor in
@@ -1070,6 +1066,11 @@ module Ast = struct
     and attribute_of_cxcursor (cursor : cxcursor) : attribute =
       let desc =
         match ext_attr_get_kind cursor with
+        | AbiTag ->
+            let list =
+              List.init (ext_abi_tag_attr_get_num_tags cursor)
+                (ext_abi_tag_attr_get_tag cursor) in
+            AbiTag list
         | Aligned ->
             let argument =
               if ext_aligned_attr_is_alignment_expr cursor then
@@ -1078,6 +1079,16 @@ module Ast = struct
               else
                 failwith "attribute_of_cxcursor" in
             Aligned argument
+        | AllocAlign ->
+            AllocAlign (ext_alloc_align_attr_get_param_index cursor)
+        | AllocSize ->
+            let num_elems : int option =
+              match ext_alloc_size_attr_get_num_elems_param cursor with
+              | 0 -> None
+              | num_elems -> Some num_elems in
+            AllocSize {
+              elem_size = ext_alloc_size_attr_get_elem_size_param cursor;
+              num_elems }
         | WarnUnusedResult ->
             WarnUnusedResult {
               spelling =

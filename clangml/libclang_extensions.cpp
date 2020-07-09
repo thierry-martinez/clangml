@@ -3412,6 +3412,26 @@ extern "C" {
     return MakeCXCursor(d->getAttrs()[index], d, getCursorTU(cursor));
   }
 
+  unsigned
+  clang_ext_AbiTagAttr_getNumTags(CXCursor cursor)
+  {
+    auto a = GetCursorAttr(cursor);
+    if (auto aa = llvm::dyn_cast_or_null<clang::AbiTagAttr>(a)) {
+      return aa->tags_size();
+    }
+    return 0;
+  }
+
+  CXString
+  clang_ext_AbiTagAttr_getTag(CXCursor cursor, unsigned index)
+  {
+    auto a = GetCursorAttr(cursor);
+    if (auto aa = llvm::dyn_cast_or_null<clang::AbiTagAttr>(a)) {
+      return cxstring_createDup(aa->tags().begin()[index]);
+    }
+    return cxstring_createRef("");
+  }
+
   bool
   clang_ext_AlignedAttr_isAlignmentExpr(CXCursor cursor)
   {
@@ -3443,9 +3463,60 @@ extern "C" {
     return MakeTypeLocInvalid(getCursorTU(cursor));
   }
 
+  unsigned
+  clang_ext_AllocAlignAttr_getParamIndex(CXCursor cursor)
+  {
+    auto a = GetCursorAttr(cursor);
+    if (auto aa = llvm::dyn_cast_or_null<clang::AllocAlignAttr>(a)) {
+      return aa->getParamIndex().getSourceIndex();
+    }
+    return 0;
+  }
+
+  unsigned
+  clang_ext_AllocSizeAttr_getElemSizeParam(CXCursor cursor)
+  {
+    auto a = GetCursorAttr(cursor);
+    if (auto aa = llvm::dyn_cast_or_null<clang::AllocSizeAttr>(a)) {
+      return aa->getElemSizeParam().getSourceIndex();
+    }
+    return 0;
+  }
+
+  unsigned
+  clang_ext_AllocSizeAttr_getNumElemsParam(CXCursor cursor)
+  {
+    auto a = GetCursorAttr(cursor);
+    if (auto aa = llvm::dyn_cast_or_null<clang::AllocSizeAttr>(a)) {
+      const auto &param = aa->getNumElemsParam();
+      if (param.isValid()) {
+        return param.getSourceIndex();
+      }
+    }
+    return 0;
+  }
+
   bool
   clang_ext_CursorKind_isAttr(enum CXCursorKind kind)
   {
     return CXCursor_FirstAttr <= kind && kind <= CXCursor_LastAttr;
+  }
+
+  bool
+  clang_ext_FunctionDecl_isInlineSpecified(CXCursor cursor)
+  {
+    if (auto *function = getFunctionDecl(cursor)) {
+      return function->isInlineSpecified();
+    }
+    return false;
+  }
+
+  bool
+  clang_ext_FunctionDecl_isInlined(CXCursor cursor)
+  {
+    if (auto *function = getFunctionDecl(cursor)) {
+      return function->isInlined();
+    }
+    return false;
   }
 }

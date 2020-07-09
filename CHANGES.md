@@ -18,6 +18,11 @@
 - Support for `_Alignas` (C) and `alignas` (C++) attributes.
   (reported by Damien Rouhling)
 
+- `function_decl` now exposes `inline_specified` and `inlined` fields
+
+- Support for `abi_tag`, `alloc_align`, `alloc_size` attributes.
+
+
 # 2020-05-15, 4.1.0
 
 - Compatible with LLVM from 3.4.2 to 10.0.0, OCaml from 4.03.0 to 4.11.0

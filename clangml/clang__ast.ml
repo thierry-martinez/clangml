@@ -818,6 +818,38 @@ and function_decl = {
     body : stmt option;
     deleted : bool;
     constexpr : bool;
+    inline_specified : bool;
+(** Determine whether the [inline] keyword was specified for this function.
+
+    {[
+let example = {|inline void f(void);|}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~standard:C11) example
+  [%pattern?
+    [{ desc = Function {
+      name = IdentifierName "f";
+      inline_specified = true;
+      inlined = true; }}]]
+    ]}*)
+    inlined : bool;
+(** Determine whether this function should be inlined, because it is
+    either marked [inline] or [constexpr] or is a member function of a class
+    that was defined in the class body.
+    {[
+let example = {|constexpr void f(void);|}
+
+let () =
+  check_pattern quote_decl_list
+    (parse_declaration_list ~language:CXX ~standard:Cxx11) example
+  [%pattern?
+    [{ desc = Function {
+      name = IdentifierName "f";
+      constexpr = true;
+      inline_specified = false;
+      inlined = true; }}]]
+    ]}*)
+    attributes : attribute list;
   }
 
 (** Function type. *)
@@ -1741,6 +1773,23 @@ and asm_operand = {
 and attribute = (attribute_desc, qual_type) open_node
 
 and attribute_desc =
+  | AbiTag of string list
+(** ABI tags.
+
+    {[
+let example = {|
+__attribute__((abi_tag("a", "b"))) float f;
+|}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = Var {
+         attributes = [{ desc = AbiTag ["a"; "b"] }];
+         var_type = { desc = BuiltinType Float };
+         var_name = "f"; }}]]
+    ]}*)
+
   | Aligned of expr
 (** Field alignment.
 
@@ -1835,11 +1884,90 @@ let () =
           { name = "f";
             qual_type = { desc = BuiltinType Float }}}] }}]]
     ]}*)
+  | AllocAlign of int
+(**
+Specify that the return value of the function (which must be a pointer type) is
+at least as aligned as the value of the indicated parameter.
+
+    {[
+let example = {|
+void *a(int align) __attribute__((alloc_align(1)));
+|}
+
+let () =
+  check_pattern quote_decl_list
+    (parse_declaration_list ~language:CXX ~standard:Cxx11) example
+  [%pattern?
+    [{ desc = Function {
+         attributes = [{ desc = AllocAlign 1 }];
+         name = IdentifierName "a";
+         function_type = {
+           result = { desc = Pointer { desc = BuiltinType Void }};
+           parameters = Some {
+             non_variadic = [{ desc = {
+               name = "align"; qual_type = { desc = BuiltinType Int }}}];
+             variadic = false }}}}]]
+    ]}*)
+  | AllocSize of { elem_size : int; num_elems : int option }
+(** Hint to the compiler how many bytes of memory will be available at the
+    returned pointer.
+
+    {[
+let example = {|
+void *my_malloc(int a) __attribute__((alloc_size(1)));
+void *my_calloc(int a, int b) __attribute__((alloc_size(1, 2)));
+|}
+
+let () =
+  check_pattern quote_decl_list
+    (parse_declaration_list ~language:CXX ~standard:Cxx11) example
+  [%pattern?
+    [{ desc = Function {
+         attributes = [{ desc = AllocSize { elem_size = 1; num_elems = None }}];
+         name = IdentifierName "my_malloc";
+         function_type = {
+           result = { desc = Pointer { desc = BuiltinType Void }};
+           parameters = Some {
+             non_variadic = [{ desc = {
+               name = "a"; qual_type = { desc = BuiltinType Int }}}];
+             variadic = false }}}};
+      { desc = Function {
+         attributes = [
+           { desc = AllocSize { elem_size = 1; num_elems = Some 2 }}];
+         name = IdentifierName "my_calloc";
+         function_type = {
+           result = { desc = Pointer { desc = BuiltinType Void }};
+           parameters = Some {
+             non_variadic = [
+               { desc = {
+                   name = "a"; qual_type = { desc = BuiltinType Int }}};
+               { desc = {
+                   name = "b"; qual_type = { desc = BuiltinType Int }}}];
+             variadic = false }}}}]]
+    ]}*)
   | WarnUnusedResult of {
       spelling : clang_ext_warnunusedresultattr_spelling;
       message : string;
     }
   | Other of attribute_kind
+(** Attributes without argument.
+
+    {[
+let example = {|
+_Noreturn void f(void);
+|}
+
+let () =
+  check_pattern quote_decl_list
+    (parse_declaration_list ~standard:C11) example
+  [%pattern?
+    [{ desc = Function {
+         attributes = [{ desc = Other C11NoReturn }];
+         name = IdentifierName "f";
+         function_type = {
+           result = { desc = BuiltinType Void };
+           parameters = Some { non_variadic = []; variadic = false }}}}]]
+    ]}*)
 
 (** {3 Expressions} *)
 
@@ -4096,6 +4224,7 @@ and var_decl_desc = {
     var_type : qual_type;
     var_init : expr option;
     constexpr : bool;
+    attributes : attribute list;
   }
 
 and cxx_method_binding_kind = NonVirtual | Virtual | PureVirtual

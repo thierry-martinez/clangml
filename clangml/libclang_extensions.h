@@ -1120,6 +1120,12 @@ clang_ext_Decl_getAttrCount(CXCursor);
 CXCursor
 clang_ext_Decl_getAttr(CXCursor, unsigned);
 
+unsigned
+clang_ext_AbiTagAttr_getNumTags(CXCursor);
+
+CXString
+clang_ext_AbiTagAttr_getTag(CXCursor, unsigned);
+
 bool
 clang_ext_AlignedAttr_isAlignmentExpr(CXCursor);
 
@@ -1129,5 +1135,20 @@ clang_ext_AlignedAttr_getAlignmentExpr(CXCursor);
 struct clang_ext_TypeLoc
 clang_ext_AlignedAttr_getAlignmentType(CXCursor);
 
+unsigned
+clang_ext_AllocAlignAttr_getParamIndex(CXCursor);
+
+unsigned
+clang_ext_AllocSizeAttr_getElemSizeParam(CXCursor);
+
+unsigned
+clang_ext_AllocSizeAttr_getNumElemsParam(CXCursor);
+
 bool
-clang_ext_CursorKind_isAttr(enum CXCursorKind kind);
+clang_ext_CursorKind_isAttr(enum CXCursorKind);
+
+bool
+clang_ext_FunctionDecl_isInlineSpecified(CXCursor);
+
+bool
+clang_ext_FunctionDecl_isInlined(CXCursor);

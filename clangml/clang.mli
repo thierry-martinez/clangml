@@ -76,11 +76,14 @@ module Ast : sig
       nodes. *)
 
   val var : ?linkage:linkage_kind -> ?var_init:expr ->
-    ?constexpr:bool -> string -> qual_type -> var_decl_desc
+    ?constexpr:bool -> ?attributes:attribute list -> string -> qual_type ->
+    var_decl_desc
 
   val function_decl : ?linkage:linkage_kind -> ?body:stmt -> ?deleted:bool ->
-    ?constexpr:bool -> ?nested_name_specifier:nested_name_specifier ->
-    function_type -> declaration_name -> function_decl
+    ?constexpr:bool -> ?inline_specified:bool -> ?inlined:bool ->
+    ?nested_name_specifier:nested_name_specifier ->
+    ?attributes:attribute list -> function_type ->
+    declaration_name -> function_decl
 
   val function_type : ?calling_conv:calling_conv -> ?parameters:parameters ->
     ?exception_spec:exception_spec -> qual_type -> function_type
