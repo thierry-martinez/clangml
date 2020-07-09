@@ -2942,3 +2942,18 @@ external ext_decl_context_visit_decls :
 external ext_tag_decl_get_tag_kind :
   cxcursor -> clang_ext_elaboratedtypekeyword =
     "clang_ext_TagDecl_getTagKind_wrapper"
+external ext_decl_has_attrs :
+  cxcursor -> bool = "clang_ext_Decl_hasAttrs_wrapper"
+external ext_decl_get_attr_count :
+  cxcursor -> int = "clang_ext_Decl_getAttrCount_wrapper"
+external ext_decl_get_attr :
+  cxcursor -> int -> cxcursor = "clang_ext_Decl_getAttr_wrapper"
+external ext_aligned_attr_is_alignment_expr :
+  cxcursor -> bool = "clang_ext_AlignedAttr_isAlignmentExpr_wrapper"
+external ext_aligned_attr_get_alignment_expr :
+  cxcursor -> cxcursor = "clang_ext_AlignedAttr_getAlignmentExpr_wrapper"
+external ext_aligned_attr_get_alignment_type :
+  cxcursor -> clang_ext_typeloc =
+    "clang_ext_AlignedAttr_getAlignmentType_wrapper"
+external ext_cursor_kind_is_attr :
+  cxcursorkind -> bool = "clang_ext_CursorKind_isAttr_wrapper"

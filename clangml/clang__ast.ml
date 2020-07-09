@@ -1741,6 +1741,100 @@ and asm_operand = {
 and attribute = (attribute_desc, qual_type) open_node
 
 and attribute_desc =
+  | Aligned of expr
+(** Field alignment.
+
+    {[
+let example = {|
+struct {
+  _Alignas(32) float f;
+};
+|}
+
+let () =
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = RecordDecl {
+      keyword = Struct;
+      fields = [
+        { desc = Field
+          { name = "f";
+            qual_type = { desc = BuiltinType Float };
+            attributes = [
+              { desc = Aligned
+                { desc = IntegerLiteral (Int 32) }}] }}] }}]]
+
+let example = {|
+struct alignas(32) s {
+  float f;
+};
+|}
+
+let () =
+  check_pattern quote_decl_list
+    (parse_declaration_list ~language:CXX ~standard:Cxx11) example
+  [%pattern?
+    [{ desc = RecordDecl {
+      keyword = Struct;
+      attributes = [
+        { desc = Aligned { desc = IntegerLiteral (Int 32)}}];
+      fields = [
+        { desc = Field
+          { name = "f";
+            qual_type = { desc = BuiltinType Float }}}] }}]]
+
+    ]}
+
+Note that whereas clang AST allows [_Alignas] attribute to carry a type
+as argument, clang parser transforms [_Alignas(type)] into
+[_Alignas(alignof(type))].
+
+    {[
+let example = {|
+struct {
+  _Alignas(double) float f;
+};
+|}
+
+let () =
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = RecordDecl {
+      keyword = Struct;
+      fields = [
+        { desc = Field
+          { name = "f";
+            qual_type = { desc = BuiltinType Float };
+            attributes = [
+              { desc = Aligned
+                { desc = UnaryExpr {
+                    kind = AlignOf;
+                    argument = ArgumentType
+                      { desc = BuiltinType Double }}}}] }}] }}]]
+
+let example = {|
+struct alignas(double) s {
+  float f;
+};
+|}
+
+let () =
+  check_pattern quote_decl_list
+    (parse_declaration_list ~language:CXX ~standard:Cxx11) example
+  [%pattern?
+    [{ desc = RecordDecl {
+      keyword = Struct;
+      attributes = [
+        { desc = Aligned
+                { desc = UnaryExpr {
+                    kind = AlignOf;
+                    argument = ArgumentType
+                      { desc = BuiltinType Double }}}}];
+      fields = [
+        { desc = Field
+          { name = "f";
+            qual_type = { desc = BuiltinType Float }}}] }}]]
+    ]}*)
   | WarnUnusedResult of {
       spelling : clang_ext_warnunusedresultattr_spelling;
       message : string;
@@ -2279,7 +2373,7 @@ let () =
     ]}*)
   | UnaryExpr of {
       kind : unary_expr_kind;
-      argument : unary_expr_or_type_trait;
+      argument : expr_or_type;
     }
 (** Unary expr: sizeof, alignof (C++11), ...
     {[
@@ -2528,7 +2622,7 @@ let () =
           array_form = false;
           argument = { desc = DeclRef ({ name = IdentifierName "t" })}}}}] }}}]]
    ]}*)
-  | Typeid of unary_expr_or_type_trait
+  | Typeid of expr_or_type
   | PackExpansionExpr of expr
   | Fold of {
       lhs : expr option;
@@ -2651,7 +2745,7 @@ and cast_kind =
   | Dynamic
   | Const
 
-and unary_expr_or_type_trait =
+and expr_or_type =
   | ArgumentExpr of expr
   | ArgumentType of qual_type
 
@@ -3332,6 +3426,7 @@ let () =
       qual_type : qual_type;
       bitwidth : expr option;
       init : expr option; (* C++11 *)
+      attributes : attribute list;
     }
 (** Record (struct, union or class) field.
 

@@ -11620,3 +11620,109 @@ clang_ext_TagDecl_getTagKind_wrapper(value arg_ocaml)
   }
 }
 
+CAMLprim value
+clang_ext_Decl_hasAttrs_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  _Bool result = clang_ext_Decl_hasAttrs(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_Decl_getAttrCount_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int result = clang_ext_Decl_getAttrCount(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_Decl_getAttr_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int arg2;
+  arg2 = Int_val(arg2_ocaml);
+  CXCursor result = clang_ext_Decl_getAttr(arg, arg2);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_AlignedAttr_isAlignmentExpr_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  _Bool result = clang_ext_AlignedAttr_isAlignmentExpr(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_AlignedAttr_getAlignmentExpr_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  CXCursor result = clang_ext_AlignedAttr_getAlignmentExpr(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_AlignedAttr_getAlignmentType_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  struct clang_ext_TypeLoc result = clang_ext_AlignedAttr_getAlignmentType(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_typeloc(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_CursorKind_isAttr_wrapper(value kind_ocaml)
+{
+  CAMLparam1(kind_ocaml);
+  enum CXCursorKind kind;
+  kind = Cxcursorkind_val(kind_ocaml);
+  _Bool result = clang_ext_CursorKind_isAttr(kind);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+

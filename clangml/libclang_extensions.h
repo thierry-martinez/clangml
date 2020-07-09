@@ -1110,3 +1110,24 @@ clang_ext_DeclContext_visitDecls(
 
 enum clang_ext_ElaboratedTypeKeyword
 clang_ext_TagDecl_getTagKind(CXCursor);
+
+bool
+clang_ext_Decl_hasAttrs(CXCursor);
+
+unsigned
+clang_ext_Decl_getAttrCount(CXCursor);
+
+CXCursor
+clang_ext_Decl_getAttr(CXCursor, unsigned);
+
+bool
+clang_ext_AlignedAttr_isAlignmentExpr(CXCursor);
+
+CXCursor
+clang_ext_AlignedAttr_getAlignmentExpr(CXCursor);
+
+struct clang_ext_TypeLoc
+clang_ext_AlignedAttr_getAlignmentType(CXCursor);
+
+bool
+clang_ext_CursorKind_isAttr(enum CXCursorKind kind);

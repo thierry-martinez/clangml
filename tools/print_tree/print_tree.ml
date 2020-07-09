@@ -9,7 +9,10 @@ let rec print_tree indent cursor history =
     | UnexposedDecl | VarDecl ->
         Refl.show [%refl: Clang.clang_ext_declkind] []
           (Clang.ext_decl_get_kind cursor)
-    | kind -> Clang.get_cursor_kind_spelling kind in
+    | kind ->
+        Printf.sprintf "%s (%s)"
+          (Clang.get_cursor_kind_spelling kind)
+          (Refl.show [%refl: Clang.cxcursorkind] [] kind) in
   let spelling =
     match kind with
     | IntegerLiteral ->
