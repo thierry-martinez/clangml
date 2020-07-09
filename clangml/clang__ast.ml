@@ -1771,7 +1771,8 @@ struct alignas(32) s {
 |}
 
 let () =
-  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  check_pattern quote_decl_list
+    (parse_declaration_list ~language:CXX ~standard:Cxx11) example
   [%pattern?
     [{ desc = RecordDecl {
       keyword = Struct;
@@ -1818,7 +1819,8 @@ struct alignas(double) s {
 |}
 
 let () =
-  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  check_pattern quote_decl_list
+    (parse_declaration_list ~language:CXX ~standard:Cxx11) example
   [%pattern?
     [{ desc = RecordDecl {
       keyword = Struct;
