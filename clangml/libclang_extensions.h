@@ -1122,19 +1122,25 @@ clang_ext_Decl_getAttr(CXCursor, unsigned);
 
 unsigned
 clang_ext_AbiTagAttr_getNumTags(CXCursor);
-
+/*
 CXString
 clang_ext_AbiTagAttr_getTag(CXCursor, unsigned);
-
+*/
+unsigned
+clang_ext_AcquireCapabilityAttr_getArgSize(CXCursor);
+/*
+CXCursor
+clang_ext_AcquireCapabilityAttr_getArg(CXCursor, unsigned);
+*/
 bool
 clang_ext_AlignedAttr_isAlignmentExpr(CXCursor);
-
+/*
 CXCursor
 clang_ext_AlignedAttr_getAlignmentExpr(CXCursor);
-
+*/
 struct clang_ext_TypeLoc
 clang_ext_AlignedAttr_getAlignmentType(CXCursor);
-
+/*
 unsigned
 clang_ext_AllocAlignAttr_getParamIndex(CXCursor);
 
@@ -1143,7 +1149,7 @@ clang_ext_AllocSizeAttr_getElemSizeParam(CXCursor);
 
 unsigned
 clang_ext_AllocSizeAttr_getNumElemsParam(CXCursor);
-
+*/
 bool
 clang_ext_CursorKind_isAttr(enum CXCursorKind);
 
@@ -1152,3 +1158,15 @@ clang_ext_FunctionDecl_isInlineSpecified(CXCursor);
 
 bool
 clang_ext_FunctionDecl_isInlined(CXCursor);
+
+struct clang_ext_TypeLoc
+clang_ext_CXXBaseSpecifier_getTypeLoc(CXCursor);
+
+struct clang_ext_VersionTuple {
+  unsigned int major;
+  unsigned int minor;
+  unsigned int subminor;
+  unsigned int build;
+};
+
+#include "libclang_extensions_attrs_headers.inc"

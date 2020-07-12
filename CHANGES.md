@@ -22,6 +22,14 @@
 
 - Support for `abi_tag`, `alloc_align`, `alloc_size` attributes.
 
+- class base specifiers now expose a full `qual_type` instead of a mere
+  `ident` string.
+  
+- The common signature exposed by every AST node module
+  (`Clang.Expr`, `Clang.Stmt`, ...) now declares a `hash` function and
+  and a `Hashtbl` module.
+  
+- `ident_ref` now carries a `template_arguments` parameter.
 
 # 2020-05-15, 4.1.0
 

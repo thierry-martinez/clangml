@@ -1,3 +1,14 @@
+let string_of_builtin_type (ty : Clang__ast.builtin_type) =
+  match ty with
+  | Bool -> "bool"
+  | Char_S -> "char"
+  | Float -> "float"
+  | Int -> "int"
+  | UInt -> "unsigned int"
+  | _ ->
+      Printf.sprintf "<unknown builtin type:%s>"
+        (Clang__bindings.get_type_kind_spelling ty)
+
 let maybe_parentheses in_prec out_prec fmt k =
   if in_prec >= out_prec then
     Format.fprintf fmt "(@[%t@])" k
@@ -66,19 +77,27 @@ let prec_of_binary_operator (kind : Clang__ast.binary_operator_kind) =
   | Comma -> 15, Left_to_right
   | _ -> invalid_arg "prec_of_binary_operator"
 
+let pp_comma fmt () =
+  Format.fprintf fmt ",@ "
+
 let rec decl fmt (d : Clang__ast.decl) =
   match d.desc with
   | Function { linkage; function_type; name; body; _ } ->
-      print_linkage fmt linkage;
-      print_function_type fmt function_type name;
-      print_function_body fmt body
-  | Var { linkage; var_type = ty; var_name; var_init; _ } ->
-      Format.fprintf fmt "@[%a%a%a;@]"
-	print_linkage linkage
-	(typed_value (fun fmt -> Format.pp_print_string fmt var_name)) ty
-	print_variable_init var_init
+      Format.fprintf fmt "@[<v>%a%a%a@]"
+        pp_linkage linkage
+        pp_function_type (function_type, name)
+        pp_function_body body
+  | Var var_decl ->
+      Format.fprintf fmt "@[%a;@]" pp_var_decl var_decl
+  | EnumDecl { name; constants; _ } ->
+      let pp_constant fmt (constant : Clang__ast.enum_constant) =
+        Format.pp_print_string fmt constant.desc.constant_name;
+        constant.desc.constant_init |> Option.iter (fun init ->
+          Format.fprintf fmt "@ =@ %a" expr init) in
+      Format.fprintf fmt "@[<v>@[enum@ %s@ {@]@,%a};@]" name
+        (Format.pp_print_list ~pp_sep:pp_comma pp_constant) constants
   | RecordDecl { keyword; name; fields; _ } ->
-      Format.fprintf fmt "@[%s@ %s@ {%a}@]"
+      Format.fprintf fmt "@[<v>@[%s@ %s@ {@]@,%a};@]"
         (Clang__bindings.ext_elaborated_type_get_keyword_spelling keyword)
         name
         (Format.pp_print_list decl)
@@ -97,13 +116,13 @@ let rec decl fmt (d : Clang__ast.decl) =
         (fun fmt ->
           if explicit then Format.fprintf fmt "explicit@ ")
         class_name
-        print_parameters parameters
+        pp_parameters parameters
         (fun fmt ->
           match initializer_list with
           | [] -> ()
           | _ ->
               Format.fprintf fmt "@ :@ ";
-              Format.pp_print_list ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ")
+              Format.pp_print_list ~pp_sep:pp_comma
                 (fun fmt (name, value) ->
                   Format.fprintf fmt "%s(%a)" name expr value)
                 fmt initializer_list)
@@ -112,7 +131,7 @@ let rec decl fmt (d : Clang__ast.decl) =
             Format.fprintf fmt "@ =@ default";
           if deleted then
             Format.fprintf fmt "@ =@ delete")
-        print_function_body body
+        pp_function_body body
   | Directive (Include { program_context; filename }) ->
       let pp_arg fmt =
         if program_context then
@@ -124,10 +143,18 @@ let rec decl fmt (d : Clang__ast.decl) =
       Format.fprintf fmt "@[extern@ \"%s\"@ {@ @[%a@]@ }@]"
         (Clang__utils.extern_of_language language)
         decls list
-  | _ -> failwith (Format.asprintf "Not implemented decl: %a"
-           (Refl.pp [%refl: Clang__ast.decl] []) d)
+  | _ ->
+      Format.fprintf fmt {|@[\<not implemented decl: %a>@]|}
+        (Refl.pp [%refl: Clang__ast.decl] []) d
 
-and print_variable_init fmt init =
+and pp_var_decl fmt (var_decl : Clang__ast.var_decl_desc) =
+  match var_decl with { linkage; var_type = ty; var_name; var_init; _ } ->
+  Format.fprintf fmt "@[%a%a%a@]"
+    pp_linkage linkage
+    (typed_value (fun fmt -> Format.pp_print_string fmt var_name)) ty
+    pp_variable_init var_init
+
+and pp_variable_init fmt init =
   match init with
   | None -> ()
   | Some value ->
@@ -152,6 +179,12 @@ and expr_prec prec fmt (e : Clang__ast.expr) =
       Format.pp_print_string fmt "\"";
       String.iter (c_escape_char fmt) bytes;
       Format.pp_print_string fmt "\""
+  | BoolLiteral b ->
+      Format.pp_print_bool fmt b
+  | ArraySubscript { base; index } ->
+      maybe_parentheses 1 prec fmt (fun fmt ->
+        Format.fprintf fmt "@[%a[@[%a@]]@]" (expr_prec 1) base (expr_prec 15)
+          index)
   | Call {
         callee = { desc = DeclRef { name = OperatorName kind }; _ };
         args = [lhs; rhs]} ->
@@ -159,20 +192,20 @@ and expr_prec prec fmt (e : Clang__ast.expr) =
       expr_prec prec fmt { e with desc = BinaryOperator { lhs; kind; rhs }}
   | Call { callee; args } ->
       maybe_parentheses 1 prec fmt (fun fmt ->
-	Format.fprintf fmt "@[%a(@[%a@])@]" (expr_prec 1) callee
-	  (Format.pp_print_list ~pp_sep:(fun fmt () -> Format.pp_print_string fmt ",@ ")
-	     (expr_prec 15)) args)
+        Format.fprintf fmt "@[%a(@[%a@])@]" (expr_prec 1) callee
+          (Format.pp_print_list ~pp_sep:pp_comma
+             (expr_prec 15)) args)
   | UnaryOperator { kind; operand } ->
       let op_prec, position = prec_of_unary_operator kind in
       begin match position with
       | Prefix ->
           maybe_parentheses op_prec prec fmt (fun fmt ->
-	    Format.fprintf fmt "@[%s@ %a@]"
+            Format.fprintf fmt "@[%s@ %a@]"
               (Clang__bindings.ext_unary_operator_get_opcode_spelling kind)
               (expr_prec op_prec) operand)
       | Postfix ->
           maybe_parentheses op_prec prec fmt (fun fmt ->
-	    Format.fprintf fmt "@[%a@ %s@]" (expr_prec op_prec)
+            Format.fprintf fmt "@[%a@ %s@]" (expr_prec op_prec)
               operand (Clang__bindings.ext_unary_operator_get_opcode_spelling kind))
       end
   | BinaryOperator { lhs; kind; rhs } ->
@@ -182,40 +215,38 @@ and expr_prec prec fmt (e : Clang__ast.expr) =
         | Left_to_right -> op_prec - 1, op_prec
         | Right_to_left -> op_prec, op_prec - 1 in
       maybe_parentheses op_prec prec fmt (fun fmt ->
-	Format.fprintf fmt "@[%a@ %s@ %a@]" (expr_prec left_prec) lhs
+        Format.fprintf fmt "@[%a@ %s@ %a@]" (expr_prec left_prec) lhs
           (Clang__bindings.ext_binary_operator_get_opcode_spelling kind)
           (expr_prec right_prec) rhs)
   | DeclRef ident_ref ->
-      print_ident_ref fmt ident_ref
+      pp_ident_ref fmt ident_ref
   | Member { base = None; field = FieldName field } ->
-      print_ident_ref fmt field.desc
+      pp_ident_ref fmt field.desc
   | Member { base = Some base; arrow; field } ->
       let arrow_str =
         if arrow then "->"
         else "." in
-      let print_field fmt (field : Clang__ast.field) =
+      let pp_field fmt (field : Clang__ast.field) =
         match field with
-        | FieldName name -> print_ident_ref fmt name.desc
+        | FieldName name -> pp_ident_ref fmt name.desc
         | _ -> invalid_arg "print_field" in
       Format.fprintf fmt "@[%a%s%a@]" expr base arrow_str
-        print_field field
+        pp_field field
   | Cast { kind = CStyle; qual_type = ty; operand } ->
       maybe_parentheses 2 prec fmt (fun fmt ->
-        Format.fprintf fmt "@[(%a)@ %a@]" qual_type ty (expr_prec 4) operand)
+        Format.fprintf fmt "@[(%a)@ %a@]" pp_qual_type ty (expr_prec 4) operand)
   | New { qual_type = ty; init; _ } ->
       let format_init fmt (init : Clang__ast.expr option) =
         match init with
         | None -> ()
         | Some { desc = Construct { args; _ }; _ } ->
             Format.fprintf fmt "@[(%a)@]"
-              (Format.pp_print_list
-                ~pp_sep:(fun fmt () -> Format.fprintf fmt ",@ ")
-                expr) args
+              (Format.pp_print_list ~pp_sep:pp_comma expr) args
         | Some expr ->
             failwith
               (Format.asprintf "Unexpected constructor argument %a"
                  (Refl.pp [%refl: Clang__ast.expr] []) e) in
-      Format.fprintf fmt "new@ %a%a" qual_type ty format_init init
+      Format.fprintf fmt "new@ %a%a" pp_qual_type ty format_init init
   | Delete { argument; _ } ->
       Format.fprintf fmt "delete@ %a" expr argument
   | ConditionalOperator { cond; then_branch; else_branch } ->
@@ -227,20 +258,39 @@ and expr_prec prec fmt (e : Clang__ast.expr) =
           Format.fprintf fmt "%a ?: %a" expr cond expr else_branch
       end
   | _ ->
-      failwith (Format.asprintf "Not implemented expr %a"
-        (Refl.pp [%refl: Clang__ast.expr] []) e)
+      Format.fprintf fmt "<not implemented expr: %a>"
+        (Refl.pp [%refl: Clang__ast.expr] []) e
+
+and pp_condition_variable fmt
+    ((condition_variable : Clang__ast.var_decl option), cond) =
+  match condition_variable with
+  | Some condition_variable -> pp_var_decl fmt condition_variable.desc
+  | None -> expr fmt cond
 
 and stmt fmt (s : Clang__ast.stmt) =
   match s.desc with
   | Null -> Format.pp_print_string fmt ";"
+  | Break -> Format.pp_print_string fmt "break;"
+  | Case { lhs; rhs; body } ->
+      let pp_rhs fmt =
+        match rhs with
+        | None -> ()
+        | Some rhs -> Format.fprintf fmt " .. %a" expr rhs in
+      Format.fprintf fmt "@[case@ %a%t:@]@ %a" expr lhs pp_rhs stmt body
+  | Default body ->
+      Format.fprintf fmt "default:@ %a" stmt body
+  | Switch { condition_variable; cond; body; _ } ->
+      Format.fprintf fmt "@[switch@ (@[%a@])@ %a@]"
+        pp_condition_variable (condition_variable, cond) stmt body
   | Compound list ->
-      Format.fprintf fmt "@[{@[%a@]}@]" (Format.pp_print_list stmt) list
-  | If { cond; then_branch; else_branch; _ } ->
+      Format.fprintf fmt "@[{@[<v>%a@]}@]" (Format.pp_print_list stmt) list
+  | If { condition_variable; cond; then_branch; else_branch; _ } ->
       Format.fprintf fmt "@[if@ (@[%a@])@ %a%a@]"
-	expr cond stmt then_branch print_else_branch else_branch
+        pp_condition_variable (condition_variable, cond) stmt then_branch
+        pp_else_branch else_branch
   | While { cond; body; _ } ->
       Format.fprintf fmt "@[while@ (@[%a@])@ %a@]"
-	expr cond stmt body
+        expr cond stmt body
   | Return None ->
       Format.fprintf fmt "@[return;@]"
   | Return (Some value) ->
@@ -250,16 +300,16 @@ and stmt fmt (s : Clang__ast.stmt) =
   | Expr e ->
       Format.fprintf fmt "@[%a;@]" expr e
   | _ ->
-      failwith (Format.asprintf "Not implemented stmt: %a"
-        (Refl.pp [%refl: Clang__ast.stmt] []) s)
+      Format.fprintf fmt "<not implemented stmt: %a>"
+        (Refl.pp [%refl: Clang__ast.stmt] []) s
 
-and print_else_branch fmt else_branch =
+and pp_else_branch fmt else_branch =
   match else_branch with
   | None -> ()
   | Some else_branch ->
       Format.fprintf fmt "@[else@ %a@]" stmt else_branch
 
-and print_linkage fmt linkage =
+and pp_linkage fmt linkage =
   match linkage with
   | Internal -> Format.fprintf fmt "static@ "
   | External
@@ -268,32 +318,32 @@ and print_linkage fmt linkage =
       failwith (Format.asprintf "Not implemented linkage: %a"
         (Refl.pp [%refl: Clang__ast.linkage_kind] []) linkage)
 
-and print_parameters fmt parameters =
+and pp_parameters fmt parameters =
   let all_parameters = List.map Option.some parameters.non_variadic in
   let all_parameters =
     if parameters.variadic then all_parameters @ [None] else all_parameters in
-  let print_parameter fmt (parameter : Clang__ast.parameter option) =
+  let pp_parameter fmt (parameter : Clang__ast.parameter option) =
     match parameter with
     | None -> Format.pp_print_string fmt "..."
     | Some { desc = { name; qual_type = ty; _ }} ->
         typed_value (fun fmt -> Format.pp_print_string fmt name) fmt ty in
   Format.pp_print_list
-    ~pp_sep:(fun fmt () -> Format.pp_print_string fmt ",@ ")
-    print_parameter fmt all_parameters
+    ~pp_sep:pp_comma
+    pp_parameter fmt all_parameters
 
-and print_function_type fmt function_type name =
+and pp_function_type fmt (function_type, name) =
   typed_value
-    (fun fmt -> Format.fprintf fmt "@[%a(%a)@]" print_declaration_name name
-        (pp_print_option print_parameters) function_type.parameters)
+    (fun fmt -> Format.fprintf fmt "@[%a(@]@,@[%a)@]" pp_declaration_name name
+        (pp_print_option pp_parameters) function_type.parameters)
     fmt function_type.result
 
-and print_function_body fmt body =
+and pp_function_body fmt body =
   match body with
   | None -> Format.pp_print_string fmt ";"
-  | Some body -> stmt fmt body
+  | Some body -> Format.fprintf fmt "@ %a" stmt body
 
-and print_ident_ref fmt ident_ref =
-  let print_nested_name_specifier_component
+and pp_ident_ref fmt ident_ref =
+  let pp_nested_name_specifier_component
       (component : Clang__ast.nested_name_specifier_component) =
     match component with
     | Global -> Format.pp_print_string fmt "::"
@@ -303,22 +353,34 @@ and print_ident_ref fmt ident_ref =
         Format.fprintf fmt "%s::" name
     | TypeSpec ty
     | TypeSpecWithTemplate ty ->
-        Format.fprintf fmt "%a::" qual_type ty in
-  Option.iter (List.iter print_nested_name_specifier_component)
+        Format.fprintf fmt "%a::" pp_qual_type ty in
+  Option.iter (List.iter pp_nested_name_specifier_component)
     ident_ref.nested_name_specifier;
-  print_declaration_name fmt ident_ref.name
+  pp_declaration_name fmt ident_ref.name;
+  if ident_ref.template_arguments <> [] then
+    Format.fprintf fmt "<%a>"
+      (Format.pp_print_list ~pp_sep:pp_comma pp_template_argument)
+      ident_ref.template_arguments
 
-and print_declaration_name fmt (name : Clang__ast.declaration_name) =
+and pp_template_argument fmt (argument : Clang__ast.template_argument) =
+  match argument with
+  | Type ty -> pp_qual_type fmt ty
+  | ExprTemplateArgument e -> expr fmt e
+  | _ ->
+      Format.fprintf fmt "@[<not implemented template argument: %a>@]"
+        (Refl.pp [%refl: Clang__ast.template_argument] []) argument
+
+and pp_declaration_name fmt (name : Clang__ast.declaration_name) =
   match name with
   | IdentifierName s
   | LiteralOperatorName s -> Format.pp_print_string fmt s
   | ConstructorName ty
-  | ConversionFunctionName ty -> qual_type fmt ty
-  | DestructorName ty -> Format.fprintf fmt "~%a" qual_type ty
+  | ConversionFunctionName ty -> pp_qual_type fmt ty
+  | DestructorName ty -> Format.fprintf fmt "~%a" pp_qual_type ty
   | OperatorName op ->
       Format.fprintf fmt "operator%s"
         (Clang__bindings.ext_overloaded_operator_get_spelling op)
-  | _ -> failwith "Not implemented print_ident_ref.declaration_name"
+  | _ -> failwith "Not implemented pp_ident_ref.declaration_name"
 
 and typed_value fmt_value fmt t =
   let fmt_value =
@@ -329,12 +391,10 @@ and typed_value fmt_value fmt t =
   match t.desc with
   | Pointer t ->
       typed_value (fun fmt -> Format.fprintf fmt "@[*%t@]" fmt_value) fmt t
-  | BuiltinType Void ->
-      Format.fprintf fmt "@[void@ %t@]" fmt_value
-  | BuiltinType Int ->
-      Format.fprintf fmt "@[int@ %t@]" fmt_value
-  | BuiltinType (SChar | Char_S) ->
-      Format.fprintf fmt "@[char@ %t@]" fmt_value
+  | LValueReference t ->
+      typed_value (fun fmt -> Format.fprintf fmt "@[&%t@]" fmt_value) fmt t
+  | BuiltinType ty ->
+      Format.fprintf fmt "@[%s@ %t@]" (string_of_builtin_type ty) fmt_value
   | ConstantArray { element; size_as_expr = Some size_as_expr; _ } ->
       typed_value
         (fun fmt -> Format.fprintf fmt "@[%t[%a]@]" fmt_value expr size_as_expr)
@@ -348,14 +408,16 @@ and typed_value fmt_value fmt t =
         (Clang__bindings.ext_elaborated_type_get_keyword_spelling keyword)
         (typed_value fmt_value) named_type
   | Record ident
-  | Enum ident ->
-      Format.fprintf fmt "@[%a@ %t@]" print_ident_ref ident fmt_value
+  | Enum ident
+  | Typedef ident ->
+      Format.fprintf fmt "@[%a@ %t@]" pp_ident_ref ident fmt_value
+  | Auto ->
+      Format.fprintf fmt "@[auto@ %t@]" fmt_value
   | _ ->
-      failwith (
-        Format.asprintf "Not implemented qual type: %a"
-        (Refl.pp [%refl: Clang__ast.qual_type] []) t)
+      Format.fprintf fmt "@[<not implemented qual type: %a>@]"
+        (Refl.pp [%refl: Clang__ast.qual_type] []) t
 
-and qual_type fmt t =
+and pp_qual_type fmt t =
   typed_value (fun fmt -> ()) fmt t
 
 and decls fmt decls =
@@ -364,3 +426,5 @@ and decls fmt decls =
 
 let translation_unit fmt (tu : Clang__ast.translation_unit) =
   decls fmt tu.desc.items
+
+let qual_type = pp_qual_type

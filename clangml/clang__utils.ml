@@ -404,7 +404,7 @@ let language_of_string s =
   | "cl" -> OpenCL
   | "cuda" -> CUDA
   | "hip" -> HIP
-  | "c++" | "C++" | "cpp" | "CPP" -> CXX
+  | "c++" | "C++" | "cpp" | "CPP" | "cxx"| "CXX" -> CXX
   | "objective-c" | "objc" -> ObjC
   | "objective-c++" | "objc++" | "objcpp" -> ObjCXX
   | "renderscript" -> RenderScript
@@ -510,3 +510,20 @@ let binary_of_overloaded_operator_kind kind =
   | Comma -> Comma
   | ArrowStar -> PtrMemD
   | _ -> invalid_arg "binary_of_overloaded_operator_kind"
+
+let rec extract_prefix_from_list'
+    (p : 'a -> 'b option) (accu : 'b list) (list : 'a list)
+    : 'b list * 'a list =
+  match
+    match list with
+    | [] -> (None : _ option), []
+    | hd :: tl ->
+        match p hd with
+        | None -> None, list
+        | (Some _) as y -> y, tl
+  with
+  | Some x, tl -> extract_prefix_from_list' p (x :: accu) tl
+  | None, tl -> List.rev accu, tl
+
+let extract_prefix_from_list p list =
+  extract_prefix_from_list' p [] list

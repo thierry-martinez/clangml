@@ -196,6 +196,7 @@ val string_of_cxfloat : cxfloat -> string
 (** [string_of_cxfloat f] is an alias for
     {!val:Clang__bindings.ext_float_to_string}. *)
 
+
 (** {2 Error management } *)
 
 val string_of_cxerrorcode : cxerrorcode -> string
@@ -270,3 +271,8 @@ val sourcelocation_get_translation_unit :
 
 val binary_of_overloaded_operator_kind :
     clang_ext_overloadedoperatorkind -> clang_ext_binaryoperatorkind
+
+(** {2 General purpose utilities} *)
+
+val extract_prefix_from_list :
+    ('a -> 'b option) -> 'a list -> 'b list * 'a list

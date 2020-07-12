@@ -54,4 +54,7 @@ let command_line k language standard include_paths include_clang trigraphs =
       Clang.Command_line.trigraphs :: command_line_args
     else
       command_line_args in
-  k command_line_args
+  let language =
+    Option.value ~default:Clang.C
+      (Option.bind language Clang.language_of_string_opt) in
+  k language command_line_args

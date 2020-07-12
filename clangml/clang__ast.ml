@@ -3,6 +3,7 @@
 open Clang__bindings
 open Clang__types
 
+module Common = struct
 let pp_cxint fmt cxint =
   Format.pp_print_string fmt (ext_int_to_string cxint 10 true)
 
@@ -103,46 +104,6 @@ let check_pattern ?result quoter (parser : string -> 'a)
   check_result ?result (pattern ~quoted:(quoter ast) ast)
 ]}*)
 
-(** {2 Nodes and decorations} *)
-
-(** AST nodes are of type ['a ]{!type:node} for some ['a] and
-    carry a {!type:decoration}.
-    If the node comes for a translation unit parsed by clang,
-    the decoration is of the form {!const:Cursor}[ cursor],
-    where [cursor] points to the corresponding node in clang
-    internal AST.
-    Decorations
-    can be of the form {!const:Custom}[ custom_decoration],
-    where the inlined record [custom_decoration] may optionnally
-    carry a location, or a type, or both.
-
-    To break type recursion between {!type:qual_type} and {!type:decoration},
-    open types ['qual_type ]{!type:open_decoration} and
-    [('a, 'qual_type) ]{!type:open_node} are defined first, and then
-    {!type:node} and {!type:decoration} are defined as aliases
-    with ['qual_type = ]{!type:qual_type}.
-
-    Breaking recursion allows [visitors] to derive polymorphic
-    visitors for [open_node] while deriving monomorphic visitors
-    for the concrete AST nodes themselves.
-*)
-
-type 'qual_type open_decoration =
-  | Cursor of (cxcursor [@opaque])
-  | Custom of {
-      location : (source_location option [@opaque]);
-      qual_type : 'qual_type option;
-    } [@@deriving refl]
-
-type 'qual_type opaque_open_decoration =
-    ('qual_type open_decoration [@mapopaque])
-       [@@deriving refl]
-
-type ('a, 'qual_type) open_node = {
-    decoration : 'qual_type opaque_open_decoration;
-    desc : 'a;
-  } [@@deriving refl]
-
 (** {2 Aliases} *)
 
 (** The following aliases provide more readable names for some types
@@ -205,6 +166,115 @@ and languages = {
 
 and asm_compiler_extension = GCC | MS
 
+and opaque_cxtype = cxtype [@opaque]
+
+and opaque_type_loc = clang_ext_typeloc option [@opaque]
+      [@@deriving refl]
+
+module type NodeS = sig
+  type 'a t
+
+  val t__variable_positive0 : 'a -> 'b -> 'a
+  val t__variable_negative0 : 'a -> 'b -> 'b
+  val t__variable_direct0 : 'a -> 'b -> 'a
+
+  type ('present, 'unknown) t__variable_positive0 = 'present
+  type ('present, 'unknown) t__variable_negative0 = 'unknown
+  type ('present, 'unknown) t__variable_direct0 = 'present
+
+  type t__arity = [ `Succ of [ `Zero ] ]
+  type t__structure
+  type t__rec_group = (t__arity * t__structure) ref
+  type t__kinds = [ `Lazy | `Variable ]
+  type 'a0 t__gadt = unit
+
+  type _ Refl.refl +=
+    | Refl_t: 'a0 t Refl.refl
+
+  val t_refl :
+      ('a0 t, t__structure, ('a0 * unit), t__rec_group, [> t__kinds ],
+       (([ `Present ], [ `Absent ]) t__variable_positive0 * unit),
+       (([ `Present ], [ `Absent ]) t__variable_negative0 * unit),
+       (([ `Present ], [ `Absent ]) t__variable_direct0 * unit),
+       'a0 t__gadt) Refl.desc
+
+  val from_fun : (unit -> 'a) -> 'a t
+
+  val from_val : 'a -> 'a t
+
+  val force : 'a t -> 'a
+end
+
+module IdNode = struct
+  module Sub = struct
+    type 'a t = 'a [@@deriving refl]
+  end
+
+  include (Sub : sig
+    type 'a t = 'a [@@deriving refl]
+  end with type t__kinds := Sub.t__kinds)
+
+  type t__kinds = [ `Lazy | `Variable ]
+
+  let from_fun f = f ()
+
+  let from_val = Fun.id
+
+  let force = Fun.id
+end
+
+module LazyNode = struct
+  type 'a t = 'a Lazy.t [@@deriving refl]
+
+  let from_fun = Lazy.from_fun
+
+  let from_val = Lazy.from_val
+
+  let force = Lazy.force
+end
+end
+
+include Common
+
+(** {2 Nodes and decorations} *)
+
+(** AST nodes are of type ['a ]{!type:node} for some ['a] and
+    carry a {!type:decoration}.
+    If the node comes for a translation unit parsed by clang,
+    the decoration is of the form {!const:Cursor}[ cursor],
+    where [cursor] points to the corresponding node in clang
+    internal AST.
+    Decorations
+    can be of the form {!const:Custom}[ custom_decoration],
+    where the inlined record [custom_decoration] may optionnally
+    carry a location, or a type, or both.
+
+    To break type recursion between {!type:qual_type} and {!type:decoration},
+    open types ['qual_type ]{!type:open_decoration} and
+    [('a, 'qual_type) ]{!type:open_node} are defined first, and then
+    {!type:node} and {!type:decoration} are defined as aliases
+    with ['qual_type = ]{!type:qual_type}.
+
+    Breaking recursion allows [visitors] to derive polymorphic
+    visitors for [open_node] while deriving monomorphic visitors
+    for the concrete AST nodes themselves.
+*)
+
+module Custom (Node : NodeS) = struct
+type decoration =
+  | Cursor of (cxcursor [@opaque])
+  | Custom of {
+      location : (source_location option [@opaque]);
+      qual_type : qual_type option;
+    }
+
+and opaque_decoration = decoration [@opaque]
+
+and 'a node = {
+    decoration : opaque_decoration;
+    desc : 'a Node.t;
+  }
+
 (** {2 Types and nodes} *)
 
 (**
@@ -239,10 +309,6 @@ let parse_declaration_list_last ?filename ?command_line_args ?language ?options
    ]}*)
 
 (** {3 Qualified types } *)
-
-and opaque_cxtype = cxtype [@opaque]
-
-and opaque_type_loc = clang_ext_typeloc option [@opaque]
 
 and qual_type = {
     cxtype : opaque_cxtype;
@@ -322,7 +388,7 @@ let () =
       desc = Pointer { desc = BuiltinType Int }}}}] -> ()
   | _ -> assert false
     ]}*)
-    desc : type_desc;
+    desc : type_desc Node.t;
   }
 
 and type_desc =
@@ -1173,7 +1239,7 @@ let () =
  *)
 }
 
-and parameter = (parameter_desc, qual_type) open_node
+and parameter = parameter_desc node
 
 and parameter_desc = {
   qual_type : qual_type;
@@ -1204,7 +1270,7 @@ let parse_statement_list ?(return_type = "void") ?filename ?command_line_args
       assert false
     ]}*)
 
-and stmt = (stmt_desc, qual_type) open_node
+and stmt = stmt_desc node
 
 and stmt_desc =
   | Null
@@ -1770,11 +1836,11 @@ and asm_operand = {
   asm_expr : expr;
 }
 
-and attribute = (attribute_desc, qual_type) open_node
+and attribute = attribute_desc node
 
-and attribute_desc =
-  | AbiTag of string list
-(** ABI tags.
+and attribute_desc = (expr, qual_type, declaration_name) Attributes.t
+(** [| AbiTag of string list]
+   ABI tags.
 
     {[
 let example = {|
@@ -1788,10 +1854,32 @@ let () =
          attributes = [{ desc = AbiTag ["a"; "b"] }];
          var_type = { desc = BuiltinType Float };
          var_name = "f"; }}]]
-    ]}*)
+    ]}
 
-  | Aligned of expr
-(** Field alignment.
+    [| AcquireCapability of expr list]
+    Marks a function as acquiring a capability.
+
+    {[
+let example = {|
+int mu;
+
+void lockAndInit() __attribute__((acquire_capability(mu)));
+|}
+
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = Var { var_name = "mu" }};
+      { desc = Function {
+         name = IdentifierName "lockAndInit";
+         attributes = [
+           { desc = AcquireCapability
+               [{ desc = DeclRef { name = IdentifierName "mu" }}] }] }}]]
+    ]}
+
+    [| Aligned of expr]
+    Field alignment.
 
     {[
 let example = {|
@@ -1883,9 +1971,10 @@ let () =
         { desc = Field
           { name = "f";
             qual_type = { desc = BuiltinType Float }}}] }}]]
-    ]}*)
-  | AllocAlign of int
-(**
+    ]}
+
+  [| AllocAlign of int]
+
 Specify that the return value of the function (which must be a pointer type) is
 at least as aligned as the value of the indicated parameter.
 
@@ -1907,9 +1996,10 @@ let () =
              non_variadic = [{ desc = {
                name = "align"; qual_type = { desc = BuiltinType Int }}}];
              variadic = false }}}}]]
-    ]}*)
-  | AllocSize of { elem_size : int; num_elems : int option }
-(** Hint to the compiler how many bytes of memory will be available at the
+    ]}
+
+  [| AllocSize of { elem_size : int; num_elems : int option }]
+    Hint to the compiler how many bytes of memory will be available at the
     returned pointer.
 
     {[
@@ -1944,13 +2034,37 @@ let () =
                { desc = {
                    name = "b"; qual_type = { desc = BuiltinType Int }}}];
              variadic = false }}}}]]
-    ]}*)
-  | WarnUnusedResult of {
+    ]}
+
+  [| ReleaseCapability of expr list]
+    Marks a function as releasing a capability.
+
+    {[
+let example = {|
+int mu;
+
+void cleanupAndUnlock()  __attribute__((release_capability(mu)));
+|}
+
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = Var { var_name = "mu" }};
+      { desc = Function {
+         name = IdentifierName "cleanupAndUnlock";
+         attributes = [
+           { desc = ReleaseCapability
+               [{ desc = DeclRef { name = IdentifierName "mu" }}] }] }}]]
+    ]}
+
+  [| WarnUnusedResult of {
       spelling : clang_ext_warnunusedresultattr_spelling;
       message : string;
-    }
-  | Other of attribute_kind
-(** Attributes without argument.
+    }]
+
+  [| Other of attribute_kind]
+  Attributes without argument.
 
     {[
 let example = {|
@@ -1971,7 +2085,7 @@ let () =
 
 (** {3 Expressions} *)
 
-and expr = (expr_desc, qual_type) open_node
+and expr = expr_desc node
 
 and expr_desc =
   | IntegerLiteral of integer_literal
@@ -2847,7 +2961,7 @@ let () =
   | UnknownExpr of cxcursorkind * clang_ext_stmtkind
 
 and field =
-  | FieldName of (ident_ref, qual_type) open_node
+  | FieldName of ident_ref node
   | PseudoDestructor of {
       nested_name_specifier : nested_name_specifier option;
       qual_type : qual_type;
@@ -2915,7 +3029,7 @@ let () =
 
 (** {3 Declarations} *)
 
-and decl = (decl_desc, qual_type) open_node
+and decl = decl_desc node
 
 and decl_desc =
   | TemplateDecl of {
@@ -4125,14 +4239,88 @@ and directive =
     }
 
 and base_specifier = {
-  ident : string;
+  qual_type : qual_type;
+(** Type of the base class.
+    {[
+let example = {|
+class A {};
+class B : A {};
+|}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = RecordDecl { keyword = Class; name = "A" }};
+      { desc = RecordDecl {
+          keyword = Class;
+          name = "B";
+          bases = [{
+            qual_type = { desc = Record { name = IdentifierName "A" }};
+            virtual_base = false;
+            access_specifier = CXXPrivate; }] }}]]
+    ]}*)
   virtual_base : bool;
+(** Determines whether the base is virtual.
+    {[
+let example = {|
+class A {};
+class B : virtual A {};
+|}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = RecordDecl { keyword = Class; name = "A" }};
+      { desc = RecordDecl {
+          keyword = Class;
+          name = "B";
+          bases = [{
+            qual_type = { desc = Record { name = IdentifierName "A" }};
+            virtual_base = true;
+            access_specifier = CXXPrivate; }] }}]]
+    ]}*)
   access_specifier : cxx_access_specifier;
+(** Determines whether the base is private (default), protected or public.
+    {[
+let example = {|
+class A {};
+class B : private A {};
+class C : protected A {};
+class D : public A {};
+|}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = RecordDecl { keyword = Class; name = "A" }};
+      { desc = RecordDecl {
+          keyword = Class;
+          name = "B";
+          bases = [{
+            qual_type = { desc = Record { name = IdentifierName "A" }};
+            virtual_base = false;
+            access_specifier = CXXPrivate; }] }};
+      { desc = RecordDecl {
+          keyword = Class;
+          name = "C";
+          bases = [{
+            qual_type = { desc = Record { name = IdentifierName "A" }};
+            virtual_base = false;
+            access_specifier = CXXProtected; }] }};
+      { desc = RecordDecl {
+          keyword = Class;
+          name = "D";
+          bases = [{
+            qual_type = { desc = Record { name = IdentifierName "A" }};
+            virtual_base = false;
+            access_specifier = CXXPublic; }] }}]]
+    ]}*)
 }
 
 and ident_ref = {
   nested_name_specifier : nested_name_specifier option;
   name : declaration_name;
+  template_arguments : template_argument list;
 }
 (**
     {[
@@ -4209,14 +4397,14 @@ and friend_decl =
 
 and label_ref = string
 
-and enum_constant = (enum_constant_desc, qual_type) open_node
+and enum_constant = enum_constant_desc node
 
 and enum_constant_desc = {
     constant_name : string;
     constant_init : expr option;
   }
 
-and var_decl = (var_decl_desc, qual_type) open_node
+and var_decl = var_decl_desc node
 
 and var_decl_desc = {
     linkage : linkage_kind;
@@ -4235,7 +4423,7 @@ and template_parameter_list = {
     requires_clause : expr option;
   }
 
-and template_parameter = (template_parameter_desc, qual_type) open_node
+and template_parameter = template_parameter_desc node
 (** C++ template parameter *)
 
 and template_parameter_desc = {
@@ -4403,16 +4591,11 @@ let () =
 
 (** {3 Translation units} *)
 
-and translation_unit = (translation_unit_desc, qual_type) open_node
+and translation_unit = translation_unit_desc node
 
 and translation_unit_desc = {
     filename : string; items : decl list
   } [@@deriving refl]
-
-type 'a node = ('a, qual_type) open_node
-  [@@deriving refl]
-
-type decoration = qual_type open_decoration
 
 (** {3 Type loc: source representation of types} *)
 
@@ -4654,6 +4837,13 @@ let () =
   | ElaboratedTypeLoc of qual_type
   | UnknownTypeLoc of clang_ext_typeloc_class
         [@@deriving refl]
+end
+
+module Id = Custom (IdNode)
+
+module Lazy = Custom (LazyNode)
+
+include Id
 
 (*{[
 let () =

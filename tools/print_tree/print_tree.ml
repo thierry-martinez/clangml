@@ -48,6 +48,7 @@ let rec print_tree indent cursor history =
     Continue)
 
 let print ast tu =
+  Clang.format_diagnostics Clang.warning_or_error Format.err_formatter tu;
   if ast then
     Format.printf "@[%a@]@." Clang.Translation_unit.pp
       (Clang.Ast.of_cxtranslationunit tu)
@@ -55,7 +56,7 @@ let print ast tu =
     print_tree "" (Clang.get_translation_unit_cursor tu) []
 
 let main ast exprs files =
-  Clangml_tools_common.command_line begin fun command_line_args ->
+  Clangml_tools_common.command_line begin fun language command_line_args ->
     let options = Clang.default_editing_translation_unit_options () in
   (*
     let options =
@@ -64,7 +65,10 @@ let main ast exprs files =
         + include_attributed_types) in
   *)
     exprs |> List.iter begin fun expr ->
-      let tu = Clang.parse_string ~command_line_args expr ~options in
+      let suffix = Clang.suffix_of_language language in
+      let filename = "string" ^ suffix in
+      prerr_endline filename;
+      let tu = Clang.parse_string ~command_line_args ~filename expr ~options in
       print ast tu
     end;
     files |> List.iter begin fun file ->

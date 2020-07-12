@@ -1,22 +1,7 @@
 [%%metapackage "metapp"]
 [%%metadir "config/.clangml_config.objs/byte"]
 
-(** Common part of AST node signatures *)
-module type S = sig
-  type t
-
-  val compare : t -> t -> int
-
-  val equal : t -> t -> bool
-
-  val pp : Format.formatter -> t -> unit
-
-  val show : t -> string
-
-  module Set : Set.S with type elt = t
-
-  module Map : Map.S with type key = t
-end
+module type S = Ast_sig.S
 
 [%%metadef
 let node_module s = Ast_helper.Mod.structure [%str
@@ -26,6 +11,8 @@ let node_module s = Ast_helper.Mod.structure [%str
     let compare = Refl.compare [%refl: t] []
 
     let equal = Refl.equal [%refl: t] []
+
+    let hash = Refl.hash [%refl: t] []
 
     let pp = Refl.pp [%refl: t] []
 
@@ -37,6 +24,8 @@ let node_module s = Ast_helper.Mod.structure [%str
   module Set = Set.Make (Self)
 
   module Map = Map.Make (Self)
+
+  module Hashtbl = Hashtbl.Make (Self)
 ]]
 
 module Bindings = struct
@@ -92,23 +81,6 @@ let rec filter_out_prefix_from_list p list =
   | hd :: tl when p hd -> filter_out_prefix_from_list p tl
   | _ -> list
 
-let rec extract_prefix_from_list'
-    (p : 'a -> 'b option) (accu : 'b list) (list : 'a list)
-    : 'b list * 'a list =
-  match
-    match list with
-    | [] -> (None : _ option), []
-    | hd :: tl ->
-        match p hd with
-        | None -> None, list
-        | (Some _) as y -> y, tl
-  with
-  | Some x, tl -> extract_prefix_from_list' p (x :: accu) tl
-  | None, tl -> List.rev accu, tl
-
-let extract_prefix_from_list p list =
-  extract_prefix_from_list' p [] list
-
 (*
 let string_chop_prefix_opt prefix s =
   let prefix_length = String.length prefix in
@@ -154,9 +126,13 @@ module Init_list = struct
     | Semantic -> semantic_form cursor
 end
 
+module Custom (Node : Clang__ast.NodeS) = struct
+
 [%%meta Metapp.Stri.of_list (Metapp.filter.structure Metapp.filter [%str
 module Ast = struct
-  include Clang__ast
+  include Clang__ast.Common
+
+  include Clang__ast.Custom (Node)
 
   let node ?decoration ?cursor ?location ?qual_type desc =
     let decoration : decoration =
@@ -190,14 +166,18 @@ module Ast = struct
   let parameter ?default qual_type name =
     { default; qual_type; name }
 
-  let ident_ref ?nested_name_specifier name : ident_ref =
-    { nested_name_specifier; name }
+  let ident_ref ?nested_name_specifier ?(template_arguments = [])
+      name : ident_ref =
+    { nested_name_specifier; name; template_arguments }
 
-  let identifier_name ?nested_name_specifier name =
-    ident_ref ?nested_name_specifier (IdentifierName name)
+  let identifier_name ?nested_name_specifier ?template_arguments name =
+    ident_ref ?nested_name_specifier ?template_arguments (IdentifierName name)
 
   let constant_array ?size_as_expr element size =
     ConstantArray { element; size; size_as_expr }
+
+  let if_ ?init ?condition_variable ?else_branch cond then_branch =
+    If { init; condition_variable; cond; then_branch; else_branch }
 
   let new_instance ?(placement_args = []) ?array_size ?init ?args qual_type =
     let init =
@@ -207,7 +187,7 @@ module Ast = struct
           "Clang.Ast.new_instance: ~init and ~args are mutually exclusive"
       | init, None -> init
       | None, Some args ->
-          Some (node (Construct { qual_type; args; })) in
+          Some (node (Node.from_val (Construct { qual_type; args; }))) in
     New { placement_args; qual_type; array_size; init }
 
   let delete ?(global_delete = false) ?(array_form = false) argument =
@@ -327,7 +307,7 @@ module Ast = struct
       | InvalidNestedNameSpecifier -> None
       | kind -> Some (enumerate [] name kind)
 
-    and extract_declaration_name cursor =
+    and declaration_name_of_cxcursor cursor =
       let name = ext_decl_get_name cursor in
       match ext_declaration_name_get_kind name with
       | Identifier ->
@@ -356,8 +336,9 @@ module Ast = struct
       let nested_name_specifier =
         cursor |> ext_decl_get_nested_name_specifier |>
         convert_nested_name_specifier in
-      let name = extract_declaration_name cursor in
-      { nested_name_specifier; name }
+      let name = declaration_name_of_cxcursor cursor in
+      let template_arguments = extract_template_arguments cursor in
+      { nested_name_specifier; name; template_arguments }
 
     and make_template_name name =
       match ext_template_name_get_kind name with
@@ -441,10 +422,11 @@ module Ast = struct
               if options.ignore_paren_in_types then
                 ty
               else
-                make_qual_type cxtype type_loc (ParenType ty) in
+                make_qual_type cxtype type_loc
+                  (Node.from_val (ParenType ty)) in
             make_paren, type_loc', cxtype'
         | _ -> Fun.id, type_loc, cxtype in
-      let desc =
+      let desc () =
         match get_type_kind cxtype with
         | Invalid -> InvalidType
         | ConstantArray ->
@@ -553,10 +535,10 @@ module Ast = struct
                   Decltype sub
               | kind -> UnexposedType kind
             end in
-      make_paren (make_qual_type cxtype type_loc desc)
+      make_paren (make_qual_type cxtype type_loc (Node.from_fun desc))
 
     and of_cxtype cxtype =
-      let desc =
+      let desc () =
         match get_type_kind cxtype with
         | Invalid -> InvalidType
         | ConstantArray ->
@@ -650,17 +632,19 @@ module Ast = struct
                   Decltype sub
               | kind -> UnexposedType kind
             end in
-      match desc with
-      | ParenType inner when options.ignore_paren_in_types ->
-          { inner with cxtype }
-      | _ ->
-          { cxtype; type_loc = None; desc;
-            const = is_const_qualified_type cxtype;
-            volatile = is_volatile_qualified_type cxtype;
-            restrict = is_restrict_qualified_type cxtype; }
+      if options.ignore_paren_in_types &&
+        ext_type_get_kind cxtype = Paren then
+        let inner = cxtype |> ext_get_inner_type |> of_cxtype in
+        { inner with cxtype }
+      else
+        { cxtype; type_loc = None; desc = Node.from_fun desc;
+          const = is_const_qualified_type cxtype;
+          volatile = is_volatile_qualified_type cxtype;
+          restrict = is_restrict_qualified_type cxtype; }
 
     and decl_of_cxcursor ?in_record cursor =
-      node ~cursor (decl_desc_of_cxcursor ?in_record cursor)
+      node ~cursor
+        (Node.from_fun (fun () -> decl_desc_of_cxcursor ?in_record cursor))
 
     and decl_desc_of_cxcursor ?(in_record = false) cursor =
       try
@@ -687,12 +671,12 @@ module Ast = struct
               (record_decl_of_cxcursor keyword cursor)
         | ClassTemplatePartialSpecialization ->
             let keyword = ext_tag_decl_get_tag_kind cursor in
-            let decl = record_decl_of_cxcursor keyword cursor in
+            let decl () = record_decl_of_cxcursor keyword cursor in
             let result =
             TemplatePartialSpecialization
               { parameters = extract_template_parameters cursor;
                 arguments = extract_template_arguments cursor;
-                decl = node ~cursor decl } in
+                decl = node ~cursor (Node.from_fun decl) } in
             result
         | EnumDecl -> enum_decl_of_cxcursor cursor
         | TypedefDecl ->
@@ -841,7 +825,7 @@ module Ast = struct
                     (ext_decomposition_decl_get_bindings_count cursor)
                     begin fun i ->
                       ext_decomposition_decl_get_bindings cursor i |>
-                      extract_declaration_name
+                      declaration_name_of_cxcursor
                     end;
                   init;
                 }
@@ -849,7 +833,7 @@ module Ast = struct
                 [@if [%meta Metapp.Exp.of_bool
                   (Clangml_config.version.major >= 9)]] ->
                 let parameters = extract_template_parameters cursor in
-                let name = extract_declaration_name cursor in
+                let name = declaration_name_of_cxcursor cursor in
                 let constraint_expr =
                   cursor |> ext_concept_decl_get_constraint_expr |>
                   expr_of_cxcursor in
@@ -882,17 +866,17 @@ module Ast = struct
         None
 
     and parameter_of_cxcursor cursor =
-      let namespaces, others = list_of_children cursor |>
-        extract begin fun c : string option ->
-          match get_cursor_kind c with
-          | NamespaceRef -> Some (get_cursor_spelling c)
-          | _ -> None
-        end in
-      let others = others |> filter_out_ref in
-      let qual_type =
-        cursor |> ext_declarator_decl_get_type_loc |> of_type_loc in
-      node ~cursor {
-          name = cursor |> get_cursor_spelling;
+      let desc () =
+        let namespaces, others = list_of_children cursor |>
+          extract begin fun c : string option ->
+            match get_cursor_kind c with
+            | NamespaceRef -> Some (get_cursor_spelling c)
+            | _ -> None
+          end in
+        let others = others |> filter_out_ref in
+        let qual_type =
+          cursor |> ext_declarator_decl_get_type_loc |> of_type_loc in
+        { name = cursor |> get_cursor_spelling;
           qual_type;
           default =
             if ext_var_decl_has_init cursor then
@@ -902,7 +886,8 @@ module Ast = struct
                 | default :: _ -> default in
               Some (default |> expr_of_cxcursor)
             else
-              None }
+              None } in
+      node ~cursor (Node.from_fun desc)
 
     and function_type_of_decl cursor =
       (* Hack for Clang 3.4 and 3.5! See current_decl declaration. *)
@@ -914,7 +899,7 @@ module Ast = struct
       let nested_name_specifier =
         cursor |> ext_decl_get_nested_name_specifier |>
         convert_nested_name_specifier in
-      let name = extract_declaration_name cursor in
+      let name = declaration_name_of_cxcursor cursor in
       let body : stmt option =
         match List.rev children with
         | last :: _ -> function_body_of_cxcursor last
@@ -969,8 +954,8 @@ module Ast = struct
         let non_variadic =
           List.init (get_num_arg_types cxtype) @@ fun i ->
             let qual_type = of_cxtype (get_arg_type cxtype i) in
-            node ~qual_type {
-              name = ""; qual_type; default = None } in
+            let desc () = { name = ""; qual_type; default = None } in
+            node ~qual_type (Node.from_fun desc) in
         let variadic = is_function_type_variadic cxtype in
         Some { non_variadic; variadic }
       else
@@ -1012,7 +997,7 @@ module Ast = struct
       | other -> Some (Other other)
 
     and var_decl_of_cxcursor cursor =
-      node ~cursor (var_decl_desc_of_cxcursor cursor)
+      node ~cursor (Node.from_fun (fun () -> var_decl_desc_of_cxcursor cursor))
 
     and var_decl_desc_of_cxcursor cursor =
       let children =
@@ -1044,13 +1029,15 @@ module Ast = struct
       EnumDecl { name; constants; complete_definition }
 
     and enum_constant_of_cxcursor cursor =
-      let constant_name = get_cursor_spelling cursor in
-      let constant_init =
-        match filter_out_attributes (list_of_children cursor) with
-        | [init] -> Some (expr_of_cxcursor init)
-        | [] -> None
-        | _ -> raise Invalid_structure in
-      node ~cursor { constant_name; constant_init }
+      let desc () =
+        let constant_name = get_cursor_spelling cursor in
+        let constant_init =
+          match filter_out_attributes (list_of_children cursor) with
+          | [init] -> Some (expr_of_cxcursor init)
+          | [] -> None
+          | _ -> raise Invalid_structure in
+        { constant_name; constant_init } in
+      node ~cursor (Node.from_fun desc)
 
     and base_specifier_of_cxcursor_opt cursor =
       match get_cursor_kind cursor with
@@ -1058,19 +1045,29 @@ module Ast = struct
       | _ -> None
 
     and base_specifier_of_cxcursor cursor =
-      { ident = get_cursor_spelling cursor;
+      { qual_type = of_type_loc (ext_cxxbase_specifier_get_type_loc cursor);
         virtual_base = is_virtual_base cursor;
         access_specifier = get_cxxaccess_specifier cursor;
       }
 
     and attribute_of_cxcursor (cursor : cxcursor) : attribute =
-      let desc =
+(*
+      let get_acquire_capability_exprs cursor =
+        List.init (ext_acquire_capability_attr_get_arg_size cursor)
+          (fun i ->
+            ext_acquire_capability_attr_get_arg cursor i |>
+            expr_of_cxcursor) in
+*)
+      let desc () : attribute_desc =
         match ext_attr_get_kind cursor with
+(*
         | AbiTag ->
             let list =
               List.init (ext_abi_tag_attr_get_num_tags cursor)
                 (ext_abi_tag_attr_get_tag cursor) in
             AbiTag list
+        | AcquireCapability ->
+            AcquireCapability (get_acquire_capability_exprs cursor)
         | Aligned ->
             let argument =
               if ext_aligned_attr_is_alignment_expr cursor then
@@ -1089,14 +1086,17 @@ module Ast = struct
             AllocSize {
               elem_size = ext_alloc_size_attr_get_elem_size_param cursor;
               num_elems }
+        | ReleaseCapability ->
+            ReleaseCapability (get_acquire_capability_exprs cursor)
         | WarnUnusedResult ->
             WarnUnusedResult {
               spelling =
                 ext_warn_unused_result_attr_get_semantic_spelling cursor;
               message = ext_warn_unused_result_attr_get_message cursor;
             }
+*)
         | other -> Other other in
-      node ~cursor desc
+      node ~cursor (Node.from_fun desc)
 
     and attribute_of_cxcursor_opt cursor : attribute option =
       let kind = get_cursor_kind cursor in
@@ -1146,7 +1146,7 @@ module Ast = struct
       children |> List.map (decl_of_cxcursor ~in_record:true)
 
     and stmt_of_cxcursor cursor =
-      let desc =
+      let desc () =
         try
           match get_cursor_kind cursor with
           | NullStmt ->
@@ -1328,14 +1328,16 @@ module Ast = struct
                     }
                 | _ -> raise Invalid_structure
               end
-          | _ -> Decl [node ~cursor (decl_desc_of_cxcursor cursor)]
+          | _ ->
+              let decl_desc = decl_desc_of_cxcursor cursor in
+              match decl_desc with
+              | UnknownDecl _ ->
+                  Expr (expr_of_cxcursor cursor)
+              | _ ->
+                  Decl [node ~cursor (Node.from_val decl_desc)]
         with Invalid_structure ->
           UnknownStmt (get_cursor_kind cursor, ext_stmt_get_kind cursor) in
-      match desc with
-      | Decl [{ desc = UnknownDecl _ }] ->
-          let expr = expr_of_cxcursor cursor in
-          node ~decoration:expr.decoration (Expr expr)
-      | _ -> node ~cursor desc
+      node ~cursor (Node.from_fun desc)
 
     and catch_of_cxcursor cursor : catch =
       match list_of_children cursor with
@@ -1366,13 +1368,15 @@ module Ast = struct
     }
 
     and expr_of_cxcursor cursor =
-      match expr_desc_of_cxcursor cursor with
-      | Paren subexpr when options.ignore_paren ->
-          node ~cursor subexpr.desc
-      | Cast { kind = Implicit; operand }
-        when options.ignore_implicit_cast ->
-          node ~cursor operand.desc
-      | desc -> node ~cursor desc
+      let desc () =
+        match expr_desc_of_cxcursor cursor with
+        | Paren subexpr when options.ignore_paren ->
+            Node.force subexpr.desc
+        | Cast { kind = Implicit; operand }
+          when options.ignore_implicit_cast ->
+            Node.force operand.desc
+        | desc -> desc in
+      node ~cursor (Node.from_fun desc)
 
     and expr_desc_of_cxcursor cursor =
       let kind = get_cursor_kind cursor in
@@ -1653,7 +1657,7 @@ module Ast = struct
                     | [sub] -> expr_of_cxcursor sub
                     | _ -> raise Invalid_structure in
                   if options.ignore_expr_with_cleanups then
-                    sub.desc
+                    Node.force sub.desc
                   else
                     ExprWithCleanups sub
               | MaterializeTemporaryExpr ->
@@ -1662,7 +1666,7 @@ module Ast = struct
                     | [sub] -> expr_of_cxcursor sub
                     | _ -> raise Invalid_structure in
                   if options.ignore_materialize_temporary_expr then
-                    sub.desc
+                    Node.force sub.desc
                   else
                     MaterializeTemporaryExpr sub
               | CXXBindTemporaryExpr ->
@@ -1671,7 +1675,7 @@ module Ast = struct
                     | [sub] -> expr_of_cxcursor sub
                     | _ -> raise Invalid_structure in
                   if options.ignore_bind_temporary_expr then
-                    sub.desc
+                    Node.force sub.desc
                   else
                     BindTemporaryExpr sub
               | CXXDefaultArgExpr ->
@@ -1783,8 +1787,8 @@ module Ast = struct
           UnresolvedMember (ident_ref_of_cxcursor cursor)
       | _ ->
           let field = get_cursor_referenced cursor in
-          let ident = ident_ref_of_cxcursor field in
-          FieldName (node ~cursor:field ident)
+          let ident () = ident_ref_of_cxcursor field in
+          FieldName (node ~cursor:field (Node.from_fun ident))
 
     and cast_of_cxcursor kind cursor =
       let operand =
@@ -1905,11 +1909,12 @@ module Ast = struct
       with
       | None -> raise Invalid_structure
       | Some parameter_kind ->
-          let parameter_name = get_cursor_spelling cursor in
-          let parameter_pack =
-            ext_template_parm_is_parameter_pack cursor in
-          node ~cursor
-            { parameter_name; parameter_kind; parameter_pack}
+          let desc () =
+            let parameter_name = get_cursor_spelling cursor in
+            let parameter_pack =
+              ext_template_parm_is_parameter_pack cursor in
+            { parameter_name; parameter_kind; parameter_pack} in
+          node ~cursor (Node.from_fun desc)
 
     and extract_template_parameters cursor =
       extract_template_parameter_list
@@ -1959,12 +1964,16 @@ ext_expr_requirement_return_type_get_type_constraint_template_parameter_list
       let parameters = extract_template_parameters cursor in
       match parameters with
       | { list = []; requires_clause = None } when optional -> body
-      | _ -> TemplateDecl { parameters; decl = node ~cursor body }
+      | _ ->
+          TemplateDecl
+            { parameters; decl = node ~cursor (Node.from_val body) }
 
     let translation_unit_of_cxcursor cursor =
-      let filename = get_cursor_spelling cursor in
-      let items = list_of_children cursor |> List.map decl_of_cxcursor in
-      node ~cursor { filename; items }
+      let desc () =
+        let filename = get_cursor_spelling cursor in
+        let items = list_of_children cursor |> List.map decl_of_cxcursor in
+        { filename; items } in
+      node ~cursor (Node.from_fun desc)
 
     let of_cxtranslationunit tu =
       translation_unit_of_cxcursor (get_translation_unit_cursor tu)
@@ -2148,10 +2157,22 @@ void f(void) {
       |} (Format.pp_print_list Printer.decl) context line filename s in
     let ast = Ast.parse_string ?index ?clang_options ?options code in
     let expr =
-      match ast.desc.items with
-      | [{ desc = Function { body = Some { desc = Compound stmts; _}; _}; _}] ->
-          begin match List.rev stmts with
-          | { desc = Expr e; _} :: _ -> Some e
+      match (Node.force ast.desc).items with
+      | [{ desc; _}] ->
+          begin match Node.force desc with
+          | Function { body = Some { desc; _}; _} ->
+              begin match Node.force desc with
+              | Compound stmts ->
+                  begin match List.rev stmts with
+                  | { desc; _} :: _ ->
+                      begin match Node.force desc with
+                      | Expr e -> Some e
+                      | _ -> None
+                      end
+                  | _ -> None
+                  end
+              | _ -> None
+              end
           | _ -> None
           end
       | _ -> None in
@@ -2291,4 +2312,10 @@ module Translation_unit = [%meta node_module [%str
   let make ?(filename = "") items : Ast.translation_unit_desc =
     { filename; items }
 ]]
+end
 
+module Id = Custom (Clang__ast.IdNode)
+
+module Lazy = Custom (Clang__ast.LazyNode)
+
+include Id

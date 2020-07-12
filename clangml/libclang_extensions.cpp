@@ -145,6 +145,13 @@ getCursorTU(CXCursor Cursor)
   return static_cast<CXTranslationUnit>(const_cast<void*>(Cursor.data[2]));
 }
 
+// Copied from clang source tree: tools/libclang/CXCursor.cpp
+static const clang::CXXBaseSpecifier *
+getCursorCXXBaseSpecifier(CXCursor C) {
+  assert(C.kind == CXCursor_CXXBaseSpecifier);
+  return static_cast<const clang::CXXBaseSpecifier*>(C.data[0]);
+}
+
 // From clang source tree: tools/libclang/CXTranslationUnit.h
 struct CXTranslationUnitImpl {
   void *CIdx;
@@ -500,6 +507,27 @@ getDesignator(const clang::DesignatedInitExpr *e, unsigned int i) {
   return e->getDesignator(i);
 #endif
 }
+
+template<typename T> static const T &
+getDefault(llvm::Optional<T> const &option, T const &default_value)
+{
+  if (option.hasValue()) {
+    return option.getValue();
+  }
+  return default_value;
+}
+
+static struct clang_ext_VersionTuple
+makeVersionTuple(llvm::VersionTuple tuple) {
+  unsigned int major = major;
+  
+  struct clang_ext_VersionTuple result = {
+    tuple.getMajor(), getDefault(tuple.getMinor(), 0u),
+    getDefault(tuple.getSubminor(), 0u), getDefault(tuple.getBuild(), 0u) };
+  return result;
+}
+
+static struct clang_ext_VersionTuple zeroVersionTuple = { 0, 0, 0, 0 };
 
 extern "C" {
   CXVersion
@@ -2513,9 +2541,17 @@ extern "C" {
     }
     else if (is_valid_stmt(cursor.kind)) {
       auto s = GetCursorStmt(cursor);
-      if (auto e = llvm::dyn_cast_or_null<
-          clang::CXXDependentScopeMemberExpr>(s)) {
-        return e->getNumTemplateArgs();
+      switch (cursor.kind) {
+      case CXCursor_DeclRefExpr:
+        if (auto e = llvm::dyn_cast_or_null<clang::DeclRefExpr>(s)) {
+          return e->getNumTemplateArgs();
+        }
+        break;
+      default:
+        if (auto e = llvm::dyn_cast_or_null<
+            clang::CXXDependentScopeMemberExpr>(s)) {
+          return e->getNumTemplateArgs();
+        }
       }
     }
     return 0;
@@ -2525,28 +2561,37 @@ extern "C" {
   clang_ext_Cursor_getTemplateArg(
     CXCursor cursor, unsigned int i)
   {
+    const clang::TemplateArgument *result = NULL;
     if (is_valid_decl(cursor.kind)) {
       auto d = GetCursorDecl(cursor);
       if (auto cts = llvm::dyn_cast_or_null<
           clang::ClassTemplateSpecializationDecl>(d)) {
-        return MakeTemplateArgument(cts->getTemplateArgs().get(i),
-          getCursorTU(cursor));
+        result = &cts->getTemplateArgs().get(i);
       }
       else if (auto cts = llvm::dyn_cast_or_null<
           clang::VarTemplateSpecializationDecl>(d)) {
-        return MakeTemplateArgument(cts->getTemplateArgs().get(i),
-          getCursorTU(cursor));
+        result = &cts->getTemplateArgs().get(i);
       }
     }
     else if (is_valid_stmt(cursor.kind)) {
       auto s = GetCursorStmt(cursor);
-      if (auto e = llvm::dyn_cast_or_null<
-          clang::CXXDependentScopeMemberExpr>(s)) {
-        return MakeTemplateArgument(e->getTemplateArgs()[i].getArgument(),
-          getCursorTU(cursor));
+      switch (cursor.kind) {
+      case CXCursor_DeclRefExpr:
+        if (auto e = llvm::dyn_cast_or_null<clang::DeclRefExpr>(s)) {
+          result = &e->getTemplateArgs()[i].getArgument();
+        }
+        break;
+      default:
+        if (auto e = llvm::dyn_cast_or_null<
+            clang::CXXDependentScopeMemberExpr>(s)) {
+          result = &e->getTemplateArgs()[i].getArgument();
+        }
       }
     }
-    return MakeTemplateArgumentInvalid(getCursorTU(cursor));
+    if (result == NULL) {
+      return MakeTemplateArgumentInvalid(getCursorTU(cursor));
+    }
+    return MakeTemplateArgument(*result, getCursorTU(cursor));
   }
 
   CXCursor
@@ -3421,7 +3466,7 @@ extern "C" {
     }
     return 0;
   }
-
+/*
   CXString
   clang_ext_AbiTagAttr_getTag(CXCursor cursor, unsigned index)
   {
@@ -3431,7 +3476,80 @@ extern "C" {
     }
     return cxstring_createRef("");
   }
-
+*/
+  unsigned
+  clang_ext_AcquireCapabilityAttr_getArgSize(CXCursor cursor)
+  {
+    auto a = GetCursorAttr(cursor);
+    switch (a->getKind()) {
+    case clang::attr::AcquireCapability:
+      if (auto aa = llvm::dyn_cast_or_null<clang::AcquireCapabilityAttr>(a)) {
+        return aa->args_size();
+      }
+      break;
+    case clang::attr::AcquiredAfter:
+      if (auto aa = llvm::dyn_cast_or_null<clang::AcquiredAfterAttr>(a)) {
+        return aa->args_size();
+      }
+      break;
+    case clang::attr::AcquiredBefore:
+      if (auto aa = llvm::dyn_cast_or_null<clang::AcquiredBeforeAttr>(a)) {
+        return aa->args_size();
+      }
+      break;
+    case clang::attr::AssertCapability:
+      if (auto aa = llvm::dyn_cast_or_null<clang::AssertCapabilityAttr>(a)) {
+        return aa->args_size();
+      }
+      break;
+    case clang::attr::AssertExclusiveLock:
+      if (auto aa = llvm::dyn_cast_or_null<clang::AssertExclusiveLockAttr>(a)) {
+        return aa->args_size();
+      }
+      break;
+    case clang::attr::AssertSharedLock:
+      if (auto aa = llvm::dyn_cast_or_null<clang::AssertSharedLockAttr>(a)) {
+        return aa->args_size();
+      }
+      break;
+    case clang::attr::ReleaseCapability:
+      if (auto aa = llvm::dyn_cast_or_null<clang::ReleaseCapabilityAttr>(a)) {
+        return aa->args_size();
+      }
+      break;
+    }
+    return 0;
+  }
+/*
+  CXCursor
+  clang_ext_AcquireCapabilityAttr_getArg(CXCursor cursor, unsigned index)
+  {
+    auto a = GetCursorAttr(cursor);
+    switch (a->getKind()) {
+    case clang::attr::AcquireCapability:
+      if (auto aa = llvm::dyn_cast_or_null<clang::AcquireCapabilityAttr>(a)) {
+        return MakeCXCursor(aa->args().begin()[index], getCursorTU(cursor));
+      }
+      break;
+    case clang::attr::AcquiredAfter:
+      if (auto aa = llvm::dyn_cast_or_null<clang::AcquiredAfterAttr>(a)) {
+        return MakeCXCursor(aa->args().begin()[index], getCursorTU(cursor));
+      }
+      break;
+    case clang::attr::AcquiredBefore:
+      if (auto aa = llvm::dyn_cast_or_null<clang::AcquiredBeforeAttr>(a)) {
+        return MakeCXCursor(aa->args().begin()[index], getCursorTU(cursor));
+      }
+      break;
+    case clang::attr::ReleaseCapability:
+      if (auto aa = llvm::dyn_cast_or_null<clang::ReleaseCapabilityAttr>(a)) {
+        return MakeCXCursor(aa->args().begin()[index], getCursorTU(cursor));
+      }
+      break;
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+*/
   bool
   clang_ext_AlignedAttr_isAlignmentExpr(CXCursor cursor)
   {
@@ -3441,7 +3559,7 @@ extern "C" {
     }
     return false;
   }
-
+/*
   CXCursor
   clang_ext_AlignedAttr_getAlignmentExpr(CXCursor cursor)
   {
@@ -3451,7 +3569,7 @@ extern "C" {
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
   }
-
+*/
   struct clang_ext_TypeLoc
   clang_ext_AlignedAttr_getAlignmentType(CXCursor cursor)
   {
@@ -3462,7 +3580,7 @@ extern "C" {
     }
     return MakeTypeLocInvalid(getCursorTU(cursor));
   }
-
+/*
   unsigned
   clang_ext_AllocAlignAttr_getParamIndex(CXCursor cursor)
   {
@@ -3495,7 +3613,7 @@ extern "C" {
     }
     return 0;
   }
-
+*/
   bool
   clang_ext_CursorKind_isAttr(enum CXCursorKind kind)
   {
@@ -3519,4 +3637,14 @@ extern "C" {
     }
     return false;
   }
+
+  struct clang_ext_TypeLoc
+  clang_ext_CXXBaseSpecifier_getTypeLoc(CXCursor cursor)
+  {
+    auto a = getCursorCXXBaseSpecifier(cursor);
+    return MakeTypeLoc(
+        a->getTypeSourceInfo()->getTypeLoc(), getCursorTU(cursor));
+  }
+
+  #include "libclang_extensions_attrs.inc"
 }

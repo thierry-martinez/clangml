@@ -439,27 +439,6 @@ let int64_type_info =
 
 let defined_set_of = String_hashtbl.create 17
 
-let uncamelcase s =
-  let result = Buffer.create 17 in
-  let previous_lowercase = ref false in
-  let add_char c =
-    match c with
-    | 'A' .. 'Z' ->
-        if !previous_lowercase then
-          begin
-            previous_lowercase := false;
-            Buffer.add_char result '_'
-          end;
-        Buffer.add_char result (Char.lowercase_ascii c)
-    | '_' ->
-        previous_lowercase := false;
-        Buffer.add_char result '_'
-    | _ ->
-        previous_lowercase := true;
-        Buffer.add_char result c in
-  String.iter add_char s;
-  Buffer.contents result
-
 let add_sig_type context ty =
   context.sig_accu <- Ast_helper.Sig.type_ Recursive ty :: context.sig_accu;
   context.struct_accu <- Ast_helper.Str.type_ Recursive ty :: context.struct_accu
@@ -563,8 +542,8 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
                     with Not_found -> failwith ("not found " ^ enum) in
                   let t = Ast_helper.Typ.constr (loc (Longident.Lident "t")) [] in
                   let bind_value name value =
-                    (Ast_helper.Str.value Nonrecursive [Ast_helper.Vb.mk (Ast_helper.Pat.var (loc (uncamelcase name))) (Ast_helper.Exp.constant (Ast_helper.Const.int value))],
-                     Ast_helper.Sig.value (Ast_helper.Val.mk (loc (uncamelcase name)) t)) in
+                    (Ast_helper.Str.value Nonrecursive [Ast_helper.Vb.mk (Ast_helper.Pat.var (loc (Stubgen_common.uncamelcase name))) (Ast_helper.Exp.constant (Ast_helper.Const.int value))],
+                     Ast_helper.Sig.value (Ast_helper.Val.mk (loc (Stubgen_common.uncamelcase name)) t)) in
                   let has_zero = enum_info.constructors |> List.exists @@ fun (_, _, value) -> value = 0 in
                   let zero_value =
                     if has_zero then []
@@ -1185,11 +1164,11 @@ static %s __attribute__((unused))
 " type_name;
           let fields = fields |> List.map @@ fun (field, cur) ->
             let attrs = make_doc_attributes cur in
-            let attrs = deriving_attr () :: attrs in
             Ast_helper.Type.field (loc (String.lowercase_ascii (field_name field)))
               (translate_field_type field) ~attrs in
                 Ptype_record fields, None in
     let attrs = make_doc_attributes cur in
+    let attrs = deriving_attr () :: attrs in
     let type_decl =
       Ast_helper.Type.mk (loc ocaml_type_name) ~kind ~attrs ?manifest in
     add_sig_type context [type_decl] in
@@ -1718,7 +1697,7 @@ let translate_function_decl context cur =
           if not function_interface.label_unique || !unique then
             Asttypes.Nolabel
           else
-            Asttypes.Labelled (uncamelcase name) in
+            Asttypes.Labelled (Stubgen_common.uncamelcase name) in
         Ast_helper.Typ.arrow label ty pval_type
       end arg_list result_ty in
   let wrapper_name = name ^ "_wrapper" in
@@ -1893,15 +1872,7 @@ let translate_function_decl context cur =
   add_primitive context desc
 
 let rename_clang name =
-  uncamelcase (String.sub name 6 (String.length name - 6))
-
-let run_llvm_config llvm_config arguments =
-  let command = String.concat " " (llvm_config :: arguments) in
-  let output = Unix.open_process_in command in
-  let result = input_line output in
-  if Unix.close_process_in output <> Unix.WEXITED 0 then
-    failwith (Printf.sprintf "%s: execution failed" command);
-  result
+  Stubgen_common.uncamelcase (String.sub name 6 (String.length name - 6))
 
 let make_destructor f =
   destructor (fun value -> Printf.sprintf "%s(%s);" f value)
@@ -1921,13 +1892,6 @@ let output_warning_c channel =
 /* %s */
 " (Pcre.replace ~pat:"\n" ~templ:"\n * " warning_text)
 
-let string_remove_suffix ~suffix s =
-  let ls = String.length s and lsuffix = String.length suffix in
-  if lsuffix <= ls && String.sub s (ls - lsuffix) (lsuffix) = suffix then
-    String.sub s 0 (ls - lsuffix)
-  else
-    s
-
 let string_option =
   Type_info ({ ocamltype = ocaml_option ocaml_string;
     c_of_ocaml = (fun _ -> assert false);
@@ -1936,44 +1900,8 @@ let string_option =
         clang_disposeString(%s);" tgt src src) }, Regular)
 
 let main cflags llvm_config prefix =
-  let llvm_flags, llvm_version =
-    match llvm_config with
-    | None -> [], None
-    | Some llvm_config ->
-        let llvm_version = run_llvm_config llvm_config ["--version"] in
-        let llvm_prefix = run_llvm_config llvm_config ["--prefix"] in
-        let llvm_cflags = run_llvm_config llvm_config ["--cflags"] in
-        let llvm_version = string_remove_suffix ~suffix:"svn" llvm_version in
-        let llvm_version = string_remove_suffix ~suffix:"git" llvm_version in
-        let equivalent_llvm_version =
-          match llvm_version with
-          | "3.4"
-          | "3.4.1" -> "3.4.2"
-          | "3.5.0"
-          | "3.5.1" -> "3.5.2"
-          | "3.6.0"
-          | "3.6.1" -> "3.6.2"
-          | "3.7.0" -> "3.7.1"
-          | "3.8.0" -> "3.8.1"
-          | "3.9.0" -> "3.9.1"
-          | "4.0.0" -> "4.0.1"
-          | "5.0.0"
-          | "5.0.1" -> "5.0.2"
-          | "6.0.0" -> "6.0.1"
-          | "7.0.0" -> "7.1.0"
-          | "7.0.1" -> "7.1.0"
-          | "8.0.0" -> "8.0.1"
-          | "9.0.0" -> "9.0.1"
-          | "10.0.0" -> "10.0.1"
-          | _ -> llvm_version in
-        String.split_on_char ' ' llvm_cflags @
-        ["-I"; List.fold_left Filename.concat llvm_prefix
-           ["lib"; "clang"; llvm_version; "include"]; "-I";
-         "/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include/";
-         "-DLLVM_VERSION_" ^ String.map (fun c -> if c = '.' then '_' else c) equivalent_llvm_version],
-        Some equivalent_llvm_version in
-  let cflags = cflags |> List.map @@ String.split_on_char ',' |> List.flatten in
-  let clang_options = cflags @ llvm_flags in
+  let clang_options, llvm_version =
+    Stubgen_common.prepare_clang_options cflags llvm_config in
   let result_cxerrorcode =
     if llvm_version = Some "3.4.2" then
       integer_zero_is_true
@@ -2328,25 +2256,6 @@ let main cflags llvm_config prefix =
       Format.fprintf (Format.formatter_of_out_channel chan_impl)
         "%a@." Pprintast.structure (List.rev context.struct_accu)))
 
-let option_cflags =
-  let doc = "Pass option to the C compiler" in
-  Cmdliner.Arg.(
-    value & opt_all string [] & info ["cc"] ~docv:"FLAGS" ~doc)
-
-let option_llvm_config =
-  let doc = "Path to llvm-config" in
-  Cmdliner.Arg.(
-    value & opt (some non_dir_file) None &
-    info ["llvm-config"] ~docv:"LLVM_CONFIG" ~doc)
-
-let option_prefix =
-  let doc = "Prefix path for output files" in
-  Cmdliner.Arg.(
-    required & pos 0 (some string) None & info [] ~docv:"PREFIX" ~doc)
-
-let options = Cmdliner.Term.(
-    const main $ option_cflags $ option_llvm_config $ option_prefix)
-
 let info =
   let doc = "generate stubs for ClangML" in
   let man = [
@@ -2355,4 +2264,5 @@ let info =
     ] in
   Cmdliner.Term.info "stubgen" ~doc ~exits:Cmdliner.Term.default_exits ~man
 
-let () = Cmdliner.Term.exit (Cmdliner.Term.eval (options, info))
+let () =
+  Cmdliner.Term.exit (Cmdliner.Term.eval (Stubgen_common.options main, info))
