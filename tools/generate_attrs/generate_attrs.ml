@@ -31,12 +31,20 @@ let elaborated ?nested_name_specifier keyword named_type =
 let function_decl fun_decl =
   Clang.Ast.node (Clang.Ast.Function fun_decl)
 
+let function_type ?calling_conv ?parameters ?exception_spec result =
+  Clang.Type.make (FunctionType (Clang.Ast.function_type
+    ?calling_conv ?parameters ?exception_spec result))
+
 let record ident_ref =
   Clang.Type.make (Record ident_ref)
 
 let type_def name = Clang.Type.make (Typedef name)
 
 let cxcursor = type_def (Clang.Ast.identifier_name "CXCursor")
+
+let pointer ty = Clang.Type.make (Pointer ty)
+
+let void = Clang.Type.make (BuiltinType Void)
 
 let int = Clang.Type.make (BuiltinType Int)
 
@@ -46,11 +54,14 @@ let bool = Clang.Type.make (BuiltinType Bool)
 
 let auto = Clang.Type.make Auto
 
-let index = "index"
+let callback = "callback"
 
 let call callee args = Clang.Ast.node (Clang.Ast.Call { callee; args })
 
 let decl_ref decl_ref = Clang.Ast.node (Clang.Ast.DeclRef decl_ref)
+
+let decl_of_string s =
+  decl_ref (Clang.Ast.identifier_name s)
 
 let string s =
   Clang.Ast.node (Clang.Ast.StringLiteral (Clang.Ast.literal_of_string s))
@@ -62,6 +73,14 @@ let const_bool b = Clang.Ast.node (Clang.Ast.BoolLiteral b)
 let compound list = Clang.Ast.node (Clang.Ast.Compound list)
 
 let decl list = Clang.Ast.node (Clang.Ast.Decl list)
+
+let expr e = Clang.Ast.node (Clang.Ast.Expr e)
+
+let unary_operator kind operand =
+  Clang.Ast.node (Clang.Ast.UnaryOperator { kind; operand })
+
+let binary_operator lhs kind rhs =
+  Clang.Ast.node (Clang.Ast.BinaryOperator { lhs; kind; rhs })
 
 let member ?base ?(arrow = false) field =
   Clang.Ast.node (Clang.Ast.Member { base; arrow; field })
@@ -100,6 +119,9 @@ let parameter qual_type name =
 let switch ?init ?condition_variable cond body =
   Clang.Ast.node (Clang.Ast.Switch { init; condition_variable; cond; body })
 
+let for_ ?init ?condition_variable ?cond ?inc body =
+  Clang.Ast.node (Clang.Ast.For { init; condition_variable; cond; inc; body })
+
 let case ?rhs lhs body =
   Clang.Ast.node (Clang.Ast.Case { lhs; rhs; body })
 
@@ -119,8 +141,15 @@ let enum_constant ?constant_init constant_name : Clang.Ast.enum_constant =
   Clang.Ast.node
     ({ constant_name; constant_init } : Clang.Ast.enum_constant_desc)
 
+type ocaml_type_conversion =
+  | NoConversion
+  | Expr
+  | TypeLoc
+  | DeclarationName
+
 type type_info = {
     ocaml_type : Parsetree.core_type;
+    type_conversion : ocaml_type_conversion;
     interface_type : Clang.Type.t;
     multiple : bool;
     access : Clang.Expr.t -> Clang.Expr.t;
@@ -134,6 +163,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t) : type_info =
   match Lazy.force qual_type.desc with
   | Pointer { desc = lazy (Record { name = IdentifierName "Expr"})} ->
       { ocaml_type = [%type: 'expr];
+        type_conversion = Expr;
         interface_type = cxcursor;
         multiple = false;
         access = (fun e ->
@@ -145,6 +175,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t) : type_info =
               Lazy.force get_cursor_tu]}
   | Record { name = IdentifierName "VersionTuple" } ->
       { ocaml_type = [%type: Clang__bindings.clang_ext_versiontuple];
+        type_conversion = NoConversion;
         interface_type =
           elaborated Struct
             (record (Clang.Ast.identifier_name "clang_ext_VersionTuple"));
@@ -156,6 +187,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t) : type_info =
   | Record { name = IdentifierName "StringRef" }
   | Pointer { desc = lazy (BuiltinType Char_S) } ->
       { ocaml_type = [%type: string];
+        type_conversion = NoConversion;
         interface_type =
           type_def (Clang.Ast.identifier_name "CXString");
         multiple = false;
@@ -168,6 +200,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t) : type_info =
   | Pointer { desc = lazy (
         Record { name = IdentifierName "IdentifierInfo" }) } ->
       { ocaml_type = [%type: string];
+        type_conversion = NoConversion;
         interface_type =
           type_def (Clang.Ast.identifier_name "CXString");
         multiple = false;
@@ -181,6 +214,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t) : type_info =
   | Pointer { desc = lazy (
         Record { name = IdentifierName "FunctionDecl" }) } ->
       { ocaml_type = [%type: 'declaration_name];
+        type_conversion = DeclarationName;
         interface_type =
           elaborated Struct
             (record (Clang.Ast.identifier_name "clang_ext_DeclarationName"));
@@ -197,6 +231,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t) : type_info =
   | Pointer { desc = lazy (
         Record { name = IdentifierName "TypeSourceInfo" }) } ->
       { ocaml_type = [%type: 'qual_type];
+        type_conversion = TypeLoc;
         interface_type =
           elaborated Struct
             (record (Clang.Ast.identifier_name "clang_ext_TypeLoc"));
@@ -212,44 +247,48 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t) : type_info =
             [Lazy.force get_cursor_tu] }
   | Record { name = IdentifierName "ParamIdx" } ->
       { ocaml_type =  [%type: int];
+        type_conversion = NoConversion;
         interface_type = unsigned_int;
         multiple = false;
         access = (fun e -> conditional_operator
-          (call (member ~base:e (field_name (Clang.Ast.identifier_name "isValid"))) [])
-          ~then_branch:(call (member ~base:e (field_name (Clang.Ast.identifier_name "getSourceIndex"))) [])
+          (call (member ~base:e (field_name
+            (Clang.Ast.identifier_name "isValid"))) [])
+          ~then_branch:(call (member ~base:e (field_name
+            (Clang.Ast.identifier_name "getSourceIndex"))) [])
           (const_int 0));
         default = const_int 0; }
   | BuiltinType Int ->
       { ocaml_type =  [%type: int];
+        type_conversion = NoConversion;
         interface_type = int;
         multiple = false;
         access = Fun.id;
         default = const_int 0; }
   | BuiltinType UInt ->
       { ocaml_type =  [%type: int];
+        type_conversion = NoConversion;
         interface_type = unsigned_int;
         multiple = false;
         access = Fun.id;
         default = const_int 0; }
   | BuiltinType Bool ->
       { ocaml_type =  [%type: bool];
+        type_conversion = NoConversion;
         interface_type = bool;
         multiple = false;
         access = Fun.id;
         default = const_bool false; }
   | Pointer qual_type ->
       let type_info = get_type_info qual_type in
-      { ocaml_type = [%type: [%t type_info.ocaml_type] list];
-        interface_type = type_info.interface_type;
+      { type_info with
+        ocaml_type = [%type: [%t type_info.ocaml_type] list];
         multiple = true;
-        access = (fun e -> (type_info.access (array_subscript e
-            (decl_ref (Clang.Ast.identifier_name index)))));
-        default = type_info.default;
       }
   | _ ->
       Format.eprintf "Unsupported type %a@."
         (Refl.pp [%refl:Clang.Lazy.Ast.qual_type] []) qual_type;
       { ocaml_type =  [%type: bool];
+        type_conversion = NoConversion;
         interface_type = bool;
         multiple = false;
         access = Fun.id;
@@ -273,6 +312,20 @@ type argument_attribute = {
 type argument_desc = {
     type_info : type_info;
     mutable attributes : argument_attribute list;
+    getter_name_ref : string ref;
+  }
+
+type ocaml_argument = {
+    name : string;
+    ty : Parsetree.core_type;
+    type_conversion : ocaml_type_conversion;
+    multiple : bool;
+    getter_name_ref : string ref;
+  }
+
+type ocaml_attribute = {
+    name : string;
+    arguments : ocaml_argument list;
   }
 
 type context = {
@@ -280,27 +333,22 @@ type context = {
     mutable constructors : Parsetree.constructor_declaration list;
     mutable decls : Clang.Decl.t list;
     mutable protos : Clang.Decl.t list;
-    mutable cases : Parsetree.case list;
+    mutable attributes : ocaml_attribute list;
   }
 
-let register_argument context attribute_name public_methods
-    (argument : argument_decl) =
+let register_argument context attribute_name
+    (argument : argument_decl) (getter, getter_result_type) =
   let type_table =
     StringHashtbl.find_default context.argument_table argument.name
       ~default:(fun () -> TypeHashtbl.create 17) in
   let desc =
     TypeHashtbl.find_default type_table argument.qual_type
       ~default:(fun () ->
-        { type_info = argument.type_info; attributes = [] }) in
-  match
-    StringHashtbl.find_opt public_methods (String.lowercase argument.name)
-  with
-  | None ->
-      Format.fprintf Format.err_formatter
-        "No getter for %s in %s@." argument.name attribute_name
-  | Some (getter, getter_result_type) ->
-      desc.attributes <-
-        { attribute_name; getter; getter_result_type } :: desc.attributes
+        { type_info = argument.type_info; attributes = [];
+          getter_name_ref = ref "" }) in
+  desc.attributes <-
+    { attribute_name; getter; getter_result_type } :: desc.attributes;
+  desc.getter_name_ref
 
 type annotated_field = Clang.Ast.cxx_access_specifier * Clang.Lazy.Ast.decl
 
@@ -406,12 +454,26 @@ let unkeyword name =
   | "module" -> name ^ "_"
   | _ -> name
 
-let generate_attribute context name public_methods spelling arguments =
+let generate_attribute context name public_methods spelling
+    (arguments : argument_decl list) =
   let reduced_name = get_reduced_attribute_name name in
   let arguments =
-    arguments |> List.map @@ fun argument ->
-      { argument with name = remove_trailing_underscore argument.name } in
-  let make_ocaml_argument argument =
+    arguments |> List.map @@ fun (argument : argument_decl) ->
+      let arg_name = remove_trailing_underscore argument.name in
+      let argument = { argument with name = arg_name } in
+      match
+        StringHashtbl.find_opt public_methods (String.lowercase arg_name)
+      with
+      | None ->
+          Format.fprintf Format.err_formatter
+            "No getter for %s in %s@." arg_name name;
+          assert false
+      | Some getter_info ->
+          let getter_name_ref =
+            register_argument context name argument getter_info in
+          argument, getter_info, getter_name_ref in
+  let make_ocaml_argument
+      ((argument : argument_decl), _getter_info, getter_name_ref) =
     if has_suffix ~suffix:"_Size" argument.name
         || has_suffix ~suffix:"Length" argument.name then
       None
@@ -422,40 +484,48 @@ let generate_attribute context name public_methods spelling arguments =
           (Stubgen_common.string_remove_suffix ~suffix:"Param") |>
         Stubgen_common.uncamelcase |>
         unkeyword in
-      Some (name, argument.type_info.ocaml_type) in
-  let ocaml_arguments =
+      Some { name;
+        ty = argument.type_info.ocaml_type;
+        type_conversion = argument.type_info.type_conversion;
+        multiple = argument.type_info.multiple;
+        getter_name_ref } in
+  let arguments =
     List.filter_map make_ocaml_argument arguments in
   let spelling =
     spelling |> Option.map (fun spelling ->
-      (spelling, get_type_spelling_name reduced_name)) in
-  let ocaml_arguments =
+      let spelling_getter_name =
+        Printf.sprintf "clang_ext_%s_getSpelling" reduced_name in
+      (spelling, get_type_spelling_name reduced_name, spelling_getter_name)) in
+  let arguments =
     match spelling with
-    | None -> ocaml_arguments
-    | Some (_, type_spelling_name) ->
-      ("spelling", Ast_helper.Typ.constr
-        (Metapp.mklid ~prefix:(Lident "Clang__bindings")
-           (String.lowercase type_spelling_name)) [])
-        :: ocaml_arguments in
+    | None -> arguments
+    | Some (_, type_spelling_name, spelling_getter_name) ->
+      { name = "spelling";
+        ty = Ast_helper.Typ.constr
+          (Metapp.mklid ~prefix:(Lident "Clang__bindings")
+             (String.lowercase type_spelling_name)) [];
+        type_conversion = NoConversion;
+        multiple = false;
+        getter_name_ref = ref spelling_getter_name } :: arguments in
   let args : Parsetree.constructor_arguments =
-    match ocaml_arguments with
-    | [(_, ty)] ->
-        Pcstr_tuple [ty]
+    match arguments with
+    | [argument] ->
+        Pcstr_tuple [argument.ty]
     | _ ->
-        Pcstr_record (ocaml_arguments |> List.map
-          (fun (name, ty) -> Ast_helper.Type.field (Metapp.mkloc name) ty)) in
+        Pcstr_record (arguments |> List.map (
+        fun (argument : ocaml_argument) ->
+          Ast_helper.Type.field (Metapp.mkloc argument.name) argument.ty)) in
   let constructor =
     Ast_helper.Type.constructor (Metapp.mkloc reduced_name) ~args in
-  List.iter (register_argument context name public_methods) arguments;
   context.constructors <- constructor :: context.constructors;
-  spelling |> Option.iter (fun (spelling, type_spelling_name) ->
+  spelling |> Option.iter (
+  fun (spelling, type_spelling_name, spelling_getter_name) ->
     let constant_names = spelling |> List.map (fun constant ->
       constant, Printf.sprintf "clang_ext_%s_%s" reduced_name constant) in
     let last_constant = snd (List.hd (List.rev constant_names)) in
     let enum_constants = constant_names |> List.map (fun (_, constant) ->
       enum_constant constant) in
     let spelling_enum = enum_decl type_spelling_name enum_constants in
-    let spelling_getter_name =
-      Printf.sprintf "clang_ext_%s_getSpelling" reduced_name in
     let cases =
       constant_names |> List.map (fun (orig, prefixed) ->
         case (decl_ref (Clang.Ast.identifier_name orig
@@ -479,7 +549,8 @@ let generate_attribute context name public_methods spelling arguments =
         ~parameters:(Clang.Ast.parameters [parameter_cursor]) result)
         (IdentifierName spelling_getter_name) ~body:(compound list) in
     context.protos <- spelling_enum :: context.protos;
-    add_fun_decl context spelling_getter)
+    add_fun_decl context spelling_getter);
+  context.attributes <- { name = reduced_name; arguments } :: context.attributes
 
 let is_parameter_base_class name =
   match name with
@@ -536,53 +607,60 @@ let rec partition_map_aux (accu_some : 'b list) (accu_none : 'a list)
 let partition_map f l =
   partition_map_aux [] [] f l
 
-let filter_singleton (key, desc) =
+let filter_singleton (key, (desc : argument_desc)) =
   match desc.attributes with
-  | [attribute] -> Some (key, attribute, desc.type_info)
+  | [attribute] -> Some (key, attribute, desc)
   | _ -> None
 
-let generate_code context argument type_name_attr attributes ty type_info =
+let data = "data"
+
+let generate_code context argument type_name_attr ty
+    (argument_desc : argument_desc) =
   let parameter_list = [parameter_cursor] in
-  let parameter_list =
-    if type_info.multiple then
-      parameter_list @ [parameter unsigned_int index]
+  let parameter_list, result =
+    if argument_desc.type_info.multiple then
+      parameter_list @ [parameter (pointer (function_type void
+        ~parameters:(Clang.Ast.parameters [
+          parameter argument_desc.type_info.interface_type "";
+          parameter (pointer void) ""]))) callback;
+        parameter (pointer void) data],
+      void
     else
-      parameter_list in
+      parameter_list, argument_desc.type_info.interface_type in
   let parameters = Clang.Ast.parameters parameter_list in
-  let result = type_info.interface_type in
-  let argument_name =
-    if type_info.multiple then
-      Stubgen_common.option_apply
-        (Stubgen_common.string_remove_suffix ~suffix:"s")
-        argument
-    else
-      argument in
   let name =
     Printf.sprintf "clang_ext_%s_get%s" type_name_attr
-      (String.capitalize argument_name) in
+      (String.capitalize argument) in
+  argument_desc.getter_name_ref := name;
   let param = "param" in
   let make_attribute_cast attribute =
     let init =
       call (arrow (decl_ref (Clang.Ast.identifier_name qual_attr)) (FieldName
         (Clang.Ast.node (Clang.Ast.identifier_name attribute.getter)))) [] in
-    let init =
-      match Lazy.force attribute.getter_result_type.desc with
-      | Elaborated {
-          keyword = NoKeyword;
-          nested_name_specifier = Some [NamespaceName "llvm"];
-          named_type = {
-            desc = lazy (
-              TemplateSpecialization {
-                name = NameTemplate "iterator_range"; _ }); _}; _} ->
-          call (member ~base:init (field_of_string "begin")) []
-      | _ -> init in
     cast attr qual_attr attribute.attribute_name
       (compound [decl [var (lvalue_reference (const auto)) param ~init];
-       return (Some (type_info.access (decl_ref (Clang.Ast.identifier_name param))))]) in
+       if argument_desc.type_info.multiple then
+         let iter = "iter" in
+         let item = "item" in
+         let range limit =
+           call (member ~base:init (field_of_string limit)) [] in
+         for_
+           ~init:(decl [var auto iter ~init:(range "begin")])
+           ~cond:(binary_operator (decl_of_string iter) NE (range "end"))
+           ~inc:(expr (unary_operator PreInc (decl_of_string iter)))
+           (compound [
+             decl [var (lvalue_reference (const auto)) item
+               ~init:(unary_operator Deref (decl_of_string iter))];
+             expr (call (decl_of_string callback)
+               [argument_desc.type_info.access (decl_of_string item);
+                 decl_of_string data])])
+       else
+         return
+           (Some (argument_desc.type_info.access (decl_of_string param)))]) in
   let switch =
-    match attributes with
+    match argument_desc.attributes with
     | [attribute] -> make_attribute_cast attribute
-    | _ ->
+    | attributes ->
         let make_case attribute =
           [case (decl_ref
              (Clang.Ast.identifier_name
@@ -598,48 +676,51 @@ let generate_code context argument type_name_attr attributes ty type_info =
           (field_name (Clang.Ast.identifier_name "getKind"))) []) cases in
   let list = [
     get_cursor_attr;
-    switch;
-    return (Some type_info.default)] in
+    switch] @
+    if argument_desc.type_info.multiple then
+      []
+    else
+      [return (Some argument_desc.type_info.default)] in
   let fun_decl =
     Clang.Ast.function_decl (Clang.Ast.function_type ~parameters result)
       (IdentifierName name) ~body:(compound list) in
   add_fun_decl context fun_decl
+
+let tool_name = "generate_attrs"
 
 let main cflags llvm_config prefix =
   let command_line_args, _llvm_version =
     Stubgen_common.prepare_clang_options cflags llvm_config in
   let tu =
     Clang.Lazy.Ast.parse_string ~filename:"string.cpp" ~command_line_args {|
-#include <clang/AST/Attr.h>
-class Test {};
-|} in
-  Clang.Lazy.Ast.format_diagnostics Clang.warning_or_error Format.err_formatter tu;
+      #include <clang/AST/Attr.h>
+    |} in
+  Clang.Lazy.Ast.format_diagnostics Clang.warning_or_error Format.err_formatter
+    tu;
   assert (not (Clang.Lazy.Ast.has_severity Clang.error tu));
   let context = {
     argument_table = StringHashtbl.create 17;
     constructors = [];
     decls = [];
     protos = [];
-    cases = [];
+    attributes = [];
   } in
   List.iter (do_namespace context) (Lazy.force tu.desc).items;
   context.argument_table |> StringHashtbl.iter (fun argument types ->
     let singletons, multiples =
       partition_map filter_singleton (List.of_seq (TypeHashtbl.to_seq types)) in
-    singletons |> List.iter (fun (ty, singleton, type_info) ->
+    singletons |> List.iter (fun (ty, singleton, desc) ->
       generate_code context argument singleton.attribute_name
-        [singleton] ty type_info);
+        ty desc);
     match multiples with
     | [] -> ()
     | [(key, argument_desc)] ->
-        generate_code context argument "Attrs" argument_desc.attributes key
-          argument_desc.type_info
+        generate_code context argument "Attrs" key argument_desc
     | _ ->
-        multiples |> List.iter (fun (key, argument_desc) ->
+        multiples |> List.iter (fun (key, (argument_desc : argument_desc)) ->
           let type_attr_name =
             (List.hd (List.rev argument_desc.attributes)).attribute_name in
-          generate_code context argument type_attr_name argument_desc.attributes
-            key argument_desc.type_info));
+          generate_code context argument type_attr_name key argument_desc));
   let other =
     Ast_helper.Type.constructor (Metapp.mkloc "Other")
       ~args:(Pcstr_tuple [[%type: Clang__bindings.clang_ext_attrkind]]) in
@@ -652,27 +733,69 @@ class Test {};
       ~attrs:[Metapp.Attr.mk (Metapp.mkloc "deriving") (PStr [%str refl])] in
   let type_decl =
     Ast_helper.Str.type_ Recursive [ty] in
+  let cases =
+    context.attributes |> List.map (
+    fun (attribute : ocaml_attribute) ->
+      let lid = Metapp.mklid attribute.name in
+      let pattern = Ast_helper.Pat.construct lid None in
+      let expr =
+        let args =
+          attribute.arguments |> List.map (fun (argument : ocaml_argument) ->
+            let getter_name =
+              !(argument.getter_name_ref) |>
+              Stubgen_common.option_apply
+                (Stubgen_common.string_remove_prefix ~prefix:"clang_") |>
+              Stubgen_common.uncamelcase in
+            let convert e =
+              match argument.type_conversion with
+              | NoConversion -> e
+              | Expr -> [%expr expr_of_cxcursor [%e e]]
+              | TypeLoc -> [%expr of_type_loc [%e e]]
+              | DeclarationName ->
+                  [%expr convert_declaration_name [%e e]] in
+            let getter =
+              let ident =
+                Ast_helper.Exp.ident
+                  (Metapp.mklid ~prefix:(Lident "Clang__bindings")
+                     getter_name) in
+              if argument.multiple then
+                [%expr
+                   let accu = ref [] in
+                   [%e ident] cursor
+                     (fun value -> accu := [%e convert [%expr value]] :: !accu);
+                   List.rev !accu]
+              else
+                convert [%expr [%e ident] cursor] in
+            Metapp.mklid argument.name, getter) in
+        let args =
+          match args with
+          | [(_, arg)] -> arg
+          | _ -> Ast_helper.Exp.record args None in
+        Ast_helper.Exp.construct lid (Some args) in
+      Ast_helper.Exp.case pattern expr) in
+  let cases = Ast_helper.Exp.case [%pat? other] [%expr Other other] :: cases in
   let convert =
-    let cases =
-      Ast_helper.Exp.case [%pat? other] [%expr Other other] :: context.cases in
     let pattern_matching =
       Ast_helper.Exp.match_ [%expr Clang__bindings.ext_attr_get_kind cursor]
         (List.rev cases) in
     [%stri
        let convert
-           cursor expr_of_cxcursor of_type_loc declaration_name_of_cxcursor =
+           cursor expr_of_cxcursor of_type_loc convert_declaration_name =
          [%e pattern_matching]] in
   let chan = open_out (prefix ^ "attributes.ml") in
   Fun.protect ~finally:(fun () -> close_out chan) (fun () ->
+    Stubgen_common.output_warning_ml chan tool_name;
     let fmt = Format.formatter_of_out_channel chan in
     Format.fprintf fmt "%a@." Pprintast.structure
       [type_decl; convert]);
   let chan = open_out (prefix ^ "libclang_extensions_attrs.inc") in
   Fun.protect ~finally:(fun () -> close_out chan) (fun () ->
+    Stubgen_common.output_warning_c chan tool_name;
     let fmt = Format.formatter_of_out_channel chan in
     Format.fprintf fmt "%a@." Clang.Printer.decls (List.rev context.decls));
   let chan = open_out (prefix ^ "libclang_extensions_attrs_headers.inc") in
   Fun.protect ~finally:(fun () -> close_out chan) (fun () ->
+    Stubgen_common.output_warning_c chan tool_name;
     let fmt = Format.formatter_of_out_channel chan in
     Format.fprintf fmt "%a@." Clang.Printer.decls (List.rev context.protos))
 
@@ -682,7 +805,7 @@ let info =
       `S Cmdliner.Manpage.s_bugs;
       `P "Email bug reports to <thierry.martinez@inria.fr>.";
     ] in
-  Cmdliner.Term.info "stubgen" ~doc ~exits:Cmdliner.Term.default_exits ~man
+  Cmdliner.Term.info tool_name ~doc ~exits:Cmdliner.Term.default_exits ~man
 
 let () =
   Cmdliner.Term.exit (Cmdliner.Term.eval (Stubgen_common.options main, info))

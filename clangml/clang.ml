@@ -309,6 +309,9 @@ module Ast = struct
 
     and declaration_name_of_cxcursor cursor =
       let name = ext_decl_get_name cursor in
+      convert_declaration_name name
+
+    and convert_declaration_name name =
       match ext_declaration_name_get_kind name with
       | Identifier ->
           IdentifierName (ext_declaration_name_get_as_identifier name)
@@ -1051,51 +1054,9 @@ module Ast = struct
       }
 
     and attribute_of_cxcursor (cursor : cxcursor) : attribute =
-(*
-      let get_acquire_capability_exprs cursor =
-        List.init (ext_acquire_capability_attr_get_arg_size cursor)
-          (fun i ->
-            ext_acquire_capability_attr_get_arg cursor i |>
-            expr_of_cxcursor) in
-*)
-      let desc () : attribute_desc =
-        match ext_attr_get_kind cursor with
-(*
-        | AbiTag ->
-            let list =
-              List.init (ext_abi_tag_attr_get_num_tags cursor)
-                (ext_abi_tag_attr_get_tag cursor) in
-            AbiTag list
-        | AcquireCapability ->
-            AcquireCapability (get_acquire_capability_exprs cursor)
-        | Aligned ->
-            let argument =
-              if ext_aligned_attr_is_alignment_expr cursor then
-                let expr = ext_aligned_attr_get_alignment_expr cursor in
-                expr_of_cxcursor expr
-              else
-                failwith "attribute_of_cxcursor" in
-            Aligned argument
-        | AllocAlign ->
-            AllocAlign (ext_alloc_align_attr_get_param_index cursor)
-        | AllocSize ->
-            let num_elems : int option =
-              match ext_alloc_size_attr_get_num_elems_param cursor with
-              | 0 -> None
-              | num_elems -> Some num_elems in
-            AllocSize {
-              elem_size = ext_alloc_size_attr_get_elem_size_param cursor;
-              num_elems }
-        | ReleaseCapability ->
-            ReleaseCapability (get_acquire_capability_exprs cursor)
-        | WarnUnusedResult ->
-            WarnUnusedResult {
-              spelling =
-                ext_warn_unused_result_attr_get_semantic_spelling cursor;
-              message = ext_warn_unused_result_attr_get_message cursor;
-            }
-*)
-        | other -> Other other in
+      let desc () =
+        Attributes.convert cursor expr_of_cxcursor of_type_loc
+          convert_declaration_name in
       node ~cursor (Node.from_fun desc)
 
     and attribute_of_cxcursor_opt cursor : attribute option =

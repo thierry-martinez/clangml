@@ -3466,17 +3466,7 @@ extern "C" {
     }
     return 0;
   }
-/*
-  CXString
-  clang_ext_AbiTagAttr_getTag(CXCursor cursor, unsigned index)
-  {
-    auto a = GetCursorAttr(cursor);
-    if (auto aa = llvm::dyn_cast_or_null<clang::AbiTagAttr>(a)) {
-      return cxstring_createDup(aa->tags().begin()[index]);
-    }
-    return cxstring_createRef("");
-  }
-*/
+
   unsigned
   clang_ext_AcquireCapabilityAttr_getArgSize(CXCursor cursor)
   {
@@ -3520,36 +3510,7 @@ extern "C" {
     }
     return 0;
   }
-/*
-  CXCursor
-  clang_ext_AcquireCapabilityAttr_getArg(CXCursor cursor, unsigned index)
-  {
-    auto a = GetCursorAttr(cursor);
-    switch (a->getKind()) {
-    case clang::attr::AcquireCapability:
-      if (auto aa = llvm::dyn_cast_or_null<clang::AcquireCapabilityAttr>(a)) {
-        return MakeCXCursor(aa->args().begin()[index], getCursorTU(cursor));
-      }
-      break;
-    case clang::attr::AcquiredAfter:
-      if (auto aa = llvm::dyn_cast_or_null<clang::AcquiredAfterAttr>(a)) {
-        return MakeCXCursor(aa->args().begin()[index], getCursorTU(cursor));
-      }
-      break;
-    case clang::attr::AcquiredBefore:
-      if (auto aa = llvm::dyn_cast_or_null<clang::AcquiredBeforeAttr>(a)) {
-        return MakeCXCursor(aa->args().begin()[index], getCursorTU(cursor));
-      }
-      break;
-    case clang::attr::ReleaseCapability:
-      if (auto aa = llvm::dyn_cast_or_null<clang::ReleaseCapabilityAttr>(a)) {
-        return MakeCXCursor(aa->args().begin()[index], getCursorTU(cursor));
-      }
-      break;
-    }
-    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
-  }
-*/
+
   bool
   clang_ext_AlignedAttr_isAlignmentExpr(CXCursor cursor)
   {
@@ -3559,17 +3520,7 @@ extern "C" {
     }
     return false;
   }
-/*
-  CXCursor
-  clang_ext_AlignedAttr_getAlignmentExpr(CXCursor cursor)
-  {
-    auto a = GetCursorAttr(cursor);
-    if (auto aa = llvm::dyn_cast_or_null<clang::AlignedAttr>(a)) {
-      return MakeCXCursor(aa->getAlignmentExpr(), getCursorTU(cursor));
-    }
-    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
-  }
-*/
+
   struct clang_ext_TypeLoc
   clang_ext_AlignedAttr_getAlignmentType(CXCursor cursor)
   {
@@ -3580,40 +3531,7 @@ extern "C" {
     }
     return MakeTypeLocInvalid(getCursorTU(cursor));
   }
-/*
-  unsigned
-  clang_ext_AllocAlignAttr_getParamIndex(CXCursor cursor)
-  {
-    auto a = GetCursorAttr(cursor);
-    if (auto aa = llvm::dyn_cast_or_null<clang::AllocAlignAttr>(a)) {
-      return aa->getParamIndex().getSourceIndex();
-    }
-    return 0;
-  }
 
-  unsigned
-  clang_ext_AllocSizeAttr_getElemSizeParam(CXCursor cursor)
-  {
-    auto a = GetCursorAttr(cursor);
-    if (auto aa = llvm::dyn_cast_or_null<clang::AllocSizeAttr>(a)) {
-      return aa->getElemSizeParam().getSourceIndex();
-    }
-    return 0;
-  }
-
-  unsigned
-  clang_ext_AllocSizeAttr_getNumElemsParam(CXCursor cursor)
-  {
-    auto a = GetCursorAttr(cursor);
-    if (auto aa = llvm::dyn_cast_or_null<clang::AllocSizeAttr>(a)) {
-      const auto &param = aa->getNumElemsParam();
-      if (param.isValid()) {
-        return param.getSourceIndex();
-      }
-    }
-    return 0;
-  }
-*/
   bool
   clang_ext_CursorKind_isAttr(enum CXCursorKind kind)
   {

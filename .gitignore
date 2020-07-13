@@ -24,3 +24,6 @@
 /norms
 
 /m4/ax_compare_version.m4
+/clangml/attributes.ml
+/clangml/libclang_extensions_attrs_headers.inc
+/clangml/libclang_extensions_attrs.inc

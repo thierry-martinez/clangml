@@ -1140,16 +1140,7 @@ clang_ext_AlignedAttr_getAlignmentExpr(CXCursor);
 */
 struct clang_ext_TypeLoc
 clang_ext_AlignedAttr_getAlignmentType(CXCursor);
-/*
-unsigned
-clang_ext_AllocAlignAttr_getParamIndex(CXCursor);
 
-unsigned
-clang_ext_AllocSizeAttr_getElemSizeParam(CXCursor);
-
-unsigned
-clang_ext_AllocSizeAttr_getNumElemsParam(CXCursor);
-*/
 bool
 clang_ext_CursorKind_isAttr(enum CXCursorKind);
 

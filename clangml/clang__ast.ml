@@ -462,9 +462,12 @@ let example = {|
 let () =
   check_pattern quote_decl parse_declaration_list_last example
   [%pattern?
-    { desc = Var { var_name = "v"; var_type = { desc = Vector {
-      element = { desc = Typedef ({ name = IdentifierName "int32_t" })};
-      size = 4 }}}} ]
+    { desc = Var {
+        var_name = "v";
+        var_type = { desc = Vector {
+          element = { desc = Typedef ({ name = IdentifierName "int32_t" })};
+          size = 4 }};
+        attributes = [] }}]
     ]}*)
   | IncompleteArray of qual_type
 (** Incomplete array.
@@ -943,13 +946,15 @@ let () =
   fun ast -> match ast with
   | [{ desc = Function {
       name = IdentifierName "f";
-      function_type = { calling_conv = AAPCS }}}] ->
+      function_type = { calling_conv = AAPCS };
+      attributes = []; }}] ->
       assert (
         Clang.version () < { major = 3; minor = 8; subminor = 0 } ||
         Clang.version () >= { major = 3; minor = 9; subminor = 0 })
   | [{ desc = Function {
       name = IdentifierName "f";
-      function_type = { calling_conv = C }}}] ->
+      function_type = { calling_conv = C };
+      attributes = []; }}] ->
       assert (
         Clang.version () >= { major = 3; minor = 8; subminor = 0 } &&
         Clang.version () < { major = 3; minor = 9; subminor = 0 })
@@ -1839,8 +1844,8 @@ and asm_operand = {
 and attribute = attribute_desc node
 
 and attribute_desc = (expr, qual_type, declaration_name) Attributes.t
-(** [| AbiTag of string list]
-   ABI tags.
+(**
+   [AbiTag]: ABI tags.
 
     {[
 let example = {|
@@ -1875,10 +1880,12 @@ let () =
          name = IdentifierName "lockAndInit";
          attributes = [
            { desc = AcquireCapability
-               [{ desc = DeclRef { name = IdentifierName "mu" }}] }] }}]]
+               { spelling = GNU_acquire_capability;
+                 args = [{
+                   desc = DeclRef { name = IdentifierName "mu" }}] }}] }}]]
     ]}
 
-    [| Aligned of expr]
+    [Aligned]:
     Field alignment.
 
     {[
@@ -1898,8 +1905,9 @@ let () =
           { name = "f";
             qual_type = { desc = BuiltinType Float };
             attributes = [
-              { desc = Aligned
-                { desc = IntegerLiteral (Int 32) }}] }}] }}]]
+              { desc = Aligned {
+                spelling = Keyword_Alignas;
+                alignment_expr = { desc = IntegerLiteral (Int 32) }}}] }}] }}]]
 
 let example = {|
 struct alignas(32) s {
@@ -1914,7 +1922,9 @@ let () =
     [{ desc = RecordDecl {
       keyword = Struct;
       attributes = [
-        { desc = Aligned { desc = IntegerLiteral (Int 32)}}];
+        { desc = Aligned {
+          spelling = Keyword_alignas;
+          alignment_expr = {desc = IntegerLiteral (Int 32)}}}];
       fields = [
         { desc = Field
           { name = "f";
@@ -1943,11 +1953,12 @@ let () =
           { name = "f";
             qual_type = { desc = BuiltinType Float };
             attributes = [
-              { desc = Aligned
-                { desc = UnaryExpr {
+              { desc = Aligned {
+                spelling = Keyword_Alignas;
+                alignment_expr = { desc = UnaryExpr {
                     kind = AlignOf;
                     argument = ArgumentType
-                      { desc = BuiltinType Double }}}}] }}] }}]]
+                      { desc = BuiltinType Double }}}}}] }}] }}]]
 
 let example = {|
 struct alignas(double) s {
@@ -1962,19 +1973,19 @@ let () =
     [{ desc = RecordDecl {
       keyword = Struct;
       attributes = [
-        { desc = Aligned
-                { desc = UnaryExpr {
+        { desc = Aligned {
+          spelling = Keyword_alignas;
+          alignment_expr = { desc = UnaryExpr {
                     kind = AlignOf;
                     argument = ArgumentType
-                      { desc = BuiltinType Double }}}}];
+                      { desc = BuiltinType Double }}}}}];
       fields = [
         { desc = Field
           { name = "f";
             qual_type = { desc = BuiltinType Float }}}] }}]]
     ]}
 
-  [| AllocAlign of int]
-
+  [AllocAlign]:
 Specify that the return value of the function (which must be a pointer type) is
 at least as aligned as the value of the indicated parameter.
 
@@ -1998,7 +2009,7 @@ let () =
              variadic = false }}}}]]
     ]}
 
-  [| AllocSize of { elem_size : int; num_elems : int option }]
+  [AllocSize]:
     Hint to the compiler how many bytes of memory will be available at the
     returned pointer.
 
@@ -2013,7 +2024,7 @@ let () =
     (parse_declaration_list ~language:CXX ~standard:Cxx11) example
   [%pattern?
     [{ desc = Function {
-         attributes = [{ desc = AllocSize { elem_size = 1; num_elems = None }}];
+         attributes = [{ desc = AllocSize { elem_size = 1; num_elems = 0 }}];
          name = IdentifierName "my_malloc";
          function_type = {
            result = { desc = Pointer { desc = BuiltinType Void }};
@@ -2023,7 +2034,7 @@ let () =
              variadic = false }}}};
       { desc = Function {
          attributes = [
-           { desc = AllocSize { elem_size = 1; num_elems = Some 2 }}];
+           { desc = AllocSize { elem_size = 1; num_elems = 2 }}];
          name = IdentifierName "my_calloc";
          function_type = {
            result = { desc = Pointer { desc = BuiltinType Void }};
@@ -2036,8 +2047,7 @@ let () =
              variadic = false }}}}]]
     ]}
 
-  [| ReleaseCapability of expr list]
-    Marks a function as releasing a capability.
+  [ReleaseCapability]: Marks a function as releasing a capability.
 
     {[
 let example = {|
@@ -2054,17 +2064,12 @@ let () =
       { desc = Function {
          name = IdentifierName "cleanupAndUnlock";
          attributes = [
-           { desc = ReleaseCapability
-               [{ desc = DeclRef { name = IdentifierName "mu" }}] }] }}]]
+           { desc = ReleaseCapability {
+             spelling = GNU_release_capability;
+             args = [{ desc = DeclRef { name = IdentifierName "mu" }}] }}] }}]]
     ]}
 
-  [| WarnUnusedResult of {
-      spelling : clang_ext_warnunusedresultattr_spelling;
-      message : string;
-    }]
-
-  [| Other of attribute_kind]
-  Attributes without argument.
+  [Other]: Attributes without argument.
 
     {[
 let example = {|

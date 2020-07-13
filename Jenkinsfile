@@ -53,6 +53,12 @@ pipeline {
                 sh 'make -C build clangml.opam && cp build/clangml.opam src/'
                 sh 'make -C build tools/stubgen'
                 sh 'make -C build tools/norm_extractor'
+                sh 'make -C build tools/generate_attrs'
+            }
+        }
+        stage('Generate attributes') {
+            steps {
+                sh 'dune exec -- tools/generate_attrs/generate_attrs.exe --llvm-config /media/llvms/10.0.1/bin/llvm-config "bootstrap/"
             }
         }
         stage('Generate stubs') {

@@ -1,5 +1,6 @@
 let string_of_builtin_type (ty : Clang__ast.builtin_type) =
   match ty with
+  | Void -> "void"
   | Bool -> "bool"
   | Char_S -> "char"
   | Float -> "float"
@@ -291,6 +292,13 @@ and stmt fmt (s : Clang__ast.stmt) =
   | While { cond; body; _ } ->
       Format.fprintf fmt "@[while@ (@[%a@])@ %a@]"
         expr cond stmt body
+  | For { init; condition_variable; cond; inc; body } ->
+      Format.fprintf fmt "@[for@ (@[%t@];@ @[%t@];@ @[%t@])@ %a@]"
+        (fun fmt -> init |> Option.iter @@ stmt_without_semicolon fmt)
+        (fun fmt -> cond |> Option.iter @@ fun cond ->
+          pp_condition_variable fmt (condition_variable, cond))
+        (fun fmt -> inc |> Option.iter @@ stmt_without_semicolon fmt)
+        stmt body
   | Return None ->
       Format.fprintf fmt "@[return;@]"
   | Return (Some value) ->
@@ -301,6 +309,16 @@ and stmt fmt (s : Clang__ast.stmt) =
       Format.fprintf fmt "@[%a;@]" expr e
   | _ ->
       Format.fprintf fmt "<not implemented stmt: %a>"
+        (Refl.pp [%refl: Clang__ast.stmt] []) s
+
+and stmt_without_semicolon fmt (s : Clang__ast.stmt) =
+  match s.desc with
+  | Decl [{desc = Var var_decl}] ->
+      pp_var_decl fmt var_decl
+  | Expr e ->
+      expr fmt e
+  | _ ->
+      Format.fprintf fmt "<not implemented stmt_without_semicolon: %a>"
         (Refl.pp [%refl: Clang__ast.stmt] []) s
 
 and pp_else_branch fmt else_branch =
@@ -413,8 +431,12 @@ and typed_value fmt_value fmt t =
       Format.fprintf fmt "@[%a@ %t@]" pp_ident_ref ident fmt_value
   | Auto ->
       Format.fprintf fmt "@[auto@ %t@]" fmt_value
+  | FunctionType { result; parameters; _ } ->
+      typed_value (fun fmt -> Format.fprintf fmt "@[(%t)(%t)@]"
+          fmt_value (fun fmt -> parameters |> Option.iter @@ pp_parameters fmt))
+        fmt result
   | _ ->
-      Format.fprintf fmt "@[<not implemented qual type: %a>@]"
+      Format.fprintf fmt {|@[\<not implemented qual type: %a>@]|}
         (Refl.pp [%refl: Clang__ast.qual_type] []) t
 
 and pp_qual_type fmt t =

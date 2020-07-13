@@ -465,6 +465,16 @@ AC_CP([$srcdir/bootstrap/$EQUIVALENT_LLVM_VERSION/clang__bindings.mli],
 AC_CP([$srcdir/bootstrap/$EQUIVALENT_LLVM_VERSION/clang_stubs.c],
   [clangml/clang_stubs.c])
 
+AC_CP([$srcdir/bootstrap/attributes.ml], [clangml/attributes.ml])
+
+AC_CP(
+  [$srcdir/bootstrap/libclang_extensions_attrs_headers.inc],
+  [clangml/libclang_extensions_attrs_headers.inc])
+
+AC_CP(
+  [$srcdir/bootstrap/libclang_extensions_attrs.inc],
+  [clangml/libclang_extensions_attrs.inc])
+
 AC_CONFIG_FILES([
   Makefile
   config/cflags.sexp
