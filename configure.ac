@@ -413,6 +413,12 @@ AS_IF([test -d tools/common],
      AC_CP([$srcdir/tools/common/clangml_tools_common.ml], [tools/common/])
      AC_CP([$srcdir/tools/common/clangml_tools_common.mli], [tools/common/])])])
 
+AS_IF([test -d tools/stubgen_common],
+  [true],
+  [AS_IF([mkdir tools/stubgen_common],
+    [AC_CP([$srcdir/tools/stubgen_common/dune], [tools/stubgen_common/])
+     AC_CP([$srcdir/tools/stubgen_common/stubgen.ml], [tools/stubgen_common/])])])
+
 AS_IF([test -d tools/stubgen],
   [true],
   [AS_IF([mkdir tools/stubgen],
@@ -436,6 +442,12 @@ AS_IF([test -d tools/print_tree],
   [AS_IF([mkdir tools/print_tree],
     [AC_CP([$srcdir/tools/print_tree/dune], [tools/print_tree/])
      AC_CP([$srcdir/tools/print_tree/print_tree.ml], [tools/print_tree/])])])
+
+AS_IF([test -d tools/generate_attrs],
+  [true],
+  [AS_IF([mkdir tools/generate_attrs],
+    [AC_CP([$srcdir/tools/generate_attrs/dune], [tools/generate_attrs/])
+     AC_CP([$srcdir/tools/generate_attrs/stubgen.ml], [tools/generate_attrs/])])])
 
 AS_IF([test -d tests],
   [true],
