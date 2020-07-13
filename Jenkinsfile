@@ -58,7 +58,11 @@ pipeline {
         }
         stage('Generate attributes') {
             steps {
-                sh 'dune exec -- tools/generate_attrs/generate_attrs.exe --llvm-config /media/llvms/10.0.1/bin/llvm-config "bootstrap/"'
+                sh '''
+                   cd build && \
+                   dune exec -- tools/generate_attrs/generate_attrs.exe \
+                     --llvm-config /media/llvms/10.0.1/bin/llvm-config "bootstrap/"
+                   '''
             }
         }
         stage('Generate stubs') {
