@@ -61,7 +61,7 @@ pipeline {
                 sh '''
                    cd build && \
                    dune exec -- tools/generate_attrs/generate_attrs.exe \
-                     --llvm-config /media/llvms/10.0.1/bin/llvm-config "bootstrap/"
+                     --llvm-config /media/llvms/10.0.1/bin/llvm-config "../src/bootstrap/"
                    '''
             }
         }
