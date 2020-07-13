@@ -97,6 +97,9 @@ let field_of_string s =
 let var ~init qual_type name =
   Clang.Ast.node (Clang.Ast.Var (Clang.Ast.var ~var_init:init name qual_type))
 
+let directive directive =
+  Clang.Ast.node (Clang.Ast.Directive directive)
+
 let const (qual_type : Clang.Type.t) =
   { qual_type with const = true }
 
@@ -304,7 +307,8 @@ let make_argument_decl name qual_type =
   { name; qual_type; type_info = get_type_info qual_type }
 
 type argument_attribute = {
-    attribute_name : string;
+    name : string;
+    reduced_name : string;
     getter : string;
     getter_result_type : Clang.Lazy.Type.t;
   }
@@ -336,7 +340,7 @@ type context = {
     mutable attributes : ocaml_attribute list;
   }
 
-let register_argument context attribute_name
+let register_argument context name reduced_name
     (argument : argument_decl) (getter, getter_result_type) =
   let type_table =
     StringHashtbl.find_default context.argument_table argument.name
@@ -347,7 +351,7 @@ let register_argument context attribute_name
         { type_info = argument.type_info; attributes = [];
           getter_name_ref = ref "" }) in
   desc.attributes <-
-    { attribute_name; getter; getter_result_type } :: desc.attributes;
+    { name; reduced_name; getter; getter_result_type } :: desc.attributes;
   desc.getter_name_ref
 
 type annotated_field = Clang.Ast.cxx_access_specifier * Clang.Lazy.Ast.decl
@@ -470,7 +474,7 @@ let generate_attribute context name public_methods spelling
           assert false
       | Some getter_info ->
           let getter_name_ref =
-            register_argument context name argument getter_info in
+            register_argument context name reduced_name argument getter_info in
           argument, getter_info, getter_name_ref in
   let make_ocaml_argument
       ((argument : argument_decl), _getter_info, getter_name_ref) =
@@ -614,7 +618,15 @@ let filter_singleton (key, (desc : argument_desc)) =
 
 let data = "data"
 
-let generate_code context argument type_name_attr ty
+let find_version_constraint versions attribute =
+  match StringHashtbl.find_opt versions attribute with
+  | None ->
+      prerr_endline attribute;
+      assert false
+  | Some (3, 4) -> None
+  | result -> result
+
+let generate_code context versions argument type_name_attr ty
     (argument_desc : argument_desc) =
   let parameter_list = [parameter_cursor] in
   let parameter_list, result =
@@ -637,7 +649,7 @@ let generate_code context argument type_name_attr ty
     let init =
       call (arrow (decl_ref (Clang.Ast.identifier_name qual_attr)) (FieldName
         (Clang.Ast.node (Clang.Ast.identifier_name attribute.getter)))) [] in
-    cast attr qual_attr attribute.attribute_name
+    cast attr qual_attr attribute.name
       (compound [decl [var (lvalue_reference (const auto)) param ~init];
        if argument_desc.type_info.multiple then
          let iter = "iter" in
@@ -657,26 +669,35 @@ let generate_code context argument type_name_attr ty
        else
          return
            (Some (argument_desc.type_info.access (decl_of_string param)))]) in
+  let make_attribute decorate attribute : Clang.Stmt.t list =
+    let body = decorate (make_attribute_cast attribute) in
+    match find_version_constraint versions attribute.reduced_name with
+    | None -> body
+    | Some (major, minor) ->
+        decl [directive (Ifndef (
+          Printf.sprintf "LLVM_VERSION_BEFORE_%d_%d_0" major minor))] ::
+        body @ [decl [directive Endif]] in
   let switch =
     match argument_desc.attributes with
-    | [attribute] -> make_attribute_cast attribute
+    | [attribute] -> make_attribute (fun x -> [x]) attribute
     | attributes ->
-        let make_case attribute =
+        let make_case (attribute : argument_attribute) =
+          make_attribute (fun x ->
           [case (decl_ref
              (Clang.Ast.identifier_name
-                (get_reduced_attribute_name attribute.attribute_name)
+                (get_reduced_attribute_name attribute.name)
                  ~nested_name_specifier:[
                    namespace_clang;
                    Clang.Ast.NamespaceName "attr"]))
-             (make_attribute_cast attribute); break] in
+             x; break]) attribute in
         let cases =
           compound
             (List.concat_map make_case attributes @ [default null_stmt]) in
-        switch (call (arrow (decl_ref (Clang.Ast.identifier_name attr))
-          (field_name (Clang.Ast.identifier_name "getKind"))) []) cases in
-  let list = [
-    get_cursor_attr;
-    switch] @
+        [switch (call (arrow (decl_ref (Clang.Ast.identifier_name attr))
+          (field_name (Clang.Ast.identifier_name "getKind"))) [])
+          cases] in
+  let list = [get_cursor_attr] @
+    switch @
     if argument_desc.type_info.multiple then
       []
     else
@@ -688,7 +709,45 @@ let generate_code context argument type_name_attr ty
 
 let tool_name = "generate_attrs"
 
+let find_attributes_among_clang_versions dir : (int * int) StringHashtbl.t =
+  let versions = StringHashtbl.create 17 in
+  Sys.readdir dir |> Array.iter (fun filename ->
+    let full_filename = Filename.concat dir filename in
+    match List.map int_of_string_opt (String.split_on_char '.' filename) with
+    | [Some major; Some minor; Some _subminor]
+      when Sys.is_directory full_filename ->
+        let bindings =
+          Pparse.parse_implementation ~tool_name
+            (Filename.concat full_filename "clang__bindings.ml") in
+        let attributes =
+          bindings |> List.find_map (fun (item : Parsetree.structure_item) ->
+            match item.pstr_desc with
+            | Pstr_type (Recursive, type_declarations) ->
+                begin
+                  type_declarations |> List.find_map (
+                  fun (decl : Parsetree.type_declaration) ->
+                    if decl.ptype_name.txt = "clang_ext_attrkind" then
+                      match decl.ptype_kind with
+                      | Ptype_variant constructors ->
+                          Some (constructors |> List.map (fun
+                            (constructor : Parsetree.constructor_declaration) ->
+                            constructor.pcd_name.txt))
+                      | _ -> assert false
+                    else None)
+                end
+            | _ -> None) |> Option.get in
+        let version = major, minor in
+        attributes |> List.iter (fun attribute ->
+          match StringHashtbl.find_opt versions attribute with
+          | Some version' when version >= version' ->
+              ()
+          | _ ->
+              StringHashtbl.replace versions attribute version)
+    | _ -> ());
+  versions
+
 let main cflags llvm_config prefix =
+  let versions = find_attributes_among_clang_versions prefix in
   let command_line_args, _llvm_version =
     Stubgen_common.prepare_clang_options cflags llvm_config in
   let tu =
@@ -709,18 +768,19 @@ let main cflags llvm_config prefix =
   context.argument_table |> StringHashtbl.iter (fun argument types ->
     let singletons, multiples =
       partition_map filter_singleton (List.of_seq (TypeHashtbl.to_seq types)) in
-    singletons |> List.iter (fun (ty, singleton, desc) ->
-      generate_code context argument singleton.attribute_name
+    singletons |> List.iter (fun (ty, (singleton : argument_attribute), desc) ->
+      generate_code context versions argument singleton.name
         ty desc);
     match multiples with
     | [] -> ()
     | [(key, argument_desc)] ->
-        generate_code context argument "Attrs" key argument_desc
+        generate_code context versions argument "Attrs" key argument_desc
     | _ ->
         multiples |> List.iter (fun (key, (argument_desc : argument_desc)) ->
           let type_attr_name =
-            (List.hd (List.rev argument_desc.attributes)).attribute_name in
-          generate_code context argument type_attr_name key argument_desc));
+            (List.hd (List.rev argument_desc.attributes)).name in
+          generate_code context versions argument type_attr_name key
+            argument_desc));
   let other =
     Ast_helper.Type.constructor (Metapp.mkloc "Other")
       ~args:(Pcstr_tuple [[%type: Clang__bindings.clang_ext_attrkind]]) in
@@ -737,7 +797,25 @@ let main cflags llvm_config prefix =
     context.attributes |> List.map (
     fun (attribute : ocaml_attribute) ->
       let lid = Metapp.mklid attribute.name in
-      let pattern = Ast_helper.Pat.construct lid None in
+      let attrs =
+        match find_version_constraint versions attribute.name with
+        | None -> []
+        | Some (major, minor) ->
+            let make_condition_attr condition =
+              Metapp.Attr.mk (Metapp.mkloc "if") (PStr [%str [%meta
+                Metapp.Exp.of_bool [%e condition]]]) in
+            if major >= 4 then
+              [make_condition_attr
+                 [%expr Clangml_config.version.major >=
+                   [%e Metapp.Exp.of_int major]]]
+            else if major = 3 then
+              [make_condition_attr
+                 [%expr (Clangml_config.version.major,
+                   Clangml_config.version.minor) >=
+                   (3, [%e Metapp.Exp.of_int minor])]]
+            else
+              assert false in
+      let pattern = Ast_helper.Pat.construct lid None ~attrs in
       let expr =
         let args =
           attribute.arguments |> List.map (fun (argument : ocaml_argument) ->
@@ -779,15 +857,19 @@ let main cflags llvm_config prefix =
       Ast_helper.Exp.match_ [%expr Clang__bindings.ext_attr_get_kind cursor]
         (List.rev cases) in
     [%stri
+       [%%meta Metapp.filter.structure_item Metapp.filter [%stri
        let convert
            cursor expr_of_cxcursor of_type_loc convert_declaration_name =
-         [%e pattern_matching]] in
+         [%e pattern_matching]]]] in
   let chan = open_out (prefix ^ "attributes.ml") in
   Fun.protect ~finally:(fun () -> close_out chan) (fun () ->
     Stubgen_common.output_warning_ml chan tool_name;
     let fmt = Format.formatter_of_out_channel chan in
     Format.fprintf fmt "%a@." Pprintast.structure
-      [type_decl; convert]);
+      ([%str
+          [%%metapackage "metapp"]
+          [%%metadir "config/.clangml_config.objs/byte"]] @
+        [type_decl; convert]));
   let chan = open_out (prefix ^ "libclang_extensions_attrs.inc") in
   Fun.protect ~finally:(fun () -> close_out chan) (fun () ->
     Stubgen_common.output_warning_c chan tool_name;

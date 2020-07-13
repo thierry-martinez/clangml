@@ -140,6 +140,12 @@ let rec decl fmt (d : Clang__ast.decl) =
         else
           Format.fprintf fmt "<%s>" filename in
       Format.fprintf fmt "@\n#include %t@\n" pp_arg
+  | Directive (Ifdef var) ->
+      Format.fprintf fmt "@\n#ifdef %s@\n" var
+  | Directive (Ifndef var) ->
+      Format.fprintf fmt "@\n#ifndef %s@\n" var
+  | Directive Endif ->
+      Format.fprintf fmt "@\n#endif@\n"
   | LinkageSpec { language; decls = list } ->
       Format.fprintf fmt "@[extern@ \"%s\"@ {@ @[%a@]@ }@]"
         (Clang__utils.extern_of_language language)

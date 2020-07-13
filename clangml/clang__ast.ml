@@ -1873,6 +1873,7 @@ void lockAndInit() __attribute__((acquire_capability(mu)));
 
 
 let () =
+  if Clang.version () >= { major = 3; minor = 5; subminor = 0 } then
   check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
   [%pattern?
     [{ desc = Var { var_name = "mu" }};
@@ -1995,6 +1996,7 @@ void *a(int align) __attribute__((alloc_align(1)));
 |}
 
 let () =
+  if Clang.version () >= { major = 5; minor = 0; subminor = 0 } then
   check_pattern quote_decl_list
     (parse_declaration_list ~language:CXX ~standard:Cxx11) example
   [%pattern?
@@ -2058,6 +2060,7 @@ void cleanupAndUnlock()  __attribute__((release_capability(mu)));
 
 
 let () =
+  if Clang.version () >= { major = 3; minor = 5; subminor = 0 } then
   check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
   [%pattern?
     [{ desc = Var { var_name = "mu" }};
@@ -4242,6 +4245,9 @@ and directive =
       program_context : bool;
       filename : string;
     }
+  | Ifdef of string
+  | Ifndef of string
+  | Endif
 
 and base_specifier = {
   qual_type : qual_type;
