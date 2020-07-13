@@ -320,7 +320,7 @@ let extract_code command_line_args target filename =
   open_lexbuf filename (loop { section_table; target; command_line_args } [])
 
 let main files target =
-  Clangml_tools_common.command_line begin fun command_line_args ->
+  Clangml_tools_common.command_line begin fun _language command_line_args ->
     let target =
       match target with
       | None -> failwith "Missing target name"
