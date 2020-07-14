@@ -373,10 +373,15 @@ let find_spelling (fields : annotated_field list) : string list option =
     | CXXPublic ->
         begin match Lazy.force field.desc with
         | EnumDecl { name = "Spelling"; constants; _ } ->
-            Some (List.map (
-            fun ({ desc = lazy constant } : Clang.Lazy.Ast.enum_constant) ->
-              constant.constant_name)
-              constants)
+            let list =
+              List.map (
+              fun ({ desc = lazy constant } : Clang.Lazy.Ast.enum_constant) ->
+                constant.constant_name) constants in
+            let list =
+              match List.rev list with
+              | "SpellingNotCalculated" :: others -> List.rev others
+              | _ -> list in
+            Some list
         | _ -> None
         end
     | _ -> None in
@@ -618,8 +623,10 @@ let filter_singleton (key, (desc : argument_desc)) =
 
 let data = "data"
 
+module StringMap = Map.Make (String)
+
 let find_version_constraint versions attribute =
-  match StringHashtbl.find_opt versions attribute with
+  match StringMap.find_opt attribute versions with
   | None ->
       prerr_endline attribute;
       assert false
@@ -709,42 +716,45 @@ let generate_code context versions argument type_name_attr ty
 
 let tool_name = "generate_attrs"
 
-let find_attributes_among_clang_versions dir : (int * int) StringHashtbl.t =
-  let versions = StringHashtbl.create 17 in
-  Sys.readdir dir |> Array.iter (fun filename ->
-    let full_filename = Filename.concat dir filename in
-    match List.map int_of_string_opt (String.split_on_char '.' filename) with
-    | [Some major; Some minor; Some _subminor]
-      when Sys.is_directory full_filename ->
-        let bindings =
-          Pparse.parse_implementation ~tool_name
-            (Filename.concat full_filename "clang__bindings.ml") in
-        let attributes =
-          bindings |> List.find_map (fun (item : Parsetree.structure_item) ->
-            match item.pstr_desc with
-            | Pstr_type (Recursive, type_declarations) ->
-                begin
-                  type_declarations |> List.find_map (
-                  fun (decl : Parsetree.type_declaration) ->
-                    if decl.ptype_name.txt = "clang_ext_attrkind" then
-                      match decl.ptype_kind with
-                      | Ptype_variant constructors ->
-                          Some (constructors |> List.map (fun
-                            (constructor : Parsetree.constructor_declaration) ->
-                            constructor.pcd_name.txt))
-                      | _ -> assert false
-                    else None)
-                end
-            | _ -> None) |> Option.get in
-        let version = major, minor in
-        attributes |> List.iter (fun attribute ->
-          match StringHashtbl.find_opt versions attribute with
-          | Some version' when version >= version' ->
-              ()
-          | _ ->
-              StringHashtbl.replace versions attribute version)
-    | _ -> ());
-  versions
+let find_attributes_among_clang_versions dir : (int * int) StringMap.t =
+  let bindings =
+    Sys.readdir dir |> Array.to_list |> List.filter_map (fun filename ->
+      let full_filename = Filename.concat dir filename in
+      match List.map int_of_string_opt (String.split_on_char '.' filename) with
+      | [Some major; Some minor; Some _subminor]
+        when Sys.is_directory full_filename ->
+          let bindings =
+            Pparse.parse_implementation ~tool_name
+              (Filename.concat full_filename "clang__bindings.ml") in
+          Some ((major, minor), bindings)
+      | _ -> None) in
+  let bindings =
+    List.sort (fun (a, _) (b, _) -> compare a b) bindings in
+  List.fold_left (fun previous (version, bindings) ->
+    let attributes =
+      bindings |> List.find_map (fun (item : Parsetree.structure_item) ->
+        match item.pstr_desc with
+        | Pstr_type (Recursive, type_declarations) ->
+            begin
+              type_declarations |> List.find_map (
+              fun (decl : Parsetree.type_declaration) ->
+                if decl.ptype_name.txt = "clang_ext_attrkind" then
+                  match decl.ptype_kind with
+                  | Ptype_variant constructors ->
+                      Some (constructors |> List.map (fun
+                        (constructor : Parsetree.constructor_declaration) ->
+                        constructor.pcd_name.txt))
+                  | _ -> assert false
+                else None)
+            end
+        | _ -> None) |> Option.get in
+    List.fold_left (fun versions attribute ->
+      let version =
+        match StringMap.find_opt attribute previous with
+        | Some version -> version
+        | _ -> version in
+      StringMap.add attribute version versions) StringMap.empty attributes)
+    StringMap.empty bindings
 
 let main cflags llvm_config prefix =
   let versions = find_attributes_among_clang_versions prefix in
