@@ -884,6 +884,10 @@ clang_ext_AttributedStmt_GetAttributeCount(CXCursor);
 enum clang_ext_AttrKind
 clang_ext_AttributedStmt_GetAttributeKind(CXCursor, unsigned int);
 
+void
+clang_ext_AttributedStmt_getAttrs(
+  CXCursor, void (*)(CXCursor, void *), void *);
+
 unsigned int
 clang_ext_DecompositionDecl_GetBindingsCount(CXCursor);
 

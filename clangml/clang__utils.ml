@@ -131,6 +131,11 @@ let iter_decl_context f c =
 let list_of_decl_context c =
   list_of_iter (fun f -> iter_decl_context f c)
 
+let list_of_iter iter =
+  let accu = ref [] in
+  iter (fun item -> accu := item :: !accu);
+  List.rev !accu
+
 let seq_of_diagnostics tu =
   let count = get_num_diagnostics tu in
   let rec next i () =

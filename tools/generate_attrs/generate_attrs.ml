@@ -838,26 +838,28 @@ let main cflags llvm_config prefix =
               Stubgen_common.option_apply
                 (Stubgen_common.string_remove_prefix ~prefix:"clang_") |>
               Stubgen_common.uncamelcase in
-            let convert e =
+            let converter =
               match argument.type_conversion with
-              | NoConversion -> e
-              | Expr -> [%expr expr_of_cxcursor [%e e]]
-              | TypeLoc -> [%expr of_type_loc [%e e]]
+              | NoConversion -> None
+              | Expr -> Some [%expr expr_of_cxcursor]
+              | TypeLoc -> Some [%expr of_type_loc]
               | DeclarationName ->
-                  [%expr convert_declaration_name [%e e]] in
+                 Some [%expr convert_declaration_name] in
             let getter =
               let ident =
                 Ast_helper.Exp.ident
                   (Metapp.mklid ~prefix:(Lident "Clang__bindings")
                      getter_name) in
               if argument.multiple then
-                [%expr
-                   let accu = ref [] in
-                   [%e ident] cursor
-                     (fun value -> accu := [%e convert [%expr value]] :: !accu);
-                   List.rev !accu]
+                let e = [%expr Clang__utils.list_of_iter [%e ident]] in
+                match converter with
+                | None -> e
+                | Some converter -> [%expr [%e e] |> List.map [%e converter]]
               else
-                convert [%expr [%e ident] cursor] in
+                let e = [%expr [%e ident] cursor] in
+                match converter with
+                | None -> e
+                | Some converter -> [%expr [%e converter] [%e e]] in
             Metapp.mklid argument.name, getter) in
         let args =
           match args with

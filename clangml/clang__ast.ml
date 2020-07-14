@@ -1819,7 +1819,7 @@ let () =
       handlers : catch list;
     }
   | AttributedStmt of {
-      attributes : attribute_kind list;
+      attributes : attribute list;
       sub_stmts : stmt list;
     }
   | UnknownStmt of cxcursorkind * clang_ext_stmtkind

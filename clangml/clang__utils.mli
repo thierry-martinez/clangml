@@ -137,6 +137,10 @@ val list_of_decl_context : cxcursor -> cxcursor list
 (** [list_of_decl_context f ty] returns the list of all the declaration nodes
     of declaration context [c]. *)
 
+val list_of_iter : (('a -> unit) -> unit) -> 'a list
+(** [list_of_iter iter] calls [iter f] and returns all the values which [f] has
+    been applied to. *)
+
 (** {2 Integer or floating point types} *)
 val is_integer : cxtypekind -> bool
 (** [is_integer ty] returns true if [ty] is a built-in integer type. *)

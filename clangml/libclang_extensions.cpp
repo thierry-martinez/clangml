@@ -518,7 +518,13 @@ getDefault(llvm::Optional<T> const &option, T const &default_value)
 }
 
 static struct clang_ext_VersionTuple
-makeVersionTuple(llvm::VersionTuple tuple) {
+makeVersionTuple(
+  #ifdef LLVM_VERSION_BEFORE_7_0_0
+    llvm::VersionTuple
+  #else
+    clang::VersionTuple
+  #endif
+  tuple) {
   unsigned int major = major;
   
   struct clang_ext_VersionTuple result = {
@@ -2721,6 +2727,21 @@ extern "C" {
       return static_cast<enum clang_ext_AttrKind>(e->getAttrs()[i]->getKind());
     }
     return CLANG_EXT_ATTR_NoAttr;
+  }
+
+  void
+  clang_ext_AttributedStmt_getAttrs(
+    CXCursor cursor, void (*callback)(CXCursor, void *), void *data)
+  {
+    auto stmt = GetCursorStmt(cursor);
+    if (auto as = llvm::dyn_cast_or_null<clang::AttributedStmt>(stmt)) {
+      for (auto&& attr : as->getAttrs()) {
+        /* Hack: libclang supposes that attribute cursors have Decl
+           parents only. */
+        auto decl = reinterpret_cast<const clang::Decl *>(stmt);
+        callback(MakeCXCursor(attr, decl, getCursorTU(cursor)), data);
+      }
+    }
   }
 
   unsigned int

@@ -1280,10 +1280,11 @@ module Ast = struct
               begin
                 match ext_stmt_get_kind cursor with
                 | AttributedStmt ->
+                    let attributes =
+                      list_of_iter (ext_attributed_stmt_get_attrs cursor) |>
+                      List.map attribute_of_cxcursor in
                     AttributedStmt {
-                      attributes = List.init
-                        (ext_attributed_stmt_get_attribute_count cursor)
-                        (ext_attributed_stmt_get_attribute_kind cursor);
+                      attributes;
                       sub_stmts =
                         list_of_children cursor |> List.map stmt_of_cxcursor;
                     }
