@@ -1088,22 +1088,6 @@ clang_ext_RequiresExpr_getRequirementCount(CXCursor);
 struct clang_ext_Requirement
 clang_ext_RequiresExpr_getRequirement(CXCursor, unsigned int);
 
-/* From clang/AST/Attrs.inc:WarnUnusedResultAttr::Spelling */
-enum clang_ext_WarnUnusedResultAttr_Spelling {
-  clang_ext_CXX11_nodiscard,
-  clang_ext_C2x_nodiscard,
-  clang_ext_CXX11_clang_warn_unused_result,
-  clang_ext_GNU_warn_unused_result,
-  clang_ext_CXX11_gnu_warn_unused_result,
-  clang_ext_SpellingNotCalculated
-};
-
-enum clang_ext_WarnUnusedResultAttr_Spelling
-clang_ext_WarnUnusedResultAttr_getSemanticSpelling(CXCursor);
-
-CXString
-clang_ext_WarnUnusedResultAttr_getMessage(CXCursor);
-
 unsigned
 clang_ext_DeclContext_visitDecls(
   CXCursor parent, CXCursorVisitor visitor, CXClientData client_data);
@@ -1119,27 +1103,6 @@ clang_ext_Decl_getAttrCount(CXCursor);
 
 CXCursor
 clang_ext_Decl_getAttr(CXCursor, unsigned);
-
-unsigned
-clang_ext_AbiTagAttr_getNumTags(CXCursor);
-/*
-CXString
-clang_ext_AbiTagAttr_getTag(CXCursor, unsigned);
-*/
-unsigned
-clang_ext_AcquireCapabilityAttr_getArgSize(CXCursor);
-/*
-CXCursor
-clang_ext_AcquireCapabilityAttr_getArg(CXCursor, unsigned);
-*/
-bool
-clang_ext_AlignedAttr_isAlignmentExpr(CXCursor);
-/*
-CXCursor
-clang_ext_AlignedAttr_getAlignmentExpr(CXCursor);
-*/
-struct clang_ext_TypeLoc
-clang_ext_AlignedAttr_getAlignmentType(CXCursor);
 
 bool
 clang_ext_CursorKind_isAttr(enum CXCursorKind);

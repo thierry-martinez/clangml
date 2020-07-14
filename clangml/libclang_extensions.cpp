@@ -3365,42 +3365,6 @@ extern "C" {
     return MakeRequirementInvalid(getCursorTU(cursor));
   }
 
-  enum clang_ext_WarnUnusedResultAttr_Spelling
-  clang_ext_WarnUnusedResultAttr_getSemanticSpelling(CXCursor cursor)
-  {
-    #ifndef LLVM_VERSION_BEFORE_10_0_0
-      auto a = GetCursorAttr(cursor);
-      if (auto wura = llvm::dyn_cast_or_null<clang::WarnUnusedResultAttr>(a)) {
-        switch (wura->getSemanticSpelling()) {
-        case clang::WarnUnusedResultAttr::Spelling::CXX11_nodiscard:
-          return clang_ext_CXX11_nodiscard;
-        case clang::WarnUnusedResultAttr::Spelling::C2x_nodiscard:
-          return clang_ext_C2x_nodiscard;
-        case clang::WarnUnusedResultAttr::Spelling::CXX11_clang_warn_unused_result:
-          return clang_ext_CXX11_clang_warn_unused_result;
-        case clang::WarnUnusedResultAttr::Spelling::GNU_warn_unused_result:
-          return clang_ext_GNU_warn_unused_result;
-        case clang::WarnUnusedResultAttr::Spelling::CXX11_gnu_warn_unused_result:
-          return clang_ext_CXX11_gnu_warn_unused_result;
-        default:;
-        }
-      }
-    #endif
-    return clang_ext_SpellingNotCalculated;
-  }
-
-  CXString
-  clang_ext_WarnUnusedResultAttr_getMessage(CXCursor cursor)
-  {
-    #ifndef LLVM_VERSION_BEFORE_10_0_0
-      auto a = GetCursorAttr(cursor);
-      if (auto wura = llvm::dyn_cast_or_null<clang::WarnUnusedResultAttr>(a)) {
-        return cxstring_createDup(wura->getMessage());
-      }
-    #endif
-    return cxstring_createRef("");
-  }
-
   unsigned
   clang_ext_DeclContext_visitDecls(
     CXCursor parent, CXCursorVisitor visitor, CXClientData client_data)
@@ -3455,81 +3419,6 @@ extern "C" {
   {
     auto d = GetCursorDecl(cursor);
     return MakeCXCursor(d->getAttrs()[index], d, getCursorTU(cursor));
-  }
-
-  unsigned
-  clang_ext_AbiTagAttr_getNumTags(CXCursor cursor)
-  {
-    auto a = GetCursorAttr(cursor);
-    if (auto aa = llvm::dyn_cast_or_null<clang::AbiTagAttr>(a)) {
-      return aa->tags_size();
-    }
-    return 0;
-  }
-
-  unsigned
-  clang_ext_AcquireCapabilityAttr_getArgSize(CXCursor cursor)
-  {
-    auto a = GetCursorAttr(cursor);
-    switch (a->getKind()) {
-    case clang::attr::AcquireCapability:
-      if (auto aa = llvm::dyn_cast_or_null<clang::AcquireCapabilityAttr>(a)) {
-        return aa->args_size();
-      }
-      break;
-    case clang::attr::AcquiredAfter:
-      if (auto aa = llvm::dyn_cast_or_null<clang::AcquiredAfterAttr>(a)) {
-        return aa->args_size();
-      }
-      break;
-    case clang::attr::AcquiredBefore:
-      if (auto aa = llvm::dyn_cast_or_null<clang::AcquiredBeforeAttr>(a)) {
-        return aa->args_size();
-      }
-      break;
-    case clang::attr::AssertCapability:
-      if (auto aa = llvm::dyn_cast_or_null<clang::AssertCapabilityAttr>(a)) {
-        return aa->args_size();
-      }
-      break;
-    case clang::attr::AssertExclusiveLock:
-      if (auto aa = llvm::dyn_cast_or_null<clang::AssertExclusiveLockAttr>(a)) {
-        return aa->args_size();
-      }
-      break;
-    case clang::attr::AssertSharedLock:
-      if (auto aa = llvm::dyn_cast_or_null<clang::AssertSharedLockAttr>(a)) {
-        return aa->args_size();
-      }
-      break;
-    case clang::attr::ReleaseCapability:
-      if (auto aa = llvm::dyn_cast_or_null<clang::ReleaseCapabilityAttr>(a)) {
-        return aa->args_size();
-      }
-      break;
-    }
-    return 0;
-  }
-
-  bool
-  clang_ext_AlignedAttr_isAlignmentExpr(CXCursor cursor)
-  {
-    auto a = GetCursorAttr(cursor);
-    if (auto aa = llvm::dyn_cast_or_null<clang::AlignedAttr>(a)) {
-      return aa->isAlignmentExpr();
-    }
-    return false;
-  }
-
-  struct clang_ext_TypeLoc
-  clang_ext_AlignedAttr_getAlignmentType(CXCursor cursor)
-  {
-    auto a = GetCursorAttr(cursor);
-    if (auto aa = llvm::dyn_cast_or_null<clang::AlignedAttr>(a)) {
-      return MakeTypeLoc(
-        aa->getAlignmentType()->getTypeLoc(), getCursorTU(cursor));
-    }
-    return MakeTypeLocInvalid(getCursorTU(cursor));
   }
 
   bool
