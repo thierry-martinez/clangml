@@ -1403,6 +1403,34 @@ let () =
       range : expr;
       body : stmt;
     }
+(** For-range statement.
+    {[
+let example = {|
+  int a[] = {1, 2};
+  for (int i : a) {}
+|}
+
+let () =
+  check_pattern quote_stmt_list (parse_statement_list ~language:CXX) example
+  [%pattern?
+    [{ desc = Decl [
+       { desc = Var {
+           var_name = "a";
+           var_type = { desc = IncompleteArray { desc = BuiltinType Int }};
+           var_init = Some { desc = InitList [
+             { desc = IntegerLiteral (Int 1)};
+             { desc = IntegerLiteral (Int 2)}] }}}] };
+     { desc = ForRange {
+         var = { desc = {
+           var_name = "i";
+           var_type = { desc = BuiltinType Int };
+           var_init = Some { desc = UnaryOperator {
+             kind = Deref;
+             operand = { desc = DeclRef {
+               name = IdentifierName "__begin1" }}}}}};
+         range = { desc = DeclRef { name = IdentifierName "a" }};
+         body = { desc = Compound [] }}}]]
+    ]}*)
   | If of {
       init : stmt option; (** C++17 *)
       condition_variable : var_decl option; (** C++ *)

@@ -305,6 +305,10 @@ and stmt fmt (s : Clang__ast.stmt) =
           pp_condition_variable fmt (condition_variable, cond))
         (fun fmt -> inc |> Option.iter @@ stmt_without_semicolon fmt)
         stmt body
+  | ForRange { var = { desc = { var_name; var_type; _ }}; range; body } ->
+      Format.fprintf fmt "@[for@ (@[%a@ :@ %a@])@ %a@]"
+        (typed_value (fun fmt -> Format.pp_print_string fmt var_name)) var_type
+        expr range stmt body
   | Return None ->
       Format.fprintf fmt "@[return;@]"
   | Return (Some value) ->
@@ -417,6 +421,8 @@ and typed_value fmt_value fmt t =
       typed_value (fun fmt -> Format.fprintf fmt "@[*%t@]" fmt_value) fmt t
   | LValueReference t ->
       typed_value (fun fmt -> Format.fprintf fmt "@[&%t@]" fmt_value) fmt t
+  | RValueReference t ->
+      typed_value (fun fmt -> Format.fprintf fmt "@[&&%t@]" fmt_value) fmt t
   | BuiltinType ty ->
       Format.fprintf fmt "@[%s@ %t@]" (string_of_builtin_type ty) fmt_value
   | ConstantArray { element; size_as_expr = Some size_as_expr; _ } ->

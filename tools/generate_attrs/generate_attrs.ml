@@ -106,6 +106,9 @@ let const (qual_type : Clang.Type.t) =
 let lvalue_reference qual_type =
   Clang.Type.make (LValueReference qual_type)
 
+let rvalue_reference qual_type =
+  Clang.Type.make (RValueReference qual_type)
+
 let return e =
   Clang.Ast.node (Clang.Ast.Return e)
 
@@ -124,6 +127,9 @@ let switch ?init ?condition_variable cond body =
 
 let for_ ?init ?condition_variable ?cond ?inc body =
   Clang.Ast.node (Clang.Ast.For { init; condition_variable; cond; inc; body })
+
+let for_range var range body =
+  Clang.Ast.node (Clang.Ast.ForRange { var; range; body })
 
 let case ?rhs lhs body =
   Clang.Ast.node (Clang.Ast.Case { lhs; rhs; body })
@@ -665,20 +671,13 @@ let generate_code context versions argument type_name_attr ty
     cast attr qual_attr attribute.name
       (compound [decl [var (lvalue_reference (const auto)) param ~init];
        if argument_desc.type_info.multiple then
-         let iter = "iter" in
          let item = "item" in
-         let range limit =
-           call (member ~base:init (field_of_string limit)) [] in
-         for_
-           ~init:(decl [var auto iter ~init:(range "begin")])
-           ~cond:(binary_operator (decl_of_string iter) NE (range "end"))
-           ~inc:(expr (unary_operator PreInc (decl_of_string iter)))
-           (compound [
-             decl [var (lvalue_reference (const auto)) item
-               ~init:(unary_operator Deref (decl_of_string iter))];
-             expr (call (decl_of_string callback)
+         for_range
+           (Clang.Ast.node (Clang.Ast.var item (lvalue_reference (const auto))))
+           (decl_of_string param)
+           (expr (call (decl_of_string callback)
                [argument_desc.type_info.access (decl_of_string item);
-                 decl_of_string data])])
+                 decl_of_string data]))
        else
          return
            (Some (argument_desc.type_info.access (decl_of_string param)))]) in
@@ -851,7 +850,7 @@ let main cflags llvm_config prefix =
                   (Metapp.mklid ~prefix:(Lident "Clang__bindings")
                      getter_name) in
               if argument.multiple then
-                let e = [%expr Clang__utils.list_of_iter [%e ident]] in
+                let e = [%expr Clang__utils.list_of_iter ([%e ident] cursor)] in
                 match converter with
                 | None -> e
                 | Some converter -> [%expr [%e e] |> List.map [%e converter]]
