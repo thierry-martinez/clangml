@@ -539,6 +539,23 @@ makeVersionTuple(
   return result;
 }
 
+#ifdef LLVM_VERSION_BEFORE_7_0_0
+static unsigned int
+unsigned_int_of_ParamIdx(unsigned int i)
+{
+  return i;
+}
+#else
+static unsigned int
+unsigned_int_of_ParamIdx(const clang::ParamIdx &param)
+{
+  if (param.isValid()) {
+    return param.getSourceIndex();
+  }
+  return 0;
+}
+#endif
+
 static struct clang_ext_VersionTuple zeroVersionTuple = { 0, 0, 0, 0 };
 
 extern "C" {

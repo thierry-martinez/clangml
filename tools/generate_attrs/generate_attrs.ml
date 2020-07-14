@@ -259,12 +259,8 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t) : type_info =
         type_conversion = NoConversion;
         interface_type = unsigned_int;
         multiple = false;
-        access = (fun e -> conditional_operator
-          (call (member ~base:e (field_name
-            (Clang.Ast.identifier_name "isValid"))) [])
-          ~then_branch:(call (member ~base:e (field_name
-            (Clang.Ast.identifier_name "getSourceIndex"))) [])
-          (const_int 0));
+        access =
+          (fun e -> call (decl_of_string "unsigned_int_of_ParamIdx") [e]);
         default = const_int 0; }
   | BuiltinType Int ->
       { ocaml_type =  [%type: int];
@@ -730,6 +726,11 @@ let find_attributes_among_clang_versions dir : (int * int) StringMap.t =
           let bindings =
             Pparse.parse_implementation ~tool_name
               (Filename.concat full_filename "clang__bindings.ml") in
+          let minor =
+            if major >= 4 then
+              0
+            else
+              minor in
           Some ((major, minor), bindings)
       | _ -> None) in
   let bindings =
@@ -762,6 +763,16 @@ let find_attributes_among_clang_versions dir : (int * int) StringMap.t =
 
 let main cflags llvm_config prefix =
   let versions = find_attributes_among_clang_versions prefix in
+  let versions =
+    versions |>
+    (* min and max arguments were unsigned int *)
+    StringMap.add "AMDGPUWavesPerEU" (9, 0) |>
+    (* no argument strict *)
+    StringMap.add "Availability" (3, 9) |>
+    (* module was not IdentifierInfo *)
+    StringMap.add "Ownership" (3, 7) |>
+    (* getMinBlocks were int *)
+    StringMap.add "CUDALaunchBounds" (3, 7) in
   let command_line_args, _llvm_version =
     Stubgen_common.prepare_clang_options cflags llvm_config in
   let tu =
