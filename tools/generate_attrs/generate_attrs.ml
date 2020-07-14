@@ -480,7 +480,7 @@ let find_version_constraint versions attribute =
   | Some (3, 4) -> None
   | result -> result
 
-let generate_attribute context versions name public_methods spelling
+let generate_attribute context _versions name public_methods spelling
     (arguments : argument_decl list) =
   let reduced_name = get_reduced_attribute_name name in
   let arguments =
@@ -573,8 +573,7 @@ let generate_attribute context versions name public_methods spelling
     let return_default =
       return (Some (decl_ref (Clang.Ast.identifier_name last_constant))) in
     let list =
-      Option.fold (find_version_constraint versions reduced_name)
-        ~none:Fun.id ~some:restrict_statement_version [get_cursor_attr; switch]
+      restrict_statement_version (10, 0) [get_cursor_attr; switch]
       @ [return_default] in
     let result =
       elaborated Enum (record (Clang.Ast.identifier_name type_spelling_name)) in
