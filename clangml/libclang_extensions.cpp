@@ -525,8 +525,6 @@ makeVersionTuple(
     llvm::VersionTuple
   #endif
   tuple) {
-  unsigned int major = major;
-  
   struct clang_ext_VersionTuple result = {
     tuple.getMajor(), getDefault(tuple.getMinor(), 0u),
     getDefault(tuple.getSubminor(), 0u),
