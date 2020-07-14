@@ -9,9 +9,12 @@
 #define LLVM_VERSION_BEFORE_3_6_0
 #endif
 #ifdef LLVM_VERSION_BEFORE_3_6_0
-#define LLVM_VERSION_BEFORE_3_8_0
+#define LLVM_VERSION_BEFORE_3_7_0
 #endif
 #ifdef LLVM_VERSION_3_6_2
+#define LLVM_VERSION_BEFORE_3_7_0
+#endif
+#ifdef LLVM_VERSION_BEFORE_3_7_0
 #define LLVM_VERSION_BEFORE_3_8_0
 #endif
 #ifdef LLVM_VERSION_3_7_1

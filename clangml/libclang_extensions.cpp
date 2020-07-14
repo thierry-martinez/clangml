@@ -520,16 +520,22 @@ getDefault(llvm::Optional<T> const &option, T const &default_value)
 static struct clang_ext_VersionTuple
 makeVersionTuple(
   #ifdef LLVM_VERSION_BEFORE_7_0_0
-    llvm::VersionTuple
-  #else
     clang::VersionTuple
+  #else
+    llvm::VersionTuple
   #endif
   tuple) {
   unsigned int major = major;
   
   struct clang_ext_VersionTuple result = {
     tuple.getMajor(), getDefault(tuple.getMinor(), 0u),
-    getDefault(tuple.getSubminor(), 0u), getDefault(tuple.getBuild(), 0u) };
+    getDefault(tuple.getSubminor(), 0u),
+    #ifdef LLVM_VERSION_BEFORE_3_7_0
+      0
+    #else
+      getDefault(tuple.getBuild(), 0u)
+    #endif
+  };
   return result;
 }
 

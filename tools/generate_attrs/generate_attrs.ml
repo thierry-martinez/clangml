@@ -470,7 +470,17 @@ let restrict_statement_version (major, minor) body =
     Printf.sprintf "LLVM_VERSION_BEFORE_%d_%d_0" major minor))] ::
   body @ [decl [directive Endif]]
 
-let generate_attribute context name public_methods spelling
+module StringMap = Map.Make (String)
+
+let find_version_constraint versions attribute =
+  match StringMap.find_opt attribute versions with
+  | None ->
+      prerr_endline attribute;
+      assert false
+  | Some (3, 4) -> None
+  | result -> result
+
+let generate_attribute context versions name public_methods spelling
     (arguments : argument_decl list) =
   let reduced_name = get_reduced_attribute_name name in
   let arguments =
@@ -562,7 +572,10 @@ let generate_attribute context name public_methods spelling
           (compound cases)) in
     let return_default =
       return (Some (decl_ref (Clang.Ast.identifier_name last_constant))) in
-    let list = [get_cursor_attr; switch; return_default] in
+    let list =
+      Option.fold (find_version_constraint versions reduced_name)
+        ~none:Fun.id ~some:restrict_statement_version [get_cursor_attr; switch]
+      @ [return_default] in
     let result =
       elaborated Enum (record (Clang.Ast.identifier_name type_spelling_name)) in
     let spelling_getter =
@@ -579,7 +592,7 @@ let is_parameter_base_class name =
   | "InheritableParamAttr" | "ParameterABIAttr" -> true
   | _ -> false
 
-let do_decl context (decl : Clang.Lazy.Decl.t) =
+let do_decl context versions (decl : Clang.Lazy.Decl.t) =
   match Lazy.force decl.desc with
   | RecordDecl {
         keyword = Class; name; fields = fields; bases = [
@@ -606,13 +619,14 @@ let do_decl context (decl : Clang.Lazy.Decl.t) =
       let spelling = find_spelling annotated_fields in
       if arguments <> [] || spelling <> None then
         let public_methods = enumerate_public_methods annotated_fields in
-        generate_attribute context name public_methods spelling arguments
+        generate_attribute context versions name public_methods spelling
+          arguments
   | _ -> ()
 
-let do_namespace context (decl : Clang.Lazy.Decl.t) =
+let do_namespace context versions (decl : Clang.Lazy.Decl.t) =
   match Lazy.force decl.desc with
   | Namespace { name = "clang"; declarations; _ } ->
-      List.iter (do_decl context) declarations
+      List.iter (do_decl context versions) declarations
   | _ ->
       ()
 
@@ -634,16 +648,6 @@ let filter_singleton (key, (desc : argument_desc)) =
   | _ -> None
 
 let data = "data"
-
-module StringMap = Map.Make (String)
-
-let find_version_constraint versions attribute =
-  match StringMap.find_opt attribute versions with
-  | None ->
-      prerr_endline attribute;
-      assert false
-  | Some (3, 4) -> None
-  | result -> result
 
 let generate_code context versions argument type_name_attr ty
     (argument_desc : argument_desc) =
@@ -683,10 +687,8 @@ let generate_code context versions argument type_name_attr ty
            (Some (argument_desc.type_info.access (decl_of_string param)))]) in
   let make_attribute decorate attribute : Clang.Stmt.t list =
     let body = decorate (make_attribute_cast attribute) in
-    match find_version_constraint versions attribute.reduced_name with
-    | None -> body
-    | Some version ->
-        restrict_statement_version version body in
+    Option.fold (find_version_constraint versions attribute.reduced_name)
+      ~none:Fun.id ~some:restrict_statement_version body in
   let switch =
     match argument_desc.attributes with
     | [attribute] -> make_attribute (fun x -> [x]) attribute
@@ -777,7 +779,7 @@ let main cflags llvm_config prefix =
     protos = [];
     attributes = [];
   } in
-  List.iter (do_namespace context) (Lazy.force tu.desc).items;
+  List.iter (do_namespace context versions) (Lazy.force tu.desc).items;
   context.argument_table |> StringHashtbl.iter (fun argument types ->
     let singletons, multiples =
       partition_map filter_singleton (List.of_seq (TypeHashtbl.to_seq types)) in
