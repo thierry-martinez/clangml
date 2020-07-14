@@ -548,7 +548,7 @@ let generate_attribute context name public_methods spelling
         if orig = "SpellingNotCalculated" then
           restrict_statement_version (10, 0) [case]
         else
-          [case] in
+          [case]) in
     let switch =
       cast attr qual_attr name
         (switch (call (arrow (decl_ref (Clang.Ast.identifier_name qual_attr))
