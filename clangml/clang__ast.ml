@@ -1909,8 +1909,7 @@ let () =
          name = IdentifierName "lockAndInit";
          attributes = [
            { desc = AcquireCapability
-               { spelling = GNU_acquire_capability;
-                 args = [{
+               { args = [{
                    desc = DeclRef { name = IdentifierName "mu" }}] }}] }}]]
     ]}
 
@@ -1935,7 +1934,6 @@ let () =
             qual_type = { desc = BuiltinType Float };
             attributes = [
               { desc = Aligned {
-                spelling = Keyword_Alignas;
                 alignment_expr = { desc = IntegerLiteral (Int 32) }}}] }}] }}]]
 
 let example = {|
@@ -1952,7 +1950,6 @@ let () =
       keyword = Struct;
       attributes = [
         { desc = Aligned {
-          spelling = Keyword_alignas;
           alignment_expr = {desc = IntegerLiteral (Int 32)}}}];
       fields = [
         { desc = Field
@@ -1983,7 +1980,6 @@ let () =
             qual_type = { desc = BuiltinType Float };
             attributes = [
               { desc = Aligned {
-                spelling = Keyword_Alignas;
                 alignment_expr = { desc = UnaryExpr {
                     kind = AlignOf;
                     argument = ArgumentType
@@ -2003,7 +1999,6 @@ let () =
       keyword = Struct;
       attributes = [
         { desc = Aligned {
-          spelling = Keyword_alignas;
           alignment_expr = { desc = UnaryExpr {
                     kind = AlignOf;
                     argument = ArgumentType
@@ -2096,7 +2091,6 @@ let () =
          name = IdentifierName "cleanupAndUnlock";
          attributes = [
            { desc = ReleaseCapability {
-             spelling = GNU_release_capability;
              args = [{ desc = DeclRef { name = IdentifierName "mu" }}] }}] }}]]
     ]}
 
