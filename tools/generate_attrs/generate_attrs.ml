@@ -662,24 +662,28 @@ let generate_code context versions argument type_name_attr ty
     Printf.sprintf "clang_ext_%s_get%s" type_name_attr
       (String.capitalize argument) in
   argument_desc.getter_name_ref := name;
-  let param = "param" in
   let make_attribute_cast attribute =
-    let init =
+    let param suffix =
       call (arrow (decl_ref (Clang.Ast.identifier_name qual_attr)) (FieldName
-        (Clang.Ast.node (Clang.Ast.identifier_name attribute.getter)))) [] in
+        (Clang.Ast.node
+          (Clang.Ast.identifier_name (attribute.getter ^ suffix))))) [] in
     cast attr qual_attr attribute.name
-      (compound [decl [var (lvalue_reference (const auto)) param ~init];
-       if argument_desc.type_info.multiple then
+      (if argument_desc.type_info.multiple then
+         let iter = "iter" in
          let item = "item" in
-         for_range
-           (Clang.Ast.node (Clang.Ast.var item (lvalue_reference (const auto))))
-           (decl_of_string param)
-           (expr (call (decl_of_string callback)
+         for_
+           ~init:(decl [var auto iter ~init:(param "_begin")])
+           ~cond:(binary_operator (decl_of_string iter) NE (param "_end"))
+           ~inc:(expr (unary_operator PreInc (decl_of_string iter)))
+           (compound [
+             decl [var (lvalue_reference (const auto)) item
+               ~init:(unary_operator Deref (decl_of_string iter))];
+             expr (call (decl_of_string callback)
                [argument_desc.type_info.access (decl_of_string item);
-                 decl_of_string data]))
+                 decl_of_string data])])
        else
          return
-           (Some (argument_desc.type_info.access (decl_of_string param)))]) in
+           (Some (argument_desc.type_info.access (param "")))) in
   let make_attribute decorate attribute : Clang.Stmt.t list =
     let body = decorate (make_attribute_cast attribute) in
     Option.fold (find_version_constraint versions attribute.reduced_name)
@@ -772,7 +776,13 @@ let main cflags llvm_config prefix =
     (* module was not IdentifierInfo *)
     StringMap.add "Ownership" (3, 7) |>
     (* getMinBlocks were int *)
-    StringMap.add "CUDALaunchBounds" (3, 7) in
+    StringMap.add "CUDALaunchBounds" (3, 7) |>
+    (* no argument replacement *)
+    StringMap.add "Deprecated" (3, 9) |>
+    (* no message *)
+    StringMap.add "WarnUnusedResult" (10, 0) |>
+    (* no isLiteralLabel *)
+    StringMap.add "AsmLabel" (10, 0) in
   let command_line_args, _llvm_version =
     Stubgen_common.prepare_clang_options cflags llvm_config in
   let tu =
