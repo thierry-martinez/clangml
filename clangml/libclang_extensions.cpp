@@ -12,6 +12,7 @@ extern "C" {
   #include <clang/AST/ExprConcepts.h>
 #endif
 #include <clang/AST/Stmt.h>
+#include <clang/AST/StmtCXX.h>
 #include <clang/AST/Type.h>
 #include <clang/Basic/ExceptionSpecificationType.h>
 #include <clang/Basic/SourceLocation.h>
@@ -3493,6 +3494,36 @@ extern "C" {
     auto a = getCursorCXXBaseSpecifier(cursor);
     return MakeTypeLoc(
         a->getTypeSourceInfo()->getTypeLoc(), getCursorTU(cursor));
+  }
+
+  CXCursor
+  clang_ext_CXXForRangeStmt_getLoopVariable(CXCursor cursor)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto f = llvm::dyn_cast_or_null<clang::CXXForRangeStmt>(s)) {
+        return MakeCXCursor(f->getLoopVariable(), getCursorTU(cursor));
+      }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  CXCursor
+  clang_ext_CXXForRangeStmt_getRangeInit(CXCursor cursor)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto f = llvm::dyn_cast_or_null<clang::CXXForRangeStmt>(s)) {
+        return MakeCXCursor(f->getRangeInit(), getCursorTU(cursor));
+      }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  CXCursor
+  clang_ext_CXXForRangeStmt_getBody(CXCursor cursor)
+  {
+    auto s = GetCursorStmt(cursor);
+    if (auto f = llvm::dyn_cast_or_null<clang::CXXForRangeStmt>(s)) {
+        return MakeCXCursor(f->getBody(), getCursorTU(cursor));
+      }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
   }
 
   #include "libclang_extensions_attrs.inc"

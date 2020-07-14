@@ -893,12 +893,12 @@ module Ast = struct
       node ~cursor (Node.from_fun desc)
 
     and function_type_of_decl cursor =
-      (* Hack for Clang 3.4 and 3.5! See current_decl declaration. *)
-      current_decl := cursor;
       cursor |> get_cursor_type |>
         function_type_of_cxtype (parameters_of_function_decl_or_proto cursor)
 
     and function_decl_of_cxcursor cursor children =
+      (* Hack for Clang 3.4 and 3.5! See current_decl declaration. *)
+      current_decl := cursor;
       let nested_name_specifier =
         cursor |> ext_decl_get_nested_name_specifier |>
         convert_nested_name_specifier in
@@ -1260,14 +1260,17 @@ module Ast = struct
           | MSAsmStmt ->
               Asm (asm_of_cxcursor MS cursor)
           | CXXForRangeStmt ->
-              let var, range, body =
-                match list_of_children cursor with
-                | [var; range; body] ->
-                    var |> var_decl_of_cxcursor,
-                    range |> expr_of_cxcursor,
-                    body |> stmt_of_cxcursor
-                | _ -> raise Invalid_structure in
-              ForRange { var; range; body }
+              ForRange {
+                var =
+                  ext_cxxfor_range_stmt_get_loop_variable cursor |>
+                  var_decl_of_cxcursor;
+                range =
+                  ext_cxxfor_range_stmt_get_range_init cursor |>
+                  expr_of_cxcursor;
+                body =
+                  ext_cxxfor_range_stmt_get_body cursor |>
+                  stmt_of_cxcursor;
+              }
           | CXXTryStmt ->
               let try_block, handlers =
                 match list_of_children cursor with
@@ -1610,6 +1613,7 @@ module Ast = struct
                   unary_expr_of_cxcursor cursor
               | PredefinedExpr ->
                   let kind = ext_predefined_expr_get_ident_kind cursor in
+                  prerr_endline (get_cursor_kind_spelling (get_cursor_kind !current_decl));
                   let function_name =
                     predefined_expr_get_function_name cursor !current_decl in
                   Predefined { kind; function_name }

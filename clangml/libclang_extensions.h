@@ -1133,4 +1133,13 @@ struct clang_ext_VersionTuple {
   unsigned int build;
 };
 
+CXCursor
+clang_ext_CXXForRangeStmt_getLoopVariable(CXCursor);
+
+CXCursor
+clang_ext_CXXForRangeStmt_getRangeInit(CXCursor);
+
+CXCursor
+clang_ext_CXXForRangeStmt_getBody(CXCursor);
+
 #include "libclang_extensions_attrs_headers.inc"

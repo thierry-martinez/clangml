@@ -1427,7 +1427,7 @@ let () =
            var_init = Some { desc = UnaryOperator {
              kind = Deref;
              operand = { desc = DeclRef {
-               name = IdentifierName "__begin1" }}}}}};
+               name = IdentifierName _ }}}}}};
          range = { desc = DeclRef { name = IdentifierName "a" }};
          body = { desc = Compound [] }}}]]
     ]}*)
