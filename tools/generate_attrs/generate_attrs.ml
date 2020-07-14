@@ -377,10 +377,6 @@ let find_spelling (fields : annotated_field list) : string list option =
               List.map (
               fun ({ desc = lazy constant } : Clang.Lazy.Ast.enum_constant) ->
                 constant.constant_name) constants in
-            let list =
-              match List.rev list with
-              | "SpellingNotCalculated" :: others -> List.rev others
-              | _ -> list in
             Some list
         | _ -> None
         end
@@ -463,6 +459,11 @@ let unkeyword name =
   | "module" -> name ^ "_"
   | _ -> name
 
+let restrict_statement_version (major, minor) body =
+  decl [directive (Ifndef (
+    Printf.sprintf "LLVM_VERSION_BEFORE_%d_%d_0" major minor))] ::
+  body @ [decl [directive Endif]]
+
 let generate_attribute context name public_methods spelling
     (arguments : argument_decl list) =
   let reduced_name = get_reduced_attribute_name name in
@@ -536,13 +537,18 @@ let generate_attribute context name public_methods spelling
       enum_constant constant) in
     let spelling_enum = enum_decl type_spelling_name enum_constants in
     let cases =
-      constant_names |> List.map (fun (orig, prefixed) ->
-        case (decl_ref (Clang.Ast.identifier_name orig
-          ~nested_name_specifier:[
-            namespace_clang;
-            TypeSpec (record (Clang.Ast.identifier_name name));
-            TypeSpec (record (Clang.Ast.identifier_name "Spelling"))]))
-          (return (Some (decl_ref (Clang.Ast.identifier_name prefixed))))) in
+      constant_names |> List.concat_map (fun (orig, prefixed) ->
+        let case =
+          case (decl_ref (Clang.Ast.identifier_name orig
+            ~nested_name_specifier:[
+              namespace_clang;
+              TypeSpec (record (Clang.Ast.identifier_name name));
+              TypeSpec (record (Clang.Ast.identifier_name "Spelling"))]))
+            (return (Some (decl_ref (Clang.Ast.identifier_name prefixed)))) in
+        if orig = "SpellingNotCalculated" then
+          restrict_statement_version (10, 0) [case]
+        else
+          [case] in
     let switch =
       cast attr qual_attr name
         (switch (call (arrow (decl_ref (Clang.Ast.identifier_name qual_attr))
@@ -680,10 +686,8 @@ let generate_code context versions argument type_name_attr ty
     let body = decorate (make_attribute_cast attribute) in
     match find_version_constraint versions attribute.reduced_name with
     | None -> body
-    | Some (major, minor) ->
-        decl [directive (Ifndef (
-          Printf.sprintf "LLVM_VERSION_BEFORE_%d_%d_0" major minor))] ::
-        body @ [decl [directive Endif]] in
+    | Some version ->
+        restrict_statement_version version body in
   let switch =
     match argument_desc.attributes with
     | [attribute] -> make_attribute (fun x -> [x]) attribute
