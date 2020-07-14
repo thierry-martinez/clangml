@@ -771,8 +771,9 @@ let main cflags llvm_config prefix =
     versions |>
     (* min and max arguments were unsigned int *)
     StringMap.add "AMDGPUWavesPerEU" (9, 0) |>
-    (* no argument strict *)
-    StringMap.add "Availability" (3, 9) |>
+    StringMap.add "AMDGPUFlatWorkGroupSize" (9, 0) |>
+    (* no argument strict nor priority *)
+    StringMap.add "Availability" (9, 0) |>
     (* module was not IdentifierInfo *)
     StringMap.add "Ownership" (3, 7) |>
     (* getMinBlocks were int *)
