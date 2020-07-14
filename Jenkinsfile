@@ -67,7 +67,7 @@ pipeline {
                    cp ../src/bootstrap/libclang_extensions_attrs.inc \
                      clangml && \
                    cp ../src/bootstrap/libclang_extensions_attrs_headers.inc \
-                     clangml &&
+                     clangml
                    '''
             }
         }
