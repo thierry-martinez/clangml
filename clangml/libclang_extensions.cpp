@@ -3644,6 +3644,17 @@ extern "C" {
     return MakeCXCursorInvalid(CXCursor_InvalidCode, tl.tu);
   }
 
+  /* clang_Type_getModifiedType has been introduced in Clang 8 */
+  CXType
+  clang_ext_AttributedType_getModifiedType(CXType CT)
+  {
+    clang::QualType T = GetQualType(CT);
+    if (auto *ATT = T->getAs<clang::AttributedType>()) {
+      return MakeCXType(ATT->getModifiedType(), GetTU(CT));
+    }
+    return MakeCXTypeInvalid(GetTU(CT));
+  }
+
   enum clang_ext_AttrKind
   clang_ext_AttributedType_getAttrKind(CXType CT)
   {

@@ -1163,6 +1163,10 @@ clang_ext_AttributedTypeLoc_getModifiedLoc(struct clang_ext_TypeLoc);
 CXCursor
 clang_ext_AttributedTypeLoc_getAttr(struct clang_ext_TypeLoc);
 
+/* clang_Type_getModifiedType has been introduced in Clang 8 */
+CXType
+clang_ext_AttributedType_getModifiedType(CXType);
+
 enum clang_ext_AttrKind
 clang_ext_AttributedType_getAttrKind(CXType);
 

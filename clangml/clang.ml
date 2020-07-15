@@ -667,7 +667,8 @@ module Ast = struct
                   }
               | Attributed -> (* Here for Clang <8.0.0 *)
                   Attributed {
-                    modified_type = type_get_modified_type cxtype |> of_cxtype;
+                    modified_type =
+                      ext_attributed_type_get_modified_type cxtype |> of_cxtype;
                     attribute = attribute_of_cxtype cxtype;
                   }
               | TemplateTypeParm->
