@@ -35,6 +35,8 @@ type source_location =
 (*{[
 [@@@ocaml.warning "-30"]
 [@@@ocaml.warning "-9"]
+[%%metapackage "metapp"]
+[%%metadir "config/.clangml_config.objs/byte"]
 
 open Stdcompat
 
@@ -3781,24 +3783,27 @@ template<typename T, typename Alloc> struct my_vector {
 };
 |}
 
-let () =
-  if Clang.version () >= { major = 9; minor = 0; subminor = 0 } then
-  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
-  [%pattern?
-    [{ desc = TemplateDecl {
-      parameters = { list = [
-        { desc = { parameter_name = "T" }};
-        { desc = { parameter_name = "Alloc" }}] };
-      decl = { desc = RecordDecl {
-        keyword = Struct;
-        fields = [
-          { desc = Field {
-              name = "p";
-              qual_type = { desc = Pointer { desc = TemplateTypeParm "T" }}}};
-          { desc = Field {
-              name = "alloc";
-              qual_type = { desc = TemplateTypeParm "Alloc" };
-              attributes = [{ desc = Other NoUniqueAddress }] }}] }}}}]]
+[%%meta if Clangml_config.version.major >= 9 then [%stri
+    let () =
+      check_pattern quote_decl_list (parse_declaration_list ~language:CXX)
+        example
+      [%pattern?
+        [{ desc = TemplateDecl {
+          parameters = { list = [
+            { desc = { parameter_name = "T" }};
+            { desc = { parameter_name = "Alloc" }}] };
+          decl = { desc = RecordDecl {
+            keyword = Struct;
+            fields = [
+              { desc = Field {
+                  name = "p";
+                  qual_type = { desc =
+                    Pointer { desc = TemplateTypeParm "T" }}}};
+              { desc = Field {
+                  name = "alloc";
+                  qual_type = { desc = TemplateTypeParm "Alloc" };
+                  attributes = [{ desc = Other NoUniqueAddress }] }}] }}}}]]]
+  else Metapp.Stri.of_list []]
     ]}*)
   | AccessSpecifier of cxx_access_specifier
 (** C++ access specifier.
