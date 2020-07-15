@@ -7,6 +7,7 @@
 - Support for all C/C++ Clang attributes
   (including `_Alignas` (C) and `alignas` (C++) attributes, that have been
   requested by Damien Rouhling).
+  See the auto-generated `bootstrap/attributes.ml`.
 
 - class base specifiers now expose a full `qual_type` instead of a mere
   `ident` string.
@@ -23,6 +24,14 @@
 
 ## API changes
 
+- `Clang.Lazy` exposes a lazy AST, that is to say that each `desc` field
+  is a lazy value that is computed on demand. This is useful to explore
+  large ASTs efficiently (note that Clang parsing itself can still be slow;
+  the lazy part only concerns the conversion into the `Clang.Lazy.Ast`
+  datatypes). Modules `Clang.Ast`, `Clang.Expr`, `Clang.Stmt`,
+  `Clang.Type`, ..., have their lazy counter-parts: `Clang.Lazy.Ast`,
+  `Clang.Lazy.Expr`, `Clang.Lazy.Stmt`, `Clang.Lazy.Type`, etc.
+
 - The common signature exposed by every AST node module
   (`Clang.Expr`, `Clang.Stmt`, ...) now declares a `hash` function and
   and a `Hashtbl` module.
@@ -33,12 +42,12 @@
   `Clang.pp_diagnostic` which is an OCaml reimplementation of
   `clang_formatDiagnostic` from libclang.
 
+- `Clang.Expr.parse_string` parses strings as C expressions.
+  (suggested by Damien Rouhling)
+
 - `Clangml_printer` has now moved to `Clang.Printer`. The package
   `clangml.printer` still exists for compatibility and reexposes the
   `Clang.Printer` interface.
-
-- `Clang.Expr.parse_string` parses strings as C expressions.
-  (suggested by Damien Rouhling)
 
 # 2020-05-15, 4.1.0
 

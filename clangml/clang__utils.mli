@@ -49,12 +49,6 @@ val predefined_expr_get_function_name : cxcursor -> cxcursor -> string
 
     val type_visit_fields : cxtype -> (cxcursor -> cxvisitorresult) -> bool])]
 
-[%%meta Metapp.Sigi.of_list (
-  if Clangml_config.version.major >= 8 then
-    []
-  else [%sig:
-    val type_get_modified_type : cxtype -> cxtype])]
-
 (** {2 Parsing files and strings } *)
 
 val parse_file : ?index:cxindex ->
