@@ -785,7 +785,9 @@ let main cflags llvm_config prefix =
     (* no isLiteralLabel *)
     StringMap.add "AsmLabel" (10, 0) |>
     (* no args *)
-    StringMap.add "AssertCapability" (6, 0) in
+    StringMap.add "AssertCapability" (6, 0) |>
+    (* no features_str_length *)
+    StringMap.add "Target" (3, 8) in
   let command_line_args, _llvm_version =
     Stubgen_common.prepare_clang_options cflags llvm_config in
   let tu =

@@ -1881,6 +1881,7 @@ __attribute__((abi_tag("a", "b"))) float f;
 |}
 
 let () =
+  if Clang.version () >= { major = 3; minor = 9; subminor = 0 } then
   check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
   [%pattern?
     [{ desc = Var {
@@ -2045,6 +2046,7 @@ void *my_calloc(int a, int b) __attribute__((alloc_size(1, 2)));
 |}
 
 let () =
+  if Clang.version () >= { major = 4; minor = 0; subminor = 0 } then
   check_pattern quote_decl_list
     (parse_declaration_list ~language:CXX ~standard:Cxx11) example
   [%pattern?
