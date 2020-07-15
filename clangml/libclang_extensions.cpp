@@ -1356,16 +1356,6 @@ extern "C" {
     #endif
   }
 
-  enum clang_ext_AttrKind
-  clang_ext_Type_GetAttributeKind(CXType CT)
-  {
-    clang::QualType T = GetQualType(CT);
-    if (auto *ATT = T->getAs<clang::AttributedType>()) {
-      return (enum clang_ext_AttrKind) ATT->getAttrKind();
-    }
-    return CLANG_EXT_ATTR_NoAttr;
-  }
-
   CXString
   clang_ext_AttrKind_GetSpelling(enum clang_ext_AttrKind AttrKind)
   {
@@ -3644,12 +3634,24 @@ extern "C" {
   CXCursor
   clang_ext_AttributedTypeLoc_getAttr(struct clang_ext_TypeLoc tl)
   {
+    #ifndef LLVM_VERSION_BEFORE_4_0_0
     if (auto *t = GetTypeLoc(tl)) {
       if (auto at = t->getAs<clang::AttributedTypeLoc>()) {
         return MakeCXCursor(at.getAttr(), tl.tu);
       }
     }
+    #endif
     return MakeCXCursorInvalid(CXCursor_InvalidCode, tl.tu);
+  }
+
+  enum clang_ext_AttrKind
+  clang_ext_AttributedType_getAttrKind(CXType CT)
+  {
+    clang::QualType T = GetQualType(CT);
+    if (auto *ATT = T->getAs<clang::AttributedType>()) {
+      return (enum clang_ext_AttrKind) ATT->getAttrKind();
+    }
+    return CLANG_EXT_ATTR_NoAttr;
   }
 
   struct clang_ext_TypeLoc

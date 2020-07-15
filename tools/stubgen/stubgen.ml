@@ -1991,7 +1991,7 @@ let main cflags llvm_config prefix =
     add_type (Pcre.regexp "^CXToken$")
       (empty_type_interface |> carry_reference "tokens") |>
     add_type (Pcre.regexp "^CXCursor$")
-      (empty_type_interface |>
+        (empty_type_interface |>
        compare_value "clang_ext_compare_cursor" |>
        hash_value "clang_ext_hash_cursor") |>
     add_type (Pcre.regexp "^CXVirtualFileOverlay$")

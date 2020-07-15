@@ -238,6 +238,11 @@ module Ast = struct
     val options : Options.t
   end
 
+  let attribute_of_cxtype cxtype =
+    let attribute_desc : attribute_desc =
+      Other (ext_attributed_type_get_attr_kind cxtype) in
+    node (Node.from_val attribute_desc)
+
   module Converter (Options : OptionsS) = struct
     let options = Options.options
 
@@ -473,13 +478,18 @@ module Ast = struct
       let desc () =
         match ext_type_loc_get_class type_loc with
         | Attributed ->
+            let attribute =
+              if Clangml_config.version.major >= 4 then
+                ext_attributed_type_loc_get_attr type_loc |>
+                attribute_of_cxcursor
+              else
+                attribute_of_cxtype cxtype in
             Attributed {
-            modified_type =
-              ext_attributed_type_loc_get_modified_loc type_loc |> of_type_loc;
-            attribute =
-              ext_attributed_type_loc_get_attr type_loc |>
-              attribute_of_cxcursor;
-          }
+              modified_type =
+                ext_attributed_type_loc_get_modified_loc type_loc |>
+                of_type_loc;
+              attribute
+            }
         |_ ->
         match get_type_kind cxtype with
         | Invalid -> InvalidType
@@ -654,6 +664,11 @@ module Ast = struct
                     keyword = ext_elaborated_type_get_keyword cxtype;
                     nested_name_specifier;
                     named_type = ext_type_get_named_type cxtype |> of_cxtype;
+                  }
+              | Attributed -> (* Here for Clang <8.0.0 *)
+                  Attributed {
+                    modified_type = type_get_modified_type cxtype |> of_cxtype;
+                    attribute = attribute_of_cxtype cxtype;
                   }
               | TemplateTypeParm->
                   TemplateTypeParm (get_type_spelling cxtype);

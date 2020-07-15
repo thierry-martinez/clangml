@@ -140,7 +140,7 @@ let () =
           pack_expansion = false; }];
         parameters = Some [];
         result_type =
-          Some { desc = LValueReference { desc = BuiltinType Int }};
+          Some { desc = RValueReference { desc = Auto }};
         body = { desc = Compound [{ desc =
           Return (Some { desc = DeclRef ({ name = IdentifierName "j" })})}]}}}]
   end]
@@ -261,7 +261,8 @@ let () =
         callee = { desc = DeclRef { name = OperatorName EqualEqual }};
         args = [
           { desc = Typeid (ArgumentType { desc = Record ({ name = IdentifierName "D" })})};
-          { desc = Typeid (ArgumentType { desc = Record ({ name = IdentifierName "D" })})}]}}]
+          { desc = Typeid (ArgumentType { desc = LValueReference {
+              desc = Record ({ name = IdentifierName "D" })}})}]}}]
   | _ -> assert false
 
 (* 5.3.3 Sizeof *)

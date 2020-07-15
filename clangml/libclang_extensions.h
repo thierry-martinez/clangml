@@ -403,9 +403,6 @@ enum clang_ext_AttrKind {
   #include <clang/Basic/AttrList.inc>
 };
 
-enum clang_ext_AttrKind
-clang_ext_Type_GetAttributeKind(CXType CT);
-
 CXString
 clang_ext_AttrKind_GetSpelling(enum clang_ext_AttrKind AttrKind);
 
@@ -1165,6 +1162,9 @@ clang_ext_AttributedTypeLoc_getModifiedLoc(struct clang_ext_TypeLoc);
 
 CXCursor
 clang_ext_AttributedTypeLoc_getAttr(struct clang_ext_TypeLoc);
+
+enum clang_ext_AttrKind
+clang_ext_AttributedType_getAttrKind(CXType);
 
 struct clang_ext_TypeLoc
 clang_ext_ElaboratedTypeLoc_getNamedTypeLoc(struct clang_ext_TypeLoc);
