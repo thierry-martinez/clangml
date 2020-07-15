@@ -602,16 +602,14 @@ enum clang_ext_LambdaCaptureDefault {
 enum clang_ext_LambdaCaptureDefault
 clang_ext_LambdaExpr_getCaptureDefault(CXCursor c);
 
-unsigned
-clang_ext_LambdaExpr_getCaptureCount(CXCursor c);
-
 struct clang_ext_LambdaCapture {
   const void *data;
   CXTranslationUnit TU;
 };
 
-struct clang_ext_LambdaCapture
-clang_ext_LambdaExpr_getCapture(CXCursor c, unsigned index);
+void
+clang_ext_LambdaExpr_getCaptures(
+  CXCursor, void (*)(struct clang_ext_LambdaCapture, void *), void *);
 
 CXCursor
 clang_ext_LambdaExpr_getCallOperator(CXCursor c);

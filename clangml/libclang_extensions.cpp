@@ -1852,27 +1852,17 @@ extern "C" {
     return clang_ext_LCD_CaptureNone;
   }
 
-  unsigned
-  clang_ext_LambdaExpr_getCaptureCount(CXCursor c)
+  void
+  clang_ext_LambdaExpr_getCaptures(
+    CXCursor c, void (*callback)(struct clang_ext_LambdaCapture, void *),
+    void *data)
   {
     if (auto e =
       llvm::dyn_cast_or_null<clang::LambdaExpr>(GetCursorStmt(c))) {
-      return e->capture_end() - e->capture_begin();
-    }
-    return 0;
-  }
-
-  struct clang_ext_LambdaCapture
-  clang_ext_LambdaExpr_getCapture(CXCursor c, unsigned index)
-  {
-    if (auto e =
-      llvm::dyn_cast_or_null<clang::LambdaExpr>(GetCursorStmt(c))) {
-      if (index < e->capture_end() - e->capture_begin()) {
-        return MakeLambdaCapture(
-          e->capture_begin()[index], getCursorTU(c));
+      for (auto iter = e->capture_begin(); iter != e->capture_end(); ++iter) {
+        callback(MakeLambdaCapture(*iter, getCursorTU(c)), data);
       }
     }
-    return MakeLambdaCaptureInvalid(getCursorTU(c));
   }
 
   bool

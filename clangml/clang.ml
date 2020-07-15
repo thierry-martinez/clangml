@@ -1871,11 +1871,8 @@ module Ast = struct
 
     and lambda_expr_of_cxcursor cursor =
       let captures =
-        List.init (ext_lambda_expr_get_capture_count cursor)
-          begin fun i ->
-            ext_lambda_expr_get_capture cursor i |>
-            lambda_capture_of_capture
-          end in
+        list_of_iter (ext_lambda_expr_get_captures cursor) |>
+        List.map lambda_capture_of_capture in
       let children = list_of_children cursor in
       let parameters, children =
         if ext_lambda_expr_has_explicit_parameters cursor then
