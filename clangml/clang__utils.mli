@@ -49,10 +49,6 @@ val predefined_expr_get_function_name : cxcursor -> cxcursor -> string
 
     val type_visit_fields : cxtype -> (cxcursor -> cxvisitorresult) -> bool])]
 
-val include_attributed_types : Cxtranslationunit_flags.t
-
-val type_non_null : clang_ext_attrkind
-
 [%%meta Metapp.Sigi.of_list (
   if Clangml_config.version.major >= 8 then
     []

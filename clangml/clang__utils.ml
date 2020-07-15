@@ -56,21 +56,6 @@ open Clang__types
             end
         | _ -> Continue)])]
 
-[%%meta Metapp.Stri.of_list (
-  if Clangml_config.version.major >= 8 then [%str
-    let include_attributed_types =
-      Cxtranslationunit_flags.include_attributed_types
-
-    let type_non_null = TypeNonNull]
-  else [%str
-    let include_attributed_types =
-      Cxtranslationunit_flags.none
-
-    let type_get_modified_type ty =
-      ty
-
-    let type_non_null = NoAttr])]
-
 let iter_visitor f visitor =
   let exn_ref = ref (None : exn option) in
   visitor begin fun cur ->

@@ -221,6 +221,10 @@ module Type : sig
   (** [of_cxtype ?options ty] translates [ty] into its high-level
       representation. *)
 
+  val of_type_loc : ?options:Ast.Options.t -> clang_ext_typeloc -> t
+  (** [of_type_loc ?options ty] translates [ty] into its high-level
+      representation. *)
+
   val of_cursor : ?options:Ast.Options.t -> cxcursor -> t
   (** [of_cxcursor ?options cu] returns the type associated to [cu]. *)
 

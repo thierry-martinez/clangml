@@ -1,6 +1,31 @@
-# Next release, 4.1.1
+# 2020-07-15, 4.2.0
 
 - Support for Clang/LLVM 10.0.1
+
+## C/C++ AST features
+
+- Support for all C/C++ Clang attributes
+  (including `_Alignas` (C) and `alignas` (C++) attributes, that have been
+  requested by Damien Rouhling).
+
+- class base specifiers now expose a full `qual_type` instead of a mere
+  `ident` string.
+  
+- `ident_ref` now carries a `template_arguments` parameter.
+
+- `function_decl` now exposes `inline_specified` and `inlined` fields
+
+- `TypeLoc` are used broaderly to compute `qual_type`: in particular,
+  parameters in function types have now correct names.
+  The type `type_loc` and the functions `Clang.Decl.get_type_loc` and
+  `Clang.Parameter.get_type_loc` are kept for compatibility, but
+  `qual_type` should contain all the informations.
+
+## API changes
+
+- The common signature exposed by every AST node module
+  (`Clang.Expr`, `Clang.Stmt`, ...) now declares a `hash` function and
+  and a `Hashtbl` module.
 
 - `Clang.format_diagnostics` now prints presumed locations by default
   and the behavior can be changed through the optional `?options`
@@ -14,22 +39,6 @@
 
 - `Clang.Expr.parse_string` parses strings as C expressions.
   (suggested by Damien Rouhling)
-
-- Support for `_Alignas` (C) and `alignas` (C++) attributes.
-  (reported by Damien Rouhling)
-
-- `function_decl` now exposes `inline_specified` and `inlined` fields
-
-- Support for `abi_tag`, `alloc_align`, `alloc_size` attributes.
-
-- class base specifiers now expose a full `qual_type` instead of a mere
-  `ident` string.
-  
-- The common signature exposed by every AST node module
-  (`Clang.Expr`, `Clang.Stmt`, ...) now declares a `hash` function and
-  and a `Hashtbl` module.
-  
-- `ident_ref` now carries a `template_arguments` parameter.
 
 # 2020-05-15, 4.1.0
 

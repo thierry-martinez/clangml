@@ -413,10 +413,6 @@ let () =
     }
 (** Constant-sized array.
 
-    Note: The "qual_type" contains the canonical type where the size has already
-    been computed. If you need to get the original expression of the size, you
-    may use {!val:Clang.Decl.get_type_loc} or
-    {!val:Clang.Parameter.get_type_loc} (See {!type:type_loc}).
     {[
 let example = "char s[21 * 2];"
 
@@ -558,8 +554,6 @@ let () =
     ]}*)
   | FunctionType of function_type
 (** Function type.
-    Warning: parameter names are not preserved in canonical types.
-    (See {!type:type_loc}.)
 
     {[
 let example = "int (*p)(void);"
@@ -581,7 +575,7 @@ let () =
       Pointer { desc = FunctionType {
         result = { desc = BuiltinType Int };
         parameters = Some { non_variadic = [{ desc = {
-          name = ""; qual_type = { desc = BuiltinType Int }}}] }}}}}}]]
+          name = "x"; qual_type = { desc = BuiltinType Int }}}] }}}}}}]]
     ]}*)
   | Record of ident_ref
 (** Record type (either struct or union).
@@ -695,31 +689,31 @@ let () =
     ]} *)
   | Attributed of {
       modified_type : qual_type;
-      attribute_kind : attribute_kind;
+      attribute : attribute;
     }
 (** Attributed type.
-
-    Attributed types are only visible with Clang >=8.0.0 when
-    [Cxtranslationunit_flags.include_attributed_types] is set.
-    Otherwise, the type is directly substituted by its modified type.
 
     {[
 let example = "int * _Nonnull ptr;"
 
 let () =
-  if Clang.version () >= { major = 8; minor = 0; subminor = 0 } then
-    let clang_options = Clang.Cxtranslationunit_flags.(
-      Clang.default_editing_translation_unit_options ()
-      + Clang.include_attributed_types) in
-    check_pattern quote_decl_list (parse_declaration_list ~clang_options)
-      example [%pattern?
-      [{ desc = Var { var_name = "ptr";
-         var_type = { desc = Attributed {
-           modified_type = { desc = Pointer { desc = BuiltinType Int }};
-           attribute_kind }}}}]]
-      ~result:begin fun bindings ->
-          assert (bindings#attribute_kind = Clang.type_non_null)
-        end
+  check_pattern quote_decl_list parse_declaration_list
+    example [%pattern?
+    [{ desc = Var { var_name = "ptr";
+       var_type = { desc = Attributed {
+         modified_type = { desc = Pointer { desc = BuiltinType Int }};
+         attribute = { desc = Other TypeNonNull }}}}}]]
+
+let example = "void * __ptr32 p;"
+
+let () =
+  check_pattern quote_decl_list
+    (parse_declaration_list ~command_line_args:["-fms-extensions"])
+    example [%pattern?
+    [{ desc = Var { var_name = "p";
+       var_type = { desc = Attributed {
+         modified_type = { desc = Pointer { desc = BuiltinType Void }};
+         attribute = { desc = Other Ptr32 }}}}}]]
     ]} *)
   | ParenType of qual_type
 (** Parenthesized type.
@@ -3775,7 +3769,37 @@ let () =
             init = Some { desc = IntegerLiteral (Int 2)}}}] }}] -> ()
     | _ -> assert false
       ]}
-*)
+
+    Fields can have a [no_unique_address] attribute.
+
+    {[
+let example = {|
+template<typename T, typename Alloc> struct my_vector {
+  T *p;
+  [[no_unique_address]] Alloc alloc;
+  // ...
+};
+|}
+
+let () =
+  if Clang.version () >= { major = 9; minor = 0; subminor = 0 } then
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = TemplateDecl {
+      parameters = { list = [
+        { desc = { parameter_name = "T" }};
+        { desc = { parameter_name = "Alloc" }}] };
+      decl = { desc = RecordDecl {
+        keyword = Struct;
+        fields = [
+          { desc = Field {
+              name = "p";
+              qual_type = { desc = Pointer { desc = TemplateTypeParm "T" }}}};
+          { desc = Field {
+              name = "alloc";
+              qual_type = { desc = TemplateTypeParm "Alloc" };
+              attributes = [{ desc = Other NoUniqueAddress }] }}] }}}}]]
+    ]}*)
   | AccessSpecifier of cxx_access_specifier
 (** C++ access specifier.
 
@@ -4632,7 +4656,10 @@ and translation_unit_desc = {
     filename : string; items : decl list
   } [@@deriving refl]
 
-(** {3 Type loc: source representation of types} *)
+(** {3 Type loc: source representation of types}
+
+    [type_loc] API is now deprecated and is kept for compatibility only.
+    *)
 
 type type_loc = {
     typeloc : (clang_ext_typeloc option [@opaque]);
@@ -4649,8 +4676,8 @@ and type_loc_desc =
     }
 (** Constant array type.
     [size] contains the original expression.
-    By contrast, in the type  {!type:qual_type}, the [size] of [ConstantArray]
-    is computed.
+    In the type  {!type:qual_type}, the [size] of [ConstantArray]
+    is computed but [size_as_expr] contains the original expression.
 
     {[
 let example = {| const int i = 1; int a[i + 1]; |}
@@ -4812,7 +4839,6 @@ let () =
       parameters : parameter list;
     }
 (** Function type.
-    Parameter names are preserved.
 
     {[
 let example = "int (*p)(int x[1 + 1]);"
@@ -4824,10 +4850,14 @@ let () =
       Pointer { desc = FunctionType {
         result = { desc = BuiltinType Int };
         parameters = Some { non_variadic = [
-          { desc = { name = ""; qual_type = { desc =
+          { desc = { name = "x"; qual_type = { desc =
             ConstantArray {
               element = { desc = BuiltinType Int };
-              size = 2; }}}}] }}}}}} as decl]]
+              size = 2;
+              size_as_expr = Some { desc = BinaryOperator {
+              lhs = { desc = IntegerLiteral (Int 1)};
+              kind = Add;
+              rhs = { desc = IntegerLiteral (Int 1)}}}}}}}] }}}}}} as decl]]
   ~result:begin fun bindings ->
     check_result (Pattern.check quote_type_loc
       (Clang.Decl.get_type_loc bindings#decl)

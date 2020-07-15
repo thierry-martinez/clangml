@@ -386,8 +386,13 @@ clang_ext_UnaryExpr_GetKind(CXCursor);
 bool
 clang_ext_UnaryExpr_isArgumentType(CXCursor);
 
-CXType
-clang_ext_UnaryExpr_GetArgumentType(CXCursor);
+struct clang_ext_TypeLoc {
+  const void *data;
+  CXTranslationUnit tu;
+};
+
+struct clang_ext_TypeLoc
+clang_ext_UnaryExpr_getArgumentTypeLoc(CXCursor);
 
 CXType
 clang_ext_Type_getNamedType(CXType CT);
@@ -552,7 +557,7 @@ bool
 clang_ext_TemplateParm_isParameterPack(CXCursor c);
 
 CXCursor
-clang_ext_ClassTemplateDecl_getTemplatedDecl(CXCursor c);
+clang_ext_TemplateDecl_getTemplatedDecl(CXCursor);
 
 /* Copied from AST/Expr.h */
 enum clang_ext_PredefinedExpr_IdentKind {
@@ -638,8 +643,8 @@ clang_ext_LambdaCapture_isPackExpansion(struct clang_ext_LambdaCapture capture);
 void
 clang_ext_LambdaCapture_dispose(struct clang_ext_LambdaCapture capture);
 
-CXType
-clang_ext_CXXNewExpr_getAllocatedType(CXCursor c);
+struct clang_ext_TypeLoc
+clang_ext_CXXNewExpr_getAllocatedTypeLoc(CXCursor);
 
 CXCursor
 clang_ext_CXXNewExpr_getArraySize(CXCursor c);
@@ -662,8 +667,8 @@ clang_ext_CXXDeleteExpr_isArrayForm(CXCursor c);
 bool
 clang_ext_CXXTypeidExpr_isTypeOperand(CXCursor c);
 
-CXType
-clang_ext_CXXTypeidExpr_getTypeOperand(CXCursor c);
+struct clang_ext_TypeLoc
+clang_ext_CXXTypeidExpr_getTypeOperand(CXCursor);
 
 CXCursor
 clang_ext_CXXTypeidExpr_getExprOperand(CXCursor c);
@@ -830,8 +835,32 @@ CXType
 clang_ext_NestedNameSpecifier_getAsType(
   struct clang_ext_NestedNameSpecifier);
 
+struct clang_ext_NestedNameSpecifierLoc {
+  void *data;
+  CXTranslationUnit tu;
+};
+
+void
+clang_ext_NestedNameSpecifierLoc_dispose(
+  struct clang_ext_NestedNameSpecifierLoc);
+
 struct clang_ext_NestedNameSpecifier
-clang_ext_Decl_getNestedNameSpecifier(CXCursor);
+clang_ext_NestedNameSpecifierLoc_getNestedNameSpecifier(
+  struct clang_ext_NestedNameSpecifierLoc);
+
+struct clang_ext_NestedNameSpecifierLoc
+clang_ext_NestedNameSpecifierLoc_getPrefix(
+  struct clang_ext_NestedNameSpecifierLoc);
+
+struct clang_ext_TypeLoc
+clang_ext_NestedNameSpecifierLoc_getAsTypeLoc(
+  struct clang_ext_NestedNameSpecifierLoc);
+
+struct clang_ext_NestedNameSpecifierLoc
+clang_ext_Decl_getNestedNameSpecifierLoc(CXCursor);
+
+struct clang_ext_NestedNameSpecifierLoc
+clang_ext_TypeLoc_getQualifierLoc(struct clang_ext_TypeLoc);
 
 struct clang_ext_NestedNameSpecifier
 clang_ext_Type_getQualifier(CXType);
@@ -839,17 +868,14 @@ clang_ext_Type_getQualifier(CXType);
 bool
 clang_ext_TagDecl_isCompleteDefinition(CXCursor);
 
-CXType
-clang_ext_CXXPseudoDestructorExpr_getDestroyedType(CXCursor);
+struct clang_ext_TypeLoc
+clang_ext_CXXPseudoDestructorExpr_getDestroyedTypeLoc(CXCursor);
 
 unsigned int
 clang_ext_Cursor_getNumTemplateArgs(CXCursor);
 
 struct clang_ext_TemplateArgument
 clang_ext_Cursor_getTemplateArg(CXCursor, unsigned int);
-
-CXCursor
-clang_ext_TypeAliasTemplateDecl_getTemplatedDecl(CXCursor);
 
 struct clang_ext_TemplateParameterList {
   const void *data;
@@ -903,9 +929,6 @@ clang_ext_DecompositionDecl_GetBindings(CXCursor, unsigned int);
 enum clang_ext_AttrKind
 clang_ext_Attr_GetKind(CXCursor);
 
-CXCursor
-clang_ext_VarTemplateDecl_getTemplatedDecl(CXCursor);
-
 /* From clang/Basic/ExceptionSpecificationType.h */
 enum clang_ext_ExceptionSpecificationType {
   CLANG_EXT_EST_NoExceptionSpecification,
@@ -956,11 +979,6 @@ clang_ext_AsmStmt_getInputConstraint(CXCursor, unsigned);
 
 CXCursor
 clang_ext_AsmStmt_getInputExpr(CXCursor, unsigned);
-
-struct clang_ext_TypeLoc {
-  const void *data;
-  CXTranslationUnit tu;
-};
 
 enum clang_ext_TypeLoc_Class {
   #define TYPELOC(Class, Base) CLANG_EXT_TYPELOC_##Class,
@@ -1124,7 +1142,7 @@ bool
 clang_ext_FunctionDecl_isInlined(CXCursor);
 
 struct clang_ext_TypeLoc
-clang_ext_CXXBaseSpecifier_getTypeLoc(CXCursor);
+clang_ext_Cursor_getTypeLoc(CXCursor);
 
 struct clang_ext_VersionTuple {
   unsigned int major;
@@ -1141,5 +1159,20 @@ clang_ext_CXXForRangeStmt_getRangeInit(CXCursor);
 
 CXCursor
 clang_ext_CXXForRangeStmt_getBody(CXCursor);
+
+struct clang_ext_TypeLoc
+clang_ext_AttributedTypeLoc_getModifiedLoc(struct clang_ext_TypeLoc);
+
+CXCursor
+clang_ext_AttributedTypeLoc_getAttr(struct clang_ext_TypeLoc);
+
+struct clang_ext_TypeLoc
+clang_ext_ElaboratedTypeLoc_getNamedTypeLoc(struct clang_ext_TypeLoc);
+
+struct clang_ext_TypeLoc
+clang_ext_PackExpansionTypeLoc_getPatternLoc(struct clang_ext_TypeLoc);
+
+struct clang_ext_TypeLoc
+clang_ext_TypedefDecl_getUnderlyingTypeLoc(CXCursor);
 
 #include "libclang_extensions_attrs_headers.inc"
