@@ -245,7 +245,8 @@ MakeCXCursor(const clang::Decl *T, CXTranslationUnit TU)
     return MakeCXCursorInvalid(CXCursor_InvalidCode, TU);
   }
   CXCursor C = { CXCursor_UnexposedStmt, 0, { T, nullptr, TU }};
-  return clang_getCursorSemanticParent(C);
+  CXCursor D = clang_getCursorSemanticParent(C);
+  return D;
 }
 
 /* MakeCXType is not exported in libclang.
@@ -3008,17 +3009,20 @@ extern "C" {
   struct clang_ext_TypeLoc
   clang_ext_DeclaratorDecl_getTypeLoc(CXCursor c)
   {
+    if (is_valid_decl(c.kind)) {
     if (auto d = getDeclaratorDecl(c)) {
       if (auto t = d->getTypeSourceInfo()->getTypeLoc()) {
         return MakeTypeLoc(t, getCursorTU(c));
       }
     }
-    else if (auto d = GetCursorDecl(c)) {
-      if (auto td = llvm::dyn_cast_or_null<clang::TypedefNameDecl>(d)) {
+    else {
+      auto cd = GetCursorDecl(c);
+      if (auto td = llvm::dyn_cast_or_null<clang::TypedefNameDecl>(cd)) {
         if (auto t = td->getTypeSourceInfo()->getTypeLoc()) {
           return MakeTypeLoc(t, getCursorTU(c));
         }
       }
+    }
     }
     return MakeTypeLocInvalid(getCursorTU(c));
   }

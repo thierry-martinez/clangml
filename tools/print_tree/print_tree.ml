@@ -19,7 +19,7 @@ let rec print_type indent ty history =
       if not (Clang.is_invalid (Clang.get_cursor_kind decl)) &&
         not (List.exists (Clang.equal_cursors decl) history) then
         print_tree sub_indent decl history;
-      match Clang.ext_type_get_attribute_kind ty with
+      match Clang.ext_attributed_type_get_attr_kind ty with
       | NoAttr -> ()
       | attr ->
           Printf.printf "%s+ %s" sub_indent

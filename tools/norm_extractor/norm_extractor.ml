@@ -255,17 +255,17 @@ class B {
         with
         | None -> (contents, tu)
         | Some result -> result in
-      let ast = Clang.Ast.of_cxtranslationunit tu in
-      Format.fprintf target "
+      let pp pp fmt () =
+        Format.fprintf fmt "@[(*@ @[<v>%a@] *)@]" pp () in
+      Clang.format_diagnostics ~pp Clang.warning_or_error target tu;
+      if Clang.has_severity Clang.error tu then
+        Format.fprintf target "ignore ast"
+      else
+        let ast = Clang.Ast.of_cxtranslationunit tu in
+        Format.fprintf target "
 let () =
   let ast = parse_string {|%s|} in
 " contents;
-      let pp pp fmt () =
-        Format.fprintf fmt "@[(*@ @[<v>%a@] *)@]" pp () in
-      Clang.Ast.format_diagnostics ~pp Clang.warning_or_error target ast;
-      if Clang.Ast.has_severity Clang.error ast then
-        Format.fprintf target "ignore ast"
-      else
         format_check_pattern target ast
 
 let rec loop context title_buffer lexbuf =
