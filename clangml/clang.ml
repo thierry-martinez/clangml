@@ -954,6 +954,7 @@ module Ast = struct
         None
 
     and parameter_of_cxcursor cursor =
+      prerr_endline (get_cursor_kind_spelling (get_cursor_kind cursor));
       let desc () =
         let namespaces, others = list_of_children cursor |>
           extract begin fun c : string option ->
@@ -1038,13 +1039,16 @@ module Ast = struct
         const = ext_cxxmethod_is_const cursor;
       }
 
+    and parameter_of_cxtype cxtype =
+      let qual_type = of_cxtype cxtype in
+      let desc () = { name = ""; qual_type; default = None } in
+      node ~qual_type (Node.from_fun desc)
+
     and parameters_of_cxtype cxtype =
       if cxtype |> get_type_kind = FunctionProto then
         let non_variadic =
           List.init (get_num_arg_types cxtype) @@ fun i ->
-            let qual_type = of_cxtype (get_arg_type cxtype i) in
-            let desc () = { name = ""; qual_type; default = None } in
-            node ~qual_type (Node.from_fun desc) in
+            parameter_of_cxtype (get_arg_type cxtype i) in
         let variadic = is_function_type_variadic cxtype in
         Some { non_variadic; variadic }
       else
@@ -1055,8 +1059,11 @@ module Ast = struct
       if cxtype |> get_type_kind = FunctionProto then
         let non_variadic =
           List.init (get_num_arg_types cxtype) @@ fun i ->
-            parameter_of_cxcursor
-              (ext_function_type_loc_get_param type_loc i) in
+            let cursor = ext_function_type_loc_get_param type_loc i in
+            if get_cursor_kind cursor = InvalidCode then
+              parameter_of_cxtype (get_arg_type cxtype i)
+            else
+              parameter_of_cxcursor cursor in
         let variadic = is_function_type_variadic cxtype in
         Some { non_variadic; variadic }
       else
