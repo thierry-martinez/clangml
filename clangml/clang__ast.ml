@@ -710,14 +710,16 @@ let example = "int * _Nonnull ptr;"
 
 let example = "void * __ptr32 p;"
 
-let () =
-  check_pattern quote_decl_list
-    (parse_declaration_list ~command_line_args:["-fms-extensions"])
-    example [%pattern?
-    [{ desc = Var { var_name = "p";
-       var_type = { desc = Attributed {
-         modified_type = { desc = Pointer { desc = BuiltinType Void }};
-         attribute = { desc = Other Ptr32 }}}}}]]
+[%%meta if Clangml_config.version.major >= 8 then [%stri
+    let () =
+      check_pattern quote_decl_list
+        (parse_declaration_list ~command_line_args:["-fms-extensions"])
+        example [%pattern?
+        [{ desc = Var { var_name = "p";
+           var_type = { desc = Attributed {
+             modified_type = { desc = Pointer { desc = BuiltinType Void }};
+             attribute = { desc = Other Ptr32 }}}}}]]
+  else Metapp.Stri.of_list []]
     ]} *)
   | ParenType of qual_type
 (** Parenthesized type.
