@@ -3624,7 +3624,7 @@ extern "C" {
   CXCursor
   clang_ext_AttributedTypeLoc_getAttr(struct clang_ext_TypeLoc tl)
   {
-    #ifndef LLVM_VERSION_BEFORE_4_0_0
+    #ifndef LLVM_VERSION_BEFORE_8_0_0
     if (auto *t = GetTypeLoc(tl)) {
       if (auto at = t->getAs<clang::AttributedTypeLoc>()) {
         return MakeCXCursor(at.getAttr(), tl.tu);

@@ -479,7 +479,7 @@ module Ast = struct
         match ext_type_loc_get_class type_loc with
         | Attributed ->
             let attribute =
-              if Clangml_config.version.major >= 4 then
+              if Clangml_config.version.major >= 8 then
                 ext_attributed_type_loc_get_attr type_loc |>
                 attribute_of_cxcursor
               else
