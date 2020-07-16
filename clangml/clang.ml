@@ -954,7 +954,6 @@ module Ast = struct
         None
 
     and parameter_of_cxcursor cursor =
-      prerr_endline (get_cursor_kind_spelling (get_cursor_kind cursor));
       let desc () =
         let namespaces, others = list_of_children cursor |>
           extract begin fun c : string option ->
