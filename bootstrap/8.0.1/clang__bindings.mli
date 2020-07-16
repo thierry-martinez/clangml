@@ -297,13 +297,11 @@ external get_translation_unit_spelling :
 type cxunsavedfile =
   {
   filename: string
-    [@deriving refl][@ocaml.doc
-                      "The file whose contents have not yet been saved."];
+    [@ocaml.doc "The file whose contents have not yet been saved."];
   contents: string
-    [@deriving refl][@ocaml.doc
-                      "A buffer containing the unsaved contents of this file."]}
-[@@ocaml.doc
-  "Provides the contents of a file that has not yet been saved to disk."]
+    [@ocaml.doc "A buffer containing the unsaved contents of this file."]}
+[@@deriving refl][@@ocaml.doc
+                   "Provides the contents of a file that has not yet been saved to disk."]
 external create_translation_unit_from_source_file :
   cxindex ->
     string -> string array -> cxunsavedfile array -> cxtranslationunit =
@@ -2030,15 +2028,16 @@ external type_visit_fields :
 type cxversion =
   {
   major: int
-    [@deriving refl][@ocaml.doc
-                      "The major version number, e.g., the '10' in '10.7.3'. A negative value indicates that there is no version number at all."];
+    [@ocaml.doc
+      "The major version number, e.g., the '10' in '10.7.3'. A negative value indicates that there is no version number at all."];
   minor: int
-    [@deriving refl][@ocaml.doc
-                      "The minor version number, e.g., the '7' in '10.7.3'. This value will be negative if no minor version number was provided, e.g., for version '10'."];
+    [@ocaml.doc
+      "The minor version number, e.g., the '7' in '10.7.3'. This value will be negative if no minor version number was provided, e.g., for version '10'."];
   subminor: int
-    [@deriving refl][@ocaml.doc
-                      "The subminor version number, e.g., the '3' in '10.7.3'. This value will be negative if no minor or subminor version number was provided, e.g., in version '10' or '10.7'."]}
-[@@ocaml.doc "Describes a version number of the form major.minor.subminor."]
+    [@ocaml.doc
+      "The subminor version number, e.g., the '3' in '10.7.3'. This value will be negative if no minor or subminor version number was provided, e.g., in version '10' or '10.7'."]}
+[@@deriving refl][@@ocaml.doc
+                   "Describes a version number of the form major.minor.subminor."]
 external ext_get_version : unit -> cxversion = "clang_ext_getVersion_wrapper"
 type cxint
 external equal_cxint : cxint -> cxint -> bool = "clang_equal_cxint_wrapper"
@@ -2576,8 +2575,10 @@ external ext_unary_expr_get_kind :
   cxcursor -> clang_ext_unaryexpr = "clang_ext_UnaryExpr_GetKind_wrapper"
 external ext_unary_expr_is_argument_type :
   cxcursor -> bool = "clang_ext_UnaryExpr_isArgumentType_wrapper"
-external ext_unary_expr_get_argument_type :
-  cxcursor -> cxtype = "clang_ext_UnaryExpr_GetArgumentType_wrapper"
+type clang_ext_typeloc
+external ext_unary_expr_get_argument_type_loc :
+  cxcursor -> clang_ext_typeloc =
+    "clang_ext_UnaryExpr_getArgumentTypeLoc_wrapper"
 external ext_type_get_named_type :
   cxtype -> cxtype = "clang_ext_Type_getNamedType_wrapper"
 type clang_ext_attrkind =
@@ -2854,8 +2855,6 @@ type clang_ext_attrkind =
   | Overloadable 
   | RenderScriptKernel 
   | Thread [@@deriving refl]
-external ext_type_get_attribute_kind :
-  cxtype -> clang_ext_attrkind = "clang_ext_Type_GetAttributeKind_wrapper"
 external ext_attr_kind_get_spelling :
   clang_ext_attrkind -> string = "clang_ext_AttrKind_GetSpelling_wrapper"
 external ext_cxxmethod_is_defaulted :
@@ -2958,9 +2957,8 @@ external ext_generic_selection_expr_get_assoc_type :
     "clang_ext_GenericSelectionExpr_getAssocType_wrapper"
 external ext_template_parm_is_parameter_pack :
   cxcursor -> bool = "clang_ext_TemplateParm_isParameterPack_wrapper"
-external ext_class_template_decl_get_templated_decl :
-  cxcursor -> cxcursor =
-    "clang_ext_ClassTemplateDecl_getTemplatedDecl_wrapper"
+external ext_template_decl_get_templated_decl :
+  cxcursor -> cxcursor = "clang_ext_TemplateDecl_getTemplatedDecl_wrapper"
 type clang_ext_predefinedexpr_identkind =
   | Func 
   | Function 
@@ -2992,12 +2990,10 @@ type clang_ext_lambdacapturedefault =
 external ext_lambda_expr_get_capture_default :
   cxcursor -> clang_ext_lambdacapturedefault =
     "clang_ext_LambdaExpr_getCaptureDefault_wrapper"
-external ext_lambda_expr_get_capture_count :
-  cxcursor -> int = "clang_ext_LambdaExpr_getCaptureCount_wrapper"
 type clang_ext_lambdacapture
-external ext_lambda_expr_get_capture :
-  cxcursor -> int -> clang_ext_lambdacapture =
-    "clang_ext_LambdaExpr_getCapture_wrapper"
+external ext_lambda_expr_get_captures :
+  cxcursor -> (clang_ext_lambdacapture -> unit) -> unit =
+    "clang_ext_LambdaExpr_getCaptures_wrapper"
 external ext_lambda_expr_get_call_operator :
   cxcursor -> cxcursor = "clang_ext_LambdaExpr_getCallOperator_wrapper"
 type clang_ext_lambdacapturekind =
@@ -3018,8 +3014,9 @@ external ext_lambda_capture_is_implicit :
 external ext_lambda_capture_is_pack_expansion :
   clang_ext_lambdacapture -> bool =
     "clang_ext_LambdaCapture_isPackExpansion_wrapper"
-external ext_cxxnew_expr_get_allocated_type :
-  cxcursor -> cxtype = "clang_ext_CXXNewExpr_getAllocatedType_wrapper"
+external ext_cxxnew_expr_get_allocated_type_loc :
+  cxcursor -> clang_ext_typeloc =
+    "clang_ext_CXXNewExpr_getAllocatedTypeLoc_wrapper"
 external ext_cxxnew_expr_get_array_size :
   cxcursor -> cxcursor = "clang_ext_CXXNewExpr_getArraySize_wrapper"
 external ext_cxxnew_expr_get_num_placement_args :
@@ -3036,7 +3033,8 @@ external ext_cxxdelete_expr_is_array_form :
 external ext_cxxtypeid_expr_is_type_operand :
   cxcursor -> bool = "clang_ext_CXXTypeidExpr_isTypeOperand_wrapper"
 external ext_cxxtypeid_expr_get_type_operand :
-  cxcursor -> cxtype = "clang_ext_CXXTypeidExpr_getTypeOperand_wrapper"
+  cxcursor -> clang_ext_typeloc =
+    "clang_ext_CXXTypeidExpr_getTypeOperand_wrapper"
 external ext_cxxtypeid_expr_get_expr_operand :
   cxcursor -> cxcursor = "clang_ext_CXXTypeidExpr_getExprOperand_wrapper"
 type clang_ext_langstandards =
@@ -3205,25 +3203,35 @@ external ext_nested_name_specifier_get_as_namespace :
 external ext_nested_name_specifier_get_as_type :
   clang_ext_nestednamespecifier -> cxtype =
     "clang_ext_NestedNameSpecifier_getAsType_wrapper"
-external ext_decl_get_nested_name_specifier :
-  cxcursor -> clang_ext_nestednamespecifier =
-    "clang_ext_Decl_getNestedNameSpecifier_wrapper"
+type clang_ext_nestednamespecifierloc
+external ext_nested_name_specifier_loc_get_nested_name_specifier :
+  clang_ext_nestednamespecifierloc -> clang_ext_nestednamespecifier =
+    "clang_ext_NestedNameSpecifierLoc_getNestedNameSpecifier_wrapper"
+external ext_nested_name_specifier_loc_get_prefix :
+  clang_ext_nestednamespecifierloc -> clang_ext_nestednamespecifierloc =
+    "clang_ext_NestedNameSpecifierLoc_getPrefix_wrapper"
+external ext_nested_name_specifier_loc_get_as_type_loc :
+  clang_ext_nestednamespecifierloc -> clang_ext_typeloc =
+    "clang_ext_NestedNameSpecifierLoc_getAsTypeLoc_wrapper"
+external ext_decl_get_nested_name_specifier_loc :
+  cxcursor -> clang_ext_nestednamespecifierloc =
+    "clang_ext_Decl_getNestedNameSpecifierLoc_wrapper"
+external ext_type_loc_get_qualifier_loc :
+  clang_ext_typeloc -> clang_ext_nestednamespecifierloc =
+    "clang_ext_TypeLoc_getQualifierLoc_wrapper"
 external ext_type_get_qualifier :
   cxtype -> clang_ext_nestednamespecifier =
     "clang_ext_Type_getQualifier_wrapper"
 external ext_tag_decl_is_complete_definition :
   cxcursor -> bool = "clang_ext_TagDecl_isCompleteDefinition_wrapper"
-external ext_cxxpseudo_destructor_expr_get_destroyed_type :
-  cxcursor -> cxtype =
-    "clang_ext_CXXPseudoDestructorExpr_getDestroyedType_wrapper"
+external ext_cxxpseudo_destructor_expr_get_destroyed_type_loc :
+  cxcursor -> clang_ext_typeloc =
+    "clang_ext_CXXPseudoDestructorExpr_getDestroyedTypeLoc_wrapper"
 external ext_cursor_get_num_template_args :
   cxcursor -> int = "clang_ext_Cursor_getNumTemplateArgs_wrapper"
 external ext_cursor_get_template_arg :
   cxcursor -> int -> clang_ext_templateargument =
     "clang_ext_Cursor_getTemplateArg_wrapper"
-external ext_type_alias_template_decl_get_templated_decl :
-  cxcursor -> cxcursor =
-    "clang_ext_TypeAliasTemplateDecl_getTemplatedDecl_wrapper"
 type clang_ext_templateparameterlist
 external ext_template_parameter_list_size :
   clang_ext_templateparameterlist -> int =
@@ -3249,6 +3257,9 @@ external ext_attributed_stmt_get_attribute_count :
 external ext_attributed_stmt_get_attribute_kind :
   cxcursor -> int -> clang_ext_attrkind =
     "clang_ext_AttributedStmt_GetAttributeKind_wrapper"
+external ext_attributed_stmt_get_attrs :
+  cxcursor -> (cxcursor -> unit) -> unit =
+    "clang_ext_AttributedStmt_getAttrs_wrapper"
 external ext_decomposition_decl_get_bindings_count :
   cxcursor -> int = "clang_ext_DecompositionDecl_GetBindingsCount_wrapper"
 external ext_decomposition_decl_get_bindings :
@@ -3256,8 +3267,6 @@ external ext_decomposition_decl_get_bindings :
     "clang_ext_DecompositionDecl_GetBindings_wrapper"
 external ext_attr_get_kind :
   cxcursor -> clang_ext_attrkind = "clang_ext_Attr_GetKind_wrapper"
-external ext_var_template_decl_get_templated_decl :
-  cxcursor -> cxcursor = "clang_ext_VarTemplateDecl_getTemplatedDecl_wrapper"
 type clang_ext_exceptionspecificationtype =
   | NoExceptionSpecification 
   | DynamicNone 
@@ -3295,7 +3304,6 @@ external ext_asm_stmt_get_input_constraint :
   cxcursor -> int -> string = "clang_ext_AsmStmt_getInputConstraint_wrapper"
 external ext_asm_stmt_get_input_expr :
   cxcursor -> int -> cxcursor = "clang_ext_AsmStmt_getInputExpr_wrapper"
-type clang_ext_typeloc
 external ext_declarator_decl_get_type_loc :
   cxcursor -> clang_ext_typeloc =
     "clang_ext_DeclaratorDecl_getTypeLoc_wrapper"
@@ -3449,18 +3457,6 @@ external ext_requires_expr_get_requirement_count :
 external ext_requires_expr_get_requirement :
   cxcursor -> int -> clang_ext_requirement =
     "clang_ext_RequiresExpr_getRequirement_wrapper"
-type clang_ext_warnunusedresultattr_spelling =
-  | CXX11_nodiscard 
-  | C2x_nodiscard 
-  | CXX11_clang_warn_unused_result 
-  | GNU_warn_unused_result 
-  | CXX11_gnu_warn_unused_result 
-  | SpellingNotCalculated [@@deriving refl]
-external ext_warn_unused_result_attr_get_semantic_spelling :
-  cxcursor -> clang_ext_warnunusedresultattr_spelling =
-    "clang_ext_WarnUnusedResultAttr_getSemanticSpelling_wrapper"
-external ext_warn_unused_result_attr_get_message :
-  cxcursor -> string = "clang_ext_WarnUnusedResultAttr_getMessage_wrapper"
 external ext_decl_context_visit_decls :
   cxcursor -> (cxcursor -> cxcursor -> cxchildvisitresult) -> bool =
     "clang_ext_DeclContext_visitDecls_wrapper"
@@ -3473,12 +3469,624 @@ external ext_decl_get_attr_count :
   cxcursor -> int = "clang_ext_Decl_getAttrCount_wrapper"
 external ext_decl_get_attr :
   cxcursor -> int -> cxcursor = "clang_ext_Decl_getAttr_wrapper"
-external ext_aligned_attr_is_alignment_expr :
-  cxcursor -> bool = "clang_ext_AlignedAttr_isAlignmentExpr_wrapper"
-external ext_aligned_attr_get_alignment_expr :
-  cxcursor -> cxcursor = "clang_ext_AlignedAttr_getAlignmentExpr_wrapper"
-external ext_aligned_attr_get_alignment_type :
-  cxcursor -> clang_ext_typeloc =
-    "clang_ext_AlignedAttr_getAlignmentType_wrapper"
 external ext_cursor_kind_is_attr :
   cxcursorkind -> bool = "clang_ext_CursorKind_isAttr_wrapper"
+external ext_function_decl_is_inline_specified :
+  cxcursor -> bool = "clang_ext_FunctionDecl_isInlineSpecified_wrapper"
+external ext_function_decl_is_inlined :
+  cxcursor -> bool = "clang_ext_FunctionDecl_isInlined_wrapper"
+external ext_cursor_get_type_loc :
+  cxcursor -> clang_ext_typeloc = "clang_ext_Cursor_getTypeLoc_wrapper"
+external ext_cxxfor_range_stmt_get_loop_variable :
+  cxcursor -> cxcursor = "clang_ext_CXXForRangeStmt_getLoopVariable_wrapper"
+external ext_cxxfor_range_stmt_get_range_init :
+  cxcursor -> cxcursor = "clang_ext_CXXForRangeStmt_getRangeInit_wrapper"
+external ext_cxxfor_range_stmt_get_body :
+  cxcursor -> cxcursor = "clang_ext_CXXForRangeStmt_getBody_wrapper"
+external ext_attributed_type_loc_get_modified_loc :
+  clang_ext_typeloc -> clang_ext_typeloc =
+    "clang_ext_AttributedTypeLoc_getModifiedLoc_wrapper"
+external ext_attributed_type_loc_get_attr :
+  clang_ext_typeloc -> cxcursor =
+    "clang_ext_AttributedTypeLoc_getAttr_wrapper"
+external ext_attributed_type_get_modified_type :
+  cxtype -> cxtype = "clang_ext_AttributedType_getModifiedType_wrapper"
+external ext_attributed_type_get_attr_kind :
+  cxtype -> clang_ext_attrkind =
+    "clang_ext_AttributedType_getAttrKind_wrapper"
+external ext_elaborated_type_loc_get_named_type_loc :
+  clang_ext_typeloc -> clang_ext_typeloc =
+    "clang_ext_ElaboratedTypeLoc_getNamedTypeLoc_wrapper"
+external ext_pack_expansion_type_loc_get_pattern_loc :
+  clang_ext_typeloc -> clang_ext_typeloc =
+    "clang_ext_PackExpansionTypeLoc_getPatternLoc_wrapper"
+external ext_typedef_decl_get_underlying_type_loc :
+  cxcursor -> clang_ext_typeloc =
+    "clang_ext_TypedefDecl_getUnderlyingTypeLoc_wrapper"
+external ext_cxxmethod_decl_get_parent :
+  cxcursor -> cxcursor = "clang_ext_CXXMethodDecl_getParent_wrapper"
+external ext_injected_class_name_type_get_injected_specialization_type :
+  cxtype -> cxtype =
+    "clang_ext_InjectedClassNameType_getInjectedSpecializationType_wrapper"
+external ext_type_get_unqualified_type :
+  cxtype -> cxtype = "clang_ext_Type_getUnqualifiedType_wrapper"
+type clang_ext_acquirecapability_spelling =
+  | GNU_acquire_capability 
+  | CXX11_clang_acquire_capability 
+  | GNU_acquire_shared_capability 
+  | CXX11_clang_acquire_shared_capability 
+  | GNU_exclusive_lock_function 
+  | GNU_shared_lock_function 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_acquire_capability_get_spelling :
+  cxcursor -> clang_ext_acquirecapability_spelling =
+    "clang_ext_AcquireCapability_getSpelling_wrapper"
+type clang_ext_aligned_spelling =
+  | GNU_aligned 
+  | CXX11_gnu_aligned 
+  | Declspec_align 
+  | Keyword_alignas 
+  | Keyword_Alignas 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_aligned_get_spelling :
+  cxcursor -> clang_ext_aligned_spelling =
+    "clang_ext_Aligned_getSpelling_wrapper"
+type clang_ext_alwaysinline_spelling =
+  | GNU_always_inline 
+  | CXX11_gnu_always_inline 
+  | Keyword_forceinline 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_always_inline_get_spelling :
+  cxcursor -> clang_ext_alwaysinline_spelling =
+    "clang_ext_AlwaysInline_getSpelling_wrapper"
+type clang_ext_argumentwithtypetag_spelling =
+  | GNU_argument_with_type_tag 
+  | CXX11_clang_argument_with_type_tag 
+  | C2x_clang_argument_with_type_tag 
+  | GNU_pointer_with_type_tag 
+  | CXX11_clang_pointer_with_type_tag 
+  | C2x_clang_pointer_with_type_tag 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_argument_with_type_tag_get_spelling :
+  cxcursor -> clang_ext_argumentwithtypetag_spelling =
+    "clang_ext_ArgumentWithTypeTag_getSpelling_wrapper"
+type clang_ext_assertcapability_spelling =
+  | GNU_assert_capability 
+  | CXX11_clang_assert_capability 
+  | GNU_assert_shared_capability 
+  | CXX11_clang_assert_shared_capability 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_assert_capability_get_spelling :
+  cxcursor -> clang_ext_assertcapability_spelling =
+    "clang_ext_AssertCapability_getSpelling_wrapper"
+type clang_ext_capability_spelling =
+  | GNU_capability 
+  | CXX11_clang_capability 
+  | GNU_shared_capability 
+  | CXX11_clang_shared_capability 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_capability_get_spelling :
+  cxcursor -> clang_ext_capability_spelling =
+    "clang_ext_Capability_getSpelling_wrapper"
+type clang_ext_constinit_spelling =
+  | Keyword_constinit 
+  | GNU_require_constant_initialization 
+  | CXX11_clang_require_constant_initialization 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_const_init_get_spelling :
+  cxcursor -> clang_ext_constinit_spelling =
+    "clang_ext_ConstInit_getSpelling_wrapper"
+type clang_ext_final_spelling =
+  | Keyword_final 
+  | Keyword_sealed 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_final_get_spelling :
+  cxcursor -> clang_ext_final_spelling =
+    "clang_ext_Final_getSpelling_wrapper"
+type clang_ext_loophint_spelling =
+  | Pragma_clang_loop 
+  | Pragma_unroll 
+  | Pragma_nounroll 
+  | Pragma_unroll_and_jam 
+  | Pragma_nounroll_and_jam 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_loop_hint_get_spelling :
+  cxcursor -> clang_ext_loophint_spelling =
+    "clang_ext_LoopHint_getSpelling_wrapper"
+type clang_ext_msinheritance_spelling =
+  | Keyword_single_inheritance 
+  | Keyword_multiple_inheritance 
+  | Keyword_virtual_inheritance 
+  | Keyword_unspecified_inheritance 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_msinheritance_get_spelling :
+  cxcursor -> clang_ext_msinheritance_spelling =
+    "clang_ext_MSInheritance_getSpelling_wrapper"
+type clang_ext_mipslongcall_spelling =
+  | GNU_long_call 
+  | CXX11_gnu_long_call 
+  | GNU_far 
+  | CXX11_gnu_far 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_mips_long_call_get_spelling :
+  cxcursor -> clang_ext_mipslongcall_spelling =
+    "clang_ext_MipsLongCall_getSpelling_wrapper"
+type clang_ext_mipsshortcall_spelling =
+  | GNU_short_call 
+  | CXX11_gnu_short_call 
+  | GNU_near 
+  | CXX11_gnu_near 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_mips_short_call_get_spelling :
+  cxcursor -> clang_ext_mipsshortcall_spelling =
+    "clang_ext_MipsShortCall_getSpelling_wrapper"
+type clang_ext_openclaccess_spelling =
+  | Keyword_read_only 
+  | Keyword_write_only 
+  | Keyword_read_write 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_open_claccess_get_spelling :
+  cxcursor -> clang_ext_openclaccess_spelling =
+    "clang_ext_OpenCLAccess_getSpelling_wrapper"
+type clang_ext_openclconstantaddressspace_spelling =
+  | Keyword_constant 
+  | GNU_opencl_constant 
+  | CXX11_clang_opencl_constant 
+  | C2x_clang_opencl_constant 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_open_clconstant_address_space_get_spelling :
+  cxcursor -> clang_ext_openclconstantaddressspace_spelling =
+    "clang_ext_OpenCLConstantAddressSpace_getSpelling_wrapper"
+type clang_ext_openclgenericaddressspace_spelling =
+  | Keyword_generic 
+  | GNU_opencl_generic 
+  | CXX11_clang_opencl_generic 
+  | C2x_clang_opencl_generic 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_open_clgeneric_address_space_get_spelling :
+  cxcursor -> clang_ext_openclgenericaddressspace_spelling =
+    "clang_ext_OpenCLGenericAddressSpace_getSpelling_wrapper"
+type clang_ext_openclglobaladdressspace_spelling =
+  | Keyword_global 
+  | GNU_opencl_global 
+  | CXX11_clang_opencl_global 
+  | C2x_clang_opencl_global 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_open_clglobal_address_space_get_spelling :
+  cxcursor -> clang_ext_openclglobaladdressspace_spelling =
+    "clang_ext_OpenCLGlobalAddressSpace_getSpelling_wrapper"
+type clang_ext_opencllocaladdressspace_spelling =
+  | Keyword_local 
+  | GNU_opencl_local 
+  | CXX11_clang_opencl_local 
+  | C2x_clang_opencl_local 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_open_cllocal_address_space_get_spelling :
+  cxcursor -> clang_ext_opencllocaladdressspace_spelling =
+    "clang_ext_OpenCLLocalAddressSpace_getSpelling_wrapper"
+type clang_ext_openclprivateaddressspace_spelling =
+  | Keyword_private 
+  | GNU_opencl_private 
+  | CXX11_clang_opencl_private 
+  | C2x_clang_opencl_private 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_open_clprivate_address_space_get_spelling :
+  cxcursor -> clang_ext_openclprivateaddressspace_spelling =
+    "clang_ext_OpenCLPrivateAddressSpace_getSpelling_wrapper"
+type clang_ext_ownership_spelling =
+  | GNU_ownership_holds 
+  | CXX11_clang_ownership_holds 
+  | C2x_clang_ownership_holds 
+  | GNU_ownership_returns 
+  | CXX11_clang_ownership_returns 
+  | C2x_clang_ownership_returns 
+  | GNU_ownership_takes 
+  | CXX11_clang_ownership_takes 
+  | C2x_clang_ownership_takes 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_ownership_get_spelling :
+  cxcursor -> clang_ext_ownership_spelling =
+    "clang_ext_Ownership_getSpelling_wrapper"
+type clang_ext_passobjectsize_spelling =
+  | GNU_pass_object_size 
+  | CXX11_clang_pass_object_size 
+  | C2x_clang_pass_object_size 
+  | GNU_pass_dynamic_object_size 
+  | CXX11_clang_pass_dynamic_object_size 
+  | C2x_clang_pass_dynamic_object_size 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_pass_object_size_get_spelling :
+  cxcursor -> clang_ext_passobjectsize_spelling =
+    "clang_ext_PassObjectSize_getSpelling_wrapper"
+type clang_ext_releasecapability_spelling =
+  | GNU_release_capability 
+  | CXX11_clang_release_capability 
+  | GNU_release_shared_capability 
+  | CXX11_clang_release_shared_capability 
+  | GNU_release_generic_capability 
+  | CXX11_clang_release_generic_capability 
+  | GNU_unlock_function 
+  | CXX11_clang_unlock_function 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_release_capability_get_spelling :
+  cxcursor -> clang_ext_releasecapability_spelling =
+    "clang_ext_ReleaseCapability_getSpelling_wrapper"
+type clang_ext_requirescapability_spelling =
+  | GNU_requires_capability 
+  | CXX11_clang_requires_capability 
+  | GNU_exclusive_locks_required 
+  | CXX11_clang_exclusive_locks_required 
+  | GNU_requires_shared_capability 
+  | CXX11_clang_requires_shared_capability 
+  | GNU_shared_locks_required 
+  | CXX11_clang_shared_locks_required 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_requires_capability_get_spelling :
+  cxcursor -> clang_ext_requirescapability_spelling =
+    "clang_ext_RequiresCapability_getSpelling_wrapper"
+type clang_ext_restrict_spelling =
+  | Declspec_restrict 
+  | GNU_malloc 
+  | CXX11_gnu_malloc 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_restrict_get_spelling :
+  cxcursor -> clang_ext_restrict_spelling =
+    "clang_ext_Restrict_getSpelling_wrapper"
+type clang_ext_section_spelling =
+  | GNU_section 
+  | CXX11_gnu_section 
+  | Declspec_allocate 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_section_get_spelling :
+  cxcursor -> clang_ext_section_spelling =
+    "clang_ext_Section_getSpelling_wrapper"
+type clang_ext_tryacquirecapability_spelling =
+  | GNU_try_acquire_capability 
+  | CXX11_clang_try_acquire_capability 
+  | GNU_try_acquire_shared_capability 
+  | CXX11_clang_try_acquire_shared_capability 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_try_acquire_capability_get_spelling :
+  cxcursor -> clang_ext_tryacquirecapability_spelling =
+    "clang_ext_TryAcquireCapability_getSpelling_wrapper"
+type clang_ext_unused_spelling =
+  | CXX11_maybe_unused 
+  | GNU_unused 
+  | CXX11_gnu_unused 
+  | C2x_maybe_unused 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_unused_get_spelling :
+  cxcursor -> clang_ext_unused_spelling =
+    "clang_ext_Unused_getSpelling_wrapper"
+type clang_ext_warnunusedresult_spelling =
+  | CXX11_nodiscard 
+  | C2x_nodiscard 
+  | CXX11_clang_warn_unused_result 
+  | GNU_warn_unused_result 
+  | CXX11_gnu_warn_unused_result 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_warn_unused_result_get_spelling :
+  cxcursor -> clang_ext_warnunusedresult_spelling =
+    "clang_ext_WarnUnusedResult_getSpelling_wrapper"
+type clang_ext_xrayinstrument_spelling =
+  | GNU_xray_always_instrument 
+  | CXX11_clang_xray_always_instrument 
+  | C2x_clang_xray_always_instrument 
+  | GNU_xray_never_instrument 
+  | CXX11_clang_xray_never_instrument 
+  | C2x_clang_xray_never_instrument 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_xray_instrument_get_spelling :
+  cxcursor -> clang_ext_xrayinstrument_spelling =
+    "clang_ext_XRayInstrument_getSpelling_wrapper"
+external ext_tlsmodel_attr_get_model :
+  cxcursor -> string = "clang_ext_TLSModelAttr_getModel_wrapper"
+external ext_format_attr_get_first_arg :
+  cxcursor -> int = "clang_ext_FormatAttr_getFirstArg_wrapper"
+external ext_attrs_get_aliasee_length :
+  cxcursor -> int = "clang_ext_Attrs_getAliaseeLength_wrapper"
+external ext_amdgpunum_vgprattr_get_num_vgpr :
+  cxcursor -> int = "clang_ext_AMDGPUNumVGPRAttr_getNumVGPR_wrapper"
+external ext_obj_cruntime_name_attr_get_metadata_name :
+  cxcursor -> string =
+    "clang_ext_ObjCRuntimeNameAttr_getMetadataName_wrapper"
+external ext_attrs_get_min :
+  cxcursor -> cxcursor = "clang_ext_Attrs_getMin_wrapper"
+external ext_ompdeclare_variant_attr_get_impl_vendors :
+  cxcursor -> (string -> unit) -> unit =
+    "clang_ext_OMPDeclareVariantAttr_getImplVendors_wrapper"
+external ext_ifunc_attr_get_resolver :
+  cxcursor -> string = "clang_ext_IFuncAttr_getResolver_wrapper"
+external ext_assume_aligned_attr_get_offset :
+  cxcursor -> cxcursor = "clang_ext_AssumeAlignedAttr_getOffset_wrapper"
+external ext_patchable_function_entry_attr_get_offset :
+  cxcursor -> int = "clang_ext_PatchableFunctionEntryAttr_getOffset_wrapper"
+external ext_alloc_align_attr_get_param_index :
+  cxcursor -> int = "clang_ext_AllocAlignAttr_getParamIndex_wrapper"
+external ext_web_assembly_import_name_attr_get_import_name_length :
+  cxcursor -> int =
+    "clang_ext_WebAssemblyImportNameAttr_getImportNameLength_wrapper"
+external ext_sentinel_attr_get_sentinel :
+  cxcursor -> int = "clang_ext_SentinelAttr_getSentinel_wrapper"
+external ext_attrs_get_success_value :
+  cxcursor -> cxcursor = "clang_ext_Attrs_getSuccessValue_wrapper"
+external ext_attrs_get_cpus_size :
+  cxcursor -> int = "clang_ext_Attrs_getCpus_Size_wrapper"
+external ext_tlsmodel_attr_get_model_length :
+  cxcursor -> int = "clang_ext_TLSModelAttr_getModelLength_wrapper"
+external ext_external_source_symbol_attr_get_generated_declaration :
+  cxcursor -> bool =
+    "clang_ext_ExternalSourceSymbolAttr_getGeneratedDeclaration_wrapper"
+type clang_ext_versiontuple =
+  {
+  major: int ;
+  minor: int ;
+  subminor: int ;
+  build: int }[@@deriving refl]
+external ext_availability_attr_get_introduced :
+  cxcursor -> clang_ext_versiontuple =
+    "clang_ext_AvailabilityAttr_getIntroduced_wrapper"
+external ext_max_field_alignment_attr_get_alignment :
+  cxcursor -> int = "clang_ext_MaxFieldAlignmentAttr_getAlignment_wrapper"
+external ext_attrs_get_alignment :
+  cxcursor -> cxcursor = "clang_ext_Attrs_getAlignment_wrapper"
+external ext_suppress_attr_get_diagnostic_identifiers :
+  cxcursor -> (string -> unit) -> unit =
+    "clang_ext_SuppressAttr_getDiagnosticIdentifiers_wrapper"
+external ext_attrs_get_deref_type :
+  cxcursor -> clang_ext_typeloc = "clang_ext_Attrs_getDerefType_wrapper"
+external ext_address_space_attr_get_address_space :
+  cxcursor -> int = "clang_ext_AddressSpaceAttr_getAddressSpace_wrapper"
+external ext_mode_attr_get_mode :
+  cxcursor -> string = "clang_ext_ModeAttr_getMode_wrapper"
+external ext_type_tag_for_datatype_attr_get_matching_ctype :
+  cxcursor -> clang_ext_typeloc =
+    "clang_ext_TypeTagForDatatypeAttr_getMatchingCType_wrapper"
+external ext_attrs_get_arg :
+  cxcursor -> cxcursor = "clang_ext_Attrs_getArg_wrapper"
+external ext_annotate_attr_get_annotation_length :
+  cxcursor -> int = "clang_ext_AnnotateAttr_getAnnotationLength_wrapper"
+external ext_attrs_get_cpus :
+  cxcursor -> (string -> unit) -> unit = "clang_ext_Attrs_getCpus_wrapper"
+external ext_ompdeclare_variant_attr_get_device_kinds :
+  cxcursor -> (string -> unit) -> unit =
+    "clang_ext_OMPDeclareVariantAttr_getDeviceKinds_wrapper"
+external ext_open_clintel_reqd_sub_group_size_attr_get_sub_group_size :
+  cxcursor -> int =
+    "clang_ext_OpenCLIntelReqdSubGroupSizeAttr_getSubGroupSize_wrapper"
+external ext_layout_version_attr_get_version :
+  cxcursor -> int = "clang_ext_LayoutVersionAttr_getVersion_wrapper"
+external ext_argument_with_type_tag_attr_get_argument_idx :
+  cxcursor -> int =
+    "clang_ext_ArgumentWithTypeTagAttr_getArgumentIdx_wrapper"
+external ext_sentinel_attr_get_null_pos :
+  cxcursor -> int = "clang_ext_SentinelAttr_getNullPos_wrapper"
+external ext_ompdeclare_variant_attr_get_scores :
+  cxcursor -> (cxcursor -> unit) -> unit =
+    "clang_ext_OMPDeclareVariantAttr_getScores_wrapper"
+external ext_availability_attr_get_strict :
+  cxcursor -> bool = "clang_ext_AvailabilityAttr_getStrict_wrapper"
+external ext_attrs_get_args_size :
+  cxcursor -> int = "clang_ext_Attrs_getArgs_Size_wrapper"
+external ext_ownership_attr_get_module :
+  cxcursor -> string = "clang_ext_OwnershipAttr_getModule_wrapper"
+external ext_ompdeclare_variant_attr_get_ctx_selectors_size :
+  cxcursor -> int =
+    "clang_ext_OMPDeclareVariantAttr_getCtxSelectors_Size_wrapper"
+external ext_min_vector_width_attr_get_vector_width :
+  cxcursor -> int = "clang_ext_MinVectorWidthAttr_getVectorWidth_wrapper"
+external ext_cudalaunch_bounds_attr_get_min_blocks :
+  cxcursor -> cxcursor =
+    "clang_ext_CUDALaunchBoundsAttr_getMinBlocks_wrapper"
+external ext_type_tag_for_datatype_attr_get_layout_compatible :
+  cxcursor -> bool =
+    "clang_ext_TypeTagForDatatypeAttr_getLayoutCompatible_wrapper"
+external ext_ompdeclare_variant_attr_get_impl_vendors_size :
+  cxcursor -> int =
+    "clang_ext_OMPDeclareVariantAttr_getImplVendors_Size_wrapper"
+external ext_init_seg_attr_get_section_length :
+  cxcursor -> int = "clang_ext_InitSegAttr_getSectionLength_wrapper"
+external ext_external_source_symbol_attr_get_defined_in_length :
+  cxcursor -> int =
+    "clang_ext_ExternalSourceSymbolAttr_getDefinedInLength_wrapper"
+external ext_vec_type_hint_attr_get_type_hint :
+  cxcursor -> clang_ext_typeloc =
+    "clang_ext_VecTypeHintAttr_getTypeHint_wrapper"
+external ext_ompcapture_kind_attr_get_capture_kind :
+  cxcursor -> int = "clang_ext_OMPCaptureKindAttr_getCaptureKind_wrapper"
+external ext_format_attr_get_type :
+  cxcursor -> string = "clang_ext_FormatAttr_getType_wrapper"
+external ext_pass_object_size_attr_get_type :
+  cxcursor -> int = "clang_ext_PassObjectSizeAttr_getType_wrapper"
+external ext_asm_label_attr_get_label :
+  cxcursor -> string = "clang_ext_AsmLabelAttr_getLabel_wrapper"
+external ext_ompdeclare_variant_attr_get_ctx_selector_sets_size :
+  cxcursor -> int =
+    "clang_ext_OMPDeclareVariantAttr_getCtxSelectorSets_Size_wrapper"
+external ext_availability_attr_get_platform :
+  cxcursor -> string = "clang_ext_AvailabilityAttr_getPlatform_wrapper"
+external ext_attrs_get_max :
+  cxcursor -> cxcursor = "clang_ext_Attrs_getMax_wrapper"
+external ext_ompdeclare_variant_attr_get_ctx_selector_sets :
+  cxcursor -> (int -> unit) -> unit =
+    "clang_ext_OMPDeclareVariantAttr_getCtxSelectorSets_wrapper"
+external ext_external_source_symbol_attr_get_language_length :
+  cxcursor -> int =
+    "clang_ext_ExternalSourceSymbolAttr_getLanguageLength_wrapper"
+external ext_obj_cruntime_name_attr_get_metadata_name_length :
+  cxcursor -> int =
+    "clang_ext_ObjCRuntimeNameAttr_getMetadataNameLength_wrapper"
+external ext_target_attr_get_features_str :
+  cxcursor -> string = "clang_ext_TargetAttr_getFeaturesStr_wrapper"
+external ext_init_priority_attr_get_priority :
+  cxcursor -> int = "clang_ext_InitPriorityAttr_getPriority_wrapper"
+external ext_attrs_get_priority :
+  cxcursor -> int = "clang_ext_Attrs_getPriority_wrapper"
+external ext_attrs_get_bridged_type :
+  cxcursor -> string = "clang_ext_Attrs_getBridgedType_wrapper"
+external ext_attrs_get_ydim :
+  cxcursor -> int = "clang_ext_Attrs_getYDim_wrapper"
+external ext_obj_cbridge_related_attr_get_class_method :
+  cxcursor -> string =
+    "clang_ext_ObjCBridgeRelatedAttr_getClassMethod_wrapper"
+external ext_ompreferenced_var_attr_get_ref :
+  cxcursor -> cxcursor = "clang_ext_OMPReferencedVarAttr_getRef_wrapper"
+external ext_cleanup_attr_get_function_decl :
+  cxcursor -> clang_ext_declarationname =
+    "clang_ext_CleanupAttr_getFunctionDecl_wrapper"
+external ext_availability_attr_get_obsoleted :
+  cxcursor -> clang_ext_versiontuple =
+    "clang_ext_AvailabilityAttr_getObsoleted_wrapper"
+external ext_alloc_size_attr_get_elem_size_param :
+  cxcursor -> int = "clang_ext_AllocSizeAttr_getElemSizeParam_wrapper"
+external ext_external_source_symbol_attr_get_language :
+  cxcursor -> string =
+    "clang_ext_ExternalSourceSymbolAttr_getLanguage_wrapper"
+external ext_attrs_get_replacement_length :
+  cxcursor -> int = "clang_ext_Attrs_getReplacementLength_wrapper"
+external ext_init_seg_attr_get_section :
+  cxcursor -> string = "clang_ext_InitSegAttr_getSection_wrapper"
+external ext_external_source_symbol_attr_get_defined_in :
+  cxcursor -> string =
+    "clang_ext_ExternalSourceSymbolAttr_getDefinedIn_wrapper"
+external ext_alloc_size_attr_get_num_elems_param :
+  cxcursor -> int = "clang_ext_AllocSizeAttr_getNumElemsParam_wrapper"
+external ext_xray_log_args_attr_get_argument_count :
+  cxcursor -> int = "clang_ext_XRayLogArgsAttr_getArgumentCount_wrapper"
+external ext_ompdeclare_variant_attr_get_ctx_selectors :
+  cxcursor -> (int -> unit) -> unit =
+    "clang_ext_OMPDeclareVariantAttr_getCtxSelectors_wrapper"
+external ext_ifunc_attr_get_resolver_length :
+  cxcursor -> int = "clang_ext_IFuncAttr_getResolverLength_wrapper"
+external ext_attrs_get_message :
+  cxcursor -> string = "clang_ext_Attrs_getMessage_wrapper"
+external ext_asm_label_attr_get_label_length :
+  cxcursor -> int = "clang_ext_AsmLabelAttr_getLabelLength_wrapper"
+external ext_argument_with_type_tag_attr_get_type_tag_idx :
+  cxcursor -> int = "clang_ext_ArgumentWithTypeTagAttr_getTypeTagIdx_wrapper"
+external ext_abi_tag_attr_get_tags_size :
+  cxcursor -> int = "clang_ext_AbiTagAttr_getTags_Size_wrapper"
+external ext_uuid_attr_get_guid :
+  cxcursor -> string = "clang_ext_UuidAttr_getGuid_wrapper"
+external ext_cudalaunch_bounds_attr_get_max_threads :
+  cxcursor -> cxcursor =
+    "clang_ext_CUDALaunchBoundsAttr_getMaxThreads_wrapper"
+external ext_arm_mve_alias_attr_get_builtin_name :
+  cxcursor -> string = "clang_ext_ArmMveAliasAttr_getBuiltinName_wrapper"
+external ext_web_assembly_import_module_attr_get_import_module :
+  cxcursor -> string =
+    "clang_ext_WebAssemblyImportModuleAttr_getImportModule_wrapper"
+external ext_attrs_get_zdim :
+  cxcursor -> int = "clang_ext_Attrs_getZDim_wrapper"
+external ext_no_sanitize_attr_get_sanitizers_size :
+  cxcursor -> int = "clang_ext_NoSanitizeAttr_getSanitizers_Size_wrapper"
+external ext_callback_attr_get_encoding_size :
+  cxcursor -> int = "clang_ext_CallbackAttr_getEncoding_Size_wrapper"
+external ext_attrs_get_handle_type_length :
+  cxcursor -> int = "clang_ext_Attrs_getHandleTypeLength_wrapper"
+external ext_attrs_get_xdim :
+  cxcursor -> int = "clang_ext_Attrs_getXDim_wrapper"
+external ext_obj_cbridge_related_attr_get_related_class :
+  cxcursor -> string =
+    "clang_ext_ObjCBridgeRelatedAttr_getRelatedClass_wrapper"
+external ext_attrs_get_aliasee :
+  cxcursor -> string = "clang_ext_Attrs_getAliasee_wrapper"
+external ext_attrs_get_handle_type :
+  cxcursor -> string = "clang_ext_Attrs_getHandleType_wrapper"
+external ext_web_assembly_import_name_attr_get_import_name :
+  cxcursor -> string =
+    "clang_ext_WebAssemblyImportNameAttr_getImportName_wrapper"
+external ext_web_assembly_import_module_attr_get_import_module_length :
+  cxcursor -> int =
+    "clang_ext_WebAssemblyImportModuleAttr_getImportModuleLength_wrapper"
+external ext_ompdeclare_variant_attr_get_device_kinds_size :
+  cxcursor -> int =
+    "clang_ext_OMPDeclareVariantAttr_getDeviceKinds_Size_wrapper"
+external ext_availability_attr_get_deprecated :
+  cxcursor -> clang_ext_versiontuple =
+    "clang_ext_AvailabilityAttr_getDeprecated_wrapper"
+external ext_no_sanitize_attr_get_sanitizers :
+  cxcursor -> (string -> unit) -> unit =
+    "clang_ext_NoSanitizeAttr_getSanitizers_wrapper"
+external ext_ompdeclare_variant_attr_get_scores_size :
+  cxcursor -> int = "clang_ext_OMPDeclareVariantAttr_getScores_Size_wrapper"
+external ext_asm_label_attr_get_is_literal_label :
+  cxcursor -> bool = "clang_ext_AsmLabelAttr_getIsLiteralLabel_wrapper"
+external ext_web_assembly_export_name_attr_get_export_name :
+  cxcursor -> string =
+    "clang_ext_WebAssemblyExportNameAttr_getExportName_wrapper"
+external ext_format_arg_attr_get_format_idx :
+  cxcursor -> int = "clang_ext_FormatArgAttr_getFormatIdx_wrapper"
+external ext_format_attr_get_format_idx :
+  cxcursor -> int = "clang_ext_FormatAttr_getFormatIdx_wrapper"
+external ext_argument_with_type_tag_attr_get_is_pointer :
+  cxcursor -> bool = "clang_ext_ArgumentWithTypeTagAttr_getIsPointer_wrapper"
+external ext_type_tag_for_datatype_attr_get_must_be_null :
+  cxcursor -> bool = "clang_ext_TypeTagForDatatypeAttr_getMustBeNull_wrapper"
+external ext_attrs_get_name_length :
+  cxcursor -> int = "clang_ext_Attrs_getNameLength_wrapper"
+external ext_uuid_attr_get_guid_length :
+  cxcursor -> int = "clang_ext_UuidAttr_getGuidLength_wrapper"
+external ext_attrs_get_name :
+  cxcursor -> string = "clang_ext_Attrs_getName_wrapper"
+external ext_suppress_attr_get_diagnostic_identifiers_size :
+  cxcursor -> int =
+    "clang_ext_SuppressAttr_getDiagnosticIdentifiers_Size_wrapper"
+external ext_attrs_get_message_length :
+  cxcursor -> int = "clang_ext_Attrs_getMessageLength_wrapper"
+external ext_web_assembly_export_name_attr_get_export_name_length :
+  cxcursor -> int =
+    "clang_ext_WebAssemblyExportNameAttr_getExportNameLength_wrapper"
+external ext_callback_attr_get_encoding :
+  cxcursor -> (int -> unit) -> unit =
+    "clang_ext_CallbackAttr_getEncoding_wrapper"
+external ext_attrs_get_argument_kind :
+  cxcursor -> string = "clang_ext_Attrs_getArgumentKind_wrapper"
+external ext_msvtor_disp_attr_get_vdm :
+  cxcursor -> int = "clang_ext_MSVtorDispAttr_getVdm_wrapper"
+external ext_availability_attr_get_unavailable :
+  cxcursor -> bool = "clang_ext_AvailabilityAttr_getUnavailable_wrapper"
+external ext_attrs_get_cond :
+  cxcursor -> cxcursor = "clang_ext_Attrs_getCond_wrapper"
+external ext_iboutlet_collection_attr_get_interface :
+  cxcursor -> clang_ext_typeloc =
+    "clang_ext_IBOutletCollectionAttr_getInterface_wrapper"
+external ext_annotate_attr_get_annotation :
+  cxcursor -> string = "clang_ext_AnnotateAttr_getAnnotation_wrapper"
+external ext_ompdeclare_variant_attr_get_variant_func_ref :
+  cxcursor -> cxcursor =
+    "clang_ext_OMPDeclareVariantAttr_getVariantFuncRef_wrapper"
+external ext_no_builtin_attr_get_builtin_names_size :
+  cxcursor -> int = "clang_ext_NoBuiltinAttr_getBuiltinNames_Size_wrapper"
+external ext_attrs_get_kind :
+  cxcursor -> string = "clang_ext_Attrs_getKind_wrapper"
+external ext_attrs_get_replacement :
+  cxcursor -> string = "clang_ext_Attrs_getReplacement_wrapper"
+external ext_patchable_function_entry_attr_get_count :
+  cxcursor -> int = "clang_ext_PatchableFunctionEntryAttr_getCount_wrapper"
+external ext_amdgpunum_sgprattr_get_num_sgpr :
+  cxcursor -> int = "clang_ext_AMDGPUNumSGPRAttr_getNumSGPR_wrapper"
+external ext_obj_cbridge_related_attr_get_instance_method :
+  cxcursor -> string =
+    "clang_ext_ObjCBridgeRelatedAttr_getInstanceMethod_wrapper"
+external ext_abi_tag_attr_get_tags :
+  cxcursor -> (string -> unit) -> unit =
+    "clang_ext_AbiTagAttr_getTags_wrapper"
+external ext_msp430_interrupt_attr_get_number :
+  cxcursor -> int = "clang_ext_MSP430InterruptAttr_getNumber_wrapper"
+external ext_open_clunroll_hint_attr_get_unroll_hint :
+  cxcursor -> int = "clang_ext_OpenCLUnrollHintAttr_getUnrollHint_wrapper"
+external ext_no_builtin_attr_get_builtin_names :
+  cxcursor -> (string -> unit) -> unit =
+    "clang_ext_NoBuiltinAttr_getBuiltinNames_wrapper"
+external ext_target_attr_get_features_str_length :
+  cxcursor -> int = "clang_ext_TargetAttr_getFeaturesStrLength_wrapper"
+external ext_aligned_attr_get_alignment_expr :
+  cxcursor -> cxcursor = "clang_ext_AlignedAttr_getAlignmentExpr_wrapper"
+external ext_msinheritance_attr_get_best_case :
+  cxcursor -> bool = "clang_ext_MSInheritanceAttr_getBestCase_wrapper"
+external ext_non_null_attr_get_args :
+  cxcursor -> (int -> unit) -> unit = "clang_ext_NonNullAttr_getArgs_wrapper"
+external ext_acquire_capability_attr_get_args :
+  cxcursor -> (cxcursor -> unit) -> unit =
+    "clang_ext_AcquireCapabilityAttr_getArgs_wrapper"

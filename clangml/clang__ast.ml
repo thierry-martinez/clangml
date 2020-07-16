@@ -3,6 +3,7 @@
 open Clang__bindings
 open Clang__types
 
+module Common = struct
 let pp_cxint fmt cxint =
   Format.pp_print_string fmt (ext_int_to_string cxint 10 true)
 
@@ -34,6 +35,8 @@ type source_location =
 (*{[
 [@@@ocaml.warning "-30"]
 [@@@ocaml.warning "-9"]
+[%%metapackage "metapp"]
+[%%metadir "config/.clangml_config.objs/byte"]
 
 open Stdcompat
 
@@ -103,46 +106,6 @@ let check_pattern ?result quoter (parser : string -> 'a)
   check_result ?result (pattern ~quoted:(quoter ast) ast)
 ]}*)
 
-(** {2 Nodes and decorations} *)
-
-(** AST nodes are of type ['a ]{!type:node} for some ['a] and
-    carry a {!type:decoration}.
-    If the node comes for a translation unit parsed by clang,
-    the decoration is of the form {!const:Cursor}[ cursor],
-    where [cursor] points to the corresponding node in clang
-    internal AST.
-    Decorations
-    can be of the form {!const:Custom}[ custom_decoration],
-    where the inlined record [custom_decoration] may optionnally
-    carry a location, or a type, or both.
-
-    To break type recursion between {!type:qual_type} and {!type:decoration},
-    open types ['qual_type ]{!type:open_decoration} and
-    [('a, 'qual_type) ]{!type:open_node} are defined first, and then
-    {!type:node} and {!type:decoration} are defined as aliases
-    with ['qual_type = ]{!type:qual_type}.
-
-    Breaking recursion allows [visitors] to derive polymorphic
-    visitors for [open_node] while deriving monomorphic visitors
-    for the concrete AST nodes themselves.
-*)
-
-type 'qual_type open_decoration =
-  | Cursor of (cxcursor [@opaque])
-  | Custom of {
-      location : (source_location option [@opaque]);
-      qual_type : 'qual_type option;
-    } [@@deriving refl]
-
-type 'qual_type opaque_open_decoration =
-    ('qual_type open_decoration [@mapopaque])
-       [@@deriving refl]
-
-type ('a, 'qual_type) open_node = {
-    decoration : 'qual_type opaque_open_decoration;
-    desc : 'a;
-  } [@@deriving refl]
-
 (** {2 Aliases} *)
 
 (** The following aliases provide more readable names for some types
@@ -205,6 +168,115 @@ and languages = {
 
 and asm_compiler_extension = GCC | MS
 
+and opaque_cxtype = cxtype [@opaque]
+
+and opaque_type_loc = clang_ext_typeloc option [@opaque]
+      [@@deriving refl]
+
+module type NodeS = sig
+  type 'a t
+
+  val t__variable_positive0 : 'a -> 'b -> 'a
+  val t__variable_negative0 : 'a -> 'b -> 'b
+  val t__variable_direct0 : 'a -> 'b -> 'a
+
+  type ('present, 'unknown) t__variable_positive0 = 'present
+  type ('present, 'unknown) t__variable_negative0 = 'unknown
+  type ('present, 'unknown) t__variable_direct0 = 'present
+
+  type t__arity = [ `Succ of [ `Zero ] ]
+  type t__structure
+  type t__rec_group = (t__arity * t__structure) ref
+  type t__kinds = [ `Lazy | `Variable ]
+  type 'a0 t__gadt = unit
+
+  type _ Refl.refl +=
+    | Refl_t: 'a0 t Refl.refl
+
+  val t_refl :
+      ('a0 t, t__structure, ('a0 * unit), t__rec_group, [> t__kinds ],
+       (([ `Present ], [ `Absent ]) t__variable_positive0 * unit),
+       (([ `Present ], [ `Absent ]) t__variable_negative0 * unit),
+       (([ `Present ], [ `Absent ]) t__variable_direct0 * unit),
+       'a0 t__gadt) Refl.desc
+
+  val from_fun : (unit -> 'a) -> 'a t
+
+  val from_val : 'a -> 'a t
+
+  val force : 'a t -> 'a
+end
+
+module IdNode = struct
+  module Sub = struct
+    type 'a t = 'a [@@deriving refl]
+  end
+
+  include (Sub : sig
+    type 'a t = 'a [@@deriving refl]
+  end with type t__kinds := Sub.t__kinds)
+
+  type t__kinds = [ `Lazy | `Variable ]
+
+  let from_fun f = f ()
+
+  let from_val = Fun.id
+
+  let force = Fun.id
+end
+
+module LazyNode = struct
+  type 'a t = 'a Lazy.t [@@deriving refl]
+
+  let from_fun = Lazy.from_fun
+
+  let from_val = Lazy.from_val
+
+  let force = Lazy.force
+end
+end
+
+include Common
+
+(** {2 Nodes and decorations} *)
+
+(** AST nodes are of type ['a ]{!type:node} for some ['a] and
+    carry a {!type:decoration}.
+    If the node comes for a translation unit parsed by clang,
+    the decoration is of the form {!const:Cursor}[ cursor],
+    where [cursor] points to the corresponding node in clang
+    internal AST.
+    Decorations
+    can be of the form {!const:Custom}[ custom_decoration],
+    where the inlined record [custom_decoration] may optionnally
+    carry a location, or a type, or both.
+
+    To break type recursion between {!type:qual_type} and {!type:decoration},
+    open types ['qual_type ]{!type:open_decoration} and
+    [('a, 'qual_type) ]{!type:open_node} are defined first, and then
+    {!type:node} and {!type:decoration} are defined as aliases
+    with ['qual_type = ]{!type:qual_type}.
+
+    Breaking recursion allows [visitors] to derive polymorphic
+    visitors for [open_node] while deriving monomorphic visitors
+    for the concrete AST nodes themselves.
+*)
+
+module Custom (Node : NodeS) = struct
+type decoration =
+  | Cursor of (cxcursor [@opaque])
+  | Custom of {
+      location : (source_location option [@opaque]);
+      qual_type : qual_type option;
+    }
+
+and opaque_decoration = decoration [@opaque]
+
+and 'a node = {
+    decoration : opaque_decoration;
+    desc : 'a Node.t;
+  }
+
 (** {2 Types and nodes} *)
 
 (**
@@ -239,10 +311,6 @@ let parse_declaration_list_last ?filename ?command_line_args ?language ?options
    ]}*)
 
 (** {3 Qualified types } *)
-
-and opaque_cxtype = cxtype [@opaque]
-
-and opaque_type_loc = clang_ext_typeloc option [@opaque]
 
 and qual_type = {
     cxtype : opaque_cxtype;
@@ -322,7 +390,7 @@ let () =
       desc = Pointer { desc = BuiltinType Int }}}}] -> ()
   | _ -> assert false
     ]}*)
-    desc : type_desc;
+    desc : type_desc Node.t;
   }
 
 and type_desc =
@@ -347,10 +415,6 @@ let () =
     }
 (** Constant-sized array.
 
-    Note: The "qual_type" contains the canonical type where the size has already
-    been computed. If you need to get the original expression of the size, you
-    may use {!val:Clang.Decl.get_type_loc} or
-    {!val:Clang.Parameter.get_type_loc} (See {!type:type_loc}).
     {[
 let example = "char s[21 * 2];"
 
@@ -396,9 +460,12 @@ let example = {|
 let () =
   check_pattern quote_decl parse_declaration_list_last example
   [%pattern?
-    { desc = Var { var_name = "v"; var_type = { desc = Vector {
-      element = { desc = Typedef ({ name = IdentifierName "int32_t" })};
-      size = 4 }}}} ]
+    { desc = Var {
+        var_name = "v";
+        var_type = { desc = Vector {
+          element = { desc = Typedef ({ name = IdentifierName "int32_t" })};
+          size = 4 }};
+        attributes = [] }}]
     ]}*)
   | IncompleteArray of qual_type
 (** Incomplete array.
@@ -489,8 +556,6 @@ let () =
     ]}*)
   | FunctionType of function_type
 (** Function type.
-    Warning: parameter names are not preserved in canonical types.
-    (See {!type:type_loc}.)
 
     {[
 let example = "int (*p)(void);"
@@ -512,7 +577,7 @@ let () =
       Pointer { desc = FunctionType {
         result = { desc = BuiltinType Int };
         parameters = Some { non_variadic = [{ desc = {
-          name = ""; qual_type = { desc = BuiltinType Int }}}] }}}}}}]]
+          name = "x"; qual_type = { desc = BuiltinType Int }}}] }}}}}}]]
     ]}*)
   | Record of ident_ref
 (** Record type (either struct or union).
@@ -626,31 +691,35 @@ let () =
     ]} *)
   | Attributed of {
       modified_type : qual_type;
-      attribute_kind : attribute_kind;
+      attribute : attribute;
     }
 (** Attributed type.
-
-    Attributed types are only visible with Clang >=8.0.0 when
-    [Cxtranslationunit_flags.include_attributed_types] is set.
-    Otherwise, the type is directly substituted by its modified type.
 
     {[
 let example = "int * _Nonnull ptr;"
 
-let () =
-  if Clang.version () >= { major = 8; minor = 0; subminor = 0 } then
-    let clang_options = Clang.Cxtranslationunit_flags.(
-      Clang.default_editing_translation_unit_options ()
-      + Clang.include_attributed_types) in
-    check_pattern quote_decl_list (parse_declaration_list ~clang_options)
-      example [%pattern?
-      [{ desc = Var { var_name = "ptr";
-         var_type = { desc = Attributed {
-           modified_type = { desc = Pointer { desc = BuiltinType Int }};
-           attribute_kind }}}}]]
-      ~result:begin fun bindings ->
-          assert (bindings#attribute_kind = Clang.type_non_null)
-        end
+[%%meta if Clangml_config.version.major >= 8 then [%stri
+    let () =
+      check_pattern quote_decl_list parse_declaration_list
+        example [%pattern?
+        [{ desc = Var { var_name = "ptr";
+           var_type = { desc = Attributed {
+             modified_type = { desc = Pointer { desc = BuiltinType Int }};
+             attribute = { desc = Other TypeNonNull }}}}}]]]
+  else Metapp.Stri.of_list []]
+
+let example = "void * __ptr32 p;"
+
+[%%meta if Clangml_config.version.major >= 8 then [%stri
+    let () =
+      check_pattern quote_decl_list
+        (parse_declaration_list ~command_line_args:["-fms-extensions"])
+        example [%pattern?
+        [{ desc = Var { var_name = "p";
+           var_type = { desc = Attributed {
+             modified_type = { desc = Pointer { desc = BuiltinType Void }};
+             attribute = { desc = Other Ptr32 }}}}}]]]
+  else Metapp.Stri.of_list []]
     ]} *)
   | ParenType of qual_type
 (** Parenthesized type.
@@ -740,6 +809,7 @@ let () =
       var_type = { desc = Decltype { desc = IntegerLiteral (Int 1)}};
       var_init = Some { desc = IntegerLiteral (Int 1)}}}]]
     ]}*)
+  | InjectedClassName of qual_type
   | UnexposedType of clang_ext_typekind
   | InvalidType
 
@@ -816,8 +886,40 @@ and function_decl = {
     nested_name_specifier : nested_name_specifier option; (** C++ *)
     name : declaration_name;
     body : stmt option;
-    deleted : bool;
-    constexpr : bool;
+    deleted : bool; (** C++ *)
+    constexpr : bool; (** C++ *)
+    inline_specified : bool;
+(** Determine whether the [inline] keyword was specified for this function.
+
+    {[
+let example = {|inline void f(void);|}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~standard:C11) example
+  [%pattern?
+    [{ desc = Function {
+      name = IdentifierName "f";
+      inline_specified = true;
+      inlined = true; }}]]
+    ]}*)
+    inlined : bool;
+(** Determine whether this function should be inlined, because it is
+    either marked [inline] or [constexpr] or is a member function of a class
+    that was defined in the class body.
+    {[
+let example = {|constexpr void f(void);|}
+
+let () =
+  check_pattern quote_decl_list
+    (parse_declaration_list ~language:CXX ~standard:Cxx11) example
+  [%pattern?
+    [{ desc = Function {
+      name = IdentifierName "f";
+      constexpr = true;
+      inline_specified = false;
+      inlined = true; }}]]
+    ]}*)
+    attributes : attribute list;
   }
 
 (** Function type. *)
@@ -845,13 +947,15 @@ let () =
   fun ast -> match ast with
   | [{ desc = Function {
       name = IdentifierName "f";
-      function_type = { calling_conv = AAPCS }}}] ->
+      function_type = { calling_conv = AAPCS };
+      attributes = []; }}] ->
       assert (
         Clang.version () < { major = 3; minor = 8; subminor = 0 } ||
         Clang.version () >= { major = 3; minor = 9; subminor = 0 })
   | [{ desc = Function {
       name = IdentifierName "f";
-      function_type = { calling_conv = C }}}] ->
+      function_type = { calling_conv = C };
+      attributes = []; }}] ->
       assert (
         Clang.version () >= { major = 3; minor = 8; subminor = 0 } &&
         Clang.version () < { major = 3; minor = 9; subminor = 0 })
@@ -1037,6 +1141,72 @@ let () =
       name = IdentifierName "f";
       function_type = { exception_spec = Some (Other MSAny)}}}]]
     ]}*)
+
+    ref_qualifier : cxrefqualifierkind; (** C++ *)
+(** Method ref-qualifier.
+    {[
+let example = {|
+template <typename T>
+class C
+{
+  T        no_ref_qualifier();
+  T&       value() &;
+  T&&      value() &&;
+  T const& value() const&;
+};
+|}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = TemplateDecl {
+         parameters = { list = [{ desc = {
+           parameter_name = "T";
+           parameter_kind = Class { default = _ }}}] };
+         decl = { desc = RecordDecl {
+           keyword = Class;
+           name = "C";
+           fields = [
+             { desc = CXXMethod {
+                 function_decl = {
+                   function_type = {
+                     result = { desc = TemplateTypeParm "T" };
+                     parameters = Some { non_variadic = [] };
+                     ref_qualifier = None };
+                   name = IdentifierName "no_ref_qualifier";
+                   body = None }}};
+             { desc = CXXMethod {
+                 const = false;
+                 function_decl = {
+                   function_type = {
+                     result = { desc =
+                       LValueReference { desc = TemplateTypeParm "T" };
+                       const = false };
+                     parameters = Some { non_variadic = [] };
+                     ref_qualifier = LValue };
+                   name = IdentifierName "value";
+                   body = None }}};
+             { desc = CXXMethod {
+                 function_decl = {
+                   function_type = {
+                     result = { desc =
+                       RValueReference { desc = TemplateTypeParm "T" }};
+                     parameters = Some { non_variadic = [] };
+                     ref_qualifier = RValue };
+                   name = IdentifierName "value";
+                   body = None }}};
+             { desc = CXXMethod {
+                 const = true;
+                 function_decl = {
+                   function_type = {
+                     result = { desc = LValueReference {
+                       desc = TemplateTypeParm "T";
+                       const = true; }};
+                     parameters = Some { non_variadic = [] };
+                     ref_qualifier = LValue };
+                   name = IdentifierName "value";
+                   body = None }}}] }}}}]]
+    ]}*)
 }
 
 and exception_spec =
@@ -1141,7 +1311,7 @@ let () =
  *)
 }
 
-and parameter = (parameter_desc, qual_type) open_node
+and parameter = parameter_desc node
 
 and parameter_desc = {
   qual_type : qual_type;
@@ -1172,7 +1342,7 @@ let parse_statement_list ?(return_type = "void") ?filename ?command_line_args
       assert false
     ]}*)
 
-and stmt = (stmt_desc, qual_type) open_node
+and stmt = stmt_desc node
 
 and stmt_desc =
   | Null
@@ -1300,6 +1470,34 @@ let () =
       range : expr;
       body : stmt;
     }
+(** For-range statement.
+    {[
+let example = {|
+  int a[] = {1, 2};
+  for (int i : a) {}
+|}
+
+let () =
+  check_pattern quote_stmt_list (parse_statement_list ~language:CXX) example
+  [%pattern?
+    [{ desc = Decl [
+       { desc = Var {
+           var_name = "a";
+           var_type = { desc = IncompleteArray { desc = BuiltinType Int }};
+           var_init = Some { desc = InitList [
+             { desc = IntegerLiteral (Int 1)};
+             { desc = IntegerLiteral (Int 2)}] }}}] };
+     { desc = ForRange {
+         var = { desc = {
+           var_name = "i";
+           var_type = { desc = BuiltinType Int };
+           var_init = Some { desc = UnaryOperator {
+             kind = Deref;
+             operand = { desc = DeclRef {
+               name = IdentifierName _ }}}}}};
+         range = { desc = DeclRef { name = IdentifierName "a" }};
+         body = { desc = Compound [] }}}]]
+    ]}*)
   | If of {
       init : stmt option; (** C++17 *)
       condition_variable : var_decl option; (** C++ *)
@@ -1716,7 +1914,7 @@ let () =
       handlers : catch list;
     }
   | AttributedStmt of {
-      attributes : attribute_kind list;
+      attributes : attribute list;
       sub_stmts : stmt list;
     }
   | UnknownStmt of cxcursorkind * clang_ext_stmtkind
@@ -1738,11 +1936,53 @@ and asm_operand = {
   asm_expr : expr;
 }
 
-and attribute = (attribute_desc, qual_type) open_node
+and attribute = attribute_desc node
 
-and attribute_desc =
-  | Aligned of expr
-(** Field alignment.
+and attribute_desc = (expr, qual_type, declaration_name) Attributes.t
+(**
+   [AbiTag]: ABI tags.
+
+    {[
+let example = {|
+__attribute__((abi_tag("a", "b"))) float f;
+|}
+
+let () =
+  if Clang.version () >= { major = 3; minor = 9; subminor = 0 } then
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = Var {
+         attributes = [{ desc = AbiTag ["a"; "b"] }];
+         var_type = { desc = BuiltinType Float };
+         var_name = "f"; }}]]
+    ]}
+
+    [| AcquireCapability of expr list]
+    Marks a function as acquiring a capability.
+
+    {[
+let example = {|
+int mu;
+
+void lockAndInit() __attribute__((acquire_capability(mu)));
+|}
+
+
+let () =
+  if Clang.version () >= { major = 3; minor = 5; subminor = 0 } then
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = Var { var_name = "mu" }};
+      { desc = Function {
+         name = IdentifierName "lockAndInit";
+         attributes = [
+           { desc = AcquireCapability
+               { args = [{
+                   desc = DeclRef { name = IdentifierName "mu" }}] }}] }}]]
+    ]}
+
+    [Aligned]:
+    Field alignment.
 
     {[
 let example = {|
@@ -1761,8 +2001,8 @@ let () =
           { name = "f";
             qual_type = { desc = BuiltinType Float };
             attributes = [
-              { desc = Aligned
-                { desc = IntegerLiteral (Int 32) }}] }}] }}]]
+              { desc = Aligned {
+                alignment_expr = { desc = IntegerLiteral (Int 32) }}}] }}] }}]]
 
 let example = {|
 struct alignas(32) s {
@@ -1777,7 +2017,8 @@ let () =
     [{ desc = RecordDecl {
       keyword = Struct;
       attributes = [
-        { desc = Aligned { desc = IntegerLiteral (Int 32)}}];
+        { desc = Aligned {
+          alignment_expr = {desc = IntegerLiteral (Int 32)}}}];
       fields = [
         { desc = Field
           { name = "f";
@@ -1806,11 +2047,11 @@ let () =
           { name = "f";
             qual_type = { desc = BuiltinType Float };
             attributes = [
-              { desc = Aligned
-                { desc = UnaryExpr {
+              { desc = Aligned {
+                alignment_expr = { desc = UnaryExpr {
                     kind = AlignOf;
                     argument = ArgumentType
-                      { desc = BuiltinType Double }}}}] }}] }}]]
+                      { desc = BuiltinType Double }}}}}] }}] }}]]
 
 let example = {|
 struct alignas(double) s {
@@ -1825,25 +2066,125 @@ let () =
     [{ desc = RecordDecl {
       keyword = Struct;
       attributes = [
-        { desc = Aligned
-                { desc = UnaryExpr {
+        { desc = Aligned {
+          alignment_expr = { desc = UnaryExpr {
                     kind = AlignOf;
                     argument = ArgumentType
-                      { desc = BuiltinType Double }}}}];
+                      { desc = BuiltinType Double }}}}}];
       fields = [
         { desc = Field
           { name = "f";
             qual_type = { desc = BuiltinType Float }}}] }}]]
+    ]}
+
+  [AllocAlign]:
+Specify that the return value of the function (which must be a pointer type) is
+at least as aligned as the value of the indicated parameter.
+
+    {[
+let example = {|
+void *a(int align) __attribute__((alloc_align(1)));
+|}
+
+let () =
+  if Clang.version () >= { major = 5; minor = 0; subminor = 0 } then
+  check_pattern quote_decl_list
+    (parse_declaration_list ~language:CXX ~standard:Cxx11) example
+  [%pattern?
+    [{ desc = Function {
+         attributes = [{ desc = AllocAlign 1 }];
+         name = IdentifierName "a";
+         function_type = {
+           result = { desc = Pointer { desc = BuiltinType Void }};
+           parameters = Some {
+             non_variadic = [{ desc = {
+               name = "align"; qual_type = { desc = BuiltinType Int }}}];
+             variadic = false }}}}]]
+    ]}
+
+  [AllocSize]:
+    Hint to the compiler how many bytes of memory will be available at the
+    returned pointer.
+
+    {[
+let example = {|
+void *my_malloc(int a) __attribute__((alloc_size(1)));
+void *my_calloc(int a, int b) __attribute__((alloc_size(1, 2)));
+|}
+
+let () =
+  if Clang.version () >= { major = 4; minor = 0; subminor = 0 } then
+  check_pattern quote_decl_list
+    (parse_declaration_list ~language:CXX ~standard:Cxx11) example
+  [%pattern?
+    [{ desc = Function {
+         attributes = [{ desc = AllocSize { elem_size = 1; num_elems = 0 }}];
+         name = IdentifierName "my_malloc";
+         function_type = {
+           result = { desc = Pointer { desc = BuiltinType Void }};
+           parameters = Some {
+             non_variadic = [{ desc = {
+               name = "a"; qual_type = { desc = BuiltinType Int }}}];
+             variadic = false }}}};
+      { desc = Function {
+         attributes = [
+           { desc = AllocSize { elem_size = 1; num_elems = 2 }}];
+         name = IdentifierName "my_calloc";
+         function_type = {
+           result = { desc = Pointer { desc = BuiltinType Void }};
+           parameters = Some {
+             non_variadic = [
+               { desc = {
+                   name = "a"; qual_type = { desc = BuiltinType Int }}};
+               { desc = {
+                   name = "b"; qual_type = { desc = BuiltinType Int }}}];
+             variadic = false }}}}]]
+    ]}
+
+  [ReleaseCapability]: Marks a function as releasing a capability.
+
+    {[
+let example = {|
+int mu;
+
+void cleanupAndUnlock()  __attribute__((release_capability(mu)));
+|}
+
+
+let () =
+  if Clang.version () >= { major = 3; minor = 5; subminor = 0 } then
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = Var { var_name = "mu" }};
+      { desc = Function {
+         name = IdentifierName "cleanupAndUnlock";
+         attributes = [
+           { desc = ReleaseCapability {
+             args = [{ desc = DeclRef { name = IdentifierName "mu" }}] }}] }}]]
+    ]}
+
+  [Other]: Attributes without argument.
+
+    {[
+let example = {|
+_Noreturn void f(void);
+|}
+
+let () =
+  check_pattern quote_decl_list
+    (parse_declaration_list ~standard:C11) example
+  [%pattern?
+    [{ desc = Function {
+         attributes = [{ desc = Other C11NoReturn }];
+         name = IdentifierName "f";
+         function_type = {
+           result = { desc = BuiltinType Void };
+           parameters = Some { non_variadic = []; variadic = false }}}}]]
     ]}*)
-  | WarnUnusedResult of {
-      spelling : clang_ext_warnunusedresultattr_spelling;
-      message : string;
-    }
-  | Other of attribute_kind
 
 (** {3 Expressions} *)
 
-and expr = (expr_desc, qual_type) open_node
+and expr = expr_desc node
 
 and expr_desc =
   | IntegerLiteral of integer_literal
@@ -2719,7 +3060,7 @@ let () =
   | UnknownExpr of cxcursorkind * clang_ext_stmtkind
 
 and field =
-  | FieldName of (ident_ref, qual_type) open_node
+  | FieldName of ident_ref node
   | PseudoDestructor of {
       nested_name_specifier : nested_name_specifier option;
       qual_type : qual_type;
@@ -2787,7 +3128,7 @@ let () =
 
 (** {3 Declarations} *)
 
-and decl = (decl_desc, qual_type) open_node
+and decl = decl_desc node
 
 and decl_desc =
   | TemplateDecl of {
@@ -2878,7 +3219,7 @@ let () =
                 parameter_kind = Class { default = None };
                 parameter_pack = false; }}] };
             decl = { desc = CXXMethod {
-              type_ref = None;
+              type_ref = { desc = Record ({ name = IdentifierName "C" }) };
               function_decl = {
                 function_type = {
                   result = { desc = BuiltinType Int };
@@ -2894,7 +3235,7 @@ let () =
            parameter_kind = Class { default = None };
            parameter_pack = false; }}] };
          decl = { desc = CXXMethod {
-           type_ref = Some { desc = Record ({ name = IdentifierName "C" }) };
+           type_ref = { desc = Record ({ name = IdentifierName "C" }) };
            function_decl = {
              function_type = {
                result = { desc = BuiltinType Int };
@@ -3046,7 +3387,7 @@ let () =
     ]}*)
   | CXXMethod of {
       function_decl : function_decl;
-      type_ref : qual_type option;
+      type_ref : qual_type;
       defaulted : bool;
       static : bool;
       binding : cxx_method_binding_kind;
@@ -3084,7 +3425,7 @@ let () =
       name = "C";
       fields = [
         { desc = CXXMethod {
-          type_ref = None;
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
           function_decl = {
             name = IdentifierName "f";
             function_type = {
@@ -3095,7 +3436,7 @@ let () =
                     qual_type = { desc = BuiltinType Char_S }}}] }};
             body = None; }}};
         { desc = CXXMethod {
-          type_ref = None;
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
           function_decl = {
             name = IdentifierName "const_method";
             function_type = {
@@ -3104,7 +3445,7 @@ let () =
             body = Some { desc = Compound [] }};
           const = true; }};
         { desc = CXXMethod {
-          type_ref = None;
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
           binding = Virtual;
           function_decl = {
             name = IdentifierName "virtual_method";
@@ -3113,7 +3454,7 @@ let () =
               parameters = Some { non_variadic = [] }};
             body = Some { desc = Compound [] }; }}};
         { desc = CXXMethod {
-          type_ref = None;
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
           binding = PureVirtual;
           function_decl = {
             name = IdentifierName "pure_virtual_method";
@@ -3122,7 +3463,7 @@ let () =
               parameters = Some { non_variadic = [] }};
             body = None; }}};
         { desc = CXXMethod {
-          type_ref = None;
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
           function_decl = {
             name = IdentifierName "static_method";
             function_type = {
@@ -3131,7 +3472,7 @@ let () =
             body = Some { desc = Compound [] }};
           static = true; }};
         { desc = CXXMethod {
-          type_ref = None;
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
           function_decl = {
             name = IdentifierName "deleted_method";
             function_type = {
@@ -3140,7 +3481,7 @@ let () =
             deleted = true;
             body = None; }; }};
         { desc = CXXMethod {
-          type_ref = Some { desc = Record ({ name = IdentifierName "C" }) };
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
           function_decl = {
             name = OperatorName Plus;
             function_type = {
@@ -3158,7 +3499,7 @@ let () =
                   kind = Deref;
                   operand = { desc = This }}})}] }}}}] }};
       { desc = CXXMethod {
-        type_ref = Some { desc = Record ({ name = IdentifierName "C" }) };
+        type_ref = { desc = Record ({ name = IdentifierName "C" }) };
         function_decl = {
           name = IdentifierName "f";
           function_type = {
@@ -3501,7 +3842,40 @@ let () =
             init = Some { desc = IntegerLiteral (Int 2)}}}] }}] -> ()
     | _ -> assert false
       ]}
-*)
+
+    Fields can have a [no_unique_address] attribute.
+
+    {[
+let example = {|
+template<typename T, typename Alloc> struct my_vector {
+  T *p;
+  [[no_unique_address]] Alloc alloc;
+  // ...
+};
+|}
+
+[%%meta if Clangml_config.version.major >= 9 then [%stri
+    let () =
+      check_pattern quote_decl_list (parse_declaration_list ~language:CXX)
+        example
+      [%pattern?
+        [{ desc = TemplateDecl {
+          parameters = { list = [
+            { desc = { parameter_name = "T" }};
+            { desc = { parameter_name = "Alloc" }}] };
+          decl = { desc = RecordDecl {
+            keyword = Struct;
+            fields = [
+              { desc = Field {
+                  name = "p";
+                  qual_type = { desc =
+                    Pointer { desc = TemplateTypeParm "T" }}}};
+              { desc = Field {
+                  name = "alloc";
+                  qual_type = { desc = TemplateTypeParm "Alloc" };
+                  attributes = [{ desc = Other NoUniqueAddress }] }}] }}}}]]]
+  else Metapp.Stri.of_list []]
+    ]}*)
   | AccessSpecifier of cxx_access_specifier
 (** C++ access specifier.
 
@@ -3995,16 +4369,93 @@ and directive =
       program_context : bool;
       filename : string;
     }
+  | Ifdef of string
+  | Ifndef of string
+  | Endif
 
 and base_specifier = {
-  ident : string;
+  qual_type : qual_type;
+(** Type of the base class.
+    {[
+let example = {|
+class A {};
+class B : A {};
+|}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = RecordDecl { keyword = Class; name = "A" }};
+      { desc = RecordDecl {
+          keyword = Class;
+          name = "B";
+          bases = [{
+            qual_type = { desc = Record { name = IdentifierName "A" }};
+            virtual_base = false;
+            access_specifier = CXXPrivate; }] }}]]
+    ]}*)
   virtual_base : bool;
+(** Determines whether the base is virtual.
+    {[
+let example = {|
+class A {};
+class B : virtual A {};
+|}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = RecordDecl { keyword = Class; name = "A" }};
+      { desc = RecordDecl {
+          keyword = Class;
+          name = "B";
+          bases = [{
+            qual_type = { desc = Record { name = IdentifierName "A" }};
+            virtual_base = true;
+            access_specifier = CXXPrivate; }] }}]]
+    ]}*)
   access_specifier : cxx_access_specifier;
+(** Determines whether the base is private (default), protected or public.
+    {[
+let example = {|
+class A {};
+class B : private A {};
+class C : protected A {};
+class D : public A {};
+|}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = RecordDecl { keyword = Class; name = "A" }};
+      { desc = RecordDecl {
+          keyword = Class;
+          name = "B";
+          bases = [{
+            qual_type = { desc = Record { name = IdentifierName "A" }};
+            virtual_base = false;
+            access_specifier = CXXPrivate; }] }};
+      { desc = RecordDecl {
+          keyword = Class;
+          name = "C";
+          bases = [{
+            qual_type = { desc = Record { name = IdentifierName "A" }};
+            virtual_base = false;
+            access_specifier = CXXProtected; }] }};
+      { desc = RecordDecl {
+          keyword = Class;
+          name = "D";
+          bases = [{
+            qual_type = { desc = Record { name = IdentifierName "A" }};
+            virtual_base = false;
+            access_specifier = CXXPublic; }] }}]]
+    ]}*)
 }
 
 and ident_ref = {
   nested_name_specifier : nested_name_specifier option;
   name : declaration_name;
+  template_arguments : template_argument list;
 }
 (**
     {[
@@ -4081,14 +4532,14 @@ and friend_decl =
 
 and label_ref = string
 
-and enum_constant = (enum_constant_desc, qual_type) open_node
+and enum_constant = enum_constant_desc node
 
 and enum_constant_desc = {
     constant_name : string;
     constant_init : expr option;
   }
 
-and var_decl = (var_decl_desc, qual_type) open_node
+and var_decl = var_decl_desc node
 
 and var_decl_desc = {
     linkage : linkage_kind;
@@ -4096,6 +4547,7 @@ and var_decl_desc = {
     var_type : qual_type;
     var_init : expr option;
     constexpr : bool;
+    attributes : attribute list;
   }
 
 and cxx_method_binding_kind = NonVirtual | Virtual | PureVirtual
@@ -4106,7 +4558,7 @@ and template_parameter_list = {
     requires_clause : expr option;
   }
 
-and template_parameter = (template_parameter_desc, qual_type) open_node
+and template_parameter = template_parameter_desc node
 (** C++ template parameter *)
 
 and template_parameter_desc = {
@@ -4274,18 +4726,16 @@ let () =
 
 (** {3 Translation units} *)
 
-and translation_unit = (translation_unit_desc, qual_type) open_node
+and translation_unit = translation_unit_desc node
 
 and translation_unit_desc = {
     filename : string; items : decl list
   } [@@deriving refl]
 
-type 'a node = ('a, qual_type) open_node
-  [@@deriving refl]
+(** {3 Type loc: source representation of types}
 
-type decoration = qual_type open_decoration
-
-(** {3 Type loc: source representation of types} *)
+    [type_loc] API is now deprecated and is kept for compatibility only.
+    *)
 
 type type_loc = {
     typeloc : (clang_ext_typeloc option [@opaque]);
@@ -4302,8 +4752,8 @@ and type_loc_desc =
     }
 (** Constant array type.
     [size] contains the original expression.
-    By contrast, in the type  {!type:qual_type}, the [size] of [ConstantArray]
-    is computed.
+    In the type  {!type:qual_type}, the [size] of [ConstantArray]
+    is computed but [size_as_expr] contains the original expression.
 
     {[
 let example = {| const int i = 1; int a[i + 1]; |}
@@ -4465,7 +4915,6 @@ let () =
       parameters : parameter list;
     }
 (** Function type.
-    Parameter names are preserved.
 
     {[
 let example = "int (*p)(int x[1 + 1]);"
@@ -4477,10 +4926,14 @@ let () =
       Pointer { desc = FunctionType {
         result = { desc = BuiltinType Int };
         parameters = Some { non_variadic = [
-          { desc = { name = ""; qual_type = { desc =
+          { desc = { name = "x"; qual_type = { desc =
             ConstantArray {
               element = { desc = BuiltinType Int };
-              size = 2; }}}}] }}}}}} as decl]]
+              size = 2;
+              size_as_expr = Some { desc = BinaryOperator {
+              lhs = { desc = IntegerLiteral (Int 1)};
+              kind = Add;
+              rhs = { desc = IntegerLiteral (Int 1)}}}}}}}] }}}}}} as decl]]
   ~result:begin fun bindings ->
     check_result (Pattern.check quote_type_loc
       (Clang.Decl.get_type_loc bindings#decl)
@@ -4525,6 +4978,13 @@ let () =
   | ElaboratedTypeLoc of qual_type
   | UnknownTypeLoc of clang_ext_typeloc_class
         [@@deriving refl]
+end
+
+module Id = Custom (IdNode)
+
+module Lazy = Custom (LazyNode)
+
+include Id
 
 (*{[
 let () =

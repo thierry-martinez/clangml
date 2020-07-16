@@ -69,3 +69,7 @@ val language_of_ids : Clang_ext_languageids.t -> Clang__types.language
 val ids_of_languages : languages -> Clang_ext_languageids.t
 
 val ids_of_language :  Clang__types.language -> Clang_ext_languageids.t
+
+val literal_of_string :
+    ?byte_width:int -> ?string_kind:clang_ext_stringkind -> string ->
+      string_literal

@@ -278,7 +278,7 @@ module Make (Target : Metapp.ValueS) = struct
                 Target.choice
                   (fun () -> [%expr get_cursor_type (get_null_cursor ())])
                   (fun () -> [%pat? _])
-            | Clang.Ast.Refl_opaque_open_decoration ->
+            | Clang.Ast.Refl_opaque_decoration ->
                 Target.choice
                   (fun () ->
                     [%expr Custom { location = None; qual_type = None }])

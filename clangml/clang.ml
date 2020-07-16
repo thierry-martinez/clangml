@@ -1,22 +1,7 @@
 [%%metapackage "metapp"]
 [%%metadir "config/.clangml_config.objs/byte"]
 
-(** Common part of AST node signatures *)
-module type S = sig
-  type t
-
-  val compare : t -> t -> int
-
-  val equal : t -> t -> bool
-
-  val pp : Format.formatter -> t -> unit
-
-  val show : t -> string
-
-  module Set : Set.S with type elt = t
-
-  module Map : Map.S with type key = t
-end
+module type S = Ast_sig.S
 
 [%%metadef
 let node_module s = Ast_helper.Mod.structure [%str
@@ -26,6 +11,8 @@ let node_module s = Ast_helper.Mod.structure [%str
     let compare = Refl.compare [%refl: t] []
 
     let equal = Refl.equal [%refl: t] []
+
+    let hash = Refl.hash [%refl: t] []
 
     let pp = Refl.pp [%refl: t] []
 
@@ -37,6 +24,8 @@ let node_module s = Ast_helper.Mod.structure [%str
   module Set = Set.Make (Self)
 
   module Map = Map.Make (Self)
+
+  module Hashtbl = Hashtbl.Make (Self)
 ]]
 
 module Bindings = struct
@@ -92,23 +81,6 @@ let rec filter_out_prefix_from_list p list =
   | hd :: tl when p hd -> filter_out_prefix_from_list p tl
   | _ -> list
 
-let rec extract_prefix_from_list'
-    (p : 'a -> 'b option) (accu : 'b list) (list : 'a list)
-    : 'b list * 'a list =
-  match
-    match list with
-    | [] -> (None : _ option), []
-    | hd :: tl ->
-        match p hd with
-        | None -> None, list
-        | (Some _) as y -> y, tl
-  with
-  | Some x, tl -> extract_prefix_from_list' p (x :: accu) tl
-  | None, tl -> List.rev accu, tl
-
-let extract_prefix_from_list p list =
-  extract_prefix_from_list' p [] list
-
 (*
 let string_chop_prefix_opt prefix s =
   let prefix_length = String.length prefix in
@@ -135,6 +107,19 @@ let rec get_typedef_underlying_type ?(recursive = false) (t : cxtype) =
   else
     t
 
+let rec get_typedef_underlying_type_loc ?(recursive = false)
+    (t : clang_ext_typeloc) =
+  if ext_type_loc_get_class t = Typedef then
+    let result =
+      ext_typedef_decl_get_underlying_type_loc
+        (get_type_declaration (ext_type_loc_get_type t)) in
+    if recursive then
+      get_typedef_underlying_type_loc ~recursive:true result
+    else
+      result
+  else
+    t
+
 module Init_list = struct
   let syntactic_form cursor =
     let result = ext_init_list_expr_get_syntactic_form cursor in
@@ -154,9 +139,13 @@ module Init_list = struct
     | Semantic -> semantic_form cursor
 end
 
+module Custom (Node : Clang__ast.NodeS) = struct
+
 [%%meta Metapp.Stri.of_list (Metapp.filter.structure Metapp.filter [%str
 module Ast = struct
-  include Clang__ast
+  include Clang__ast.Common
+
+  include Clang__ast.Custom (Node)
 
   let node ?decoration ?cursor ?location ?qual_type desc =
     let decoration : decoration =
@@ -168,18 +157,21 @@ module Ast = struct
     { decoration; desc }
 
   let var
-      ?(linkage = NoLinkage) ?var_init ?(constexpr = false) var_name var_type =
-    { linkage; var_name; var_type; var_init; constexpr }
+      ?(linkage = NoLinkage) ?var_init ?(constexpr = false)
+      ?(attributes = []) var_name var_type =
+    { linkage; var_name; var_type; var_init; constexpr; attributes }
 
   let function_decl
       ?(linkage = NoLinkage) ?body ?(deleted = false) ?(constexpr = false)
-      ?nested_name_specifier function_type name =
-    { linkage; body; deleted; constexpr; function_type; nested_name_specifier;
-      name }
+      ?(inline_specified = false) ?(inlined = false) ?nested_name_specifier
+      ?(attributes = [])
+      function_type name =
+    { linkage; body; deleted; constexpr; inline_specified; inlined;
+      function_type; nested_name_specifier; name; attributes }
 
   let function_type ?(calling_conv = (C : cxcallingconv)) ?parameters
-        ?exception_spec result =
-    { calling_conv; parameters; result; exception_spec; }
+        ?exception_spec ?(ref_qualifier = (None : cxrefqualifierkind)) result =
+    { calling_conv; parameters; result; exception_spec; ref_qualifier }
 
   let parameters ?(variadic = false) non_variadic =
     { variadic; non_variadic }
@@ -187,14 +179,18 @@ module Ast = struct
   let parameter ?default qual_type name =
     { default; qual_type; name }
 
-  let ident_ref ?nested_name_specifier name : ident_ref =
-    { nested_name_specifier; name }
+  let ident_ref ?nested_name_specifier ?(template_arguments = [])
+      name : ident_ref =
+    { nested_name_specifier; name; template_arguments }
 
-  let identifier_name ?nested_name_specifier name =
-    ident_ref ?nested_name_specifier (IdentifierName name)
+  let identifier_name ?nested_name_specifier ?template_arguments name =
+    ident_ref ?nested_name_specifier ?template_arguments (IdentifierName name)
 
   let constant_array ?size_as_expr element size =
     ConstantArray { element; size; size_as_expr }
+
+  let if_ ?init ?condition_variable ?else_branch cond then_branch =
+    If { init; condition_variable; cond; then_branch; else_branch }
 
   let new_instance ?(placement_args = []) ?array_size ?init ?args qual_type =
     let init =
@@ -204,7 +200,7 @@ module Ast = struct
           "Clang.Ast.new_instance: ~init and ~args are mutually exclusive"
       | init, None -> init
       | None, Some args ->
-          Some (node (Construct { qual_type; args; })) in
+          Some (node (Node.from_val (Construct { qual_type; args; }))) in
     New { placement_args; qual_type; array_size; init }
 
   let delete ?(global_delete = false) ?(array_form = false) argument =
@@ -241,6 +237,11 @@ module Ast = struct
   module type OptionsS = sig
     val options : Options.t
   end
+
+  let attribute_of_cxtype cxtype =
+    let attribute_desc : attribute_desc =
+      Other (ext_attributed_type_get_attr_kind cxtype) in
+    node (Node.from_val attribute_desc)
 
   module Converter (Options : OptionsS) = struct
     let options = Options.options
@@ -291,41 +292,72 @@ module Ast = struct
         end ([], []) in
       List.rev acc_match, List.rev acc_others
 
-    let rec convert_nested_name_specifier (name : clang_ext_nestednamespecifier)
+    let rec convert_nested_name_specifier
+        (name : clang_ext_nestednamespecifier)
         : nested_name_specifier option =
-      let rec enumerate accu name (kind : clang_ext_nestednamespecifierkind) =
-        let component =
-          match kind with
-          | Identifier ->
-              let ident = ext_nested_name_specifier_get_as_identifier name in
-              Some (NestedIdentifier ident)
-          | Namespace ->
-              let decl = ext_nested_name_specifier_get_as_namespace name in
-              Some (NamespaceName (get_cursor_spelling decl))
-          | NamespaceAlias ->
-              let decl = ext_nested_name_specifier_get_as_namespace name in
-              Some (NamespaceAliasName (get_cursor_spelling decl))
-          | TypeSpec ->
-              let ty = ext_nested_name_specifier_get_as_type name in
-              Some (TypeSpec (ty |> of_cxtype))
-          | TypeSpecWithTemplate ->
-              let ty = ext_nested_name_specifier_get_as_type name in
-              Some (TypeSpecWithTemplate (ty |> of_cxtype))
-          | Global -> Some Global
-          | InvalidNestedNameSpecifier -> None
-          | Super -> raise Invalid_structure in
+      let rec enumerate accu name =
+        let component = convert_nested_name_specifier_component name in
         match component with
-        | None -> accu
         | Some component ->
             let name = ext_nested_name_specifier_get_prefix name in
             enumerate (component :: accu) name
-              (ext_nested_name_specifier_get_kind name) in
+        | None -> accu in
       match ext_nested_name_specifier_get_kind name with
       | InvalidNestedNameSpecifier -> None
-      | kind -> Some (enumerate [] name kind)
+      | _ -> Some (enumerate [] name)
 
-    and extract_declaration_name cursor =
+    and convert_nested_name_specifier_component
+        (name : clang_ext_nestednamespecifier) =
+      match ext_nested_name_specifier_get_kind name with
+      | Identifier ->
+          let ident =
+            ext_nested_name_specifier_get_as_identifier name in
+          Some (NestedIdentifier ident)
+      | Namespace ->
+          let decl = ext_nested_name_specifier_get_as_namespace name in
+          Some (NamespaceName (get_cursor_spelling decl))
+      | NamespaceAlias ->
+          let decl = ext_nested_name_specifier_get_as_namespace name in
+          Some (NamespaceAliasName (get_cursor_spelling decl))
+      | TypeSpec ->
+          let ty = ext_nested_name_specifier_get_as_type name in
+          Some (TypeSpec (ty |> of_cxtype))
+      | TypeSpecWithTemplate ->
+          let ty = ext_nested_name_specifier_get_as_type name in
+          Some (TypeSpecWithTemplate (ty |> of_cxtype))
+      | Global -> Some Global
+      | InvalidNestedNameSpecifier -> None
+      | Super -> raise Invalid_structure
+
+    and convert_nested_name_specifier_loc
+        (name : clang_ext_nestednamespecifierloc)
+        : nested_name_specifier option =
+      let rec enumerate accu name =
+        let ns = ext_nested_name_specifier_loc_get_nested_name_specifier name in
+        let component =
+          match ext_nested_name_specifier_get_kind ns with
+          | TypeSpec ->
+              let ty = ext_nested_name_specifier_loc_get_as_type_loc name in
+              Some (TypeSpec (ty |> of_type_loc))
+          | TypeSpecWithTemplate ->
+              let ty = ext_nested_name_specifier_loc_get_as_type_loc name in
+              Some (TypeSpecWithTemplate (ty |> of_type_loc))
+          | _ -> convert_nested_name_specifier_component ns in
+        match component with
+        | None -> accu
+        | Some component ->
+            let name = ext_nested_name_specifier_loc_get_prefix name in
+            enumerate (component :: accu) name in
+      match ext_nested_name_specifier_get_kind
+          (ext_nested_name_specifier_loc_get_nested_name_specifier name) with
+      | InvalidNestedNameSpecifier -> None
+      | _ -> Some (enumerate [] name)
+
+    and declaration_name_of_cxcursor cursor =
       let name = ext_decl_get_name cursor in
+      convert_declaration_name name
+
+    and convert_declaration_name name =
       match ext_declaration_name_get_kind name with
       | Identifier ->
           IdentifierName (ext_declaration_name_get_as_identifier name)
@@ -341,7 +373,7 @@ module Ast = struct
       | CXXDeductionGuideName ->
           DeductionGuideName
             (ext_declaration_name_get_cxxdeduction_guide_template name |>
-             (decl_of_cxcursor ~in_record:false))
+             decl_of_cxcursor)
       | CXXOperatorName ->
           OperatorName (ext_declaration_name_get_cxxoverloaded_operator name)
       | CXXLiteralOperatorName ->
@@ -351,10 +383,11 @@ module Ast = struct
 
     and ident_ref_of_cxcursor cursor =
       let nested_name_specifier =
-        cursor |> ext_decl_get_nested_name_specifier |>
-        convert_nested_name_specifier in
-      let name = extract_declaration_name cursor in
-      { nested_name_specifier; name }
+        cursor |> ext_decl_get_nested_name_specifier_loc |>
+        convert_nested_name_specifier_loc in
+      let name = declaration_name_of_cxcursor cursor in
+      let template_arguments = extract_template_arguments cursor in
+      { nested_name_specifier; name; template_arguments }
 
     and make_template_name name =
       match ext_template_name_get_kind name with
@@ -416,7 +449,7 @@ module Ast = struct
           )
       | _ -> raise Invalid_structure
 
-    and of_type_loc type_loc =
+    and of_type_loc (type_loc : clang_ext_typeloc) =
       let unqualify type_loc =
         match ext_type_loc_get_class type_loc with
         | Qualified -> ext_qualified_type_loc_get_unqualified_loc type_loc
@@ -438,10 +471,26 @@ module Ast = struct
               if options.ignore_paren_in_types then
                 ty
               else
-                make_qual_type cxtype type_loc (ParenType ty) in
+                make_qual_type cxtype type_loc
+                  (Node.from_val (ParenType ty)) in
             make_paren, type_loc', cxtype'
         | _ -> Fun.id, type_loc, cxtype in
-      let desc =
+      let desc () =
+        match ext_type_loc_get_class type_loc with
+        | Attributed ->
+            let attribute =
+              if Clangml_config.version.major >= 8 then
+                ext_attributed_type_loc_get_attr type_loc |>
+                attribute_of_cxcursor
+              else
+                attribute_of_cxtype cxtype in
+            Attributed {
+              modified_type =
+                ext_attributed_type_loc_get_modified_loc type_loc |>
+                of_type_loc;
+              attribute
+            }
+        |_ ->
         match get_type_kind cxtype with
         | Invalid -> InvalidType
         | ConstantArray ->
@@ -477,10 +526,14 @@ module Ast = struct
               of_type_loc in
             Pointer pointee
         | LValueReference ->
-            let pointee = cxtype |> get_pointee_type |> of_cxtype in
+            let pointee =
+              ext_pointer_like_type_loc_get_pointee_loc type_loc |>
+              of_type_loc in
             LValueReference pointee
         | RValueReference ->
-            let pointee = cxtype |> get_pointee_type |> of_cxtype in
+            let pointee =
+              ext_pointer_like_type_loc_get_pointee_loc type_loc |>
+              of_type_loc in
             RValueReference pointee
         | Enum ->
             Enum (cxtype |> get_type_declaration |> ident_ref_of_cxcursor)
@@ -491,7 +544,8 @@ module Ast = struct
         | FunctionProto
         | FunctionNoProto ->
             let function_type =
-              cxtype |> function_type_of_cxtype (parameters_of_cxtype cxtype) in
+              type_loc |>
+              function_type_of_type_loc (parameters_of_type_loc type_loc) in
             FunctionType function_type
         | Complex ->
             let element_type = cxtype |> get_element_type |> of_cxtype in
@@ -509,22 +563,23 @@ module Ast = struct
               match ext_type_get_kind cxtype with
               | Elaborated -> (* Here for Clang <3.9.0 *)
                   let nested_name_specifier =
-                    ext_type_get_qualifier cxtype |>
-                    convert_nested_name_specifier in
+                    ext_type_loc_get_qualifier_loc type_loc |>
+                    convert_nested_name_specifier_loc in
                   Elaborated {
                     keyword = ext_elaborated_type_get_keyword cxtype;
                     nested_name_specifier;
-                    named_type = ext_type_get_named_type cxtype |> of_cxtype;
+                    named_type =
+                      ext_elaborated_type_loc_get_named_type_loc type_loc |>
+                      of_type_loc
                   }
-              | Attributed -> (* Here for Clang <8.0.0 *)
-                  Attributed {
-                    modified_type = type_get_modified_type cxtype |> of_cxtype;
-                    attribute_kind = ext_type_get_attribute_kind cxtype;
-                  }
-              | TemplateTypeParm->
-                  TemplateTypeParm (get_type_spelling cxtype);
-              | SubstTemplateTypeParm->
-                  SubstTemplateTypeParm (get_type_spelling cxtype);
+              | TemplateTypeParm ->
+                  TemplateTypeParm
+                    (cxtype |> ext_type_get_unqualified_type |>
+                      get_type_spelling)
+              | SubstTemplateTypeParm ->
+                  SubstTemplateTypeParm
+                    (cxtype |> ext_type_get_unqualified_type |>
+                      get_type_spelling)
               | TemplateSpecialization ->
                   let name =
                     cxtype |>
@@ -541,19 +596,26 @@ module Ast = struct
               | Auto -> Auto
               | PackExpansion ->
                   let pattern =
-                    ext_pack_expansion_get_pattern cxtype |> of_cxtype in
+                    ext_pack_expansion_type_loc_get_pattern_loc type_loc |>
+                    of_type_loc in
                   PackExpansion pattern
               | Decltype ->
                   let sub =
                     ext_decltype_type_get_underlying_expr cxtype |>
                     expr_of_cxcursor in
                   Decltype sub
+              | InjectedClassName ->
+                  let sub =
+              ext_injected_class_name_type_get_injected_specialization_type
+                      cxtype |>
+                    of_cxtype in
+                  InjectedClassName sub
               | kind -> UnexposedType kind
             end in
-      make_paren (make_qual_type cxtype type_loc desc)
+      make_paren (make_qual_type cxtype type_loc (Node.from_fun desc))
 
     and of_cxtype cxtype =
-      let desc =
+      let desc () =
         match get_type_kind cxtype with
         | Invalid -> InvalidType
         | ConstantArray ->
@@ -615,13 +677,18 @@ module Ast = struct
                   }
               | Attributed -> (* Here for Clang <8.0.0 *)
                   Attributed {
-                    modified_type = type_get_modified_type cxtype |> of_cxtype;
-                    attribute_kind = ext_type_get_attribute_kind cxtype;
+                    modified_type =
+                      ext_attributed_type_get_modified_type cxtype |> of_cxtype;
+                    attribute = attribute_of_cxtype cxtype;
                   }
-              | TemplateTypeParm->
-                  TemplateTypeParm (get_type_spelling cxtype);
-              | SubstTemplateTypeParm->
-                  SubstTemplateTypeParm (get_type_spelling cxtype);
+              | TemplateTypeParm ->
+                  TemplateTypeParm
+                    (cxtype |> ext_type_get_unqualified_type |>
+                      get_type_spelling)
+              | SubstTemplateTypeParm ->
+                  SubstTemplateTypeParm
+                    (cxtype |> ext_type_get_unqualified_type |>
+                      get_type_spelling)
               | TemplateSpecialization ->
                   let name =
                     cxtype |>
@@ -645,29 +712,38 @@ module Ast = struct
                     ext_decltype_type_get_underlying_expr cxtype |>
                     expr_of_cxcursor in
                   Decltype sub
+              | InjectedClassName ->
+                  let sub =
+              ext_injected_class_name_type_get_injected_specialization_type
+                      cxtype |>
+                    of_cxtype in
+                  InjectedClassName sub
               | kind -> UnexposedType kind
             end in
-      match desc with
-      | ParenType inner when options.ignore_paren_in_types ->
-          { inner with cxtype }
-      | _ ->
-          { cxtype; type_loc = None; desc;
-            const = is_const_qualified_type cxtype;
-            volatile = is_volatile_qualified_type cxtype;
-            restrict = is_restrict_qualified_type cxtype; }
+      if options.ignore_paren_in_types &&
+        ext_type_get_kind cxtype = Paren then
+        let inner = cxtype |> ext_get_inner_type |> of_cxtype in
+        { inner with cxtype }
+      else
+        { cxtype; type_loc = None; desc = Node.from_fun desc;
+          const = is_const_qualified_type cxtype;
+          volatile = is_volatile_qualified_type cxtype;
+          restrict = is_restrict_qualified_type cxtype; }
 
-    and decl_of_cxcursor ?in_record cursor =
-      node ~cursor (decl_desc_of_cxcursor ?in_record cursor)
+    and decl_of_cxcursor cursor =
+      node ~cursor
+        (Node.from_fun (fun () -> decl_desc_of_cxcursor cursor))
 
-    and decl_desc_of_cxcursor ?(in_record = false) cursor =
+    and decl_desc_of_cxcursor cursor =
       try
         match get_cursor_kind cursor with
         | FunctionDecl ->
-            function_decl_of_cxcursor cursor (list_of_children cursor)
+            Function
+              (function_decl_of_cxcursor cursor (list_of_children cursor))
         | FunctionTemplate ->
             make_template cursor begin
-              cxxmethod_decl_of_cxcursor ~can_be_function:(not in_record)
-                cursor
+              decl_desc_of_cxcursor
+                (ext_template_decl_get_templated_decl cursor)
             end
         | CXXMethod
         | ConversionFunction -> cxxmethod_decl_of_cxcursor cursor
@@ -677,18 +753,18 @@ module Ast = struct
         | ClassDecl -> record_decl_of_cxcursor Class cursor
         | ClassTemplate ->
             let keyword =
-              ext_class_template_decl_get_templated_decl cursor |>
+              ext_template_decl_get_templated_decl cursor |>
               ext_tag_decl_get_tag_kind in
             make_template cursor
               (record_decl_of_cxcursor keyword cursor)
         | ClassTemplatePartialSpecialization ->
             let keyword = ext_tag_decl_get_tag_kind cursor in
-            let decl = record_decl_of_cxcursor keyword cursor in
+            let decl () = record_decl_of_cxcursor keyword cursor in
             let result =
             TemplatePartialSpecialization
               { parameters = extract_template_parameters cursor;
                 arguments = extract_template_arguments cursor;
-                decl = node ~cursor decl } in
+                decl = node ~cursor (Node.from_fun decl) } in
             result
         | EnumDecl -> enum_decl_of_cxcursor cursor
         | TypedefDecl ->
@@ -710,20 +786,14 @@ module Ast = struct
             let init =
               ext_field_decl_get_in_class_initializer cursor |>
               option_cursor expr_of_cxcursor in
-            let attributes =
-              if ext_decl_has_attrs cursor then
-                List.init (ext_decl_get_attr_count cursor)
-                  (fun i -> attribute_of_cxcursor
-                     (ext_decl_get_attr cursor i))
-              else
-                [] in
+            let attributes = attributes_of_decl cursor in
             Field { name; qual_type; bitwidth; init; attributes }
         | CXXAccessSpecifier ->
             AccessSpecifier (cursor |> get_cxxaccess_specifier)
         | UsingDirective ->
             let nested_name_specifier =
-              cursor |> ext_decl_get_nested_name_specifier |>
-              convert_nested_name_specifier in
+              cursor |> ext_decl_get_nested_name_specifier_loc |>
+              convert_nested_name_specifier_loc in
             let namespace =
               ext_using_directive_decl_get_nominated_namespace cursor |>
               decl_of_cxcursor in
@@ -819,15 +889,15 @@ module Ast = struct
             | VarTemplate ->
                 make_template cursor begin
                   Var (var_decl_desc_of_cxcursor
-                    (cursor |> ext_var_template_decl_get_templated_decl))
+                    (cursor |> ext_template_decl_get_templated_decl))
                 end
             | TypeAliasTemplate ->
                 (* No TypeAliasTemplateDecl : cxcursortype in Clang <3.8.0 *)
                 make_template cursor begin
                   let ident_ref = ident_ref_of_cxcursor cursor in
-                  let qual_type = cursor |>
-                  ext_type_alias_template_decl_get_templated_decl |>
-                  get_typedef_decl_underlying_type |> of_cxtype in
+                  let qual_type =
+                    cursor |> ext_template_decl_get_templated_decl |>
+                    get_typedef_decl_underlying_type |> of_cxtype in
                   TypeAlias { ident_ref; qual_type }
                 end
             | Decomposition
@@ -843,7 +913,7 @@ module Ast = struct
                     (ext_decomposition_decl_get_bindings_count cursor)
                     begin fun i ->
                       ext_decomposition_decl_get_bindings cursor i |>
-                      extract_declaration_name
+                      declaration_name_of_cxcursor
                     end;
                   init;
                 }
@@ -851,7 +921,7 @@ module Ast = struct
                 [@if [%meta Metapp.Exp.of_bool
                   (Clangml_config.version.major >= 9)]] ->
                 let parameters = extract_template_parameters cursor in
-                let name = extract_declaration_name cursor in
+                let name = declaration_name_of_cxcursor cursor in
                 let constraint_expr =
                   cursor |> ext_concept_decl_get_constraint_expr |>
                   expr_of_cxcursor in
@@ -884,17 +954,17 @@ module Ast = struct
         None
 
     and parameter_of_cxcursor cursor =
-      let namespaces, others = list_of_children cursor |>
-        extract begin fun c : string option ->
-          match get_cursor_kind c with
-          | NamespaceRef -> Some (get_cursor_spelling c)
-          | _ -> None
-        end in
-      let others = others |> filter_out_ref in
-      let qual_type =
-        cursor |> ext_declarator_decl_get_type_loc |> of_type_loc in
-      node ~cursor {
-          name = cursor |> get_cursor_spelling;
+      let desc () =
+        let namespaces, others = list_of_children cursor |>
+          extract begin fun c : string option ->
+            match get_cursor_kind c with
+            | NamespaceRef -> Some (get_cursor_spelling c)
+            | _ -> None
+          end in
+        let others = others |> filter_out_ref in
+        let qual_type =
+          cursor |> ext_declarator_decl_get_type_loc |> of_type_loc in
+        { name = cursor |> get_cursor_spelling;
           qual_type;
           default =
             if ext_var_decl_has_init cursor then
@@ -904,91 +974,113 @@ module Ast = struct
                 | default :: _ -> default in
               Some (default |> expr_of_cxcursor)
             else
-              None }
+              None } in
+      node ~cursor (Node.from_fun desc)
 
     and function_type_of_decl cursor =
-      (* Hack for Clang 3.4 and 3.5! See current_decl declaration. *)
-      current_decl := cursor;
-      cursor |> get_cursor_type |>
-        function_type_of_cxtype (parameters_of_function_decl_or_proto cursor)
+      cursor |> ext_declarator_decl_get_type_loc |>
+        function_type_of_type_loc (parameters_of_function_decl_or_proto cursor)
 
     and function_decl_of_cxcursor cursor children =
-      let linkage = cursor |> get_cursor_linkage in
+      let cursor =
+        match get_cursor_kind cursor with
+        | FunctionTemplate ->
+            ext_template_decl_get_templated_decl cursor
+        | _ ->
+            cursor in
+      (* Hack for Clang 3.4 and 3.5! See current_decl declaration. *)
+      current_decl := cursor;
       let nested_name_specifier =
-        cursor |> ext_decl_get_nested_name_specifier |>
-        convert_nested_name_specifier in
-      let function_type = function_type_of_decl cursor in
-      let name = extract_declaration_name cursor in
+        cursor |> ext_decl_get_nested_name_specifier_loc |>
+        convert_nested_name_specifier_loc in
+      let name = declaration_name_of_cxcursor cursor in
       let body : stmt option =
         match List.rev children with
         | last :: _ -> function_body_of_cxcursor last
         | _ -> None in
-      Clang__ast.Function { linkage; function_type;
+      {
+        linkage = get_cursor_linkage cursor;
+        function_type = function_type_of_decl cursor;
         nested_name_specifier; name; body;
         deleted = ext_function_decl_is_deleted cursor;
-        constexpr = ext_function_decl_is_constexpr cursor; }
+        constexpr = ext_function_decl_is_constexpr cursor;
+        attributes = attributes_of_decl cursor;
+        inline_specified = ext_function_decl_is_inline_specified cursor;
+        inlined = ext_function_decl_is_inlined cursor;
+      }
 
-    and cxxmethod_decl_of_cxcursor ?(can_be_function = false) cursor =
-      let function_type = function_type_of_decl cursor in
-      let name = extract_declaration_name cursor in
+    and attributes_of_decl cursor =
+      if ext_decl_has_attrs cursor then
+        List.init (ext_decl_get_attr_count cursor)
+          (fun i -> attribute_of_cxcursor (ext_decl_get_attr cursor i))
+      else
+        []
+
+    and cxxmethod_decl_of_cxcursor cursor =
       let children =
         list_of_children cursor |>
         filter_out_prefix_from_list is_template_parameter in
-      let type_ref : qual_type option =
-        match children with
-        | type_ref :: _ when get_cursor_kind type_ref = TypeRef ->
-            Some (type_ref |> get_cursor_type |> of_cxtype)
-        | _ -> None in
-      let body : stmt option =
-        match List.rev children with
-        | [] -> None
-        | body :: _ -> function_body_of_cxcursor body in
-      let deleted = ext_function_decl_is_deleted cursor in
-      let constexpr = ext_function_decl_is_constexpr cursor in
-      let nested_name_specifier =
-        cursor |> ext_decl_get_nested_name_specifier |>
-        convert_nested_name_specifier in
-      let linkage = cursor |> get_cursor_linkage in
-      let function_decl = {
-        linkage; function_type; nested_name_specifier; name; body; deleted;
-        constexpr } in
-      if can_be_function && type_ref = None then
-        Function function_decl
-      else
-        CXXMethod {
-          type_ref; function_decl;
-          defaulted = ext_cxxmethod_is_defaulted cursor;
-          static = cxxmethod_is_static cursor;
-          binding =
-            if cxxmethod_is_pure_virtual cursor then
-              PureVirtual
-            else if cxxmethod_is_virtual cursor then
-              Virtual
-            else
-              NonVirtual;
-          const = ext_cxxmethod_is_const cursor;
-        }
+      let type_ref =
+        ext_cxxmethod_decl_get_parent cursor |>
+        get_cursor_type |> of_cxtype in
+      let function_decl = function_decl_of_cxcursor cursor children in
+      CXXMethod {
+        type_ref; function_decl;
+        defaulted = ext_cxxmethod_is_defaulted cursor;
+        static = cxxmethod_is_static cursor;
+        binding =
+          if cxxmethod_is_pure_virtual cursor then
+            PureVirtual
+          else if cxxmethod_is_virtual cursor then
+            Virtual
+          else
+            NonVirtual;
+        const = ext_cxxmethod_is_const cursor;
+      }
 
     and parameters_of_cxtype cxtype =
       if cxtype |> get_type_kind = FunctionProto then
         let non_variadic =
           List.init (get_num_arg_types cxtype) @@ fun i ->
             let qual_type = of_cxtype (get_arg_type cxtype i) in
-            node ~qual_type {
-              name = ""; qual_type; default = None } in
+            let desc () = { name = ""; qual_type; default = None } in
+            node ~qual_type (Node.from_fun desc) in
+        let variadic = is_function_type_variadic cxtype in
+        Some { non_variadic; variadic }
+      else
+        None
+
+    and parameters_of_type_loc type_loc =
+      let cxtype = ext_type_loc_get_type type_loc in
+      if cxtype |> get_type_kind = FunctionProto then
+        let non_variadic =
+          List.init (get_num_arg_types cxtype) @@ fun i ->
+            parameter_of_cxcursor
+              (ext_function_type_loc_get_param type_loc i) in
         let variadic = is_function_type_variadic cxtype in
         Some { non_variadic; variadic }
       else
         None
 
     and function_type_of_cxtype parameters cxtype =
-      let calling_conv = cxtype |> get_function_type_calling_conv in
       let result = cxtype |> get_result_type |> of_cxtype in
+      function_type_of_cxtype_result parameters cxtype result
+
+    and function_type_of_cxtype_result parameters cxtype result =
+      let calling_conv = cxtype |> get_function_type_calling_conv in
       let exception_spec : exception_spec option =
         extract_exception_spec cxtype in
-      { calling_conv; result; parameters; exception_spec; }
+      let ref_qualifier = cxtype |> type_get_cxxref_qualifier in
+      { calling_conv; result; parameters; exception_spec; ref_qualifier }
+
+    and function_type_of_type_loc parameters type_loc =
+      let cxtype = ext_type_loc_get_type type_loc in
+      let result =
+        type_loc |> ext_function_type_loc_get_return_loc |> of_type_loc in
+      function_type_of_cxtype_result parameters cxtype result
 
     and extract_exception_spec cxtype =
+      let _t = ext_function_proto_type_get_exception_spec_type cxtype in
       match ext_function_proto_type_get_exception_spec_type cxtype with
       | NoExceptionSpecification -> None
       | DynamicNone -> Some (Throw [])
@@ -1017,7 +1109,7 @@ module Ast = struct
       | other -> Some (Other other)
 
     and var_decl_of_cxcursor cursor =
-      node ~cursor (var_decl_desc_of_cxcursor cursor)
+      node ~cursor (Node.from_fun (fun () -> var_decl_desc_of_cxcursor cursor))
 
     and var_decl_desc_of_cxcursor cursor =
       let children =
@@ -1035,7 +1127,8 @@ module Ast = struct
         else
           None in
       { linkage; var_name; var_type; var_init;
-        constexpr = ext_var_decl_is_constexpr cursor }
+        constexpr = ext_var_decl_is_constexpr cursor;
+        attributes = attributes_of_decl cursor; }
 
     and enum_decl_of_cxcursor cursor =
       let name = get_cursor_spelling cursor in
@@ -1048,13 +1141,15 @@ module Ast = struct
       EnumDecl { name; constants; complete_definition }
 
     and enum_constant_of_cxcursor cursor =
-      let constant_name = get_cursor_spelling cursor in
-      let constant_init =
-        match filter_out_attributes (list_of_children cursor) with
-        | [init] -> Some (expr_of_cxcursor init)
-        | [] -> None
-        | _ -> raise Invalid_structure in
-      node ~cursor { constant_name; constant_init }
+      let desc () =
+        let constant_name = get_cursor_spelling cursor in
+        let constant_init =
+          match filter_out_attributes (list_of_children cursor) with
+          | [init] -> Some (expr_of_cxcursor init)
+          | [] -> None
+          | _ -> raise Invalid_structure in
+        { constant_name; constant_init } in
+      node ~cursor (Node.from_fun desc)
 
     and base_specifier_of_cxcursor_opt cursor =
       match get_cursor_kind cursor with
@@ -1062,30 +1157,16 @@ module Ast = struct
       | _ -> None
 
     and base_specifier_of_cxcursor cursor =
-      { ident = get_cursor_spelling cursor;
+      { qual_type = of_type_loc (ext_cursor_get_type_loc cursor);
         virtual_base = is_virtual_base cursor;
         access_specifier = get_cxxaccess_specifier cursor;
       }
 
     and attribute_of_cxcursor (cursor : cxcursor) : attribute =
-      let desc =
-        match ext_attr_get_kind cursor with
-        | Aligned ->
-            let argument =
-              if ext_aligned_attr_is_alignment_expr cursor then
-                let expr = ext_aligned_attr_get_alignment_expr cursor in
-                expr_of_cxcursor expr
-              else
-                failwith "attribute_of_cxcursor" in
-            Aligned argument
-        | WarnUnusedResult ->
-            WarnUnusedResult {
-              spelling =
-                ext_warn_unused_result_attr_get_semantic_spelling cursor;
-              message = ext_warn_unused_result_attr_get_message cursor;
-            }
-        | other -> Other other in
-      node ~cursor desc
+      let desc () =
+        Attributes.convert cursor expr_of_cxcursor of_type_loc
+          convert_declaration_name in
+      node ~cursor (Node.from_fun desc)
 
     and attribute_of_cxcursor_opt cursor : attribute option =
       let kind = get_cursor_kind cursor in
@@ -1103,8 +1184,8 @@ module Ast = struct
         filter_out_prefix_from_list is_template_parameter in
       let name = get_cursor_spelling cursor in
       let nested_name_specifier =
-        cursor |> ext_decl_get_nested_name_specifier |>
-        convert_nested_name_specifier in
+        cursor |> ext_decl_get_nested_name_specifier_loc |>
+        convert_nested_name_specifier_loc in
       let final, children =
         match children with
         | attr :: tl when get_cursor_kind attr = CXXFinalAttr -> true, tl
@@ -1132,10 +1213,10 @@ module Ast = struct
         complete_definition }
 
     and fields_of_children children =
-      children |> List.map (decl_of_cxcursor ~in_record:true)
+      children |> List.map decl_of_cxcursor
 
     and stmt_of_cxcursor cursor =
-      let desc =
+      let desc () =
         try
           match get_cursor_kind cursor with
           | NullStmt ->
@@ -1288,14 +1369,17 @@ module Ast = struct
           | MSAsmStmt ->
               Asm (asm_of_cxcursor MS cursor)
           | CXXForRangeStmt ->
-              let var, range, body =
-                match list_of_children cursor with
-                | [var; range; body] ->
-                    var |> var_decl_of_cxcursor,
-                    range |> expr_of_cxcursor,
-                    body |> stmt_of_cxcursor
-                | _ -> raise Invalid_structure in
-              ForRange { var; range; body }
+              ForRange {
+                var =
+                  ext_cxxfor_range_stmt_get_loop_variable cursor |>
+                  var_decl_of_cxcursor;
+                range =
+                  ext_cxxfor_range_stmt_get_range_init cursor |>
+                  expr_of_cxcursor;
+                body =
+                  ext_cxxfor_range_stmt_get_body cursor |>
+                  stmt_of_cxcursor;
+              }
           | CXXTryStmt ->
               let try_block, handlers =
                 match list_of_children cursor with
@@ -1308,23 +1392,26 @@ module Ast = struct
               begin
                 match ext_stmt_get_kind cursor with
                 | AttributedStmt ->
+                    let attributes =
+                      list_of_iter (ext_attributed_stmt_get_attrs cursor) |>
+                      List.map attribute_of_cxcursor in
                     AttributedStmt {
-                      attributes = List.init
-                        (ext_attributed_stmt_get_attribute_count cursor)
-                        (ext_attributed_stmt_get_attribute_kind cursor);
+                      attributes;
                       sub_stmts =
                         list_of_children cursor |> List.map stmt_of_cxcursor;
                     }
                 | _ -> raise Invalid_structure
               end
-          | _ -> Decl [node ~cursor (decl_desc_of_cxcursor cursor)]
+          | _ ->
+              let decl_desc = decl_desc_of_cxcursor cursor in
+              match decl_desc with
+              | UnknownDecl _ ->
+                  Expr (expr_of_cxcursor cursor)
+              | _ ->
+                  Decl [node ~cursor (Node.from_val decl_desc)]
         with Invalid_structure ->
           UnknownStmt (get_cursor_kind cursor, ext_stmt_get_kind cursor) in
-      match desc with
-      | Decl [{ desc = UnknownDecl _ }] ->
-          let expr = expr_of_cxcursor cursor in
-          node ~decoration:expr.decoration (Expr expr)
-      | _ -> node ~cursor desc
+      node ~cursor (Node.from_fun desc)
 
     and catch_of_cxcursor cursor : catch =
       match list_of_children cursor with
@@ -1355,13 +1442,15 @@ module Ast = struct
     }
 
     and expr_of_cxcursor cursor =
-      match expr_desc_of_cxcursor cursor with
-      | Paren subexpr when options.ignore_paren ->
-          node ~cursor subexpr.desc
-      | Cast { kind = Implicit; operand }
-        when options.ignore_implicit_cast ->
-          node ~cursor operand.desc
-      | desc -> node ~cursor desc
+      let desc () =
+        match expr_desc_of_cxcursor cursor with
+        | Paren subexpr when options.ignore_paren ->
+            Node.force subexpr.desc
+        | Cast { kind = Implicit; operand }
+          when options.ignore_implicit_cast ->
+            Node.force operand.desc
+        | desc -> desc in
+      node ~cursor (Node.from_fun desc)
 
     and expr_desc_of_cxcursor cursor =
       let kind = get_cursor_kind cursor in
@@ -1561,7 +1650,8 @@ module Ast = struct
                     expr_of_cxcursor
                   end in
               let qual_type =
-                cursor |> ext_cxxnew_expr_get_allocated_type |> of_cxtype in
+                cursor |> ext_cxxnew_expr_get_allocated_type_loc |>
+                of_type_loc in
               let array_size =
                 cursor |> ext_cxxnew_expr_get_array_size |>
                 option_cursor expr_of_cxcursor in
@@ -1582,7 +1672,7 @@ module Ast = struct
             let argument =
               if ext_cxxtypeid_expr_is_type_operand cursor then
                 ArgumentType (ext_cxxtypeid_expr_get_type_operand cursor |>
-                  of_cxtype)
+                  of_type_loc)
               else
                 ArgumentExpr (ext_cxxtypeid_expr_get_expr_operand cursor |>
                   expr_of_cxcursor) in
@@ -1642,7 +1732,7 @@ module Ast = struct
                     | [sub] -> expr_of_cxcursor sub
                     | _ -> raise Invalid_structure in
                   if options.ignore_expr_with_cleanups then
-                    sub.desc
+                    Node.force sub.desc
                   else
                     ExprWithCleanups sub
               | MaterializeTemporaryExpr ->
@@ -1651,7 +1741,7 @@ module Ast = struct
                     | [sub] -> expr_of_cxcursor sub
                     | _ -> raise Invalid_structure in
                   if options.ignore_materialize_temporary_expr then
-                    sub.desc
+                    Node.force sub.desc
                   else
                     MaterializeTemporaryExpr sub
               | CXXBindTemporaryExpr ->
@@ -1660,7 +1750,7 @@ module Ast = struct
                     | [sub] -> expr_of_cxcursor sub
                     | _ -> raise Invalid_structure in
                   if options.ignore_bind_temporary_expr then
-                    sub.desc
+                    Node.force sub.desc
                   else
                     BindTemporaryExpr sub
               | CXXDefaultArgExpr ->
@@ -1757,12 +1847,12 @@ module Ast = struct
       | CXXPseudoDestructorExpr ->
           PseudoDestructor {
             nested_name_specifier =
-              ext_decl_get_nested_name_specifier cursor |>
-              convert_nested_name_specifier;
+              ext_decl_get_nested_name_specifier_loc cursor |>
+              convert_nested_name_specifier_loc;
             qual_type =
               cursor |>
-              ext_cxxpseudo_destructor_expr_get_destroyed_type |>
-              of_cxtype }
+              ext_cxxpseudo_destructor_expr_get_destroyed_type_loc |>
+              of_type_loc }
       | CXXDependentScopeMemberExpr ->
           DependentScopeMember {
             ident_ref = ident_ref_of_cxcursor cursor;
@@ -1772,15 +1862,18 @@ module Ast = struct
           UnresolvedMember (ident_ref_of_cxcursor cursor)
       | _ ->
           let field = get_cursor_referenced cursor in
-          let ident = ident_ref_of_cxcursor field in
-          FieldName (node ~cursor:field ident)
+          let ident () = ident_ref_of_cxcursor field in
+          FieldName (node ~cursor:field (Node.from_fun ident))
 
     and cast_of_cxcursor kind cursor =
       let operand =
         match List.rev (list_of_children cursor) with
         | operand :: _ -> expr_of_cxcursor operand
         | _ -> raise Invalid_structure in
-      let qual_type = get_cursor_type cursor |> of_cxtype in
+      let qual_type =
+        match kind with
+        | Implicit -> get_cursor_type cursor |> of_cxtype
+        | _ -> ext_cursor_get_type_loc cursor |> of_type_loc in
       Cast { kind; qual_type; operand }
 
     and option_call_expr_of_cxcursor cursor =
@@ -1794,11 +1887,8 @@ module Ast = struct
 
     and lambda_expr_of_cxcursor cursor =
       let captures =
-        List.init (ext_lambda_expr_get_capture_count cursor)
-          begin fun i ->
-            ext_lambda_expr_get_capture cursor i |>
-            lambda_capture_of_capture
-          end in
+        list_of_iter (ext_lambda_expr_get_captures cursor) |>
+        List.map lambda_capture_of_capture in
       let children = list_of_children cursor in
       let parameters, children =
         if ext_lambda_expr_has_explicit_parameters cursor then
@@ -1809,8 +1899,9 @@ module Ast = struct
       let result_type =
         if ext_lambda_expr_has_explicit_result_type cursor then
           Some (
-            cursor |> ext_lambda_expr_get_call_operator |> get_cursor_type |>
-              get_result_type |> of_cxtype)
+            cursor |> ext_lambda_expr_get_call_operator |>
+              ext_declarator_decl_get_type_loc |>
+              ext_function_type_loc_get_return_loc |> of_type_loc)
         else
           None in
       let body =
@@ -1849,7 +1940,7 @@ module Ast = struct
       let argument =
         if cursor |> ext_unary_expr_is_argument_type then
           let qual_type =
-            cursor |> ext_unary_expr_get_argument_type |> of_cxtype in
+            cursor |> ext_unary_expr_get_argument_type_loc |> of_type_loc in
           ArgumentType qual_type
         else
           match list_of_children cursor with
@@ -1894,11 +1985,12 @@ module Ast = struct
       with
       | None -> raise Invalid_structure
       | Some parameter_kind ->
-          let parameter_name = get_cursor_spelling cursor in
-          let parameter_pack =
-            ext_template_parm_is_parameter_pack cursor in
-          node ~cursor
-            { parameter_name; parameter_kind; parameter_pack}
+          let desc () =
+            let parameter_name = get_cursor_spelling cursor in
+            let parameter_pack =
+              ext_template_parm_is_parameter_pack cursor in
+            { parameter_name; parameter_kind; parameter_pack} in
+          node ~cursor (Node.from_fun desc)
 
     and extract_template_parameters cursor =
       extract_template_parameter_list
@@ -1948,12 +2040,16 @@ ext_expr_requirement_return_type_get_type_constraint_template_parameter_list
       let parameters = extract_template_parameters cursor in
       match parameters with
       | { list = []; requires_clause = None } when optional -> body
-      | _ -> TemplateDecl { parameters; decl = node ~cursor body }
+      | _ ->
+          TemplateDecl
+            { parameters; decl = node ~cursor (Node.from_val body) }
 
     let translation_unit_of_cxcursor cursor =
-      let filename = get_cursor_spelling cursor in
-      let items = list_of_children cursor |> List.map decl_of_cxcursor in
-      node ~cursor { filename; items }
+      let desc () =
+        let filename = get_cursor_spelling cursor in
+        let items = list_of_children cursor |> List.map decl_of_cxcursor in
+        { filename; items } in
+      node ~cursor (Node.from_fun desc)
 
     let of_cxtranslationunit tu =
       translation_unit_of_cxcursor (get_translation_unit_cursor tu)
@@ -2044,6 +2140,10 @@ ext_expr_requirement_return_type_get_type_constraint_template_parameter_list
   let of_cxtype ?(options = Options.default) tu =
     let module Convert = Converter (struct let options = options end) in
     Convert.of_cxtype tu
+
+  let of_type_loc ?(options = Options.default) tu =
+    let module Convert = Converter (struct let options = options end) in
+    Convert.of_type_loc tu
 
   let of_cxtranslationunit ?(options = Options.default) tu =
     let module Convert = Converter (struct let options = options end) in
@@ -2137,10 +2237,22 @@ void f(void) {
       |} (Format.pp_print_list Printer.decl) context line filename s in
     let ast = Ast.parse_string ?index ?clang_options ?options code in
     let expr =
-      match ast.desc.items with
-      | [{ desc = Function { body = Some { desc = Compound stmts; _}; _}; _}] ->
-          begin match List.rev stmts with
-          | { desc = Expr e; _} :: _ -> Some e
+      match (Node.force ast.desc).items with
+      | [{ desc; _}] ->
+          begin match Node.force desc with
+          | Function { body = Some { desc; _}; _} ->
+              begin match Node.force desc with
+              | Compound stmts ->
+                  begin match List.rev stmts with
+                  | { desc; _} :: _ ->
+                      begin match Node.force desc with
+                      | Expr e -> Some e
+                      | _ -> None
+                      end
+                  | _ -> None
+                  end
+              | _ -> None
+              end
           | _ -> None
           end
       | _ -> None in
@@ -2152,7 +2264,7 @@ module Type_loc = [%meta node_module [%str
 
   let to_qual_type ?options (t : t) =
     match t.typeloc with
-    | Some tl -> tl |> ext_type_loc_get_type |> Ast.of_cxtype ?options
+    | Some tl -> Ast.of_type_loc ?options tl
     | None -> get_cursor_type (get_null_cursor ()) |> Ast.of_cxtype ?options
 
   let of_typeloc ?(options = Ast.Options.default) typeloc =
@@ -2169,13 +2281,13 @@ module Decl = [%meta node_module [%str
 
   let get_typedef_underlying_type ?options ?(recursive = false) decl =
     let result =
-      decl |> Ast.cursor_of_node |> get_typedef_decl_underlying_type in
+      decl |> Ast.cursor_of_node |> ext_typedef_decl_get_underlying_type_loc in
     let result =
       if recursive then
-        get_typedef_underlying_type ~recursive:true result
+        get_typedef_underlying_type_loc ~recursive:true result
       else
         result in
-    Ast.of_cxtype ?options result
+    Ast.of_type_loc ?options result
 
   let get_field_bit_width field =
     field |> Ast.cursor_of_node |> get_field_decl_bit_width
@@ -2212,6 +2324,8 @@ module Type = [%meta node_module [%str
       const; volatile; restrict; desc }
 
   let of_cxtype = Ast.of_cxtype
+
+  let of_type_loc = Ast.of_type_loc
 
   let of_cursor ?options cursor =
     get_cursor_type cursor |> of_cxtype ?options
@@ -2280,4 +2394,10 @@ module Translation_unit = [%meta node_module [%str
   let make ?(filename = "") items : Ast.translation_unit_desc =
     { filename; items }
 ]]
+end
 
+module Id = Custom (Clang__ast.IdNode)
+
+module Lazy = Custom (Clang__ast.LazyNode)
+
+include Id

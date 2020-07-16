@@ -384,7 +384,8 @@ AS_IF([test -d clangml],
      AC_CP([$srcdir/clangml/stubgen.h], [clangml/])
      AC_CP([$srcdir/clangml/libclang_extensions.cpp], [clangml/])
      AC_CP([$srcdir/clangml/libclang_extensions.h], [clangml/])
-     AC_CP([$srcdir/clangml/clangml_OperationKinds.def], [clangml/])],
+     AC_CP([$srcdir/clangml/clangml_OperationKinds.def], [clangml/])
+     AC_CP([$srcdir/clangml/ast_sig.ml], [clangml/])],
     [AC_MSG_ERROR([[cannot create directory clangml/]])])])
 
 AS_IF([test -d ppx],
@@ -412,6 +413,12 @@ AS_IF([test -d tools/common],
      AC_CP([$srcdir/tools/common/clangml_tools_common.ml], [tools/common/])
      AC_CP([$srcdir/tools/common/clangml_tools_common.mli], [tools/common/])])])
 
+AS_IF([test -d tools/stubgen_common],
+  [true],
+  [AS_IF([mkdir tools/stubgen_common],
+    [AC_CP([$srcdir/tools/stubgen_common/dune], [tools/stubgen_common/])
+     AC_CP([$srcdir/tools/stubgen_common/stubgen_common.ml], [tools/stubgen_common/])])])
+
 AS_IF([test -d tools/stubgen],
   [true],
   [AS_IF([mkdir tools/stubgen],
@@ -435,6 +442,12 @@ AS_IF([test -d tools/print_tree],
   [AS_IF([mkdir tools/print_tree],
     [AC_CP([$srcdir/tools/print_tree/dune], [tools/print_tree/])
      AC_CP([$srcdir/tools/print_tree/print_tree.ml], [tools/print_tree/])])])
+
+AS_IF([test -d tools/generate_attrs],
+  [true],
+  [AS_IF([mkdir tools/generate_attrs],
+    [AC_CP([$srcdir/tools/generate_attrs/dune], [tools/generate_attrs/])
+     AC_CP([$srcdir/tools/generate_attrs/generate_attrs.ml], [tools/generate_attrs/])])])
 
 AS_IF([test -d tests],
   [true],
@@ -464,6 +477,16 @@ AC_CP([$srcdir/bootstrap/$EQUIVALENT_LLVM_VERSION/clang__bindings.mli],
 
 AC_CP([$srcdir/bootstrap/$EQUIVALENT_LLVM_VERSION/clang_stubs.c],
   [clangml/clang_stubs.c])
+
+AC_CP([$srcdir/bootstrap/attributes.ml], [clangml/attributes.ml])
+
+AC_CP(
+  [$srcdir/bootstrap/libclang_extensions_attrs_headers.inc],
+  [clangml/libclang_extensions_attrs_headers.inc])
+
+AC_CP(
+  [$srcdir/bootstrap/libclang_extensions_attrs.inc],
+  [clangml/libclang_extensions_attrs.inc])
 
 AC_CONFIG_FILES([
   Makefile

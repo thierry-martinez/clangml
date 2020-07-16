@@ -100,9 +100,12 @@ $(foreach dune_file, $(dune_files) $(tools_exe), $(eval $(foreach_dune_file)))
 
 # Targets for bootstrapping bindings
 
-current/clang__bindings.ml : tools/stubgen
+.PHONY: current
+current:
 	$(DUNE_PREFIX)/$(foreach tool,stubgen,$(tool_exe)) \
 		--llvm-config $(LLVM_CONFIG) current/
+
+current/clang__bindings.ml : tools/stubgen current
 
 current/clang__bindings.mli : current/clang__bindings.ml
 

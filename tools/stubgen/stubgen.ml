@@ -439,27 +439,6 @@ let int64_type_info =
 
 let defined_set_of = String_hashtbl.create 17
 
-let uncamelcase s =
-  let result = Buffer.create 17 in
-  let previous_lowercase = ref false in
-  let add_char c =
-    match c with
-    | 'A' .. 'Z' ->
-        if !previous_lowercase then
-          begin
-            previous_lowercase := false;
-            Buffer.add_char result '_'
-          end;
-        Buffer.add_char result (Char.lowercase_ascii c)
-    | '_' ->
-        previous_lowercase := false;
-        Buffer.add_char result '_'
-    | _ ->
-        previous_lowercase := true;
-        Buffer.add_char result c in
-  String.iter add_char s;
-  Buffer.contents result
-
 let add_sig_type context ty =
   context.sig_accu <- Ast_helper.Sig.type_ Recursive ty :: context.sig_accu;
   context.struct_accu <- Ast_helper.Str.type_ Recursive ty :: context.struct_accu
@@ -563,8 +542,8 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
                     with Not_found -> failwith ("not found " ^ enum) in
                   let t = Ast_helper.Typ.constr (loc (Longident.Lident "t")) [] in
                   let bind_value name value =
-                    (Ast_helper.Str.value Nonrecursive [Ast_helper.Vb.mk (Ast_helper.Pat.var (loc (uncamelcase name))) (Ast_helper.Exp.constant (Ast_helper.Const.int value))],
-                     Ast_helper.Sig.value (Ast_helper.Val.mk (loc (uncamelcase name)) t)) in
+                    (Ast_helper.Str.value Nonrecursive [Ast_helper.Vb.mk (Ast_helper.Pat.var (loc (Stubgen_common.uncamelcase name))) (Ast_helper.Exp.constant (Ast_helper.Const.int value))],
+                     Ast_helper.Sig.value (Ast_helper.Val.mk (loc (Stubgen_common.uncamelcase name)) t)) in
                   let has_zero = enum_info.constructors |> List.exists @@ fun (_, _, value) -> value = 0 in
                   let zero_value =
                     if has_zero then []
@@ -1185,11 +1164,14 @@ static %s __attribute__((unused))
 " type_name;
           let fields = fields |> List.map @@ fun (field, cur) ->
             let attrs = make_doc_attributes cur in
-            let attrs = deriving_attr () :: attrs in
             Ast_helper.Type.field (loc (String.lowercase_ascii (field_name field)))
               (translate_field_type field) ~attrs in
                 Ptype_record fields, None in
     let attrs = make_doc_attributes cur in
+    let attrs =
+      match kind with
+      | Ptype_abstract -> attrs
+      | _ -> deriving_attr () :: attrs in
     let type_decl =
       Ast_helper.Type.mk (loc ocaml_type_name) ~kind ~attrs ?manifest in
     add_sig_type context [type_decl] in
@@ -1558,6 +1540,34 @@ let get_arg args value =
   | Variable index -> args.(index)
   | Fixed value -> value
 
+let detect_closures args : argument_interface option =
+  let pointer = ref None in
+  let data_caller = ref None in
+  let data_callee = ref None in
+  let references = ref [] in
+  let detect_callee_arg i (parameter : Clang.Lazy.Ast.parameter) =
+    match Lazy.force ((Lazy.force parameter.desc).qual_type).desc with
+    | Pointer { desc = lazy (BuiltinType Void); _ } ->
+        data_callee := Some (Index i)
+    | _ -> () in
+  let detect_arg i ty =
+    match Lazy.force (Clang.Lazy.Type.of_cxtype ty).desc with
+    | Typedef { name = IdentifierName "CXCursor"; _ } ->
+        references := Index i :: !references
+    | Pointer { desc = lazy (BuiltinType Void); _ } ->
+        data_caller := Some (Index i)
+    | Pointer { desc = lazy (FunctionType {
+          parameters = Some { non_variadic; _ }; _ })} ->
+        pointer := Some (Index i);
+        non_variadic |> List.iteri detect_callee_arg
+    | _ -> () in
+  args |> Array.iteri detect_arg;
+  match !pointer, !data_caller, !data_callee with
+  | Some pointer, Some data_caller, Some data_callee ->
+      Some (Closure {
+        pointer; data_caller; data_callee; references = !references })
+  | _ -> None
+
 let translate_function_decl context cur =
   let name = Clang.get_cursor_spelling cur in
   let function_interface = get_function name context.module_interface in
@@ -1568,10 +1578,15 @@ let translate_function_decl context cur =
   let arg_names = Array.init num_args (fun i ->
     Clang.get_cursor_spelling (Clang.cursor_get_argument cur i)) in
   let index = index_args arg_names in
-  let args = Array.init num_args (fun i ->
-    CXType (Clang.get_arg_type ty i)) in
+  let args = Array.init num_args (fun i -> Clang.get_arg_type ty i) in
   let outputs = ref [] in
   let arg_interfaces = Array.make num_args empty_type_interface in
+  let argument_interfaces = function_interface.arguments in
+  let argument_interfaces =
+    match detect_closures args with
+    | None -> argument_interfaces
+    | Some argument_interface -> argument_interface :: argument_interfaces in
+  let args = Array.map (fun ty -> CXType ty) args in
   let apply_argument_rule (rule : argument_interface) =
     match rule with
     | Array { length; contents } ->
@@ -1629,7 +1644,12 @@ let translate_function_decl context cur =
         begin
           match args.(pointer), args.(data_caller) with
           | CXType pointer_ty, CXType data_caller_type ->
-              let pointer_ty = Clang.get_typedef_decl_underlying_type (Clang.get_type_declaration pointer_ty) in
+              let pointer_ty =
+                match Clang.get_type_kind pointer_ty with
+                | Pointer -> pointer_ty
+                | Typedef ->
+                    Clang.get_typedef_decl_underlying_type (Clang.get_type_declaration pointer_ty)
+                | _ -> assert false in
               let pointee_ty = Clang.get_pointee_type pointer_ty in
               let num_args = Clang.get_num_arg_types pointee_ty in
               let closure_args = Array.init num_args (fun i ->
@@ -1651,7 +1671,7 @@ let translate_function_decl context cur =
         let argument = find_argument argument index in
         arg_interfaces.(argument) <- union_type_interfaces arg_interfaces.(argument)
           interface in
-  List.iter apply_argument_rule function_interface.arguments;
+  List.iter apply_argument_rule argument_interfaces;
   let outputs = List.rev !outputs in
   let result_type = Clang.get_result_type ty in
   let parameters = ref [| |] in
@@ -1718,7 +1738,7 @@ let translate_function_decl context cur =
           if not function_interface.label_unique || !unique then
             Asttypes.Nolabel
           else
-            Asttypes.Labelled (uncamelcase name) in
+            Asttypes.Labelled (Stubgen_common.uncamelcase name) in
         Ast_helper.Typ.arrow label ty pval_type
       end arg_list result_ty in
   let wrapper_name = name ^ "_wrapper" in
@@ -1893,40 +1913,10 @@ let translate_function_decl context cur =
   add_primitive context desc
 
 let rename_clang name =
-  uncamelcase (String.sub name 6 (String.length name - 6))
-
-let run_llvm_config llvm_config arguments =
-  let command = String.concat " " (llvm_config :: arguments) in
-  let output = Unix.open_process_in command in
-  let result = input_line output in
-  if Unix.close_process_in output <> Unix.WEXITED 0 then
-    failwith (Printf.sprintf "%s: execution failed" command);
-  result
+  Stubgen_common.uncamelcase (String.sub name 6 (String.length name - 6))
 
 let make_destructor f =
   destructor (fun value -> Printf.sprintf "%s(%s);" f value)
-
-let warning_text =
-  "This file is auto-generated by stubgen tool.
-It should not be modified by hand and it should not be versioned
-(except by continuous integration on the dedicated bootstrap branch)."
-
-let output_warning_ml channel =
-  Printf.fprintf channel "\
-(* %s *)
-" (Pcre.replace ~pat:"\n" ~templ:"\n   " warning_text)
-
-let output_warning_c channel =
-  Printf.fprintf channel "\
-/* %s */
-" (Pcre.replace ~pat:"\n" ~templ:"\n * " warning_text)
-
-let string_remove_suffix ~suffix s =
-  let ls = String.length s and lsuffix = String.length suffix in
-  if lsuffix <= ls && String.sub s (ls - lsuffix) (lsuffix) = suffix then
-    String.sub s 0 (ls - lsuffix)
-  else
-    s
 
 let string_option =
   Type_info ({ ocamltype = ocaml_option ocaml_string;
@@ -1935,45 +1925,11 @@ let string_option =
       Printf.fprintf fmt "%s = Val_string_option(clang_getCString(%s));
         clang_disposeString(%s);" tgt src src) }, Regular)
 
+let tool_name = "stubgen"
+
 let main cflags llvm_config prefix =
-  let llvm_flags, llvm_version =
-    match llvm_config with
-    | None -> [], None
-    | Some llvm_config ->
-        let llvm_version = run_llvm_config llvm_config ["--version"] in
-        let llvm_prefix = run_llvm_config llvm_config ["--prefix"] in
-        let llvm_cflags = run_llvm_config llvm_config ["--cflags"] in
-        let llvm_version = string_remove_suffix ~suffix:"svn" llvm_version in
-        let llvm_version = string_remove_suffix ~suffix:"git" llvm_version in
-        let equivalent_llvm_version =
-          match llvm_version with
-          | "3.4"
-          | "3.4.1" -> "3.4.2"
-          | "3.5.0"
-          | "3.5.1" -> "3.5.2"
-          | "3.6.0"
-          | "3.6.1" -> "3.6.2"
-          | "3.7.0" -> "3.7.1"
-          | "3.8.0" -> "3.8.1"
-          | "3.9.0" -> "3.9.1"
-          | "4.0.0" -> "4.0.1"
-          | "5.0.0"
-          | "5.0.1" -> "5.0.2"
-          | "6.0.0" -> "6.0.1"
-          | "7.0.0" -> "7.1.0"
-          | "7.0.1" -> "7.1.0"
-          | "8.0.0" -> "8.0.1"
-          | "9.0.0" -> "9.0.1"
-          | "10.0.0" -> "10.0.1"
-          | _ -> llvm_version in
-        String.split_on_char ' ' llvm_cflags @
-        ["-I"; List.fold_left Filename.concat llvm_prefix
-           ["lib"; "clang"; llvm_version; "include"]; "-I";
-         "/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include/";
-         "-DLLVM_VERSION_" ^ String.map (fun c -> if c = '.' then '_' else c) equivalent_llvm_version],
-        Some equivalent_llvm_version in
-  let cflags = cflags |> List.map @@ String.split_on_char ',' |> List.flatten in
-  let clang_options = cflags @ llvm_flags in
+  let clang_options, llvm_version =
+    Stubgen_common.prepare_clang_options cflags llvm_config in
   let result_cxerrorcode =
     if llvm_version = Some "3.4.2" then
       integer_zero_is_true
@@ -2027,12 +1983,15 @@ let main cflags llvm_config prefix =
       (empty_type_interface |>
        make_destructor "clang_disposeTranslationUnit" |>
        carry_reference "CXIndex") |>
-    add_type (Pcre.regexp "^CXCursor$|^CXType$|^CXFile$|^CXModule$|^CXSourceRange$|^CXSourceLocation$|^CXComment$|^clang_ext_TemplateName$|^clang_ext_TemplateArgument$|^clang_ext_LambdaCapture$|^clang_ext_DeclarationName$|^clang_ext_NestedNameSpecifier$|^clang_ext_TypeLoc$|^clang_ext_TemplateParameterList$|^clang_ext_Requirement$")
+    add_type (Pcre.regexp "^clang_ext_NestedNameSpecifierLoc$")
+      (empty_type_interface |>
+       make_destructor "clang_ext_NestedNameSpecifierLoc_dispose") |>
+    add_type (Pcre.regexp "^CXCursor$|^CXType$|^CXFile$|^CXModule$|^CXSourceRange$|^CXSourceLocation$|^CXComment$|^clang_ext_TemplateName$|^clang_ext_TemplateArgument$|^clang_ext_LambdaCapture$|^clang_ext_DeclarationName$|^clang_ext_NestedNameSpecifier$|^clang_ext_NestedNameSpecifierLoc$|^clang_ext_TypeLoc$|^clang_ext_TemplateParameterList$|^clang_ext_Requirement$")
       (empty_type_interface |> carry_reference "CXTranslationUnit") |>
     add_type (Pcre.regexp "^CXToken$")
       (empty_type_interface |> carry_reference "tokens") |>
     add_type (Pcre.regexp "^CXCursor$")
-      (empty_type_interface |>
+        (empty_type_interface |>
        compare_value "clang_ext_compare_cursor" |>
        hash_value "clang_ext_hash_cursor") |>
     add_type (Pcre.regexp "^CXVirtualFileOverlay$")
@@ -2292,7 +2251,7 @@ let main cflags llvm_config prefix =
   let cur = Clang.get_translation_unit_cursor tu in
   let chan_stubs = open_out (prefix ^ "clang_stubs.c") in
   Fun.protect ~finally:(fun () -> close_out chan_stubs) (fun () ->
-    output_warning_c chan_stubs;
+    Stubgen_common.output_warning_c chan_stubs tool_name;
     output_string chan_stubs "\
 #include \"stubgen.h\"
 #include <clang-c/Index.h>
@@ -2319,33 +2278,14 @@ let main cflags llvm_config prefix =
       Continue));
     let chan_intf = open_out (prefix ^ "clang__bindings.mli") in
     Fun.protect ~finally:(fun () -> close_out chan_intf) (fun () ->
-      output_warning_ml chan_intf;
+      Stubgen_common.output_warning_ml chan_intf tool_name;
       Format.fprintf (Format.formatter_of_out_channel chan_intf)
         "%a@." Pprintast.signature (List.rev context.sig_accu));
     let chan_impl = open_out (prefix ^ "clang__bindings.ml") in
     Fun.protect ~finally:(fun () -> close_out chan_intf) (fun () ->
-      output_warning_ml chan_impl;
+      Stubgen_common.output_warning_ml chan_impl tool_name;
       Format.fprintf (Format.formatter_of_out_channel chan_impl)
         "%a@." Pprintast.structure (List.rev context.struct_accu)))
-
-let option_cflags =
-  let doc = "Pass option to the C compiler" in
-  Cmdliner.Arg.(
-    value & opt_all string [] & info ["cc"] ~docv:"FLAGS" ~doc)
-
-let option_llvm_config =
-  let doc = "Path to llvm-config" in
-  Cmdliner.Arg.(
-    value & opt (some non_dir_file) None &
-    info ["llvm-config"] ~docv:"LLVM_CONFIG" ~doc)
-
-let option_prefix =
-  let doc = "Prefix path for output files" in
-  Cmdliner.Arg.(
-    required & pos 0 (some string) None & info [] ~docv:"PREFIX" ~doc)
-
-let options = Cmdliner.Term.(
-    const main $ option_cflags $ option_llvm_config $ option_prefix)
 
 let info =
   let doc = "generate stubs for ClangML" in
@@ -2353,6 +2293,7 @@ let info =
       `S Cmdliner.Manpage.s_bugs;
       `P "Email bug reports to <thierry.martinez@inria.fr>.";
     ] in
-  Cmdliner.Term.info "stubgen" ~doc ~exits:Cmdliner.Term.default_exits ~man
+  Cmdliner.Term.info tool_name ~doc ~exits:Cmdliner.Term.default_exits ~man
 
-let () = Cmdliner.Term.exit (Cmdliner.Term.eval (options, info))
+let () =
+  Cmdliner.Term.exit (Cmdliner.Term.eval (Stubgen_common.options main, info))

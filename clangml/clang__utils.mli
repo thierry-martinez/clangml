@@ -49,16 +49,6 @@ val predefined_expr_get_function_name : cxcursor -> cxcursor -> string
 
     val type_visit_fields : cxtype -> (cxcursor -> cxvisitorresult) -> bool])]
 
-val include_attributed_types : Cxtranslationunit_flags.t
-
-val type_non_null : clang_ext_attrkind
-
-[%%meta Metapp.Sigi.of_list (
-  if Clangml_config.version.major >= 8 then
-    []
-  else [%sig:
-    val type_get_modified_type : cxtype -> cxtype])]
-
 (** {2 Parsing files and strings } *)
 
 val parse_file : ?index:cxindex ->
@@ -137,6 +127,10 @@ val list_of_decl_context : cxcursor -> cxcursor list
 (** [list_of_decl_context f ty] returns the list of all the declaration nodes
     of declaration context [c]. *)
 
+val list_of_iter : (('a -> unit) -> unit) -> 'a list
+(** [list_of_iter iter] calls [iter f] and returns all the values which [f] has
+    been applied to. *)
+
 (** {2 Integer or floating point types} *)
 val is_integer : cxtypekind -> bool
 (** [is_integer ty] returns true if [ty] is a built-in integer type. *)
@@ -195,6 +189,7 @@ val float_of_cxfloat : cxfloat -> float
 val string_of_cxfloat : cxfloat -> string
 (** [string_of_cxfloat f] is an alias for
     {!val:Clang__bindings.ext_float_to_string}. *)
+
 
 (** {2 Error management } *)
 
@@ -270,3 +265,8 @@ val sourcelocation_get_translation_unit :
 
 val binary_of_overloaded_operator_kind :
     clang_ext_overloadedoperatorkind -> clang_ext_binaryoperatorkind
+
+(** {2 General purpose utilities} *)
+
+val extract_prefix_from_list :
+    ('a -> 'b option) -> 'a list -> 'b list * 'a list
