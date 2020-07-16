@@ -718,7 +718,7 @@ let example = "void * __ptr32 p;"
         [{ desc = Var { var_name = "p";
            var_type = { desc = Attributed {
              modified_type = { desc = Pointer { desc = BuiltinType Void }};
-             attribute = { desc = Other Ptr32 }}}}}]]
+             attribute = { desc = Other Ptr32 }}}}}]]]
   else Metapp.Stri.of_list []]
     ]} *)
   | ParenType of qual_type
