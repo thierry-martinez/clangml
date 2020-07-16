@@ -698,13 +698,15 @@ let () =
     {[
 let example = "int * _Nonnull ptr;"
 
-let () =
-  check_pattern quote_decl_list parse_declaration_list
-    example [%pattern?
-    [{ desc = Var { var_name = "ptr";
-       var_type = { desc = Attributed {
-         modified_type = { desc = Pointer { desc = BuiltinType Int }};
-         attribute = { desc = Other TypeNonNull }}}}}]]
+[%%meta if Clangml_config.version.major >= 8 then [%stri
+    let () =
+      check_pattern quote_decl_list parse_declaration_list
+        example [%pattern?
+        [{ desc = Var { var_name = "ptr";
+           var_type = { desc = Attributed {
+             modified_type = { desc = Pointer { desc = BuiltinType Int }};
+             attribute = { desc = Other TypeNonNull }}}}}]]]
+  else Metapp.Stri.of_list []]
 
 let example = "void * __ptr32 p;"
 
