@@ -170,8 +170,8 @@ module Ast = struct
       function_type; nested_name_specifier; name; attributes }
 
   let function_type ?(calling_conv = (C : cxcallingconv)) ?parameters
-        ?exception_spec result =
-    { calling_conv; parameters; result; exception_spec; }
+        ?exception_spec ?(ref_qualifier = (None : cxrefqualifierkind)) result =
+    { calling_conv; parameters; result; exception_spec; ref_qualifier }
 
   let parameters ?(variadic = false) non_variadic =
     { variadic; non_variadic }
@@ -373,7 +373,7 @@ module Ast = struct
       | CXXDeductionGuideName ->
           DeductionGuideName
             (ext_declaration_name_get_cxxdeduction_guide_template name |>
-             (decl_of_cxcursor ~in_record:false))
+             decl_of_cxcursor)
       | CXXOperatorName ->
           OperatorName (ext_declaration_name_get_cxxoverloaded_operator name)
       | CXXLiteralOperatorName ->
@@ -572,10 +572,14 @@ module Ast = struct
                       ext_elaborated_type_loc_get_named_type_loc type_loc |>
                       of_type_loc
                   }
-              | TemplateTypeParm->
-                  TemplateTypeParm (get_type_spelling cxtype);
-              | SubstTemplateTypeParm->
-                  SubstTemplateTypeParm (get_type_spelling cxtype);
+              | TemplateTypeParm ->
+                  TemplateTypeParm
+                    (cxtype |> ext_type_get_unqualified_type |>
+                      get_type_spelling)
+              | SubstTemplateTypeParm ->
+                  SubstTemplateTypeParm
+                    (cxtype |> ext_type_get_unqualified_type |>
+                      get_type_spelling)
               | TemplateSpecialization ->
                   let name =
                     cxtype |>
@@ -600,6 +604,12 @@ module Ast = struct
                     ext_decltype_type_get_underlying_expr cxtype |>
                     expr_of_cxcursor in
                   Decltype sub
+              | InjectedClassName ->
+                  let sub =
+              ext_injected_class_name_type_get_injected_specialization_type
+                      cxtype |>
+                    of_cxtype in
+                  InjectedClassName sub
               | kind -> UnexposedType kind
             end in
       make_paren (make_qual_type cxtype type_loc (Node.from_fun desc))
@@ -671,10 +681,14 @@ module Ast = struct
                       ext_attributed_type_get_modified_type cxtype |> of_cxtype;
                     attribute = attribute_of_cxtype cxtype;
                   }
-              | TemplateTypeParm->
-                  TemplateTypeParm (get_type_spelling cxtype);
-              | SubstTemplateTypeParm->
-                  SubstTemplateTypeParm (get_type_spelling cxtype);
+              | TemplateTypeParm ->
+                  TemplateTypeParm
+                    (cxtype |> ext_type_get_unqualified_type |>
+                      get_type_spelling)
+              | SubstTemplateTypeParm ->
+                  SubstTemplateTypeParm
+                    (cxtype |> ext_type_get_unqualified_type |>
+                      get_type_spelling)
               | TemplateSpecialization ->
                   let name =
                     cxtype |>
@@ -698,6 +712,12 @@ module Ast = struct
                     ext_decltype_type_get_underlying_expr cxtype |>
                     expr_of_cxcursor in
                   Decltype sub
+              | InjectedClassName ->
+                  let sub =
+              ext_injected_class_name_type_get_injected_specialization_type
+                      cxtype |>
+                    of_cxtype in
+                  InjectedClassName sub
               | kind -> UnexposedType kind
             end in
       if options.ignore_paren_in_types &&
@@ -710,11 +730,11 @@ module Ast = struct
           volatile = is_volatile_qualified_type cxtype;
           restrict = is_restrict_qualified_type cxtype; }
 
-    and decl_of_cxcursor ?in_record cursor =
+    and decl_of_cxcursor cursor =
       node ~cursor
-        (Node.from_fun (fun () -> decl_desc_of_cxcursor ?in_record cursor))
+        (Node.from_fun (fun () -> decl_desc_of_cxcursor cursor))
 
-    and decl_desc_of_cxcursor ?(in_record = false) cursor =
+    and decl_desc_of_cxcursor cursor =
       try
         match get_cursor_kind cursor with
         | FunctionDecl ->
@@ -722,8 +742,8 @@ module Ast = struct
               (function_decl_of_cxcursor cursor (list_of_children cursor))
         | FunctionTemplate ->
             make_template cursor begin
-              cxxmethod_decl_of_cxcursor ~can_be_function:(not in_record)
-                cursor
+              decl_desc_of_cxcursor
+                (ext_template_decl_get_templated_decl cursor)
             end
         | CXXMethod
         | ConversionFunction -> cxxmethod_decl_of_cxcursor cursor
@@ -996,32 +1016,27 @@ module Ast = struct
       else
         []
 
-    and cxxmethod_decl_of_cxcursor ?(can_be_function = false) cursor =
+    and cxxmethod_decl_of_cxcursor cursor =
       let children =
         list_of_children cursor |>
         filter_out_prefix_from_list is_template_parameter in
-      let type_ref : qual_type option =
-        match children with
-        | type_ref :: _ when get_cursor_kind type_ref = TypeRef ->
-            Some (type_ref |> get_cursor_type |> of_cxtype)
-        | _ -> None in
+      let type_ref =
+        ext_cxxmethod_decl_get_parent cursor |>
+        get_cursor_type |> of_cxtype in
       let function_decl = function_decl_of_cxcursor cursor children in
-      if can_be_function && type_ref = None then
-        Function function_decl
-      else
-        CXXMethod {
-          type_ref; function_decl;
-          defaulted = ext_cxxmethod_is_defaulted cursor;
-          static = cxxmethod_is_static cursor;
-          binding =
-            if cxxmethod_is_pure_virtual cursor then
-              PureVirtual
-            else if cxxmethod_is_virtual cursor then
-              Virtual
-            else
-              NonVirtual;
-          const = ext_cxxmethod_is_const cursor;
-        }
+      CXXMethod {
+        type_ref; function_decl;
+        defaulted = ext_cxxmethod_is_defaulted cursor;
+        static = cxxmethod_is_static cursor;
+        binding =
+          if cxxmethod_is_pure_virtual cursor then
+            PureVirtual
+          else if cxxmethod_is_virtual cursor then
+            Virtual
+          else
+            NonVirtual;
+        const = ext_cxxmethod_is_const cursor;
+      }
 
     and parameters_of_cxtype cxtype =
       if cxtype |> get_type_kind = FunctionProto then
@@ -1048,20 +1063,21 @@ module Ast = struct
         None
 
     and function_type_of_cxtype parameters cxtype =
-      let calling_conv = cxtype |> get_function_type_calling_conv in
       let result = cxtype |> get_result_type |> of_cxtype in
+      function_type_of_cxtype_result parameters cxtype result
+
+    and function_type_of_cxtype_result parameters cxtype result =
+      let calling_conv = cxtype |> get_function_type_calling_conv in
       let exception_spec : exception_spec option =
         extract_exception_spec cxtype in
-      { calling_conv; result; parameters; exception_spec; }
+      let ref_qualifier = cxtype |> type_get_cxxref_qualifier in
+      { calling_conv; result; parameters; exception_spec; ref_qualifier }
 
     and function_type_of_type_loc parameters type_loc =
       let cxtype = ext_type_loc_get_type type_loc in
-      let calling_conv = cxtype |> get_function_type_calling_conv in
       let result =
         type_loc |> ext_function_type_loc_get_return_loc |> of_type_loc in
-      let exception_spec : exception_spec option =
-        extract_exception_spec cxtype in
-      { calling_conv; result; parameters; exception_spec; }
+      function_type_of_cxtype_result parameters cxtype result
 
     and extract_exception_spec cxtype =
       let _t = ext_function_proto_type_get_exception_spec_type cxtype in
@@ -1197,7 +1213,7 @@ module Ast = struct
         complete_definition }
 
     and fields_of_children children =
-      children |> List.map (decl_of_cxcursor ~in_record:true)
+      children |> List.map decl_of_cxcursor
 
     and stmt_of_cxcursor cursor =
       let desc () =

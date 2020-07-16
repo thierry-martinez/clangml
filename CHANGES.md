@@ -14,7 +14,9 @@
   
 - `ident_ref` now carries a `template_arguments` parameter.
 
-- `function_decl` now exposes `inline_specified` and `inlined` fields
+- `function_decl` now exposes `inline_specified` and `inlined` fields.
+
+- `function_type` now exposes `ref_qualifier` field.
 
 - `TypeLoc` are used broaderly to compute `qual_type`: in particular,
   parameters in function types have now correct names.

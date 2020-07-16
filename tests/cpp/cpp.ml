@@ -685,7 +685,6 @@ let () =
     |}]] in
   check_pattern_decl bindings#int [%pattern? {
     desc = CXXMethod {
-      type_ref = None;
       function_decl = {
         function_type = {
           result = { desc = BuiltinType Int };

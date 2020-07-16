@@ -1177,4 +1177,13 @@ clang_ext_PackExpansionTypeLoc_getPatternLoc(struct clang_ext_TypeLoc);
 struct clang_ext_TypeLoc
 clang_ext_TypedefDecl_getUnderlyingTypeLoc(CXCursor);
 
+CXCursor
+clang_ext_CXXMethodDecl_getParent(CXCursor);
+
+CXType
+clang_ext_InjectedClassNameType_getInjectedSpecializationType(CXType);
+
+CXType
+clang_ext_Type_getUnqualifiedType(CXType);
+
 #include "libclang_extensions_attrs_headers.inc"

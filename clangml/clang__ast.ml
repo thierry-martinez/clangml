@@ -805,6 +805,7 @@ let () =
       var_type = { desc = Decltype { desc = IntegerLiteral (Int 1)}};
       var_init = Some { desc = IntegerLiteral (Int 1)}}}]]
     ]}*)
+  | InjectedClassName of qual_type
   | UnexposedType of clang_ext_typekind
   | InvalidType
 
@@ -881,8 +882,8 @@ and function_decl = {
     nested_name_specifier : nested_name_specifier option; (** C++ *)
     name : declaration_name;
     body : stmt option;
-    deleted : bool;
-    constexpr : bool;
+    deleted : bool; (** C++ *)
+    constexpr : bool; (** C++ *)
     inline_specified : bool;
 (** Determine whether the [inline] keyword was specified for this function.
 
@@ -1135,6 +1136,72 @@ let () =
     [{ desc = Function {
       name = IdentifierName "f";
       function_type = { exception_spec = Some (Other MSAny)}}}]]
+    ]}*)
+
+    ref_qualifier : cxrefqualifierkind; (** C++ *)
+(** Method ref-qualifier.
+    {[
+let example = {|
+template <typename T>
+class C
+{
+  T        no_ref_qualifier();
+  T&       value() &;
+  T&&      value() &&;
+  T const& value() const&;
+};
+|}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = TemplateDecl {
+         parameters = { list = [{ desc = {
+           parameter_name = "T";
+           parameter_kind = Class { default = _ }}}] };
+         decl = { desc = RecordDecl {
+           keyword = Class;
+           name = "C";
+           fields = [
+             { desc = CXXMethod {
+                 function_decl = {
+                   function_type = {
+                     result = { desc = TemplateTypeParm "T" };
+                     parameters = Some { non_variadic = [] };
+                     ref_qualifier = None };
+                   name = IdentifierName "no_ref_qualifier";
+                   body = None }}};
+             { desc = CXXMethod {
+                 const = false;
+                 function_decl = {
+                   function_type = {
+                     result = { desc =
+                       LValueReference { desc = TemplateTypeParm "T" };
+                       const = false };
+                     parameters = Some { non_variadic = [] };
+                     ref_qualifier = LValue };
+                   name = IdentifierName "value";
+                   body = None }}};
+             { desc = CXXMethod {
+                 function_decl = {
+                   function_type = {
+                     result = { desc =
+                       RValueReference { desc = TemplateTypeParm "T" }};
+                     parameters = Some { non_variadic = [] };
+                     ref_qualifier = RValue };
+                   name = IdentifierName "value";
+                   body = None }}};
+             { desc = CXXMethod {
+                 const = true;
+                 function_decl = {
+                   function_type = {
+                     result = { desc = LValueReference {
+                       desc = TemplateTypeParm "T";
+                       const = true; }};
+                     parameters = Some { non_variadic = [] };
+                     ref_qualifier = LValue };
+                   name = IdentifierName "value";
+                   body = None }}}] }}}}]]
     ]}*)
 }
 
@@ -3148,7 +3215,7 @@ let () =
                 parameter_kind = Class { default = None };
                 parameter_pack = false; }}] };
             decl = { desc = CXXMethod {
-              type_ref = None;
+              type_ref = { desc = Record ({ name = IdentifierName "C" }) };
               function_decl = {
                 function_type = {
                   result = { desc = BuiltinType Int };
@@ -3164,7 +3231,7 @@ let () =
            parameter_kind = Class { default = None };
            parameter_pack = false; }}] };
          decl = { desc = CXXMethod {
-           type_ref = Some { desc = Record ({ name = IdentifierName "C" }) };
+           type_ref = { desc = Record ({ name = IdentifierName "C" }) };
            function_decl = {
              function_type = {
                result = { desc = BuiltinType Int };
@@ -3316,7 +3383,7 @@ let () =
     ]}*)
   | CXXMethod of {
       function_decl : function_decl;
-      type_ref : qual_type option;
+      type_ref : qual_type;
       defaulted : bool;
       static : bool;
       binding : cxx_method_binding_kind;
@@ -3354,7 +3421,7 @@ let () =
       name = "C";
       fields = [
         { desc = CXXMethod {
-          type_ref = None;
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
           function_decl = {
             name = IdentifierName "f";
             function_type = {
@@ -3365,7 +3432,7 @@ let () =
                     qual_type = { desc = BuiltinType Char_S }}}] }};
             body = None; }}};
         { desc = CXXMethod {
-          type_ref = None;
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
           function_decl = {
             name = IdentifierName "const_method";
             function_type = {
@@ -3374,7 +3441,7 @@ let () =
             body = Some { desc = Compound [] }};
           const = true; }};
         { desc = CXXMethod {
-          type_ref = None;
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
           binding = Virtual;
           function_decl = {
             name = IdentifierName "virtual_method";
@@ -3383,7 +3450,7 @@ let () =
               parameters = Some { non_variadic = [] }};
             body = Some { desc = Compound [] }; }}};
         { desc = CXXMethod {
-          type_ref = None;
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
           binding = PureVirtual;
           function_decl = {
             name = IdentifierName "pure_virtual_method";
@@ -3392,7 +3459,7 @@ let () =
               parameters = Some { non_variadic = [] }};
             body = None; }}};
         { desc = CXXMethod {
-          type_ref = None;
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
           function_decl = {
             name = IdentifierName "static_method";
             function_type = {
@@ -3401,7 +3468,7 @@ let () =
             body = Some { desc = Compound [] }};
           static = true; }};
         { desc = CXXMethod {
-          type_ref = None;
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
           function_decl = {
             name = IdentifierName "deleted_method";
             function_type = {
@@ -3410,7 +3477,7 @@ let () =
             deleted = true;
             body = None; }; }};
         { desc = CXXMethod {
-          type_ref = Some { desc = Record ({ name = IdentifierName "C" }) };
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
           function_decl = {
             name = OperatorName Plus;
             function_type = {
@@ -3428,7 +3495,7 @@ let () =
                   kind = Deref;
                   operand = { desc = This }}})}] }}}}] }};
       { desc = CXXMethod {
-        type_ref = Some { desc = Record ({ name = IdentifierName "C" }) };
+        type_ref = { desc = Record ({ name = IdentifierName "C" }) };
         function_decl = {
           name = IdentifierName "f";
           function_type = {

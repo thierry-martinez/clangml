@@ -3688,5 +3688,31 @@ extern "C" {
     return MakeTypeLocInvalid(getCursorTU(cursor));
   }
 
+  CXCursor
+  clang_ext_CXXMethodDecl_getParent(CXCursor cursor)
+  {
+    auto d = GetCursorDecl(cursor);
+    if (auto rd = llvm::dyn_cast_or_null<clang::CXXMethodDecl>(d)) {
+      return MakeCXCursor(rd->getParent(), getCursorTU(cursor));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  CXType
+  clang_ext_InjectedClassNameType_getInjectedSpecializationType(CXType CT)
+  {
+    clang::QualType T = GetQualType(CT);
+    if (auto *ICT = T->getAs<clang::InjectedClassNameType>()) {
+      return MakeCXType(ICT->getInjectedSpecializationType(), GetTU(CT));
+    }
+    return MakeCXTypeInvalid(GetTU(CT));
+  }
+
+  CXType
+  clang_ext_Type_getUnqualifiedType(CXType CT)
+  {
+    return MakeCXType(GetQualType(CT).getUnqualifiedType(), GetTU(CT));
+  }
+
   #include "libclang_extensions_attrs.inc"
 }
