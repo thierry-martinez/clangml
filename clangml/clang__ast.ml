@@ -3552,6 +3552,7 @@ let () =
 
 let example = {| int var1 asm("altvar") = 1; |}
 
+[%%meta if Clangml_config.version.major >= 5 then [%stri
 let () =
   check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
   [%pattern?
@@ -3559,7 +3560,8 @@ let () =
       var_type = { const = false; desc = BuiltinType Int };
       var_name = "var1";
       var_init = Some ({ desc = IntegerLiteral (Int 1)});
-      attributes = [{ desc = AsmLabel { label = "altvar" }}] }}]]
+      attributes = [{ desc = AsmLabel { label = "altvar" }}] }}]]]
+else Metapp.Stri.of_list []]
     ]}*)
   | EnumDecl of {
       name : string;
