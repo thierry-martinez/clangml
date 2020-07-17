@@ -12,6 +12,8 @@ type ('expr, 'qual_type, 'declaration_name) t =
   | AMDGPUWavesPerEU of {
   min: 'expr ;
   max: 'expr } 
+  | ARMInterrupt of Clang__bindings.clang_ext_arminterruptattr_interrupttype
+  
   | AbiTag of string list 
   | AcquireCapability of
   {
@@ -64,11 +66,15 @@ type ('expr, 'qual_type, 'declaration_name) t =
   strict: bool ;
   replacement: string ;
   priority: int } 
+  | Blocks of Clang__bindings.clang_ext_blocksattr_blocktype 
+  | CFGuard of Clang__bindings.clang_ext_cfguardattr_guardarg 
   | CPUDispatch of string list 
   | CPUSpecific of string list 
   | CUDALaunchBounds of {
   max_threads: 'expr ;
   min_blocks: 'expr } 
+  | CallableWhen of Clang__bindings.clang_ext_callablewhenattr_consumedstate
+  list 
   | Callback of int list 
   | Capability of
   {
@@ -78,6 +84,7 @@ type ('expr, 'qual_type, 'declaration_name) t =
   | CodeSeg of string 
   | ConstInit of Clang__bindings.clang_ext_constinit_spelling 
   | Constructor of int 
+  | Consumable of Clang__bindings.clang_ext_consumableattr_consumedstate 
   | Deprecated of {
   message: string ;
   replacement: string } 
@@ -88,6 +95,8 @@ type ('expr, 'qual_type, 'declaration_name) t =
   | EnableIf of {
   cond: 'expr ;
   message: string } 
+  | EnumExtensibility of Clang__bindings.clang_ext_enumextensibilityattr_kind
+  
   | ExclusiveTrylockFunction of {
   success_value: 'expr ;
   args: 'expr list } 
@@ -110,7 +119,10 @@ type ('expr, 'qual_type, 'declaration_name) t =
   | LayoutVersion of int 
   | LockReturned of 'expr 
   | LocksExcluded of 'expr list 
-  | LoopHint of Clang__bindings.clang_ext_loophint_spelling 
+  | LoopHint of
+  {
+  spelling: Clang__bindings.clang_ext_loophint_spelling ;
+  option: Clang__bindings.clang_ext_loophintattr_optiontype } 
   | MSInheritance of
   {
   spelling: Clang__bindings.clang_ext_msinheritance_spelling ;
@@ -119,13 +131,33 @@ type ('expr, 'qual_type, 'declaration_name) t =
   | MSVtorDisp of int 
   | MaxFieldAlignment of int 
   | MinVectorWidth of int 
+  | MipsInterrupt of
+  Clang__bindings.clang_ext_mipsinterruptattr_interrupttype 
   | MipsLongCall of Clang__bindings.clang_ext_mipslongcall_spelling 
   | MipsShortCall of Clang__bindings.clang_ext_mipsshortcall_spelling 
   | Mode of string 
   | NoBuiltin of string list 
   | NoSanitize of string list 
   | NonNull of int list 
+  | OMPAllocateDecl of
+  {
+  allocator_type:
+    Clang__bindings.clang_ext_ompallocatedeclattr_allocatortypety ;
+  allocator: 'expr } 
   | OMPCaptureKind of int 
+  | OMPDeclareSimdDecl of
+  {
+  branch_state:
+    Clang__bindings.clang_ext_ompdeclaresimddeclattr_branchstatety ;
+  simdlen: 'expr ;
+  uniforms: 'expr list ;
+  aligneds: 'expr list ;
+  alignments: 'expr list ;
+  linears: 'expr list ;
+  modifiers: int list ;
+  steps: 'expr list } 
+  | OMPDeclareTargetDecl of
+  Clang__bindings.clang_ext_ompdeclaretargetdeclattr_maptypety 
   | OMPDeclareVariant of
   {
   variant_func_ref: 'expr ;
@@ -143,6 +175,8 @@ type ('expr, 'qual_type, 'declaration_name) t =
   class_method: string ;
   instance_method: string } 
   | ObjCGC of string 
+  | ObjCMethodFamily of
+  Clang__bindings.clang_ext_objcmethodfamilyattr_familykind 
   | ObjCOwnership of string 
   | ObjCRuntimeName of string 
   | OpenCLAccess of Clang__bindings.clang_ext_openclaccess_spelling 
@@ -164,6 +198,8 @@ type ('expr, 'qual_type, 'declaration_name) t =
   spelling: Clang__bindings.clang_ext_ownership_spelling ;
   module_: string ;
   args: int list } 
+  | ParamTypestate of
+  Clang__bindings.clang_ext_paramtypestateattr_consumedstate 
   | PassObjectSize of
   {
   spelling: Clang__bindings.clang_ext_passobjectsize_spelling ;
@@ -171,6 +207,7 @@ type ('expr, 'qual_type, 'declaration_name) t =
   | PatchableFunctionEntry of {
   count: int ;
   offset: int } 
+  | Pcs of Clang__bindings.clang_ext_pcsattr_pcstype 
   | Pointer of 'qual_type 
   | PragmaClangBSSSection of string 
   | PragmaClangDataSection of string 
@@ -178,6 +215,8 @@ type ('expr, 'qual_type, 'declaration_name) t =
   | PragmaClangRodataSection of string 
   | PragmaClangTextSection of string 
   | PtGuardedBy of 'expr 
+  | RISCVInterrupt of
+  Clang__bindings.clang_ext_riscvinterruptattr_interrupttype 
   | ReleaseCapability of
   {
   spelling: Clang__bindings.clang_ext_releasecapability_spelling ;
@@ -192,6 +231,8 @@ type ('expr, 'qual_type, 'declaration_name) t =
   spelling: Clang__bindings.clang_ext_requirescapability_spelling ;
   args: 'expr list } 
   | Restrict of Clang__bindings.clang_ext_restrict_spelling 
+  | ReturnTypestate of
+  Clang__bindings.clang_ext_returntypestateattr_consumedstate 
   | Section of
   {
   spelling: Clang__bindings.clang_ext_section_spelling ;
@@ -199,12 +240,16 @@ type ('expr, 'qual_type, 'declaration_name) t =
   | Sentinel of {
   sentinel: int ;
   null_pos: int } 
+  | SetTypestate of Clang__bindings.clang_ext_settypestateattr_consumedstate
+  
   | SharedTrylockFunction of {
   success_value: 'expr ;
   args: 'expr list } 
   | Suppress of string list 
   | TLSModel of string 
   | Target of string 
+  | TestTypestate of
+  Clang__bindings.clang_ext_testtypestateattr_consumedstate 
   | TryAcquireCapability of
   {
   spelling: Clang__bindings.clang_ext_tryacquirecapability_spelling ;
@@ -216,11 +261,14 @@ type ('expr, 'qual_type, 'declaration_name) t =
   matching_ctype: 'qual_type ;
   layout_compatible: bool ;
   must_be_null: bool } 
+  | TypeVisibility of
+  Clang__bindings.clang_ext_typevisibilityattr_visibilitytype 
   | Unavailable of string 
   | Unused of Clang__bindings.clang_ext_unused_spelling 
   | UseHandle of string 
   | Uuid of string 
   | VecTypeHint of 'qual_type 
+  | Visibility of Clang__bindings.clang_ext_visibilityattr_visibilitytype 
   | WarnUnusedResult of
   {
   spelling: Clang__bindings.clang_ext_warnunusedresult_spelling ;
@@ -288,6 +336,9 @@ type ('expr, 'qual_type, 'declaration_name) t =
                    (expr_of_cxcursor
                       (Clang__bindings.ext_attrs_get_max cursor))
                }
+         | ARMInterrupt ->
+             ARMInterrupt
+               (Clang__bindings.ext_arminterrupt_attr_get_interrupt cursor)
          | ((AbiTag)[@if
                       [%meta
                         Metapp.Exp.of_bool
@@ -498,6 +549,12 @@ type ('expr, 'qual_type, 'declaration_name) t =
                    (Clang__bindings.ext_attrs_get_replacement cursor);
                  priority = (Clang__bindings.ext_attrs_get_priority cursor)
                }
+         | Blocks -> Blocks (Clang__bindings.ext_blocks_attr_get_type cursor)
+         | ((CFGuard)[@if
+                       [%meta
+                         Metapp.Exp.of_bool
+                           (Clangml_config.version.major >= 10)]])
+             -> CFGuard (Clang__bindings.ext_cfguard_attr_get_guard cursor)
          | ((CPUDispatch)[@if
                            [%meta
                              Metapp.Exp.of_bool
@@ -532,6 +589,17 @@ type ('expr, 'qual_type, 'declaration_name) t =
                       (Clang__bindings.ext_cudalaunch_bounds_attr_get_min_blocks
                          cursor))
                }
+         | ((CallableWhen)[@if
+                            [%meta
+                              Metapp.Exp.of_bool
+                                (((Clangml_config.version.major),
+                                   (Clangml_config.version.minor)) >= 
+                                   (3, 5))]])
+             ->
+             CallableWhen
+               (Clang__utils.list_of_iter
+                  (Clang__bindings.ext_callable_when_attr_get_callable_states
+                     cursor))
          | ((Callback)[@if
                         [%meta
                           Metapp.Exp.of_bool
@@ -569,6 +637,9 @@ type ('expr, 'qual_type, 'declaration_name) t =
              ConstInit (Clang__bindings.ext_const_init_get_spelling cursor)
          | Constructor ->
              Constructor (Clang__bindings.ext_attrs_get_priority cursor)
+         | Consumable ->
+             Consumable
+               (Clang__bindings.ext_consumable_attr_get_default_state cursor)
          | ((Deprecated)[@if
                           [%meta
                             Metapp.Exp.of_bool
@@ -608,6 +679,14 @@ type ('expr, 'qual_type, 'declaration_name) t =
                       (Clang__bindings.ext_attrs_get_cond cursor));
                  message = (Clang__bindings.ext_attrs_get_message cursor)
                }
+         | ((EnumExtensibility)[@if
+                                 [%meta
+                                   Metapp.Exp.of_bool
+                                     (Clangml_config.version.major >= 5)]])
+             ->
+             EnumExtensibility
+               (Clang__bindings.ext_enum_extensibility_attr_get_extensibility
+                  cursor)
          | ExclusiveTrylockFunction ->
              ExclusiveTrylockFunction
                {
@@ -695,9 +774,15 @@ type ('expr, 'qual_type, 'declaration_name) t =
          | ((LoopHint)[@if
                         [%meta
                           Metapp.Exp.of_bool
-                            (((Clangml_config.version.major),
-                               (Clangml_config.version.minor)) >= (3, 5))]])
-             -> LoopHint (Clang__bindings.ext_loop_hint_get_spelling cursor)
+                            (Clangml_config.version.major >= 10)]])
+             ->
+             LoopHint
+               {
+                 spelling =
+                   (Clang__bindings.ext_loop_hint_get_spelling cursor);
+                 option =
+                   (Clang__bindings.ext_loop_hint_attr_get_option cursor)
+               }
          | ((MSInheritance)[@if
                              [%meta
                                Metapp.Exp.of_bool
@@ -735,6 +820,15 @@ type ('expr, 'qual_type, 'declaration_name) t =
              MinVectorWidth
                (Clang__bindings.ext_min_vector_width_attr_get_vector_width
                   cursor)
+         | ((MipsInterrupt)[@if
+                             [%meta
+                               Metapp.Exp.of_bool
+                                 (((Clangml_config.version.major),
+                                    (Clangml_config.version.minor)) >= 
+                                    (3, 8))]])
+             ->
+             MipsInterrupt
+               (Clang__bindings.ext_mips_interrupt_attr_get_interrupt cursor)
          | ((MipsLongCall)[@if
                             [%meta
                               Metapp.Exp.of_bool
@@ -772,6 +866,21 @@ type ('expr, 'qual_type, 'declaration_name) t =
              NonNull
                (Clang__utils.list_of_iter
                   (Clang__bindings.ext_non_null_attr_get_args cursor))
+         | ((OMPAllocateDecl)[@if
+                               [%meta
+                                 Metapp.Exp.of_bool
+                                   (Clangml_config.version.major >= 9)]])
+             ->
+             OMPAllocateDecl
+               {
+                 allocator_type =
+                   (Clang__bindings.ext_ompallocate_decl_attr_get_allocator_type
+                      cursor);
+                 allocator =
+                   (expr_of_cxcursor
+                      (Clang__bindings.ext_ompallocate_decl_attr_get_allocator
+                         cursor))
+               }
          | ((OMPCaptureKind)[@if
                               [%meta
                                 Metapp.Exp.of_bool
@@ -779,6 +888,62 @@ type ('expr, 'qual_type, 'declaration_name) t =
              ->
              OMPCaptureKind
                (Clang__bindings.ext_ompcapture_kind_attr_get_capture_kind
+                  cursor)
+         | ((OMPDeclareSimdDecl)[@if
+                                  [%meta
+                                    Metapp.Exp.of_bool
+                                      (((Clangml_config.version.major),
+                                         (Clangml_config.version.minor)) >=
+                                         (3, 9))]])
+             ->
+             OMPDeclareSimdDecl
+               {
+                 branch_state =
+                   (Clang__bindings.ext_ompdeclare_simd_decl_attr_get_branch_state
+                      cursor);
+                 simdlen =
+                   (expr_of_cxcursor
+                      (Clang__bindings.ext_ompdeclare_simd_decl_attr_get_simdlen
+                         cursor));
+                 uniforms =
+                   ((Clang__utils.list_of_iter
+                       (Clang__bindings.ext_ompdeclare_simd_decl_attr_get_uniforms
+                          cursor))
+                      |> (List.map expr_of_cxcursor));
+                 aligneds =
+                   ((Clang__utils.list_of_iter
+                       (Clang__bindings.ext_ompdeclare_simd_decl_attr_get_aligneds
+                          cursor))
+                      |> (List.map expr_of_cxcursor));
+                 alignments =
+                   ((Clang__utils.list_of_iter
+                       (Clang__bindings.ext_ompdeclare_simd_decl_attr_get_alignments
+                          cursor))
+                      |> (List.map expr_of_cxcursor));
+                 linears =
+                   ((Clang__utils.list_of_iter
+                       (Clang__bindings.ext_ompdeclare_simd_decl_attr_get_linears
+                          cursor))
+                      |> (List.map expr_of_cxcursor));
+                 modifiers =
+                   (Clang__utils.list_of_iter
+                      (Clang__bindings.ext_ompdeclare_simd_decl_attr_get_modifiers
+                         cursor));
+                 steps =
+                   ((Clang__utils.list_of_iter
+                       (Clang__bindings.ext_ompdeclare_simd_decl_attr_get_steps
+                          cursor))
+                      |> (List.map expr_of_cxcursor))
+               }
+         | ((OMPDeclareTargetDecl)[@if
+                                    [%meta
+                                      Metapp.Exp.of_bool
+                                        (((Clangml_config.version.major),
+                                           (Clangml_config.version.minor)) >=
+                                           (3, 9))]])
+             ->
+             OMPDeclareTargetDecl
+               (Clang__bindings.ext_ompdeclare_target_decl_attr_get_map_type
                   cursor)
          | ((OMPDeclareVariant)[@if
                                  [%meta
@@ -856,6 +1021,9 @@ type ('expr, 'qual_type, 'declaration_name) t =
                         Metapp.Exp.of_bool
                           (Clangml_config.version.major >= 8)]])
              -> ObjCGC (Clang__bindings.ext_attrs_get_kind cursor)
+         | ObjCMethodFamily ->
+             ObjCMethodFamily
+               (Clang__bindings.ext_obj_cmethod_family_attr_get_family cursor)
          | ((ObjCOwnership)[@if
                              [%meta
                                Metapp.Exp.of_bool
@@ -966,6 +1134,10 @@ type ('expr, 'qual_type, 'declaration_name) t =
                    (Clang__utils.list_of_iter
                       (Clang__bindings.ext_non_null_attr_get_args cursor))
                }
+         | ParamTypestate ->
+             ParamTypestate
+               (Clang__bindings.ext_param_typestate_attr_get_param_state
+                  cursor)
          | ((PassObjectSize)[@if
                               [%meta
                                 Metapp.Exp.of_bool
@@ -994,6 +1166,7 @@ type ('expr, 'qual_type, 'declaration_name) t =
                    (Clang__bindings.ext_patchable_function_entry_attr_get_offset
                       cursor)
                }
+         | Pcs -> Pcs (Clang__bindings.ext_pcs_attr_get_pcs cursor)
          | ((Pointer)[@if
                        [%meta
                          Metapp.Exp.of_bool
@@ -1041,6 +1214,13 @@ type ('expr, 'qual_type, 'declaration_name) t =
          | PtGuardedBy ->
              PtGuardedBy
                (expr_of_cxcursor (Clang__bindings.ext_attrs_get_arg cursor))
+         | ((RISCVInterrupt)[@if
+                              [%meta
+                                Metapp.Exp.of_bool
+                                  (Clangml_config.version.major >= 7)]])
+             ->
+             RISCVInterrupt
+               (Clang__bindings.ext_riscvinterrupt_attr_get_interrupt cursor)
          | ((ReleaseCapability)[@if
                                  [%meta
                                    Metapp.Exp.of_bool
@@ -1096,6 +1276,9 @@ type ('expr, 'qual_type, 'declaration_name) t =
                             (((Clangml_config.version.major),
                                (Clangml_config.version.minor)) >= (3, 7))]])
              -> Restrict (Clang__bindings.ext_restrict_get_spelling cursor)
+         | ReturnTypestate ->
+             ReturnTypestate
+               (Clang__bindings.ext_return_typestate_attr_get_state cursor)
          | Section ->
              Section
                {
@@ -1110,6 +1293,9 @@ type ('expr, 'qual_type, 'declaration_name) t =
                  null_pos =
                    (Clang__bindings.ext_sentinel_attr_get_null_pos cursor)
                }
+         | SetTypestate ->
+             SetTypestate
+               (Clang__bindings.ext_set_typestate_attr_get_new_state cursor)
          | SharedTrylockFunction ->
              SharedTrylockFunction
                {
@@ -1140,6 +1326,9 @@ type ('expr, 'qual_type, 'declaration_name) t =
                              (Clangml_config.version.minor)) >= (3, 8))]])
              ->
              Target (Clang__bindings.ext_target_attr_get_features_str cursor)
+         | TestTypestate ->
+             TestTypestate
+               (Clang__bindings.ext_test_typestate_attr_get_test_state cursor)
          | ((TryAcquireCapability)[@if
                                     [%meta
                                       Metapp.Exp.of_bool
@@ -1177,6 +1366,10 @@ type ('expr, 'qual_type, 'declaration_name) t =
                    (Clang__bindings.ext_type_tag_for_datatype_attr_get_must_be_null
                       cursor)
                }
+         | TypeVisibility ->
+             TypeVisibility
+               (Clang__bindings.ext_type_visibility_attr_get_visibility
+                  cursor)
          | Unavailable ->
              Unavailable (Clang__bindings.ext_attrs_get_message cursor)
          | Unused -> Unused (Clang__bindings.ext_unused_get_spelling cursor)
@@ -1191,6 +1384,9 @@ type ('expr, 'qual_type, 'declaration_name) t =
                (of_type_loc
                   (Clang__bindings.ext_vec_type_hint_attr_get_type_hint
                      cursor))
+         | Visibility ->
+             Visibility
+               (Clang__bindings.ext_visibility_attr_get_visibility cursor)
          | ((WarnUnusedResult)[@if
                                 [%meta
                                   Metapp.Exp.of_bool
