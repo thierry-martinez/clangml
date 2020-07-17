@@ -73,6 +73,9 @@ module Ast : sig
 
   val delete : ?global_delete:bool -> ?array_form:bool -> expr -> expr_desc
 
+  val enum_decl : ?complete_definition: bool -> ?attributes:attribute list ->
+    string -> enum_constant list -> decl_desc
+
   val if_ :
       ?init:stmt -> ?condition_variable:var_decl -> ?else_branch:stmt -> expr ->
         stmt -> stmt_desc

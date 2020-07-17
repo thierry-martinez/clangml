@@ -18,7 +18,7 @@ module StringHashtbl = HashtblExt (struct
   let hash = Hashtbl.hash
 end)
 
-module TypeHashtbl = HashtblExt (Clang.Lazy.Type)
+module TypeHashtbl = HashtblExt (Clang.Type)
 
 let has_suffix ~suffix s =
   let suffix_len = String.length suffix in
@@ -38,9 +38,11 @@ let function_type ?calling_conv ?parameters ?exception_spec result =
 let record ident_ref =
   Clang.Type.make (Record ident_ref)
 
-let type_def name = Clang.Type.make (Typedef name)
+let typedef name = Clang.Type.make (Typedef name)
 
-let cxcursor = type_def (Clang.Ast.identifier_name "CXCursor")
+let enum name = Clang.Type.make (Enum name)
+
+let cxcursor = typedef (Clang.Ast.identifier_name "CXCursor")
 
 let pointer ty = Clang.Type.make (Pointer ty)
 
@@ -60,8 +62,8 @@ let call callee args = Clang.Ast.node (Clang.Ast.Call { callee; args })
 
 let decl_ref decl_ref = Clang.Ast.node (Clang.Ast.DeclRef decl_ref)
 
-let decl_of_string s =
-  decl_ref (Clang.Ast.identifier_name s)
+let decl_of_string ?nested_name_specifier s =
+  decl_ref (Clang.Ast.identifier_name ?nested_name_specifier s)
 
 let string s =
   Clang.Ast.node (Clang.Ast.StringLiteral (Clang.Ast.literal_of_string s))
@@ -144,11 +146,25 @@ let null_stmt =
   Clang.Ast.node (Clang.Ast.Null)
 
 let enum_decl ?(complete_definition = false) name constants =
-  Clang.Ast.node (Clang.Ast.EnumDecl { name; constants; complete_definition })
+  Clang.Ast.node (Clang.Ast.EnumDecl
+    { name; constants; complete_definition; attributes = [] })
 
 let enum_constant ?constant_init constant_name : Clang.Ast.enum_constant =
   Clang.Ast.node
     ({ constant_name; constant_init } : Clang.Ast.enum_constant_desc)
+
+type enum_constant = {
+    constant_name : string;
+    converted_name : string;
+  }
+
+type enum_decl = {
+    name : string;
+    ocaml_type_name : string;
+    c_type_name : string;
+    c_type_conversion_function : string;
+    constants : enum_constant list;
+  }
 
 type ocaml_type_conversion =
   | NoConversion
@@ -165,7 +181,12 @@ type type_info = {
     default : Clang.Expr.t;
   }
 
-let rec get_type_info (qual_type : Clang.Lazy.Type.t) : type_info =
+module StringMap = Map.Make (String)
+
+let clang__bindings = "Clang__bindings"
+
+let rec get_type_info (qual_type : Clang.Lazy.Type.t)
+    (enums : enum_decl StringMap.t) : type_info =
   let get_cursor_tu =
     lazy (call (decl_ref (Clang.Ast.identifier_name "getCursorTU"))
       [decl_ref (Clang.Ast.identifier_name "cursor")]) in
@@ -198,7 +219,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t) : type_info =
       { ocaml_type = [%type: string];
         type_conversion = NoConversion;
         interface_type =
-          type_def (Clang.Ast.identifier_name "CXString");
+          typedef (Clang.Ast.identifier_name "CXString");
         multiple = false;
         access = (fun e ->
           call (decl_ref (Clang.Ast.identifier_name "cxstring_createDup"))
@@ -211,7 +232,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t) : type_info =
       { ocaml_type = [%type: string];
         type_conversion = NoConversion;
         interface_type =
-          type_def (Clang.Ast.identifier_name "CXString");
+          typedef (Clang.Ast.identifier_name "CXString");
         multiple = false;
         access = (fun e ->
           call (decl_ref (Clang.Ast.identifier_name "cxstring_createDup"))
@@ -284,11 +305,30 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t) : type_info =
         access = Fun.id;
         default = const_bool false; }
   | Pointer qual_type ->
-      let type_info = get_type_info qual_type in
+      let type_info = get_type_info qual_type enums in
       { type_info with
         ocaml_type = [%type: [%t type_info.ocaml_type] list];
         multiple = true;
       }
+  | Enum { name = IdentifierName name; _ } ->
+      begin match StringMap.find_opt name enums with
+      | Some enum_decl ->
+          { ocaml_type =
+            Ast_helper.Typ.constr
+              (Metapp.mklid ~prefix:(Lident clang__bindings)
+                 enum_decl.ocaml_type_name) [];
+            type_conversion = NoConversion;
+            interface_type =
+            elaborated Enum
+              (enum (Clang.Ast.identifier_name enum_decl.c_type_name));
+            multiple = false;
+            access = (fun e ->
+              call (decl_of_string enum_decl.c_type_conversion_function) [e]);
+            default =
+            decl_of_string (List.hd enum_decl.constants).converted_name;
+          }
+      | None -> assert false
+      end
   | _ ->
       Format.eprintf "Unsupported type %a@."
         (Refl.pp [%refl:Clang.Lazy.Ast.qual_type] []) qual_type;
@@ -301,12 +341,11 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t) : type_info =
 
 type argument_decl = {
     name : string;
-    qual_type : Clang.Lazy.Type.t;
     type_info : type_info;
   }
 
-let make_argument_decl name qual_type =
-  { name; qual_type; type_info = get_type_info qual_type }
+let make_argument_decl name qual_type enums =
+  { name; type_info = get_type_info qual_type enums }
 
 type argument_attribute = {
     name : string;
@@ -348,7 +387,7 @@ let register_argument context name reduced_name
     StringHashtbl.find_default context.argument_table argument.name
       ~default:(fun () -> TypeHashtbl.create 17) in
   let desc =
-    TypeHashtbl.find_default type_table argument.qual_type
+    TypeHashtbl.find_default type_table argument.type_info.interface_type
       ~default:(fun () ->
         { type_info = argument.type_info; attributes = [];
           getter_name_ref = ref "" }) in
@@ -369,17 +408,19 @@ let annotate_access_specifier
     List.fold_left annotate_field (default_specifier, []) fields in
   List.rev rev
 
+let get_constant_names
+    (constants : Clang.Lazy.Ast.enum_constant list) : string list =
+   constants |>
+   List.map (fun ({ desc = lazy constant } : Clang.Lazy.Ast.enum_constant) ->
+     constant.constant_name)
+
 let find_spelling (fields : annotated_field list) : string list option =
   let get_spelling ((specifier, field) : annotated_field) =
     match specifier with
     | CXXPublic ->
         begin match Lazy.force field.desc with
         | EnumDecl { name = "Spelling"; constants; _ } ->
-            let list =
-              List.map (
-              fun ({ desc = lazy constant } : Clang.Lazy.Ast.enum_constant) ->
-                constant.constant_name) constants in
-            Some list
+            Some (get_constant_names constants)
         | _ -> None
         end
     | _ -> None in
@@ -461,12 +502,15 @@ let unkeyword name =
   | "module" -> name ^ "_"
   | _ -> name
 
+let restrict_decl_version (major, minor) body =
+  directive (Ifndef (
+    Printf.sprintf "LLVM_VERSION_BEFORE_%d_%d_0" major minor)) ::
+  body @ [directive Endif]
+
 let restrict_statement_version (major, minor) body =
   decl [directive (Ifndef (
     Printf.sprintf "LLVM_VERSION_BEFORE_%d_%d_0" major minor))] ::
   body @ [decl [directive Endif]]
-
-module StringMap = Map.Make (String)
 
 let find_version_constraint versions attribute =
   match StringMap.find_opt attribute versions with
@@ -476,9 +520,8 @@ let find_version_constraint versions attribute =
   | Some (3, 4) -> None
   | result -> result
 
-let generate_attribute context _versions name public_methods spelling
-    (arguments : argument_decl list) =
-  let reduced_name = get_reduced_attribute_name name in
+let generate_attribute context versions name reduced_name public_methods
+    spelling (arguments : argument_decl list) =
   let arguments =
     arguments |> List.map @@ fun (argument : argument_decl) ->
       let arg_name = remove_trailing_underscore argument.name in
@@ -524,7 +567,7 @@ let generate_attribute context _versions name public_methods spelling
     | Some (_, type_spelling_name, spelling_getter_name) ->
       { name = "spelling";
         ty = Ast_helper.Typ.constr
-          (Metapp.mklid ~prefix:(Lident "Clang__bindings")
+          (Metapp.mklid ~prefix:(Lident clang__bindings)
              (String.lowercase type_spelling_name)) [];
         type_conversion = NoConversion;
         multiple = false;
@@ -572,7 +615,7 @@ let generate_attribute context _versions name public_methods spelling
       restrict_statement_version (10, 0) [get_cursor_attr; switch]
       @ [return_default] in
     let result =
-      elaborated Enum (record (Clang.Ast.identifier_name type_spelling_name)) in
+      elaborated Enum (enum (Clang.Ast.identifier_name type_spelling_name)) in
     let spelling_getter =
       Clang.Ast.function_decl (Clang.Ast.function_type
         ~parameters:(Clang.Ast.parameters [parameter_cursor]) result)
@@ -594,11 +637,45 @@ let do_decl context versions (decl : Clang.Lazy.Decl.t) =
           { qual_type = { desc = lazy (Record {
               name = IdentifierName base_class; _ }); _}; _}]; _} when
     is_parameter_base_class base_class && not (is_parameter_base_class name) ->
+      let extract_enum
+          (field : Clang.Lazy.Decl.t) : (string * enum_decl) option =
+        match Lazy.force field.desc with
+        | EnumDecl { name = enum_name; constants; _ } ->
+            let c_type_name = Printf.sprintf "clang_ext_%s_%s" name enum_name in
+            let constants =
+              constants |> List.map (fun ({ desc = lazy { constant_name; _ }}
+                  : Clang.Lazy.Ast.enum_constant) ->
+                  let converted_name =
+                    Printf.sprintf "%s_%s" c_type_name constant_name in
+                  { constant_name; converted_name }) in
+            let enum_decl = {
+              name = enum_name;
+              ocaml_type_name = String.lowercase c_type_name;
+              c_type_name;
+              c_type_conversion_function =
+                Printf.sprintf "convert_%s_%s" name enum_name;
+              constants;
+            } in
+            Some (enum_name, enum_decl)
+        | _ -> None in
+      let enums, fields =
+        match fields with
+        | { desc = lazy (AccessSpecifier CXXPublic) } :: tail ->
+            let enums, tail =
+              Clang.extract_prefix_from_list extract_enum tail in
+            begin match tail with
+            | { desc = lazy (AccessSpecifier CXXPrivate) } :: tail ->
+                enums, tail
+            | _ ->
+                [], fields
+            end
+        | _ -> [], fields in
+      let enums = StringMap.of_seq (List.to_seq enums) in
       let extract_simple_field
           (field : Clang.Lazy.Decl.t) : argument_decl option =
         match Lazy.force field.desc with
         | Field { name; qual_type; _ } ->
-            Some (make_argument_decl name qual_type)
+            Some (make_argument_decl name qual_type enums)
         | _ -> None in
       let arguments, fields =
         match name with
@@ -607,15 +684,52 @@ let do_decl context versions (decl : Clang.Lazy.Decl.t) =
               Clang.Lazy.Type.make (lazy (Pointer (
                 Clang.Lazy.Type.make (lazy (Record (
                   Clang.Lazy.Ast.identifier_name "Expr")))))) in
-            [make_argument_decl "alignmentExpr" expr_type], fields
+            [make_argument_decl "alignmentExpr" expr_type enums], fields
         | _ ->
             Clang.extract_prefix_from_list extract_simple_field fields in
       let annotated_fields = annotate_access_specifier CXXPrivate fields in
       let spelling = find_spelling annotated_fields in
+      let reduced_name = get_reduced_attribute_name name in
+      enums |> StringMap.iter (fun _ (enum_decl' : enum_decl) ->
+        let constants =
+          enum_decl'.constants |> List.map (fun constant ->
+            constant.converted_name) in
+        let result =
+          elaborated Enum
+            (enum (Clang.Ast.identifier_name enum_decl'.c_type_name)) in
+        let nested_name_specifier = [
+          namespace_clang;
+          TypeSpec (record (Clang.Ast.identifier_name name))] in
+        let value = "value" in
+        let parameter =
+          parameter (typedef (Clang.Ast.identifier_name enum_decl'.name
+            ~nested_name_specifier)) value in
+        let nested_name_specifier =
+          nested_name_specifier @
+          [TypeSpec (record (Clang.Ast.identifier_name enum_decl'.name))] in
+        let body = compound [switch (decl_of_string value) (compound
+          (enum_decl'.constants |> List.map
+          (fun (constant : enum_constant) ->
+            case (decl_of_string ~nested_name_specifier constant.constant_name)
+              (return (Some (decl_of_string constant.converted_name))))));
+          return (Some
+            (decl_of_string (List.hd enum_decl'.constants).converted_name))] in
+        let convert_function =
+          function_decl (Clang.Ast.function_decl (Clang.Ast.function_type
+            ~parameters:(Clang.Ast.parameters [parameter]) result)
+            (IdentifierName enum_decl'.c_type_conversion_function)
+            ~body) in
+        let decls =
+          Option.fold (find_version_constraint versions reduced_name)
+            ~none:Fun.id ~some:restrict_decl_version [convert_function] in
+        context.protos <-
+          enum_decl enum_decl'.c_type_name (List.map enum_constant constants) ::
+          context.protos;
+        context.decls <- List.rev_append decls context.decls);
       if arguments <> [] || spelling <> None then
         let public_methods = enumerate_public_methods annotated_fields in
-        generate_attribute context versions name public_methods spelling
-          arguments
+        generate_attribute context versions name reduced_name public_methods
+          spelling arguments
   | _ -> ()
 
 let do_namespace context versions (decl : Clang.Lazy.Decl.t) =
@@ -787,7 +901,11 @@ let main cflags llvm_config prefix =
     (* no args *)
     StringMap.add "AssertCapability" (6, 0) |>
     (* no features_str_length *)
-    StringMap.add "Target" (3, 8) in
+    StringMap.add "Target" (3, 8) |>
+    (* fields are misnamed *)
+    StringMap.add "CallableWhen" (3, 5) |>
+    (* some constants are missing *)
+    StringMap.add "LoopHint" (10, 0) in
   let command_line_args, _llvm_version =
     Stubgen_common.prepare_clang_options cflags llvm_config in
   let tu =

@@ -3549,11 +3549,25 @@ let () =
       var_name = "x";
       var_init = Some ({ desc = IntegerLiteral (Int 1)})}}] -> ()
   | _ -> assert false
+
+let example = {| int var1 asm("altvar") = 1; |}
+
+[%%meta if Clangml_config.version.major >= 10 then [%stri
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = Var {
+      var_type = { const = false; desc = BuiltinType Int };
+      var_name = "var1";
+      var_init = Some ({ desc = IntegerLiteral (Int 1)});
+      attributes = [{ desc = AsmLabel { label = "altvar" }}] }}]]]
+else Metapp.Stri.of_list []]
     ]}*)
   | EnumDecl of {
       name : string;
       constants : enum_constant list;
       complete_definition : bool;
+      attributes : attribute list;
     }
 (** Enum declaration.
     {[
@@ -3574,6 +3588,82 @@ let () =
     assert (Clang.Enum_constant.get_value bindings#a = 0);
     assert (Clang.Enum_constant.get_value bindings#b = 2);
     assert (Clang.Enum_constant.get_value bindings#c = 3))
+
+let example = {|
+enum __attribute__((enum_extensibility(closed))) ClosedEnum {
+  A0, A1
+};
+
+enum __attribute__((enum_extensibility(open))) OpenEnum {
+  B0, B1
+};
+
+enum __attribute__((enum_extensibility(closed),flag_enum)) ClosedFlagEnum {
+  C0 = 1 << 0, C1 = 1 << 1
+};
+
+enum __attribute__((enum_extensibility(open),flag_enum)) OpenFlagEnum {
+  D0 = 1 << 0, D1 = 1 << 1
+};
+|}
+
+[%%meta if Clangml_config.version.major >= 5 then [%stri
+let () =
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = EnumDecl {
+          name = "ClosedEnum";
+          constants = [
+            { desc = { constant_name = "A0"; constant_init = None }};
+            { desc = { constant_name = "A1"; constant_init = None }}];
+          complete_definition = true;
+          attributes = [{ desc = EnumExtensibility Closed }] }};
+      { desc = EnumDecl {
+          name = "OpenEnum";
+          constants = [
+            { desc = { constant_name = "B0"; constant_init = None }};
+            { desc = { constant_name = "B1"; constant_init = None }}];
+          complete_definition = true;
+          attributes = [{ desc = EnumExtensibility Open }] }};
+      { desc = EnumDecl {
+          name = "ClosedFlagEnum";
+          constants = [
+            { desc = { constant_name = "C0";
+                constant_init = Some { desc = BinaryOperator {
+                  lhs = { desc = IntegerLiteral (Int 1) };
+                  kind = Shl;
+                  rhs = { desc = IntegerLiteral (Int 0) }}}}};
+            { desc = { constant_name = "C1";
+                constant_init = Some { desc = BinaryOperator {
+                  lhs = { desc = IntegerLiteral (Int 1) };
+                  kind = Shl;
+                  rhs = { desc = IntegerLiteral (Int 1) }}}}}];
+          complete_definition = true;
+          attributes = ([
+            { desc = EnumExtensibility Closed };
+            { desc = Other FlagEnum }] | [
+            { desc = Other FlagEnum };
+            { desc = EnumExtensibility Closed }]) }};
+      { desc = EnumDecl {
+          name = "OpenFlagEnum";
+          constants = [
+            { desc = { constant_name = "D0";
+                constant_init = Some { desc = BinaryOperator {
+                  lhs = { desc = IntegerLiteral (Int 1) };
+                  kind = Shl;
+                  rhs = { desc = IntegerLiteral (Int 0) }}}}};
+            { desc = { constant_name = "D1";
+                constant_init = Some { desc = BinaryOperator {
+                  lhs = { desc = IntegerLiteral (Int 1) };
+                  kind = Shl;
+                  rhs = { desc = IntegerLiteral (Int 1) }}}}}];
+          complete_definition = true;
+          attributes = ([
+            { desc = EnumExtensibility Open };
+            { desc = Other FlagEnum }] | [
+            { desc = Other FlagEnum };
+            { desc = EnumExtensibility Open }]) }}]]]
+else Metapp.Stri.of_list []]
     ]}*)
   | RecordDecl of record_decl
 (** Record declaration ([struct], [union] or [class]).

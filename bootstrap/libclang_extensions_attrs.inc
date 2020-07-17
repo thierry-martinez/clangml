@@ -2,6 +2,24 @@
  * It should not be modified by hand and it should not be versioned
  * (except by continuous integration on the dedicated bootstrap branch). */
 enum
+clang_ext_ARMInterruptAttr_InterruptType
+convert_ARMInterruptAttr_InterruptType(
+clang::ARMInterruptAttr ::InterruptType value)
+{switch (value)
+ {case clang::ARMInterruptAttr ::InterruptType ::IRQ:
+  return clang_ext_ARMInterruptAttr_InterruptType_IRQ;
+  case clang::ARMInterruptAttr ::InterruptType ::FIQ:
+  return clang_ext_ARMInterruptAttr_InterruptType_FIQ;
+  case clang::ARMInterruptAttr ::InterruptType ::SWI:
+  return clang_ext_ARMInterruptAttr_InterruptType_SWI;
+  case clang::ARMInterruptAttr ::InterruptType ::ABORT:
+  return clang_ext_ARMInterruptAttr_InterruptType_ABORT;
+  case clang::ARMInterruptAttr ::InterruptType ::UNDEF:
+  return clang_ext_ARMInterruptAttr_InterruptType_UNDEF;
+  case clang::ARMInterruptAttr ::InterruptType ::Generic:
+  return clang_ext_ARMInterruptAttr_InterruptType_Generic;}
+ return clang_ext_ARMInterruptAttr_InterruptType_IRQ;}
+enum
 clang_ext_AcquireCapability_spelling clang_ext_AcquireCapability_getSpelling(
 CXCursor cursor)
 {
@@ -169,34 +187,68 @@ CXCursor cursor)
  
  return clang_ext_AssertCapability_SpellingNotCalculated;}
 enum
-clang_ext_Capability_spelling clang_ext_Capability_getSpelling(
-CXCursor cursor)
-{
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+clang_ext_BlocksAttr_BlockType convert_BlocksAttr_BlockType(
+clang::BlocksAttr ::BlockType value)
+{switch (value)
+ {case clang::BlocksAttr ::BlockType ::ByRef:
+  return clang_ext_BlocksAttr_BlockType_ByRef;}
+ return clang_ext_BlocksAttr_BlockType_ByRef;}
+
+#ifndef LLVM_VERSION_BEFORE_10_0_0
+ enum
+ clang_ext_CFGuardAttr_GuardArg convert_CFGuardAttr_GuardArg(
+ clang::CFGuardAttr ::GuardArg value)
+ {switch (value)
+  {case clang::CFGuardAttr ::GuardArg ::nocf:
+   return clang_ext_CFGuardAttr_GuardArg_nocf;}
+  return clang_ext_CFGuardAttr_GuardArg_nocf;}
+
+#endif
  
- auto attr = GetCursorAttr(cursor);
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::CapabilityAttr >(attr))
- switch (qual_attr->getSemanticSpelling())
- {case clang::CapabilityAttr ::Spelling ::GNU_capability:
-  return clang_ext_Capability_GNU_capability;
-  case clang::CapabilityAttr ::Spelling ::CXX11_clang_capability:
-  return clang_ext_Capability_CXX11_clang_capability;
-  case clang::CapabilityAttr ::Spelling ::GNU_shared_capability:
-  return clang_ext_Capability_GNU_shared_capability;
-  case clang::CapabilityAttr ::Spelling ::CXX11_clang_shared_capability:
-  return clang_ext_Capability_CXX11_clang_shared_capability;
-  
+#ifndef LLVM_VERSION_BEFORE_3_5_0
+ enum
+ clang_ext_CallableWhenAttr_ConsumedState
+ convert_CallableWhenAttr_ConsumedState(
+ clang::CallableWhenAttr ::ConsumedState value)
+ {switch (value)
+  {case clang::CallableWhenAttr ::ConsumedState ::Unknown:
+   return clang_ext_CallableWhenAttr_ConsumedState_Unknown;
+   case clang::CallableWhenAttr ::ConsumedState ::Consumed:
+   return clang_ext_CallableWhenAttr_ConsumedState_Consumed;
+   case clang::CallableWhenAttr ::ConsumedState ::Unconsumed:
+   return clang_ext_CallableWhenAttr_ConsumedState_Unconsumed;}
+  return clang_ext_CallableWhenAttr_ConsumedState_Unknown;}
+
+#endif
+ enum
+ clang_ext_Capability_spelling clang_ext_Capability_getSpelling(
+ CXCursor cursor)
+ {
   #ifndef LLVM_VERSION_BEFORE_10_0_0
   
-  case clang::CapabilityAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_Capability_SpellingNotCalculated;
+  auto attr = GetCursorAttr(cursor);
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::CapabilityAttr >(attr))
+  switch (qual_attr->getSemanticSpelling())
+  {case clang::CapabilityAttr ::Spelling ::GNU_capability:
+   return clang_ext_Capability_GNU_capability;
+   case clang::CapabilityAttr ::Spelling ::CXX11_clang_capability:
+   return clang_ext_Capability_CXX11_clang_capability;
+   case clang::CapabilityAttr ::Spelling ::GNU_shared_capability:
+   return clang_ext_Capability_GNU_shared_capability;
+   case clang::CapabilityAttr ::Spelling ::CXX11_clang_shared_capability:
+   return clang_ext_Capability_CXX11_clang_shared_capability;
+   
+   #ifndef LLVM_VERSION_BEFORE_10_0_0
+   
+   case clang::CapabilityAttr ::Spelling ::SpellingNotCalculated:
+   return clang_ext_Capability_SpellingNotCalculated;
+   
+   #endif
+   }
   
   #endif
-  }
- 
- #endif
- 
- return clang_ext_Capability_SpellingNotCalculated;}
+  
+  return clang_ext_Capability_SpellingNotCalculated;}
 enum
 clang_ext_ConstInit_spelling clang_ext_ConstInit_getSpelling(CXCursor cursor)
 {
@@ -224,59 +276,116 @@ clang_ext_ConstInit_spelling clang_ext_ConstInit_getSpelling(CXCursor cursor)
  #endif
  
  return clang_ext_ConstInit_SpellingNotCalculated;}
-enum clang_ext_Final_spelling clang_ext_Final_getSpelling(CXCursor cursor)
-{
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- auto attr = GetCursorAttr(cursor);
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::FinalAttr >(attr))
- switch (qual_attr->getSemanticSpelling())
- {case clang::FinalAttr ::Spelling ::Keyword_final:
-  return clang_ext_Final_Keyword_final;
-  case clang::FinalAttr ::Spelling ::Keyword_sealed:
-  return clang_ext_Final_Keyword_sealed;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::FinalAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_Final_SpellingNotCalculated;
-  
-  #endif
-  }
- 
- #endif
- 
- return clang_ext_Final_SpellingNotCalculated;}
 enum
-clang_ext_LoopHint_spelling clang_ext_LoopHint_getSpelling(CXCursor cursor)
-{
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- auto attr = GetCursorAttr(cursor);
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::LoopHintAttr >(attr))
- switch (qual_attr->getSemanticSpelling())
- {case clang::LoopHintAttr ::Spelling ::Pragma_clang_loop:
-  return clang_ext_LoopHint_Pragma_clang_loop;
-  case clang::LoopHintAttr ::Spelling ::Pragma_unroll:
-  return clang_ext_LoopHint_Pragma_unroll;
-  case clang::LoopHintAttr ::Spelling ::Pragma_nounroll:
-  return clang_ext_LoopHint_Pragma_nounroll;
-  case clang::LoopHintAttr ::Spelling ::Pragma_unroll_and_jam:
-  return clang_ext_LoopHint_Pragma_unroll_and_jam;
-  case clang::LoopHintAttr ::Spelling ::Pragma_nounroll_and_jam:
-  return clang_ext_LoopHint_Pragma_nounroll_and_jam;
-  
+clang_ext_ConsumableAttr_ConsumedState convert_ConsumableAttr_ConsumedState(
+clang::ConsumableAttr ::ConsumedState value)
+{switch (value)
+ {case clang::ConsumableAttr ::ConsumedState ::Unknown:
+  return clang_ext_ConsumableAttr_ConsumedState_Unknown;
+  case clang::ConsumableAttr ::ConsumedState ::Consumed:
+  return clang_ext_ConsumableAttr_ConsumedState_Consumed;
+  case clang::ConsumableAttr ::ConsumedState ::Unconsumed:
+  return clang_ext_ConsumableAttr_ConsumedState_Unconsumed;}
+ return clang_ext_ConsumableAttr_ConsumedState_Unknown;}
+
+#ifndef LLVM_VERSION_BEFORE_5_0_0
+ enum
+ clang_ext_EnumExtensibilityAttr_Kind convert_EnumExtensibilityAttr_Kind(
+ clang::EnumExtensibilityAttr ::Kind value)
+ {switch (value)
+  {case clang::EnumExtensibilityAttr ::Kind ::Closed:
+   return clang_ext_EnumExtensibilityAttr_Kind_Closed;
+   case clang::EnumExtensibilityAttr ::Kind ::Open:
+   return clang_ext_EnumExtensibilityAttr_Kind_Open;}
+  return clang_ext_EnumExtensibilityAttr_Kind_Closed;}
+
+#endif
+ enum clang_ext_Final_spelling clang_ext_Final_getSpelling(CXCursor cursor)
+ {
   #ifndef LLVM_VERSION_BEFORE_10_0_0
   
-  case clang::LoopHintAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_LoopHint_SpellingNotCalculated;
+  auto attr = GetCursorAttr(cursor);
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::FinalAttr >(attr))
+  switch (qual_attr->getSemanticSpelling())
+  {case clang::FinalAttr ::Spelling ::Keyword_final:
+   return clang_ext_Final_Keyword_final;
+   case clang::FinalAttr ::Spelling ::Keyword_sealed:
+   return clang_ext_Final_Keyword_sealed;
+   
+   #ifndef LLVM_VERSION_BEFORE_10_0_0
+   
+   case clang::FinalAttr ::Spelling ::SpellingNotCalculated:
+   return clang_ext_Final_SpellingNotCalculated;
+   
+   #endif
+   }
   
   #endif
-  }
- 
- #endif
- 
- return clang_ext_LoopHint_SpellingNotCalculated;}
+  
+  return clang_ext_Final_SpellingNotCalculated;}
+
+#ifndef LLVM_VERSION_BEFORE_10_0_0
+ enum
+ clang_ext_LoopHintAttr_OptionType convert_LoopHintAttr_OptionType(
+ clang::LoopHintAttr ::OptionType value)
+ {switch (value)
+  {case clang::LoopHintAttr ::OptionType ::Vectorize:
+   return clang_ext_LoopHintAttr_OptionType_Vectorize;
+   case clang::LoopHintAttr ::OptionType ::VectorizeWidth:
+   return clang_ext_LoopHintAttr_OptionType_VectorizeWidth;
+   case clang::LoopHintAttr ::OptionType ::Interleave:
+   return clang_ext_LoopHintAttr_OptionType_Interleave;
+   case clang::LoopHintAttr ::OptionType ::InterleaveCount:
+   return clang_ext_LoopHintAttr_OptionType_InterleaveCount;
+   case clang::LoopHintAttr ::OptionType ::Unroll:
+   return clang_ext_LoopHintAttr_OptionType_Unroll;
+   case clang::LoopHintAttr ::OptionType ::UnrollCount:
+   return clang_ext_LoopHintAttr_OptionType_UnrollCount;
+   case clang::LoopHintAttr ::OptionType ::UnrollAndJam:
+   return clang_ext_LoopHintAttr_OptionType_UnrollAndJam;
+   case clang::LoopHintAttr ::OptionType ::UnrollAndJamCount:
+   return clang_ext_LoopHintAttr_OptionType_UnrollAndJamCount;
+   case clang::LoopHintAttr ::OptionType ::PipelineDisabled:
+   return clang_ext_LoopHintAttr_OptionType_PipelineDisabled;
+   case clang::LoopHintAttr ::OptionType ::PipelineInitiationInterval:
+   return clang_ext_LoopHintAttr_OptionType_PipelineInitiationInterval;
+   case clang::LoopHintAttr ::OptionType ::Distribute:
+   return clang_ext_LoopHintAttr_OptionType_Distribute;
+   case clang::LoopHintAttr ::OptionType ::VectorizePredicate:
+   return clang_ext_LoopHintAttr_OptionType_VectorizePredicate;}
+  return clang_ext_LoopHintAttr_OptionType_Vectorize;}
+
+#endif
+ enum
+ clang_ext_LoopHint_spelling clang_ext_LoopHint_getSpelling(CXCursor cursor)
+ {
+  #ifndef LLVM_VERSION_BEFORE_10_0_0
+  
+  auto attr = GetCursorAttr(cursor);
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::LoopHintAttr >(attr))
+  switch (qual_attr->getSemanticSpelling())
+  {case clang::LoopHintAttr ::Spelling ::Pragma_clang_loop:
+   return clang_ext_LoopHint_Pragma_clang_loop;
+   case clang::LoopHintAttr ::Spelling ::Pragma_unroll:
+   return clang_ext_LoopHint_Pragma_unroll;
+   case clang::LoopHintAttr ::Spelling ::Pragma_nounroll:
+   return clang_ext_LoopHint_Pragma_nounroll;
+   case clang::LoopHintAttr ::Spelling ::Pragma_unroll_and_jam:
+   return clang_ext_LoopHint_Pragma_unroll_and_jam;
+   case clang::LoopHintAttr ::Spelling ::Pragma_nounroll_and_jam:
+   return clang_ext_LoopHint_Pragma_nounroll_and_jam;
+   
+   #ifndef LLVM_VERSION_BEFORE_10_0_0
+   
+   case clang::LoopHintAttr ::Spelling ::SpellingNotCalculated:
+   return clang_ext_LoopHint_SpellingNotCalculated;
+   
+   #endif
+   }
+  
+  #endif
+  
+  return clang_ext_LoopHint_SpellingNotCalculated;}
 enum
 clang_ext_MSInheritance_spelling clang_ext_MSInheritance_getSpelling(
 CXCursor cursor)
@@ -307,35 +416,64 @@ CXCursor cursor)
  #endif
  
  return clang_ext_MSInheritance_SpellingNotCalculated;}
-enum
-clang_ext_MipsLongCall_spelling clang_ext_MipsLongCall_getSpelling(
-CXCursor cursor)
-{
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- auto attr = GetCursorAttr(cursor);
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::MipsLongCallAttr >(attr))
- switch (qual_attr->getSemanticSpelling())
- {case clang::MipsLongCallAttr ::Spelling ::GNU_long_call:
-  return clang_ext_MipsLongCall_GNU_long_call;
-  case clang::MipsLongCallAttr ::Spelling ::CXX11_gnu_long_call:
-  return clang_ext_MipsLongCall_CXX11_gnu_long_call;
-  case clang::MipsLongCallAttr ::Spelling ::GNU_far:
-  return clang_ext_MipsLongCall_GNU_far;
-  case clang::MipsLongCallAttr ::Spelling ::CXX11_gnu_far:
-  return clang_ext_MipsLongCall_CXX11_gnu_far;
-  
+
+#ifndef LLVM_VERSION_BEFORE_3_8_0
+ enum
+ clang_ext_MipsInterruptAttr_InterruptType
+ convert_MipsInterruptAttr_InterruptType(
+ clang::MipsInterruptAttr ::InterruptType value)
+ {switch (value)
+  {case clang::MipsInterruptAttr ::InterruptType ::sw0:
+   return clang_ext_MipsInterruptAttr_InterruptType_sw0;
+   case clang::MipsInterruptAttr ::InterruptType ::sw1:
+   return clang_ext_MipsInterruptAttr_InterruptType_sw1;
+   case clang::MipsInterruptAttr ::InterruptType ::hw0:
+   return clang_ext_MipsInterruptAttr_InterruptType_hw0;
+   case clang::MipsInterruptAttr ::InterruptType ::hw1:
+   return clang_ext_MipsInterruptAttr_InterruptType_hw1;
+   case clang::MipsInterruptAttr ::InterruptType ::hw2:
+   return clang_ext_MipsInterruptAttr_InterruptType_hw2;
+   case clang::MipsInterruptAttr ::InterruptType ::hw3:
+   return clang_ext_MipsInterruptAttr_InterruptType_hw3;
+   case clang::MipsInterruptAttr ::InterruptType ::hw4:
+   return clang_ext_MipsInterruptAttr_InterruptType_hw4;
+   case clang::MipsInterruptAttr ::InterruptType ::hw5:
+   return clang_ext_MipsInterruptAttr_InterruptType_hw5;
+   case clang::MipsInterruptAttr ::InterruptType ::eic:
+   return clang_ext_MipsInterruptAttr_InterruptType_eic;}
+  return clang_ext_MipsInterruptAttr_InterruptType_sw0;}
+
+#endif
+ enum
+ clang_ext_MipsLongCall_spelling clang_ext_MipsLongCall_getSpelling(
+ CXCursor cursor)
+ {
   #ifndef LLVM_VERSION_BEFORE_10_0_0
   
-  case clang::MipsLongCallAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_MipsLongCall_SpellingNotCalculated;
+  auto attr = GetCursorAttr(cursor);
+  if
+  (auto qual_attr = llvm::dyn_cast_or_null<clang::MipsLongCallAttr >(attr))
+  switch (qual_attr->getSemanticSpelling())
+  {case clang::MipsLongCallAttr ::Spelling ::GNU_long_call:
+   return clang_ext_MipsLongCall_GNU_long_call;
+   case clang::MipsLongCallAttr ::Spelling ::CXX11_gnu_long_call:
+   return clang_ext_MipsLongCall_CXX11_gnu_long_call;
+   case clang::MipsLongCallAttr ::Spelling ::GNU_far:
+   return clang_ext_MipsLongCall_GNU_far;
+   case clang::MipsLongCallAttr ::Spelling ::CXX11_gnu_far:
+   return clang_ext_MipsLongCall_CXX11_gnu_far;
+   
+   #ifndef LLVM_VERSION_BEFORE_10_0_0
+   
+   case clang::MipsLongCallAttr ::Spelling ::SpellingNotCalculated:
+   return clang_ext_MipsLongCall_SpellingNotCalculated;
+   
+   #endif
+   }
   
   #endif
-  }
- 
- #endif
- 
- return clang_ext_MipsLongCall_SpellingNotCalculated;}
+  
+  return clang_ext_MipsLongCall_SpellingNotCalculated;}
 enum
 clang_ext_MipsShortCall_spelling clang_ext_MipsShortCall_getSpelling(
 CXCursor cursor)
@@ -366,6 +504,84 @@ CXCursor cursor)
  #endif
  
  return clang_ext_MipsShortCall_SpellingNotCalculated;}
+
+#ifndef LLVM_VERSION_BEFORE_9_0_0
+ enum
+ clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy
+ convert_OMPAllocateDeclAttr_AllocatorTypeTy(
+ clang::OMPAllocateDeclAttr ::AllocatorTypeTy value)
+ {switch (value)
+  {case clang::OMPAllocateDeclAttr ::AllocatorTypeTy ::OMPDefaultMemAlloc:
+   return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPDefaultMemAlloc;
+   case clang::OMPAllocateDeclAttr ::AllocatorTypeTy ::OMPLargeCapMemAlloc:
+   return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPLargeCapMemAlloc;
+   case clang::OMPAllocateDeclAttr ::AllocatorTypeTy ::OMPConstMemAlloc:
+   return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPConstMemAlloc;
+   case clang::OMPAllocateDeclAttr ::AllocatorTypeTy ::OMPHighBWMemAlloc:
+   return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPHighBWMemAlloc;
+   case clang::OMPAllocateDeclAttr ::AllocatorTypeTy ::OMPLowLatMemAlloc:
+   return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPLowLatMemAlloc;
+   case clang::OMPAllocateDeclAttr ::AllocatorTypeTy ::OMPCGroupMemAlloc:
+   return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPCGroupMemAlloc;
+   case clang::OMPAllocateDeclAttr ::AllocatorTypeTy ::OMPPTeamMemAlloc:
+   return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPPTeamMemAlloc;
+   case clang::OMPAllocateDeclAttr ::AllocatorTypeTy ::OMPThreadMemAlloc:
+   return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPThreadMemAlloc;
+   case
+   clang::OMPAllocateDeclAttr ::AllocatorTypeTy ::OMPUserDefinedMemAlloc:
+   return
+   clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPUserDefinedMemAlloc;}
+  return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPDefaultMemAlloc;}
+
+#endif
+ 
+#ifndef LLVM_VERSION_BEFORE_3_9_0
+ enum
+ clang_ext_OMPDeclareSimdDeclAttr_BranchStateTy
+ convert_OMPDeclareSimdDeclAttr_BranchStateTy(
+ clang::OMPDeclareSimdDeclAttr ::BranchStateTy value)
+ {switch (value)
+  {case clang::OMPDeclareSimdDeclAttr ::BranchStateTy ::BS_Undefined:
+   return clang_ext_OMPDeclareSimdDeclAttr_BranchStateTy_BS_Undefined;
+   case clang::OMPDeclareSimdDeclAttr ::BranchStateTy ::BS_Inbranch:
+   return clang_ext_OMPDeclareSimdDeclAttr_BranchStateTy_BS_Inbranch;
+   case clang::OMPDeclareSimdDeclAttr ::BranchStateTy ::BS_Notinbranch:
+   return clang_ext_OMPDeclareSimdDeclAttr_BranchStateTy_BS_Notinbranch;}
+  return clang_ext_OMPDeclareSimdDeclAttr_BranchStateTy_BS_Undefined;}
+
+#endif
+ 
+#ifndef LLVM_VERSION_BEFORE_3_9_0
+ enum
+ clang_ext_OMPDeclareTargetDeclAttr_MapTypeTy
+ convert_OMPDeclareTargetDeclAttr_MapTypeTy(
+ clang::OMPDeclareTargetDeclAttr ::MapTypeTy value)
+ {switch (value)
+  {case clang::OMPDeclareTargetDeclAttr ::MapTypeTy ::MT_To:
+   return clang_ext_OMPDeclareTargetDeclAttr_MapTypeTy_MT_To;
+   case clang::OMPDeclareTargetDeclAttr ::MapTypeTy ::MT_Link:
+   return clang_ext_OMPDeclareTargetDeclAttr_MapTypeTy_MT_Link;}
+  return clang_ext_OMPDeclareTargetDeclAttr_MapTypeTy_MT_To;}
+
+#endif
+ enum
+ clang_ext_ObjCMethodFamilyAttr_FamilyKind
+ convert_ObjCMethodFamilyAttr_FamilyKind(
+ clang::ObjCMethodFamilyAttr ::FamilyKind value)
+ {switch (value)
+  {case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_None:
+   return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_None;
+   case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_alloc:
+   return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_alloc;
+   case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_copy:
+   return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_copy;
+   case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_init:
+   return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_init;
+   case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_mutableCopy:
+   return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_mutableCopy;
+   case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_new:
+   return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_new;}
+  return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_None;}
 enum
 clang_ext_OpenCLAccess_spelling clang_ext_OpenCLAccess_getSpelling(
 CXCursor cursor)
@@ -602,6 +818,18 @@ clang_ext_Ownership_spelling clang_ext_Ownership_getSpelling(CXCursor cursor)
  
  return clang_ext_Ownership_SpellingNotCalculated;}
 enum
+clang_ext_ParamTypestateAttr_ConsumedState
+convert_ParamTypestateAttr_ConsumedState(
+clang::ParamTypestateAttr ::ConsumedState value)
+{switch (value)
+ {case clang::ParamTypestateAttr ::ConsumedState ::Unknown:
+  return clang_ext_ParamTypestateAttr_ConsumedState_Unknown;
+  case clang::ParamTypestateAttr ::ConsumedState ::Consumed:
+  return clang_ext_ParamTypestateAttr_ConsumedState_Consumed;
+  case clang::ParamTypestateAttr ::ConsumedState ::Unconsumed:
+  return clang_ext_ParamTypestateAttr_ConsumedState_Unconsumed;}
+ return clang_ext_ParamTypestateAttr_ConsumedState_Unknown;}
+enum
 clang_ext_PassObjectSize_spelling clang_ext_PassObjectSize_getSpelling(
 CXCursor cursor)
 {
@@ -638,49 +866,75 @@ CXCursor cursor)
  
  return clang_ext_PassObjectSize_SpellingNotCalculated;}
 enum
-clang_ext_ReleaseCapability_spelling clang_ext_ReleaseCapability_getSpelling(
-CXCursor cursor)
-{
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- auto attr = GetCursorAttr(cursor);
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::ReleaseCapabilityAttr >(attr))
- switch (qual_attr->getSemanticSpelling())
- {case clang::ReleaseCapabilityAttr ::Spelling ::GNU_release_capability:
-  return clang_ext_ReleaseCapability_GNU_release_capability;
-  case
-  clang::ReleaseCapabilityAttr ::Spelling ::CXX11_clang_release_capability:
-  return clang_ext_ReleaseCapability_CXX11_clang_release_capability;
-  case
-  clang::ReleaseCapabilityAttr ::Spelling ::GNU_release_shared_capability:
-  return clang_ext_ReleaseCapability_GNU_release_shared_capability;
-  case
-  clang::ReleaseCapabilityAttr ::Spelling ::CXX11_clang_release_shared_capability:
-  return clang_ext_ReleaseCapability_CXX11_clang_release_shared_capability;
-  case
-  clang::ReleaseCapabilityAttr ::Spelling ::GNU_release_generic_capability:
-  return clang_ext_ReleaseCapability_GNU_release_generic_capability;
-  case
-  clang::ReleaseCapabilityAttr ::Spelling ::CXX11_clang_release_generic_capability:
-  return clang_ext_ReleaseCapability_CXX11_clang_release_generic_capability;
-  case clang::ReleaseCapabilityAttr ::Spelling ::GNU_unlock_function:
-  return clang_ext_ReleaseCapability_GNU_unlock_function;
-  case clang::ReleaseCapabilityAttr ::Spelling ::CXX11_clang_unlock_function:
-  return clang_ext_ReleaseCapability_CXX11_clang_unlock_function;
-  
+clang_ext_PcsAttr_PCSType convert_PcsAttr_PCSType(
+clang::PcsAttr ::PCSType value)
+{switch (value)
+ {case clang::PcsAttr ::PCSType ::AAPCS:
+  return clang_ext_PcsAttr_PCSType_AAPCS;
+  case clang::PcsAttr ::PCSType ::AAPCS_VFP:
+  return clang_ext_PcsAttr_PCSType_AAPCS_VFP;}
+ return clang_ext_PcsAttr_PCSType_AAPCS;}
+
+#ifndef LLVM_VERSION_BEFORE_7_0_0
+ enum
+ clang_ext_RISCVInterruptAttr_InterruptType
+ convert_RISCVInterruptAttr_InterruptType(
+ clang::RISCVInterruptAttr ::InterruptType value)
+ {switch (value)
+  {case clang::RISCVInterruptAttr ::InterruptType ::user:
+   return clang_ext_RISCVInterruptAttr_InterruptType_user;
+   case clang::RISCVInterruptAttr ::InterruptType ::supervisor:
+   return clang_ext_RISCVInterruptAttr_InterruptType_supervisor;
+   case clang::RISCVInterruptAttr ::InterruptType ::machine:
+   return clang_ext_RISCVInterruptAttr_InterruptType_machine;}
+  return clang_ext_RISCVInterruptAttr_InterruptType_user;}
+
+#endif
+ enum
+ clang_ext_ReleaseCapability_spelling
+ clang_ext_ReleaseCapability_getSpelling(CXCursor cursor)
+ {
   #ifndef LLVM_VERSION_BEFORE_10_0_0
   
-  case clang::ReleaseCapabilityAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_ReleaseCapability_SpellingNotCalculated;
+  auto attr = GetCursorAttr(cursor);
+  if
+  (auto qual_attr =
+   llvm::dyn_cast_or_null<clang::ReleaseCapabilityAttr >(attr))
+  switch (qual_attr->getSemanticSpelling())
+  {case clang::ReleaseCapabilityAttr ::Spelling ::GNU_release_capability:
+   return clang_ext_ReleaseCapability_GNU_release_capability;
+   case
+   clang::ReleaseCapabilityAttr ::Spelling ::CXX11_clang_release_capability:
+   return clang_ext_ReleaseCapability_CXX11_clang_release_capability;
+   case
+   clang::ReleaseCapabilityAttr ::Spelling ::GNU_release_shared_capability:
+   return clang_ext_ReleaseCapability_GNU_release_shared_capability;
+   case
+   clang::ReleaseCapabilityAttr ::Spelling ::CXX11_clang_release_shared_capability:
+   return clang_ext_ReleaseCapability_CXX11_clang_release_shared_capability;
+   case
+   clang::ReleaseCapabilityAttr ::Spelling ::GNU_release_generic_capability:
+   return clang_ext_ReleaseCapability_GNU_release_generic_capability;
+   case
+   clang::ReleaseCapabilityAttr ::Spelling ::CXX11_clang_release_generic_capability:
+   return clang_ext_ReleaseCapability_CXX11_clang_release_generic_capability;
+   case clang::ReleaseCapabilityAttr ::Spelling ::GNU_unlock_function:
+   return clang_ext_ReleaseCapability_GNU_unlock_function;
+   case
+   clang::ReleaseCapabilityAttr ::Spelling ::CXX11_clang_unlock_function:
+   return clang_ext_ReleaseCapability_CXX11_clang_unlock_function;
+   
+   #ifndef LLVM_VERSION_BEFORE_10_0_0
+   
+   case clang::ReleaseCapabilityAttr ::Spelling ::SpellingNotCalculated:
+   return clang_ext_ReleaseCapability_SpellingNotCalculated;
+   
+   #endif
+   }
   
   #endif
-  }
- 
- #endif
- 
- return clang_ext_ReleaseCapability_SpellingNotCalculated;}
+  
+  return clang_ext_ReleaseCapability_SpellingNotCalculated;}
 enum
 clang_ext_RequiresCapability_spelling
 clang_ext_RequiresCapability_getSpelling(CXCursor cursor)
@@ -753,6 +1007,18 @@ clang_ext_Restrict_spelling clang_ext_Restrict_getSpelling(CXCursor cursor)
  
  return clang_ext_Restrict_SpellingNotCalculated;}
 enum
+clang_ext_ReturnTypestateAttr_ConsumedState
+convert_ReturnTypestateAttr_ConsumedState(
+clang::ReturnTypestateAttr ::ConsumedState value)
+{switch (value)
+ {case clang::ReturnTypestateAttr ::ConsumedState ::Unknown:
+  return clang_ext_ReturnTypestateAttr_ConsumedState_Unknown;
+  case clang::ReturnTypestateAttr ::ConsumedState ::Consumed:
+  return clang_ext_ReturnTypestateAttr_ConsumedState_Consumed;
+  case clang::ReturnTypestateAttr ::ConsumedState ::Unconsumed:
+  return clang_ext_ReturnTypestateAttr_ConsumedState_Unconsumed;}
+ return clang_ext_ReturnTypestateAttr_ConsumedState_Unknown;}
+enum
 clang_ext_Section_spelling clang_ext_Section_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_10_0_0
@@ -778,6 +1044,28 @@ clang_ext_Section_spelling clang_ext_Section_getSpelling(CXCursor cursor)
  #endif
  
  return clang_ext_Section_SpellingNotCalculated;}
+enum
+clang_ext_SetTypestateAttr_ConsumedState
+convert_SetTypestateAttr_ConsumedState(
+clang::SetTypestateAttr ::ConsumedState value)
+{switch (value)
+ {case clang::SetTypestateAttr ::ConsumedState ::Unknown:
+  return clang_ext_SetTypestateAttr_ConsumedState_Unknown;
+  case clang::SetTypestateAttr ::ConsumedState ::Consumed:
+  return clang_ext_SetTypestateAttr_ConsumedState_Consumed;
+  case clang::SetTypestateAttr ::ConsumedState ::Unconsumed:
+  return clang_ext_SetTypestateAttr_ConsumedState_Unconsumed;}
+ return clang_ext_SetTypestateAttr_ConsumedState_Unknown;}
+enum
+clang_ext_TestTypestateAttr_ConsumedState
+convert_TestTypestateAttr_ConsumedState(
+clang::TestTypestateAttr ::ConsumedState value)
+{switch (value)
+ {case clang::TestTypestateAttr ::ConsumedState ::Consumed:
+  return clang_ext_TestTypestateAttr_ConsumedState_Consumed;
+  case clang::TestTypestateAttr ::ConsumedState ::Unconsumed:
+  return clang_ext_TestTypestateAttr_ConsumedState_Unconsumed;}
+ return clang_ext_TestTypestateAttr_ConsumedState_Consumed;}
 enum
 clang_ext_TryAcquireCapability_spelling
 clang_ext_TryAcquireCapability_getSpelling(CXCursor cursor)
@@ -814,6 +1102,18 @@ clang_ext_TryAcquireCapability_getSpelling(CXCursor cursor)
  #endif
  
  return clang_ext_TryAcquireCapability_SpellingNotCalculated;}
+enum
+clang_ext_TypeVisibilityAttr_VisibilityType
+convert_TypeVisibilityAttr_VisibilityType(
+clang::TypeVisibilityAttr ::VisibilityType value)
+{switch (value)
+ {case clang::TypeVisibilityAttr ::VisibilityType ::Default:
+  return clang_ext_TypeVisibilityAttr_VisibilityType_Default;
+  case clang::TypeVisibilityAttr ::VisibilityType ::Hidden:
+  return clang_ext_TypeVisibilityAttr_VisibilityType_Hidden;
+  case clang::TypeVisibilityAttr ::VisibilityType ::Protected:
+  return clang_ext_TypeVisibilityAttr_VisibilityType_Protected;}
+ return clang_ext_TypeVisibilityAttr_VisibilityType_Default;}
 enum clang_ext_Unused_spelling clang_ext_Unused_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_10_0_0
@@ -841,6 +1141,18 @@ enum clang_ext_Unused_spelling clang_ext_Unused_getSpelling(CXCursor cursor)
  #endif
  
  return clang_ext_Unused_SpellingNotCalculated;}
+enum
+clang_ext_VisibilityAttr_VisibilityType
+convert_VisibilityAttr_VisibilityType(
+clang::VisibilityAttr ::VisibilityType value)
+{switch (value)
+ {case clang::VisibilityAttr ::VisibilityType ::Default:
+  return clang_ext_VisibilityAttr_VisibilityType_Default;
+  case clang::VisibilityAttr ::VisibilityType ::Hidden:
+  return clang_ext_VisibilityAttr_VisibilityType_Hidden;
+  case clang::VisibilityAttr ::VisibilityType ::Protected:
+  return clang_ext_VisibilityAttr_VisibilityType_Protected;}
+ return clang_ext_VisibilityAttr_VisibilityType_Default;}
 enum
 clang_ext_WarnUnusedResult_spelling clang_ext_WarnUnusedResult_getSpelling(
 CXCursor cursor)
@@ -912,16 +1224,28 @@ CXCursor cursor)
  #endif
  
  return clang_ext_XRayInstrument_SpellingNotCalculated;}
-CXString clang_ext_TLSModelAttr_getModel(CXCursor cursor)
+unsigned int clang_ext_OMPDeclareSimdDeclAttr_getUniforms_Size(
+CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::TLSModelAttr >(attr))
- return cxstring_createDup(qual_attr->getModel());
- return cxstring_createRef("");}
-int clang_ext_FormatAttr_getFirstArg(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::FormatAttr >(attr))
- return qual_attr->getFirstArg();
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareSimdDeclAttr >(attr))
+ return qual_attr->uniforms_size();
+ 
+ #endif
+ 
  return 0;}
+enum
+clang_ext_ReturnTypestateAttr_ConsumedState
+clang_ext_ReturnTypestateAttr_getState(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ReturnTypestateAttr >(attr))
+ return convert_ReturnTypestateAttr_ConsumedState(qual_attr->getState());
+ return clang_ext_ReturnTypestateAttr_ConsumedState_Unknown;}
 unsigned int clang_ext_Attrs_getAliaseeLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  switch (attr->getKind())
@@ -936,18 +1260,6 @@ unsigned int clang_ext_Attrs_getAliaseeLength(CXCursor cursor)
   default:
   ;}
  return 0;}
-unsigned int clang_ext_AMDGPUNumVGPRAttr_getNumVGPR(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_3_6_0
- 
- if
- (auto qual_attr = llvm::dyn_cast_or_null<clang::AMDGPUNumVGPRAttr >(attr))
- return qual_attr->getNumVGPR();
- 
- #endif
- 
- return 0;}
 CXString clang_ext_ObjCRuntimeNameAttr_getMetadataName(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -960,36 +1272,6 @@ CXString clang_ext_ObjCRuntimeNameAttr_getMetadataName(CXCursor cursor)
  #endif
  
  return cxstring_createRef("");}
-CXCursor clang_ext_Attrs_getMin(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- switch (attr->getKind())
- {
-  #ifndef LLVM_VERSION_BEFORE_9_0_0
-  
-  case clang::attr::AMDGPUWavesPerEU:
-  if
-  (auto qual_attr =
-   llvm::dyn_cast_or_null<clang::AMDGPUWavesPerEUAttr >(attr))
-  return MakeCXCursor(qual_attr->getMin(), getCursorTU(cursor));
-  break;
-  
-  #endif
-  
-  
-  #ifndef LLVM_VERSION_BEFORE_9_0_0
-  
-  case clang::attr::AMDGPUFlatWorkGroupSize:
-  if
-  (auto qual_attr =
-   llvm::dyn_cast_or_null<clang::AMDGPUFlatWorkGroupSizeAttr >(attr))
-  return MakeCXCursor(qual_attr->getMin(), getCursorTU(cursor));
-  break;
-  
-  #endif
-  
-  default:
-  ;}
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 void clang_ext_OMPDeclareVariantAttr_getImplVendors(
 CXCursor cursor, void (*callback)(CXString , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -1017,18 +1299,6 @@ CXString clang_ext_IFuncAttr_getResolver(CXCursor cursor)
  #endif
  
  return cxstring_createRef("");}
-CXCursor clang_ext_AssumeAlignedAttr_getOffset(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_3_6_0
- 
- if
- (auto qual_attr = llvm::dyn_cast_or_null<clang::AssumeAlignedAttr >(attr))
- return MakeCXCursor(qual_attr->getOffset(), getCursorTU(cursor));
- 
- #endif
- 
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 int clang_ext_PatchableFunctionEntryAttr_getOffset(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -1042,17 +1312,18 @@ int clang_ext_PatchableFunctionEntryAttr_getOffset(CXCursor cursor)
  #endif
  
  return 0;}
-unsigned int clang_ext_AllocAlignAttr_getParamIndex(CXCursor cursor)
+CXCursor clang_ext_AssumeAlignedAttr_getOffset(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
- #ifndef LLVM_VERSION_BEFORE_5_0_0
+ #ifndef LLVM_VERSION_BEFORE_3_6_0
  
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::AllocAlignAttr >(attr))
- return unsigned_int_of_ParamIdx(qual_attr->getParamIndex());
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::AssumeAlignedAttr >(attr))
+ return MakeCXCursor(qual_attr->getOffset(), getCursorTU(cursor));
  
  #endif
  
- return 0;}
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 unsigned int clang_ext_WebAssemblyImportNameAttr_getImportNameLength(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -1133,6 +1404,14 @@ unsigned int clang_ext_TLSModelAttr_getModelLength(CXCursor cursor)
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::TLSModelAttr >(attr))
  return qual_attr->getModelLength();
  return 0;}
+enum
+clang_ext_ParamTypestateAttr_ConsumedState
+clang_ext_ParamTypestateAttr_getParamState(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ParamTypestateAttr >(attr))
+ return convert_ParamTypestateAttr_ConsumedState(qual_attr->getParamState());
+ return clang_ext_ParamTypestateAttr_ConsumedState_Unknown;}
 bool clang_ext_ExternalSourceSymbolAttr_getGeneratedDeclaration(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -1147,53 +1426,6 @@ CXCursor cursor)
  #endif
  
  return false;}
-struct
-clang_ext_VersionTuple clang_ext_AvailabilityAttr_getIntroduced(
-CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_9_0_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::AvailabilityAttr >(attr))
- return makeVersionTuple(qual_attr->getIntroduced());
- 
- #endif
- 
- return zeroVersionTuple;}
-unsigned int clang_ext_MaxFieldAlignmentAttr_getAlignment(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::MaxFieldAlignmentAttr >(attr))
- return qual_attr->getAlignment();
- return 0;}
-CXCursor clang_ext_Attrs_getAlignment(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- switch (attr->getKind())
- {
-  #ifndef LLVM_VERSION_BEFORE_3_6_0
-  
-  case clang::attr::AssumeAligned:
-  if
-  (auto qual_attr = llvm::dyn_cast_or_null<clang::AssumeAlignedAttr >(attr))
-  return MakeCXCursor(qual_attr->getAlignment(), getCursorTU(cursor));
-  break;
-  
-  #endif
-  
-  
-  #ifndef LLVM_VERSION_BEFORE_3_6_0
-  
-  case clang::attr::AlignValue:
-  if (auto qual_attr = llvm::dyn_cast_or_null<clang::AlignValueAttr >(attr))
-  return MakeCXCursor(qual_attr->getAlignment(), getCursorTU(cursor));
-  break;
-  
-  #endif
-  
-  default:
-  ;}
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 void clang_ext_SuppressAttr_getDiagnosticIdentifiers(
 CXCursor cursor, void (*callback)(CXString , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -1236,22 +1468,6 @@ struct clang_ext_TypeLoc clang_ext_Attrs_getDerefType(CXCursor cursor)
   default:
   ;}
  return MakeTypeLocInvalid(getCursorTU(cursor));}
-int clang_ext_AddressSpaceAttr_getAddressSpace(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_8_0_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::AddressSpaceAttr >(attr))
- return qual_attr->getAddressSpace();
- 
- #endif
- 
- return 0;}
-CXString clang_ext_ModeAttr_getMode(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::ModeAttr >(attr))
- return cxstring_createDup(qual_attr->getMode()->getName());
- return cxstring_createRef("");}
 struct
 clang_ext_TypeLoc clang_ext_TypeTagForDatatypeAttr_getMatchingCType(
 CXCursor cursor)
@@ -1263,62 +1479,11 @@ CXCursor cursor)
  MakeTypeLoc(qual_attr->getMatchingCTypeLoc()->getTypeLoc(),
              getCursorTU(cursor));
  return MakeTypeLocInvalid(getCursorTU(cursor));}
-CXCursor clang_ext_Attrs_getArg(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- switch (attr->getKind())
- {case clang::attr::PtGuardedBy:
-  if (auto qual_attr = llvm::dyn_cast_or_null<clang::PtGuardedByAttr >(attr))
-  return MakeCXCursor(qual_attr->getArg(), getCursorTU(cursor));
-  break;
-  case clang::attr::LockReturned:
-  if
-  (auto qual_attr = llvm::dyn_cast_or_null<clang::LockReturnedAttr >(attr))
-  return MakeCXCursor(qual_attr->getArg(), getCursorTU(cursor));
-  break;
-  case clang::attr::GuardedBy:
-  if (auto qual_attr = llvm::dyn_cast_or_null<clang::GuardedByAttr >(attr))
-  return MakeCXCursor(qual_attr->getArg(), getCursorTU(cursor));
-  break;
-  default:
-  ;}
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 unsigned int clang_ext_AnnotateAttr_getAnnotationLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::AnnotateAttr >(attr))
  return qual_attr->getAnnotationLength();
  return 0;}
-void clang_ext_Attrs_getCpus(
-CXCursor cursor, void (*callback)(CXString , void *), void *data)
-{auto attr = GetCursorAttr(cursor);
- switch (attr->getKind())
- {
-  #ifndef LLVM_VERSION_BEFORE_7_0_0
-  
-  case clang::attr::CPUSpecific:
-  if (auto qual_attr = llvm::dyn_cast_or_null<clang::CPUSpecificAttr >(attr))
-  for (auto iter = qual_attr->cpus_begin(); iter != qual_attr->cpus_end();
-  ++ iter)
-  {auto const &item = * iter;
-   callback(cxstring_createDup(item->getName()), data);}
-  break;
-  
-  #endif
-  
-  
-  #ifndef LLVM_VERSION_BEFORE_7_0_0
-  
-  case clang::attr::CPUDispatch:
-  if (auto qual_attr = llvm::dyn_cast_or_null<clang::CPUDispatchAttr >(attr))
-  for (auto iter = qual_attr->cpus_begin(); iter != qual_attr->cpus_end();
-  ++ iter)
-  {auto const &item = * iter;
-   callback(cxstring_createDup(item->getName()), data);}
-  break;
-  
-  #endif
-  
-  default:
-  ;}}
 void clang_ext_OMPDeclareVariantAttr_getDeviceKinds(
 CXCursor cursor, void (*callback)(CXString , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -1335,20 +1500,6 @@ CXCursor cursor, void (*callback)(CXString , void *), void *data)
  
  #endif
  }
-unsigned int clang_ext_OpenCLIntelReqdSubGroupSizeAttr_getSubGroupSize(
-CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_5_0_0
- 
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::OpenCLIntelReqdSubGroupSizeAttr >(attr))
- return qual_attr->getSubGroupSize();
- 
- #endif
- 
- return 0;}
 unsigned int clang_ext_LayoutVersionAttr_getVersion(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -1361,46 +1512,27 @@ unsigned int clang_ext_LayoutVersionAttr_getVersion(CXCursor cursor)
  #endif
  
  return 0;}
-unsigned int clang_ext_ArgumentWithTypeTagAttr_getArgumentIdx(
-CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::ArgumentWithTypeTagAttr >(attr))
- return unsigned_int_of_ParamIdx(qual_attr->getArgumentIdx());
- return 0;}
 int clang_ext_SentinelAttr_getNullPos(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::SentinelAttr >(attr))
  return qual_attr->getNullPos();
  return 0;}
-void clang_ext_OMPDeclareVariantAttr_getScores(
+void clang_ext_OMPDeclareSimdDeclAttr_getAligneds(
 CXCursor cursor, void (*callback)(CXCursor , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
  
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
  
  if
  (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
- for (auto iter = qual_attr->scores_begin(); iter != qual_attr->scores_end();
- ++ iter)
+  llvm::dyn_cast_or_null<clang::OMPDeclareSimdDeclAttr >(attr))
+ for (auto iter = qual_attr->aligneds_begin();
+ iter != qual_attr->aligneds_end(); ++ iter)
  {auto const &item = * iter;
   callback(MakeCXCursor(item, getCursorTU(cursor)), data);}
  
  #endif
  }
-bool clang_ext_AvailabilityAttr_getStrict(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_9_0_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::AvailabilityAttr >(attr))
- return qual_attr->getStrict();
- 
- #endif
- 
- return false;}
 unsigned int clang_ext_Attrs_getArgs_Size(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  switch (attr->getKind())
@@ -1520,17 +1652,6 @@ unsigned int clang_ext_Attrs_getArgs_Size(CXCursor cursor)
   default:
   ;}
  return 0;}
-CXString clang_ext_OwnershipAttr_getModule(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_3_7_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::OwnershipAttr >(attr))
- return cxstring_createDup(qual_attr->getModule()->getName());
- 
- #endif
- 
- return cxstring_createRef("");}
 unsigned int clang_ext_OMPDeclareVariantAttr_getCtxSelectors_Size(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -1541,18 +1662,6 @@ CXCursor cursor)
  (auto qual_attr =
   llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
  return qual_attr->ctxSelectors_size();
- 
- #endif
- 
- return 0;}
-unsigned int clang_ext_MinVectorWidthAttr_getVectorWidth(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_7_0_0
- 
- if
- (auto qual_attr = llvm::dyn_cast_or_null<clang::MinVectorWidthAttr >(attr))
- return qual_attr->getVectorWidth();
  
  #endif
  
@@ -1569,13 +1678,6 @@ CXCursor clang_ext_CUDALaunchBoundsAttr_getMinBlocks(CXCursor cursor)
  #endif
  
  return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
-bool clang_ext_TypeTagForDatatypeAttr_getLayoutCompatible(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::TypeTagForDatatypeAttr >(attr))
- return qual_attr->getLayoutCompatible();
- return false;}
 unsigned int clang_ext_OMPDeclareVariantAttr_getImplVendors_Size(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -1586,17 +1688,6 @@ CXCursor cursor)
  (auto qual_attr =
   llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
  return qual_attr->implVendors_size();
- 
- #endif
- 
- return 0;}
-unsigned int clang_ext_InitSegAttr_getSectionLength(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_3_5_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::InitSegAttr >(attr))
- return qual_attr->getSectionLength();
  
  #endif
  
@@ -1615,13 +1706,6 @@ CXCursor cursor)
  #endif
  
  return 0;}
-struct
-clang_ext_TypeLoc clang_ext_VecTypeHintAttr_getTypeHint(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::VecTypeHintAttr >(attr))
- return
- MakeTypeLoc(qual_attr->getTypeHintLoc()->getTypeLoc(), getCursorTU(cursor));
- return MakeTypeLocInvalid(getCursorTU(cursor));}
 unsigned int clang_ext_OMPCaptureKindAttr_getCaptureKind(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -1651,6 +1735,12 @@ int clang_ext_PassObjectSizeAttr_getType(CXCursor cursor)
  #endif
  
  return 0;}
+enum
+clang_ext_BlocksAttr_BlockType clang_ext_BlocksAttr_getType(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::BlocksAttr >(attr))
+ return convert_BlocksAttr_BlockType(qual_attr->getType());
+ return clang_ext_BlocksAttr_BlockType_ByRef;}
 CXString clang_ext_AsmLabelAttr_getLabel(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -1662,20 +1752,6 @@ CXString clang_ext_AsmLabelAttr_getLabel(CXCursor cursor)
  #endif
  
  return cxstring_createRef("");}
-unsigned int clang_ext_OMPDeclareVariantAttr_getCtxSelectorSets_Size(
-CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
- return qual_attr->ctxSelectorSets_size();
- 
- #endif
- 
- return 0;}
 CXString clang_ext_AvailabilityAttr_getPlatform(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -1717,6 +1793,1033 @@ CXCursor clang_ext_Attrs_getMax(CXCursor cursor)
   default:
   ;}
  return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
+CXString clang_ext_TargetAttr_getFeaturesStr(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_8_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::TargetAttr >(attr))
+ return cxstring_createDup(qual_attr->getFeaturesStr());
+ 
+ #endif
+ 
+ return cxstring_createRef("");}
+unsigned int clang_ext_CallableWhenAttr_getCallableStates_Size(
+CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CallableWhenAttr >(attr))
+ return qual_attr->callableStates_size();
+ 
+ #endif
+ 
+ return 0;}
+enum
+clang_ext_TestTypestateAttr_ConsumedState
+clang_ext_TestTypestateAttr_getTestState(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::TestTypestateAttr >(attr))
+ return convert_TestTypestateAttr_ConsumedState(qual_attr->getTestState());
+ return clang_ext_TestTypestateAttr_ConsumedState_Consumed;}
+unsigned int clang_ext_InitPriorityAttr_getPriority(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::InitPriorityAttr >(attr))
+ return qual_attr->getPriority();
+ return 0;}
+int clang_ext_Attrs_getPriority(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ switch (attr->getKind())
+ {case clang::attr::Destructor:
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::DestructorAttr >(attr))
+  return qual_attr->getPriority();
+  break;
+  case clang::attr::Constructor:
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::ConstructorAttr >(attr))
+  return qual_attr->getPriority();
+  break;
+  
+  #ifndef LLVM_VERSION_BEFORE_9_0_0
+  
+  case clang::attr::Availability:
+  if
+  (auto qual_attr = llvm::dyn_cast_or_null<clang::AvailabilityAttr >(attr))
+  return qual_attr->getPriority();
+  break;
+  
+  #endif
+  
+  default:
+  ;}
+ return 0;}
+enum
+clang_ext_OMPDeclareTargetDeclAttr_MapTypeTy
+clang_ext_OMPDeclareTargetDeclAttr_getMapType(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareTargetDeclAttr >(attr))
+ return convert_OMPDeclareTargetDeclAttr_MapTypeTy(qual_attr->getMapType());
+ 
+ #endif
+ 
+ return clang_ext_OMPDeclareTargetDeclAttr_MapTypeTy_MT_To;}
+unsigned int clang_ext_Attrs_getYDim(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ switch (attr->getKind())
+ {case clang::attr::WorkGroupSizeHint:
+  if
+  (auto qual_attr =
+   llvm::dyn_cast_or_null<clang::WorkGroupSizeHintAttr >(attr))
+  return qual_attr->getYDim();
+  break;
+  case clang::attr::ReqdWorkGroupSize:
+  if
+  (auto qual_attr =
+   llvm::dyn_cast_or_null<clang::ReqdWorkGroupSizeAttr >(attr))
+  return qual_attr->getYDim();
+  break;
+  default:
+  ;}
+ return 0;}
+struct
+clang_ext_DeclarationName clang_ext_CleanupAttr_getFunctionDecl(
+CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CleanupAttr >(attr))
+ return
+ MakeDeclarationName(qual_attr->getFunctionDecl()->getDeclName(),
+                     getCursorTU(cursor));
+ return MakeDeclarationNameInvalid(getCursorTU(cursor));}
+struct
+clang_ext_VersionTuple clang_ext_AvailabilityAttr_getObsoleted(
+CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AvailabilityAttr >(attr))
+ return makeVersionTuple(qual_attr->getObsoleted());
+ 
+ #endif
+ 
+ return zeroVersionTuple;}
+CXString clang_ext_InitSegAttr_getSection(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::InitSegAttr >(attr))
+ return cxstring_createDup(qual_attr->getSection());
+ 
+ #endif
+ 
+ return cxstring_createRef("");}
+CXString clang_ext_ExternalSourceSymbolAttr_getDefinedIn(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_5_0_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ExternalSourceSymbolAttr >(attr))
+ return cxstring_createDup(qual_attr->getDefinedIn());
+ 
+ #endif
+ 
+ return cxstring_createRef("");}
+unsigned int clang_ext_AllocSizeAttr_getNumElemsParam(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_4_0_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AllocSizeAttr >(attr))
+ return unsigned_int_of_ParamIdx(qual_attr->getNumElemsParam());
+ 
+ #endif
+ 
+ return 0;}
+void clang_ext_OMPDeclareVariantAttr_getCtxSelectors(
+CXCursor cursor, void (*callback)(unsigned int , void *), void *data)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
+ for (auto iter = qual_attr->ctxSelectors_begin();
+ iter != qual_attr->ctxSelectors_end(); ++ iter)
+ {auto const &item = * iter;
+  callback(item, data);}
+ 
+ #endif
+ }
+unsigned int clang_ext_IFuncAttr_getResolverLength(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::IFuncAttr >(attr))
+ return qual_attr->getResolverLength();
+ 
+ #endif
+ 
+ return 0;}
+unsigned int clang_ext_AsmLabelAttr_getLabelLength(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AsmLabelAttr >(attr))
+ return qual_attr->getLabelLength();
+ 
+ #endif
+ 
+ return 0;}
+unsigned int clang_ext_AbiTagAttr_getTags_Size(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AbiTagAttr >(attr))
+ return qual_attr->tags_size();
+ 
+ #endif
+ 
+ return 0;}
+CXCursor clang_ext_CUDALaunchBoundsAttr_getMaxThreads(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_7_0
+ 
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::CUDALaunchBoundsAttr >(attr))
+ return MakeCXCursor(qual_attr->getMaxThreads(), getCursorTU(cursor));
+ 
+ #endif
+ 
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
+CXString clang_ext_ArmMveAliasAttr_getBuiltinName(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ArmMveAliasAttr >(attr))
+ return cxstring_createDup(qual_attr->getBuiltinName()->getName());
+ 
+ #endif
+ 
+ return cxstring_createRef("");}
+CXString clang_ext_WebAssemblyImportModuleAttr_getImportModule(
+CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::WebAssemblyImportModuleAttr >(attr))
+ return cxstring_createDup(qual_attr->getImportModule());
+ 
+ #endif
+ 
+ return cxstring_createRef("");}
+unsigned int clang_ext_NoSanitizeAttr_getSanitizers_Size(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_7_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoSanitizeAttr >(attr))
+ return qual_attr->sanitizers_size();
+ 
+ #endif
+ 
+ return 0;}
+unsigned int clang_ext_CallbackAttr_getEncoding_Size(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CallbackAttr >(attr))
+ return qual_attr->encoding_size();
+ 
+ #endif
+ 
+ return 0;}
+unsigned int clang_ext_Attrs_getXDim(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ switch (attr->getKind())
+ {case clang::attr::WorkGroupSizeHint:
+  if
+  (auto qual_attr =
+   llvm::dyn_cast_or_null<clang::WorkGroupSizeHintAttr >(attr))
+  return qual_attr->getXDim();
+  break;
+  case clang::attr::ReqdWorkGroupSize:
+  if
+  (auto qual_attr =
+   llvm::dyn_cast_or_null<clang::ReqdWorkGroupSizeAttr >(attr))
+  return qual_attr->getXDim();
+  break;
+  default:
+  ;}
+ return 0;}
+CXString clang_ext_Attrs_getAliasee(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ switch (attr->getKind())
+ {case clang::attr::WeakRef:
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::WeakRefAttr >(attr))
+  return cxstring_createDup(qual_attr->getAliasee());
+  break;
+  case clang::attr::Alias:
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::AliasAttr >(attr))
+  return cxstring_createDup(qual_attr->getAliasee());
+  break;
+  default:
+  ;}
+ return cxstring_createRef("");}
+CXString clang_ext_Attrs_getHandleType(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ switch (attr->getKind())
+ {
+  #ifndef LLVM_VERSION_BEFORE_10_0_0
+  
+  case clang::attr::UseHandle:
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::UseHandleAttr >(attr))
+  return cxstring_createDup(qual_attr->getHandleType());
+  break;
+  
+  #endif
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_10_0_0
+  
+  case clang::attr::ReleaseHandle:
+  if
+  (auto qual_attr = llvm::dyn_cast_or_null<clang::ReleaseHandleAttr >(attr))
+  return cxstring_createDup(qual_attr->getHandleType());
+  break;
+  
+  #endif
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_10_0_0
+  
+  case clang::attr::AcquireHandle:
+  if
+  (auto qual_attr = llvm::dyn_cast_or_null<clang::AcquireHandleAttr >(attr))
+  return cxstring_createDup(qual_attr->getHandleType());
+  break;
+  
+  #endif
+  
+  default:
+  ;}
+ return cxstring_createRef("");}
+unsigned int clang_ext_WebAssemblyImportModuleAttr_getImportModuleLength(
+CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::WebAssemblyImportModuleAttr >(attr))
+ return qual_attr->getImportModuleLength();
+ 
+ #endif
+ 
+ return 0;}
+void clang_ext_OMPDeclareSimdDeclAttr_getLinears(
+CXCursor cursor, void (*callback)(CXCursor , void *), void *data)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareSimdDeclAttr >(attr))
+ for (auto iter = qual_attr->linears_begin();
+ iter != qual_attr->linears_end(); ++ iter)
+ {auto const &item = * iter;
+  callback(MakeCXCursor(item, getCursorTU(cursor)), data);}
+ 
+ #endif
+ }
+struct
+clang_ext_VersionTuple clang_ext_AvailabilityAttr_getDeprecated(
+CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AvailabilityAttr >(attr))
+ return makeVersionTuple(qual_attr->getDeprecated());
+ 
+ #endif
+ 
+ return zeroVersionTuple;}
+CXString clang_ext_WebAssemblyExportNameAttr_getExportName(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::WebAssemblyExportNameAttr >(attr))
+ return cxstring_createDup(qual_attr->getExportName());
+ 
+ #endif
+ 
+ return cxstring_createRef("");}
+bool clang_ext_ArgumentWithTypeTagAttr_getIsPointer(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ArgumentWithTypeTagAttr >(attr))
+ return qual_attr->getIsPointer();
+ return false;}
+unsigned int clang_ext_UuidAttr_getGuidLength(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::UuidAttr >(attr))
+ return qual_attr->getGuidLength();
+ return 0;}
+unsigned int clang_ext_OMPDeclareSimdDeclAttr_getAligneds_Size(
+CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareSimdDeclAttr >(attr))
+ return qual_attr->aligneds_size();
+ 
+ #endif
+ 
+ return 0;}
+unsigned int clang_ext_Attrs_getMessageLength(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ switch (attr->getKind())
+ {
+  #ifndef LLVM_VERSION_BEFORE_10_0_0
+  
+  case clang::attr::WarnUnusedResult:
+  if
+  (auto qual_attr =
+   llvm::dyn_cast_or_null<clang::WarnUnusedResultAttr >(attr))
+  return qual_attr->getMessageLength();
+  break;
+  
+  #endif
+  
+  case clang::attr::Unavailable:
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::UnavailableAttr >(attr))
+  return qual_attr->getMessageLength();
+  break;
+  
+  #ifndef LLVM_VERSION_BEFORE_3_5_0
+  
+  case clang::attr::EnableIf:
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::EnableIfAttr >(attr))
+  return qual_attr->getMessageLength();
+  break;
+  
+  #endif
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_4_0_0
+  
+  case clang::attr::DiagnoseIf:
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::DiagnoseIfAttr >(attr))
+  return qual_attr->getMessageLength();
+  break;
+  
+  #endif
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_3_9_0
+  
+  case clang::attr::Deprecated:
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::DeprecatedAttr >(attr))
+  return qual_attr->getMessageLength();
+  break;
+  
+  #endif
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_9_0_0
+  
+  case clang::attr::Availability:
+  if
+  (auto qual_attr = llvm::dyn_cast_or_null<clang::AvailabilityAttr >(attr))
+  return qual_attr->getMessageLength();
+  break;
+  
+  #endif
+  
+  default:
+  ;}
+ return 0;}
+enum clang_ext_PcsAttr_PCSType clang_ext_PcsAttr_getPCS(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::PcsAttr >(attr))
+ return convert_PcsAttr_PCSType(qual_attr->getPCS());
+ return clang_ext_PcsAttr_PCSType_AAPCS;}
+void clang_ext_CallbackAttr_getEncoding(
+CXCursor cursor, void (*callback)(int , void *), void *data)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CallbackAttr >(attr))
+ for (auto iter = qual_attr->encoding_begin();
+ iter != qual_attr->encoding_end(); ++ iter)
+ {auto const &item = * iter;
+  callback(item, data);}
+ 
+ #endif
+ }
+CXString clang_ext_Attrs_getArgumentKind(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ switch (attr->getKind())
+ {case clang::attr::TypeTagForDatatype:
+  if
+  (auto qual_attr =
+   llvm::dyn_cast_or_null<clang::TypeTagForDatatypeAttr >(attr))
+  return cxstring_createDup(qual_attr->getArgumentKind()->getName());
+  break;
+  case clang::attr::ArgumentWithTypeTag:
+  if
+  (auto qual_attr =
+   llvm::dyn_cast_or_null<clang::ArgumentWithTypeTagAttr >(attr))
+  return cxstring_createDup(qual_attr->getArgumentKind()->getName());
+  break;
+  default:
+  ;}
+ return cxstring_createRef("");}
+bool clang_ext_AvailabilityAttr_getUnavailable(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AvailabilityAttr >(attr))
+ return qual_attr->getUnavailable();
+ 
+ #endif
+ 
+ return false;}
+CXCursor clang_ext_OMPAllocateDeclAttr_getAllocator(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
+ 
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::OMPAllocateDeclAttr >(attr))
+ return MakeCXCursor(qual_attr->getAllocator(), getCursorTU(cursor));
+ 
+ #endif
+ 
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
+CXString clang_ext_AnnotateAttr_getAnnotation(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AnnotateAttr >(attr))
+ return cxstring_createDup(qual_attr->getAnnotation());
+ return cxstring_createRef("");}
+CXCursor clang_ext_OMPDeclareVariantAttr_getVariantFuncRef(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
+ return MakeCXCursor(qual_attr->getVariantFuncRef(), getCursorTU(cursor));
+ 
+ #endif
+ 
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
+unsigned int clang_ext_NoBuiltinAttr_getBuiltinNames_Size(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoBuiltinAttr >(attr))
+ return qual_attr->builtinNames_size();
+ 
+ #endif
+ 
+ return 0;}
+CXString clang_ext_Attrs_getReplacement(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ switch (attr->getKind())
+ {
+  #ifndef LLVM_VERSION_BEFORE_3_9_0
+  
+  case clang::attr::Deprecated:
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::DeprecatedAttr >(attr))
+  return cxstring_createDup(qual_attr->getReplacement());
+  break;
+  
+  #endif
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_9_0_0
+  
+  case clang::attr::Availability:
+  if
+  (auto qual_attr = llvm::dyn_cast_or_null<clang::AvailabilityAttr >(attr))
+  return cxstring_createDup(qual_attr->getReplacement());
+  break;
+  
+  #endif
+  
+  default:
+  ;}
+ return cxstring_createRef("");}
+unsigned int clang_ext_AMDGPUNumSGPRAttr_getNumSGPR(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_6_0
+ 
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::AMDGPUNumSGPRAttr >(attr))
+ return qual_attr->getNumSGPR();
+ 
+ #endif
+ 
+ return 0;}
+CXString clang_ext_ObjCBridgeRelatedAttr_getInstanceMethod(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ObjCBridgeRelatedAttr >(attr))
+ return cxstring_createDup(qual_attr->getInstanceMethod()->getName());
+ 
+ #endif
+ 
+ return cxstring_createRef("");}
+CXCursor clang_ext_OMPDeclareSimdDeclAttr_getSimdlen(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareSimdDeclAttr >(attr))
+ return MakeCXCursor(qual_attr->getSimdlen(), getCursorTU(cursor));
+ 
+ #endif
+ 
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
+unsigned int clang_ext_TargetAttr_getFeaturesStrLength(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_8_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::TargetAttr >(attr))
+ return qual_attr->getFeaturesStrLength();
+ 
+ #endif
+ 
+ return 0;}
+CXCursor clang_ext_AlignedAttr_getAlignmentExpr(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AlignedAttr >(attr))
+ return MakeCXCursor(qual_attr->getAlignmentExpr(), getCursorTU(cursor));
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
+void clang_ext_OMPDeclareSimdDeclAttr_getSteps(
+CXCursor cursor, void (*callback)(CXCursor , void *), void *data)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareSimdDeclAttr >(attr))
+ for (auto iter = qual_attr->steps_begin(); iter != qual_attr->steps_end();
+ ++ iter)
+ {auto const &item = * iter;
+  callback(MakeCXCursor(item, getCursorTU(cursor)), data);}
+ 
+ #endif
+ }
+CXString clang_ext_TLSModelAttr_getModel(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::TLSModelAttr >(attr))
+ return cxstring_createDup(qual_attr->getModel());
+ return cxstring_createRef("");}
+void clang_ext_OMPDeclareSimdDeclAttr_getModifiers(
+CXCursor cursor, void (*callback)(unsigned int , void *), void *data)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareSimdDeclAttr >(attr))
+ for (auto iter = qual_attr->modifiers_begin();
+ iter != qual_attr->modifiers_end(); ++ iter)
+ {auto const &item = * iter;
+  callback(item, data);}
+ 
+ #endif
+ }
+int clang_ext_FormatAttr_getFirstArg(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::FormatAttr >(attr))
+ return qual_attr->getFirstArg();
+ return 0;}
+unsigned int clang_ext_AMDGPUNumVGPRAttr_getNumVGPR(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_6_0
+ 
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::AMDGPUNumVGPRAttr >(attr))
+ return qual_attr->getNumVGPR();
+ 
+ #endif
+ 
+ return 0;}
+enum
+clang_ext_MipsInterruptAttr_InterruptType
+clang_ext_MipsInterruptAttr_getInterrupt(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_8_0
+ 
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::MipsInterruptAttr >(attr))
+ return convert_MipsInterruptAttr_InterruptType(qual_attr->getInterrupt());
+ 
+ #endif
+ 
+ return clang_ext_MipsInterruptAttr_InterruptType_sw0;}
+enum
+clang_ext_ARMInterruptAttr_InterruptType
+clang_ext_ARMInterruptAttr_getInterrupt(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ARMInterruptAttr >(attr))
+ return convert_ARMInterruptAttr_InterruptType(qual_attr->getInterrupt());
+ return clang_ext_ARMInterruptAttr_InterruptType_IRQ;}
+enum
+clang_ext_RISCVInterruptAttr_InterruptType
+clang_ext_RISCVInterruptAttr_getInterrupt(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_7_0_0
+ 
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::RISCVInterruptAttr >(attr))
+ return convert_RISCVInterruptAttr_InterruptType(qual_attr->getInterrupt());
+ 
+ #endif
+ 
+ return clang_ext_RISCVInterruptAttr_InterruptType_user;}
+CXCursor clang_ext_Attrs_getMin(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ switch (attr->getKind())
+ {
+  #ifndef LLVM_VERSION_BEFORE_9_0_0
+  
+  case clang::attr::AMDGPUWavesPerEU:
+  if
+  (auto qual_attr =
+   llvm::dyn_cast_or_null<clang::AMDGPUWavesPerEUAttr >(attr))
+  return MakeCXCursor(qual_attr->getMin(), getCursorTU(cursor));
+  break;
+  
+  #endif
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_9_0_0
+  
+  case clang::attr::AMDGPUFlatWorkGroupSize:
+  if
+  (auto qual_attr =
+   llvm::dyn_cast_or_null<clang::AMDGPUFlatWorkGroupSizeAttr >(attr))
+  return MakeCXCursor(qual_attr->getMin(), getCursorTU(cursor));
+  break;
+  
+  #endif
+  
+  default:
+  ;}
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
+enum
+clang_ext_EnumExtensibilityAttr_Kind
+clang_ext_EnumExtensibilityAttr_getExtensibility(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_5_0_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::EnumExtensibilityAttr >(attr))
+ return convert_EnumExtensibilityAttr_Kind(qual_attr->getExtensibility());
+ 
+ #endif
+ 
+ return clang_ext_EnumExtensibilityAttr_Kind_Closed;}
+unsigned int clang_ext_AllocAlignAttr_getParamIndex(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_5_0_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AllocAlignAttr >(attr))
+ return unsigned_int_of_ParamIdx(qual_attr->getParamIndex());
+ 
+ #endif
+ 
+ return 0;}
+struct
+clang_ext_VersionTuple clang_ext_AvailabilityAttr_getIntroduced(
+CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AvailabilityAttr >(attr))
+ return makeVersionTuple(qual_attr->getIntroduced());
+ 
+ #endif
+ 
+ return zeroVersionTuple;}
+unsigned int clang_ext_MaxFieldAlignmentAttr_getAlignment(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::MaxFieldAlignmentAttr >(attr))
+ return qual_attr->getAlignment();
+ return 0;}
+CXCursor clang_ext_Attrs_getAlignment(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ switch (attr->getKind())
+ {
+  #ifndef LLVM_VERSION_BEFORE_3_6_0
+  
+  case clang::attr::AssumeAligned:
+  if
+  (auto qual_attr = llvm::dyn_cast_or_null<clang::AssumeAlignedAttr >(attr))
+  return MakeCXCursor(qual_attr->getAlignment(), getCursorTU(cursor));
+  break;
+  
+  #endif
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_3_6_0
+  
+  case clang::attr::AlignValue:
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::AlignValueAttr >(attr))
+  return MakeCXCursor(qual_attr->getAlignment(), getCursorTU(cursor));
+  break;
+  
+  #endif
+  
+  default:
+  ;}
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
+int clang_ext_AddressSpaceAttr_getAddressSpace(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AddressSpaceAttr >(attr))
+ return qual_attr->getAddressSpace();
+ 
+ #endif
+ 
+ return 0;}
+CXString clang_ext_ModeAttr_getMode(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ModeAttr >(attr))
+ return cxstring_createDup(qual_attr->getMode()->getName());
+ return cxstring_createRef("");}
+CXCursor clang_ext_Attrs_getArg(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ switch (attr->getKind())
+ {case clang::attr::PtGuardedBy:
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::PtGuardedByAttr >(attr))
+  return MakeCXCursor(qual_attr->getArg(), getCursorTU(cursor));
+  break;
+  case clang::attr::LockReturned:
+  if
+  (auto qual_attr = llvm::dyn_cast_or_null<clang::LockReturnedAttr >(attr))
+  return MakeCXCursor(qual_attr->getArg(), getCursorTU(cursor));
+  break;
+  case clang::attr::GuardedBy:
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::GuardedByAttr >(attr))
+  return MakeCXCursor(qual_attr->getArg(), getCursorTU(cursor));
+  break;
+  default:
+  ;}
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
+void clang_ext_Attrs_getCpus(
+CXCursor cursor, void (*callback)(CXString , void *), void *data)
+{auto attr = GetCursorAttr(cursor);
+ switch (attr->getKind())
+ {
+  #ifndef LLVM_VERSION_BEFORE_7_0_0
+  
+  case clang::attr::CPUSpecific:
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::CPUSpecificAttr >(attr))
+  for (auto iter = qual_attr->cpus_begin(); iter != qual_attr->cpus_end();
+  ++ iter)
+  {auto const &item = * iter;
+   callback(cxstring_createDup(item->getName()), data);}
+  break;
+  
+  #endif
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_7_0_0
+  
+  case clang::attr::CPUDispatch:
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::CPUDispatchAttr >(attr))
+  for (auto iter = qual_attr->cpus_begin(); iter != qual_attr->cpus_end();
+  ++ iter)
+  {auto const &item = * iter;
+   callback(cxstring_createDup(item->getName()), data);}
+  break;
+  
+  #endif
+  
+  default:
+  ;}}
+unsigned int clang_ext_OpenCLIntelReqdSubGroupSizeAttr_getSubGroupSize(
+CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_5_0_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OpenCLIntelReqdSubGroupSizeAttr >(attr))
+ return qual_attr->getSubGroupSize();
+ 
+ #endif
+ 
+ return 0;}
+unsigned int clang_ext_ArgumentWithTypeTagAttr_getArgumentIdx(
+CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ArgumentWithTypeTagAttr >(attr))
+ return unsigned_int_of_ParamIdx(qual_attr->getArgumentIdx());
+ return 0;}
+void clang_ext_OMPDeclareVariantAttr_getScores(
+CXCursor cursor, void (*callback)(CXCursor , void *), void *data)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
+ for (auto iter = qual_attr->scores_begin(); iter != qual_attr->scores_end();
+ ++ iter)
+ {auto const &item = * iter;
+  callback(MakeCXCursor(item, getCursorTU(cursor)), data);}
+ 
+ #endif
+ }
+bool clang_ext_AvailabilityAttr_getStrict(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AvailabilityAttr >(attr))
+ return qual_attr->getStrict();
+ 
+ #endif
+ 
+ return false;}
+enum
+clang_ext_CFGuardAttr_GuardArg clang_ext_CFGuardAttr_getGuard(
+CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CFGuardAttr >(attr))
+ return convert_CFGuardAttr_GuardArg(qual_attr->getGuard());
+ 
+ #endif
+ 
+ return clang_ext_CFGuardAttr_GuardArg_nocf;}
+CXString clang_ext_OwnershipAttr_getModule(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_7_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::OwnershipAttr >(attr))
+ return cxstring_createDup(qual_attr->getModule()->getName());
+ 
+ #endif
+ 
+ return cxstring_createRef("");}
+unsigned int clang_ext_MinVectorWidthAttr_getVectorWidth(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_7_0_0
+ 
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::MinVectorWidthAttr >(attr))
+ return qual_attr->getVectorWidth();
+ 
+ #endif
+ 
+ return 0;}
+bool clang_ext_TypeTagForDatatypeAttr_getLayoutCompatible(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::TypeTagForDatatypeAttr >(attr))
+ return qual_attr->getLayoutCompatible();
+ return false;}
+unsigned int clang_ext_InitSegAttr_getSectionLength(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::InitSegAttr >(attr))
+ return qual_attr->getSectionLength();
+ 
+ #endif
+ 
+ return 0;}
+struct
+clang_ext_TypeLoc clang_ext_VecTypeHintAttr_getTypeHint(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::VecTypeHintAttr >(attr))
+ return
+ MakeTypeLoc(qual_attr->getTypeHintLoc()->getTypeLoc(), getCursorTU(cursor));
+ return MakeTypeLocInvalid(getCursorTU(cursor));}
+unsigned int clang_ext_OMPDeclareVariantAttr_getCtxSelectorSets_Size(
+CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
+ return qual_attr->ctxSelectorSets_size();
+ 
+ #endif
+ 
+ return 0;}
 void clang_ext_OMPDeclareVariantAttr_getCtxSelectorSets(
 CXCursor cursor, void (*callback)(unsigned int , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -1760,47 +2863,13 @@ CXCursor cursor)
  #endif
  
  return 0;}
-CXString clang_ext_TargetAttr_getFeaturesStr(CXCursor cursor)
+enum
+clang_ext_ConsumableAttr_ConsumedState
+clang_ext_ConsumableAttr_getDefaultState(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_3_8_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::TargetAttr >(attr))
- return cxstring_createDup(qual_attr->getFeaturesStr());
- 
- #endif
- 
- return cxstring_createRef("");}
-unsigned int clang_ext_InitPriorityAttr_getPriority(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::InitPriorityAttr >(attr))
- return qual_attr->getPriority();
- return 0;}
-int clang_ext_Attrs_getPriority(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- switch (attr->getKind())
- {case clang::attr::Destructor:
-  if (auto qual_attr = llvm::dyn_cast_or_null<clang::DestructorAttr >(attr))
-  return qual_attr->getPriority();
-  break;
-  case clang::attr::Constructor:
-  if (auto qual_attr = llvm::dyn_cast_or_null<clang::ConstructorAttr >(attr))
-  return qual_attr->getPriority();
-  break;
-  
-  #ifndef LLVM_VERSION_BEFORE_9_0_0
-  
-  case clang::attr::Availability:
-  if
-  (auto qual_attr = llvm::dyn_cast_or_null<clang::AvailabilityAttr >(attr))
-  return qual_attr->getPriority();
-  break;
-  
-  #endif
-  
-  default:
-  ;}
- return 0;}
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ConsumableAttr >(attr))
+ return convert_ConsumableAttr_ConsumedState(qual_attr->getDefaultState());
+ return clang_ext_ConsumableAttr_ConsumedState_Unknown;}
 CXString clang_ext_Attrs_getBridgedType(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  switch (attr->getKind())
@@ -1823,24 +2892,27 @@ CXString clang_ext_Attrs_getBridgedType(CXCursor cursor)
   default:
   ;}
  return cxstring_createRef("");}
-unsigned int clang_ext_Attrs_getYDim(CXCursor cursor)
+unsigned int clang_ext_OMPDeclareSimdDeclAttr_getModifiers_Size(
+CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
- switch (attr->getKind())
- {case clang::attr::WorkGroupSizeHint:
-  if
-  (auto qual_attr =
-   llvm::dyn_cast_or_null<clang::WorkGroupSizeHintAttr >(attr))
-  return qual_attr->getYDim();
-  break;
-  case clang::attr::ReqdWorkGroupSize:
-  if
-  (auto qual_attr =
-   llvm::dyn_cast_or_null<clang::ReqdWorkGroupSizeAttr >(attr))
-  return qual_attr->getYDim();
-  break;
-  default:
-  ;}
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareSimdDeclAttr >(attr))
+ return qual_attr->modifiers_size();
+ 
+ #endif
+ 
  return 0;}
+enum
+clang_ext_SetTypestateAttr_ConsumedState
+clang_ext_SetTypestateAttr_getNewState(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::SetTypestateAttr >(attr))
+ return convert_SetTypestateAttr_ConsumedState(qual_attr->getNewState());
+ return clang_ext_SetTypestateAttr_ConsumedState_Unknown;}
 CXString clang_ext_ObjCBridgeRelatedAttr_getClassMethod(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -1866,28 +2938,6 @@ CXCursor clang_ext_OMPReferencedVarAttr_getRef(CXCursor cursor)
  #endif
  
  return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
-struct
-clang_ext_DeclarationName clang_ext_CleanupAttr_getFunctionDecl(
-CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::CleanupAttr >(attr))
- return
- MakeDeclarationName(qual_attr->getFunctionDecl()->getDeclName(),
-                     getCursorTU(cursor));
- return MakeDeclarationNameInvalid(getCursorTU(cursor));}
-struct
-clang_ext_VersionTuple clang_ext_AvailabilityAttr_getObsoleted(
-CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_9_0_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::AvailabilityAttr >(attr))
- return makeVersionTuple(qual_attr->getObsoleted());
- 
- #endif
- 
- return zeroVersionTuple;}
 unsigned int clang_ext_AllocSizeAttr_getElemSizeParam(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -1899,6 +2949,22 @@ unsigned int clang_ext_AllocSizeAttr_getElemSizeParam(CXCursor cursor)
  #endif
  
  return 0;}
+enum
+clang_ext_VisibilityAttr_VisibilityType
+clang_ext_VisibilityAttr_getVisibility(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::VisibilityAttr >(attr))
+ return convert_VisibilityAttr_VisibilityType(qual_attr->getVisibility());
+ return clang_ext_VisibilityAttr_VisibilityType_Default;}
+enum
+clang_ext_TypeVisibilityAttr_VisibilityType
+clang_ext_TypeVisibilityAttr_getVisibility(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::TypeVisibilityAttr >(attr))
+ return
+ convert_TypeVisibilityAttr_VisibilityType(qual_attr->getVisibility());
+ return clang_ext_TypeVisibilityAttr_VisibilityType_Default;}
 CXString clang_ext_ExternalSourceSymbolAttr_getLanguage(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -1939,37 +3005,30 @@ unsigned int clang_ext_Attrs_getReplacementLength(CXCursor cursor)
   default:
   ;}
  return 0;}
-CXString clang_ext_InitSegAttr_getSection(CXCursor cursor)
+unsigned int clang_ext_OMPDeclareSimdDeclAttr_getAlignments_Size(
+CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
- #ifndef LLVM_VERSION_BEFORE_3_5_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::InitSegAttr >(attr))
- return cxstring_createDup(qual_attr->getSection());
- 
- #endif
- 
- return cxstring_createRef("");}
-CXString clang_ext_ExternalSourceSymbolAttr_getDefinedIn(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_5_0_0
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
  
  if
  (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::ExternalSourceSymbolAttr >(attr))
- return cxstring_createDup(qual_attr->getDefinedIn());
+  llvm::dyn_cast_or_null<clang::OMPDeclareSimdDeclAttr >(attr))
+ return qual_attr->alignments_size();
  
  #endif
  
- return cxstring_createRef("");}
-unsigned int clang_ext_AllocSizeAttr_getNumElemsParam(CXCursor cursor)
+ return 0;}
+unsigned int clang_ext_OMPDeclareSimdDeclAttr_getLinears_Size(
+CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
- #ifndef LLVM_VERSION_BEFORE_4_0_0
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
  
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::AllocSizeAttr >(attr))
- return unsigned_int_of_ParamIdx(qual_attr->getNumElemsParam());
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareSimdDeclAttr >(attr))
+ return qual_attr->linears_size();
  
  #endif
  
@@ -1981,33 +3040,6 @@ unsigned int clang_ext_XRayLogArgsAttr_getArgumentCount(CXCursor cursor)
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::XRayLogArgsAttr >(attr))
  return qual_attr->getArgumentCount();
- 
- #endif
- 
- return 0;}
-void clang_ext_OMPDeclareVariantAttr_getCtxSelectors(
-CXCursor cursor, void (*callback)(unsigned int , void *), void *data)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
- for (auto iter = qual_attr->ctxSelectors_begin();
- iter != qual_attr->ctxSelectors_end(); ++ iter)
- {auto const &item = * iter;
-  callback(item, data);}
- 
- #endif
- }
-unsigned int clang_ext_IFuncAttr_getResolverLength(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_3_9_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::IFuncAttr >(attr))
- return qual_attr->getResolverLength();
  
  #endif
  
@@ -2075,17 +3107,6 @@ CXString clang_ext_Attrs_getMessage(CXCursor cursor)
   default:
   ;}
  return cxstring_createRef("");}
-unsigned int clang_ext_AsmLabelAttr_getLabelLength(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::AsmLabelAttr >(attr))
- return qual_attr->getLabelLength();
- 
- #endif
- 
- return 0;}
 unsigned int clang_ext_ArgumentWithTypeTagAttr_getTypeTagIdx(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  if
@@ -2093,58 +3114,10 @@ unsigned int clang_ext_ArgumentWithTypeTagAttr_getTypeTagIdx(CXCursor cursor)
   llvm::dyn_cast_or_null<clang::ArgumentWithTypeTagAttr >(attr))
  return unsigned_int_of_ParamIdx(qual_attr->getTypeTagIdx());
  return 0;}
-unsigned int clang_ext_AbiTagAttr_getTags_Size(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_3_9_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::AbiTagAttr >(attr))
- return qual_attr->tags_size();
- 
- #endif
- 
- return 0;}
 CXString clang_ext_UuidAttr_getGuid(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::UuidAttr >(attr))
  return cxstring_createDup(qual_attr->getGuid());
- return cxstring_createRef("");}
-CXCursor clang_ext_CUDALaunchBoundsAttr_getMaxThreads(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_3_7_0
- 
- if
- (auto qual_attr = llvm::dyn_cast_or_null<clang::CUDALaunchBoundsAttr >(attr))
- return MakeCXCursor(qual_attr->getMaxThreads(), getCursorTU(cursor));
- 
- #endif
- 
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
-CXString clang_ext_ArmMveAliasAttr_getBuiltinName(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::ArmMveAliasAttr >(attr))
- return cxstring_createDup(qual_attr->getBuiltinName()->getName());
- 
- #endif
- 
- return cxstring_createRef("");}
-CXString clang_ext_WebAssemblyImportModuleAttr_getImportModule(
-CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_8_0_0
- 
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::WebAssemblyImportModuleAttr >(attr))
- return cxstring_createDup(qual_attr->getImportModule());
- 
- #endif
- 
  return cxstring_createRef("");}
 unsigned int clang_ext_Attrs_getZDim(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -2163,28 +3136,6 @@ unsigned int clang_ext_Attrs_getZDim(CXCursor cursor)
   break;
   default:
   ;}
- return 0;}
-unsigned int clang_ext_NoSanitizeAttr_getSanitizers_Size(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_3_7_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoSanitizeAttr >(attr))
- return qual_attr->sanitizers_size();
- 
- #endif
- 
- return 0;}
-unsigned int clang_ext_CallbackAttr_getEncoding_Size(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_9_0_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::CallbackAttr >(attr))
- return qual_attr->encoding_size();
- 
- #endif
- 
  return 0;}
 unsigned int clang_ext_Attrs_getHandleTypeLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -2224,24 +3175,35 @@ unsigned int clang_ext_Attrs_getHandleTypeLength(CXCursor cursor)
   default:
   ;}
  return 0;}
-unsigned int clang_ext_Attrs_getXDim(CXCursor cursor)
+void clang_ext_OMPDeclareSimdDeclAttr_getUniforms(
+CXCursor cursor, void (*callback)(CXCursor , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
- switch (attr->getKind())
- {case clang::attr::WorkGroupSizeHint:
-  if
-  (auto qual_attr =
-   llvm::dyn_cast_or_null<clang::WorkGroupSizeHintAttr >(attr))
-  return qual_attr->getXDim();
-  break;
-  case clang::attr::ReqdWorkGroupSize:
-  if
-  (auto qual_attr =
-   llvm::dyn_cast_or_null<clang::ReqdWorkGroupSizeAttr >(attr))
-  return qual_attr->getXDim();
-  break;
-  default:
-  ;}
- return 0;}
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareSimdDeclAttr >(attr))
+ for (auto iter = qual_attr->uniforms_begin();
+ iter != qual_attr->uniforms_end(); ++ iter)
+ {auto const &item = * iter;
+  callback(MakeCXCursor(item, getCursorTU(cursor)), data);}
+ 
+ #endif
+ }
+enum
+clang_ext_LoopHintAttr_OptionType clang_ext_LoopHintAttr_getOption(
+CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::LoopHintAttr >(attr))
+ return convert_LoopHintAttr_OptionType(qual_attr->getOption());
+ 
+ #endif
+ 
+ return clang_ext_LoopHintAttr_OptionType_Vectorize;}
 CXString clang_ext_ObjCBridgeRelatedAttr_getRelatedClass(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -2254,58 +3216,6 @@ CXString clang_ext_ObjCBridgeRelatedAttr_getRelatedClass(CXCursor cursor)
  
  #endif
  
- return cxstring_createRef("");}
-CXString clang_ext_Attrs_getAliasee(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- switch (attr->getKind())
- {case clang::attr::WeakRef:
-  if (auto qual_attr = llvm::dyn_cast_or_null<clang::WeakRefAttr >(attr))
-  return cxstring_createDup(qual_attr->getAliasee());
-  break;
-  case clang::attr::Alias:
-  if (auto qual_attr = llvm::dyn_cast_or_null<clang::AliasAttr >(attr))
-  return cxstring_createDup(qual_attr->getAliasee());
-  break;
-  default:
-  ;}
- return cxstring_createRef("");}
-CXString clang_ext_Attrs_getHandleType(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- switch (attr->getKind())
- {
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::attr::UseHandle:
-  if (auto qual_attr = llvm::dyn_cast_or_null<clang::UseHandleAttr >(attr))
-  return cxstring_createDup(qual_attr->getHandleType());
-  break;
-  
-  #endif
-  
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::attr::ReleaseHandle:
-  if
-  (auto qual_attr = llvm::dyn_cast_or_null<clang::ReleaseHandleAttr >(attr))
-  return cxstring_createDup(qual_attr->getHandleType());
-  break;
-  
-  #endif
-  
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::attr::AcquireHandle:
-  if
-  (auto qual_attr = llvm::dyn_cast_or_null<clang::AcquireHandleAttr >(attr))
-  return cxstring_createDup(qual_attr->getHandleType());
-  break;
-  
-  #endif
-  
-  default:
-  ;}
  return cxstring_createRef("");}
 CXString clang_ext_WebAssemblyImportNameAttr_getImportName(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -2320,20 +3230,6 @@ CXString clang_ext_WebAssemblyImportNameAttr_getImportName(CXCursor cursor)
  #endif
  
  return cxstring_createRef("");}
-unsigned int clang_ext_WebAssemblyImportModuleAttr_getImportModuleLength(
-CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_8_0_0
- 
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::WebAssemblyImportModuleAttr >(attr))
- return qual_attr->getImportModuleLength();
- 
- #endif
- 
- return 0;}
 unsigned int clang_ext_OMPDeclareVariantAttr_getDeviceKinds_Size(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -2348,19 +3244,6 @@ CXCursor cursor)
  #endif
  
  return 0;}
-struct
-clang_ext_VersionTuple clang_ext_AvailabilityAttr_getDeprecated(
-CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_9_0_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::AvailabilityAttr >(attr))
- return makeVersionTuple(qual_attr->getDeprecated());
- 
- #endif
- 
- return zeroVersionTuple;}
 void clang_ext_NoSanitizeAttr_getSanitizers(
 CXCursor cursor, void (*callback)(CXString , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -2372,6 +3255,22 @@ CXCursor cursor, void (*callback)(CXString , void *), void *data)
  iter != qual_attr->sanitizers_end(); ++ iter)
  {auto const &item = * iter;
   callback(cxstring_createDup(item), data);}
+ 
+ #endif
+ }
+void clang_ext_CallableWhenAttr_getCallableStates(
+CXCursor cursor,
+void (*callback)(enum clang_ext_CallableWhenAttr_ConsumedState , void *),
+void *data)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CallableWhenAttr >(attr))
+ for (auto iter = qual_attr->callableStates_begin();
+ iter != qual_attr->callableStates_end(); ++ iter)
+ {auto const &item = * iter;
+  callback(convert_CallableWhenAttr_ConsumedState(item), data);}
  
  #endif
  }
@@ -2388,6 +3287,22 @@ unsigned int clang_ext_OMPDeclareVariantAttr_getScores_Size(CXCursor cursor)
  #endif
  
  return 0;}
+enum
+clang_ext_OMPDeclareSimdDeclAttr_BranchStateTy
+clang_ext_OMPDeclareSimdDeclAttr_getBranchState(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareSimdDeclAttr >(attr))
+ return
+ convert_OMPDeclareSimdDeclAttr_BranchStateTy(qual_attr->getBranchState());
+ 
+ #endif
+ 
+ return clang_ext_OMPDeclareSimdDeclAttr_BranchStateTy_BS_Undefined;}
 bool clang_ext_AsmLabelAttr_getIsLiteralLabel(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -2399,19 +3314,6 @@ bool clang_ext_AsmLabelAttr_getIsLiteralLabel(CXCursor cursor)
  #endif
  
  return false;}
-CXString clang_ext_WebAssemblyExportNameAttr_getExportName(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::WebAssemblyExportNameAttr >(attr))
- return cxstring_createDup(qual_attr->getExportName());
- 
- #endif
- 
- return cxstring_createRef("");}
 unsigned int clang_ext_FormatArgAttr_getFormatIdx(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::FormatArgAttr >(attr))
@@ -2422,13 +3324,6 @@ int clang_ext_FormatAttr_getFormatIdx(CXCursor cursor)
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::FormatAttr >(attr))
  return qual_attr->getFormatIdx();
  return 0;}
-bool clang_ext_ArgumentWithTypeTagAttr_getIsPointer(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::ArgumentWithTypeTagAttr >(attr))
- return qual_attr->getIsPointer();
- return false;}
 bool clang_ext_TypeTagForDatatypeAttr_getMustBeNull(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  if
@@ -2436,6 +3331,21 @@ bool clang_ext_TypeTagForDatatypeAttr_getMustBeNull(CXCursor cursor)
   llvm::dyn_cast_or_null<clang::TypeTagForDatatypeAttr >(attr))
  return qual_attr->getMustBeNull();
  return false;}
+enum
+clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy
+clang_ext_OMPAllocateDeclAttr_getAllocatorType(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
+ 
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::OMPAllocateDeclAttr >(attr))
+ return
+ convert_OMPAllocateDeclAttr_AllocatorTypeTy(qual_attr->getAllocatorType());
+ 
+ #endif
+ 
+ return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPDefaultMemAlloc;}
 unsigned int clang_ext_Attrs_getNameLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  switch (attr->getKind())
@@ -2525,11 +3435,6 @@ unsigned int clang_ext_Attrs_getNameLength(CXCursor cursor)
   
   default:
   ;}
- return 0;}
-unsigned int clang_ext_UuidAttr_getGuidLength(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::UuidAttr >(attr))
- return qual_attr->getGuidLength();
  return 0;}
 CXString clang_ext_Attrs_getName(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -2633,68 +3538,18 @@ CXCursor cursor)
  #endif
  
  return 0;}
-unsigned int clang_ext_Attrs_getMessageLength(CXCursor cursor)
+unsigned int clang_ext_OMPDeclareSimdDeclAttr_getSteps_Size(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
- switch (attr->getKind())
- {
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::attr::WarnUnusedResult:
-  if
-  (auto qual_attr =
-   llvm::dyn_cast_or_null<clang::WarnUnusedResultAttr >(attr))
-  return qual_attr->getMessageLength();
-  break;
-  
-  #endif
-  
-  case clang::attr::Unavailable:
-  if (auto qual_attr = llvm::dyn_cast_or_null<clang::UnavailableAttr >(attr))
-  return qual_attr->getMessageLength();
-  break;
-  
-  #ifndef LLVM_VERSION_BEFORE_3_5_0
-  
-  case clang::attr::EnableIf:
-  if (auto qual_attr = llvm::dyn_cast_or_null<clang::EnableIfAttr >(attr))
-  return qual_attr->getMessageLength();
-  break;
-  
-  #endif
-  
-  
-  #ifndef LLVM_VERSION_BEFORE_4_0_0
-  
-  case clang::attr::DiagnoseIf:
-  if (auto qual_attr = llvm::dyn_cast_or_null<clang::DiagnoseIfAttr >(attr))
-  return qual_attr->getMessageLength();
-  break;
-  
-  #endif
-  
-  
-  #ifndef LLVM_VERSION_BEFORE_3_9_0
-  
-  case clang::attr::Deprecated:
-  if (auto qual_attr = llvm::dyn_cast_or_null<clang::DeprecatedAttr >(attr))
-  return qual_attr->getMessageLength();
-  break;
-  
-  #endif
-  
-  
-  #ifndef LLVM_VERSION_BEFORE_9_0_0
-  
-  case clang::attr::Availability:
-  if
-  (auto qual_attr = llvm::dyn_cast_or_null<clang::AvailabilityAttr >(attr))
-  return qual_attr->getMessageLength();
-  break;
-  
-  #endif
-  
-  default:
-  ;}
+ 
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareSimdDeclAttr >(attr))
+ return qual_attr->steps_size();
+ 
+ #endif
+ 
  return 0;}
 unsigned int clang_ext_WebAssemblyExportNameAttr_getExportNameLength(
 CXCursor cursor)
@@ -2710,38 +3565,22 @@ CXCursor cursor)
  #endif
  
  return 0;}
-void clang_ext_CallbackAttr_getEncoding(
-CXCursor cursor, void (*callback)(int , void *), void *data)
+void clang_ext_OMPDeclareSimdDeclAttr_getAlignments(
+CXCursor cursor, void (*callback)(CXCursor , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
  
- #ifndef LLVM_VERSION_BEFORE_9_0_0
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
  
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::CallbackAttr >(attr))
- for (auto iter = qual_attr->encoding_begin();
- iter != qual_attr->encoding_end(); ++ iter)
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareSimdDeclAttr >(attr))
+ for (auto iter = qual_attr->alignments_begin();
+ iter != qual_attr->alignments_end(); ++ iter)
  {auto const &item = * iter;
-  callback(item, data);}
+  callback(MakeCXCursor(item, getCursorTU(cursor)), data);}
  
  #endif
  }
-CXString clang_ext_Attrs_getArgumentKind(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- switch (attr->getKind())
- {case clang::attr::TypeTagForDatatype:
-  if
-  (auto qual_attr =
-   llvm::dyn_cast_or_null<clang::TypeTagForDatatypeAttr >(attr))
-  return cxstring_createDup(qual_attr->getArgumentKind()->getName());
-  break;
-  case clang::attr::ArgumentWithTypeTag:
-  if
-  (auto qual_attr =
-   llvm::dyn_cast_or_null<clang::ArgumentWithTypeTagAttr >(attr))
-  return cxstring_createDup(qual_attr->getArgumentKind()->getName());
-  break;
-  default:
-  ;}
- return cxstring_createRef("");}
 unsigned int clang_ext_MSVtorDispAttr_getVdm(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -2753,17 +3592,6 @@ unsigned int clang_ext_MSVtorDispAttr_getVdm(CXCursor cursor)
  #endif
  
  return 0;}
-bool clang_ext_AvailabilityAttr_getUnavailable(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_9_0_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::AvailabilityAttr >(attr))
- return qual_attr->getUnavailable();
- 
- #endif
- 
- return false;}
 CXCursor clang_ext_Attrs_getCond(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  switch (attr->getKind())
@@ -2800,35 +3628,14 @@ CXCursor cursor)
  return
  MakeTypeLoc(qual_attr->getInterfaceLoc()->getTypeLoc(), getCursorTU(cursor));
  return MakeTypeLocInvalid(getCursorTU(cursor));}
-CXString clang_ext_AnnotateAttr_getAnnotation(CXCursor cursor)
+enum
+clang_ext_ObjCMethodFamilyAttr_FamilyKind
+clang_ext_ObjCMethodFamilyAttr_getFamily(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::AnnotateAttr >(attr))
- return cxstring_createDup(qual_attr->getAnnotation());
- return cxstring_createRef("");}
-CXCursor clang_ext_OMPDeclareVariantAttr_getVariantFuncRef(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
  if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
- return MakeCXCursor(qual_attr->getVariantFuncRef(), getCursorTU(cursor));
- 
- #endif
- 
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
-unsigned int clang_ext_NoBuiltinAttr_getBuiltinNames_Size(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoBuiltinAttr >(attr))
- return qual_attr->builtinNames_size();
- 
- #endif
- 
- return 0;}
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ObjCMethodFamilyAttr >(attr))
+ return convert_ObjCMethodFamilyAttr_FamilyKind(qual_attr->getFamily());
+ return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_None;}
 CXString clang_ext_Attrs_getKind(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  switch (attr->getKind())
@@ -2856,33 +3663,6 @@ CXString clang_ext_Attrs_getKind(CXCursor cursor)
   default:
   ;}
  return cxstring_createRef("");}
-CXString clang_ext_Attrs_getReplacement(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- switch (attr->getKind())
- {
-  #ifndef LLVM_VERSION_BEFORE_3_9_0
-  
-  case clang::attr::Deprecated:
-  if (auto qual_attr = llvm::dyn_cast_or_null<clang::DeprecatedAttr >(attr))
-  return cxstring_createDup(qual_attr->getReplacement());
-  break;
-  
-  #endif
-  
-  
-  #ifndef LLVM_VERSION_BEFORE_9_0_0
-  
-  case clang::attr::Availability:
-  if
-  (auto qual_attr = llvm::dyn_cast_or_null<clang::AvailabilityAttr >(attr))
-  return cxstring_createDup(qual_attr->getReplacement());
-  break;
-  
-  #endif
-  
-  default:
-  ;}
- return cxstring_createRef("");}
 unsigned int clang_ext_PatchableFunctionEntryAttr_getCount(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -2896,31 +3676,6 @@ unsigned int clang_ext_PatchableFunctionEntryAttr_getCount(CXCursor cursor)
  #endif
  
  return 0;}
-unsigned int clang_ext_AMDGPUNumSGPRAttr_getNumSGPR(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_3_6_0
- 
- if
- (auto qual_attr = llvm::dyn_cast_or_null<clang::AMDGPUNumSGPRAttr >(attr))
- return qual_attr->getNumSGPR();
- 
- #endif
- 
- return 0;}
-CXString clang_ext_ObjCBridgeRelatedAttr_getInstanceMethod(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_3_5_0
- 
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::ObjCBridgeRelatedAttr >(attr))
- return cxstring_createDup(qual_attr->getInstanceMethod()->getName());
- 
- #endif
- 
- return cxstring_createRef("");}
 void clang_ext_AbiTagAttr_getTags(
 CXCursor cursor, void (*callback)(CXString , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -2967,22 +3722,6 @@ CXCursor cursor, void (*callback)(CXString , void *), void *data)
  
  #endif
  }
-unsigned int clang_ext_TargetAttr_getFeaturesStrLength(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_3_8_0
- 
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::TargetAttr >(attr))
- return qual_attr->getFeaturesStrLength();
- 
- #endif
- 
- return 0;}
-CXCursor clang_ext_AlignedAttr_getAlignmentExpr(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::AlignedAttr >(attr))
- return MakeCXCursor(qual_attr->getAlignmentExpr(), getCursorTU(cursor));
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 bool clang_ext_MSInheritanceAttr_getBestCase(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  

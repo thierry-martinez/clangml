@@ -3065,30 +3065,30 @@ type clang_ext_xrayinstrument_spelling =
 external ext_xray_instrument_get_spelling :
   cxcursor -> clang_ext_xrayinstrument_spelling =
     "clang_ext_XRayInstrument_getSpelling_wrapper"
-external ext_tlsmodel_attr_get_model :
-  cxcursor -> string = "clang_ext_TLSModelAttr_getModel_wrapper"
-external ext_format_attr_get_first_arg :
-  cxcursor -> int = "clang_ext_FormatAttr_getFirstArg_wrapper"
+external ext_ompdeclare_simd_decl_attr_get_uniforms_size :
+  cxcursor -> int =
+    "clang_ext_OMPDeclareSimdDeclAttr_getUniforms_Size_wrapper"
+type clang_ext_returntypestateattr_consumedstate =
+  | Unknown 
+  | Consumed 
+  | Unconsumed [@@deriving refl]
+external ext_return_typestate_attr_get_state :
+  cxcursor -> clang_ext_returntypestateattr_consumedstate =
+    "clang_ext_ReturnTypestateAttr_getState_wrapper"
 external ext_attrs_get_aliasee_length :
   cxcursor -> int = "clang_ext_Attrs_getAliaseeLength_wrapper"
-external ext_amdgpunum_vgprattr_get_num_vgpr :
-  cxcursor -> int = "clang_ext_AMDGPUNumVGPRAttr_getNumVGPR_wrapper"
 external ext_obj_cruntime_name_attr_get_metadata_name :
   cxcursor -> string =
     "clang_ext_ObjCRuntimeNameAttr_getMetadataName_wrapper"
-external ext_attrs_get_min :
-  cxcursor -> cxcursor = "clang_ext_Attrs_getMin_wrapper"
 external ext_ompdeclare_variant_attr_get_impl_vendors :
   cxcursor -> (string -> unit) -> unit =
     "clang_ext_OMPDeclareVariantAttr_getImplVendors_wrapper"
 external ext_ifunc_attr_get_resolver :
   cxcursor -> string = "clang_ext_IFuncAttr_getResolver_wrapper"
-external ext_assume_aligned_attr_get_offset :
-  cxcursor -> cxcursor = "clang_ext_AssumeAlignedAttr_getOffset_wrapper"
 external ext_patchable_function_entry_attr_get_offset :
   cxcursor -> int = "clang_ext_PatchableFunctionEntryAttr_getOffset_wrapper"
-external ext_alloc_align_attr_get_param_index :
-  cxcursor -> int = "clang_ext_AllocAlignAttr_getParamIndex_wrapper"
+external ext_assume_aligned_attr_get_offset :
+  cxcursor -> cxcursor = "clang_ext_AssumeAlignedAttr_getOffset_wrapper"
 external ext_web_assembly_import_name_attr_get_import_name_length :
   cxcursor -> int =
     "clang_ext_WebAssemblyImportNameAttr_getImportNameLength_wrapper"
@@ -3100,15 +3100,244 @@ external ext_attrs_get_cpus_size :
   cxcursor -> int = "clang_ext_Attrs_getCpus_Size_wrapper"
 external ext_tlsmodel_attr_get_model_length :
   cxcursor -> int = "clang_ext_TLSModelAttr_getModelLength_wrapper"
+type clang_ext_paramtypestateattr_consumedstate =
+  | Unknown 
+  | Consumed 
+  | Unconsumed [@@deriving refl]
+external ext_param_typestate_attr_get_param_state :
+  cxcursor -> clang_ext_paramtypestateattr_consumedstate =
+    "clang_ext_ParamTypestateAttr_getParamState_wrapper"
 external ext_external_source_symbol_attr_get_generated_declaration :
   cxcursor -> bool =
     "clang_ext_ExternalSourceSymbolAttr_getGeneratedDeclaration_wrapper"
+external ext_suppress_attr_get_diagnostic_identifiers :
+  cxcursor -> (string -> unit) -> unit =
+    "clang_ext_SuppressAttr_getDiagnosticIdentifiers_wrapper"
+external ext_attrs_get_deref_type :
+  cxcursor -> clang_ext_typeloc = "clang_ext_Attrs_getDerefType_wrapper"
+external ext_type_tag_for_datatype_attr_get_matching_ctype :
+  cxcursor -> clang_ext_typeloc =
+    "clang_ext_TypeTagForDatatypeAttr_getMatchingCType_wrapper"
+external ext_annotate_attr_get_annotation_length :
+  cxcursor -> int = "clang_ext_AnnotateAttr_getAnnotationLength_wrapper"
+external ext_ompdeclare_variant_attr_get_device_kinds :
+  cxcursor -> (string -> unit) -> unit =
+    "clang_ext_OMPDeclareVariantAttr_getDeviceKinds_wrapper"
+external ext_layout_version_attr_get_version :
+  cxcursor -> int = "clang_ext_LayoutVersionAttr_getVersion_wrapper"
+external ext_sentinel_attr_get_null_pos :
+  cxcursor -> int = "clang_ext_SentinelAttr_getNullPos_wrapper"
+external ext_ompdeclare_simd_decl_attr_get_aligneds :
+  cxcursor -> (cxcursor -> unit) -> unit =
+    "clang_ext_OMPDeclareSimdDeclAttr_getAligneds_wrapper"
+external ext_attrs_get_args_size :
+  cxcursor -> int = "clang_ext_Attrs_getArgs_Size_wrapper"
+external ext_ompdeclare_variant_attr_get_ctx_selectors_size :
+  cxcursor -> int =
+    "clang_ext_OMPDeclareVariantAttr_getCtxSelectors_Size_wrapper"
+external ext_cudalaunch_bounds_attr_get_min_blocks :
+  cxcursor -> cxcursor =
+    "clang_ext_CUDALaunchBoundsAttr_getMinBlocks_wrapper"
+external ext_ompdeclare_variant_attr_get_impl_vendors_size :
+  cxcursor -> int =
+    "clang_ext_OMPDeclareVariantAttr_getImplVendors_Size_wrapper"
+external ext_external_source_symbol_attr_get_defined_in_length :
+  cxcursor -> int =
+    "clang_ext_ExternalSourceSymbolAttr_getDefinedInLength_wrapper"
+external ext_ompcapture_kind_attr_get_capture_kind :
+  cxcursor -> int = "clang_ext_OMPCaptureKindAttr_getCaptureKind_wrapper"
+external ext_format_attr_get_type :
+  cxcursor -> string = "clang_ext_FormatAttr_getType_wrapper"
+external ext_pass_object_size_attr_get_type :
+  cxcursor -> int = "clang_ext_PassObjectSizeAttr_getType_wrapper"
+type clang_ext_blocksattr_blocktype =
+  | ByRef [@@deriving refl]
+external ext_blocks_attr_get_type :
+  cxcursor -> clang_ext_blocksattr_blocktype =
+    "clang_ext_BlocksAttr_getType_wrapper"
+external ext_asm_label_attr_get_label :
+  cxcursor -> string = "clang_ext_AsmLabelAttr_getLabel_wrapper"
+external ext_availability_attr_get_platform :
+  cxcursor -> string = "clang_ext_AvailabilityAttr_getPlatform_wrapper"
+external ext_attrs_get_max :
+  cxcursor -> cxcursor = "clang_ext_Attrs_getMax_wrapper"
+external ext_target_attr_get_features_str :
+  cxcursor -> string = "clang_ext_TargetAttr_getFeaturesStr_wrapper"
+external ext_callable_when_attr_get_callable_states_size :
+  cxcursor -> int =
+    "clang_ext_CallableWhenAttr_getCallableStates_Size_wrapper"
+type clang_ext_testtypestateattr_consumedstate =
+  | Consumed 
+  | Unconsumed [@@deriving refl]
+external ext_test_typestate_attr_get_test_state :
+  cxcursor -> clang_ext_testtypestateattr_consumedstate =
+    "clang_ext_TestTypestateAttr_getTestState_wrapper"
+external ext_init_priority_attr_get_priority :
+  cxcursor -> int = "clang_ext_InitPriorityAttr_getPriority_wrapper"
+external ext_attrs_get_priority :
+  cxcursor -> int = "clang_ext_Attrs_getPriority_wrapper"
+type clang_ext_ompdeclaretargetdeclattr_maptypety =
+  | To 
+  | Link [@@deriving refl]
+external ext_ompdeclare_target_decl_attr_get_map_type :
+  cxcursor -> clang_ext_ompdeclaretargetdeclattr_maptypety =
+    "clang_ext_OMPDeclareTargetDeclAttr_getMapType_wrapper"
+external ext_attrs_get_ydim :
+  cxcursor -> int = "clang_ext_Attrs_getYDim_wrapper"
+external ext_cleanup_attr_get_function_decl :
+  cxcursor -> clang_ext_declarationname =
+    "clang_ext_CleanupAttr_getFunctionDecl_wrapper"
 type clang_ext_versiontuple =
   {
   major: int ;
   minor: int ;
   subminor: int ;
   build: int }[@@deriving refl]
+external ext_availability_attr_get_obsoleted :
+  cxcursor -> clang_ext_versiontuple =
+    "clang_ext_AvailabilityAttr_getObsoleted_wrapper"
+external ext_init_seg_attr_get_section :
+  cxcursor -> string = "clang_ext_InitSegAttr_getSection_wrapper"
+external ext_external_source_symbol_attr_get_defined_in :
+  cxcursor -> string =
+    "clang_ext_ExternalSourceSymbolAttr_getDefinedIn_wrapper"
+external ext_alloc_size_attr_get_num_elems_param :
+  cxcursor -> int = "clang_ext_AllocSizeAttr_getNumElemsParam_wrapper"
+external ext_ompdeclare_variant_attr_get_ctx_selectors :
+  cxcursor -> (int -> unit) -> unit =
+    "clang_ext_OMPDeclareVariantAttr_getCtxSelectors_wrapper"
+external ext_ifunc_attr_get_resolver_length :
+  cxcursor -> int = "clang_ext_IFuncAttr_getResolverLength_wrapper"
+external ext_asm_label_attr_get_label_length :
+  cxcursor -> int = "clang_ext_AsmLabelAttr_getLabelLength_wrapper"
+external ext_abi_tag_attr_get_tags_size :
+  cxcursor -> int = "clang_ext_AbiTagAttr_getTags_Size_wrapper"
+external ext_cudalaunch_bounds_attr_get_max_threads :
+  cxcursor -> cxcursor =
+    "clang_ext_CUDALaunchBoundsAttr_getMaxThreads_wrapper"
+external ext_arm_mve_alias_attr_get_builtin_name :
+  cxcursor -> string = "clang_ext_ArmMveAliasAttr_getBuiltinName_wrapper"
+external ext_web_assembly_import_module_attr_get_import_module :
+  cxcursor -> string =
+    "clang_ext_WebAssemblyImportModuleAttr_getImportModule_wrapper"
+external ext_no_sanitize_attr_get_sanitizers_size :
+  cxcursor -> int = "clang_ext_NoSanitizeAttr_getSanitizers_Size_wrapper"
+external ext_callback_attr_get_encoding_size :
+  cxcursor -> int = "clang_ext_CallbackAttr_getEncoding_Size_wrapper"
+external ext_attrs_get_xdim :
+  cxcursor -> int = "clang_ext_Attrs_getXDim_wrapper"
+external ext_attrs_get_aliasee :
+  cxcursor -> string = "clang_ext_Attrs_getAliasee_wrapper"
+external ext_attrs_get_handle_type :
+  cxcursor -> string = "clang_ext_Attrs_getHandleType_wrapper"
+external ext_web_assembly_import_module_attr_get_import_module_length :
+  cxcursor -> int =
+    "clang_ext_WebAssemblyImportModuleAttr_getImportModuleLength_wrapper"
+external ext_ompdeclare_simd_decl_attr_get_linears :
+  cxcursor -> (cxcursor -> unit) -> unit =
+    "clang_ext_OMPDeclareSimdDeclAttr_getLinears_wrapper"
+external ext_availability_attr_get_deprecated :
+  cxcursor -> clang_ext_versiontuple =
+    "clang_ext_AvailabilityAttr_getDeprecated_wrapper"
+external ext_web_assembly_export_name_attr_get_export_name :
+  cxcursor -> string =
+    "clang_ext_WebAssemblyExportNameAttr_getExportName_wrapper"
+external ext_argument_with_type_tag_attr_get_is_pointer :
+  cxcursor -> bool = "clang_ext_ArgumentWithTypeTagAttr_getIsPointer_wrapper"
+external ext_uuid_attr_get_guid_length :
+  cxcursor -> int = "clang_ext_UuidAttr_getGuidLength_wrapper"
+external ext_ompdeclare_simd_decl_attr_get_aligneds_size :
+  cxcursor -> int =
+    "clang_ext_OMPDeclareSimdDeclAttr_getAligneds_Size_wrapper"
+external ext_attrs_get_message_length :
+  cxcursor -> int = "clang_ext_Attrs_getMessageLength_wrapper"
+type clang_ext_pcsattr_pcstype =
+  | AAPCS 
+  | AAPCS_VFP [@@deriving refl]
+external ext_pcs_attr_get_pcs :
+  cxcursor -> clang_ext_pcsattr_pcstype = "clang_ext_PcsAttr_getPCS_wrapper"
+external ext_callback_attr_get_encoding :
+  cxcursor -> (int -> unit) -> unit =
+    "clang_ext_CallbackAttr_getEncoding_wrapper"
+external ext_attrs_get_argument_kind :
+  cxcursor -> string = "clang_ext_Attrs_getArgumentKind_wrapper"
+external ext_availability_attr_get_unavailable :
+  cxcursor -> bool = "clang_ext_AvailabilityAttr_getUnavailable_wrapper"
+external ext_ompallocate_decl_attr_get_allocator :
+  cxcursor -> cxcursor = "clang_ext_OMPAllocateDeclAttr_getAllocator_wrapper"
+external ext_annotate_attr_get_annotation :
+  cxcursor -> string = "clang_ext_AnnotateAttr_getAnnotation_wrapper"
+external ext_ompdeclare_variant_attr_get_variant_func_ref :
+  cxcursor -> cxcursor =
+    "clang_ext_OMPDeclareVariantAttr_getVariantFuncRef_wrapper"
+external ext_no_builtin_attr_get_builtin_names_size :
+  cxcursor -> int = "clang_ext_NoBuiltinAttr_getBuiltinNames_Size_wrapper"
+external ext_attrs_get_replacement :
+  cxcursor -> string = "clang_ext_Attrs_getReplacement_wrapper"
+external ext_amdgpunum_sgprattr_get_num_sgpr :
+  cxcursor -> int = "clang_ext_AMDGPUNumSGPRAttr_getNumSGPR_wrapper"
+external ext_obj_cbridge_related_attr_get_instance_method :
+  cxcursor -> string =
+    "clang_ext_ObjCBridgeRelatedAttr_getInstanceMethod_wrapper"
+external ext_ompdeclare_simd_decl_attr_get_simdlen :
+  cxcursor -> cxcursor =
+    "clang_ext_OMPDeclareSimdDeclAttr_getSimdlen_wrapper"
+external ext_target_attr_get_features_str_length :
+  cxcursor -> int = "clang_ext_TargetAttr_getFeaturesStrLength_wrapper"
+external ext_aligned_attr_get_alignment_expr :
+  cxcursor -> cxcursor = "clang_ext_AlignedAttr_getAlignmentExpr_wrapper"
+external ext_ompdeclare_simd_decl_attr_get_steps :
+  cxcursor -> (cxcursor -> unit) -> unit =
+    "clang_ext_OMPDeclareSimdDeclAttr_getSteps_wrapper"
+external ext_tlsmodel_attr_get_model :
+  cxcursor -> string = "clang_ext_TLSModelAttr_getModel_wrapper"
+external ext_ompdeclare_simd_decl_attr_get_modifiers :
+  cxcursor -> (int -> unit) -> unit =
+    "clang_ext_OMPDeclareSimdDeclAttr_getModifiers_wrapper"
+external ext_format_attr_get_first_arg :
+  cxcursor -> int = "clang_ext_FormatAttr_getFirstArg_wrapper"
+external ext_amdgpunum_vgprattr_get_num_vgpr :
+  cxcursor -> int = "clang_ext_AMDGPUNumVGPRAttr_getNumVGPR_wrapper"
+type clang_ext_mipsinterruptattr_interrupttype =
+  | Sw0 
+  | Sw1 
+  | Hw0 
+  | Hw1 
+  | Hw2 
+  | Hw3 
+  | Hw4 
+  | Hw5 
+  | Eic [@@deriving refl]
+external ext_mips_interrupt_attr_get_interrupt :
+  cxcursor -> clang_ext_mipsinterruptattr_interrupttype =
+    "clang_ext_MipsInterruptAttr_getInterrupt_wrapper"
+type clang_ext_arminterruptattr_interrupttype =
+  | IRQ 
+  | FIQ 
+  | SWI 
+  | ABORT 
+  | UNDEF 
+  | Generic [@@deriving refl]
+external ext_arminterrupt_attr_get_interrupt :
+  cxcursor -> clang_ext_arminterruptattr_interrupttype =
+    "clang_ext_ARMInterruptAttr_getInterrupt_wrapper"
+type clang_ext_riscvinterruptattr_interrupttype =
+  | User 
+  | Supervisor 
+  | Machine [@@deriving refl]
+external ext_riscvinterrupt_attr_get_interrupt :
+  cxcursor -> clang_ext_riscvinterruptattr_interrupttype =
+    "clang_ext_RISCVInterruptAttr_getInterrupt_wrapper"
+external ext_attrs_get_min :
+  cxcursor -> cxcursor = "clang_ext_Attrs_getMin_wrapper"
+type clang_ext_enumextensibilityattr_kind =
+  | Closed 
+  | Open [@@deriving refl]
+external ext_enum_extensibility_attr_get_extensibility :
+  cxcursor -> clang_ext_enumextensibilityattr_kind =
+    "clang_ext_EnumExtensibilityAttr_getExtensibility_wrapper"
+external ext_alloc_align_attr_get_param_index :
+  cxcursor -> int = "clang_ext_AllocAlignAttr_getParamIndex_wrapper"
 external ext_availability_attr_get_introduced :
   cxcursor -> clang_ext_versiontuple =
     "clang_ext_AvailabilityAttr_getIntroduced_wrapper"
@@ -3116,83 +3345,45 @@ external ext_max_field_alignment_attr_get_alignment :
   cxcursor -> int = "clang_ext_MaxFieldAlignmentAttr_getAlignment_wrapper"
 external ext_attrs_get_alignment :
   cxcursor -> cxcursor = "clang_ext_Attrs_getAlignment_wrapper"
-external ext_suppress_attr_get_diagnostic_identifiers :
-  cxcursor -> (string -> unit) -> unit =
-    "clang_ext_SuppressAttr_getDiagnosticIdentifiers_wrapper"
-external ext_attrs_get_deref_type :
-  cxcursor -> clang_ext_typeloc = "clang_ext_Attrs_getDerefType_wrapper"
 external ext_address_space_attr_get_address_space :
   cxcursor -> int = "clang_ext_AddressSpaceAttr_getAddressSpace_wrapper"
 external ext_mode_attr_get_mode :
   cxcursor -> string = "clang_ext_ModeAttr_getMode_wrapper"
-external ext_type_tag_for_datatype_attr_get_matching_ctype :
-  cxcursor -> clang_ext_typeloc =
-    "clang_ext_TypeTagForDatatypeAttr_getMatchingCType_wrapper"
 external ext_attrs_get_arg :
   cxcursor -> cxcursor = "clang_ext_Attrs_getArg_wrapper"
-external ext_annotate_attr_get_annotation_length :
-  cxcursor -> int = "clang_ext_AnnotateAttr_getAnnotationLength_wrapper"
 external ext_attrs_get_cpus :
   cxcursor -> (string -> unit) -> unit = "clang_ext_Attrs_getCpus_wrapper"
-external ext_ompdeclare_variant_attr_get_device_kinds :
-  cxcursor -> (string -> unit) -> unit =
-    "clang_ext_OMPDeclareVariantAttr_getDeviceKinds_wrapper"
 external ext_open_clintel_reqd_sub_group_size_attr_get_sub_group_size :
   cxcursor -> int =
     "clang_ext_OpenCLIntelReqdSubGroupSizeAttr_getSubGroupSize_wrapper"
-external ext_layout_version_attr_get_version :
-  cxcursor -> int = "clang_ext_LayoutVersionAttr_getVersion_wrapper"
 external ext_argument_with_type_tag_attr_get_argument_idx :
   cxcursor -> int =
     "clang_ext_ArgumentWithTypeTagAttr_getArgumentIdx_wrapper"
-external ext_sentinel_attr_get_null_pos :
-  cxcursor -> int = "clang_ext_SentinelAttr_getNullPos_wrapper"
 external ext_ompdeclare_variant_attr_get_scores :
   cxcursor -> (cxcursor -> unit) -> unit =
     "clang_ext_OMPDeclareVariantAttr_getScores_wrapper"
 external ext_availability_attr_get_strict :
   cxcursor -> bool = "clang_ext_AvailabilityAttr_getStrict_wrapper"
-external ext_attrs_get_args_size :
-  cxcursor -> int = "clang_ext_Attrs_getArgs_Size_wrapper"
+type clang_ext_cfguardattr_guardarg =
+  | Nocf [@@deriving refl]
+external ext_cfguard_attr_get_guard :
+  cxcursor -> clang_ext_cfguardattr_guardarg =
+    "clang_ext_CFGuardAttr_getGuard_wrapper"
 external ext_ownership_attr_get_module :
   cxcursor -> string = "clang_ext_OwnershipAttr_getModule_wrapper"
-external ext_ompdeclare_variant_attr_get_ctx_selectors_size :
-  cxcursor -> int =
-    "clang_ext_OMPDeclareVariantAttr_getCtxSelectors_Size_wrapper"
 external ext_min_vector_width_attr_get_vector_width :
   cxcursor -> int = "clang_ext_MinVectorWidthAttr_getVectorWidth_wrapper"
-external ext_cudalaunch_bounds_attr_get_min_blocks :
-  cxcursor -> cxcursor =
-    "clang_ext_CUDALaunchBoundsAttr_getMinBlocks_wrapper"
 external ext_type_tag_for_datatype_attr_get_layout_compatible :
   cxcursor -> bool =
     "clang_ext_TypeTagForDatatypeAttr_getLayoutCompatible_wrapper"
-external ext_ompdeclare_variant_attr_get_impl_vendors_size :
-  cxcursor -> int =
-    "clang_ext_OMPDeclareVariantAttr_getImplVendors_Size_wrapper"
 external ext_init_seg_attr_get_section_length :
   cxcursor -> int = "clang_ext_InitSegAttr_getSectionLength_wrapper"
-external ext_external_source_symbol_attr_get_defined_in_length :
-  cxcursor -> int =
-    "clang_ext_ExternalSourceSymbolAttr_getDefinedInLength_wrapper"
 external ext_vec_type_hint_attr_get_type_hint :
   cxcursor -> clang_ext_typeloc =
     "clang_ext_VecTypeHintAttr_getTypeHint_wrapper"
-external ext_ompcapture_kind_attr_get_capture_kind :
-  cxcursor -> int = "clang_ext_OMPCaptureKindAttr_getCaptureKind_wrapper"
-external ext_format_attr_get_type :
-  cxcursor -> string = "clang_ext_FormatAttr_getType_wrapper"
-external ext_pass_object_size_attr_get_type :
-  cxcursor -> int = "clang_ext_PassObjectSizeAttr_getType_wrapper"
-external ext_asm_label_attr_get_label :
-  cxcursor -> string = "clang_ext_AsmLabelAttr_getLabel_wrapper"
 external ext_ompdeclare_variant_attr_get_ctx_selector_sets_size :
   cxcursor -> int =
     "clang_ext_OMPDeclareVariantAttr_getCtxSelectorSets_Size_wrapper"
-external ext_availability_attr_get_platform :
-  cxcursor -> string = "clang_ext_AvailabilityAttr_getPlatform_wrapper"
-external ext_attrs_get_max :
-  cxcursor -> cxcursor = "clang_ext_Attrs_getMax_wrapper"
 external ext_ompdeclare_variant_attr_get_ctx_selector_sets :
   cxcursor -> (int -> unit) -> unit =
     "clang_ext_OMPDeclareVariantAttr_getCtxSelectorSets_wrapper"
@@ -3202,159 +3393,173 @@ external ext_external_source_symbol_attr_get_language_length :
 external ext_obj_cruntime_name_attr_get_metadata_name_length :
   cxcursor -> int =
     "clang_ext_ObjCRuntimeNameAttr_getMetadataNameLength_wrapper"
-external ext_target_attr_get_features_str :
-  cxcursor -> string = "clang_ext_TargetAttr_getFeaturesStr_wrapper"
-external ext_init_priority_attr_get_priority :
-  cxcursor -> int = "clang_ext_InitPriorityAttr_getPriority_wrapper"
-external ext_attrs_get_priority :
-  cxcursor -> int = "clang_ext_Attrs_getPriority_wrapper"
+type clang_ext_consumableattr_consumedstate =
+  | Unknown 
+  | Consumed 
+  | Unconsumed [@@deriving refl]
+external ext_consumable_attr_get_default_state :
+  cxcursor -> clang_ext_consumableattr_consumedstate =
+    "clang_ext_ConsumableAttr_getDefaultState_wrapper"
 external ext_attrs_get_bridged_type :
   cxcursor -> string = "clang_ext_Attrs_getBridgedType_wrapper"
-external ext_attrs_get_ydim :
-  cxcursor -> int = "clang_ext_Attrs_getYDim_wrapper"
+external ext_ompdeclare_simd_decl_attr_get_modifiers_size :
+  cxcursor -> int =
+    "clang_ext_OMPDeclareSimdDeclAttr_getModifiers_Size_wrapper"
+type clang_ext_settypestateattr_consumedstate =
+  | Unknown 
+  | Consumed 
+  | Unconsumed [@@deriving refl]
+external ext_set_typestate_attr_get_new_state :
+  cxcursor -> clang_ext_settypestateattr_consumedstate =
+    "clang_ext_SetTypestateAttr_getNewState_wrapper"
 external ext_obj_cbridge_related_attr_get_class_method :
   cxcursor -> string =
     "clang_ext_ObjCBridgeRelatedAttr_getClassMethod_wrapper"
 external ext_ompreferenced_var_attr_get_ref :
   cxcursor -> cxcursor = "clang_ext_OMPReferencedVarAttr_getRef_wrapper"
-external ext_cleanup_attr_get_function_decl :
-  cxcursor -> clang_ext_declarationname =
-    "clang_ext_CleanupAttr_getFunctionDecl_wrapper"
-external ext_availability_attr_get_obsoleted :
-  cxcursor -> clang_ext_versiontuple =
-    "clang_ext_AvailabilityAttr_getObsoleted_wrapper"
 external ext_alloc_size_attr_get_elem_size_param :
   cxcursor -> int = "clang_ext_AllocSizeAttr_getElemSizeParam_wrapper"
+type clang_ext_visibilityattr_visibilitytype =
+  | Default 
+  | Hidden 
+  | Protected [@@deriving refl]
+external ext_visibility_attr_get_visibility :
+  cxcursor -> clang_ext_visibilityattr_visibilitytype =
+    "clang_ext_VisibilityAttr_getVisibility_wrapper"
+type clang_ext_typevisibilityattr_visibilitytype =
+  | Default 
+  | Hidden 
+  | Protected [@@deriving refl]
+external ext_type_visibility_attr_get_visibility :
+  cxcursor -> clang_ext_typevisibilityattr_visibilitytype =
+    "clang_ext_TypeVisibilityAttr_getVisibility_wrapper"
 external ext_external_source_symbol_attr_get_language :
   cxcursor -> string =
     "clang_ext_ExternalSourceSymbolAttr_getLanguage_wrapper"
 external ext_attrs_get_replacement_length :
   cxcursor -> int = "clang_ext_Attrs_getReplacementLength_wrapper"
-external ext_init_seg_attr_get_section :
-  cxcursor -> string = "clang_ext_InitSegAttr_getSection_wrapper"
-external ext_external_source_symbol_attr_get_defined_in :
-  cxcursor -> string =
-    "clang_ext_ExternalSourceSymbolAttr_getDefinedIn_wrapper"
-external ext_alloc_size_attr_get_num_elems_param :
-  cxcursor -> int = "clang_ext_AllocSizeAttr_getNumElemsParam_wrapper"
+external ext_ompdeclare_simd_decl_attr_get_alignments_size :
+  cxcursor -> int =
+    "clang_ext_OMPDeclareSimdDeclAttr_getAlignments_Size_wrapper"
+external ext_ompdeclare_simd_decl_attr_get_linears_size :
+  cxcursor -> int =
+    "clang_ext_OMPDeclareSimdDeclAttr_getLinears_Size_wrapper"
 external ext_xray_log_args_attr_get_argument_count :
   cxcursor -> int = "clang_ext_XRayLogArgsAttr_getArgumentCount_wrapper"
-external ext_ompdeclare_variant_attr_get_ctx_selectors :
-  cxcursor -> (int -> unit) -> unit =
-    "clang_ext_OMPDeclareVariantAttr_getCtxSelectors_wrapper"
-external ext_ifunc_attr_get_resolver_length :
-  cxcursor -> int = "clang_ext_IFuncAttr_getResolverLength_wrapper"
 external ext_attrs_get_message :
   cxcursor -> string = "clang_ext_Attrs_getMessage_wrapper"
-external ext_asm_label_attr_get_label_length :
-  cxcursor -> int = "clang_ext_AsmLabelAttr_getLabelLength_wrapper"
 external ext_argument_with_type_tag_attr_get_type_tag_idx :
   cxcursor -> int = "clang_ext_ArgumentWithTypeTagAttr_getTypeTagIdx_wrapper"
-external ext_abi_tag_attr_get_tags_size :
-  cxcursor -> int = "clang_ext_AbiTagAttr_getTags_Size_wrapper"
 external ext_uuid_attr_get_guid :
   cxcursor -> string = "clang_ext_UuidAttr_getGuid_wrapper"
-external ext_cudalaunch_bounds_attr_get_max_threads :
-  cxcursor -> cxcursor =
-    "clang_ext_CUDALaunchBoundsAttr_getMaxThreads_wrapper"
-external ext_arm_mve_alias_attr_get_builtin_name :
-  cxcursor -> string = "clang_ext_ArmMveAliasAttr_getBuiltinName_wrapper"
-external ext_web_assembly_import_module_attr_get_import_module :
-  cxcursor -> string =
-    "clang_ext_WebAssemblyImportModuleAttr_getImportModule_wrapper"
 external ext_attrs_get_zdim :
   cxcursor -> int = "clang_ext_Attrs_getZDim_wrapper"
-external ext_no_sanitize_attr_get_sanitizers_size :
-  cxcursor -> int = "clang_ext_NoSanitizeAttr_getSanitizers_Size_wrapper"
-external ext_callback_attr_get_encoding_size :
-  cxcursor -> int = "clang_ext_CallbackAttr_getEncoding_Size_wrapper"
 external ext_attrs_get_handle_type_length :
   cxcursor -> int = "clang_ext_Attrs_getHandleTypeLength_wrapper"
-external ext_attrs_get_xdim :
-  cxcursor -> int = "clang_ext_Attrs_getXDim_wrapper"
+external ext_ompdeclare_simd_decl_attr_get_uniforms :
+  cxcursor -> (cxcursor -> unit) -> unit =
+    "clang_ext_OMPDeclareSimdDeclAttr_getUniforms_wrapper"
+type clang_ext_loophintattr_optiontype =
+  | Vectorize 
+  | VectorizeWidth 
+  | Interleave 
+  | InterleaveCount 
+  | Unroll 
+  | UnrollCount 
+  | UnrollAndJam 
+  | UnrollAndJamCount 
+  | PipelineDisabled 
+  | PipelineInitiationInterval 
+  | Distribute 
+  | VectorizePredicate [@@deriving refl]
+external ext_loop_hint_attr_get_option :
+  cxcursor -> clang_ext_loophintattr_optiontype =
+    "clang_ext_LoopHintAttr_getOption_wrapper"
 external ext_obj_cbridge_related_attr_get_related_class :
   cxcursor -> string =
     "clang_ext_ObjCBridgeRelatedAttr_getRelatedClass_wrapper"
-external ext_attrs_get_aliasee :
-  cxcursor -> string = "clang_ext_Attrs_getAliasee_wrapper"
-external ext_attrs_get_handle_type :
-  cxcursor -> string = "clang_ext_Attrs_getHandleType_wrapper"
 external ext_web_assembly_import_name_attr_get_import_name :
   cxcursor -> string =
     "clang_ext_WebAssemblyImportNameAttr_getImportName_wrapper"
-external ext_web_assembly_import_module_attr_get_import_module_length :
-  cxcursor -> int =
-    "clang_ext_WebAssemblyImportModuleAttr_getImportModuleLength_wrapper"
 external ext_ompdeclare_variant_attr_get_device_kinds_size :
   cxcursor -> int =
     "clang_ext_OMPDeclareVariantAttr_getDeviceKinds_Size_wrapper"
-external ext_availability_attr_get_deprecated :
-  cxcursor -> clang_ext_versiontuple =
-    "clang_ext_AvailabilityAttr_getDeprecated_wrapper"
 external ext_no_sanitize_attr_get_sanitizers :
   cxcursor -> (string -> unit) -> unit =
     "clang_ext_NoSanitizeAttr_getSanitizers_wrapper"
+type clang_ext_callablewhenattr_consumedstate =
+  | Unknown 
+  | Consumed 
+  | Unconsumed [@@deriving refl]
+external ext_callable_when_attr_get_callable_states :
+  cxcursor -> (clang_ext_callablewhenattr_consumedstate -> unit) -> unit =
+    "clang_ext_CallableWhenAttr_getCallableStates_wrapper"
 external ext_ompdeclare_variant_attr_get_scores_size :
   cxcursor -> int = "clang_ext_OMPDeclareVariantAttr_getScores_Size_wrapper"
+type clang_ext_ompdeclaresimddeclattr_branchstatety =
+  | Undefined 
+  | Inbranch 
+  | Notinbranch [@@deriving refl]
+external ext_ompdeclare_simd_decl_attr_get_branch_state :
+  cxcursor -> clang_ext_ompdeclaresimddeclattr_branchstatety =
+    "clang_ext_OMPDeclareSimdDeclAttr_getBranchState_wrapper"
 external ext_asm_label_attr_get_is_literal_label :
   cxcursor -> bool = "clang_ext_AsmLabelAttr_getIsLiteralLabel_wrapper"
-external ext_web_assembly_export_name_attr_get_export_name :
-  cxcursor -> string =
-    "clang_ext_WebAssemblyExportNameAttr_getExportName_wrapper"
 external ext_format_arg_attr_get_format_idx :
   cxcursor -> int = "clang_ext_FormatArgAttr_getFormatIdx_wrapper"
 external ext_format_attr_get_format_idx :
   cxcursor -> int = "clang_ext_FormatAttr_getFormatIdx_wrapper"
-external ext_argument_with_type_tag_attr_get_is_pointer :
-  cxcursor -> bool = "clang_ext_ArgumentWithTypeTagAttr_getIsPointer_wrapper"
 external ext_type_tag_for_datatype_attr_get_must_be_null :
   cxcursor -> bool = "clang_ext_TypeTagForDatatypeAttr_getMustBeNull_wrapper"
+type clang_ext_ompallocatedeclattr_allocatortypety =
+  | OMPDefaultMemAlloc 
+  | OMPLargeCapMemAlloc 
+  | OMPConstMemAlloc 
+  | OMPHighBWMemAlloc 
+  | OMPLowLatMemAlloc 
+  | OMPCGroupMemAlloc 
+  | OMPPTeamMemAlloc 
+  | OMPThreadMemAlloc 
+  | OMPUserDefinedMemAlloc [@@deriving refl]
+external ext_ompallocate_decl_attr_get_allocator_type :
+  cxcursor -> clang_ext_ompallocatedeclattr_allocatortypety =
+    "clang_ext_OMPAllocateDeclAttr_getAllocatorType_wrapper"
 external ext_attrs_get_name_length :
   cxcursor -> int = "clang_ext_Attrs_getNameLength_wrapper"
-external ext_uuid_attr_get_guid_length :
-  cxcursor -> int = "clang_ext_UuidAttr_getGuidLength_wrapper"
 external ext_attrs_get_name :
   cxcursor -> string = "clang_ext_Attrs_getName_wrapper"
 external ext_suppress_attr_get_diagnostic_identifiers_size :
   cxcursor -> int =
     "clang_ext_SuppressAttr_getDiagnosticIdentifiers_Size_wrapper"
-external ext_attrs_get_message_length :
-  cxcursor -> int = "clang_ext_Attrs_getMessageLength_wrapper"
+external ext_ompdeclare_simd_decl_attr_get_steps_size :
+  cxcursor -> int = "clang_ext_OMPDeclareSimdDeclAttr_getSteps_Size_wrapper"
 external ext_web_assembly_export_name_attr_get_export_name_length :
   cxcursor -> int =
     "clang_ext_WebAssemblyExportNameAttr_getExportNameLength_wrapper"
-external ext_callback_attr_get_encoding :
-  cxcursor -> (int -> unit) -> unit =
-    "clang_ext_CallbackAttr_getEncoding_wrapper"
-external ext_attrs_get_argument_kind :
-  cxcursor -> string = "clang_ext_Attrs_getArgumentKind_wrapper"
+external ext_ompdeclare_simd_decl_attr_get_alignments :
+  cxcursor -> (cxcursor -> unit) -> unit =
+    "clang_ext_OMPDeclareSimdDeclAttr_getAlignments_wrapper"
 external ext_msvtor_disp_attr_get_vdm :
   cxcursor -> int = "clang_ext_MSVtorDispAttr_getVdm_wrapper"
-external ext_availability_attr_get_unavailable :
-  cxcursor -> bool = "clang_ext_AvailabilityAttr_getUnavailable_wrapper"
 external ext_attrs_get_cond :
   cxcursor -> cxcursor = "clang_ext_Attrs_getCond_wrapper"
 external ext_iboutlet_collection_attr_get_interface :
   cxcursor -> clang_ext_typeloc =
     "clang_ext_IBOutletCollectionAttr_getInterface_wrapper"
-external ext_annotate_attr_get_annotation :
-  cxcursor -> string = "clang_ext_AnnotateAttr_getAnnotation_wrapper"
-external ext_ompdeclare_variant_attr_get_variant_func_ref :
-  cxcursor -> cxcursor =
-    "clang_ext_OMPDeclareVariantAttr_getVariantFuncRef_wrapper"
-external ext_no_builtin_attr_get_builtin_names_size :
-  cxcursor -> int = "clang_ext_NoBuiltinAttr_getBuiltinNames_Size_wrapper"
+type clang_ext_objcmethodfamilyattr_familykind =
+  | None 
+  | Alloc 
+  | Copy 
+  | Init 
+  | MutableCopy 
+  | New [@@deriving refl]
+external ext_obj_cmethod_family_attr_get_family :
+  cxcursor -> clang_ext_objcmethodfamilyattr_familykind =
+    "clang_ext_ObjCMethodFamilyAttr_getFamily_wrapper"
 external ext_attrs_get_kind :
   cxcursor -> string = "clang_ext_Attrs_getKind_wrapper"
-external ext_attrs_get_replacement :
-  cxcursor -> string = "clang_ext_Attrs_getReplacement_wrapper"
 external ext_patchable_function_entry_attr_get_count :
   cxcursor -> int = "clang_ext_PatchableFunctionEntryAttr_getCount_wrapper"
-external ext_amdgpunum_sgprattr_get_num_sgpr :
-  cxcursor -> int = "clang_ext_AMDGPUNumSGPRAttr_getNumSGPR_wrapper"
-external ext_obj_cbridge_related_attr_get_instance_method :
-  cxcursor -> string =
-    "clang_ext_ObjCBridgeRelatedAttr_getInstanceMethod_wrapper"
 external ext_abi_tag_attr_get_tags :
   cxcursor -> (string -> unit) -> unit =
     "clang_ext_AbiTagAttr_getTags_wrapper"
@@ -3365,10 +3570,6 @@ external ext_open_clunroll_hint_attr_get_unroll_hint :
 external ext_no_builtin_attr_get_builtin_names :
   cxcursor -> (string -> unit) -> unit =
     "clang_ext_NoBuiltinAttr_getBuiltinNames_wrapper"
-external ext_target_attr_get_features_str_length :
-  cxcursor -> int = "clang_ext_TargetAttr_getFeaturesStrLength_wrapper"
-external ext_aligned_attr_get_alignment_expr :
-  cxcursor -> cxcursor = "clang_ext_AlignedAttr_getAlignmentExpr_wrapper"
 external ext_msinheritance_attr_get_best_case :
   cxcursor -> bool = "clang_ext_MSInheritanceAttr_getBestCase_wrapper"
 external ext_non_null_attr_get_args :

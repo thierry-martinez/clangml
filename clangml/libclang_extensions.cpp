@@ -291,9 +291,9 @@ getFunctionDecl(CXCursor cursor)
 
 [[maybe_unused]]
 static const clang::CXXMethodDecl *
-getMethodDecl(CXCursor C)
+getMethodDecl(CXCursor cursor)
 {
-  if (auto *FD = getFunctionDecl(C)) {
+  if (auto *FD = getFunctionDecl(cursor)) {
     if (auto *Method = llvm::dyn_cast_or_null<clang::CXXMethodDecl>(FD)) {
       return Method;
     }
@@ -302,9 +302,9 @@ getMethodDecl(CXCursor C)
 }
 
 static const clang::CXXConstructorDecl *
-getConstructorDecl(CXCursor C)
+getConstructorDecl(CXCursor cursor)
 {
-  if (auto *FD = getFunctionDecl(C)) {
+  if (auto *FD = getFunctionDecl(cursor)) {
     const clang::CXXConstructorDecl *Constructor =
       llvm::dyn_cast_or_null<clang::CXXConstructorDecl>(FD);
     return Constructor;
