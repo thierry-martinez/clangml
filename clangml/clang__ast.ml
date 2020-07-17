@@ -3552,7 +3552,7 @@ let () =
 
 let example = {| int var1 asm("altvar") = 1; |}
 
-[%%meta if Clangml_config.version.major >= 5 then [%stri
+[%%meta if Clangml_config.version.major >= 10 then [%stri
 let () =
   check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
   [%pattern?
@@ -3639,9 +3639,11 @@ let () =
                   kind = Shl;
                   rhs = { desc = IntegerLiteral (Int 1) }}}}}];
           complete_definition = true;
-          attributes = [
+          attributes = ([
             { desc = EnumExtensibility Closed };
-            { desc = Other FlagEnum }] }};
+            { desc = Other FlagEnum }] | [
+            { desc = Other FlagEnum };
+            { desc = EnumExtensibility Closed }]) }};
       { desc = EnumDecl {
           name = "OpenFlagEnum";
           constants = [
@@ -3656,9 +3658,11 @@ let () =
                   kind = Shl;
                   rhs = { desc = IntegerLiteral (Int 1) }}}}}];
           complete_definition = true;
-          attributes = [
+          attributes = ([
             { desc = EnumExtensibility Open };
-            { desc = Other FlagEnum }] }}]]]
+            { desc = Other FlagEnum }] | [
+            { desc = Other FlagEnum };
+            { desc = EnumExtensibility Open }]) }}]]]
 else Metapp.Stri.of_list []]
     ]}*)
   | RecordDecl of record_decl
