@@ -3605,6 +3605,7 @@ enum __attribute__((enum_extensibility(open),flag_enum)) OpenFlagEnum {
 };
 |}
 
+[%%meta if Clangml_config.version.major >= 5 then [%stri
 let () =
   check_pattern quote_decl_list parse_declaration_list example
   [%pattern?
@@ -3655,7 +3656,8 @@ let () =
           complete_definition = true;
           attributes = [
             { desc = EnumExtensibility Open };
-            { desc = Other FlagEnum }] }}]]
+            { desc = Other FlagEnum }] }}]]]
+else Metapp.Stri.of_list []]
     ]}*)
   | RecordDecl of record_decl
 (** Record declaration ([struct], [union] or [class]).
