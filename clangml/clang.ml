@@ -206,6 +206,10 @@ module Ast = struct
   let delete ?(global_delete = false) ?(array_form = false) argument =
     Delete { global_delete; array_form; argument }
 
+  let enum_decl ?(complete_definition = true) ?(attributes = []) name
+      constants =
+    EnumDecl { name; constants; complete_definition; attributes }
+
   let cursor_of_decoration decoration =
     match decoration with
     | Cursor cursor -> cursor
@@ -1139,12 +1143,13 @@ module Ast = struct
     and enum_decl_of_cxcursor cursor =
       let name = get_cursor_spelling cursor in
       let constants =
-        list_of_children cursor |> List.map @@ fun cursor ->
+        list_of_children cursor |> List.filter_map @@ fun cursor ->
           match get_cursor_kind cursor with
-          | EnumConstantDecl -> enum_constant_of_cxcursor cursor
-          | _ -> raise Invalid_structure in
+          | EnumConstantDecl -> Some (enum_constant_of_cxcursor cursor)
+          | _ -> None in
       let complete_definition = ext_tag_decl_is_complete_definition cursor in
-      EnumDecl { name; constants; complete_definition }
+      let attributes = attributes_of_decl cursor in
+      EnumDecl { name; constants; complete_definition; attributes }
 
     and enum_constant_of_cxcursor cursor =
       let desc () =
