@@ -250,16 +250,6 @@ include Common
     can be of the form {!constructor:Custom}[ custom_decoration],
     where the inlined record [custom_decoration] may optionnally
     carry a location, or a type, or both.
-
-    To break type recursion between {!type:qual_type} and {!type:decoration},
-    open types ['qual_type ]{!type:open_decoration} and
-    [('a, 'qual_type) ]{!type:open_node} are defined first, and then
-    {!type:node} and {!type:decoration} are defined as aliases
-    with ['qual_type = ]{!type:qual_type}.
-
-    Breaking recursion allows [visitors] to derive polymorphic
-    visitors for [open_node] while deriving monomorphic visitors
-    for the concrete AST nodes themselves.
 *)
 
 module Custom (Node : NodeS) = struct
