@@ -4,6 +4,9 @@
   `Hashtbl.HashedType with type t = cxcursor`
   and `Clang.Cursor.Hashtbl`.
 
+- New function `Clang.Decl.annotate_access_specifier`, to enumerate
+  class fields with their access specifiers.
+
 - Fix segmentation fault when parsing the redeclaration of a function decl
   without prototype when the previous declarations has some parameters.
   (reported by Kihong Heo)

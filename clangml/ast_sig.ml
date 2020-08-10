@@ -368,6 +368,18 @@ module Decl : sig
   val get_canonical : t -> cxcursor
   (** [get_canonical d] retrieves the canonical cursor declaring an entity. *)
 
+  type annotated_field = {
+      specifier : Ast.cxx_access_specifier;
+      decl : Ast.decl;
+    }
+
+  val annotate_access_specifier :
+      Ast.cxx_access_specifier -> Ast.decl list ->
+        annotated_field list
+  (** [annotate_access_specifier default_specifier fields] returns the
+      elements of [fields], except [AccessSpecifier] nodes, annotated
+      with the current access specifier, starting with [default_specifier]. *)
+
   include S with type t := t
 end
 

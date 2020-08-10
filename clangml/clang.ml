@@ -2328,6 +2328,22 @@ module Decl = [%meta node_module [%str
 
   let get_canonical decl =
     decl |> Ast.cursor_of_node |> get_canonical_cursor
+
+  type annotated_field = {
+      specifier : Ast.cxx_access_specifier;
+      decl : Ast.decl;
+    }
+
+  let annotate_access_specifier
+      (default_specifier : Ast.cxx_access_specifier)
+      (fields : Ast.decl list) : annotated_field list =
+    let annotate_field (specifier, rev) (decl : Ast.decl) =
+      match Node.force decl.desc with
+      | AccessSpecifier specifier -> (specifier, rev)
+      | _ -> (specifier, { specifier; decl } :: rev) in
+    let _specifier, rev =
+      List.fold_left annotate_field (default_specifier, []) fields in
+    List.rev rev
 ]]
 
 module Parameter = [%meta node_module [%str
