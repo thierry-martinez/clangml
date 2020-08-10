@@ -1,5 +1,9 @@
 # Next version
 
+- New module `Clang.Cursor`, exposing the signature
+  `Hashtbl.HashedType with type t = cxcursor`
+  and `Clang.Cursor.Hashtbl`.
+
 - Fix segmentation fault when parsing the redeclaration of a function decl
   without prototype when the previous declarations has some parameters.
   (reported by Kihong Heo)

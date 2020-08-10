@@ -36,6 +36,20 @@ end
 
 include Bindings
 
+module Cursor = struct
+  module Self = struct
+    type t = cxcursor
+
+    let equal = equal_cursors
+
+    let hash = hash_cursor
+  end
+
+  include Self
+
+  module Hashtbl = Hashtbl.Make (Self)
+end
+
 module Types = Clang__types
 
 include Types

@@ -16,6 +16,12 @@ include module type of struct
   include Bindings
 end
 
+module Cursor : sig
+  include Hashtbl.HashedType with type t = cxcursor
+
+  module Hashtbl : Hashtbl.S with type key = cxcursor
+end
+
 module Types = Clang__types
 
 include module type of struct
