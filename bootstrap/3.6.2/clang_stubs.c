@@ -7457,6 +7457,20 @@ clang_ext_FunctionDecl_isConstexpr_wrapper(value c_ocaml)
 }
 
 CAMLprim value
+clang_ext_FunctionDecl_hasWrittenPrototype_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  _Bool result = clang_ext_FunctionDecl_hasWrittenPrototype(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
 clang_ext_LinkageSpecDecl_getLanguageIDs_wrapper(value C_ocaml)
 {
   CAMLparam1(C_ocaml);

@@ -2399,6 +2399,8 @@ external ext_function_decl_get_param_decl :
   cxcursor -> int -> cxcursor = "clang_ext_FunctionDecl_getParamDecl_wrapper"
 external ext_function_decl_is_constexpr :
   cxcursor -> bool = "clang_ext_FunctionDecl_isConstexpr_wrapper"
+external ext_function_decl_has_written_prototype :
+  cxcursor -> bool = "clang_ext_FunctionDecl_hasWrittenPrototype_wrapper"
 module Clang_ext_languageids :
 sig
   type t
