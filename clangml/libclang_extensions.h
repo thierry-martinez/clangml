@@ -427,6 +427,9 @@ clang_ext_FunctionDecl_getParamDecl(CXCursor C, unsigned i);
 bool
 clang_ext_FunctionDecl_isConstexpr(CXCursor c);
 
+bool
+clang_ext_FunctionDecl_hasWrittenPrototype(CXCursor);
+
 /* Adapted from DeclCXX.h:LinkageSpecDecl:LanguageIDs */
 #ifdef LLVM_VERSION_BEFORE_10_0_0
 enum clang_ext_LanguageIDs {

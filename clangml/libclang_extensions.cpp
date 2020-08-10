@@ -1439,6 +1439,15 @@ extern "C" {
     return false;
   }
 
+  bool
+  clang_ext_FunctionDecl_hasWrittenPrototype(CXCursor c)
+  {
+    if (auto *Function = getFunctionDecl(c)) {
+      return Function->hasWrittenPrototype();
+    }
+    return false;
+  }
+
   unsigned
   clang_ext_LinkageSpecDecl_getLanguageIDs(CXCursor C)
   {
@@ -3011,8 +3020,10 @@ extern "C" {
   {
     if (is_valid_decl(c.kind)) {
     if (auto d = getDeclaratorDecl(c)) {
-      if (auto t = d->getTypeSourceInfo()->getTypeLoc()) {
-        return MakeTypeLoc(t, getCursorTU(c));
+      if (auto tsi = d->getTypeSourceInfo()) {
+        if (auto t = tsi->getTypeLoc()) {
+          return MakeTypeLoc(t, getCursorTU(c));
+        }
       }
     }
     else {

@@ -1,3 +1,9 @@
+# Next version
+
+- Fix segmentation fault when parsing the redeclaration of a function decl
+  without prototype when the previous declarations has some parameters.
+  (reported by Kihong Heo)
+
 # 2020-07-15, 4.2.0
 
 - Support for Clang/LLVM 10.0.1
