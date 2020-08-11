@@ -51,8 +51,8 @@ module Ast : sig
   val function_decl : ?linkage:linkage_kind -> ?body:stmt -> ?deleted:bool ->
     ?constexpr:bool -> ?inline_specified:bool -> ?inlined:bool ->
     ?nested_name_specifier:nested_name_specifier ->
-    ?attributes:attribute list -> function_type ->
-    declaration_name -> function_decl
+    ?attributes:attribute list -> ?has_written_prototype:bool ->
+    function_type -> declaration_name -> function_decl
 
   val function_type : ?calling_conv:calling_conv -> ?parameters:parameters ->
     ?exception_spec:exception_spec -> ?ref_qualifier:cxrefqualifierkind ->

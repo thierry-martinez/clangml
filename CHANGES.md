@@ -11,6 +11,10 @@
   without prototype when the previous declarations has some parameters.
   (reported by Kihong Heo)
 
+- New field `has_written_prototype` in `function_decl` to distinguish
+  between function declarations where the prototype is actually provided
+  and declarations where the prototype is inherited.
+
 # 2020-07-15, 4.2.0
 
 - Support for Clang/LLVM 10.0.1
