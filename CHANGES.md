@@ -1,5 +1,7 @@
 # Next version
 
+- Support for Clang/LLVM 11.0.0
+
 - New module `Clang.Cursor`, exposing the signature
   `Hashtbl.HashedType with type t = cxcursor`
   and `Clang.Cursor.Hashtbl`.

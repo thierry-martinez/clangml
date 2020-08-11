@@ -1976,6 +1976,9 @@ let main cflags llvm_config prefix =
     add_type (Pcre.regexp "^clang_ext_Requirement$")
       (empty_type_interface |>
        make_destructor "clang_ext_Requirement_dispose") |>
+    add_type (Pcre.regexp "^clang_ext_OMPTraitInfo$")
+      (empty_type_interface |>
+       make_destructor "clang_ext_OMPTraitInfo_dispose") |>
     add_type (Pcre.regexp "^CXIndex$")
       (empty_type_interface |>
        make_destructor "clang_disposeIndex") |>
@@ -1986,7 +1989,7 @@ let main cflags llvm_config prefix =
     add_type (Pcre.regexp "^clang_ext_NestedNameSpecifierLoc$")
       (empty_type_interface |>
        make_destructor "clang_ext_NestedNameSpecifierLoc_dispose") |>
-    add_type (Pcre.regexp "^CXCursor$|^CXType$|^CXFile$|^CXModule$|^CXSourceRange$|^CXSourceLocation$|^CXComment$|^clang_ext_TemplateName$|^clang_ext_TemplateArgument$|^clang_ext_LambdaCapture$|^clang_ext_DeclarationName$|^clang_ext_NestedNameSpecifier$|^clang_ext_NestedNameSpecifierLoc$|^clang_ext_TypeLoc$|^clang_ext_TemplateParameterList$|^clang_ext_Requirement$")
+    add_type (Pcre.regexp "^CXCursor$|^CXType$|^CXFile$|^CXModule$|^CXSourceRange$|^CXSourceLocation$|^CXComment$|^clang_ext_TemplateName$|^clang_ext_TemplateArgument$|^clang_ext_LambdaCapture$|^clang_ext_DeclarationName$|^clang_ext_NestedNameSpecifier$|^clang_ext_NestedNameSpecifierLoc$|^clang_ext_TypeLoc$|^clang_ext_TemplateParameterList$|^clang_ext_Requirement$|^clang_ext_OMPTraitInfo$")
       (empty_type_interface |> carry_reference "CXTranslationUnit") |>
     add_type (Pcre.regexp "^CXToken$")
       (empty_type_interface |> carry_reference "tokens") |>

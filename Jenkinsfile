@@ -43,7 +43,7 @@ pipeline {
                     eval $(opam env) && \
                     mkdir build && cd build && \
                     ../src/configure \
-                        --with-llvm-config=/media/llvms/10.0.1/bin/llvm-config
+                        --with-llvm-config=/media/llvms/11.0.0/bin/llvm-config
                    '''
             }
         }

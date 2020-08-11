@@ -1,3 +1,7 @@
+module Clang_helper = Clang_helper
+
+module String_utils = String_utils
+
 let run_llvm_config llvm_config arguments =
   let command = String.concat " " (llvm_config :: arguments) in
   let output = Unix.open_process_in command in
@@ -11,20 +15,6 @@ let option_apply f s =
   | None -> s
   | Some result -> result
 
-let string_remove_prefix ~prefix s =
-  let ls = String.length s and lprefix = String.length prefix in
-  if lprefix <= ls && String.sub s 0 lprefix = prefix then
-    Some (String.sub s lprefix (ls - lprefix))
-  else
-    None
-
-let string_remove_suffix ~suffix s =
-  let ls = String.length s and lsuffix = String.length suffix in
-  if lsuffix <= ls && String.sub s (ls - lsuffix) (lsuffix) = suffix then
-    Some (String.sub s 0 (ls - lsuffix))
-  else
-    None
-
 let macos_sdk_include_path =
   "/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include/"
 
@@ -37,9 +27,9 @@ let prepare_clang_options cflags llvm_config =
         let llvm_prefix = run_llvm_config llvm_config ["--prefix"] in
         let llvm_cflags = run_llvm_config llvm_config ["--cflags"] in
         let llvm_version =
-          option_apply (string_remove_suffix ~suffix:"svn") llvm_version in
+          option_apply (String_utils.remove_suffix ~suffix:"svn") llvm_version in
         let llvm_version =
-          option_apply (string_remove_suffix ~suffix:"git") llvm_version in
+          option_apply (String_utils.remove_suffix ~suffix:"git") llvm_version in
         let equivalent_llvm_version =
           match llvm_version with
           | "3.4"

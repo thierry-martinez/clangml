@@ -171,6 +171,8 @@ and asm_compiler_extension = GCC | MS
 and opaque_cxtype = cxtype [@opaque]
 
 and opaque_type_loc = clang_ext_typeloc option [@opaque]
+
+and omp_trait_info = clang_ext_omptraitinfo [@opaque]
       [@@deriving refl]
 
 module type NodeS = sig
@@ -1982,7 +1984,8 @@ and asm_operand = {
 
 and attribute = attribute_desc node
 
-and attribute_desc = (expr, qual_type, declaration_name) Attributes.t
+and attribute_desc =
+  (expr, decl, qual_type, declaration_name, omp_trait_info) Attributes.t
 (**
    [AbiTag]: ABI tags.
 
