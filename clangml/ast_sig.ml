@@ -51,8 +51,8 @@ module Ast : sig
   val function_decl : ?linkage:linkage_kind -> ?body:stmt -> ?deleted:bool ->
     ?constexpr:bool -> ?inline_specified:bool -> ?inlined:bool ->
     ?nested_name_specifier:nested_name_specifier ->
-    ?attributes:attribute list -> function_type ->
-    declaration_name -> function_decl
+    ?attributes:attribute list -> ?has_written_prototype:bool ->
+    function_type -> declaration_name -> function_decl
 
   val function_type : ?calling_conv:calling_conv -> ?parameters:parameters ->
     ?exception_spec:exception_spec -> ?ref_qualifier:cxrefqualifierkind ->
@@ -367,6 +367,18 @@ module Decl : sig
 
   val get_canonical : t -> cxcursor
   (** [get_canonical d] retrieves the canonical cursor declaring an entity. *)
+
+  type annotated_field = {
+      specifier : Ast.cxx_access_specifier;
+      decl : Ast.decl;
+    }
+
+  val annotate_access_specifier :
+      Ast.cxx_access_specifier -> Ast.decl list ->
+        annotated_field list
+  (** [annotate_access_specifier default_specifier fields] returns the
+      elements of [fields], except [AccessSpecifier] nodes, annotated
+      with the current access specifier, starting with [default_specifier]. *)
 
   include S with type t := t
 end

@@ -910,6 +910,60 @@ let () =
       inlined = true; }}]]
     ]}*)
     attributes : attribute list;
+    has_written_prototype : bool;
+(** Determine whether the parameters of this function are written is this
+    declaration. Otherwise, either they are inherited from a previous
+    declaration or they are written with an old-style parameter declaration.
+    Note that in the case of the prototype is inherited, there is no type-loc
+    information: parameter names are not available.
+
+let example = {|
+    void f(int a);
+    void f();
+|}
+
+let () =
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = Function {
+      name = IdentifierName "f";
+      function_type = {
+        result = { desc = BuiltinType Void };
+        parameters = Some {
+          non_variadic = [{ desc = {
+            qual_type = { desc = BuiltinType Int };
+            name = "a"}}] }};
+      has_written_prototype = true; }};
+      { desc = Function {
+      name = IdentifierName "f";
+      function_type = {
+        result = { desc = BuiltinType Void };
+        parameters = Some {
+          non_variadic = [{ desc = {
+            qual_type = { desc = BuiltinType Int };
+            name = ""}}] }};
+      has_written_prototype = false }} ]]
+
+let example = {|
+    void f(a)
+    int a;
+    {
+    }
+|}
+
+let () =
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = Function {
+      name = IdentifierName "f";
+      function_type = {
+        result = { desc = BuiltinType Void };
+        parameters = Some {
+          non_variadic = [{ desc = {
+            qual_type = { desc = BuiltinType Int };
+            name = "a"}}] }};
+      has_written_prototype = false }} ]]
+    ]}*)
   }
 
 (** Function type. *)

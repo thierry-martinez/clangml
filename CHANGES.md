@@ -1,8 +1,19 @@
 # Next version
 
+- New module `Clang.Cursor`, exposing the signature
+  `Hashtbl.HashedType with type t = cxcursor`
+  and `Clang.Cursor.Hashtbl`.
+
+- New function `Clang.Decl.annotate_access_specifier`, to enumerate
+  class fields with their access specifiers.
+
 - Fix segmentation fault when parsing the redeclaration of a function decl
   without prototype when the previous declarations has some parameters.
   (reported by Kihong Heo)
+
+- New field `has_written_prototype` in `function_decl` to distinguish
+  between function declarations where the prototype is actually provided
+  and declarations where the prototype is inherited.
 
 # 2020-07-15, 4.2.0
 

@@ -36,6 +36,20 @@ end
 
 include Bindings
 
+module Cursor = struct
+  module Self = struct
+    type t = cxcursor
+
+    let equal = equal_cursors
+
+    let hash = hash_cursor
+  end
+
+  include Self
+
+  module Hashtbl = Hashtbl.Make (Self)
+end
+
 module Types = Clang__types
 
 include Types
@@ -164,10 +178,11 @@ module Ast = struct
   let function_decl
       ?(linkage = NoLinkage) ?body ?(deleted = false) ?(constexpr = false)
       ?(inline_specified = false) ?(inlined = false) ?nested_name_specifier
-      ?(attributes = [])
+      ?(attributes = []) ?(has_written_prototype = false)
       function_type name =
     { linkage; body; deleted; constexpr; inline_specified; inlined;
-      function_type; nested_name_specifier; name; attributes }
+      function_type; nested_name_specifier; name; attributes;
+      has_written_prototype }
 
   let function_type ?(calling_conv = (C : cxcallingconv)) ?parameters
         ?exception_spec ?(ref_qualifier = (None : cxrefqualifierkind)) result =
@@ -952,8 +967,7 @@ module Ast = struct
       variadic = is_function_type_variadic (get_cursor_type cursor) }
 
     and parameters_of_function_decl_or_proto cursor =
-      if cursor |> get_cursor_type |> get_type_kind = FunctionProto &&
-          ext_function_decl_has_written_prototype cursor then
+      if cursor |> get_cursor_type |> get_type_kind = FunctionProto then
         Some (parameters_of_function_decl cursor)
       else
         None
@@ -967,8 +981,12 @@ module Ast = struct
             | _ -> None
           end in
         let others = others |> filter_out_ref in
+        let type_loc = cursor |> ext_declarator_decl_get_type_loc in
         let qual_type =
-          cursor |> ext_declarator_decl_get_type_loc |> of_type_loc in
+          if type_loc |> ext_type_loc_get_class = InvalidTypeLoc then
+            cursor |> get_cursor_type |> of_cxtype
+          else
+            type_loc|> of_type_loc in
         { name = cursor |> get_cursor_spelling;
           qual_type;
           default =
@@ -1012,6 +1030,7 @@ module Ast = struct
         attributes = attributes_of_decl cursor;
         inline_specified = ext_function_decl_is_inline_specified cursor;
         inlined = ext_function_decl_is_inlined cursor;
+        has_written_prototype = ext_function_decl_has_written_prototype cursor;
       }
 
     and attributes_of_decl cursor =
@@ -2314,6 +2333,22 @@ module Decl = [%meta node_module [%str
 
   let get_canonical decl =
     decl |> Ast.cursor_of_node |> get_canonical_cursor
+
+  type annotated_field = {
+      specifier : Ast.cxx_access_specifier;
+      decl : Ast.decl;
+    }
+
+  let annotate_access_specifier
+      (default_specifier : Ast.cxx_access_specifier)
+      (fields : Ast.decl list) : annotated_field list =
+    let annotate_field (specifier, rev) (decl : Ast.decl) =
+      match Node.force decl.desc with
+      | AccessSpecifier specifier -> (specifier, rev)
+      | _ -> (specifier, { specifier; decl } :: rev) in
+    let _specifier, rev =
+      List.fold_left annotate_field (default_specifier, []) fields in
+    List.rev rev
 ]]
 
 module Parameter = [%meta node_module [%str
