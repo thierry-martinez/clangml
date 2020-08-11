@@ -952,7 +952,8 @@ module Ast = struct
       variadic = is_function_type_variadic (get_cursor_type cursor) }
 
     and parameters_of_function_decl_or_proto cursor =
-      if cursor |> get_cursor_type |> get_type_kind = FunctionProto then
+      if cursor |> get_cursor_type |> get_type_kind = FunctionProto &&
+          ext_function_decl_has_written_prototype cursor then
         Some (parameters_of_function_decl cursor)
       else
         None

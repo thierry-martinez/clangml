@@ -243,23 +243,13 @@ include Common
 (** AST nodes are of type ['a ]{!type:node} for some ['a] and
     carry a {!type:decoration}.
     If the node comes for a translation unit parsed by clang,
-    the decoration is of the form {!const:Cursor}[ cursor],
+    the decoration is of the form {!constructor:Cursor}[ cursor],
     where [cursor] points to the corresponding node in clang
     internal AST.
     Decorations
-    can be of the form {!const:Custom}[ custom_decoration],
+    can be of the form {!constructor:Custom}[ custom_decoration],
     where the inlined record [custom_decoration] may optionnally
     carry a location, or a type, or both.
-
-    To break type recursion between {!type:qual_type} and {!type:decoration},
-    open types ['qual_type ]{!type:open_decoration} and
-    [('a, 'qual_type) ]{!type:open_node} are defined first, and then
-    {!type:node} and {!type:decoration} are defined as aliases
-    with ['qual_type = ]{!type:qual_type}.
-
-    Breaking recursion allows [visitors] to derive polymorphic
-    visitors for [open_node] while deriving monomorphic visitors
-    for the concrete AST nodes themselves.
 *)
 
 module Custom (Node : NodeS) = struct
@@ -2189,10 +2179,13 @@ and expr = expr_desc node
 and expr_desc =
   | IntegerLiteral of integer_literal
 (** Integer literal.
-    By default, integer literals are converted if possible into {!constr:Int}
-    and integers too large to be represented as [int] are not converted.
-    Integer literals can be preserved as {!constr:CXInt}
-    by turning {!recfield:Clang.convert_integer_literals} option false.
+
+    By default, integer literals are converted if possible into
+    {!constructor:Int} and integers too large to be represented as
+    [int] are not converted.  Integer literals can be preserved as
+    {!constructor:CXInt} by turning
+    {!field:Clang.convert_integer_literals} option false.
+
     {[
 let example = "0;"
 
@@ -2253,9 +2246,9 @@ let () =
   | FloatingLiteral of floating_literal
 (** Floating literal.
 
-    By default, floating literals are converted into {!constr:Float}.
-    Floating literals can be preserved as {!constr:CXFloat}
-    by turning {!recfield:Clang.convert_floating_literals} option false.
+    By default, floating literals are converted into {!constructor:Float}.
+    Floating literals can be preserved as {!constructor:CXFloat}
+    by turning {!field:Clang.convert_floating_literals} option false.
     {[
 let example = "0.5;"
 
@@ -2656,7 +2649,8 @@ let () =
   | [ { desc = Decl _ };
       { desc = Expr { desc = UnaryExpr {
           kind = SizeOf;
-          argument = ArgumentExpr { desc = Paren { desc = DeclRef ({ name = IdentifierName "i" }) }}} }}] ->
+          argument = ArgumentExpr { desc = Paren { desc =
+            DeclRef ({ name = IdentifierName "i" }) }}} }}] ->
       ()
   | _ -> assert false
     ]}*)
@@ -2727,7 +2721,8 @@ let () =
   | [ { desc = Decl _ };
       { desc = Expr { desc = UnaryExpr {
           kind = SizeOf;
-          argument = ArgumentExpr { desc = DeclRef ({ name = IdentifierName "i" }) }} }}] -> ()
+          argument = ArgumentExpr { desc =
+            DeclRef ({ name = IdentifierName "i" }) }} }}] -> ()
   | _ -> assert false
 
 let example = {| sizeof(int); |}
@@ -4019,7 +4014,6 @@ let () =
           var_type = { desc = BuiltinType Int}}}];
       inline = false; }}] -> ()
   | _ -> assert false
-    ]}
 
 let example = {|
     inline namespace example {
@@ -4037,8 +4031,7 @@ let () =
           var_type = { desc = BuiltinType Int}}}];
       inline = true; }}] -> ()
   | _ -> assert false
-    ]}
-*)
+    ]}*)
   | UsingDirective of {
       nested_name_specifier : nested_name_specifier option;
       namespace : decl;

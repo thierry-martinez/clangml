@@ -5,7 +5,7 @@ type init_list_form =
   | Semantic
       (** Semantic form: values that are not explicitly written in
           initialization lists appear as
-          {!value:Clang__ast.ImplicitValueInitExpr}. *)
+          {!val:Clang__ast.ImplicitValueInitExpr}. *)
 
 (** {!type:Options.t} stores flags that change the construction of the
     abstract syntax tree. Beware that the nodes that are ignored by default
@@ -13,7 +13,7 @@ type init_list_form =
 type t = {
     ignore_implicit_cast : bool;
     (** Ignore implicit cast nodes in expressions.
-        See {!const:Clang__ast.Cast} for examples. *)
+        See {!constructor:Clang__ast.Cast} for examples. *)
 
     ignore_paren : bool;
     (** Ignore parenthese nodes in expressions.
@@ -30,17 +30,17 @@ type t = {
     ignore_bind_temporary_expr : bool;
 
     convert_integer_literals : bool;
-    (** Convert integer literals into {!constr:Clang__ast.Int}.
-        See {!constr:Clang__ast.IntegerLiteral} for examples. *)
+    (** Convert integer literals into {!constructor:Clang__ast.Int}.
+        See {!constructor:Clang__ast.IntegerLiteral} for examples. *)
 
     convert_floating_literals : bool;
-    (** Convert floating literals into {!constr:Clang__ast.Float}.
-        See {!constr:Clang__ast.FloatingLiteral} for examples. *)
+    (** Convert floating literals into {!constructor:Clang__ast.Float}.
+        See {!constructor:Clang__ast.FloatingLiteral} for examples. *)
 
     init_list_form : init_list_form;
     (** Select between default form (syntactic or semantic) for initialization
         lists.
-        See {!constr:Clang__ast.ImplicitValueInitExpr} for examples.
+        See {!constructor:Clang__ast.ImplicitValueInitExpr} for examples.
         Default: [Syntactic]. *)
   }
 
