@@ -417,7 +417,9 @@ AS_IF([test -d tools/stubgen_common],
   [true],
   [AS_IF([mkdir tools/stubgen_common],
     [AC_CP([$srcdir/tools/stubgen_common/dune], [tools/stubgen_common/])
-     AC_CP([$srcdir/tools/stubgen_common/stubgen_common.ml], [tools/stubgen_common/])])])
+     AC_CP([$srcdir/tools/stubgen_common/stubgen_common.ml], [tools/stubgen_common/])
+     AC_CP([$srcdir/tools/stubgen_common/clang_helper.ml], [tools/stubgen_common/])
+     AC_CP([$srcdir/tools/stubgen_common/string_utils.ml], [tools/stubgen_common/])])])
 
 AS_IF([test -d tools/stubgen],
   [true],
