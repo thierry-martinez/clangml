@@ -407,9 +407,7 @@ let restrict_statement_version (major, minor) body =
 
 let find_version_constraint versions attribute =
   match StringMap.find_opt attribute versions with
-  | None ->
-      prerr_endline attribute;
-      assert false
+  | None
   | Some (3, 4) -> None
   | result -> result
 
@@ -496,7 +494,8 @@ let generate_attribute context versions name reduced_name public_methods
         if orig = "SpellingNotCalculated" then
           restrict_statement_version (10, 0) [case]
         else
-          [case]) in
+          Option.fold (find_version_constraint versions prefixed)
+            ~none:Fun.id ~some:restrict_statement_version [case]) in
     let switch =
       cast attr qual_attr name
         (H.switch (H.call (H.arrow (H.decl_of_string qual_attr)
@@ -605,10 +604,15 @@ let do_decl context versions (decl : Clang.Lazy.Decl.t) =
           nested_name_specifier @
           [TypeSpec (H.record (Clang.Ast.identifier_name enum_decl'.name))] in
         let body = H.compound [H.switch (H.decl_of_string value) (H.compound
-          (enum_decl'.constants |> List.map
+          (enum_decl'.constants |> List.concat_map
           (fun (constant : enum_constant) ->
-            H.case (H.decl_of_string ~nested_name_specifier constant.constant_name)
-              (H.return (Some (H.decl_of_string constant.converted_name))))));
+            Option.fold
+              (find_version_constraint versions constant.converted_name)
+              ~none:Fun.id ~some:restrict_statement_version
+              [H.case (H.decl_of_string ~nested_name_specifier
+                constant.constant_name)
+                (H.return
+                  (Some (H.decl_of_string constant.converted_name)))])));
           H.return (Some
             (H.decl_of_string (List.hd enum_decl'.constants).converted_name))] in
         let convert_function =
@@ -804,16 +808,21 @@ let main cflags llvm_config prefix =
     (* some constants are missing *)
     StringMap.add "LoopHint" (10, 0) |>
     (* some spelling are missing *)
-    StringMap.add "Aligned" (11, 0) |>
-    StringMap.add "AlwaysInline" (11, 0) |>
-    StringMap.add "MipsLongCall" (11, 0) |>
-    StringMap.add "MipsShortCall" (11, 0) |>
-    StringMap.add "Restrict" (11, 0) |>
-    StringMap.add "Section" (11, 0) |>
-    StringMap.add "Unused" (11, 0) |>
-    StringMap.add "WarnUnusedResult" (11, 0) |>
+    StringMap.add "clang_ext_Aligned_C2x_gnu_aligned" (11, 0) |>
+    StringMap.add "clang_ext_AlwaysInline_C2x_gnu_always_inline" (11, 0) |>
+    StringMap.add "clang_ext_MipsLongCall_C2x_gnu_long_call" (11, 0) |>
+    StringMap.add "clang_ext_MipsLongCall_C2x_gnu_far" (11, 0) |>
+    StringMap.add "clang_ext_MipsShortCall_C2x_gnu_short_call" (11, 0) |>
+    StringMap.add "clang_ext_MipsShortCall_C2x_gnu_near" (11, 0) |>
+    StringMap.add "clang_ext_Restrict_C2x_gnu_malloc" (11, 0) |>
+    StringMap.add "clang_ext_Section_C2x_gnu_section" (11, 0) |>
+    StringMap.add "clang_ext_Unused_C2x_gnu_unused" (11, 0) |>
+    StringMap.add "clang_ext_WarnUnusedResult_C2x_gnu_warn_unused_result"
+      (11, 0) |>
     (* some constants are missing *)
-    StringMap.add "OMPAllocateDecl" (11, 0) |>
+    StringMap.add
+        "clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPNullMemAlloc"
+        (11, 0) |>
     (* getCaptureKind becomes getCaptureKindVal *)
     StringMap.add "OMPCaptureKind" (11, 0) |>
     (* getGuid becomes getGuidDecl *)
