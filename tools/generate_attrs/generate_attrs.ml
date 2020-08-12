@@ -860,6 +860,15 @@ let main cflags llvm_config prefix =
     "clang_ext_RequiresCapability_CXX11_clang_shared_locks_required"
         (6, 0) |>
     StringMap.add "clang_ext_Unused_C2x_maybe_unused" (6, 0) |>
+    StringMap.add
+        "clang_ext_Ownership_CXX11_clang_ownership_holds"
+        (6, 0) |>
+    StringMap.add
+        "clang_ext_Ownership_CXX11_clang_ownership_returns"
+        (6, 0) |>
+    StringMap.add
+        "clang_ext_Ownership_CXX11_clang_ownership_takes"
+        (6, 0) |>
     (* some constants are missing *)
     StringMap.add
         "clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPNullMemAlloc"
