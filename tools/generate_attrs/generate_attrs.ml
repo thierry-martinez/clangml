@@ -504,9 +504,11 @@ let generate_attribute context versions name reduced_name public_methods
           (H.compound cases)) in
     let return_default =
       H.return (Some (H.decl_of_string last_constant)) in
-    let list =
-      restrict_statement_version (10, 0) [get_cursor_attr; switch]
-      @ [return_default] in
+    let body =
+      Option.fold (find_version_constraint versions reduced_name)
+        ~none:Fun.id ~some:restrict_statement_version
+        [get_cursor_attr; switch] in
+    let list = body @ [return_default] in
     let result =
       H.elaborated Enum (H.enum (Clang.Ast.identifier_name type_spelling_name)) in
     let spelling_getter =
