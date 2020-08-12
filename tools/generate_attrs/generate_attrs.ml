@@ -291,11 +291,17 @@ let register_argument context name reduced_name
     { name; reduced_name; getter; getter_result_type } :: desc.attributes;
   desc.getter_name_ref
 
-let get_constant_names
-    (constants : Clang.Lazy.Ast.enum_constant list) : string list =
+type constant = {
+    name : string;
+    value : int;
+  }
+
+let get_constants
+    (constants : Clang.Lazy.Ast.enum_constant list) : constant list =
    constants |>
-   List.map (fun ({ desc = lazy constant } : Clang.Lazy.Ast.enum_constant) ->
-     constant.constant_name)
+   List.map (fun (enum_constant : Clang.Lazy.Ast.enum_constant) ->
+     { name = (Lazy.force enum_constant.desc).constant_name;
+       value = Clang.Lazy.Enum_constant.get_value enum_constant })
 
 let get_public_fields (fields : Clang.Lazy.Decl.annotated_field list) :
     Clang.Lazy.Ast.decl list =
@@ -305,22 +311,26 @@ let get_public_fields (fields : Clang.Lazy.Decl.annotated_field list) :
     | _ -> None in
   List.filter_map filter fields
 
-let find_spelling (fields : Clang.Lazy.Ast.decl list) : string list option =
+type spelling = {
+    has_get_semantic_spelling : bool;
+    constants : constant list;
+  }
+
+let find_spelling (fields : Clang.Lazy.Ast.decl list) : spelling option =
   let is_get_semantic_spelling (field : Clang.Lazy.Ast.decl) =
     match Lazy.force field.desc with
     | CXXMethod { function_decl = {
           name = IdentifierName "getSemanticSpelling"; _ }; _ } ->
         true
     | _ -> false in
-  if List.exists is_get_semantic_spelling fields then
-    let get_spelling (field : Clang.Lazy.Ast.decl) =
-      match Lazy.force field.desc with
-      | EnumDecl { name = "Spelling"; constants; _ } ->
-          Some (get_constant_names constants)
-      | _ -> None in
-    List.find_map get_spelling fields
-  else
-    None
+  let get_spelling (field : Clang.Lazy.Ast.decl) =
+    match Lazy.force field.desc with
+    | EnumDecl { name = "Spelling"; constants; _ } ->
+        Some (get_constants constants)
+    | _ -> None in
+  List.find_map get_spelling fields |> Option.map (fun constants ->
+    { has_get_semantic_spelling = List.exists is_get_semantic_spelling fields;
+      constants })
 
 let enumerate_methods (fields : Clang.Lazy.Ast.decl list) :
     (string * Clang.Lazy.Type.t) StringHashtbl.t =
@@ -412,7 +422,7 @@ let find_version_constraint versions attribute =
   | result -> result
 
 let generate_attribute context versions name reduced_name public_methods
-    spelling (arguments : argument_decl list) =
+    (spelling : spelling option) (arguments : argument_decl list) =
   let arguments =
     arguments |> List.map @@ fun (argument : argument_decl) ->
       let arg_name = remove_trailing_underscore argument.name in
@@ -476,30 +486,43 @@ let generate_attribute context versions name reduced_name public_methods
   context.constructors <- constructor :: context.constructors;
   spelling |> Option.iter (
   fun (spelling, type_spelling_name, spelling_getter_name) ->
-    let constant_names = spelling |> List.map (fun constant ->
-      constant, Printf.sprintf "clang_ext_%s_%s" reduced_name constant) in
+    let constant_names = spelling.constants |> List.map
+      (fun (constant : constant) ->
+      constant, Printf.sprintf "clang_ext_%s_%s" reduced_name constant.name) in
     let last_constant = snd (List.hd (List.rev constant_names)) in
     let enum_constants = constant_names |> List.map (fun (_, constant) ->
       H.enum_constant constant) in
     let spelling_enum = H.enum_decl type_spelling_name enum_constants in
     let cases =
       constant_names |> List.concat_map (fun (orig, prefixed) ->
-        let case =
-          H.case (H.decl_of_string orig
-            ~nested_name_specifier:[
-              namespace_clang;
-              TypeSpec (H.record (Clang.Ast.identifier_name name));
-              TypeSpec (H.record (Clang.Ast.identifier_name "Spelling"))])
-            (H.return (Some (H.decl_of_string prefixed))) in
-        if orig = "SpellingNotCalculated" then
-          restrict_statement_version (10, 0) [case]
+        if orig.name = "SpellingNotCalculated" then
+          []
         else
-          Option.fold (find_version_constraint versions prefixed)
-            ~none:Fun.id ~some:restrict_statement_version [case]) in
+          begin
+            let case_expr =
+              if spelling.has_get_semantic_spelling then
+                H.decl_of_string orig.name
+                  ~nested_name_specifier:[
+                namespace_clang;
+                TypeSpec (H.record (Clang.Ast.identifier_name name));
+                TypeSpec (H.record (Clang.Ast.identifier_name "Spelling"))]
+              else
+                H.const_int orig.value in
+            let case =
+              H.case case_expr
+                (H.return (Some (H.decl_of_string prefixed))) in
+            Option.fold (find_version_constraint versions prefixed)
+              ~none:Fun.id ~some:restrict_statement_version [case]
+          end) in
+    let field_name =
+      if spelling.has_get_semantic_spelling then
+        "getSemanticSpelling"
+      else
+        "getSpellingListIndex" in
     let switch =
       cast attr qual_attr name
         (H.switch (H.call (H.arrow (H.decl_of_string qual_attr)
-          (H.field_name (Clang.Ast.identifier_name "getSemanticSpelling"))) [])
+          (H.field_name (Clang.Ast.identifier_name field_name))) [])
           (H.compound cases)) in
     let return_default =
       H.return (Some (H.decl_of_string last_constant)) in
