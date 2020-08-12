@@ -504,9 +504,9 @@ let generate_attribute context versions name reduced_name public_methods
     let return_default =
       H.return (Some (H.decl_of_string last_constant)) in
     let version_constraint =
-      max
+      max (Some (3, 5)) (max
         (find_version_constraint versions reduced_name)
-        (find_version_constraint versions type_spelling_name) in
+        (find_version_constraint versions type_spelling_name)) in
     let body =
       Option.fold version_constraint
         ~none:Fun.id ~some:restrict_statement_version
@@ -836,28 +836,28 @@ let main cflags llvm_config prefix =
         "clang_ext_ArgumentWithTypeTag_C2x_clang_pointer_with_type_tag"
         (7, 0) |>
     StringMap.add
-        "clang_ext_Ownership_spelling_C2x_clang_ownership_holds"
+        "clang_ext_Ownership_C2x_clang_ownership_holds"
         (7, 0) |>
     StringMap.add
-        "clang_ext_Ownership_spelling_C2x_clang_ownership_returns"
+        "clang_ext_Ownership_C2x_clang_ownership_returns"
         (7, 0) |>
     StringMap.add
-        "clang_ext_Ownership_spelling_C2x_clang_ownership_takes"
+        "clang_ext_Ownership_C2x_clang_ownership_takes"
         (7, 0) |>
     StringMap.add
-        "clang_ext_XRayInstrument_spelling_C2x_clang_xray_always_instrument"
+        "clang_ext_XRayInstrument_C2x_clang_xray_always_instrument"
         (7, 0) |>
     StringMap.add
-        "clang_ext_XRayInstrument_spelling_C2x_clang_xray_never_instrument"
+        "clang_ext_XRayInstrument_C2x_clang_xray_never_instrument"
         (7, 0) |>
     StringMap.add
-        "clang_ext_ReleaseCapability_spelling_CXX11_clang_unlock_function"
+        "clang_ext_ReleaseCapability_CXX11_clang_unlock_function"
         (6, 0) |>
     StringMap.add
-    "clang_ext_RequiresCapability_spelling_CXX11_clang_exclusive_locks_required"
+    "clang_ext_RequiresCapability_CXX11_clang_exclusive_locks_required"
         (6, 0) |>
     StringMap.add
-    "clang_ext_RequiresCapability_spelling_CXX11_clang_shared_locks_required"
+    "clang_ext_RequiresCapability_CXX11_clang_shared_locks_required"
         (6, 0) |>
     StringMap.add "clang_ext_Unused_C2x_maybe_unused" (6, 0) |>
     (* some constants are missing *)
@@ -876,7 +876,8 @@ let main cflags llvm_config prefix =
     StringMap.add "clang_ext_OpenCLGlobalAddressSpace_spelling" (10, 0) |>
     StringMap.add "clang_ext_OpenCLLocalAddressSpace_spelling" (10, 0) |>
     StringMap.add "clang_ext_OpenCLPrivateAddressSpace_spelling" (10, 0) |>
-    StringMap.add "clang_ext_PassObjectSize_spelling" (9, 0) in
+    StringMap.add "clang_ext_PassObjectSize_spelling" (9, 0) |>
+    StringMap.add "clang_ext_Unused_spelling" (3, 9) in
   let command_line_args, _llvm_version =
     Stubgen_common.prepare_clang_options cflags llvm_config in
   let tu =
