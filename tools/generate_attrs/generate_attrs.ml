@@ -503,8 +503,12 @@ let generate_attribute context versions name reduced_name public_methods
           (H.compound cases)) in
     let return_default =
       H.return (Some (H.decl_of_string last_constant)) in
+    let version_constraint =
+      max
+        (find_version_constraint versions reduced_name)
+        (find_version_constraint versions type_spelling_name) in
     let body =
-      Option.fold (find_version_constraint versions reduced_name)
+      Option.fold version_constraint
         ~none:Fun.id ~some:restrict_statement_version
         [get_cursor_attr; switch] in
     let list = body @ [return_default] in
@@ -828,7 +832,14 @@ let main cflags llvm_config prefix =
     (* getGuid becomes getGuidDecl *)
     StringMap.add "Uuid" (11, 0) |>
     (* OMPDeclareVariant uses OMPTraitInfo *)
-    StringMap.add "OMPDeclareVariant" (11, 0) in
+    StringMap.add "OMPDeclareVariant" (11, 0) |>
+    (* Spelling is missing *)
+    StringMap.add "clang_ext_OpenCLConstantAddressSpace_spelling" (10, 0) |>
+    StringMap.add "clang_ext_OpenCLGenericAddressSpace_spelling" (10, 0) |>
+    StringMap.add "clang_ext_OpenCLGlobalAddressSpace_spelling" (10, 0) |>
+    StringMap.add "clang_ext_OpenCLLocalAddressSpace_spelling" (10, 0) |>
+    StringMap.add "clang_ext_OpenCLPrivateAddressSpace_spelling" (10, 0) |>
+    StringMap.add "clang_ext_PassObjectSize_spelling" (9, 0) in
   let command_line_args, _llvm_version =
     Stubgen_common.prepare_clang_options cflags llvm_config in
   let tu =
