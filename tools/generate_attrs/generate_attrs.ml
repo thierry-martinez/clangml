@@ -805,7 +805,7 @@ let main cflags llvm_config prefix =
     StringMap.add "LoopHint" (10, 0) |>
     (* some spelling are missing *)
     StringMap.add "Aligned" (11, 0) |>
-    StringMap.add "AlwaysAligned" (11, 0) |>
+    StringMap.add "AlwaysInline" (11, 0) |>
     StringMap.add "MipsLongCall" (11, 0) |>
     StringMap.add "MipsShortCall" (11, 0) |>
     StringMap.add "Restrict" (11, 0) |>
@@ -813,7 +813,7 @@ let main cflags llvm_config prefix =
     StringMap.add "Unused" (11, 0) |>
     StringMap.add "WarnUnusedResult" (11, 0) |>
     (* some constants are missing *)
-    StringMap.add "OMPAllocateDeclAttr" (11, 0) |>
+    StringMap.add "OMPAllocateDecl" (11, 0) |>
     (* getCaptureKind becomes getCaptureKindVal *)
     StringMap.add "OMPCaptureKind" (11, 0) |>
     (* getGuid becomes getGuidDecl *)
