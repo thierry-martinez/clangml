@@ -800,7 +800,24 @@ let main cflags llvm_config prefix =
     (* fields are misnamed *)
     StringMap.add "CallableWhen" (3, 5) |>
     (* some constants are missing *)
-    StringMap.add "LoopHint" (10, 0) in
+    StringMap.add "LoopHint" (10, 0) |>
+    (* some spelling are missing *)
+    StringMap.add "Aligned" (11, 0) |>
+    StringMap.add "AlwaysAligned" (11, 0) |>
+    StringMap.add "MipsLongCall" (11, 0) |>
+    StringMap.add "MipsShortCall" (11, 0) |>
+    StringMap.add "Restrict" (11, 0) |>
+    StringMap.add "Section" (11, 0) |>
+    StringMap.add "Unused" (11, 0) |>
+    StringMap.add "WarnUnusedResult" (11, 0) |>
+    (* some constants are missing *)
+    StringMap.add "OMPAllocateDeclAttr" (11, 0) |>
+    (* getCaptureKind becomes getCaptureKindVal *)
+    StringMap.add "OMPCaptureKind" (11, 0) |>
+    (* getGuid becomes getGuidDecl *)
+    StringMap.add "Uuid" (11, 0) |>
+    (* OMPDeclareVariant uses OMPTraitInfo *)
+    StringMap.add "OMPDeclareVariant" (11, 0) in
   let command_line_args, _llvm_version =
     Stubgen_common.prepare_clang_options cflags llvm_config in
   let tu =
