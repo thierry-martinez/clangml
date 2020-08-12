@@ -823,6 +823,43 @@ let main cflags llvm_config prefix =
     StringMap.add "clang_ext_Unused_C2x_gnu_unused" (11, 0) |>
     StringMap.add "clang_ext_WarnUnusedResult_C2x_gnu_warn_unused_result"
       (11, 0) |>
+    StringMap.add
+        "clang_ext_ArgumentWithTypeTag_CXX11_clang_argument_with_type_tag"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_ArgumentWithTypeTag_C2x_clang_argument_with_type_tag"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_ArgumentWithTypeTag_CXX11_clang_pointer_with_type_tag"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_ArgumentWithTypeTag_C2x_clang_pointer_with_type_tag"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_Ownership_spelling_C2x_clang_ownership_holds"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_Ownership_spelling_C2x_clang_ownership_returns"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_Ownership_spelling_C2x_clang_ownership_takes"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_XRayInstrument_spelling_C2x_clang_xray_always_instrument"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_XRayInstrument_spelling_C2x_clang_xray_never_instrument"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_ReleaseCapability_spelling_CXX11_clang_unlock_function"
+        (6, 0) |>
+    StringMap.add
+    "clang_ext_RequiresCapability_spelling_CXX11_clang_exclusive_locks_required"
+        (6, 0) |>
+    StringMap.add
+    "clang_ext_RequiresCapability_spelling_CXX11_clang_shared_locks_required"
+        (6, 0) |>
+    StringMap.add "clang_ext_Unused_C2x_maybe_unused" (6, 0) |>
     (* some constants are missing *)
     StringMap.add
         "clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPNullMemAlloc"
