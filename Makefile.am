@@ -15,7 +15,7 @@ norm_files = $(shell sed -n -e 's/^\\include{\([^}]*\)}/\1/p' $(NORM_PREFIX)/std
 
 libraries = ppx printer
 
-tools = stubgen norm_extractor print_tree
+tools = stubgen norm_extractor print_tree generate_attrs
 
 # This variable is expanded for each $(library)
 library_cmxa = $(library)/clangml_$(library).cmxa
