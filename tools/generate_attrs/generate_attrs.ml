@@ -44,7 +44,7 @@ type ocaml_type_conversion =
   | DeclarationName
 
 type type_info = {
-    ocaml_type : Parsetree.core_type;
+    ocaml_type : Ppxlib.core_type;
     type_conversion : ocaml_type_conversion;
     interface_type : Clang.Type.t;
     multiple : bool;
@@ -210,7 +210,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t)
       begin match StringMap.find_opt name enums with
       | Some enum_decl ->
           { ocaml_type =
-            Ast_helper.Typ.constr
+            Ppxlib.Ast_helper.Typ.constr
               (Metapp.mklid ~prefix:(Lident clang__bindings)
                  enum_decl.ocaml_type_name) [];
             type_conversion = NoConversion;
@@ -258,7 +258,7 @@ type argument_desc = {
 
 type ocaml_argument = {
     name : string;
-    ty : Parsetree.core_type;
+    ty : Ppxlib.core_type;
     type_conversion : ocaml_type_conversion;
     multiple : bool;
     getter_name_ref : string ref;
@@ -271,7 +271,7 @@ type ocaml_attribute = {
 
 type context = {
     argument_table : argument_desc TypeHashtbl.t StringHashtbl.t;
-    mutable constructors : Parsetree.constructor_declaration list;
+    mutable constructors : Ppxlib.constructor_declaration list;
     mutable decls : Clang.Decl.t list;
     mutable protos : Clang.Decl.t list;
     mutable attributes : ocaml_attribute list;
@@ -467,22 +467,22 @@ let generate_attribute context versions name reduced_name public_methods
     | None -> arguments
     | Some (_, type_spelling_name, spelling_getter_name) ->
       { name = "spelling";
-        ty = Ast_helper.Typ.constr
+        ty = Ppxlib.Ast_helper.Typ.constr
           (Metapp.mklid ~prefix:(Lident clang__bindings)
              (String.lowercase_ascii type_spelling_name)) [];
         type_conversion = NoConversion;
         multiple = false;
         getter_name_ref = ref spelling_getter_name } :: arguments in
-  let args : Parsetree.constructor_arguments =
+  let args : Ppxlib.constructor_arguments =
     match arguments with
     | [argument] ->
         Pcstr_tuple [argument.ty]
     | _ ->
         Pcstr_record (arguments |> List.map (
         fun (argument : ocaml_argument) ->
-          Ast_helper.Type.field (Metapp.mkloc argument.name) argument.ty)) in
+          Ppxlib.Ast_helper.Type.field (Metapp.mkloc argument.name) argument.ty)) in
   let constructor =
-    Ast_helper.Type.constructor (Metapp.mkloc reduced_name) ~args in
+    Ppxlib.Ast_helper.Type.constructor (Metapp.mkloc reduced_name) ~args in
   context.constructors <- constructor :: context.constructors;
   spelling |> Option.iter (
   fun (spelling, type_spelling_name, spelling_getter_name) ->
@@ -762,6 +762,13 @@ let generate_code context versions argument type_name_attr ty
 
 let tool_name = "generate_attrs"
 
+let parse_ml_file filename =
+  let channel = open_in filename in
+  Fun.protect (fun () ->
+    let lexbuf = Lexing.from_channel channel in
+    Ppxlib.Parse.implementation lexbuf)
+    ~finally:(fun () -> close_in channel)
+
 let find_attributes_among_clang_versions dir : (int * int) StringMap.t =
   let bindings =
     Sys.readdir dir |> Array.to_list |> List.filter_map (fun filename ->
@@ -770,7 +777,7 @@ let find_attributes_among_clang_versions dir : (int * int) StringMap.t =
       | [Some major; Some minor; Some _subminor]
         when Sys.is_directory full_filename ->
           let bindings =
-            Pparse.parse_implementation ~tool_name
+            parse_ml_file
               (Filename.concat full_filename "clang__bindings.ml") in
           let minor =
             if major >= 4 then
@@ -783,17 +790,17 @@ let find_attributes_among_clang_versions dir : (int * int) StringMap.t =
     List.sort (fun (a, _) (b, _) -> compare a b) bindings in
   List.fold_left (fun previous (version, bindings) ->
     let attributes =
-      bindings |> List.find_map (fun (item : Parsetree.structure_item) ->
+      bindings |> List.find_map (fun (item : Ppxlib.structure_item) ->
         match item.pstr_desc with
         | Pstr_type (Recursive, type_declarations) ->
             begin
               type_declarations |> List.find_map (
-              fun (decl : Parsetree.type_declaration) ->
+              fun (decl : Ppxlib.type_declaration) ->
                 if decl.ptype_name.txt = "clang_ext_attrkind" then
                   match decl.ptype_kind with
                   | Ptype_variant constructors ->
                       Some (constructors |> List.map (fun
-                        (constructor : Parsetree.constructor_declaration) ->
+                        (constructor : Ppxlib.constructor_declaration) ->
                         constructor.pcd_name.txt))
                   | _ -> assert false
                 else None)
@@ -944,7 +951,7 @@ let main cflags llvm_config prefix =
           generate_code context versions argument type_attr_name key
             argument_desc));
   let other =
-    Ast_helper.Type.constructor (Metapp.mkloc "Other")
+    Ppxlib.Ast_helper.Type.constructor (Metapp.mkloc "Other")
       ~args:(Pcstr_tuple [[%type: Clang__bindings.clang_ext_attrkind]]) in
   let groups = [
     "AMD"; "AVR"; "AnyX86"; "CPU"; "CUDA"; "IB"; "NS"; "OMP"; "OS"; "ObjC";
@@ -952,7 +959,7 @@ let main cflags llvm_config prefix =
   let groups = List.map (fun group -> group, ref []) groups in
   let constructors = List.rev (other :: context.constructors) in
   let constructors = constructors |> List.filter
-    (fun (constructor : Parsetree.constructor_declaration) ->
+    (fun (constructor : Ppxlib.constructor_declaration) ->
       match List.find_map (fun (prefix, list) -> Option.map (fun suffix -> suffix, list) (Stubgen_common.String_utils.remove_prefix prefix constructor.pcd_name.txt)) groups with
       | None -> true
       | Some (suffix, list) ->
@@ -969,21 +976,21 @@ let main cflags llvm_config prefix =
       [%type: 'declaration_name]; [%type: 'omp_trait_info]] in
   let constructors =
     (groups |> List.map (fun (prefix, _) ->
-      Ast_helper.Type.constructor (Metapp.mkloc prefix)
-        ~args:(Pcstr_tuple [Ast_helper.Typ.constr (Metapp.mklid (Stubgen_common.uncamelcase prefix))
+      Ppxlib.Ast_helper.Type.constructor (Metapp.mkloc prefix)
+        ~args:(Pcstr_tuple [Ppxlib.Ast_helper.Typ.constr (Metapp.mklid (Stubgen_common.uncamelcase prefix))
           parameters])))
     @ constructors in
   let make_type_declaration name list =
-    Ast_helper.Type.mk (Metapp.mkloc name)
+    Ppxlib.Ast_helper.Type.mk (Metapp.mkloc name)
       ~kind:(Ptype_variant list)
-      ~params:(List.map (fun ty -> ty, Asttypes.Invariant) parameters)
+      ~params:(List.map (fun ty -> ty, Ppxlib.Asttypes.Invariant) parameters)
       ~attrs:[Metapp.Attr.mk (Metapp.mkloc "deriving") (PStr [%str refl])] in
   let ty =
     make_type_declaration "t" constructors in
   let type_decl =
     ((groups |> List.map (fun (prefix, list) ->
       make_type_declaration (Stubgen_common.uncamelcase prefix) list))
-    @ [ty]) |> List.map (fun decl -> Ast_helper.Str.type_ Recursive [decl]) in
+    @ [ty]) |> List.map (fun decl -> Ppxlib.Ast_helper.Str.type_ Recursive [decl]) in
   let cases =
     context.attributes |> List.map (
     fun (attribute : ocaml_attribute) ->
@@ -1006,7 +1013,7 @@ let main cflags llvm_config prefix =
                    (3, [%e Metapp.Exp.of_int minor])]]
             else
               assert false in
-      let pattern = Ast_helper.Pat.construct lid None ~attrs in
+      let pattern = Ppxlib.Ast_helper.Pat.construct lid None ~attrs in
       let expr =
         let args =
           attribute.arguments |> List.map (fun (argument : ocaml_argument) ->
@@ -1026,7 +1033,7 @@ let main cflags llvm_config prefix =
                  Some [%expr convert_declaration_name] in
             let getter =
               let ident =
-                Ast_helper.Exp.ident
+                Ppxlib.Ast_helper.Exp.ident
                   (Metapp.mklid ~prefix:(Lident "Clang__bindings")
                      getter_name) in
               if argument.multiple then
@@ -1043,21 +1050,21 @@ let main cflags llvm_config prefix =
         let args =
           match args with
           | [(_, arg)] -> arg
-          | _ -> Ast_helper.Exp.record args None in
+          | _ -> Ppxlib.Ast_helper.Exp.record args None in
         let construct =
           match List.find_map (fun (prefix, _) -> Option.map (fun suffix -> prefix, suffix) (Stubgen_common.String_utils.remove_prefix prefix attribute.name)) groups with
           | Some (prefix, suffix) ->
-              (fun args -> Ast_helper.Exp.construct (Metapp.mklid prefix) (Some (Ast_helper.Exp.construct (Metapp.mklid suffix) args)))
-          | None -> Ast_helper.Exp.construct lid in
+              (fun args -> Ppxlib.Ast_helper.Exp.construct (Metapp.mklid prefix) (Some (Ppxlib.Ast_helper.Exp.construct (Metapp.mklid suffix) args)))
+          | None -> Ppxlib.Ast_helper.Exp.construct lid in
         construct (Some args) in
-      Ast_helper.Exp.case pattern expr) in
-  let cases = Ast_helper.Exp.case [%pat? other] [%expr Other other] :: cases in
+      Ppxlib.Ast_helper.Exp.case pattern expr) in
+  let cases = Ppxlib.Ast_helper.Exp.case [%pat? other] [%expr Other other] :: cases in
   let convert =
     let pattern_matching =
-      Ast_helper.Exp.match_ [%expr Clang__bindings.ext_attr_get_kind cursor]
+      Ppxlib.Ast_helper.Exp.match_ [%expr Clang__bindings.ext_attr_get_kind cursor]
         (List.rev cases) in
     [%stri
-       [%%meta Metapp.filter.structure_item Metapp.filter [%stri
+       [%%meta (new Metapp.filter)#structure_item [%stri
        let convert cursor expr_of_cxcursor decl_of_cxcursor of_type_loc
              convert_declaration_name omp_trait_info_of_cxcursor =
          [%e pattern_matching]]]] in
@@ -1065,7 +1072,7 @@ let main cflags llvm_config prefix =
   Fun.protect ~finally:(fun () -> close_out chan) (fun () ->
     Stubgen_common.output_warning_ml chan tool_name;
     let fmt = Format.formatter_of_out_channel chan in
-    Format.fprintf fmt "%a@." Pprintast.structure
+    Format.fprintf fmt "%a@." Ppxlib.Pprintast.structure
       ([%str
           [%%metapackage "metapp"]
           [%%metadir "config/.clangml_config.objs/byte"]] @
