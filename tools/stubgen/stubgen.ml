@@ -18,7 +18,7 @@ let output_subst f channel template =
   Buffer.output_buffer channel buffer
 
 let loc txt =
-  { Location.txt; loc = !Ast_helper.default_loc }
+  { Location.txt; loc = !Ppxlib.Ast_helper.default_loc }
 
 let make_ocaml_type_name s =
   let buffer = Buffer.create 17 in
@@ -34,7 +34,7 @@ type converter =
       -> tgt:string -> unit
 
 type common_type_info = {
-    ocamltype : Parsetree.core_type;
+    ocamltype : Ppxlib.core_type;
     c_of_ocaml : converter;
     ocaml_of_c : converter;
   }
@@ -209,7 +209,7 @@ let union_constant_interfaces a b = {
 
 type enum_interface = {
     constants : (Pcre.regexp * constant_interface) list;
-    attributes : Parsetree.attributes;
+    attributes : Ppxlib.attributes;
   }
 
 let empty_enum_interface = { constants = []; attributes = []; }
@@ -348,7 +348,7 @@ let make_common_type_info ?type_interface ?converter ocaml_type_name =
         c_of_ocaml, ocaml_of_c
     | _ ->
         simple_converter c_of_ocaml, simple_converter ocaml_of_c in
-  { ocamltype = Ast_helper.Typ.constr (loc (Longident.Lident ocaml_type_name)) [];
+  { ocamltype = Ppxlib.Ast_helper.Typ.constr (loc (Longident.Lident ocaml_type_name)) [];
     c_of_ocaml; ocaml_of_c; }
 
 type translation_context = {
@@ -358,8 +358,8 @@ type translation_context = {
     enum_table : (common_type_info Lazy.t * enum_info) String_hashtbl.t;
     struct_table : (common_type_info Lazy.t * struct_info) String_hashtbl.t;
     used_type_table : unit String_hashtbl.t;
-    mutable sig_accu : Parsetree.signature_item list;
-    mutable struct_accu : Parsetree.structure_item list;
+    mutable sig_accu : Ppxlib.signature_item list;
+    mutable struct_accu : Ppxlib.structure_item list;
   }
 
 let create_translation_context module_interface chan_stubs =
@@ -392,7 +392,7 @@ let make_name_unique used_names name =
 
 exception Unknown_type
 
-let ocaml_string = Ast_helper.Typ.constr (loc (Longident.Lident "string")) []
+let ocaml_string = Ppxlib.Ast_helper.Typ.constr (loc (Longident.Lident "string")) []
 
 type elaborated_type =
   | Enum of string
@@ -422,10 +422,10 @@ let bool_info = make_common_type_info "bool"
 let not_bool_info = make_common_type_info "bool" ~converter:"not_bool"
 
 let ocaml_array ty =
-  Ast_helper.Typ.constr (loc (Longident.Lident "array")) [ty]
+  Ppxlib.Ast_helper.Typ.constr (loc (Longident.Lident "array")) [ty]
 
 let ocaml_option ty =
-  Ast_helper.Typ.constr (loc (Longident.Lident "option")) [ty]
+  Ppxlib.Ast_helper.Typ.constr (loc (Longident.Lident "option")) [ty]
 
 let string_type_info =
   { ocamltype = ocaml_string;
@@ -433,19 +433,19 @@ let string_type_info =
     ocaml_of_c = simple_converter "caml_copy_string"; }, Regular
 
 let int64_type_info =
-  { ocamltype = Ast_helper.Typ.constr (loc (Longident.Ldot (Longident.Lident "Int64", "t"))) [];
+  { ocamltype = Ppxlib.Ast_helper.Typ.constr (loc (Longident.Ldot (Longident.Lident "Int64", "t"))) [];
     c_of_ocaml = simple_converter "Int64_val";
     ocaml_of_c = simple_converter "copy_int64"; }, Regular
 
 let defined_set_of = String_hashtbl.create 17
 
 let add_sig_type context ty =
-  context.sig_accu <- Ast_helper.Sig.type_ Recursive ty :: context.sig_accu;
-  context.struct_accu <- Ast_helper.Str.type_ Recursive ty :: context.struct_accu
+  context.sig_accu <- Ppxlib.Ast_helper.Sig.type_ Recursive ty :: context.sig_accu;
+  context.struct_accu <- Ppxlib.Ast_helper.Str.type_ Recursive ty :: context.struct_accu
 
 let add_primitive context v =
-  context.sig_accu <- Ast_helper.Sig.value v :: context.sig_accu;
-  context.struct_accu <- Ast_helper.Str.primitive v :: context.struct_accu
+  context.sig_accu <- Ppxlib.Ast_helper.Sig.value v :: context.sig_accu;
+  context.struct_accu <- Ppxlib.Ast_helper.Str.primitive v :: context.struct_accu
 
 let escape_doc doc =
   Pcre.replace ~pat:"[][@{}]" ~templ:"\\$&" doc
@@ -454,9 +454,9 @@ let make_doc_attributes cur =
   match Clang.cursor_get_brief_comment_text cur with
   | None -> []
   | Some doc ->
-      [Ast_helper.Attr.mk (loc "ocaml.doc")
-         (Parsetree.PStr [Ast_helper.Str.eval
-           (Ast_helper.Exp.constant (Ast_helper.Const.string (escape_doc doc)))])]
+      [Ppxlib.Ast_helper.Attr.mk (loc "ocaml.doc")
+         (Ppxlib.PStr [Ppxlib.Ast_helper.Str.eval
+           (Ppxlib.Ast_helper.Exp.constant (Ppxlib.Ast_helper.Const.string (escape_doc doc)))])]
 
 let rec find_type_info ?(declare_abstract = true) ?parameters context type_interface ty =
   let find_enum_info type_name =
@@ -491,13 +491,13 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
         let ocaml_type_name =
           make_name_unique context.used_type_table ocaml_type_name in
         let ocamltype =
-          Ast_helper.Typ.constr (loc (Longident.Lident ocaml_type_name)) [] in
+          Ppxlib.Ast_helper.Typ.constr (loc (Longident.Lident ocaml_type_name)) [] in
         let common_info, type_info =
           { ocamltype; c_of_ocaml = simple_converter "";
             ocaml_of_c = simple_converter "" },
           Regular in
         String_hashtbl.add context.type_table type_name (lazy common_info, type_info);
-        add_sig_type context [Ast_helper.Type.mk (loc ocaml_type_name)];
+        add_sig_type context [Ppxlib.Ast_helper.Type.mk (loc ocaml_type_name)];
         common_info, type_info
         end
     | _ ->
@@ -506,7 +506,7 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
   let common_info, type_info =
   match Clang.get_type_kind ty with
   | Void ->
-      { ocamltype = Ast_helper.Typ.constr (loc (Longident.Lident "unit")) [];
+      { ocamltype = Ppxlib.Ast_helper.Typ.constr (loc (Longident.Lident "unit")) [];
         c_of_ocaml = (fun _ -> assert false);
         ocaml_of_c = (fun _ -> assert false); }, Void
   | UInt
@@ -524,7 +524,7 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
             let ocaml_type_name = String.lowercase_ascii enum in
             let mod_name = String.capitalize_ascii ocaml_type_name in
             let type_info =  
-  { ocamltype = Ast_helper.Typ.constr (loc (Longident.Ldot (Longident.Lident mod_name, "t"))) [];
+  { ocamltype = Ppxlib.Ast_helper.Typ.constr (loc (Longident.Ldot (Longident.Lident mod_name, "t"))) [];
     c_of_ocaml =
       simple_converter (name_of_c_of_ocaml "int");
     ocaml_of_c = simple_converter (name_of_ocaml_of_c "int"); } in
@@ -540,33 +540,33 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
                       | x, Enum enum_info -> x, enum_info
                       | _ -> assert false
                     with Not_found -> failwith ("not found " ^ enum) in
-                  let t = Ast_helper.Typ.constr (loc (Longident.Lident "t")) [] in
+                  let t = Ppxlib.Ast_helper.Typ.constr (loc (Longident.Lident "t")) [] in
                   let bind_value name value =
-                    (Ast_helper.Str.value Nonrecursive [Ast_helper.Vb.mk (Ast_helper.Pat.var (loc (Stubgen_common.uncamelcase name))) (Ast_helper.Exp.constant (Ast_helper.Const.int value))],
-                     Ast_helper.Sig.value (Ast_helper.Val.mk (loc (Stubgen_common.uncamelcase name)) t)) in
+                    (Ppxlib.Ast_helper.Str.value Nonrecursive [Ppxlib.Ast_helper.Vb.mk (Ppxlib.Ast_helper.Pat.var (loc (Stubgen_common.uncamelcase name))) (Ppxlib.Ast_helper.Exp.constant (Ppxlib.Ast_helper.Const.int value))],
+                     Ppxlib.Ast_helper.Sig.value (Ppxlib.Ast_helper.Val.mk (loc (Stubgen_common.uncamelcase name)) t)) in
                   let has_zero = enum_info.constructors |> List.exists @@ fun (_, _, value) -> value = 0 in
                   let zero_value =
                     if has_zero then []
                     else [bind_value "zero" 0] in
                   let items =
-                    (Ast_helper.Str.type_ Recursive [Ast_helper.Type.mk (loc "t") ~manifest:int_info.ocamltype],
-                     Ast_helper.Sig.type_ Recursive [Ast_helper.Type.mk (loc "t")]) ::
-                    (Ast_helper.Str.primitive (Ast_helper.Val.mk (loc "+") (Ast_helper.Typ.arrow Nolabel t (Ast_helper.Typ.arrow Nolabel t t)) ~prim:["%orint"]),
-                     Ast_helper.Sig.value (Ast_helper.Val.mk (loc "+") (Ast_helper.Typ.arrow Nolabel t (Ast_helper.Typ.arrow Nolabel t t)) ~prim:["%orint"])) ::
-                    (Ast_helper.Str.value Nonrecursive [Ast_helper.Vb.mk (Ast_helper.Pat.var (loc "-")) (Ast_helper.Exp.fun_ Nolabel None (Ast_helper.Pat.var (loc "x")) (Ast_helper.Exp.fun_ Nolabel None (Ast_helper.Pat.var (loc "y")) (Ast_helper.Exp.apply (Ast_helper.Exp.ident (loc (Longident.Lident "land"))) [Nolabel, Ast_helper.Exp.ident (loc (Longident.Lident "x")); Nolabel, Ast_helper.Exp.apply (Ast_helper.Exp.ident (loc (Longident.Lident "lnot"))) [Nolabel, Ast_helper.Exp.ident (loc (Longident.Lident "y"))]])))],
-                     Ast_helper.Sig.value (Ast_helper.Val.mk (loc "-") (Ast_helper.Typ.arrow Nolabel t (Ast_helper.Typ.arrow Nolabel t t)))) ::
-                    (Ast_helper.Str.primitive (Ast_helper.Val.mk (loc "&") (Ast_helper.Typ.arrow Nolabel t (Ast_helper.Typ.arrow Nolabel t t)) ~prim:["%andint"]),
-                     Ast_helper.Sig.value (Ast_helper.Val.mk (loc "&") (Ast_helper.Typ.arrow Nolabel t (Ast_helper.Typ.arrow Nolabel t t)) ~prim:["%andint"])) ::
-                    (Ast_helper.Str.primitive (Ast_helper.Val.mk (loc "*") (Ast_helper.Typ.arrow Nolabel t (Ast_helper.Typ.arrow Nolabel t t)) ~prim:["%xorint"]),
-                     Ast_helper.Sig.value (Ast_helper.Val.mk (loc "*") (Ast_helper.Typ.arrow Nolabel t (Ast_helper.Typ.arrow Nolabel t t)) ~prim:["%xorint"])) ::
-                    (Ast_helper.Str.value Nonrecursive [Ast_helper.Vb.mk (Ast_helper.Pat.var (loc "subset")) (Ast_helper.Exp.fun_ Nolabel None (Ast_helper.Pat.var (loc "x")) (Ast_helper.Exp.fun_ Nolabel None (Ast_helper.Pat.var (loc "y")) (Ast_helper.Exp.apply (Ast_helper.Exp.ident (loc (Longident.Lident "="))) [Nolabel, Ast_helper.Exp.apply (Ast_helper.Exp.ident (loc (Longident.Lident "-"))) [Nolabel, Ast_helper.Exp.ident (loc (Longident.Lident "y")); Nolabel, Ast_helper.Exp.ident (loc (Longident.Lident "x"))]; Nolabel, Ast_helper.Exp.constant (Ast_helper.Const.integer "0")])))],
-                     Ast_helper.Sig.value (Ast_helper.Val.mk (loc "subset") (Ast_helper.Typ.arrow Nolabel t (Ast_helper.Typ.arrow Nolabel t bool_info.ocamltype)))) ::
+                    (Ppxlib.Ast_helper.Str.type_ Recursive [Ppxlib.Ast_helper.Type.mk (loc "t") ~manifest:int_info.ocamltype],
+                     Ppxlib.Ast_helper.Sig.type_ Recursive [Ppxlib.Ast_helper.Type.mk (loc "t")]) ::
+                    (Ppxlib.Ast_helper.Str.primitive (Ppxlib.Ast_helper.Val.mk (loc "+") (Ppxlib.Ast_helper.Typ.arrow Nolabel t (Ppxlib.Ast_helper.Typ.arrow Nolabel t t)) ~prim:["%orint"]),
+                     Ppxlib.Ast_helper.Sig.value (Ppxlib.Ast_helper.Val.mk (loc "+") (Ppxlib.Ast_helper.Typ.arrow Nolabel t (Ppxlib.Ast_helper.Typ.arrow Nolabel t t)) ~prim:["%orint"])) ::
+                    (Ppxlib.Ast_helper.Str.value Nonrecursive [Ppxlib.Ast_helper.Vb.mk (Ppxlib.Ast_helper.Pat.var (loc "-")) (Ppxlib.Ast_helper.Exp.fun_ Nolabel None (Ppxlib.Ast_helper.Pat.var (loc "x")) (Ppxlib.Ast_helper.Exp.fun_ Nolabel None (Ppxlib.Ast_helper.Pat.var (loc "y")) (Ppxlib.Ast_helper.Exp.apply (Ppxlib.Ast_helper.Exp.ident (loc (Longident.Lident "land"))) [Nolabel, Ppxlib.Ast_helper.Exp.ident (loc (Longident.Lident "x")); Nolabel, Ppxlib.Ast_helper.Exp.apply (Ppxlib.Ast_helper.Exp.ident (loc (Longident.Lident "lnot"))) [Nolabel, Ppxlib.Ast_helper.Exp.ident (loc (Longident.Lident "y"))]])))],
+                     Ppxlib.Ast_helper.Sig.value (Ppxlib.Ast_helper.Val.mk (loc "-") (Ppxlib.Ast_helper.Typ.arrow Nolabel t (Ppxlib.Ast_helper.Typ.arrow Nolabel t t)))) ::
+                    (Ppxlib.Ast_helper.Str.primitive (Ppxlib.Ast_helper.Val.mk (loc "&") (Ppxlib.Ast_helper.Typ.arrow Nolabel t (Ppxlib.Ast_helper.Typ.arrow Nolabel t t)) ~prim:["%andint"]),
+                     Ppxlib.Ast_helper.Sig.value (Ppxlib.Ast_helper.Val.mk (loc "&") (Ppxlib.Ast_helper.Typ.arrow Nolabel t (Ppxlib.Ast_helper.Typ.arrow Nolabel t t)) ~prim:["%andint"])) ::
+                    (Ppxlib.Ast_helper.Str.primitive (Ppxlib.Ast_helper.Val.mk (loc "*") (Ppxlib.Ast_helper.Typ.arrow Nolabel t (Ppxlib.Ast_helper.Typ.arrow Nolabel t t)) ~prim:["%xorint"]),
+                     Ppxlib.Ast_helper.Sig.value (Ppxlib.Ast_helper.Val.mk (loc "*") (Ppxlib.Ast_helper.Typ.arrow Nolabel t (Ppxlib.Ast_helper.Typ.arrow Nolabel t t)) ~prim:["%xorint"])) ::
+                    (Ppxlib.Ast_helper.Str.value Nonrecursive [Ppxlib.Ast_helper.Vb.mk (Ppxlib.Ast_helper.Pat.var (loc "subset")) (Ppxlib.Ast_helper.Exp.fun_ Nolabel None (Ppxlib.Ast_helper.Pat.var (loc "x")) (Ppxlib.Ast_helper.Exp.fun_ Nolabel None (Ppxlib.Ast_helper.Pat.var (loc "y")) (Ppxlib.Ast_helper.Exp.apply (Ppxlib.Ast_helper.Exp.ident (loc (Longident.Lident "="))) [Nolabel, Ppxlib.Ast_helper.Exp.apply (Ppxlib.Ast_helper.Exp.ident (loc (Longident.Lident "-"))) [Nolabel, Ppxlib.Ast_helper.Exp.ident (loc (Longident.Lident "y")); Nolabel, Ppxlib.Ast_helper.Exp.ident (loc (Longident.Lident "x"))]; Nolabel, Ppxlib.Ast_helper.Exp.constant (Ppxlib.Ast_helper.Const.integer "0")])))],
+                     Ppxlib.Ast_helper.Sig.value (Ppxlib.Ast_helper.Val.mk (loc "subset") (Ppxlib.Ast_helper.Typ.arrow Nolabel t (Ppxlib.Ast_helper.Typ.arrow Nolabel t bool_info.ocamltype)))) ::
                     zero_value @
                     (enum_info.constructors |> List.map @@ fun (_, ocaml_name, value) ->
                       bind_value ocaml_name value) in
                   let m, s = List.split items  in
-                  context.sig_accu <- Ast_helper.Sig.module_ (Metapp.Md.mk (loc (Some mod_name)) (Ast_helper.Mty.signature s)) :: context.sig_accu;
-                  context.struct_accu <- Ast_helper.Str.module_ (Metapp.Mb.mk (loc (Some mod_name)) (Ast_helper.Mod.structure m)) :: context.struct_accu
+                  context.sig_accu <- Ppxlib.Ast_helper.Sig.module_ (Metapp.Md.mk (loc (Some mod_name)) (Ppxlib.Ast_helper.Mty.signature s)) :: context.sig_accu;
+                  context.struct_accu <- Ppxlib.Ast_helper.Str.module_ (Metapp.Mb.mk (loc (Some mod_name)) (Ppxlib.Ast_helper.Mod.structure m)) :: context.struct_accu
                 end in
             type_info, Regular
         | None -> int_info, Regular
@@ -575,7 +575,7 @@ let rec find_type_info ?(declare_abstract = true) ?parameters context type_inter
   | Bool ->
       bool_info, Bool
   | Float | Double ->
-      { ocamltype = Ast_helper.Typ.constr (loc (Longident.Lident "float")) [];
+      { ocamltype = Ppxlib.Ast_helper.Typ.constr (loc (Longident.Lident "float")) [];
         c_of_ocaml = simple_converter "Double_val";
         ocaml_of_c = simple_converter "caml_copy_double"; }, Regular
   | Pointer when Clang.get_type_kind (Clang.get_pointee_type ty) = Char_S ->
@@ -674,7 +674,7 @@ tgt); }, Regular
         let element = Clang.get_array_element_type ty in
         let size = Clang.get_array_size ty in
         let element_type_info, _ = find_type_info ~declare_abstract context empty_type_interface element in
-        { ocamltype = Ast_helper.Typ.tuple (List.init size (fun _ -> element_type_info.ocamltype));
+        { ocamltype = Ppxlib.Ast_helper.Typ.tuple (List.init size (fun _ -> element_type_info.ocamltype));
           c_of_ocaml = (fun channel ~src ~params ~references ~tgt ->
                 Printf.fprintf channel "
 CAMLlocal1(ocaml_field);
@@ -751,9 +751,9 @@ for (size_t i = 0; i < %d; i++) {
 
 let make_tuple list =
   match list with
-  | [] -> Ast_helper.Typ.constr (loc (Longident.Lident "unit")) []
+  | [] -> Ppxlib.Ast_helper.Typ.constr (loc (Longident.Lident "unit")) []
   | [ty] -> ty
-  | _ -> Ast_helper.Typ.tuple list
+  | _ -> Ppxlib.Ast_helper.Typ.tuple list
 
 type 'a output = {
     desc : 'a;
@@ -780,7 +780,7 @@ let translate_type_info ?(outputs = []) (common_info, type_info) =
       let ocaml_type =
         match enum_info.result with
         | Some _ ->
-            Ast_helper.Typ.constr (loc (Longident.Lident "result"))
+            Ppxlib.Ast_helper.Typ.constr (loc (Longident.Lident "result"))
               [make_tuple (desc_on_success outputs); make_tuple (common_info.ocamltype :: desc_on_error outputs)]
         | None -> common_info.ocamltype in
       ocaml_type
@@ -1069,11 +1069,11 @@ let translate_struct_decl' context cur typedef name =
     let type_name =
       if typedef then name
       else Printf.sprintf "struct %s" name in
-    let (kind : Parsetree.type_kind), manifest =
+    let (kind : Ppxlib.type_kind), manifest =
       match Lazy.force record_fields with
       | None ->
           declare_opaque context type_name ocaml_type_name type_interface;
-          Parsetree.Ptype_abstract, None
+          Ppxlib.Ptype_abstract, None
       | Some fields ->
           let nb_fields = List.length fields in
           let val_field tgt channel field =
@@ -1164,7 +1164,7 @@ static %s __attribute__((unused))
 " type_name;
           let fields = fields |> List.map @@ fun (field, cur) ->
             let attrs = make_doc_attributes cur in
-            Ast_helper.Type.field (loc (String.lowercase_ascii (field_name field)))
+            Ppxlib.Ast_helper.Type.field (loc (String.lowercase_ascii (field_name field)))
               (translate_field_type field) ~attrs in
                 Ptype_record fields, None in
     let attrs = make_doc_attributes cur in
@@ -1173,7 +1173,7 @@ static %s __attribute__((unused))
       | Ptype_abstract -> attrs
       | _ -> deriving_attr () :: attrs in
     let type_decl =
-      Ast_helper.Type.mk (loc ocaml_type_name) ~kind ~attrs ?manifest in
+      Ppxlib.Ast_helper.Type.mk (loc ocaml_type_name) ~kind ~attrs ?manifest in
     add_sig_type context [type_decl] in
   let decl_made = ref false in
   let make_decl () =
@@ -1215,9 +1215,9 @@ CAMLparam1(arg_ocaml);
     let prim = [stub_name] in
     let field_type_info, _ =
       find_type_info context empty_type_interface field_type in
-    let pval_type = Ast_helper.Typ.arrow Nolabel common_info.ocamltype
+    let pval_type = Ppxlib.Ast_helper.Typ.arrow Nolabel common_info.ocamltype
       field_type_info.ocamltype in
-    let desc = Ast_helper.Val.mk (loc accessor_name) pval_type ~prim in
+    let desc = Ppxlib.Ast_helper.Val.mk (loc accessor_name) pval_type ~prim in
     add_primitive context desc in
   List.iter print_accessor interface.accessors
 
@@ -1304,7 +1304,7 @@ let translate_enum_decl context cur =
   let ocaml_constructors =
     List.map (fun (_, name, (_, cur)) ->
       let attrs = make_doc_attributes cur in
-      Ast_helper.Type.constructor (loc (String.capitalize_ascii name)) ~attrs)
+      Ppxlib.Ast_helper.Type.constructor (loc (String.capitalize_ascii name)) ~attrs)
       constructors in
   let common_info = make_common_type_info ~type_interface ocaml_type_name in
   let enum_info = { result; constructors = List.map (fun (a, b, (c, _)) -> (a, b, c)) constructors } in
@@ -1350,7 +1350,7 @@ let translate_enum_decl context cur =
       (name_of_ocaml_of_c ocaml_type_name);
     let doc_attributes = make_doc_attributes cur in
     let type_decl =
-      Ast_helper.Type.mk ~kind:(Ptype_variant ocaml_constructors)
+      Ppxlib.Ast_helper.Type.mk ~kind:(Ptype_variant ocaml_constructors)
         ~attrs:(deriving_attr () :: doc_attributes @ interface.attributes)
         (loc ocaml_type_name) in
     add_sig_type context [type_decl] in
@@ -1400,7 +1400,7 @@ let translate_typedef_decl context cur =
       let common_info = make_common_type_info ~type_interface ocaml_type_name in
       let make_decl () =
         declare_opaque context name ocaml_type_name type_interface;
-        let type_decl = Ast_helper.Type.mk (loc ocaml_type_name) in
+        let type_decl = Ppxlib.Ast_helper.Type.mk (loc ocaml_type_name) in
         add_sig_type context [type_decl] in
       String_hashtbl.add context.type_table name
         (lazy (make_decl (); common_info), Regular);
@@ -1449,7 +1449,7 @@ let translate_argument_type context type_interface ty =
         if j = data_callee then
           j, accu
         else
-          j, Ast_helper.Typ.arrow Nolabel (translate_type context empty_type_interface arg_type) accu in
+          j, Ppxlib.Ast_helper.Typ.arrow Nolabel (translate_type context empty_type_interface arg_type) accu in
       snd (Array.fold_right build_closure_type closure_args
         (Array.length closure_args, translate_type context empty_type_interface closure_result))
 
@@ -1711,7 +1711,7 @@ let translate_function_decl context cur =
   let result_ty = translate_type_info ~outputs:(List.map (fun o -> { o with desc = translate_type_info (snd o.desc) }) real_outputs) result_type_info in
   let pval_type =
     if num_args = 0 then
-      Ast_helper.Typ.arrow Nolabel (Ast_helper.Typ.constr (loc (Longident.Lident "unit")) []) result_ty
+      Ppxlib.Ast_helper.Typ.arrow Nolabel (Ppxlib.Ast_helper.Typ.constr (loc (Longident.Lident "unit")) []) result_ty
     else
       let arg_types = Hashtbl.create 17 in
       let arg_list =
@@ -1736,10 +1736,10 @@ let translate_function_decl context cur =
       List.fold_right begin fun (unique, name, ty) pval_type ->
         let label =
           if not function_interface.label_unique || !unique then
-            Asttypes.Nolabel
+            Ppxlib.Asttypes.Nolabel
           else
-            Asttypes.Labelled (Stubgen_common.uncamelcase name) in
-        Ast_helper.Typ.arrow label ty pval_type
+            Ppxlib.Asttypes.Labelled (Stubgen_common.uncamelcase name) in
+        Ppxlib.Ast_helper.Typ.arrow label ty pval_type
       end arg_list result_ty in
   let wrapper_name = name ^ "_wrapper" in
   let ocaml_arg_names = Array.map2 (fun arg arg_name ->
@@ -1909,7 +1909,7 @@ let translate_function_decl context cur =
               (fun i -> Printf.sprintf "argv[%d]" i)));
       [bytecode_name; wrapper_name] in
   let attrs = make_doc_attributes cur in
-  let desc = Ast_helper.Val.mk pval_name pval_type ~prim ~attrs in
+  let desc = Ppxlib.Ast_helper.Val.mk pval_name pval_type ~prim ~attrs in
   add_primitive context desc
 
 let rename_clang name =
@@ -2283,12 +2283,12 @@ let main cflags llvm_config prefix =
     Fun.protect ~finally:(fun () -> close_out chan_intf) (fun () ->
       Stubgen_common.output_warning_ml chan_intf tool_name;
       Format.fprintf (Format.formatter_of_out_channel chan_intf)
-        "%a@." Pprintast.signature (List.rev context.sig_accu));
+        "%a@." Ppxlib.Pprintast.signature (List.rev context.sig_accu));
     let chan_impl = open_out (prefix ^ "clang__bindings.ml") in
     Fun.protect ~finally:(fun () -> close_out chan_intf) (fun () ->
       Stubgen_common.output_warning_ml chan_impl tool_name;
       Format.fprintf (Format.formatter_of_out_channel chan_impl)
-        "%a@." Pprintast.structure (List.rev context.struct_accu)))
+        "%a@." Ppxlib.Pprintast.structure (List.rev context.struct_accu)))
 
 let info =
   let doc = "generate stubs for ClangML" in
