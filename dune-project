@@ -9,7 +9,7 @@
 (homepage "https://memcad.gitlabpages.inria.fr/clangml/")
 (bug_reports "https://gitlab.inria.fr/memcad/clangml/issues")
 (documentation "https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/index.html")
-(version "4.2.0")
+(version "4.3.0")
 
 (package
  (name clangml)
@@ -27,7 +27,7 @@ clangml provides bindings to call the Clang API from OCaml.
   (ocamlfind (and :build (>= 1.8.0)))
   (ocamlcodoc (and :with-test (>= 1.0.1)))
   (pattern (and :with-test (>= 0.2.0)))
-  (metapp (>= 0.1.0))
-  (metaquot (>= 0.1.0))
-  (refl (>= 0.2.0))
+  (metapp (>= 0.3.0))
+  (metaquot (>= 0.3.0))
+  (refl (>= 0.3.0))
   (odoc (and :with-doc (>= 1.5.1)))))

@@ -4,7 +4,7 @@
 module type S = Ast_sig.S
 
 [%%metadef
-let node_module s = Ast_helper.Mod.structure [%str
+let node_module s = Ppxlib.Ast_helper.Mod.structure [%str
   module Self = struct
     [%%meta Metapp.Stri.of_list s]
 
@@ -155,7 +155,7 @@ end
 
 module Custom (Node : Clang__ast.NodeS) = struct
 
-[%%meta Metapp.Stri.of_list (Metapp.filter.structure Metapp.filter [%str
+[%%meta Metapp.Stri.of_list ((new Metapp.filter)#structure [%str
 module Ast = struct
   include Clang__ast.Common
 

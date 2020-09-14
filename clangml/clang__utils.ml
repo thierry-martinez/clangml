@@ -285,7 +285,7 @@ let is_signed_integer (ty : cxtypekind) =
 let is_integer (ty : cxtypekind) =
   is_unsigned_integer ty || is_signed_integer ty
 
-[%%meta Metapp.Stri.of_list (Metapp.filter.structure Metapp.filter [%str
+[%%meta Metapp.Stri.of_list ((new Metapp.filter)#structure [%str
 let is_floating_point (ty : cxtypekind) =
   match ty with
   | Float | Double | LongDouble -> true
