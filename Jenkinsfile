@@ -26,7 +26,6 @@ pipeline {
     stages {
         stage('Prepare') {
             steps {
-                sh "echo $env.JOB_NAME"
                 sh 'mkdir src'
                 sh 'mv * src/ || true'
                 sh '''
@@ -179,7 +178,7 @@ pipeline {
         stage('opam installation from snapshot') {
             steps {
                 script {
-                    def repo = env.JOB_BASE_NAME == "perso" ? "tmartine" : "memcad"
+                    def repo = env.JOB_NAME == "perso/master" ? "tmartine" : "memcad"
                     opam_installations(
                         ["4.10"],
 "https://gitlab.inria.fr/$repo/clangml/-/archive/snapshot/clangml-snapshot.tar.gz")
