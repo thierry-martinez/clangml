@@ -26,6 +26,7 @@ pipeline {
     stages {
         stage('Prepare') {
             steps {
+                sh "echo $env.JOB_BASE_NAME"
                 sh 'mkdir src'
                 sh 'mv * src/ || true'
                 sh '''
