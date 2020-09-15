@@ -178,9 +178,10 @@ pipeline {
         stage('opam installation from snapshot') {
             steps {
                 script {
+                    def repo = env.JOB_BASE_NAME == "perso" ? "tmartine" : "memcad"
                     opam_installations(
                         ["4.10"],
-"https://gitlab.inria.fr/memcad/clangml/-/archive/snapshot/clangml-snapshot.tar.gz")
+"https://gitlab.inria.fr/$repo/clangml/-/archive/snapshot/clangml-snapshot.tar.gz")
                 }
             }
         }
