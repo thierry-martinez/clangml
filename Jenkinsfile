@@ -38,8 +38,8 @@ pipeline {
             }
         }
         stage('Configure') {
-            timeout(time: 2, unit: 'MINUTES') {
-                steps {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
                     sh '''
                         eval $(opam env) && \
                         mkdir build && cd build && \
@@ -50,8 +50,8 @@ pipeline {
             }
         }
         stage('Build') {
-            timeout(time: 2, unit: 'MINUTES') {
-                steps {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
                     sh 'make -C build clangml'
                     sh 'make -C build clangml.opam && cp build/clangml.opam src/'
                     sh 'make -C build tools/stubgen'
