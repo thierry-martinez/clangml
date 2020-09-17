@@ -38,22 +38,26 @@ pipeline {
             }
         }
         stage('Configure') {
-            steps {
-                sh '''
-                    eval $(opam env) && \
-                    mkdir build && cd build && \
-                    ../src/configure \
-                        --with-llvm-config=/media/llvms/11.0.0/bin/llvm-config
-                   '''
+            timeout(time: 2, unit: 'MINUTES') {
+                steps {
+                    sh '''
+                        eval $(opam env) && \
+                        mkdir build && cd build && \
+                        ../src/configure \
+                            --with-llvm-config=/media/llvms/11.0.0/bin/llvm-config
+                       '''
+                }
             }
         }
         stage('Build') {
-            steps {
-                sh 'make -C build clangml'
-                sh 'make -C build clangml.opam && cp build/clangml.opam src/'
-                sh 'make -C build tools/stubgen'
-                sh 'make -C build tools/norm_extractor'
-                sh 'make -C build tools/generate_attrs'
+            timeout(time: 2, unit: 'MINUTES') {
+                steps {
+                    sh 'make -C build clangml'
+                    sh 'make -C build clangml.opam && cp build/clangml.opam src/'
+                    sh 'make -C build tools/stubgen'
+                    sh 'make -C build tools/norm_extractor'
+                    sh 'make -C build tools/generate_attrs'
+                }
             }
         }
         stage('Generate attributes') {
