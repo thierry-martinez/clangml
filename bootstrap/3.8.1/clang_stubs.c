@@ -5544,12 +5544,12 @@ clang_ext_ForStmt_getChildrenSet_wrapper(value c_ocaml)
 }
 
 CAMLprim value
-clang_ext_IfStmt_getChildrenSet_wrapper(value c_ocaml)
+clang_ext_IfStmt_getChildrenSet_wrapper(value arg_ocaml)
 {
-  CAMLparam1(c_ocaml);
-  CXCursor c;
-  c = Cxcursor_val(Field(c_ocaml, 0));
-  unsigned int result = clang_ext_IfStmt_getChildrenSet(c);
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int result = clang_ext_IfStmt_getChildrenSet(arg);
   {
     CAMLlocal1(data);
     data = Val_int(result);
@@ -5558,17 +5558,81 @@ clang_ext_IfStmt_getChildrenSet_wrapper(value c_ocaml)
 }
 
 CAMLprim value
-clang_ext_IfStmt_getInit_wrapper(value c_ocaml)
+clang_ext_IfStmt_getInit_wrapper(value arg_ocaml)
 {
-  CAMLparam1(c_ocaml);
-  CXCursor c;
-  c = Cxcursor_val(Field(c_ocaml, 0));
-  CXCursor result = clang_ext_IfStmt_getInit(c);
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  CXCursor result = clang_ext_IfStmt_getInit(arg);
   {
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxcursor(result));
-  Store_field(data, 1, safe_field(c_ocaml, 1));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_IfStmt_getConditionVariable_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  CXCursor result = clang_ext_IfStmt_getConditionVariable(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_IfStmt_getCond_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  CXCursor result = clang_ext_IfStmt_getCond(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_IfStmt_getThen_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  CXCursor result = clang_ext_IfStmt_getThen(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_IfStmt_getElse_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  CXCursor result = clang_ext_IfStmt_getElse(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -10343,6 +10407,356 @@ clang_ext_Type_getUnqualifiedType_wrapper(value arg_ocaml)
   }
 }
 
+enum clang_ext_AArch64VectorPcs_spelling
+Clang_ext_aarch64vectorpcs_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AArch64VectorPcs_GNU_aarch64_vector_pcs;
+  case 1: return clang_ext_AArch64VectorPcs_CXX11_clang_aarch64_vector_pcs;
+  case 2: return clang_ext_AArch64VectorPcs_C2x_clang_aarch64_vector_pcs;
+  case 3: return clang_ext_AArch64VectorPcs_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_aarch64vectorpcs_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AArch64VectorPcs_GNU_aarch64_vector_pcs;
+}
+
+value
+Val_clang_ext_aarch64vectorpcs_spelling(enum clang_ext_AArch64VectorPcs_spelling v)
+{
+  switch (v) {
+  case clang_ext_AArch64VectorPcs_GNU_aarch64_vector_pcs: return Val_int(0);
+  case clang_ext_AArch64VectorPcs_CXX11_clang_aarch64_vector_pcs: return Val_int(1);
+  case clang_ext_AArch64VectorPcs_C2x_clang_aarch64_vector_pcs: return Val_int(2);
+  case clang_ext_AArch64VectorPcs_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_aarch64vectorpcs_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AArch64VectorPcs_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AArch64VectorPcs_spelling result = clang_ext_AArch64VectorPcs_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_aarch64vectorpcs_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_AMDGPUFlatWorkGroupSize_spelling
+Clang_ext_amdgpuflatworkgroupsize_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AMDGPUFlatWorkGroupSize_GNU_amdgpu_flat_work_group_size;
+  case 1: return clang_ext_AMDGPUFlatWorkGroupSize_CXX11_clang_amdgpu_flat_work_group_size;
+  case 2: return clang_ext_AMDGPUFlatWorkGroupSize_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_amdgpuflatworkgroupsize_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AMDGPUFlatWorkGroupSize_GNU_amdgpu_flat_work_group_size;
+}
+
+value
+Val_clang_ext_amdgpuflatworkgroupsize_spelling(enum clang_ext_AMDGPUFlatWorkGroupSize_spelling v)
+{
+  switch (v) {
+  case clang_ext_AMDGPUFlatWorkGroupSize_GNU_amdgpu_flat_work_group_size: return Val_int(0);
+  case clang_ext_AMDGPUFlatWorkGroupSize_CXX11_clang_amdgpu_flat_work_group_size: return Val_int(1);
+  case clang_ext_AMDGPUFlatWorkGroupSize_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_amdgpuflatworkgroupsize_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AMDGPUFlatWorkGroupSize_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AMDGPUFlatWorkGroupSize_spelling result = clang_ext_AMDGPUFlatWorkGroupSize_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_amdgpuflatworkgroupsize_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_AMDGPUNumSGPR_spelling
+Clang_ext_amdgpunumsgpr_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AMDGPUNumSGPR_GNU_amdgpu_num_sgpr;
+  case 1: return clang_ext_AMDGPUNumSGPR_CXX11_clang_amdgpu_num_sgpr;
+  case 2: return clang_ext_AMDGPUNumSGPR_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_amdgpunumsgpr_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AMDGPUNumSGPR_GNU_amdgpu_num_sgpr;
+}
+
+value
+Val_clang_ext_amdgpunumsgpr_spelling(enum clang_ext_AMDGPUNumSGPR_spelling v)
+{
+  switch (v) {
+  case clang_ext_AMDGPUNumSGPR_GNU_amdgpu_num_sgpr: return Val_int(0);
+  case clang_ext_AMDGPUNumSGPR_CXX11_clang_amdgpu_num_sgpr: return Val_int(1);
+  case clang_ext_AMDGPUNumSGPR_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_amdgpunumsgpr_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AMDGPUNumSGPR_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AMDGPUNumSGPR_spelling result = clang_ext_AMDGPUNumSGPR_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_amdgpunumsgpr_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_AMDGPUNumVGPR_spelling
+Clang_ext_amdgpunumvgpr_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AMDGPUNumVGPR_GNU_amdgpu_num_vgpr;
+  case 1: return clang_ext_AMDGPUNumVGPR_CXX11_clang_amdgpu_num_vgpr;
+  case 2: return clang_ext_AMDGPUNumVGPR_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_amdgpunumvgpr_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AMDGPUNumVGPR_GNU_amdgpu_num_vgpr;
+}
+
+value
+Val_clang_ext_amdgpunumvgpr_spelling(enum clang_ext_AMDGPUNumVGPR_spelling v)
+{
+  switch (v) {
+  case clang_ext_AMDGPUNumVGPR_GNU_amdgpu_num_vgpr: return Val_int(0);
+  case clang_ext_AMDGPUNumVGPR_CXX11_clang_amdgpu_num_vgpr: return Val_int(1);
+  case clang_ext_AMDGPUNumVGPR_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_amdgpunumvgpr_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AMDGPUNumVGPR_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AMDGPUNumVGPR_spelling result = clang_ext_AMDGPUNumVGPR_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_amdgpunumvgpr_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_AMDGPUWavesPerEU_spelling
+Clang_ext_amdgpuwavespereu_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AMDGPUWavesPerEU_GNU_amdgpu_waves_per_eu;
+  case 1: return clang_ext_AMDGPUWavesPerEU_CXX11_clang_amdgpu_waves_per_eu;
+  case 2: return clang_ext_AMDGPUWavesPerEU_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_amdgpuwavespereu_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AMDGPUWavesPerEU_GNU_amdgpu_waves_per_eu;
+}
+
+value
+Val_clang_ext_amdgpuwavespereu_spelling(enum clang_ext_AMDGPUWavesPerEU_spelling v)
+{
+  switch (v) {
+  case clang_ext_AMDGPUWavesPerEU_GNU_amdgpu_waves_per_eu: return Val_int(0);
+  case clang_ext_AMDGPUWavesPerEU_CXX11_clang_amdgpu_waves_per_eu: return Val_int(1);
+  case clang_ext_AMDGPUWavesPerEU_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_amdgpuwavespereu_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AMDGPUWavesPerEU_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AMDGPUWavesPerEU_spelling result = clang_ext_AMDGPUWavesPerEU_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_amdgpuwavespereu_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ARMInterrupt_spelling
+Clang_ext_arminterrupt_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ARMInterrupt_GNU_interrupt;
+  case 1: return clang_ext_ARMInterrupt_CXX11_gnu_interrupt;
+  case 2: return clang_ext_ARMInterrupt_C2x_gnu_interrupt;
+  case 3: return clang_ext_ARMInterrupt_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_arminterrupt_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ARMInterrupt_GNU_interrupt;
+}
+
+value
+Val_clang_ext_arminterrupt_spelling(enum clang_ext_ARMInterrupt_spelling v)
+{
+  switch (v) {
+  case clang_ext_ARMInterrupt_GNU_interrupt: return Val_int(0);
+  case clang_ext_ARMInterrupt_CXX11_gnu_interrupt: return Val_int(1);
+  case clang_ext_ARMInterrupt_C2x_gnu_interrupt: return Val_int(2);
+  case clang_ext_ARMInterrupt_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_arminterrupt_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ARMInterrupt_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ARMInterrupt_spelling result = clang_ext_ARMInterrupt_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_arminterrupt_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_AVRInterrupt_spelling
+Clang_ext_avrinterrupt_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AVRInterrupt_GNU_interrupt;
+  case 1: return clang_ext_AVRInterrupt_CXX11_gnu_interrupt;
+  case 2: return clang_ext_AVRInterrupt_C2x_gnu_interrupt;
+  case 3: return clang_ext_AVRInterrupt_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_avrinterrupt_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AVRInterrupt_GNU_interrupt;
+}
+
+value
+Val_clang_ext_avrinterrupt_spelling(enum clang_ext_AVRInterrupt_spelling v)
+{
+  switch (v) {
+  case clang_ext_AVRInterrupt_GNU_interrupt: return Val_int(0);
+  case clang_ext_AVRInterrupt_CXX11_gnu_interrupt: return Val_int(1);
+  case clang_ext_AVRInterrupt_C2x_gnu_interrupt: return Val_int(2);
+  case clang_ext_AVRInterrupt_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_avrinterrupt_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AVRInterrupt_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AVRInterrupt_spelling result = clang_ext_AVRInterrupt_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_avrinterrupt_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_AVRSignal_spelling
+Clang_ext_avrsignal_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AVRSignal_GNU_signal;
+  case 1: return clang_ext_AVRSignal_CXX11_gnu_signal;
+  case 2: return clang_ext_AVRSignal_C2x_gnu_signal;
+  case 3: return clang_ext_AVRSignal_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_avrsignal_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AVRSignal_GNU_signal;
+}
+
+value
+Val_clang_ext_avrsignal_spelling(enum clang_ext_AVRSignal_spelling v)
+{
+  switch (v) {
+  case clang_ext_AVRSignal_GNU_signal: return Val_int(0);
+  case clang_ext_AVRSignal_CXX11_gnu_signal: return Val_int(1);
+  case clang_ext_AVRSignal_C2x_gnu_signal: return Val_int(2);
+  case clang_ext_AVRSignal_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_avrsignal_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AVRSignal_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AVRSignal_spelling result = clang_ext_AVRSignal_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_avrsignal_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_AbiTag_spelling
+Clang_ext_abitag_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AbiTag_GNU_abi_tag;
+  case 1: return clang_ext_AbiTag_CXX11_gnu_abi_tag;
+  case 2: return clang_ext_AbiTag_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_abitag_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AbiTag_GNU_abi_tag;
+}
+
+value
+Val_clang_ext_abitag_spelling(enum clang_ext_AbiTag_spelling v)
+{
+  switch (v) {
+  case clang_ext_AbiTag_GNU_abi_tag: return Val_int(0);
+  case clang_ext_AbiTag_CXX11_gnu_abi_tag: return Val_int(1);
+  case clang_ext_AbiTag_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_abitag_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AbiTag_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AbiTag_spelling result = clang_ext_AbiTag_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_abitag_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_AcquireCapability_spelling
 Clang_ext_acquirecapability_spelling_val(value ocaml)
 {
@@ -10389,16 +10803,137 @@ clang_ext_AcquireCapability_getSpelling_wrapper(value cursor_ocaml)
   }
 }
 
+enum clang_ext_AcquireHandle_spelling
+Clang_ext_acquirehandle_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AcquireHandle_GNU_acquire_handle;
+  case 1: return clang_ext_AcquireHandle_CXX11_clang_acquire_handle;
+  case 2: return clang_ext_AcquireHandle_C2x_clang_acquire_handle;
+  case 3: return clang_ext_AcquireHandle_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_acquirehandle_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AcquireHandle_GNU_acquire_handle;
+}
+
+value
+Val_clang_ext_acquirehandle_spelling(enum clang_ext_AcquireHandle_spelling v)
+{
+  switch (v) {
+  case clang_ext_AcquireHandle_GNU_acquire_handle: return Val_int(0);
+  case clang_ext_AcquireHandle_CXX11_clang_acquire_handle: return Val_int(1);
+  case clang_ext_AcquireHandle_C2x_clang_acquire_handle: return Val_int(2);
+  case clang_ext_AcquireHandle_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_acquirehandle_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AcquireHandle_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AcquireHandle_spelling result = clang_ext_AcquireHandle_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_acquirehandle_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_AddressSpace_spelling
+Clang_ext_addressspace_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AddressSpace_GNU_address_space;
+  case 1: return clang_ext_AddressSpace_CXX11_clang_address_space;
+  case 2: return clang_ext_AddressSpace_C2x_clang_address_space;
+  case 3: return clang_ext_AddressSpace_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_addressspace_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AddressSpace_GNU_address_space;
+}
+
+value
+Val_clang_ext_addressspace_spelling(enum clang_ext_AddressSpace_spelling v)
+{
+  switch (v) {
+  case clang_ext_AddressSpace_GNU_address_space: return Val_int(0);
+  case clang_ext_AddressSpace_CXX11_clang_address_space: return Val_int(1);
+  case clang_ext_AddressSpace_C2x_clang_address_space: return Val_int(2);
+  case clang_ext_AddressSpace_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_addressspace_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AddressSpace_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AddressSpace_spelling result = clang_ext_AddressSpace_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_addressspace_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Alias_spelling
+Clang_ext_alias_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Alias_GNU_alias;
+  case 1: return clang_ext_Alias_CXX11_gnu_alias;
+  case 2: return clang_ext_Alias_C2x_gnu_alias;
+  case 3: return clang_ext_Alias_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_alias_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Alias_GNU_alias;
+}
+
+value
+Val_clang_ext_alias_spelling(enum clang_ext_Alias_spelling v)
+{
+  switch (v) {
+  case clang_ext_Alias_GNU_alias: return Val_int(0);
+  case clang_ext_Alias_CXX11_gnu_alias: return Val_int(1);
+  case clang_ext_Alias_C2x_gnu_alias: return Val_int(2);
+  case clang_ext_Alias_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_alias_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Alias_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Alias_spelling result = clang_ext_Alias_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_alias_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_Aligned_spelling
 Clang_ext_aligned_spelling_val(value ocaml)
 {
   switch (Int_val(ocaml)) {
   case 0: return clang_ext_Aligned_GNU_aligned;
   case 1: return clang_ext_Aligned_CXX11_gnu_aligned;
-  case 2: return clang_ext_Aligned_Declspec_align;
-  case 3: return clang_ext_Aligned_Keyword_alignas;
-  case 4: return clang_ext_Aligned_Keyword_Alignas;
-  case 5: return clang_ext_Aligned_SpellingNotCalculated;
+  case 2: return clang_ext_Aligned_C2x_gnu_aligned;
+  case 3: return clang_ext_Aligned_Declspec_align;
+  case 4: return clang_ext_Aligned_Keyword_alignas;
+  case 5: return clang_ext_Aligned_Keyword_Alignas;
+  case 6: return clang_ext_Aligned_SpellingNotCalculated;
   }
   failwith_fmt("invalid value for Clang_ext_aligned_spelling_val: %d", Int_val(ocaml));
   return clang_ext_Aligned_GNU_aligned;
@@ -10410,10 +10945,11 @@ Val_clang_ext_aligned_spelling(enum clang_ext_Aligned_spelling v)
   switch (v) {
   case clang_ext_Aligned_GNU_aligned: return Val_int(0);
   case clang_ext_Aligned_CXX11_gnu_aligned: return Val_int(1);
-  case clang_ext_Aligned_Declspec_align: return Val_int(2);
-  case clang_ext_Aligned_Keyword_alignas: return Val_int(3);
-  case clang_ext_Aligned_Keyword_Alignas: return Val_int(4);
-  case clang_ext_Aligned_SpellingNotCalculated: return Val_int(5);
+  case clang_ext_Aligned_C2x_gnu_aligned: return Val_int(2);
+  case clang_ext_Aligned_Declspec_align: return Val_int(3);
+  case clang_ext_Aligned_Keyword_alignas: return Val_int(4);
+  case clang_ext_Aligned_Keyword_Alignas: return Val_int(5);
+  case clang_ext_Aligned_SpellingNotCalculated: return Val_int(6);
   }
   failwith_fmt("invalid value for Val_clang_ext_aligned_spelling: %d", v);
   return Val_int(0);
@@ -10433,14 +10969,133 @@ clang_ext_Aligned_getSpelling_wrapper(value cursor_ocaml)
   }
 }
 
+enum clang_ext_AllocAlign_spelling
+Clang_ext_allocalign_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AllocAlign_GNU_alloc_align;
+  case 1: return clang_ext_AllocAlign_CXX11_gnu_alloc_align;
+  case 2: return clang_ext_AllocAlign_C2x_gnu_alloc_align;
+  case 3: return clang_ext_AllocAlign_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_allocalign_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AllocAlign_GNU_alloc_align;
+}
+
+value
+Val_clang_ext_allocalign_spelling(enum clang_ext_AllocAlign_spelling v)
+{
+  switch (v) {
+  case clang_ext_AllocAlign_GNU_alloc_align: return Val_int(0);
+  case clang_ext_AllocAlign_CXX11_gnu_alloc_align: return Val_int(1);
+  case clang_ext_AllocAlign_C2x_gnu_alloc_align: return Val_int(2);
+  case clang_ext_AllocAlign_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_allocalign_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AllocAlign_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AllocAlign_spelling result = clang_ext_AllocAlign_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_allocalign_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_AllocSize_spelling
+Clang_ext_allocsize_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AllocSize_GNU_alloc_size;
+  case 1: return clang_ext_AllocSize_CXX11_gnu_alloc_size;
+  case 2: return clang_ext_AllocSize_C2x_gnu_alloc_size;
+  case 3: return clang_ext_AllocSize_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_allocsize_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AllocSize_GNU_alloc_size;
+}
+
+value
+Val_clang_ext_allocsize_spelling(enum clang_ext_AllocSize_spelling v)
+{
+  switch (v) {
+  case clang_ext_AllocSize_GNU_alloc_size: return Val_int(0);
+  case clang_ext_AllocSize_CXX11_gnu_alloc_size: return Val_int(1);
+  case clang_ext_AllocSize_C2x_gnu_alloc_size: return Val_int(2);
+  case clang_ext_AllocSize_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_allocsize_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AllocSize_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AllocSize_spelling result = clang_ext_AllocSize_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_allocsize_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_AlwaysDestroy_spelling
+Clang_ext_alwaysdestroy_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AlwaysDestroy_GNU_always_destroy;
+  case 1: return clang_ext_AlwaysDestroy_CXX11_clang_always_destroy;
+  case 2: return clang_ext_AlwaysDestroy_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_alwaysdestroy_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AlwaysDestroy_GNU_always_destroy;
+}
+
+value
+Val_clang_ext_alwaysdestroy_spelling(enum clang_ext_AlwaysDestroy_spelling v)
+{
+  switch (v) {
+  case clang_ext_AlwaysDestroy_GNU_always_destroy: return Val_int(0);
+  case clang_ext_AlwaysDestroy_CXX11_clang_always_destroy: return Val_int(1);
+  case clang_ext_AlwaysDestroy_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_alwaysdestroy_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AlwaysDestroy_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AlwaysDestroy_spelling result = clang_ext_AlwaysDestroy_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_alwaysdestroy_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_AlwaysInline_spelling
 Clang_ext_alwaysinline_spelling_val(value ocaml)
 {
   switch (Int_val(ocaml)) {
   case 0: return clang_ext_AlwaysInline_GNU_always_inline;
   case 1: return clang_ext_AlwaysInline_CXX11_gnu_always_inline;
-  case 2: return clang_ext_AlwaysInline_Keyword_forceinline;
-  case 3: return clang_ext_AlwaysInline_SpellingNotCalculated;
+  case 2: return clang_ext_AlwaysInline_C2x_gnu_always_inline;
+  case 3: return clang_ext_AlwaysInline_Keyword_forceinline;
+  case 4: return clang_ext_AlwaysInline_SpellingNotCalculated;
   }
   failwith_fmt("invalid value for Clang_ext_alwaysinline_spelling_val: %d", Int_val(ocaml));
   return clang_ext_AlwaysInline_GNU_always_inline;
@@ -10452,8 +11107,9 @@ Val_clang_ext_alwaysinline_spelling(enum clang_ext_AlwaysInline_spelling v)
   switch (v) {
   case clang_ext_AlwaysInline_GNU_always_inline: return Val_int(0);
   case clang_ext_AlwaysInline_CXX11_gnu_always_inline: return Val_int(1);
-  case clang_ext_AlwaysInline_Keyword_forceinline: return Val_int(2);
-  case clang_ext_AlwaysInline_SpellingNotCalculated: return Val_int(3);
+  case clang_ext_AlwaysInline_C2x_gnu_always_inline: return Val_int(2);
+  case clang_ext_AlwaysInline_Keyword_forceinline: return Val_int(3);
+  case clang_ext_AlwaysInline_SpellingNotCalculated: return Val_int(4);
   }
   failwith_fmt("invalid value for Val_clang_ext_alwaysinline_spelling: %d", v);
   return Val_int(0);
@@ -10469,6 +11125,206 @@ clang_ext_AlwaysInline_getSpelling_wrapper(value cursor_ocaml)
   {
     CAMLlocal1(data);
     data = Val_clang_ext_alwaysinline_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Annotate_spelling
+Clang_ext_annotate_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Annotate_GNU_annotate;
+  case 1: return clang_ext_Annotate_CXX11_clang_annotate;
+  case 2: return clang_ext_Annotate_C2x_clang_annotate;
+  case 3: return clang_ext_Annotate_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_annotate_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Annotate_GNU_annotate;
+}
+
+value
+Val_clang_ext_annotate_spelling(enum clang_ext_Annotate_spelling v)
+{
+  switch (v) {
+  case clang_ext_Annotate_GNU_annotate: return Val_int(0);
+  case clang_ext_Annotate_CXX11_clang_annotate: return Val_int(1);
+  case clang_ext_Annotate_C2x_clang_annotate: return Val_int(2);
+  case clang_ext_Annotate_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_annotate_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Annotate_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Annotate_spelling result = clang_ext_Annotate_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_annotate_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_AnyX86Interrupt_spelling
+Clang_ext_anyx86interrupt_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AnyX86Interrupt_GNU_interrupt;
+  case 1: return clang_ext_AnyX86Interrupt_CXX11_gnu_interrupt;
+  case 2: return clang_ext_AnyX86Interrupt_C2x_gnu_interrupt;
+  case 3: return clang_ext_AnyX86Interrupt_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_anyx86interrupt_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AnyX86Interrupt_GNU_interrupt;
+}
+
+value
+Val_clang_ext_anyx86interrupt_spelling(enum clang_ext_AnyX86Interrupt_spelling v)
+{
+  switch (v) {
+  case clang_ext_AnyX86Interrupt_GNU_interrupt: return Val_int(0);
+  case clang_ext_AnyX86Interrupt_CXX11_gnu_interrupt: return Val_int(1);
+  case clang_ext_AnyX86Interrupt_C2x_gnu_interrupt: return Val_int(2);
+  case clang_ext_AnyX86Interrupt_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_anyx86interrupt_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AnyX86Interrupt_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AnyX86Interrupt_spelling result = clang_ext_AnyX86Interrupt_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_anyx86interrupt_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_AnyX86NoCallerSavedRegisters_spelling
+Clang_ext_anyx86nocallersavedregisters_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AnyX86NoCallerSavedRegisters_GNU_no_caller_saved_registers;
+  case 1: return clang_ext_AnyX86NoCallerSavedRegisters_CXX11_gnu_no_caller_saved_registers;
+  case 2: return clang_ext_AnyX86NoCallerSavedRegisters_C2x_gnu_no_caller_saved_registers;
+  case 3: return clang_ext_AnyX86NoCallerSavedRegisters_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_anyx86nocallersavedregisters_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AnyX86NoCallerSavedRegisters_GNU_no_caller_saved_registers;
+}
+
+value
+Val_clang_ext_anyx86nocallersavedregisters_spelling(enum clang_ext_AnyX86NoCallerSavedRegisters_spelling v)
+{
+  switch (v) {
+  case clang_ext_AnyX86NoCallerSavedRegisters_GNU_no_caller_saved_registers: return Val_int(0);
+  case clang_ext_AnyX86NoCallerSavedRegisters_CXX11_gnu_no_caller_saved_registers: return Val_int(1);
+  case clang_ext_AnyX86NoCallerSavedRegisters_C2x_gnu_no_caller_saved_registers: return Val_int(2);
+  case clang_ext_AnyX86NoCallerSavedRegisters_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_anyx86nocallersavedregisters_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AnyX86NoCallerSavedRegisters_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AnyX86NoCallerSavedRegisters_spelling result = clang_ext_AnyX86NoCallerSavedRegisters_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_anyx86nocallersavedregisters_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_AnyX86NoCfCheck_spelling
+Clang_ext_anyx86nocfcheck_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AnyX86NoCfCheck_GNU_nocf_check;
+  case 1: return clang_ext_AnyX86NoCfCheck_CXX11_gnu_nocf_check;
+  case 2: return clang_ext_AnyX86NoCfCheck_C2x_gnu_nocf_check;
+  case 3: return clang_ext_AnyX86NoCfCheck_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_anyx86nocfcheck_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AnyX86NoCfCheck_GNU_nocf_check;
+}
+
+value
+Val_clang_ext_anyx86nocfcheck_spelling(enum clang_ext_AnyX86NoCfCheck_spelling v)
+{
+  switch (v) {
+  case clang_ext_AnyX86NoCfCheck_GNU_nocf_check: return Val_int(0);
+  case clang_ext_AnyX86NoCfCheck_CXX11_gnu_nocf_check: return Val_int(1);
+  case clang_ext_AnyX86NoCfCheck_C2x_gnu_nocf_check: return Val_int(2);
+  case clang_ext_AnyX86NoCfCheck_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_anyx86nocfcheck_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AnyX86NoCfCheck_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AnyX86NoCfCheck_spelling result = clang_ext_AnyX86NoCfCheck_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_anyx86nocfcheck_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ArcWeakrefUnavailable_spelling
+Clang_ext_arcweakrefunavailable_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ArcWeakrefUnavailable_GNU_objc_arc_weak_reference_unavailable;
+  case 1: return clang_ext_ArcWeakrefUnavailable_CXX11_clang_objc_arc_weak_reference_unavailable;
+  case 2: return clang_ext_ArcWeakrefUnavailable_C2x_clang_objc_arc_weak_reference_unavailable;
+  case 3: return clang_ext_ArcWeakrefUnavailable_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_arcweakrefunavailable_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ArcWeakrefUnavailable_GNU_objc_arc_weak_reference_unavailable;
+}
+
+value
+Val_clang_ext_arcweakrefunavailable_spelling(enum clang_ext_ArcWeakrefUnavailable_spelling v)
+{
+  switch (v) {
+  case clang_ext_ArcWeakrefUnavailable_GNU_objc_arc_weak_reference_unavailable: return Val_int(0);
+  case clang_ext_ArcWeakrefUnavailable_CXX11_clang_objc_arc_weak_reference_unavailable: return Val_int(1);
+  case clang_ext_ArcWeakrefUnavailable_C2x_clang_objc_arc_weak_reference_unavailable: return Val_int(2);
+  case clang_ext_ArcWeakrefUnavailable_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_arcweakrefunavailable_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ArcWeakrefUnavailable_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ArcWeakrefUnavailable_spelling result = clang_ext_ArcWeakrefUnavailable_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_arcweakrefunavailable_spelling(result);
     CAMLreturn(data);
   }
 }
@@ -10519,6 +11375,162 @@ clang_ext_ArgumentWithTypeTag_getSpelling_wrapper(value cursor_ocaml)
   }
 }
 
+enum clang_ext_ArmBuiltinAlias_spelling
+Clang_ext_armbuiltinalias_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ArmBuiltinAlias_GNU_clang_arm_builtin_alias;
+  case 1: return clang_ext_ArmBuiltinAlias_CXX11_clang_clang_arm_builtin_alias;
+  case 2: return clang_ext_ArmBuiltinAlias_C2x_clang_clang_arm_builtin_alias;
+  case 3: return clang_ext_ArmBuiltinAlias_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_armbuiltinalias_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ArmBuiltinAlias_GNU_clang_arm_builtin_alias;
+}
+
+value
+Val_clang_ext_armbuiltinalias_spelling(enum clang_ext_ArmBuiltinAlias_spelling v)
+{
+  switch (v) {
+  case clang_ext_ArmBuiltinAlias_GNU_clang_arm_builtin_alias: return Val_int(0);
+  case clang_ext_ArmBuiltinAlias_CXX11_clang_clang_arm_builtin_alias: return Val_int(1);
+  case clang_ext_ArmBuiltinAlias_C2x_clang_clang_arm_builtin_alias: return Val_int(2);
+  case clang_ext_ArmBuiltinAlias_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_armbuiltinalias_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ArmBuiltinAlias_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ArmBuiltinAlias_spelling result = clang_ext_ArmBuiltinAlias_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_armbuiltinalias_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ArmMveStrictPolymorphism_spelling
+Clang_ext_armmvestrictpolymorphism_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ArmMveStrictPolymorphism_GNU_clang_arm_mve_strict_polymorphism;
+  case 1: return clang_ext_ArmMveStrictPolymorphism_CXX11_clang_clang_arm_mve_strict_polymorphism;
+  case 2: return clang_ext_ArmMveStrictPolymorphism_C2x_clang_clang_arm_mve_strict_polymorphism;
+  case 3: return clang_ext_ArmMveStrictPolymorphism_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_armmvestrictpolymorphism_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ArmMveStrictPolymorphism_GNU_clang_arm_mve_strict_polymorphism;
+}
+
+value
+Val_clang_ext_armmvestrictpolymorphism_spelling(enum clang_ext_ArmMveStrictPolymorphism_spelling v)
+{
+  switch (v) {
+  case clang_ext_ArmMveStrictPolymorphism_GNU_clang_arm_mve_strict_polymorphism: return Val_int(0);
+  case clang_ext_ArmMveStrictPolymorphism_CXX11_clang_clang_arm_mve_strict_polymorphism: return Val_int(1);
+  case clang_ext_ArmMveStrictPolymorphism_C2x_clang_clang_arm_mve_strict_polymorphism: return Val_int(2);
+  case clang_ext_ArmMveStrictPolymorphism_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_armmvestrictpolymorphism_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ArmMveStrictPolymorphism_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ArmMveStrictPolymorphism_spelling result = clang_ext_ArmMveStrictPolymorphism_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_armmvestrictpolymorphism_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Artificial_spelling
+Clang_ext_artificial_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Artificial_GNU_artificial;
+  case 1: return clang_ext_Artificial_CXX11_gnu_artificial;
+  case 2: return clang_ext_Artificial_C2x_gnu_artificial;
+  case 3: return clang_ext_Artificial_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_artificial_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Artificial_GNU_artificial;
+}
+
+value
+Val_clang_ext_artificial_spelling(enum clang_ext_Artificial_spelling v)
+{
+  switch (v) {
+  case clang_ext_Artificial_GNU_artificial: return Val_int(0);
+  case clang_ext_Artificial_CXX11_gnu_artificial: return Val_int(1);
+  case clang_ext_Artificial_C2x_gnu_artificial: return Val_int(2);
+  case clang_ext_Artificial_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_artificial_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Artificial_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Artificial_spelling result = clang_ext_Artificial_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_artificial_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_AsmLabel_spelling
+Clang_ext_asmlabel_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AsmLabel_Keyword_asm;
+  case 1: return clang_ext_AsmLabel_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_asmlabel_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AsmLabel_Keyword_asm;
+}
+
+value
+Val_clang_ext_asmlabel_spelling(enum clang_ext_AsmLabel_spelling v)
+{
+  switch (v) {
+  case clang_ext_AsmLabel_Keyword_asm: return Val_int(0);
+  case clang_ext_AsmLabel_SpellingNotCalculated: return Val_int(1);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_asmlabel_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AsmLabel_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AsmLabel_spelling result = clang_ext_AsmLabel_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_asmlabel_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_AssertCapability_spelling
 Clang_ext_assertcapability_spelling_val(value ocaml)
 {
@@ -10557,6 +11569,914 @@ clang_ext_AssertCapability_getSpelling_wrapper(value cursor_ocaml)
   {
     CAMLlocal1(data);
     data = Val_clang_ext_assertcapability_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_AssumeAligned_spelling
+Clang_ext_assumealigned_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AssumeAligned_GNU_assume_aligned;
+  case 1: return clang_ext_AssumeAligned_CXX11_gnu_assume_aligned;
+  case 2: return clang_ext_AssumeAligned_C2x_gnu_assume_aligned;
+  case 3: return clang_ext_AssumeAligned_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_assumealigned_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AssumeAligned_GNU_assume_aligned;
+}
+
+value
+Val_clang_ext_assumealigned_spelling(enum clang_ext_AssumeAligned_spelling v)
+{
+  switch (v) {
+  case clang_ext_AssumeAligned_GNU_assume_aligned: return Val_int(0);
+  case clang_ext_AssumeAligned_CXX11_gnu_assume_aligned: return Val_int(1);
+  case clang_ext_AssumeAligned_C2x_gnu_assume_aligned: return Val_int(2);
+  case clang_ext_AssumeAligned_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_assumealigned_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AssumeAligned_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AssumeAligned_spelling result = clang_ext_AssumeAligned_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_assumealigned_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Availability_spelling
+Clang_ext_availability_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Availability_GNU_availability;
+  case 1: return clang_ext_Availability_CXX11_clang_availability;
+  case 2: return clang_ext_Availability_C2x_clang_availability;
+  case 3: return clang_ext_Availability_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_availability_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Availability_GNU_availability;
+}
+
+value
+Val_clang_ext_availability_spelling(enum clang_ext_Availability_spelling v)
+{
+  switch (v) {
+  case clang_ext_Availability_GNU_availability: return Val_int(0);
+  case clang_ext_Availability_CXX11_clang_availability: return Val_int(1);
+  case clang_ext_Availability_C2x_clang_availability: return Val_int(2);
+  case clang_ext_Availability_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_availability_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Availability_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Availability_spelling result = clang_ext_Availability_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_availability_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_BPFPreserveAccessIndex_spelling
+Clang_ext_bpfpreserveaccessindex_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_BPFPreserveAccessIndex_GNU_preserve_access_index;
+  case 1: return clang_ext_BPFPreserveAccessIndex_CXX11_clang_preserve_access_index;
+  case 2: return clang_ext_BPFPreserveAccessIndex_C2x_clang_preserve_access_index;
+  case 3: return clang_ext_BPFPreserveAccessIndex_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_bpfpreserveaccessindex_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_BPFPreserveAccessIndex_GNU_preserve_access_index;
+}
+
+value
+Val_clang_ext_bpfpreserveaccessindex_spelling(enum clang_ext_BPFPreserveAccessIndex_spelling v)
+{
+  switch (v) {
+  case clang_ext_BPFPreserveAccessIndex_GNU_preserve_access_index: return Val_int(0);
+  case clang_ext_BPFPreserveAccessIndex_CXX11_clang_preserve_access_index: return Val_int(1);
+  case clang_ext_BPFPreserveAccessIndex_C2x_clang_preserve_access_index: return Val_int(2);
+  case clang_ext_BPFPreserveAccessIndex_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_bpfpreserveaccessindex_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_BPFPreserveAccessIndex_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_BPFPreserveAccessIndex_spelling result = clang_ext_BPFPreserveAccessIndex_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_bpfpreserveaccessindex_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Blocks_spelling
+Clang_ext_blocks_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Blocks_GNU_blocks;
+  case 1: return clang_ext_Blocks_CXX11_clang_blocks;
+  case 2: return clang_ext_Blocks_C2x_clang_blocks;
+  case 3: return clang_ext_Blocks_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_blocks_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Blocks_GNU_blocks;
+}
+
+value
+Val_clang_ext_blocks_spelling(enum clang_ext_Blocks_spelling v)
+{
+  switch (v) {
+  case clang_ext_Blocks_GNU_blocks: return Val_int(0);
+  case clang_ext_Blocks_CXX11_clang_blocks: return Val_int(1);
+  case clang_ext_Blocks_C2x_clang_blocks: return Val_int(2);
+  case clang_ext_Blocks_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_blocks_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Blocks_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Blocks_spelling result = clang_ext_Blocks_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_blocks_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CDecl_spelling
+Clang_ext_cdecl_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CDecl_GNU_cdecl;
+  case 1: return clang_ext_CDecl_CXX11_gnu_cdecl;
+  case 2: return clang_ext_CDecl_C2x_gnu_cdecl;
+  case 3: return clang_ext_CDecl_Keyword_cdecl;
+  case 4: return clang_ext_CDecl_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cdecl_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CDecl_GNU_cdecl;
+}
+
+value
+Val_clang_ext_cdecl_spelling(enum clang_ext_CDecl_spelling v)
+{
+  switch (v) {
+  case clang_ext_CDecl_GNU_cdecl: return Val_int(0);
+  case clang_ext_CDecl_CXX11_gnu_cdecl: return Val_int(1);
+  case clang_ext_CDecl_C2x_gnu_cdecl: return Val_int(2);
+  case clang_ext_CDecl_Keyword_cdecl: return Val_int(3);
+  case clang_ext_CDecl_SpellingNotCalculated: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cdecl_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CDecl_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CDecl_spelling result = clang_ext_CDecl_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cdecl_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CFAuditedTransfer_spelling
+Clang_ext_cfauditedtransfer_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CFAuditedTransfer_GNU_cf_audited_transfer;
+  case 1: return clang_ext_CFAuditedTransfer_CXX11_clang_cf_audited_transfer;
+  case 2: return clang_ext_CFAuditedTransfer_C2x_clang_cf_audited_transfer;
+  case 3: return clang_ext_CFAuditedTransfer_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cfauditedtransfer_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CFAuditedTransfer_GNU_cf_audited_transfer;
+}
+
+value
+Val_clang_ext_cfauditedtransfer_spelling(enum clang_ext_CFAuditedTransfer_spelling v)
+{
+  switch (v) {
+  case clang_ext_CFAuditedTransfer_GNU_cf_audited_transfer: return Val_int(0);
+  case clang_ext_CFAuditedTransfer_CXX11_clang_cf_audited_transfer: return Val_int(1);
+  case clang_ext_CFAuditedTransfer_C2x_clang_cf_audited_transfer: return Val_int(2);
+  case clang_ext_CFAuditedTransfer_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cfauditedtransfer_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CFAuditedTransfer_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CFAuditedTransfer_spelling result = clang_ext_CFAuditedTransfer_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cfauditedtransfer_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CFConsumed_spelling
+Clang_ext_cfconsumed_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CFConsumed_GNU_cf_consumed;
+  case 1: return clang_ext_CFConsumed_CXX11_clang_cf_consumed;
+  case 2: return clang_ext_CFConsumed_C2x_clang_cf_consumed;
+  case 3: return clang_ext_CFConsumed_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cfconsumed_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CFConsumed_GNU_cf_consumed;
+}
+
+value
+Val_clang_ext_cfconsumed_spelling(enum clang_ext_CFConsumed_spelling v)
+{
+  switch (v) {
+  case clang_ext_CFConsumed_GNU_cf_consumed: return Val_int(0);
+  case clang_ext_CFConsumed_CXX11_clang_cf_consumed: return Val_int(1);
+  case clang_ext_CFConsumed_C2x_clang_cf_consumed: return Val_int(2);
+  case clang_ext_CFConsumed_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cfconsumed_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CFConsumed_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CFConsumed_spelling result = clang_ext_CFConsumed_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cfconsumed_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CFICanonicalJumpTable_spelling
+Clang_ext_cficanonicaljumptable_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CFICanonicalJumpTable_GNU_cfi_canonical_jump_table;
+  case 1: return clang_ext_CFICanonicalJumpTable_CXX11_clang_cfi_canonical_jump_table;
+  case 2: return clang_ext_CFICanonicalJumpTable_C2x_clang_cfi_canonical_jump_table;
+  case 3: return clang_ext_CFICanonicalJumpTable_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cficanonicaljumptable_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CFICanonicalJumpTable_GNU_cfi_canonical_jump_table;
+}
+
+value
+Val_clang_ext_cficanonicaljumptable_spelling(enum clang_ext_CFICanonicalJumpTable_spelling v)
+{
+  switch (v) {
+  case clang_ext_CFICanonicalJumpTable_GNU_cfi_canonical_jump_table: return Val_int(0);
+  case clang_ext_CFICanonicalJumpTable_CXX11_clang_cfi_canonical_jump_table: return Val_int(1);
+  case clang_ext_CFICanonicalJumpTable_C2x_clang_cfi_canonical_jump_table: return Val_int(2);
+  case clang_ext_CFICanonicalJumpTable_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cficanonicaljumptable_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CFICanonicalJumpTable_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CFICanonicalJumpTable_spelling result = clang_ext_CFICanonicalJumpTable_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cficanonicaljumptable_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CFReturnsNotRetained_spelling
+Clang_ext_cfreturnsnotretained_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CFReturnsNotRetained_GNU_cf_returns_not_retained;
+  case 1: return clang_ext_CFReturnsNotRetained_CXX11_clang_cf_returns_not_retained;
+  case 2: return clang_ext_CFReturnsNotRetained_C2x_clang_cf_returns_not_retained;
+  case 3: return clang_ext_CFReturnsNotRetained_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cfreturnsnotretained_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CFReturnsNotRetained_GNU_cf_returns_not_retained;
+}
+
+value
+Val_clang_ext_cfreturnsnotretained_spelling(enum clang_ext_CFReturnsNotRetained_spelling v)
+{
+  switch (v) {
+  case clang_ext_CFReturnsNotRetained_GNU_cf_returns_not_retained: return Val_int(0);
+  case clang_ext_CFReturnsNotRetained_CXX11_clang_cf_returns_not_retained: return Val_int(1);
+  case clang_ext_CFReturnsNotRetained_C2x_clang_cf_returns_not_retained: return Val_int(2);
+  case clang_ext_CFReturnsNotRetained_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cfreturnsnotretained_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CFReturnsNotRetained_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CFReturnsNotRetained_spelling result = clang_ext_CFReturnsNotRetained_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cfreturnsnotretained_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CFReturnsRetained_spelling
+Clang_ext_cfreturnsretained_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CFReturnsRetained_GNU_cf_returns_retained;
+  case 1: return clang_ext_CFReturnsRetained_CXX11_clang_cf_returns_retained;
+  case 2: return clang_ext_CFReturnsRetained_C2x_clang_cf_returns_retained;
+  case 3: return clang_ext_CFReturnsRetained_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cfreturnsretained_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CFReturnsRetained_GNU_cf_returns_retained;
+}
+
+value
+Val_clang_ext_cfreturnsretained_spelling(enum clang_ext_CFReturnsRetained_spelling v)
+{
+  switch (v) {
+  case clang_ext_CFReturnsRetained_GNU_cf_returns_retained: return Val_int(0);
+  case clang_ext_CFReturnsRetained_CXX11_clang_cf_returns_retained: return Val_int(1);
+  case clang_ext_CFReturnsRetained_C2x_clang_cf_returns_retained: return Val_int(2);
+  case clang_ext_CFReturnsRetained_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cfreturnsretained_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CFReturnsRetained_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CFReturnsRetained_spelling result = clang_ext_CFReturnsRetained_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cfreturnsretained_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CFUnknownTransfer_spelling
+Clang_ext_cfunknowntransfer_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CFUnknownTransfer_GNU_cf_unknown_transfer;
+  case 1: return clang_ext_CFUnknownTransfer_CXX11_clang_cf_unknown_transfer;
+  case 2: return clang_ext_CFUnknownTransfer_C2x_clang_cf_unknown_transfer;
+  case 3: return clang_ext_CFUnknownTransfer_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cfunknowntransfer_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CFUnknownTransfer_GNU_cf_unknown_transfer;
+}
+
+value
+Val_clang_ext_cfunknowntransfer_spelling(enum clang_ext_CFUnknownTransfer_spelling v)
+{
+  switch (v) {
+  case clang_ext_CFUnknownTransfer_GNU_cf_unknown_transfer: return Val_int(0);
+  case clang_ext_CFUnknownTransfer_CXX11_clang_cf_unknown_transfer: return Val_int(1);
+  case clang_ext_CFUnknownTransfer_C2x_clang_cf_unknown_transfer: return Val_int(2);
+  case clang_ext_CFUnknownTransfer_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cfunknowntransfer_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CFUnknownTransfer_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CFUnknownTransfer_spelling result = clang_ext_CFUnknownTransfer_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cfunknowntransfer_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CPUDispatch_spelling
+Clang_ext_cpudispatch_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CPUDispatch_GNU_cpu_dispatch;
+  case 1: return clang_ext_CPUDispatch_CXX11_clang_cpu_dispatch;
+  case 2: return clang_ext_CPUDispatch_C2x_clang_cpu_dispatch;
+  case 3: return clang_ext_CPUDispatch_Declspec_cpu_dispatch;
+  case 4: return clang_ext_CPUDispatch_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cpudispatch_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CPUDispatch_GNU_cpu_dispatch;
+}
+
+value
+Val_clang_ext_cpudispatch_spelling(enum clang_ext_CPUDispatch_spelling v)
+{
+  switch (v) {
+  case clang_ext_CPUDispatch_GNU_cpu_dispatch: return Val_int(0);
+  case clang_ext_CPUDispatch_CXX11_clang_cpu_dispatch: return Val_int(1);
+  case clang_ext_CPUDispatch_C2x_clang_cpu_dispatch: return Val_int(2);
+  case clang_ext_CPUDispatch_Declspec_cpu_dispatch: return Val_int(3);
+  case clang_ext_CPUDispatch_SpellingNotCalculated: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cpudispatch_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CPUDispatch_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CPUDispatch_spelling result = clang_ext_CPUDispatch_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cpudispatch_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CPUSpecific_spelling
+Clang_ext_cpuspecific_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CPUSpecific_GNU_cpu_specific;
+  case 1: return clang_ext_CPUSpecific_CXX11_clang_cpu_specific;
+  case 2: return clang_ext_CPUSpecific_C2x_clang_cpu_specific;
+  case 3: return clang_ext_CPUSpecific_Declspec_cpu_specific;
+  case 4: return clang_ext_CPUSpecific_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cpuspecific_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CPUSpecific_GNU_cpu_specific;
+}
+
+value
+Val_clang_ext_cpuspecific_spelling(enum clang_ext_CPUSpecific_spelling v)
+{
+  switch (v) {
+  case clang_ext_CPUSpecific_GNU_cpu_specific: return Val_int(0);
+  case clang_ext_CPUSpecific_CXX11_clang_cpu_specific: return Val_int(1);
+  case clang_ext_CPUSpecific_C2x_clang_cpu_specific: return Val_int(2);
+  case clang_ext_CPUSpecific_Declspec_cpu_specific: return Val_int(3);
+  case clang_ext_CPUSpecific_SpellingNotCalculated: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cpuspecific_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CPUSpecific_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CPUSpecific_spelling result = clang_ext_CPUSpecific_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cpuspecific_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CUDAConstant_spelling
+Clang_ext_cudaconstant_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CUDAConstant_GNU_constant;
+  case 1: return clang_ext_CUDAConstant_Declspec_constant;
+  case 2: return clang_ext_CUDAConstant_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cudaconstant_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CUDAConstant_GNU_constant;
+}
+
+value
+Val_clang_ext_cudaconstant_spelling(enum clang_ext_CUDAConstant_spelling v)
+{
+  switch (v) {
+  case clang_ext_CUDAConstant_GNU_constant: return Val_int(0);
+  case clang_ext_CUDAConstant_Declspec_constant: return Val_int(1);
+  case clang_ext_CUDAConstant_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cudaconstant_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CUDAConstant_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CUDAConstant_spelling result = clang_ext_CUDAConstant_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cudaconstant_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CUDADevice_spelling
+Clang_ext_cudadevice_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CUDADevice_GNU_device;
+  case 1: return clang_ext_CUDADevice_Declspec_device;
+  case 2: return clang_ext_CUDADevice_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cudadevice_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CUDADevice_GNU_device;
+}
+
+value
+Val_clang_ext_cudadevice_spelling(enum clang_ext_CUDADevice_spelling v)
+{
+  switch (v) {
+  case clang_ext_CUDADevice_GNU_device: return Val_int(0);
+  case clang_ext_CUDADevice_Declspec_device: return Val_int(1);
+  case clang_ext_CUDADevice_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cudadevice_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CUDADevice_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CUDADevice_spelling result = clang_ext_CUDADevice_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cudadevice_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CUDADeviceBuiltinSurfaceType_spelling
+Clang_ext_cudadevicebuiltinsurfacetype_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CUDADeviceBuiltinSurfaceType_GNU_device_builtin_surface_type;
+  case 1: return clang_ext_CUDADeviceBuiltinSurfaceType_Declspec_device_builtin_surface_type;
+  case 2: return clang_ext_CUDADeviceBuiltinSurfaceType_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cudadevicebuiltinsurfacetype_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CUDADeviceBuiltinSurfaceType_GNU_device_builtin_surface_type;
+}
+
+value
+Val_clang_ext_cudadevicebuiltinsurfacetype_spelling(enum clang_ext_CUDADeviceBuiltinSurfaceType_spelling v)
+{
+  switch (v) {
+  case clang_ext_CUDADeviceBuiltinSurfaceType_GNU_device_builtin_surface_type: return Val_int(0);
+  case clang_ext_CUDADeviceBuiltinSurfaceType_Declspec_device_builtin_surface_type: return Val_int(1);
+  case clang_ext_CUDADeviceBuiltinSurfaceType_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cudadevicebuiltinsurfacetype_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CUDADeviceBuiltinSurfaceType_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CUDADeviceBuiltinSurfaceType_spelling result = clang_ext_CUDADeviceBuiltinSurfaceType_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cudadevicebuiltinsurfacetype_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CUDADeviceBuiltinTextureType_spelling
+Clang_ext_cudadevicebuiltintexturetype_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CUDADeviceBuiltinTextureType_GNU_device_builtin_texture_type;
+  case 1: return clang_ext_CUDADeviceBuiltinTextureType_Declspec_device_builtin_texture_type;
+  case 2: return clang_ext_CUDADeviceBuiltinTextureType_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cudadevicebuiltintexturetype_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CUDADeviceBuiltinTextureType_GNU_device_builtin_texture_type;
+}
+
+value
+Val_clang_ext_cudadevicebuiltintexturetype_spelling(enum clang_ext_CUDADeviceBuiltinTextureType_spelling v)
+{
+  switch (v) {
+  case clang_ext_CUDADeviceBuiltinTextureType_GNU_device_builtin_texture_type: return Val_int(0);
+  case clang_ext_CUDADeviceBuiltinTextureType_Declspec_device_builtin_texture_type: return Val_int(1);
+  case clang_ext_CUDADeviceBuiltinTextureType_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cudadevicebuiltintexturetype_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CUDADeviceBuiltinTextureType_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CUDADeviceBuiltinTextureType_spelling result = clang_ext_CUDADeviceBuiltinTextureType_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cudadevicebuiltintexturetype_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CUDAGlobal_spelling
+Clang_ext_cudaglobal_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CUDAGlobal_GNU_global;
+  case 1: return clang_ext_CUDAGlobal_Declspec_global;
+  case 2: return clang_ext_CUDAGlobal_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cudaglobal_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CUDAGlobal_GNU_global;
+}
+
+value
+Val_clang_ext_cudaglobal_spelling(enum clang_ext_CUDAGlobal_spelling v)
+{
+  switch (v) {
+  case clang_ext_CUDAGlobal_GNU_global: return Val_int(0);
+  case clang_ext_CUDAGlobal_Declspec_global: return Val_int(1);
+  case clang_ext_CUDAGlobal_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cudaglobal_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CUDAGlobal_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CUDAGlobal_spelling result = clang_ext_CUDAGlobal_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cudaglobal_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CUDAHost_spelling
+Clang_ext_cudahost_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CUDAHost_GNU_host;
+  case 1: return clang_ext_CUDAHost_Declspec_host;
+  case 2: return clang_ext_CUDAHost_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cudahost_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CUDAHost_GNU_host;
+}
+
+value
+Val_clang_ext_cudahost_spelling(enum clang_ext_CUDAHost_spelling v)
+{
+  switch (v) {
+  case clang_ext_CUDAHost_GNU_host: return Val_int(0);
+  case clang_ext_CUDAHost_Declspec_host: return Val_int(1);
+  case clang_ext_CUDAHost_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cudahost_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CUDAHost_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CUDAHost_spelling result = clang_ext_CUDAHost_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cudahost_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CUDALaunchBounds_spelling
+Clang_ext_cudalaunchbounds_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CUDALaunchBounds_GNU_launch_bounds;
+  case 1: return clang_ext_CUDALaunchBounds_Declspec_launch_bounds;
+  case 2: return clang_ext_CUDALaunchBounds_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cudalaunchbounds_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CUDALaunchBounds_GNU_launch_bounds;
+}
+
+value
+Val_clang_ext_cudalaunchbounds_spelling(enum clang_ext_CUDALaunchBounds_spelling v)
+{
+  switch (v) {
+  case clang_ext_CUDALaunchBounds_GNU_launch_bounds: return Val_int(0);
+  case clang_ext_CUDALaunchBounds_Declspec_launch_bounds: return Val_int(1);
+  case clang_ext_CUDALaunchBounds_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cudalaunchbounds_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CUDALaunchBounds_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CUDALaunchBounds_spelling result = clang_ext_CUDALaunchBounds_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cudalaunchbounds_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CUDAShared_spelling
+Clang_ext_cudashared_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CUDAShared_GNU_shared;
+  case 1: return clang_ext_CUDAShared_Declspec_shared;
+  case 2: return clang_ext_CUDAShared_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cudashared_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CUDAShared_GNU_shared;
+}
+
+value
+Val_clang_ext_cudashared_spelling(enum clang_ext_CUDAShared_spelling v)
+{
+  switch (v) {
+  case clang_ext_CUDAShared_GNU_shared: return Val_int(0);
+  case clang_ext_CUDAShared_Declspec_shared: return Val_int(1);
+  case clang_ext_CUDAShared_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cudashared_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CUDAShared_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CUDAShared_spelling result = clang_ext_CUDAShared_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cudashared_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_CallableWhen_spelling
+Clang_ext_callablewhen_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CallableWhen_GNU_callable_when;
+  case 1: return clang_ext_CallableWhen_CXX11_clang_callable_when;
+  case 2: return clang_ext_CallableWhen_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_callablewhen_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CallableWhen_GNU_callable_when;
+}
+
+value
+Val_clang_ext_callablewhen_spelling(enum clang_ext_CallableWhen_spelling v)
+{
+  switch (v) {
+  case clang_ext_CallableWhen_GNU_callable_when: return Val_int(0);
+  case clang_ext_CallableWhen_CXX11_clang_callable_when: return Val_int(1);
+  case clang_ext_CallableWhen_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_callablewhen_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CallableWhen_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CallableWhen_spelling result = clang_ext_CallableWhen_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_callablewhen_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Callback_spelling
+Clang_ext_callback_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Callback_GNU_callback;
+  case 1: return clang_ext_Callback_CXX11_clang_callback;
+  case 2: return clang_ext_Callback_C2x_clang_callback;
+  case 3: return clang_ext_Callback_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_callback_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Callback_GNU_callback;
+}
+
+value
+Val_clang_ext_callback_spelling(enum clang_ext_Callback_spelling v)
+{
+  switch (v) {
+  case clang_ext_Callback_GNU_callback: return Val_int(0);
+  case clang_ext_Callback_CXX11_clang_callback: return Val_int(1);
+  case clang_ext_Callback_C2x_clang_callback: return Val_int(2);
+  case clang_ext_Callback_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_callback_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Callback_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Callback_spelling result = clang_ext_Callback_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_callback_spelling(result);
     CAMLreturn(data);
   }
 }
@@ -10603,6 +12523,204 @@ clang_ext_Capability_getSpelling_wrapper(value cursor_ocaml)
   }
 }
 
+enum clang_ext_CarriesDependency_spelling
+Clang_ext_carriesdependency_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_CarriesDependency_GNU_carries_dependency;
+  case 1: return clang_ext_CarriesDependency_CXX11_carries_dependency;
+  case 2: return clang_ext_CarriesDependency_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_carriesdependency_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_CarriesDependency_GNU_carries_dependency;
+}
+
+value
+Val_clang_ext_carriesdependency_spelling(enum clang_ext_CarriesDependency_spelling v)
+{
+  switch (v) {
+  case clang_ext_CarriesDependency_GNU_carries_dependency: return Val_int(0);
+  case clang_ext_CarriesDependency_CXX11_carries_dependency: return Val_int(1);
+  case clang_ext_CarriesDependency_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_carriesdependency_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_CarriesDependency_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_CarriesDependency_spelling result = clang_ext_CarriesDependency_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_carriesdependency_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Cleanup_spelling
+Clang_ext_cleanup_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Cleanup_GNU_cleanup;
+  case 1: return clang_ext_Cleanup_CXX11_gnu_cleanup;
+  case 2: return clang_ext_Cleanup_C2x_gnu_cleanup;
+  case 3: return clang_ext_Cleanup_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cleanup_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Cleanup_GNU_cleanup;
+}
+
+value
+Val_clang_ext_cleanup_spelling(enum clang_ext_Cleanup_spelling v)
+{
+  switch (v) {
+  case clang_ext_Cleanup_GNU_cleanup: return Val_int(0);
+  case clang_ext_Cleanup_CXX11_gnu_cleanup: return Val_int(1);
+  case clang_ext_Cleanup_C2x_gnu_cleanup: return Val_int(2);
+  case clang_ext_Cleanup_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cleanup_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Cleanup_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Cleanup_spelling result = clang_ext_Cleanup_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cleanup_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Cold_spelling
+Clang_ext_cold_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Cold_GNU_cold;
+  case 1: return clang_ext_Cold_CXX11_gnu_cold;
+  case 2: return clang_ext_Cold_C2x_gnu_cold;
+  case 3: return clang_ext_Cold_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_cold_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Cold_GNU_cold;
+}
+
+value
+Val_clang_ext_cold_spelling(enum clang_ext_Cold_spelling v)
+{
+  switch (v) {
+  case clang_ext_Cold_GNU_cold: return Val_int(0);
+  case clang_ext_Cold_CXX11_gnu_cold: return Val_int(1);
+  case clang_ext_Cold_C2x_gnu_cold: return Val_int(2);
+  case clang_ext_Cold_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_cold_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Cold_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Cold_spelling result = clang_ext_Cold_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_cold_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Common_spelling
+Clang_ext_common_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Common_GNU_common;
+  case 1: return clang_ext_Common_CXX11_gnu_common;
+  case 2: return clang_ext_Common_C2x_gnu_common;
+  case 3: return clang_ext_Common_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_common_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Common_GNU_common;
+}
+
+value
+Val_clang_ext_common_spelling(enum clang_ext_Common_spelling v)
+{
+  switch (v) {
+  case clang_ext_Common_GNU_common: return Val_int(0);
+  case clang_ext_Common_CXX11_gnu_common: return Val_int(1);
+  case clang_ext_Common_C2x_gnu_common: return Val_int(2);
+  case clang_ext_Common_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_common_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Common_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Common_spelling result = clang_ext_Common_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_common_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Const_spelling
+Clang_ext_const_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Const_GNU_const;
+  case 1: return clang_ext_Const_CXX11_gnu_const;
+  case 2: return clang_ext_Const_C2x_gnu_const;
+  case 3: return clang_ext_Const_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_const_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Const_GNU_const;
+}
+
+value
+Val_clang_ext_const_spelling(enum clang_ext_Const_spelling v)
+{
+  switch (v) {
+  case clang_ext_Const_GNU_const: return Val_int(0);
+  case clang_ext_Const_CXX11_gnu_const: return Val_int(1);
+  case clang_ext_Const_C2x_gnu_const: return Val_int(2);
+  case clang_ext_Const_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_const_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Const_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Const_spelling result = clang_ext_Const_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_const_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_ConstInit_spelling
 Clang_ext_constinit_spelling_val(value ocaml)
 {
@@ -10643,6 +12761,618 @@ clang_ext_ConstInit_getSpelling_wrapper(value cursor_ocaml)
   }
 }
 
+enum clang_ext_Constructor_spelling
+Clang_ext_constructor_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Constructor_GNU_constructor;
+  case 1: return clang_ext_Constructor_CXX11_gnu_constructor;
+  case 2: return clang_ext_Constructor_C2x_gnu_constructor;
+  case 3: return clang_ext_Constructor_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_constructor_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Constructor_GNU_constructor;
+}
+
+value
+Val_clang_ext_constructor_spelling(enum clang_ext_Constructor_spelling v)
+{
+  switch (v) {
+  case clang_ext_Constructor_GNU_constructor: return Val_int(0);
+  case clang_ext_Constructor_CXX11_gnu_constructor: return Val_int(1);
+  case clang_ext_Constructor_C2x_gnu_constructor: return Val_int(2);
+  case clang_ext_Constructor_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_constructor_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Constructor_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Constructor_spelling result = clang_ext_Constructor_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_constructor_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Consumable_spelling
+Clang_ext_consumable_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Consumable_GNU_consumable;
+  case 1: return clang_ext_Consumable_CXX11_clang_consumable;
+  case 2: return clang_ext_Consumable_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_consumable_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Consumable_GNU_consumable;
+}
+
+value
+Val_clang_ext_consumable_spelling(enum clang_ext_Consumable_spelling v)
+{
+  switch (v) {
+  case clang_ext_Consumable_GNU_consumable: return Val_int(0);
+  case clang_ext_Consumable_CXX11_clang_consumable: return Val_int(1);
+  case clang_ext_Consumable_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_consumable_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Consumable_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Consumable_spelling result = clang_ext_Consumable_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_consumable_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ConsumableAutoCast_spelling
+Clang_ext_consumableautocast_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ConsumableAutoCast_GNU_consumable_auto_cast_state;
+  case 1: return clang_ext_ConsumableAutoCast_CXX11_clang_consumable_auto_cast_state;
+  case 2: return clang_ext_ConsumableAutoCast_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_consumableautocast_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ConsumableAutoCast_GNU_consumable_auto_cast_state;
+}
+
+value
+Val_clang_ext_consumableautocast_spelling(enum clang_ext_ConsumableAutoCast_spelling v)
+{
+  switch (v) {
+  case clang_ext_ConsumableAutoCast_GNU_consumable_auto_cast_state: return Val_int(0);
+  case clang_ext_ConsumableAutoCast_CXX11_clang_consumable_auto_cast_state: return Val_int(1);
+  case clang_ext_ConsumableAutoCast_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_consumableautocast_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ConsumableAutoCast_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ConsumableAutoCast_spelling result = clang_ext_ConsumableAutoCast_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_consumableautocast_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ConsumableSetOnRead_spelling
+Clang_ext_consumablesetonread_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ConsumableSetOnRead_GNU_consumable_set_state_on_read;
+  case 1: return clang_ext_ConsumableSetOnRead_CXX11_clang_consumable_set_state_on_read;
+  case 2: return clang_ext_ConsumableSetOnRead_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_consumablesetonread_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ConsumableSetOnRead_GNU_consumable_set_state_on_read;
+}
+
+value
+Val_clang_ext_consumablesetonread_spelling(enum clang_ext_ConsumableSetOnRead_spelling v)
+{
+  switch (v) {
+  case clang_ext_ConsumableSetOnRead_GNU_consumable_set_state_on_read: return Val_int(0);
+  case clang_ext_ConsumableSetOnRead_CXX11_clang_consumable_set_state_on_read: return Val_int(1);
+  case clang_ext_ConsumableSetOnRead_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_consumablesetonread_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ConsumableSetOnRead_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ConsumableSetOnRead_spelling result = clang_ext_ConsumableSetOnRead_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_consumablesetonread_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Convergent_spelling
+Clang_ext_convergent_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Convergent_GNU_convergent;
+  case 1: return clang_ext_Convergent_CXX11_clang_convergent;
+  case 2: return clang_ext_Convergent_C2x_clang_convergent;
+  case 3: return clang_ext_Convergent_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_convergent_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Convergent_GNU_convergent;
+}
+
+value
+Val_clang_ext_convergent_spelling(enum clang_ext_Convergent_spelling v)
+{
+  switch (v) {
+  case clang_ext_Convergent_GNU_convergent: return Val_int(0);
+  case clang_ext_Convergent_CXX11_clang_convergent: return Val_int(1);
+  case clang_ext_Convergent_C2x_clang_convergent: return Val_int(2);
+  case clang_ext_Convergent_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_convergent_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Convergent_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Convergent_spelling result = clang_ext_Convergent_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_convergent_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_DLLExport_spelling
+Clang_ext_dllexport_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_DLLExport_Declspec_dllexport;
+  case 1: return clang_ext_DLLExport_GNU_dllexport;
+  case 2: return clang_ext_DLLExport_CXX11_gnu_dllexport;
+  case 3: return clang_ext_DLLExport_C2x_gnu_dllexport;
+  case 4: return clang_ext_DLLExport_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_dllexport_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_DLLExport_Declspec_dllexport;
+}
+
+value
+Val_clang_ext_dllexport_spelling(enum clang_ext_DLLExport_spelling v)
+{
+  switch (v) {
+  case clang_ext_DLLExport_Declspec_dllexport: return Val_int(0);
+  case clang_ext_DLLExport_GNU_dllexport: return Val_int(1);
+  case clang_ext_DLLExport_CXX11_gnu_dllexport: return Val_int(2);
+  case clang_ext_DLLExport_C2x_gnu_dllexport: return Val_int(3);
+  case clang_ext_DLLExport_SpellingNotCalculated: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_dllexport_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_DLLExport_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_DLLExport_spelling result = clang_ext_DLLExport_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_dllexport_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_DLLImport_spelling
+Clang_ext_dllimport_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_DLLImport_Declspec_dllimport;
+  case 1: return clang_ext_DLLImport_GNU_dllimport;
+  case 2: return clang_ext_DLLImport_CXX11_gnu_dllimport;
+  case 3: return clang_ext_DLLImport_C2x_gnu_dllimport;
+  case 4: return clang_ext_DLLImport_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_dllimport_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_DLLImport_Declspec_dllimport;
+}
+
+value
+Val_clang_ext_dllimport_spelling(enum clang_ext_DLLImport_spelling v)
+{
+  switch (v) {
+  case clang_ext_DLLImport_Declspec_dllimport: return Val_int(0);
+  case clang_ext_DLLImport_GNU_dllimport: return Val_int(1);
+  case clang_ext_DLLImport_CXX11_gnu_dllimport: return Val_int(2);
+  case clang_ext_DLLImport_C2x_gnu_dllimport: return Val_int(3);
+  case clang_ext_DLLImport_SpellingNotCalculated: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_dllimport_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_DLLImport_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_DLLImport_spelling result = clang_ext_DLLImport_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_dllimport_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Deprecated_spelling
+Clang_ext_deprecated_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Deprecated_GNU_deprecated;
+  case 1: return clang_ext_Deprecated_CXX11_gnu_deprecated;
+  case 2: return clang_ext_Deprecated_C2x_gnu_deprecated;
+  case 3: return clang_ext_Deprecated_Declspec_deprecated;
+  case 4: return clang_ext_Deprecated_CXX11_deprecated;
+  case 5: return clang_ext_Deprecated_C2x_deprecated;
+  case 6: return clang_ext_Deprecated_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_deprecated_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Deprecated_GNU_deprecated;
+}
+
+value
+Val_clang_ext_deprecated_spelling(enum clang_ext_Deprecated_spelling v)
+{
+  switch (v) {
+  case clang_ext_Deprecated_GNU_deprecated: return Val_int(0);
+  case clang_ext_Deprecated_CXX11_gnu_deprecated: return Val_int(1);
+  case clang_ext_Deprecated_C2x_gnu_deprecated: return Val_int(2);
+  case clang_ext_Deprecated_Declspec_deprecated: return Val_int(3);
+  case clang_ext_Deprecated_CXX11_deprecated: return Val_int(4);
+  case clang_ext_Deprecated_C2x_deprecated: return Val_int(5);
+  case clang_ext_Deprecated_SpellingNotCalculated: return Val_int(6);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_deprecated_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Deprecated_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Deprecated_spelling result = clang_ext_Deprecated_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_deprecated_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Destructor_spelling
+Clang_ext_destructor_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Destructor_GNU_destructor;
+  case 1: return clang_ext_Destructor_CXX11_gnu_destructor;
+  case 2: return clang_ext_Destructor_C2x_gnu_destructor;
+  case 3: return clang_ext_Destructor_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_destructor_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Destructor_GNU_destructor;
+}
+
+value
+Val_clang_ext_destructor_spelling(enum clang_ext_Destructor_spelling v)
+{
+  switch (v) {
+  case clang_ext_Destructor_GNU_destructor: return Val_int(0);
+  case clang_ext_Destructor_CXX11_gnu_destructor: return Val_int(1);
+  case clang_ext_Destructor_C2x_gnu_destructor: return Val_int(2);
+  case clang_ext_Destructor_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_destructor_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Destructor_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Destructor_spelling result = clang_ext_Destructor_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_destructor_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_DisableTailCalls_spelling
+Clang_ext_disabletailcalls_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_DisableTailCalls_GNU_disable_tail_calls;
+  case 1: return clang_ext_DisableTailCalls_CXX11_clang_disable_tail_calls;
+  case 2: return clang_ext_DisableTailCalls_C2x_clang_disable_tail_calls;
+  case 3: return clang_ext_DisableTailCalls_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_disabletailcalls_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_DisableTailCalls_GNU_disable_tail_calls;
+}
+
+value
+Val_clang_ext_disabletailcalls_spelling(enum clang_ext_DisableTailCalls_spelling v)
+{
+  switch (v) {
+  case clang_ext_DisableTailCalls_GNU_disable_tail_calls: return Val_int(0);
+  case clang_ext_DisableTailCalls_CXX11_clang_disable_tail_calls: return Val_int(1);
+  case clang_ext_DisableTailCalls_C2x_clang_disable_tail_calls: return Val_int(2);
+  case clang_ext_DisableTailCalls_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_disabletailcalls_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_DisableTailCalls_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_DisableTailCalls_spelling result = clang_ext_DisableTailCalls_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_disabletailcalls_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_EnumExtensibility_spelling
+Clang_ext_enumextensibility_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_EnumExtensibility_GNU_enum_extensibility;
+  case 1: return clang_ext_EnumExtensibility_CXX11_clang_enum_extensibility;
+  case 2: return clang_ext_EnumExtensibility_C2x_clang_enum_extensibility;
+  case 3: return clang_ext_EnumExtensibility_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_enumextensibility_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_EnumExtensibility_GNU_enum_extensibility;
+}
+
+value
+Val_clang_ext_enumextensibility_spelling(enum clang_ext_EnumExtensibility_spelling v)
+{
+  switch (v) {
+  case clang_ext_EnumExtensibility_GNU_enum_extensibility: return Val_int(0);
+  case clang_ext_EnumExtensibility_CXX11_clang_enum_extensibility: return Val_int(1);
+  case clang_ext_EnumExtensibility_C2x_clang_enum_extensibility: return Val_int(2);
+  case clang_ext_EnumExtensibility_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_enumextensibility_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_EnumExtensibility_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_EnumExtensibility_spelling result = clang_ext_EnumExtensibility_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_enumextensibility_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ExcludeFromExplicitInstantiation_spelling
+Clang_ext_excludefromexplicitinstantiation_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ExcludeFromExplicitInstantiation_GNU_exclude_from_explicit_instantiation;
+  case 1: return clang_ext_ExcludeFromExplicitInstantiation_CXX11_clang_exclude_from_explicit_instantiation;
+  case 2: return clang_ext_ExcludeFromExplicitInstantiation_C2x_clang_exclude_from_explicit_instantiation;
+  case 3: return clang_ext_ExcludeFromExplicitInstantiation_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_excludefromexplicitinstantiation_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ExcludeFromExplicitInstantiation_GNU_exclude_from_explicit_instantiation;
+}
+
+value
+Val_clang_ext_excludefromexplicitinstantiation_spelling(enum clang_ext_ExcludeFromExplicitInstantiation_spelling v)
+{
+  switch (v) {
+  case clang_ext_ExcludeFromExplicitInstantiation_GNU_exclude_from_explicit_instantiation: return Val_int(0);
+  case clang_ext_ExcludeFromExplicitInstantiation_CXX11_clang_exclude_from_explicit_instantiation: return Val_int(1);
+  case clang_ext_ExcludeFromExplicitInstantiation_C2x_clang_exclude_from_explicit_instantiation: return Val_int(2);
+  case clang_ext_ExcludeFromExplicitInstantiation_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_excludefromexplicitinstantiation_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ExcludeFromExplicitInstantiation_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ExcludeFromExplicitInstantiation_spelling result = clang_ext_ExcludeFromExplicitInstantiation_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_excludefromexplicitinstantiation_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ExternalSourceSymbol_spelling
+Clang_ext_externalsourcesymbol_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ExternalSourceSymbol_GNU_external_source_symbol;
+  case 1: return clang_ext_ExternalSourceSymbol_CXX11_clang_external_source_symbol;
+  case 2: return clang_ext_ExternalSourceSymbol_C2x_clang_external_source_symbol;
+  case 3: return clang_ext_ExternalSourceSymbol_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_externalsourcesymbol_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ExternalSourceSymbol_GNU_external_source_symbol;
+}
+
+value
+Val_clang_ext_externalsourcesymbol_spelling(enum clang_ext_ExternalSourceSymbol_spelling v)
+{
+  switch (v) {
+  case clang_ext_ExternalSourceSymbol_GNU_external_source_symbol: return Val_int(0);
+  case clang_ext_ExternalSourceSymbol_CXX11_clang_external_source_symbol: return Val_int(1);
+  case clang_ext_ExternalSourceSymbol_C2x_clang_external_source_symbol: return Val_int(2);
+  case clang_ext_ExternalSourceSymbol_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_externalsourcesymbol_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ExternalSourceSymbol_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ExternalSourceSymbol_spelling result = clang_ext_ExternalSourceSymbol_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_externalsourcesymbol_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_FallThrough_spelling
+Clang_ext_fallthrough_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_FallThrough_CXX11_fallthrough;
+  case 1: return clang_ext_FallThrough_C2x_fallthrough;
+  case 2: return clang_ext_FallThrough_CXX11_clang_fallthrough;
+  case 3: return clang_ext_FallThrough_GNU_fallthrough;
+  case 4: return clang_ext_FallThrough_CXX11_gnu_fallthrough;
+  case 5: return clang_ext_FallThrough_C2x_gnu_fallthrough;
+  case 6: return clang_ext_FallThrough_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_fallthrough_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_FallThrough_CXX11_fallthrough;
+}
+
+value
+Val_clang_ext_fallthrough_spelling(enum clang_ext_FallThrough_spelling v)
+{
+  switch (v) {
+  case clang_ext_FallThrough_CXX11_fallthrough: return Val_int(0);
+  case clang_ext_FallThrough_C2x_fallthrough: return Val_int(1);
+  case clang_ext_FallThrough_CXX11_clang_fallthrough: return Val_int(2);
+  case clang_ext_FallThrough_GNU_fallthrough: return Val_int(3);
+  case clang_ext_FallThrough_CXX11_gnu_fallthrough: return Val_int(4);
+  case clang_ext_FallThrough_C2x_gnu_fallthrough: return Val_int(5);
+  case clang_ext_FallThrough_SpellingNotCalculated: return Val_int(6);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_fallthrough_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_FallThrough_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_FallThrough_spelling result = clang_ext_FallThrough_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_fallthrough_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_FastCall_spelling
+Clang_ext_fastcall_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_FastCall_GNU_fastcall;
+  case 1: return clang_ext_FastCall_CXX11_gnu_fastcall;
+  case 2: return clang_ext_FastCall_C2x_gnu_fastcall;
+  case 3: return clang_ext_FastCall_Keyword_fastcall;
+  case 4: return clang_ext_FastCall_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_fastcall_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_FastCall_GNU_fastcall;
+}
+
+value
+Val_clang_ext_fastcall_spelling(enum clang_ext_FastCall_spelling v)
+{
+  switch (v) {
+  case clang_ext_FastCall_GNU_fastcall: return Val_int(0);
+  case clang_ext_FastCall_CXX11_gnu_fastcall: return Val_int(1);
+  case clang_ext_FastCall_C2x_gnu_fastcall: return Val_int(2);
+  case clang_ext_FastCall_Keyword_fastcall: return Val_int(3);
+  case clang_ext_FastCall_SpellingNotCalculated: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_fastcall_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_FastCall_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_FastCall_spelling result = clang_ext_FastCall_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_fastcall_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_Final_spelling
 Clang_ext_final_spelling_val(value ocaml)
 {
@@ -10677,6 +13407,678 @@ clang_ext_Final_getSpelling_wrapper(value cursor_ocaml)
   {
     CAMLlocal1(data);
     data = Val_clang_ext_final_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_FlagEnum_spelling
+Clang_ext_flagenum_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_FlagEnum_GNU_flag_enum;
+  case 1: return clang_ext_FlagEnum_CXX11_clang_flag_enum;
+  case 2: return clang_ext_FlagEnum_C2x_clang_flag_enum;
+  case 3: return clang_ext_FlagEnum_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_flagenum_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_FlagEnum_GNU_flag_enum;
+}
+
+value
+Val_clang_ext_flagenum_spelling(enum clang_ext_FlagEnum_spelling v)
+{
+  switch (v) {
+  case clang_ext_FlagEnum_GNU_flag_enum: return Val_int(0);
+  case clang_ext_FlagEnum_CXX11_clang_flag_enum: return Val_int(1);
+  case clang_ext_FlagEnum_C2x_clang_flag_enum: return Val_int(2);
+  case clang_ext_FlagEnum_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_flagenum_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_FlagEnum_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_FlagEnum_spelling result = clang_ext_FlagEnum_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_flagenum_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Flatten_spelling
+Clang_ext_flatten_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Flatten_GNU_flatten;
+  case 1: return clang_ext_Flatten_CXX11_gnu_flatten;
+  case 2: return clang_ext_Flatten_C2x_gnu_flatten;
+  case 3: return clang_ext_Flatten_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_flatten_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Flatten_GNU_flatten;
+}
+
+value
+Val_clang_ext_flatten_spelling(enum clang_ext_Flatten_spelling v)
+{
+  switch (v) {
+  case clang_ext_Flatten_GNU_flatten: return Val_int(0);
+  case clang_ext_Flatten_CXX11_gnu_flatten: return Val_int(1);
+  case clang_ext_Flatten_C2x_gnu_flatten: return Val_int(2);
+  case clang_ext_Flatten_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_flatten_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Flatten_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Flatten_spelling result = clang_ext_Flatten_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_flatten_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Format_spelling
+Clang_ext_format_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Format_GNU_format;
+  case 1: return clang_ext_Format_CXX11_gnu_format;
+  case 2: return clang_ext_Format_C2x_gnu_format;
+  case 3: return clang_ext_Format_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_format_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Format_GNU_format;
+}
+
+value
+Val_clang_ext_format_spelling(enum clang_ext_Format_spelling v)
+{
+  switch (v) {
+  case clang_ext_Format_GNU_format: return Val_int(0);
+  case clang_ext_Format_CXX11_gnu_format: return Val_int(1);
+  case clang_ext_Format_C2x_gnu_format: return Val_int(2);
+  case clang_ext_Format_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_format_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Format_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Format_spelling result = clang_ext_Format_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_format_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_FormatArg_spelling
+Clang_ext_formatarg_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_FormatArg_GNU_format_arg;
+  case 1: return clang_ext_FormatArg_CXX11_gnu_format_arg;
+  case 2: return clang_ext_FormatArg_C2x_gnu_format_arg;
+  case 3: return clang_ext_FormatArg_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_formatarg_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_FormatArg_GNU_format_arg;
+}
+
+value
+Val_clang_ext_formatarg_spelling(enum clang_ext_FormatArg_spelling v)
+{
+  switch (v) {
+  case clang_ext_FormatArg_GNU_format_arg: return Val_int(0);
+  case clang_ext_FormatArg_CXX11_gnu_format_arg: return Val_int(1);
+  case clang_ext_FormatArg_C2x_gnu_format_arg: return Val_int(2);
+  case clang_ext_FormatArg_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_formatarg_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_FormatArg_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_FormatArg_spelling result = clang_ext_FormatArg_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_formatarg_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_GNUInline_spelling
+Clang_ext_gnuinline_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_GNUInline_GNU_gnu_inline;
+  case 1: return clang_ext_GNUInline_CXX11_gnu_gnu_inline;
+  case 2: return clang_ext_GNUInline_C2x_gnu_gnu_inline;
+  case 3: return clang_ext_GNUInline_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_gnuinline_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_GNUInline_GNU_gnu_inline;
+}
+
+value
+Val_clang_ext_gnuinline_spelling(enum clang_ext_GNUInline_spelling v)
+{
+  switch (v) {
+  case clang_ext_GNUInline_GNU_gnu_inline: return Val_int(0);
+  case clang_ext_GNUInline_CXX11_gnu_gnu_inline: return Val_int(1);
+  case clang_ext_GNUInline_C2x_gnu_gnu_inline: return Val_int(2);
+  case clang_ext_GNUInline_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_gnuinline_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_GNUInline_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_GNUInline_spelling result = clang_ext_GNUInline_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_gnuinline_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_GuardedVar_spelling
+Clang_ext_guardedvar_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_GuardedVar_GNU_guarded_var;
+  case 1: return clang_ext_GuardedVar_CXX11_clang_guarded_var;
+  case 2: return clang_ext_GuardedVar_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_guardedvar_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_GuardedVar_GNU_guarded_var;
+}
+
+value
+Val_clang_ext_guardedvar_spelling(enum clang_ext_GuardedVar_spelling v)
+{
+  switch (v) {
+  case clang_ext_GuardedVar_GNU_guarded_var: return Val_int(0);
+  case clang_ext_GuardedVar_CXX11_clang_guarded_var: return Val_int(1);
+  case clang_ext_GuardedVar_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_guardedvar_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_GuardedVar_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_GuardedVar_spelling result = clang_ext_GuardedVar_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_guardedvar_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Hot_spelling
+Clang_ext_hot_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Hot_GNU_hot;
+  case 1: return clang_ext_Hot_CXX11_gnu_hot;
+  case 2: return clang_ext_Hot_C2x_gnu_hot;
+  case 3: return clang_ext_Hot_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_hot_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Hot_GNU_hot;
+}
+
+value
+Val_clang_ext_hot_spelling(enum clang_ext_Hot_spelling v)
+{
+  switch (v) {
+  case clang_ext_Hot_GNU_hot: return Val_int(0);
+  case clang_ext_Hot_CXX11_gnu_hot: return Val_int(1);
+  case clang_ext_Hot_C2x_gnu_hot: return Val_int(2);
+  case clang_ext_Hot_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_hot_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Hot_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Hot_spelling result = clang_ext_Hot_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_hot_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_IBAction_spelling
+Clang_ext_ibaction_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_IBAction_GNU_ibaction;
+  case 1: return clang_ext_IBAction_CXX11_clang_ibaction;
+  case 2: return clang_ext_IBAction_C2x_clang_ibaction;
+  case 3: return clang_ext_IBAction_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_ibaction_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_IBAction_GNU_ibaction;
+}
+
+value
+Val_clang_ext_ibaction_spelling(enum clang_ext_IBAction_spelling v)
+{
+  switch (v) {
+  case clang_ext_IBAction_GNU_ibaction: return Val_int(0);
+  case clang_ext_IBAction_CXX11_clang_ibaction: return Val_int(1);
+  case clang_ext_IBAction_C2x_clang_ibaction: return Val_int(2);
+  case clang_ext_IBAction_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_ibaction_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_IBAction_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_IBAction_spelling result = clang_ext_IBAction_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_ibaction_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_IBOutlet_spelling
+Clang_ext_iboutlet_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_IBOutlet_GNU_iboutlet;
+  case 1: return clang_ext_IBOutlet_CXX11_clang_iboutlet;
+  case 2: return clang_ext_IBOutlet_C2x_clang_iboutlet;
+  case 3: return clang_ext_IBOutlet_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_iboutlet_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_IBOutlet_GNU_iboutlet;
+}
+
+value
+Val_clang_ext_iboutlet_spelling(enum clang_ext_IBOutlet_spelling v)
+{
+  switch (v) {
+  case clang_ext_IBOutlet_GNU_iboutlet: return Val_int(0);
+  case clang_ext_IBOutlet_CXX11_clang_iboutlet: return Val_int(1);
+  case clang_ext_IBOutlet_C2x_clang_iboutlet: return Val_int(2);
+  case clang_ext_IBOutlet_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_iboutlet_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_IBOutlet_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_IBOutlet_spelling result = clang_ext_IBOutlet_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_iboutlet_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_IBOutletCollection_spelling
+Clang_ext_iboutletcollection_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_IBOutletCollection_GNU_iboutletcollection;
+  case 1: return clang_ext_IBOutletCollection_CXX11_clang_iboutletcollection;
+  case 2: return clang_ext_IBOutletCollection_C2x_clang_iboutletcollection;
+  case 3: return clang_ext_IBOutletCollection_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_iboutletcollection_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_IBOutletCollection_GNU_iboutletcollection;
+}
+
+value
+Val_clang_ext_iboutletcollection_spelling(enum clang_ext_IBOutletCollection_spelling v)
+{
+  switch (v) {
+  case clang_ext_IBOutletCollection_GNU_iboutletcollection: return Val_int(0);
+  case clang_ext_IBOutletCollection_CXX11_clang_iboutletcollection: return Val_int(1);
+  case clang_ext_IBOutletCollection_C2x_clang_iboutletcollection: return Val_int(2);
+  case clang_ext_IBOutletCollection_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_iboutletcollection_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_IBOutletCollection_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_IBOutletCollection_spelling result = clang_ext_IBOutletCollection_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_iboutletcollection_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_IFunc_spelling
+Clang_ext_ifunc_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_IFunc_GNU_ifunc;
+  case 1: return clang_ext_IFunc_CXX11_gnu_ifunc;
+  case 2: return clang_ext_IFunc_C2x_gnu_ifunc;
+  case 3: return clang_ext_IFunc_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_ifunc_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_IFunc_GNU_ifunc;
+}
+
+value
+Val_clang_ext_ifunc_spelling(enum clang_ext_IFunc_spelling v)
+{
+  switch (v) {
+  case clang_ext_IFunc_GNU_ifunc: return Val_int(0);
+  case clang_ext_IFunc_CXX11_gnu_ifunc: return Val_int(1);
+  case clang_ext_IFunc_C2x_gnu_ifunc: return Val_int(2);
+  case clang_ext_IFunc_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_ifunc_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_IFunc_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_IFunc_spelling result = clang_ext_IFunc_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_ifunc_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_InitPriority_spelling
+Clang_ext_initpriority_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_InitPriority_GNU_init_priority;
+  case 1: return clang_ext_InitPriority_CXX11_gnu_init_priority;
+  case 2: return clang_ext_InitPriority_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_initpriority_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_InitPriority_GNU_init_priority;
+}
+
+value
+Val_clang_ext_initpriority_spelling(enum clang_ext_InitPriority_spelling v)
+{
+  switch (v) {
+  case clang_ext_InitPriority_GNU_init_priority: return Val_int(0);
+  case clang_ext_InitPriority_CXX11_gnu_init_priority: return Val_int(1);
+  case clang_ext_InitPriority_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_initpriority_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_InitPriority_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_InitPriority_spelling result = clang_ext_InitPriority_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_initpriority_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_IntelOclBicc_spelling
+Clang_ext_inteloclbicc_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_IntelOclBicc_GNU_intel_ocl_bicc;
+  case 1: return clang_ext_IntelOclBicc_CXX11_clang_intel_ocl_bicc;
+  case 2: return clang_ext_IntelOclBicc_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_inteloclbicc_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_IntelOclBicc_GNU_intel_ocl_bicc;
+}
+
+value
+Val_clang_ext_inteloclbicc_spelling(enum clang_ext_IntelOclBicc_spelling v)
+{
+  switch (v) {
+  case clang_ext_IntelOclBicc_GNU_intel_ocl_bicc: return Val_int(0);
+  case clang_ext_IntelOclBicc_CXX11_clang_intel_ocl_bicc: return Val_int(1);
+  case clang_ext_IntelOclBicc_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_inteloclbicc_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_IntelOclBicc_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_IntelOclBicc_spelling result = clang_ext_IntelOclBicc_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_inteloclbicc_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_InternalLinkage_spelling
+Clang_ext_internallinkage_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_InternalLinkage_GNU_internal_linkage;
+  case 1: return clang_ext_InternalLinkage_CXX11_clang_internal_linkage;
+  case 2: return clang_ext_InternalLinkage_C2x_clang_internal_linkage;
+  case 3: return clang_ext_InternalLinkage_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_internallinkage_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_InternalLinkage_GNU_internal_linkage;
+}
+
+value
+Val_clang_ext_internallinkage_spelling(enum clang_ext_InternalLinkage_spelling v)
+{
+  switch (v) {
+  case clang_ext_InternalLinkage_GNU_internal_linkage: return Val_int(0);
+  case clang_ext_InternalLinkage_CXX11_clang_internal_linkage: return Val_int(1);
+  case clang_ext_InternalLinkage_C2x_clang_internal_linkage: return Val_int(2);
+  case clang_ext_InternalLinkage_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_internallinkage_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_InternalLinkage_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_InternalLinkage_spelling result = clang_ext_InternalLinkage_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_internallinkage_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_LTOVisibilityPublic_spelling
+Clang_ext_ltovisibilitypublic_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_LTOVisibilityPublic_GNU_lto_visibility_public;
+  case 1: return clang_ext_LTOVisibilityPublic_CXX11_clang_lto_visibility_public;
+  case 2: return clang_ext_LTOVisibilityPublic_C2x_clang_lto_visibility_public;
+  case 3: return clang_ext_LTOVisibilityPublic_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_ltovisibilitypublic_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_LTOVisibilityPublic_GNU_lto_visibility_public;
+}
+
+value
+Val_clang_ext_ltovisibilitypublic_spelling(enum clang_ext_LTOVisibilityPublic_spelling v)
+{
+  switch (v) {
+  case clang_ext_LTOVisibilityPublic_GNU_lto_visibility_public: return Val_int(0);
+  case clang_ext_LTOVisibilityPublic_CXX11_clang_lto_visibility_public: return Val_int(1);
+  case clang_ext_LTOVisibilityPublic_C2x_clang_lto_visibility_public: return Val_int(2);
+  case clang_ext_LTOVisibilityPublic_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_ltovisibilitypublic_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_LTOVisibilityPublic_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_LTOVisibilityPublic_spelling result = clang_ext_LTOVisibilityPublic_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_ltovisibilitypublic_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_LifetimeBound_spelling
+Clang_ext_lifetimebound_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_LifetimeBound_GNU_lifetimebound;
+  case 1: return clang_ext_LifetimeBound_CXX11_clang_lifetimebound;
+  case 2: return clang_ext_LifetimeBound_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_lifetimebound_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_LifetimeBound_GNU_lifetimebound;
+}
+
+value
+Val_clang_ext_lifetimebound_spelling(enum clang_ext_LifetimeBound_spelling v)
+{
+  switch (v) {
+  case clang_ext_LifetimeBound_GNU_lifetimebound: return Val_int(0);
+  case clang_ext_LifetimeBound_CXX11_clang_lifetimebound: return Val_int(1);
+  case clang_ext_LifetimeBound_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_lifetimebound_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_LifetimeBound_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_LifetimeBound_spelling result = clang_ext_LifetimeBound_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_lifetimebound_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_LoaderUninitialized_spelling
+Clang_ext_loaderuninitialized_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_LoaderUninitialized_GNU_loader_uninitialized;
+  case 1: return clang_ext_LoaderUninitialized_CXX11_clang_loader_uninitialized;
+  case 2: return clang_ext_LoaderUninitialized_C2x_clang_loader_uninitialized;
+  case 3: return clang_ext_LoaderUninitialized_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_loaderuninitialized_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_LoaderUninitialized_GNU_loader_uninitialized;
+}
+
+value
+Val_clang_ext_loaderuninitialized_spelling(enum clang_ext_LoaderUninitialized_spelling v)
+{
+  switch (v) {
+  case clang_ext_LoaderUninitialized_GNU_loader_uninitialized: return Val_int(0);
+  case clang_ext_LoaderUninitialized_CXX11_clang_loader_uninitialized: return Val_int(1);
+  case clang_ext_LoaderUninitialized_C2x_clang_loader_uninitialized: return Val_int(2);
+  case clang_ext_LoaderUninitialized_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_loaderuninitialized_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_LoaderUninitialized_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_LoaderUninitialized_spelling result = clang_ext_LoaderUninitialized_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_loaderuninitialized_spelling(result);
     CAMLreturn(data);
   }
 }
@@ -10725,6 +14127,86 @@ clang_ext_LoopHint_getSpelling_wrapper(value cursor_ocaml)
   }
 }
 
+enum clang_ext_MIGServerRoutine_spelling
+Clang_ext_migserverroutine_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_MIGServerRoutine_GNU_mig_server_routine;
+  case 1: return clang_ext_MIGServerRoutine_CXX11_clang_mig_server_routine;
+  case 2: return clang_ext_MIGServerRoutine_C2x_clang_mig_server_routine;
+  case 3: return clang_ext_MIGServerRoutine_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_migserverroutine_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_MIGServerRoutine_GNU_mig_server_routine;
+}
+
+value
+Val_clang_ext_migserverroutine_spelling(enum clang_ext_MIGServerRoutine_spelling v)
+{
+  switch (v) {
+  case clang_ext_MIGServerRoutine_GNU_mig_server_routine: return Val_int(0);
+  case clang_ext_MIGServerRoutine_CXX11_clang_mig_server_routine: return Val_int(1);
+  case clang_ext_MIGServerRoutine_C2x_clang_mig_server_routine: return Val_int(2);
+  case clang_ext_MIGServerRoutine_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_migserverroutine_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_MIGServerRoutine_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_MIGServerRoutine_spelling result = clang_ext_MIGServerRoutine_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_migserverroutine_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_MSABI_spelling
+Clang_ext_msabi_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_MSABI_GNU_ms_abi;
+  case 1: return clang_ext_MSABI_CXX11_gnu_ms_abi;
+  case 2: return clang_ext_MSABI_C2x_gnu_ms_abi;
+  case 3: return clang_ext_MSABI_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_msabi_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_MSABI_GNU_ms_abi;
+}
+
+value
+Val_clang_ext_msabi_spelling(enum clang_ext_MSABI_spelling v)
+{
+  switch (v) {
+  case clang_ext_MSABI_GNU_ms_abi: return Val_int(0);
+  case clang_ext_MSABI_CXX11_gnu_ms_abi: return Val_int(1);
+  case clang_ext_MSABI_C2x_gnu_ms_abi: return Val_int(2);
+  case clang_ext_MSABI_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_msabi_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_MSABI_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_MSABI_spelling result = clang_ext_MSABI_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_msabi_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_MSInheritance_spelling
 Clang_ext_msinheritance_spelling_val(value ocaml)
 {
@@ -10767,15 +14249,337 @@ clang_ext_MSInheritance_getSpelling_wrapper(value cursor_ocaml)
   }
 }
 
+enum clang_ext_MSP430Interrupt_spelling
+Clang_ext_msp430interrupt_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_MSP430Interrupt_GNU_interrupt;
+  case 1: return clang_ext_MSP430Interrupt_CXX11_gnu_interrupt;
+  case 2: return clang_ext_MSP430Interrupt_C2x_gnu_interrupt;
+  case 3: return clang_ext_MSP430Interrupt_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_msp430interrupt_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_MSP430Interrupt_GNU_interrupt;
+}
+
+value
+Val_clang_ext_msp430interrupt_spelling(enum clang_ext_MSP430Interrupt_spelling v)
+{
+  switch (v) {
+  case clang_ext_MSP430Interrupt_GNU_interrupt: return Val_int(0);
+  case clang_ext_MSP430Interrupt_CXX11_gnu_interrupt: return Val_int(1);
+  case clang_ext_MSP430Interrupt_C2x_gnu_interrupt: return Val_int(2);
+  case clang_ext_MSP430Interrupt_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_msp430interrupt_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_MSP430Interrupt_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_MSP430Interrupt_spelling result = clang_ext_MSP430Interrupt_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_msp430interrupt_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_MSStruct_spelling
+Clang_ext_msstruct_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_MSStruct_GNU_ms_struct;
+  case 1: return clang_ext_MSStruct_CXX11_gnu_ms_struct;
+  case 2: return clang_ext_MSStruct_C2x_gnu_ms_struct;
+  case 3: return clang_ext_MSStruct_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_msstruct_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_MSStruct_GNU_ms_struct;
+}
+
+value
+Val_clang_ext_msstruct_spelling(enum clang_ext_MSStruct_spelling v)
+{
+  switch (v) {
+  case clang_ext_MSStruct_GNU_ms_struct: return Val_int(0);
+  case clang_ext_MSStruct_CXX11_gnu_ms_struct: return Val_int(1);
+  case clang_ext_MSStruct_C2x_gnu_ms_struct: return Val_int(2);
+  case clang_ext_MSStruct_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_msstruct_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_MSStruct_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_MSStruct_spelling result = clang_ext_MSStruct_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_msstruct_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_MayAlias_spelling
+Clang_ext_mayalias_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_MayAlias_GNU_may_alias;
+  case 1: return clang_ext_MayAlias_CXX11_gnu_may_alias;
+  case 2: return clang_ext_MayAlias_C2x_gnu_may_alias;
+  case 3: return clang_ext_MayAlias_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_mayalias_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_MayAlias_GNU_may_alias;
+}
+
+value
+Val_clang_ext_mayalias_spelling(enum clang_ext_MayAlias_spelling v)
+{
+  switch (v) {
+  case clang_ext_MayAlias_GNU_may_alias: return Val_int(0);
+  case clang_ext_MayAlias_CXX11_gnu_may_alias: return Val_int(1);
+  case clang_ext_MayAlias_C2x_gnu_may_alias: return Val_int(2);
+  case clang_ext_MayAlias_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_mayalias_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_MayAlias_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_MayAlias_spelling result = clang_ext_MayAlias_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_mayalias_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_MicroMips_spelling
+Clang_ext_micromips_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_MicroMips_GNU_micromips;
+  case 1: return clang_ext_MicroMips_CXX11_gnu_micromips;
+  case 2: return clang_ext_MicroMips_C2x_gnu_micromips;
+  case 3: return clang_ext_MicroMips_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_micromips_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_MicroMips_GNU_micromips;
+}
+
+value
+Val_clang_ext_micromips_spelling(enum clang_ext_MicroMips_spelling v)
+{
+  switch (v) {
+  case clang_ext_MicroMips_GNU_micromips: return Val_int(0);
+  case clang_ext_MicroMips_CXX11_gnu_micromips: return Val_int(1);
+  case clang_ext_MicroMips_C2x_gnu_micromips: return Val_int(2);
+  case clang_ext_MicroMips_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_micromips_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_MicroMips_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_MicroMips_spelling result = clang_ext_MicroMips_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_micromips_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_MinSize_spelling
+Clang_ext_minsize_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_MinSize_GNU_minsize;
+  case 1: return clang_ext_MinSize_CXX11_clang_minsize;
+  case 2: return clang_ext_MinSize_C2x_clang_minsize;
+  case 3: return clang_ext_MinSize_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_minsize_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_MinSize_GNU_minsize;
+}
+
+value
+Val_clang_ext_minsize_spelling(enum clang_ext_MinSize_spelling v)
+{
+  switch (v) {
+  case clang_ext_MinSize_GNU_minsize: return Val_int(0);
+  case clang_ext_MinSize_CXX11_clang_minsize: return Val_int(1);
+  case clang_ext_MinSize_C2x_clang_minsize: return Val_int(2);
+  case clang_ext_MinSize_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_minsize_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_MinSize_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_MinSize_spelling result = clang_ext_MinSize_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_minsize_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_MinVectorWidth_spelling
+Clang_ext_minvectorwidth_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_MinVectorWidth_GNU_min_vector_width;
+  case 1: return clang_ext_MinVectorWidth_CXX11_clang_min_vector_width;
+  case 2: return clang_ext_MinVectorWidth_C2x_clang_min_vector_width;
+  case 3: return clang_ext_MinVectorWidth_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_minvectorwidth_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_MinVectorWidth_GNU_min_vector_width;
+}
+
+value
+Val_clang_ext_minvectorwidth_spelling(enum clang_ext_MinVectorWidth_spelling v)
+{
+  switch (v) {
+  case clang_ext_MinVectorWidth_GNU_min_vector_width: return Val_int(0);
+  case clang_ext_MinVectorWidth_CXX11_clang_min_vector_width: return Val_int(1);
+  case clang_ext_MinVectorWidth_C2x_clang_min_vector_width: return Val_int(2);
+  case clang_ext_MinVectorWidth_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_minvectorwidth_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_MinVectorWidth_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_MinVectorWidth_spelling result = clang_ext_MinVectorWidth_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_minvectorwidth_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Mips16_spelling
+Clang_ext_mips16_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Mips16_GNU_mips16;
+  case 1: return clang_ext_Mips16_CXX11_gnu_mips16;
+  case 2: return clang_ext_Mips16_C2x_gnu_mips16;
+  case 3: return clang_ext_Mips16_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_mips16_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Mips16_GNU_mips16;
+}
+
+value
+Val_clang_ext_mips16_spelling(enum clang_ext_Mips16_spelling v)
+{
+  switch (v) {
+  case clang_ext_Mips16_GNU_mips16: return Val_int(0);
+  case clang_ext_Mips16_CXX11_gnu_mips16: return Val_int(1);
+  case clang_ext_Mips16_C2x_gnu_mips16: return Val_int(2);
+  case clang_ext_Mips16_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_mips16_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Mips16_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Mips16_spelling result = clang_ext_Mips16_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_mips16_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_MipsInterrupt_spelling
+Clang_ext_mipsinterrupt_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_MipsInterrupt_GNU_interrupt;
+  case 1: return clang_ext_MipsInterrupt_CXX11_gnu_interrupt;
+  case 2: return clang_ext_MipsInterrupt_C2x_gnu_interrupt;
+  case 3: return clang_ext_MipsInterrupt_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_mipsinterrupt_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_MipsInterrupt_GNU_interrupt;
+}
+
+value
+Val_clang_ext_mipsinterrupt_spelling(enum clang_ext_MipsInterrupt_spelling v)
+{
+  switch (v) {
+  case clang_ext_MipsInterrupt_GNU_interrupt: return Val_int(0);
+  case clang_ext_MipsInterrupt_CXX11_gnu_interrupt: return Val_int(1);
+  case clang_ext_MipsInterrupt_C2x_gnu_interrupt: return Val_int(2);
+  case clang_ext_MipsInterrupt_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_mipsinterrupt_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_MipsInterrupt_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_MipsInterrupt_spelling result = clang_ext_MipsInterrupt_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_mipsinterrupt_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_MipsLongCall_spelling
 Clang_ext_mipslongcall_spelling_val(value ocaml)
 {
   switch (Int_val(ocaml)) {
   case 0: return clang_ext_MipsLongCall_GNU_long_call;
   case 1: return clang_ext_MipsLongCall_CXX11_gnu_long_call;
-  case 2: return clang_ext_MipsLongCall_GNU_far;
-  case 3: return clang_ext_MipsLongCall_CXX11_gnu_far;
-  case 4: return clang_ext_MipsLongCall_SpellingNotCalculated;
+  case 2: return clang_ext_MipsLongCall_C2x_gnu_long_call;
+  case 3: return clang_ext_MipsLongCall_GNU_far;
+  case 4: return clang_ext_MipsLongCall_CXX11_gnu_far;
+  case 5: return clang_ext_MipsLongCall_C2x_gnu_far;
+  case 6: return clang_ext_MipsLongCall_SpellingNotCalculated;
   }
   failwith_fmt("invalid value for Clang_ext_mipslongcall_spelling_val: %d", Int_val(ocaml));
   return clang_ext_MipsLongCall_GNU_long_call;
@@ -10787,9 +14591,11 @@ Val_clang_ext_mipslongcall_spelling(enum clang_ext_MipsLongCall_spelling v)
   switch (v) {
   case clang_ext_MipsLongCall_GNU_long_call: return Val_int(0);
   case clang_ext_MipsLongCall_CXX11_gnu_long_call: return Val_int(1);
-  case clang_ext_MipsLongCall_GNU_far: return Val_int(2);
-  case clang_ext_MipsLongCall_CXX11_gnu_far: return Val_int(3);
-  case clang_ext_MipsLongCall_SpellingNotCalculated: return Val_int(4);
+  case clang_ext_MipsLongCall_C2x_gnu_long_call: return Val_int(2);
+  case clang_ext_MipsLongCall_GNU_far: return Val_int(3);
+  case clang_ext_MipsLongCall_CXX11_gnu_far: return Val_int(4);
+  case clang_ext_MipsLongCall_C2x_gnu_far: return Val_int(5);
+  case clang_ext_MipsLongCall_SpellingNotCalculated: return Val_int(6);
   }
   failwith_fmt("invalid value for Val_clang_ext_mipslongcall_spelling: %d", v);
   return Val_int(0);
@@ -10815,9 +14621,11 @@ Clang_ext_mipsshortcall_spelling_val(value ocaml)
   switch (Int_val(ocaml)) {
   case 0: return clang_ext_MipsShortCall_GNU_short_call;
   case 1: return clang_ext_MipsShortCall_CXX11_gnu_short_call;
-  case 2: return clang_ext_MipsShortCall_GNU_near;
-  case 3: return clang_ext_MipsShortCall_CXX11_gnu_near;
-  case 4: return clang_ext_MipsShortCall_SpellingNotCalculated;
+  case 2: return clang_ext_MipsShortCall_C2x_gnu_short_call;
+  case 3: return clang_ext_MipsShortCall_GNU_near;
+  case 4: return clang_ext_MipsShortCall_CXX11_gnu_near;
+  case 5: return clang_ext_MipsShortCall_C2x_gnu_near;
+  case 6: return clang_ext_MipsShortCall_SpellingNotCalculated;
   }
   failwith_fmt("invalid value for Clang_ext_mipsshortcall_spelling_val: %d", Int_val(ocaml));
   return clang_ext_MipsShortCall_GNU_short_call;
@@ -10829,9 +14637,11 @@ Val_clang_ext_mipsshortcall_spelling(enum clang_ext_MipsShortCall_spelling v)
   switch (v) {
   case clang_ext_MipsShortCall_GNU_short_call: return Val_int(0);
   case clang_ext_MipsShortCall_CXX11_gnu_short_call: return Val_int(1);
-  case clang_ext_MipsShortCall_GNU_near: return Val_int(2);
-  case clang_ext_MipsShortCall_CXX11_gnu_near: return Val_int(3);
-  case clang_ext_MipsShortCall_SpellingNotCalculated: return Val_int(4);
+  case clang_ext_MipsShortCall_C2x_gnu_short_call: return Val_int(2);
+  case clang_ext_MipsShortCall_GNU_near: return Val_int(3);
+  case clang_ext_MipsShortCall_CXX11_gnu_near: return Val_int(4);
+  case clang_ext_MipsShortCall_C2x_gnu_near: return Val_int(5);
+  case clang_ext_MipsShortCall_SpellingNotCalculated: return Val_int(6);
   }
   failwith_fmt("invalid value for Val_clang_ext_mipsshortcall_spelling: %d", v);
   return Val_int(0);
@@ -10847,6 +14657,2372 @@ clang_ext_MipsShortCall_getSpelling_wrapper(value cursor_ocaml)
   {
     CAMLlocal1(data);
     data = Val_clang_ext_mipsshortcall_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Mode_spelling
+Clang_ext_mode_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Mode_GNU_mode;
+  case 1: return clang_ext_Mode_CXX11_gnu_mode;
+  case 2: return clang_ext_Mode_C2x_gnu_mode;
+  case 3: return clang_ext_Mode_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_mode_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Mode_GNU_mode;
+}
+
+value
+Val_clang_ext_mode_spelling(enum clang_ext_Mode_spelling v)
+{
+  switch (v) {
+  case clang_ext_Mode_GNU_mode: return Val_int(0);
+  case clang_ext_Mode_CXX11_gnu_mode: return Val_int(1);
+  case clang_ext_Mode_C2x_gnu_mode: return Val_int(2);
+  case clang_ext_Mode_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_mode_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Mode_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Mode_spelling result = clang_ext_Mode_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_mode_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NSConsumed_spelling
+Clang_ext_nsconsumed_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NSConsumed_GNU_ns_consumed;
+  case 1: return clang_ext_NSConsumed_CXX11_clang_ns_consumed;
+  case 2: return clang_ext_NSConsumed_C2x_clang_ns_consumed;
+  case 3: return clang_ext_NSConsumed_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nsconsumed_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NSConsumed_GNU_ns_consumed;
+}
+
+value
+Val_clang_ext_nsconsumed_spelling(enum clang_ext_NSConsumed_spelling v)
+{
+  switch (v) {
+  case clang_ext_NSConsumed_GNU_ns_consumed: return Val_int(0);
+  case clang_ext_NSConsumed_CXX11_clang_ns_consumed: return Val_int(1);
+  case clang_ext_NSConsumed_C2x_clang_ns_consumed: return Val_int(2);
+  case clang_ext_NSConsumed_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nsconsumed_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NSConsumed_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NSConsumed_spelling result = clang_ext_NSConsumed_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nsconsumed_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NSConsumesSelf_spelling
+Clang_ext_nsconsumesself_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NSConsumesSelf_GNU_ns_consumes_self;
+  case 1: return clang_ext_NSConsumesSelf_CXX11_clang_ns_consumes_self;
+  case 2: return clang_ext_NSConsumesSelf_C2x_clang_ns_consumes_self;
+  case 3: return clang_ext_NSConsumesSelf_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nsconsumesself_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NSConsumesSelf_GNU_ns_consumes_self;
+}
+
+value
+Val_clang_ext_nsconsumesself_spelling(enum clang_ext_NSConsumesSelf_spelling v)
+{
+  switch (v) {
+  case clang_ext_NSConsumesSelf_GNU_ns_consumes_self: return Val_int(0);
+  case clang_ext_NSConsumesSelf_CXX11_clang_ns_consumes_self: return Val_int(1);
+  case clang_ext_NSConsumesSelf_C2x_clang_ns_consumes_self: return Val_int(2);
+  case clang_ext_NSConsumesSelf_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nsconsumesself_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NSConsumesSelf_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NSConsumesSelf_spelling result = clang_ext_NSConsumesSelf_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nsconsumesself_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NSReturnsAutoreleased_spelling
+Clang_ext_nsreturnsautoreleased_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NSReturnsAutoreleased_GNU_ns_returns_autoreleased;
+  case 1: return clang_ext_NSReturnsAutoreleased_CXX11_clang_ns_returns_autoreleased;
+  case 2: return clang_ext_NSReturnsAutoreleased_C2x_clang_ns_returns_autoreleased;
+  case 3: return clang_ext_NSReturnsAutoreleased_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nsreturnsautoreleased_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NSReturnsAutoreleased_GNU_ns_returns_autoreleased;
+}
+
+value
+Val_clang_ext_nsreturnsautoreleased_spelling(enum clang_ext_NSReturnsAutoreleased_spelling v)
+{
+  switch (v) {
+  case clang_ext_NSReturnsAutoreleased_GNU_ns_returns_autoreleased: return Val_int(0);
+  case clang_ext_NSReturnsAutoreleased_CXX11_clang_ns_returns_autoreleased: return Val_int(1);
+  case clang_ext_NSReturnsAutoreleased_C2x_clang_ns_returns_autoreleased: return Val_int(2);
+  case clang_ext_NSReturnsAutoreleased_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nsreturnsautoreleased_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NSReturnsAutoreleased_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NSReturnsAutoreleased_spelling result = clang_ext_NSReturnsAutoreleased_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nsreturnsautoreleased_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NSReturnsNotRetained_spelling
+Clang_ext_nsreturnsnotretained_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NSReturnsNotRetained_GNU_ns_returns_not_retained;
+  case 1: return clang_ext_NSReturnsNotRetained_CXX11_clang_ns_returns_not_retained;
+  case 2: return clang_ext_NSReturnsNotRetained_C2x_clang_ns_returns_not_retained;
+  case 3: return clang_ext_NSReturnsNotRetained_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nsreturnsnotretained_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NSReturnsNotRetained_GNU_ns_returns_not_retained;
+}
+
+value
+Val_clang_ext_nsreturnsnotretained_spelling(enum clang_ext_NSReturnsNotRetained_spelling v)
+{
+  switch (v) {
+  case clang_ext_NSReturnsNotRetained_GNU_ns_returns_not_retained: return Val_int(0);
+  case clang_ext_NSReturnsNotRetained_CXX11_clang_ns_returns_not_retained: return Val_int(1);
+  case clang_ext_NSReturnsNotRetained_C2x_clang_ns_returns_not_retained: return Val_int(2);
+  case clang_ext_NSReturnsNotRetained_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nsreturnsnotretained_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NSReturnsNotRetained_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NSReturnsNotRetained_spelling result = clang_ext_NSReturnsNotRetained_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nsreturnsnotretained_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NSReturnsRetained_spelling
+Clang_ext_nsreturnsretained_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NSReturnsRetained_GNU_ns_returns_retained;
+  case 1: return clang_ext_NSReturnsRetained_CXX11_clang_ns_returns_retained;
+  case 2: return clang_ext_NSReturnsRetained_C2x_clang_ns_returns_retained;
+  case 3: return clang_ext_NSReturnsRetained_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nsreturnsretained_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NSReturnsRetained_GNU_ns_returns_retained;
+}
+
+value
+Val_clang_ext_nsreturnsretained_spelling(enum clang_ext_NSReturnsRetained_spelling v)
+{
+  switch (v) {
+  case clang_ext_NSReturnsRetained_GNU_ns_returns_retained: return Val_int(0);
+  case clang_ext_NSReturnsRetained_CXX11_clang_ns_returns_retained: return Val_int(1);
+  case clang_ext_NSReturnsRetained_C2x_clang_ns_returns_retained: return Val_int(2);
+  case clang_ext_NSReturnsRetained_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nsreturnsretained_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NSReturnsRetained_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NSReturnsRetained_spelling result = clang_ext_NSReturnsRetained_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nsreturnsretained_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Naked_spelling
+Clang_ext_naked_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Naked_GNU_naked;
+  case 1: return clang_ext_Naked_CXX11_gnu_naked;
+  case 2: return clang_ext_Naked_C2x_gnu_naked;
+  case 3: return clang_ext_Naked_Declspec_naked;
+  case 4: return clang_ext_Naked_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_naked_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Naked_GNU_naked;
+}
+
+value
+Val_clang_ext_naked_spelling(enum clang_ext_Naked_spelling v)
+{
+  switch (v) {
+  case clang_ext_Naked_GNU_naked: return Val_int(0);
+  case clang_ext_Naked_CXX11_gnu_naked: return Val_int(1);
+  case clang_ext_Naked_C2x_gnu_naked: return Val_int(2);
+  case clang_ext_Naked_Declspec_naked: return Val_int(3);
+  case clang_ext_Naked_SpellingNotCalculated: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_naked_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Naked_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Naked_spelling result = clang_ext_Naked_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_naked_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoBuiltin_spelling
+Clang_ext_nobuiltin_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoBuiltin_GNU_no_builtin;
+  case 1: return clang_ext_NoBuiltin_CXX11_clang_no_builtin;
+  case 2: return clang_ext_NoBuiltin_C2x_clang_no_builtin;
+  case 3: return clang_ext_NoBuiltin_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nobuiltin_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoBuiltin_GNU_no_builtin;
+}
+
+value
+Val_clang_ext_nobuiltin_spelling(enum clang_ext_NoBuiltin_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoBuiltin_GNU_no_builtin: return Val_int(0);
+  case clang_ext_NoBuiltin_CXX11_clang_no_builtin: return Val_int(1);
+  case clang_ext_NoBuiltin_C2x_clang_no_builtin: return Val_int(2);
+  case clang_ext_NoBuiltin_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nobuiltin_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoBuiltin_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoBuiltin_spelling result = clang_ext_NoBuiltin_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nobuiltin_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoCommon_spelling
+Clang_ext_nocommon_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoCommon_GNU_nocommon;
+  case 1: return clang_ext_NoCommon_CXX11_gnu_nocommon;
+  case 2: return clang_ext_NoCommon_C2x_gnu_nocommon;
+  case 3: return clang_ext_NoCommon_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nocommon_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoCommon_GNU_nocommon;
+}
+
+value
+Val_clang_ext_nocommon_spelling(enum clang_ext_NoCommon_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoCommon_GNU_nocommon: return Val_int(0);
+  case clang_ext_NoCommon_CXX11_gnu_nocommon: return Val_int(1);
+  case clang_ext_NoCommon_C2x_gnu_nocommon: return Val_int(2);
+  case clang_ext_NoCommon_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nocommon_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoCommon_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoCommon_spelling result = clang_ext_NoCommon_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nocommon_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoDebug_spelling
+Clang_ext_nodebug_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoDebug_GNU_nodebug;
+  case 1: return clang_ext_NoDebug_CXX11_gnu_nodebug;
+  case 2: return clang_ext_NoDebug_C2x_gnu_nodebug;
+  case 3: return clang_ext_NoDebug_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nodebug_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoDebug_GNU_nodebug;
+}
+
+value
+Val_clang_ext_nodebug_spelling(enum clang_ext_NoDebug_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoDebug_GNU_nodebug: return Val_int(0);
+  case clang_ext_NoDebug_CXX11_gnu_nodebug: return Val_int(1);
+  case clang_ext_NoDebug_C2x_gnu_nodebug: return Val_int(2);
+  case clang_ext_NoDebug_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nodebug_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoDebug_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoDebug_spelling result = clang_ext_NoDebug_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nodebug_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoDeref_spelling
+Clang_ext_noderef_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoDeref_GNU_noderef;
+  case 1: return clang_ext_NoDeref_CXX11_clang_noderef;
+  case 2: return clang_ext_NoDeref_C2x_clang_noderef;
+  case 3: return clang_ext_NoDeref_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_noderef_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoDeref_GNU_noderef;
+}
+
+value
+Val_clang_ext_noderef_spelling(enum clang_ext_NoDeref_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoDeref_GNU_noderef: return Val_int(0);
+  case clang_ext_NoDeref_CXX11_clang_noderef: return Val_int(1);
+  case clang_ext_NoDeref_C2x_clang_noderef: return Val_int(2);
+  case clang_ext_NoDeref_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_noderef_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoDeref_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoDeref_spelling result = clang_ext_NoDeref_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_noderef_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoDestroy_spelling
+Clang_ext_nodestroy_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoDestroy_GNU_no_destroy;
+  case 1: return clang_ext_NoDestroy_CXX11_clang_no_destroy;
+  case 2: return clang_ext_NoDestroy_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nodestroy_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoDestroy_GNU_no_destroy;
+}
+
+value
+Val_clang_ext_nodestroy_spelling(enum clang_ext_NoDestroy_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoDestroy_GNU_no_destroy: return Val_int(0);
+  case clang_ext_NoDestroy_CXX11_clang_no_destroy: return Val_int(1);
+  case clang_ext_NoDestroy_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nodestroy_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoDestroy_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoDestroy_spelling result = clang_ext_NoDestroy_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nodestroy_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoDuplicate_spelling
+Clang_ext_noduplicate_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoDuplicate_GNU_noduplicate;
+  case 1: return clang_ext_NoDuplicate_CXX11_clang_noduplicate;
+  case 2: return clang_ext_NoDuplicate_C2x_clang_noduplicate;
+  case 3: return clang_ext_NoDuplicate_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_noduplicate_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoDuplicate_GNU_noduplicate;
+}
+
+value
+Val_clang_ext_noduplicate_spelling(enum clang_ext_NoDuplicate_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoDuplicate_GNU_noduplicate: return Val_int(0);
+  case clang_ext_NoDuplicate_CXX11_clang_noduplicate: return Val_int(1);
+  case clang_ext_NoDuplicate_C2x_clang_noduplicate: return Val_int(2);
+  case clang_ext_NoDuplicate_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_noduplicate_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoDuplicate_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoDuplicate_spelling result = clang_ext_NoDuplicate_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_noduplicate_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoEscape_spelling
+Clang_ext_noescape_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoEscape_GNU_noescape;
+  case 1: return clang_ext_NoEscape_CXX11_clang_noescape;
+  case 2: return clang_ext_NoEscape_C2x_clang_noescape;
+  case 3: return clang_ext_NoEscape_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_noescape_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoEscape_GNU_noescape;
+}
+
+value
+Val_clang_ext_noescape_spelling(enum clang_ext_NoEscape_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoEscape_GNU_noescape: return Val_int(0);
+  case clang_ext_NoEscape_CXX11_clang_noescape: return Val_int(1);
+  case clang_ext_NoEscape_C2x_clang_noescape: return Val_int(2);
+  case clang_ext_NoEscape_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_noescape_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoEscape_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoEscape_spelling result = clang_ext_NoEscape_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_noescape_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoInline_spelling
+Clang_ext_noinline_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoInline_GNU_noinline;
+  case 1: return clang_ext_NoInline_CXX11_gnu_noinline;
+  case 2: return clang_ext_NoInline_C2x_gnu_noinline;
+  case 3: return clang_ext_NoInline_Declspec_noinline;
+  case 4: return clang_ext_NoInline_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_noinline_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoInline_GNU_noinline;
+}
+
+value
+Val_clang_ext_noinline_spelling(enum clang_ext_NoInline_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoInline_GNU_noinline: return Val_int(0);
+  case clang_ext_NoInline_CXX11_gnu_noinline: return Val_int(1);
+  case clang_ext_NoInline_C2x_gnu_noinline: return Val_int(2);
+  case clang_ext_NoInline_Declspec_noinline: return Val_int(3);
+  case clang_ext_NoInline_SpellingNotCalculated: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_noinline_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoInline_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoInline_spelling result = clang_ext_NoInline_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_noinline_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoInstrumentFunction_spelling
+Clang_ext_noinstrumentfunction_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoInstrumentFunction_GNU_no_instrument_function;
+  case 1: return clang_ext_NoInstrumentFunction_CXX11_gnu_no_instrument_function;
+  case 2: return clang_ext_NoInstrumentFunction_C2x_gnu_no_instrument_function;
+  case 3: return clang_ext_NoInstrumentFunction_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_noinstrumentfunction_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoInstrumentFunction_GNU_no_instrument_function;
+}
+
+value
+Val_clang_ext_noinstrumentfunction_spelling(enum clang_ext_NoInstrumentFunction_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoInstrumentFunction_GNU_no_instrument_function: return Val_int(0);
+  case clang_ext_NoInstrumentFunction_CXX11_gnu_no_instrument_function: return Val_int(1);
+  case clang_ext_NoInstrumentFunction_C2x_gnu_no_instrument_function: return Val_int(2);
+  case clang_ext_NoInstrumentFunction_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_noinstrumentfunction_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoInstrumentFunction_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoInstrumentFunction_spelling result = clang_ext_NoInstrumentFunction_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_noinstrumentfunction_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoMerge_spelling
+Clang_ext_nomerge_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoMerge_GNU_nomerge;
+  case 1: return clang_ext_NoMerge_CXX11_clang_nomerge;
+  case 2: return clang_ext_NoMerge_C2x_clang_nomerge;
+  case 3: return clang_ext_NoMerge_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nomerge_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoMerge_GNU_nomerge;
+}
+
+value
+Val_clang_ext_nomerge_spelling(enum clang_ext_NoMerge_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoMerge_GNU_nomerge: return Val_int(0);
+  case clang_ext_NoMerge_CXX11_clang_nomerge: return Val_int(1);
+  case clang_ext_NoMerge_C2x_clang_nomerge: return Val_int(2);
+  case clang_ext_NoMerge_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nomerge_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoMerge_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoMerge_spelling result = clang_ext_NoMerge_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nomerge_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoMicroMips_spelling
+Clang_ext_nomicromips_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoMicroMips_GNU_nomicromips;
+  case 1: return clang_ext_NoMicroMips_CXX11_gnu_nomicromips;
+  case 2: return clang_ext_NoMicroMips_C2x_gnu_nomicromips;
+  case 3: return clang_ext_NoMicroMips_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nomicromips_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoMicroMips_GNU_nomicromips;
+}
+
+value
+Val_clang_ext_nomicromips_spelling(enum clang_ext_NoMicroMips_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoMicroMips_GNU_nomicromips: return Val_int(0);
+  case clang_ext_NoMicroMips_CXX11_gnu_nomicromips: return Val_int(1);
+  case clang_ext_NoMicroMips_C2x_gnu_nomicromips: return Val_int(2);
+  case clang_ext_NoMicroMips_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nomicromips_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoMicroMips_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoMicroMips_spelling result = clang_ext_NoMicroMips_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nomicromips_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoMips16_spelling
+Clang_ext_nomips16_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoMips16_GNU_nomips16;
+  case 1: return clang_ext_NoMips16_CXX11_gnu_nomips16;
+  case 2: return clang_ext_NoMips16_C2x_gnu_nomips16;
+  case 3: return clang_ext_NoMips16_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nomips16_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoMips16_GNU_nomips16;
+}
+
+value
+Val_clang_ext_nomips16_spelling(enum clang_ext_NoMips16_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoMips16_GNU_nomips16: return Val_int(0);
+  case clang_ext_NoMips16_CXX11_gnu_nomips16: return Val_int(1);
+  case clang_ext_NoMips16_C2x_gnu_nomips16: return Val_int(2);
+  case clang_ext_NoMips16_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nomips16_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoMips16_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoMips16_spelling result = clang_ext_NoMips16_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nomips16_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoReturn_spelling
+Clang_ext_noreturn_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoReturn_GNU_noreturn;
+  case 1: return clang_ext_NoReturn_CXX11_gnu_noreturn;
+  case 2: return clang_ext_NoReturn_C2x_gnu_noreturn;
+  case 3: return clang_ext_NoReturn_Declspec_noreturn;
+  case 4: return clang_ext_NoReturn_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_noreturn_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoReturn_GNU_noreturn;
+}
+
+value
+Val_clang_ext_noreturn_spelling(enum clang_ext_NoReturn_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoReturn_GNU_noreturn: return Val_int(0);
+  case clang_ext_NoReturn_CXX11_gnu_noreturn: return Val_int(1);
+  case clang_ext_NoReturn_C2x_gnu_noreturn: return Val_int(2);
+  case clang_ext_NoReturn_Declspec_noreturn: return Val_int(3);
+  case clang_ext_NoReturn_SpellingNotCalculated: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_noreturn_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoReturn_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoReturn_spelling result = clang_ext_NoReturn_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_noreturn_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoSanitize_spelling
+Clang_ext_nosanitize_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoSanitize_GNU_no_sanitize;
+  case 1: return clang_ext_NoSanitize_CXX11_clang_no_sanitize;
+  case 2: return clang_ext_NoSanitize_C2x_clang_no_sanitize;
+  case 3: return clang_ext_NoSanitize_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nosanitize_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoSanitize_GNU_no_sanitize;
+}
+
+value
+Val_clang_ext_nosanitize_spelling(enum clang_ext_NoSanitize_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoSanitize_GNU_no_sanitize: return Val_int(0);
+  case clang_ext_NoSanitize_CXX11_clang_no_sanitize: return Val_int(1);
+  case clang_ext_NoSanitize_C2x_clang_no_sanitize: return Val_int(2);
+  case clang_ext_NoSanitize_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nosanitize_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoSanitize_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoSanitize_spelling result = clang_ext_NoSanitize_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nosanitize_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoSpeculativeLoadHardening_spelling
+Clang_ext_nospeculativeloadhardening_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoSpeculativeLoadHardening_GNU_no_speculative_load_hardening;
+  case 1: return clang_ext_NoSpeculativeLoadHardening_CXX11_clang_no_speculative_load_hardening;
+  case 2: return clang_ext_NoSpeculativeLoadHardening_C2x_clang_no_speculative_load_hardening;
+  case 3: return clang_ext_NoSpeculativeLoadHardening_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nospeculativeloadhardening_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoSpeculativeLoadHardening_GNU_no_speculative_load_hardening;
+}
+
+value
+Val_clang_ext_nospeculativeloadhardening_spelling(enum clang_ext_NoSpeculativeLoadHardening_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoSpeculativeLoadHardening_GNU_no_speculative_load_hardening: return Val_int(0);
+  case clang_ext_NoSpeculativeLoadHardening_CXX11_clang_no_speculative_load_hardening: return Val_int(1);
+  case clang_ext_NoSpeculativeLoadHardening_C2x_clang_no_speculative_load_hardening: return Val_int(2);
+  case clang_ext_NoSpeculativeLoadHardening_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nospeculativeloadhardening_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoSpeculativeLoadHardening_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoSpeculativeLoadHardening_spelling result = clang_ext_NoSpeculativeLoadHardening_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nospeculativeloadhardening_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoSplitStack_spelling
+Clang_ext_nosplitstack_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoSplitStack_GNU_no_split_stack;
+  case 1: return clang_ext_NoSplitStack_CXX11_gnu_no_split_stack;
+  case 2: return clang_ext_NoSplitStack_C2x_gnu_no_split_stack;
+  case 3: return clang_ext_NoSplitStack_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nosplitstack_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoSplitStack_GNU_no_split_stack;
+}
+
+value
+Val_clang_ext_nosplitstack_spelling(enum clang_ext_NoSplitStack_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoSplitStack_GNU_no_split_stack: return Val_int(0);
+  case clang_ext_NoSplitStack_CXX11_gnu_no_split_stack: return Val_int(1);
+  case clang_ext_NoSplitStack_C2x_gnu_no_split_stack: return Val_int(2);
+  case clang_ext_NoSplitStack_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nosplitstack_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoSplitStack_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoSplitStack_spelling result = clang_ext_NoSplitStack_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nosplitstack_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoStackProtector_spelling
+Clang_ext_nostackprotector_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoStackProtector_GNU_no_stack_protector;
+  case 1: return clang_ext_NoStackProtector_CXX11_clang_no_stack_protector;
+  case 2: return clang_ext_NoStackProtector_C2x_clang_no_stack_protector;
+  case 3: return clang_ext_NoStackProtector_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nostackprotector_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoStackProtector_GNU_no_stack_protector;
+}
+
+value
+Val_clang_ext_nostackprotector_spelling(enum clang_ext_NoStackProtector_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoStackProtector_GNU_no_stack_protector: return Val_int(0);
+  case clang_ext_NoStackProtector_CXX11_clang_no_stack_protector: return Val_int(1);
+  case clang_ext_NoStackProtector_C2x_clang_no_stack_protector: return Val_int(2);
+  case clang_ext_NoStackProtector_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nostackprotector_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoStackProtector_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoStackProtector_spelling result = clang_ext_NoStackProtector_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nostackprotector_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoThreadSafetyAnalysis_spelling
+Clang_ext_nothreadsafetyanalysis_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoThreadSafetyAnalysis_GNU_no_thread_safety_analysis;
+  case 1: return clang_ext_NoThreadSafetyAnalysis_CXX11_clang_no_thread_safety_analysis;
+  case 2: return clang_ext_NoThreadSafetyAnalysis_C2x_clang_no_thread_safety_analysis;
+  case 3: return clang_ext_NoThreadSafetyAnalysis_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nothreadsafetyanalysis_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoThreadSafetyAnalysis_GNU_no_thread_safety_analysis;
+}
+
+value
+Val_clang_ext_nothreadsafetyanalysis_spelling(enum clang_ext_NoThreadSafetyAnalysis_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoThreadSafetyAnalysis_GNU_no_thread_safety_analysis: return Val_int(0);
+  case clang_ext_NoThreadSafetyAnalysis_CXX11_clang_no_thread_safety_analysis: return Val_int(1);
+  case clang_ext_NoThreadSafetyAnalysis_C2x_clang_no_thread_safety_analysis: return Val_int(2);
+  case clang_ext_NoThreadSafetyAnalysis_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nothreadsafetyanalysis_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoThreadSafetyAnalysis_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoThreadSafetyAnalysis_spelling result = clang_ext_NoThreadSafetyAnalysis_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nothreadsafetyanalysis_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoThrow_spelling
+Clang_ext_nothrow_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoThrow_GNU_nothrow;
+  case 1: return clang_ext_NoThrow_CXX11_gnu_nothrow;
+  case 2: return clang_ext_NoThrow_C2x_gnu_nothrow;
+  case 3: return clang_ext_NoThrow_Declspec_nothrow;
+  case 4: return clang_ext_NoThrow_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nothrow_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoThrow_GNU_nothrow;
+}
+
+value
+Val_clang_ext_nothrow_spelling(enum clang_ext_NoThrow_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoThrow_GNU_nothrow: return Val_int(0);
+  case clang_ext_NoThrow_CXX11_gnu_nothrow: return Val_int(1);
+  case clang_ext_NoThrow_C2x_gnu_nothrow: return Val_int(2);
+  case clang_ext_NoThrow_Declspec_nothrow: return Val_int(3);
+  case clang_ext_NoThrow_SpellingNotCalculated: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nothrow_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoThrow_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoThrow_spelling result = clang_ext_NoThrow_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nothrow_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NonNull_spelling
+Clang_ext_nonnull_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NonNull_GNU_nonnull;
+  case 1: return clang_ext_NonNull_CXX11_gnu_nonnull;
+  case 2: return clang_ext_NonNull_C2x_gnu_nonnull;
+  case 3: return clang_ext_NonNull_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nonnull_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NonNull_GNU_nonnull;
+}
+
+value
+Val_clang_ext_nonnull_spelling(enum clang_ext_NonNull_spelling v)
+{
+  switch (v) {
+  case clang_ext_NonNull_GNU_nonnull: return Val_int(0);
+  case clang_ext_NonNull_CXX11_gnu_nonnull: return Val_int(1);
+  case clang_ext_NonNull_C2x_gnu_nonnull: return Val_int(2);
+  case clang_ext_NonNull_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nonnull_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NonNull_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NonNull_spelling result = clang_ext_NonNull_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nonnull_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NotTailCalled_spelling
+Clang_ext_nottailcalled_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NotTailCalled_GNU_not_tail_called;
+  case 1: return clang_ext_NotTailCalled_CXX11_clang_not_tail_called;
+  case 2: return clang_ext_NotTailCalled_C2x_clang_not_tail_called;
+  case 3: return clang_ext_NotTailCalled_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_nottailcalled_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NotTailCalled_GNU_not_tail_called;
+}
+
+value
+Val_clang_ext_nottailcalled_spelling(enum clang_ext_NotTailCalled_spelling v)
+{
+  switch (v) {
+  case clang_ext_NotTailCalled_GNU_not_tail_called: return Val_int(0);
+  case clang_ext_NotTailCalled_CXX11_clang_not_tail_called: return Val_int(1);
+  case clang_ext_NotTailCalled_C2x_clang_not_tail_called: return Val_int(2);
+  case clang_ext_NotTailCalled_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_nottailcalled_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NotTailCalled_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NotTailCalled_spelling result = clang_ext_NotTailCalled_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nottailcalled_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_OSConsumed_spelling
+Clang_ext_osconsumed_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_OSConsumed_GNU_os_consumed;
+  case 1: return clang_ext_OSConsumed_CXX11_clang_os_consumed;
+  case 2: return clang_ext_OSConsumed_C2x_clang_os_consumed;
+  case 3: return clang_ext_OSConsumed_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_osconsumed_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_OSConsumed_GNU_os_consumed;
+}
+
+value
+Val_clang_ext_osconsumed_spelling(enum clang_ext_OSConsumed_spelling v)
+{
+  switch (v) {
+  case clang_ext_OSConsumed_GNU_os_consumed: return Val_int(0);
+  case clang_ext_OSConsumed_CXX11_clang_os_consumed: return Val_int(1);
+  case clang_ext_OSConsumed_C2x_clang_os_consumed: return Val_int(2);
+  case clang_ext_OSConsumed_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_osconsumed_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_OSConsumed_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_OSConsumed_spelling result = clang_ext_OSConsumed_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_osconsumed_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_OSConsumesThis_spelling
+Clang_ext_osconsumesthis_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_OSConsumesThis_GNU_os_consumes_this;
+  case 1: return clang_ext_OSConsumesThis_CXX11_clang_os_consumes_this;
+  case 2: return clang_ext_OSConsumesThis_C2x_clang_os_consumes_this;
+  case 3: return clang_ext_OSConsumesThis_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_osconsumesthis_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_OSConsumesThis_GNU_os_consumes_this;
+}
+
+value
+Val_clang_ext_osconsumesthis_spelling(enum clang_ext_OSConsumesThis_spelling v)
+{
+  switch (v) {
+  case clang_ext_OSConsumesThis_GNU_os_consumes_this: return Val_int(0);
+  case clang_ext_OSConsumesThis_CXX11_clang_os_consumes_this: return Val_int(1);
+  case clang_ext_OSConsumesThis_C2x_clang_os_consumes_this: return Val_int(2);
+  case clang_ext_OSConsumesThis_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_osconsumesthis_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_OSConsumesThis_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_OSConsumesThis_spelling result = clang_ext_OSConsumesThis_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_osconsumesthis_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_OSReturnsNotRetained_spelling
+Clang_ext_osreturnsnotretained_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_OSReturnsNotRetained_GNU_os_returns_not_retained;
+  case 1: return clang_ext_OSReturnsNotRetained_CXX11_clang_os_returns_not_retained;
+  case 2: return clang_ext_OSReturnsNotRetained_C2x_clang_os_returns_not_retained;
+  case 3: return clang_ext_OSReturnsNotRetained_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_osreturnsnotretained_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_OSReturnsNotRetained_GNU_os_returns_not_retained;
+}
+
+value
+Val_clang_ext_osreturnsnotretained_spelling(enum clang_ext_OSReturnsNotRetained_spelling v)
+{
+  switch (v) {
+  case clang_ext_OSReturnsNotRetained_GNU_os_returns_not_retained: return Val_int(0);
+  case clang_ext_OSReturnsNotRetained_CXX11_clang_os_returns_not_retained: return Val_int(1);
+  case clang_ext_OSReturnsNotRetained_C2x_clang_os_returns_not_retained: return Val_int(2);
+  case clang_ext_OSReturnsNotRetained_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_osreturnsnotretained_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_OSReturnsNotRetained_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_OSReturnsNotRetained_spelling result = clang_ext_OSReturnsNotRetained_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_osreturnsnotretained_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_OSReturnsRetained_spelling
+Clang_ext_osreturnsretained_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_OSReturnsRetained_GNU_os_returns_retained;
+  case 1: return clang_ext_OSReturnsRetained_CXX11_clang_os_returns_retained;
+  case 2: return clang_ext_OSReturnsRetained_C2x_clang_os_returns_retained;
+  case 3: return clang_ext_OSReturnsRetained_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_osreturnsretained_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_OSReturnsRetained_GNU_os_returns_retained;
+}
+
+value
+Val_clang_ext_osreturnsretained_spelling(enum clang_ext_OSReturnsRetained_spelling v)
+{
+  switch (v) {
+  case clang_ext_OSReturnsRetained_GNU_os_returns_retained: return Val_int(0);
+  case clang_ext_OSReturnsRetained_CXX11_clang_os_returns_retained: return Val_int(1);
+  case clang_ext_OSReturnsRetained_C2x_clang_os_returns_retained: return Val_int(2);
+  case clang_ext_OSReturnsRetained_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_osreturnsretained_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_OSReturnsRetained_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_OSReturnsRetained_spelling result = clang_ext_OSReturnsRetained_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_osreturnsretained_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_OSReturnsRetainedOnNonZero_spelling
+Clang_ext_osreturnsretainedonnonzero_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_OSReturnsRetainedOnNonZero_GNU_os_returns_retained_on_non_zero;
+  case 1: return clang_ext_OSReturnsRetainedOnNonZero_CXX11_clang_os_returns_retained_on_non_zero;
+  case 2: return clang_ext_OSReturnsRetainedOnNonZero_C2x_clang_os_returns_retained_on_non_zero;
+  case 3: return clang_ext_OSReturnsRetainedOnNonZero_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_osreturnsretainedonnonzero_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_OSReturnsRetainedOnNonZero_GNU_os_returns_retained_on_non_zero;
+}
+
+value
+Val_clang_ext_osreturnsretainedonnonzero_spelling(enum clang_ext_OSReturnsRetainedOnNonZero_spelling v)
+{
+  switch (v) {
+  case clang_ext_OSReturnsRetainedOnNonZero_GNU_os_returns_retained_on_non_zero: return Val_int(0);
+  case clang_ext_OSReturnsRetainedOnNonZero_CXX11_clang_os_returns_retained_on_non_zero: return Val_int(1);
+  case clang_ext_OSReturnsRetainedOnNonZero_C2x_clang_os_returns_retained_on_non_zero: return Val_int(2);
+  case clang_ext_OSReturnsRetainedOnNonZero_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_osreturnsretainedonnonzero_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_OSReturnsRetainedOnNonZero_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_OSReturnsRetainedOnNonZero_spelling result = clang_ext_OSReturnsRetainedOnNonZero_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_osreturnsretainedonnonzero_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_OSReturnsRetainedOnZero_spelling
+Clang_ext_osreturnsretainedonzero_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_OSReturnsRetainedOnZero_GNU_os_returns_retained_on_zero;
+  case 1: return clang_ext_OSReturnsRetainedOnZero_CXX11_clang_os_returns_retained_on_zero;
+  case 2: return clang_ext_OSReturnsRetainedOnZero_C2x_clang_os_returns_retained_on_zero;
+  case 3: return clang_ext_OSReturnsRetainedOnZero_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_osreturnsretainedonzero_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_OSReturnsRetainedOnZero_GNU_os_returns_retained_on_zero;
+}
+
+value
+Val_clang_ext_osreturnsretainedonzero_spelling(enum clang_ext_OSReturnsRetainedOnZero_spelling v)
+{
+  switch (v) {
+  case clang_ext_OSReturnsRetainedOnZero_GNU_os_returns_retained_on_zero: return Val_int(0);
+  case clang_ext_OSReturnsRetainedOnZero_CXX11_clang_os_returns_retained_on_zero: return Val_int(1);
+  case clang_ext_OSReturnsRetainedOnZero_C2x_clang_os_returns_retained_on_zero: return Val_int(2);
+  case clang_ext_OSReturnsRetainedOnZero_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_osreturnsretainedonzero_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_OSReturnsRetainedOnZero_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_OSReturnsRetainedOnZero_spelling result = clang_ext_OSReturnsRetainedOnZero_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_osreturnsretainedonzero_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCBoxable_spelling
+Clang_ext_objcboxable_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCBoxable_GNU_objc_boxable;
+  case 1: return clang_ext_ObjCBoxable_CXX11_clang_objc_boxable;
+  case 2: return clang_ext_ObjCBoxable_C2x_clang_objc_boxable;
+  case 3: return clang_ext_ObjCBoxable_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcboxable_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCBoxable_GNU_objc_boxable;
+}
+
+value
+Val_clang_ext_objcboxable_spelling(enum clang_ext_ObjCBoxable_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCBoxable_GNU_objc_boxable: return Val_int(0);
+  case clang_ext_ObjCBoxable_CXX11_clang_objc_boxable: return Val_int(1);
+  case clang_ext_ObjCBoxable_C2x_clang_objc_boxable: return Val_int(2);
+  case clang_ext_ObjCBoxable_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcboxable_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCBoxable_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCBoxable_spelling result = clang_ext_ObjCBoxable_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcboxable_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCBridge_spelling
+Clang_ext_objcbridge_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCBridge_GNU_objc_bridge;
+  case 1: return clang_ext_ObjCBridge_CXX11_clang_objc_bridge;
+  case 2: return clang_ext_ObjCBridge_C2x_clang_objc_bridge;
+  case 3: return clang_ext_ObjCBridge_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcbridge_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCBridge_GNU_objc_bridge;
+}
+
+value
+Val_clang_ext_objcbridge_spelling(enum clang_ext_ObjCBridge_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCBridge_GNU_objc_bridge: return Val_int(0);
+  case clang_ext_ObjCBridge_CXX11_clang_objc_bridge: return Val_int(1);
+  case clang_ext_ObjCBridge_C2x_clang_objc_bridge: return Val_int(2);
+  case clang_ext_ObjCBridge_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcbridge_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCBridge_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCBridge_spelling result = clang_ext_ObjCBridge_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcbridge_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCBridgeMutable_spelling
+Clang_ext_objcbridgemutable_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCBridgeMutable_GNU_objc_bridge_mutable;
+  case 1: return clang_ext_ObjCBridgeMutable_CXX11_clang_objc_bridge_mutable;
+  case 2: return clang_ext_ObjCBridgeMutable_C2x_clang_objc_bridge_mutable;
+  case 3: return clang_ext_ObjCBridgeMutable_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcbridgemutable_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCBridgeMutable_GNU_objc_bridge_mutable;
+}
+
+value
+Val_clang_ext_objcbridgemutable_spelling(enum clang_ext_ObjCBridgeMutable_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCBridgeMutable_GNU_objc_bridge_mutable: return Val_int(0);
+  case clang_ext_ObjCBridgeMutable_CXX11_clang_objc_bridge_mutable: return Val_int(1);
+  case clang_ext_ObjCBridgeMutable_C2x_clang_objc_bridge_mutable: return Val_int(2);
+  case clang_ext_ObjCBridgeMutable_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcbridgemutable_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCBridgeMutable_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCBridgeMutable_spelling result = clang_ext_ObjCBridgeMutable_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcbridgemutable_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCBridgeRelated_spelling
+Clang_ext_objcbridgerelated_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCBridgeRelated_GNU_objc_bridge_related;
+  case 1: return clang_ext_ObjCBridgeRelated_CXX11_clang_objc_bridge_related;
+  case 2: return clang_ext_ObjCBridgeRelated_C2x_clang_objc_bridge_related;
+  case 3: return clang_ext_ObjCBridgeRelated_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcbridgerelated_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCBridgeRelated_GNU_objc_bridge_related;
+}
+
+value
+Val_clang_ext_objcbridgerelated_spelling(enum clang_ext_ObjCBridgeRelated_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCBridgeRelated_GNU_objc_bridge_related: return Val_int(0);
+  case clang_ext_ObjCBridgeRelated_CXX11_clang_objc_bridge_related: return Val_int(1);
+  case clang_ext_ObjCBridgeRelated_C2x_clang_objc_bridge_related: return Val_int(2);
+  case clang_ext_ObjCBridgeRelated_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcbridgerelated_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCBridgeRelated_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCBridgeRelated_spelling result = clang_ext_ObjCBridgeRelated_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcbridgerelated_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCClassStub_spelling
+Clang_ext_objcclassstub_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCClassStub_GNU_objc_class_stub;
+  case 1: return clang_ext_ObjCClassStub_CXX11_clang_objc_class_stub;
+  case 2: return clang_ext_ObjCClassStub_C2x_clang_objc_class_stub;
+  case 3: return clang_ext_ObjCClassStub_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcclassstub_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCClassStub_GNU_objc_class_stub;
+}
+
+value
+Val_clang_ext_objcclassstub_spelling(enum clang_ext_ObjCClassStub_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCClassStub_GNU_objc_class_stub: return Val_int(0);
+  case clang_ext_ObjCClassStub_CXX11_clang_objc_class_stub: return Val_int(1);
+  case clang_ext_ObjCClassStub_C2x_clang_objc_class_stub: return Val_int(2);
+  case clang_ext_ObjCClassStub_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcclassstub_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCClassStub_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCClassStub_spelling result = clang_ext_ObjCClassStub_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcclassstub_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCDesignatedInitializer_spelling
+Clang_ext_objcdesignatedinitializer_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCDesignatedInitializer_GNU_objc_designated_initializer;
+  case 1: return clang_ext_ObjCDesignatedInitializer_CXX11_clang_objc_designated_initializer;
+  case 2: return clang_ext_ObjCDesignatedInitializer_C2x_clang_objc_designated_initializer;
+  case 3: return clang_ext_ObjCDesignatedInitializer_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcdesignatedinitializer_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCDesignatedInitializer_GNU_objc_designated_initializer;
+}
+
+value
+Val_clang_ext_objcdesignatedinitializer_spelling(enum clang_ext_ObjCDesignatedInitializer_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCDesignatedInitializer_GNU_objc_designated_initializer: return Val_int(0);
+  case clang_ext_ObjCDesignatedInitializer_CXX11_clang_objc_designated_initializer: return Val_int(1);
+  case clang_ext_ObjCDesignatedInitializer_C2x_clang_objc_designated_initializer: return Val_int(2);
+  case clang_ext_ObjCDesignatedInitializer_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcdesignatedinitializer_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCDesignatedInitializer_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCDesignatedInitializer_spelling result = clang_ext_ObjCDesignatedInitializer_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcdesignatedinitializer_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCDirect_spelling
+Clang_ext_objcdirect_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCDirect_GNU_objc_direct;
+  case 1: return clang_ext_ObjCDirect_CXX11_clang_objc_direct;
+  case 2: return clang_ext_ObjCDirect_C2x_clang_objc_direct;
+  case 3: return clang_ext_ObjCDirect_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcdirect_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCDirect_GNU_objc_direct;
+}
+
+value
+Val_clang_ext_objcdirect_spelling(enum clang_ext_ObjCDirect_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCDirect_GNU_objc_direct: return Val_int(0);
+  case clang_ext_ObjCDirect_CXX11_clang_objc_direct: return Val_int(1);
+  case clang_ext_ObjCDirect_C2x_clang_objc_direct: return Val_int(2);
+  case clang_ext_ObjCDirect_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcdirect_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCDirect_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCDirect_spelling result = clang_ext_ObjCDirect_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcdirect_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCDirectMembers_spelling
+Clang_ext_objcdirectmembers_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCDirectMembers_GNU_objc_direct_members;
+  case 1: return clang_ext_ObjCDirectMembers_CXX11_clang_objc_direct_members;
+  case 2: return clang_ext_ObjCDirectMembers_C2x_clang_objc_direct_members;
+  case 3: return clang_ext_ObjCDirectMembers_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcdirectmembers_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCDirectMembers_GNU_objc_direct_members;
+}
+
+value
+Val_clang_ext_objcdirectmembers_spelling(enum clang_ext_ObjCDirectMembers_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCDirectMembers_GNU_objc_direct_members: return Val_int(0);
+  case clang_ext_ObjCDirectMembers_CXX11_clang_objc_direct_members: return Val_int(1);
+  case clang_ext_ObjCDirectMembers_C2x_clang_objc_direct_members: return Val_int(2);
+  case clang_ext_ObjCDirectMembers_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcdirectmembers_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCDirectMembers_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCDirectMembers_spelling result = clang_ext_ObjCDirectMembers_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcdirectmembers_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCException_spelling
+Clang_ext_objcexception_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCException_GNU_objc_exception;
+  case 1: return clang_ext_ObjCException_CXX11_clang_objc_exception;
+  case 2: return clang_ext_ObjCException_C2x_clang_objc_exception;
+  case 3: return clang_ext_ObjCException_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcexception_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCException_GNU_objc_exception;
+}
+
+value
+Val_clang_ext_objcexception_spelling(enum clang_ext_ObjCException_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCException_GNU_objc_exception: return Val_int(0);
+  case clang_ext_ObjCException_CXX11_clang_objc_exception: return Val_int(1);
+  case clang_ext_ObjCException_C2x_clang_objc_exception: return Val_int(2);
+  case clang_ext_ObjCException_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcexception_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCException_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCException_spelling result = clang_ext_ObjCException_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcexception_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCExplicitProtocolImpl_spelling
+Clang_ext_objcexplicitprotocolimpl_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCExplicitProtocolImpl_GNU_objc_protocol_requires_explicit_implementation;
+  case 1: return clang_ext_ObjCExplicitProtocolImpl_CXX11_clang_objc_protocol_requires_explicit_implementation;
+  case 2: return clang_ext_ObjCExplicitProtocolImpl_C2x_clang_objc_protocol_requires_explicit_implementation;
+  case 3: return clang_ext_ObjCExplicitProtocolImpl_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcexplicitprotocolimpl_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCExplicitProtocolImpl_GNU_objc_protocol_requires_explicit_implementation;
+}
+
+value
+Val_clang_ext_objcexplicitprotocolimpl_spelling(enum clang_ext_ObjCExplicitProtocolImpl_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCExplicitProtocolImpl_GNU_objc_protocol_requires_explicit_implementation: return Val_int(0);
+  case clang_ext_ObjCExplicitProtocolImpl_CXX11_clang_objc_protocol_requires_explicit_implementation: return Val_int(1);
+  case clang_ext_ObjCExplicitProtocolImpl_C2x_clang_objc_protocol_requires_explicit_implementation: return Val_int(2);
+  case clang_ext_ObjCExplicitProtocolImpl_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcexplicitprotocolimpl_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCExplicitProtocolImpl_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCExplicitProtocolImpl_spelling result = clang_ext_ObjCExplicitProtocolImpl_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcexplicitprotocolimpl_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCExternallyRetained_spelling
+Clang_ext_objcexternallyretained_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCExternallyRetained_GNU_objc_externally_retained;
+  case 1: return clang_ext_ObjCExternallyRetained_CXX11_clang_objc_externally_retained;
+  case 2: return clang_ext_ObjCExternallyRetained_C2x_clang_objc_externally_retained;
+  case 3: return clang_ext_ObjCExternallyRetained_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcexternallyretained_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCExternallyRetained_GNU_objc_externally_retained;
+}
+
+value
+Val_clang_ext_objcexternallyretained_spelling(enum clang_ext_ObjCExternallyRetained_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCExternallyRetained_GNU_objc_externally_retained: return Val_int(0);
+  case clang_ext_ObjCExternallyRetained_CXX11_clang_objc_externally_retained: return Val_int(1);
+  case clang_ext_ObjCExternallyRetained_C2x_clang_objc_externally_retained: return Val_int(2);
+  case clang_ext_ObjCExternallyRetained_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcexternallyretained_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCExternallyRetained_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCExternallyRetained_spelling result = clang_ext_ObjCExternallyRetained_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcexternallyretained_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCGC_spelling
+Clang_ext_objcgc_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCGC_GNU_objc_gc;
+  case 1: return clang_ext_ObjCGC_CXX11_clang_objc_gc;
+  case 2: return clang_ext_ObjCGC_C2x_clang_objc_gc;
+  case 3: return clang_ext_ObjCGC_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcgc_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCGC_GNU_objc_gc;
+}
+
+value
+Val_clang_ext_objcgc_spelling(enum clang_ext_ObjCGC_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCGC_GNU_objc_gc: return Val_int(0);
+  case clang_ext_ObjCGC_CXX11_clang_objc_gc: return Val_int(1);
+  case clang_ext_ObjCGC_C2x_clang_objc_gc: return Val_int(2);
+  case clang_ext_ObjCGC_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcgc_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCGC_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCGC_spelling result = clang_ext_ObjCGC_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcgc_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCIndependentClass_spelling
+Clang_ext_objcindependentclass_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCIndependentClass_GNU_objc_independent_class;
+  case 1: return clang_ext_ObjCIndependentClass_CXX11_clang_objc_independent_class;
+  case 2: return clang_ext_ObjCIndependentClass_C2x_clang_objc_independent_class;
+  case 3: return clang_ext_ObjCIndependentClass_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcindependentclass_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCIndependentClass_GNU_objc_independent_class;
+}
+
+value
+Val_clang_ext_objcindependentclass_spelling(enum clang_ext_ObjCIndependentClass_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCIndependentClass_GNU_objc_independent_class: return Val_int(0);
+  case clang_ext_ObjCIndependentClass_CXX11_clang_objc_independent_class: return Val_int(1);
+  case clang_ext_ObjCIndependentClass_C2x_clang_objc_independent_class: return Val_int(2);
+  case clang_ext_ObjCIndependentClass_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcindependentclass_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCIndependentClass_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCIndependentClass_spelling result = clang_ext_ObjCIndependentClass_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcindependentclass_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCMethodFamily_spelling
+Clang_ext_objcmethodfamily_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCMethodFamily_GNU_objc_method_family;
+  case 1: return clang_ext_ObjCMethodFamily_CXX11_clang_objc_method_family;
+  case 2: return clang_ext_ObjCMethodFamily_C2x_clang_objc_method_family;
+  case 3: return clang_ext_ObjCMethodFamily_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcmethodfamily_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCMethodFamily_GNU_objc_method_family;
+}
+
+value
+Val_clang_ext_objcmethodfamily_spelling(enum clang_ext_ObjCMethodFamily_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCMethodFamily_GNU_objc_method_family: return Val_int(0);
+  case clang_ext_ObjCMethodFamily_CXX11_clang_objc_method_family: return Val_int(1);
+  case clang_ext_ObjCMethodFamily_C2x_clang_objc_method_family: return Val_int(2);
+  case clang_ext_ObjCMethodFamily_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcmethodfamily_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCMethodFamily_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCMethodFamily_spelling result = clang_ext_ObjCMethodFamily_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcmethodfamily_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCNSObject_spelling
+Clang_ext_objcnsobject_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCNSObject_GNU_NSObject;
+  case 1: return clang_ext_ObjCNSObject_CXX11_clang_NSObject;
+  case 2: return clang_ext_ObjCNSObject_C2x_clang_NSObject;
+  case 3: return clang_ext_ObjCNSObject_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcnsobject_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCNSObject_GNU_NSObject;
+}
+
+value
+Val_clang_ext_objcnsobject_spelling(enum clang_ext_ObjCNSObject_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCNSObject_GNU_NSObject: return Val_int(0);
+  case clang_ext_ObjCNSObject_CXX11_clang_NSObject: return Val_int(1);
+  case clang_ext_ObjCNSObject_C2x_clang_NSObject: return Val_int(2);
+  case clang_ext_ObjCNSObject_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcnsobject_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCNSObject_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCNSObject_spelling result = clang_ext_ObjCNSObject_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcnsobject_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCNonLazyClass_spelling
+Clang_ext_objcnonlazyclass_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCNonLazyClass_GNU_objc_nonlazy_class;
+  case 1: return clang_ext_ObjCNonLazyClass_CXX11_clang_objc_nonlazy_class;
+  case 2: return clang_ext_ObjCNonLazyClass_C2x_clang_objc_nonlazy_class;
+  case 3: return clang_ext_ObjCNonLazyClass_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcnonlazyclass_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCNonLazyClass_GNU_objc_nonlazy_class;
+}
+
+value
+Val_clang_ext_objcnonlazyclass_spelling(enum clang_ext_ObjCNonLazyClass_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCNonLazyClass_GNU_objc_nonlazy_class: return Val_int(0);
+  case clang_ext_ObjCNonLazyClass_CXX11_clang_objc_nonlazy_class: return Val_int(1);
+  case clang_ext_ObjCNonLazyClass_C2x_clang_objc_nonlazy_class: return Val_int(2);
+  case clang_ext_ObjCNonLazyClass_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcnonlazyclass_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCNonLazyClass_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCNonLazyClass_spelling result = clang_ext_ObjCNonLazyClass_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcnonlazyclass_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCOwnership_spelling
+Clang_ext_objcownership_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCOwnership_GNU_objc_ownership;
+  case 1: return clang_ext_ObjCOwnership_CXX11_clang_objc_ownership;
+  case 2: return clang_ext_ObjCOwnership_C2x_clang_objc_ownership;
+  case 3: return clang_ext_ObjCOwnership_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcownership_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCOwnership_GNU_objc_ownership;
+}
+
+value
+Val_clang_ext_objcownership_spelling(enum clang_ext_ObjCOwnership_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCOwnership_GNU_objc_ownership: return Val_int(0);
+  case clang_ext_ObjCOwnership_CXX11_clang_objc_ownership: return Val_int(1);
+  case clang_ext_ObjCOwnership_C2x_clang_objc_ownership: return Val_int(2);
+  case clang_ext_ObjCOwnership_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcownership_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCOwnership_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCOwnership_spelling result = clang_ext_ObjCOwnership_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcownership_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCPreciseLifetime_spelling
+Clang_ext_objcpreciselifetime_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCPreciseLifetime_GNU_objc_precise_lifetime;
+  case 1: return clang_ext_ObjCPreciseLifetime_CXX11_clang_objc_precise_lifetime;
+  case 2: return clang_ext_ObjCPreciseLifetime_C2x_clang_objc_precise_lifetime;
+  case 3: return clang_ext_ObjCPreciseLifetime_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcpreciselifetime_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCPreciseLifetime_GNU_objc_precise_lifetime;
+}
+
+value
+Val_clang_ext_objcpreciselifetime_spelling(enum clang_ext_ObjCPreciseLifetime_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCPreciseLifetime_GNU_objc_precise_lifetime: return Val_int(0);
+  case clang_ext_ObjCPreciseLifetime_CXX11_clang_objc_precise_lifetime: return Val_int(1);
+  case clang_ext_ObjCPreciseLifetime_C2x_clang_objc_precise_lifetime: return Val_int(2);
+  case clang_ext_ObjCPreciseLifetime_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcpreciselifetime_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCPreciseLifetime_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCPreciseLifetime_spelling result = clang_ext_ObjCPreciseLifetime_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcpreciselifetime_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCRequiresPropertyDefs_spelling
+Clang_ext_objcrequirespropertydefs_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCRequiresPropertyDefs_GNU_objc_requires_property_definitions;
+  case 1: return clang_ext_ObjCRequiresPropertyDefs_CXX11_clang_objc_requires_property_definitions;
+  case 2: return clang_ext_ObjCRequiresPropertyDefs_C2x_clang_objc_requires_property_definitions;
+  case 3: return clang_ext_ObjCRequiresPropertyDefs_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcrequirespropertydefs_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCRequiresPropertyDefs_GNU_objc_requires_property_definitions;
+}
+
+value
+Val_clang_ext_objcrequirespropertydefs_spelling(enum clang_ext_ObjCRequiresPropertyDefs_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCRequiresPropertyDefs_GNU_objc_requires_property_definitions: return Val_int(0);
+  case clang_ext_ObjCRequiresPropertyDefs_CXX11_clang_objc_requires_property_definitions: return Val_int(1);
+  case clang_ext_ObjCRequiresPropertyDefs_C2x_clang_objc_requires_property_definitions: return Val_int(2);
+  case clang_ext_ObjCRequiresPropertyDefs_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcrequirespropertydefs_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCRequiresPropertyDefs_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCRequiresPropertyDefs_spelling result = clang_ext_ObjCRequiresPropertyDefs_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcrequirespropertydefs_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCRequiresSuper_spelling
+Clang_ext_objcrequiressuper_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCRequiresSuper_GNU_objc_requires_super;
+  case 1: return clang_ext_ObjCRequiresSuper_CXX11_clang_objc_requires_super;
+  case 2: return clang_ext_ObjCRequiresSuper_C2x_clang_objc_requires_super;
+  case 3: return clang_ext_ObjCRequiresSuper_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcrequiressuper_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCRequiresSuper_GNU_objc_requires_super;
+}
+
+value
+Val_clang_ext_objcrequiressuper_spelling(enum clang_ext_ObjCRequiresSuper_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCRequiresSuper_GNU_objc_requires_super: return Val_int(0);
+  case clang_ext_ObjCRequiresSuper_CXX11_clang_objc_requires_super: return Val_int(1);
+  case clang_ext_ObjCRequiresSuper_C2x_clang_objc_requires_super: return Val_int(2);
+  case clang_ext_ObjCRequiresSuper_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcrequiressuper_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCRequiresSuper_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCRequiresSuper_spelling result = clang_ext_ObjCRequiresSuper_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcrequiressuper_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCReturnsInnerPointer_spelling
+Clang_ext_objcreturnsinnerpointer_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCReturnsInnerPointer_GNU_objc_returns_inner_pointer;
+  case 1: return clang_ext_ObjCReturnsInnerPointer_CXX11_clang_objc_returns_inner_pointer;
+  case 2: return clang_ext_ObjCReturnsInnerPointer_C2x_clang_objc_returns_inner_pointer;
+  case 3: return clang_ext_ObjCReturnsInnerPointer_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcreturnsinnerpointer_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCReturnsInnerPointer_GNU_objc_returns_inner_pointer;
+}
+
+value
+Val_clang_ext_objcreturnsinnerpointer_spelling(enum clang_ext_ObjCReturnsInnerPointer_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCReturnsInnerPointer_GNU_objc_returns_inner_pointer: return Val_int(0);
+  case clang_ext_ObjCReturnsInnerPointer_CXX11_clang_objc_returns_inner_pointer: return Val_int(1);
+  case clang_ext_ObjCReturnsInnerPointer_C2x_clang_objc_returns_inner_pointer: return Val_int(2);
+  case clang_ext_ObjCReturnsInnerPointer_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcreturnsinnerpointer_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCReturnsInnerPointer_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCReturnsInnerPointer_spelling result = clang_ext_ObjCReturnsInnerPointer_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcreturnsinnerpointer_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCRootClass_spelling
+Clang_ext_objcrootclass_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCRootClass_GNU_objc_root_class;
+  case 1: return clang_ext_ObjCRootClass_CXX11_clang_objc_root_class;
+  case 2: return clang_ext_ObjCRootClass_C2x_clang_objc_root_class;
+  case 3: return clang_ext_ObjCRootClass_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcrootclass_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCRootClass_GNU_objc_root_class;
+}
+
+value
+Val_clang_ext_objcrootclass_spelling(enum clang_ext_ObjCRootClass_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCRootClass_GNU_objc_root_class: return Val_int(0);
+  case clang_ext_ObjCRootClass_CXX11_clang_objc_root_class: return Val_int(1);
+  case clang_ext_ObjCRootClass_C2x_clang_objc_root_class: return Val_int(2);
+  case clang_ext_ObjCRootClass_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcrootclass_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCRootClass_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCRootClass_spelling result = clang_ext_ObjCRootClass_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcrootclass_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCRuntimeName_spelling
+Clang_ext_objcruntimename_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCRuntimeName_GNU_objc_runtime_name;
+  case 1: return clang_ext_ObjCRuntimeName_CXX11_clang_objc_runtime_name;
+  case 2: return clang_ext_ObjCRuntimeName_C2x_clang_objc_runtime_name;
+  case 3: return clang_ext_ObjCRuntimeName_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcruntimename_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCRuntimeName_GNU_objc_runtime_name;
+}
+
+value
+Val_clang_ext_objcruntimename_spelling(enum clang_ext_ObjCRuntimeName_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCRuntimeName_GNU_objc_runtime_name: return Val_int(0);
+  case clang_ext_ObjCRuntimeName_CXX11_clang_objc_runtime_name: return Val_int(1);
+  case clang_ext_ObjCRuntimeName_C2x_clang_objc_runtime_name: return Val_int(2);
+  case clang_ext_ObjCRuntimeName_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcruntimename_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCRuntimeName_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCRuntimeName_spelling result = clang_ext_ObjCRuntimeName_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcruntimename_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCRuntimeVisible_spelling
+Clang_ext_objcruntimevisible_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCRuntimeVisible_GNU_objc_runtime_visible;
+  case 1: return clang_ext_ObjCRuntimeVisible_CXX11_clang_objc_runtime_visible;
+  case 2: return clang_ext_ObjCRuntimeVisible_C2x_clang_objc_runtime_visible;
+  case 3: return clang_ext_ObjCRuntimeVisible_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcruntimevisible_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCRuntimeVisible_GNU_objc_runtime_visible;
+}
+
+value
+Val_clang_ext_objcruntimevisible_spelling(enum clang_ext_ObjCRuntimeVisible_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCRuntimeVisible_GNU_objc_runtime_visible: return Val_int(0);
+  case clang_ext_ObjCRuntimeVisible_CXX11_clang_objc_runtime_visible: return Val_int(1);
+  case clang_ext_ObjCRuntimeVisible_C2x_clang_objc_runtime_visible: return Val_int(2);
+  case clang_ext_ObjCRuntimeVisible_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcruntimevisible_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCRuntimeVisible_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCRuntimeVisible_spelling result = clang_ext_ObjCRuntimeVisible_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcruntimevisible_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ObjCSubclassingRestricted_spelling
+Clang_ext_objcsubclassingrestricted_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ObjCSubclassingRestricted_GNU_objc_subclassing_restricted;
+  case 1: return clang_ext_ObjCSubclassingRestricted_CXX11_clang_objc_subclassing_restricted;
+  case 2: return clang_ext_ObjCSubclassingRestricted_C2x_clang_objc_subclassing_restricted;
+  case 3: return clang_ext_ObjCSubclassingRestricted_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_objcsubclassingrestricted_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ObjCSubclassingRestricted_GNU_objc_subclassing_restricted;
+}
+
+value
+Val_clang_ext_objcsubclassingrestricted_spelling(enum clang_ext_ObjCSubclassingRestricted_spelling v)
+{
+  switch (v) {
+  case clang_ext_ObjCSubclassingRestricted_GNU_objc_subclassing_restricted: return Val_int(0);
+  case clang_ext_ObjCSubclassingRestricted_CXX11_clang_objc_subclassing_restricted: return Val_int(1);
+  case clang_ext_ObjCSubclassingRestricted_C2x_clang_objc_subclassing_restricted: return Val_int(2);
+  case clang_ext_ObjCSubclassingRestricted_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_objcsubclassingrestricted_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ObjCSubclassingRestricted_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ObjCSubclassingRestricted_spelling result = clang_ext_ObjCSubclassingRestricted_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_objcsubclassingrestricted_spelling(result);
     CAMLreturn(data);
   }
 }
@@ -11017,6 +17193,42 @@ clang_ext_OpenCLGlobalAddressSpace_getSpelling_wrapper(value cursor_ocaml)
   }
 }
 
+enum clang_ext_OpenCLKernel_spelling
+Clang_ext_openclkernel_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_OpenCLKernel_Keyword_kernel;
+  case 1: return clang_ext_OpenCLKernel_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_openclkernel_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_OpenCLKernel_Keyword_kernel;
+}
+
+value
+Val_clang_ext_openclkernel_spelling(enum clang_ext_OpenCLKernel_spelling v)
+{
+  switch (v) {
+  case clang_ext_OpenCLKernel_Keyword_kernel: return Val_int(0);
+  case clang_ext_OpenCLKernel_SpellingNotCalculated: return Val_int(1);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_openclkernel_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_OpenCLKernel_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_OpenCLKernel_spelling result = clang_ext_OpenCLKernel_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_openclkernel_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_OpenCLLocalAddressSpace_spelling
 Clang_ext_opencllocaladdressspace_spelling_val(value ocaml)
 {
@@ -11101,6 +17313,86 @@ clang_ext_OpenCLPrivateAddressSpace_getSpelling_wrapper(value cursor_ocaml)
   }
 }
 
+enum clang_ext_OptimizeNone_spelling
+Clang_ext_optimizenone_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_OptimizeNone_GNU_optnone;
+  case 1: return clang_ext_OptimizeNone_CXX11_clang_optnone;
+  case 2: return clang_ext_OptimizeNone_C2x_clang_optnone;
+  case 3: return clang_ext_OptimizeNone_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_optimizenone_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_OptimizeNone_GNU_optnone;
+}
+
+value
+Val_clang_ext_optimizenone_spelling(enum clang_ext_OptimizeNone_spelling v)
+{
+  switch (v) {
+  case clang_ext_OptimizeNone_GNU_optnone: return Val_int(0);
+  case clang_ext_OptimizeNone_CXX11_clang_optnone: return Val_int(1);
+  case clang_ext_OptimizeNone_C2x_clang_optnone: return Val_int(2);
+  case clang_ext_OptimizeNone_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_optimizenone_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_OptimizeNone_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_OptimizeNone_spelling result = clang_ext_OptimizeNone_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_optimizenone_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Overloadable_spelling
+Clang_ext_overloadable_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Overloadable_GNU_overloadable;
+  case 1: return clang_ext_Overloadable_CXX11_clang_overloadable;
+  case 2: return clang_ext_Overloadable_C2x_clang_overloadable;
+  case 3: return clang_ext_Overloadable_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_overloadable_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Overloadable_GNU_overloadable;
+}
+
+value
+Val_clang_ext_overloadable_spelling(enum clang_ext_Overloadable_spelling v)
+{
+  switch (v) {
+  case clang_ext_Overloadable_GNU_overloadable: return Val_int(0);
+  case clang_ext_Overloadable_CXX11_clang_overloadable: return Val_int(1);
+  case clang_ext_Overloadable_C2x_clang_overloadable: return Val_int(2);
+  case clang_ext_Overloadable_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_overloadable_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Overloadable_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Overloadable_spelling result = clang_ext_Overloadable_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_overloadable_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_Ownership_spelling
 Clang_ext_ownership_spelling_val(value ocaml)
 {
@@ -11153,6 +17445,126 @@ clang_ext_Ownership_getSpelling_wrapper(value cursor_ocaml)
   }
 }
 
+enum clang_ext_Packed_spelling
+Clang_ext_packed_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Packed_GNU_packed;
+  case 1: return clang_ext_Packed_CXX11_gnu_packed;
+  case 2: return clang_ext_Packed_C2x_gnu_packed;
+  case 3: return clang_ext_Packed_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_packed_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Packed_GNU_packed;
+}
+
+value
+Val_clang_ext_packed_spelling(enum clang_ext_Packed_spelling v)
+{
+  switch (v) {
+  case clang_ext_Packed_GNU_packed: return Val_int(0);
+  case clang_ext_Packed_CXX11_gnu_packed: return Val_int(1);
+  case clang_ext_Packed_C2x_gnu_packed: return Val_int(2);
+  case clang_ext_Packed_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_packed_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Packed_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Packed_spelling result = clang_ext_Packed_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_packed_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ParamTypestate_spelling
+Clang_ext_paramtypestate_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ParamTypestate_GNU_param_typestate;
+  case 1: return clang_ext_ParamTypestate_CXX11_clang_param_typestate;
+  case 2: return clang_ext_ParamTypestate_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_paramtypestate_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ParamTypestate_GNU_param_typestate;
+}
+
+value
+Val_clang_ext_paramtypestate_spelling(enum clang_ext_ParamTypestate_spelling v)
+{
+  switch (v) {
+  case clang_ext_ParamTypestate_GNU_param_typestate: return Val_int(0);
+  case clang_ext_ParamTypestate_CXX11_clang_param_typestate: return Val_int(1);
+  case clang_ext_ParamTypestate_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_paramtypestate_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ParamTypestate_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ParamTypestate_spelling result = clang_ext_ParamTypestate_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_paramtypestate_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Pascal_spelling
+Clang_ext_pascal_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Pascal_GNU_pascal;
+  case 1: return clang_ext_Pascal_CXX11_clang_pascal;
+  case 2: return clang_ext_Pascal_C2x_clang_pascal;
+  case 3: return clang_ext_Pascal_Keyword_pascal;
+  case 4: return clang_ext_Pascal_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_pascal_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Pascal_GNU_pascal;
+}
+
+value
+Val_clang_ext_pascal_spelling(enum clang_ext_Pascal_spelling v)
+{
+  switch (v) {
+  case clang_ext_Pascal_GNU_pascal: return Val_int(0);
+  case clang_ext_Pascal_CXX11_clang_pascal: return Val_int(1);
+  case clang_ext_Pascal_C2x_clang_pascal: return Val_int(2);
+  case clang_ext_Pascal_Keyword_pascal: return Val_int(3);
+  case clang_ext_Pascal_SpellingNotCalculated: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_pascal_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Pascal_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Pascal_spelling result = clang_ext_Pascal_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_pascal_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_PassObjectSize_spelling
 Clang_ext_passobjectsize_spelling_val(value ocaml)
 {
@@ -11195,6 +17607,364 @@ clang_ext_PassObjectSize_getSpelling_wrapper(value cursor_ocaml)
   {
     CAMLlocal1(data);
     data = Val_clang_ext_passobjectsize_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_PatchableFunctionEntry_spelling
+Clang_ext_patchablefunctionentry_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_PatchableFunctionEntry_GNU_patchable_function_entry;
+  case 1: return clang_ext_PatchableFunctionEntry_CXX11_gnu_patchable_function_entry;
+  case 2: return clang_ext_PatchableFunctionEntry_C2x_gnu_patchable_function_entry;
+  case 3: return clang_ext_PatchableFunctionEntry_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_patchablefunctionentry_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_PatchableFunctionEntry_GNU_patchable_function_entry;
+}
+
+value
+Val_clang_ext_patchablefunctionentry_spelling(enum clang_ext_PatchableFunctionEntry_spelling v)
+{
+  switch (v) {
+  case clang_ext_PatchableFunctionEntry_GNU_patchable_function_entry: return Val_int(0);
+  case clang_ext_PatchableFunctionEntry_CXX11_gnu_patchable_function_entry: return Val_int(1);
+  case clang_ext_PatchableFunctionEntry_C2x_gnu_patchable_function_entry: return Val_int(2);
+  case clang_ext_PatchableFunctionEntry_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_patchablefunctionentry_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_PatchableFunctionEntry_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_PatchableFunctionEntry_spelling result = clang_ext_PatchableFunctionEntry_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_patchablefunctionentry_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Pcs_spelling
+Clang_ext_pcs_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Pcs_GNU_pcs;
+  case 1: return clang_ext_Pcs_CXX11_gnu_pcs;
+  case 2: return clang_ext_Pcs_C2x_gnu_pcs;
+  case 3: return clang_ext_Pcs_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_pcs_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Pcs_GNU_pcs;
+}
+
+value
+Val_clang_ext_pcs_spelling(enum clang_ext_Pcs_spelling v)
+{
+  switch (v) {
+  case clang_ext_Pcs_GNU_pcs: return Val_int(0);
+  case clang_ext_Pcs_CXX11_gnu_pcs: return Val_int(1);
+  case clang_ext_Pcs_C2x_gnu_pcs: return Val_int(2);
+  case clang_ext_Pcs_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_pcs_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Pcs_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Pcs_spelling result = clang_ext_Pcs_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_pcs_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_PreserveAll_spelling
+Clang_ext_preserveall_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_PreserveAll_GNU_preserve_all;
+  case 1: return clang_ext_PreserveAll_CXX11_clang_preserve_all;
+  case 2: return clang_ext_PreserveAll_C2x_clang_preserve_all;
+  case 3: return clang_ext_PreserveAll_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_preserveall_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_PreserveAll_GNU_preserve_all;
+}
+
+value
+Val_clang_ext_preserveall_spelling(enum clang_ext_PreserveAll_spelling v)
+{
+  switch (v) {
+  case clang_ext_PreserveAll_GNU_preserve_all: return Val_int(0);
+  case clang_ext_PreserveAll_CXX11_clang_preserve_all: return Val_int(1);
+  case clang_ext_PreserveAll_C2x_clang_preserve_all: return Val_int(2);
+  case clang_ext_PreserveAll_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_preserveall_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_PreserveAll_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_PreserveAll_spelling result = clang_ext_PreserveAll_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_preserveall_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_PreserveMost_spelling
+Clang_ext_preservemost_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_PreserveMost_GNU_preserve_most;
+  case 1: return clang_ext_PreserveMost_CXX11_clang_preserve_most;
+  case 2: return clang_ext_PreserveMost_C2x_clang_preserve_most;
+  case 3: return clang_ext_PreserveMost_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_preservemost_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_PreserveMost_GNU_preserve_most;
+}
+
+value
+Val_clang_ext_preservemost_spelling(enum clang_ext_PreserveMost_spelling v)
+{
+  switch (v) {
+  case clang_ext_PreserveMost_GNU_preserve_most: return Val_int(0);
+  case clang_ext_PreserveMost_CXX11_clang_preserve_most: return Val_int(1);
+  case clang_ext_PreserveMost_C2x_clang_preserve_most: return Val_int(2);
+  case clang_ext_PreserveMost_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_preservemost_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_PreserveMost_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_PreserveMost_spelling result = clang_ext_PreserveMost_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_preservemost_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_PtGuardedVar_spelling
+Clang_ext_ptguardedvar_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_PtGuardedVar_GNU_pt_guarded_var;
+  case 1: return clang_ext_PtGuardedVar_CXX11_clang_pt_guarded_var;
+  case 2: return clang_ext_PtGuardedVar_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_ptguardedvar_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_PtGuardedVar_GNU_pt_guarded_var;
+}
+
+value
+Val_clang_ext_ptguardedvar_spelling(enum clang_ext_PtGuardedVar_spelling v)
+{
+  switch (v) {
+  case clang_ext_PtGuardedVar_GNU_pt_guarded_var: return Val_int(0);
+  case clang_ext_PtGuardedVar_CXX11_clang_pt_guarded_var: return Val_int(1);
+  case clang_ext_PtGuardedVar_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_ptguardedvar_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_PtGuardedVar_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_PtGuardedVar_spelling result = clang_ext_PtGuardedVar_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_ptguardedvar_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Pure_spelling
+Clang_ext_pure_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Pure_GNU_pure;
+  case 1: return clang_ext_Pure_CXX11_gnu_pure;
+  case 2: return clang_ext_Pure_C2x_gnu_pure;
+  case 3: return clang_ext_Pure_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_pure_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Pure_GNU_pure;
+}
+
+value
+Val_clang_ext_pure_spelling(enum clang_ext_Pure_spelling v)
+{
+  switch (v) {
+  case clang_ext_Pure_GNU_pure: return Val_int(0);
+  case clang_ext_Pure_CXX11_gnu_pure: return Val_int(1);
+  case clang_ext_Pure_C2x_gnu_pure: return Val_int(2);
+  case clang_ext_Pure_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_pure_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Pure_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Pure_spelling result = clang_ext_Pure_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_pure_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_RISCVInterrupt_spelling
+Clang_ext_riscvinterrupt_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_RISCVInterrupt_GNU_interrupt;
+  case 1: return clang_ext_RISCVInterrupt_CXX11_gnu_interrupt;
+  case 2: return clang_ext_RISCVInterrupt_C2x_gnu_interrupt;
+  case 3: return clang_ext_RISCVInterrupt_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_riscvinterrupt_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_RISCVInterrupt_GNU_interrupt;
+}
+
+value
+Val_clang_ext_riscvinterrupt_spelling(enum clang_ext_RISCVInterrupt_spelling v)
+{
+  switch (v) {
+  case clang_ext_RISCVInterrupt_GNU_interrupt: return Val_int(0);
+  case clang_ext_RISCVInterrupt_CXX11_gnu_interrupt: return Val_int(1);
+  case clang_ext_RISCVInterrupt_C2x_gnu_interrupt: return Val_int(2);
+  case clang_ext_RISCVInterrupt_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_riscvinterrupt_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_RISCVInterrupt_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_RISCVInterrupt_spelling result = clang_ext_RISCVInterrupt_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_riscvinterrupt_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_RegCall_spelling
+Clang_ext_regcall_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_RegCall_GNU_regcall;
+  case 1: return clang_ext_RegCall_CXX11_gnu_regcall;
+  case 2: return clang_ext_RegCall_C2x_gnu_regcall;
+  case 3: return clang_ext_RegCall_Keyword_regcall;
+  case 4: return clang_ext_RegCall_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_regcall_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_RegCall_GNU_regcall;
+}
+
+value
+Val_clang_ext_regcall_spelling(enum clang_ext_RegCall_spelling v)
+{
+  switch (v) {
+  case clang_ext_RegCall_GNU_regcall: return Val_int(0);
+  case clang_ext_RegCall_CXX11_gnu_regcall: return Val_int(1);
+  case clang_ext_RegCall_C2x_gnu_regcall: return Val_int(2);
+  case clang_ext_RegCall_Keyword_regcall: return Val_int(3);
+  case clang_ext_RegCall_SpellingNotCalculated: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_regcall_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_RegCall_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_RegCall_spelling result = clang_ext_RegCall_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_regcall_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Reinitializes_spelling
+Clang_ext_reinitializes_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Reinitializes_GNU_reinitializes;
+  case 1: return clang_ext_Reinitializes_CXX11_clang_reinitializes;
+  case 2: return clang_ext_Reinitializes_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_reinitializes_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Reinitializes_GNU_reinitializes;
+}
+
+value
+Val_clang_ext_reinitializes_spelling(enum clang_ext_Reinitializes_spelling v)
+{
+  switch (v) {
+  case clang_ext_Reinitializes_GNU_reinitializes: return Val_int(0);
+  case clang_ext_Reinitializes_CXX11_clang_reinitializes: return Val_int(1);
+  case clang_ext_Reinitializes_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_reinitializes_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Reinitializes_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Reinitializes_spelling result = clang_ext_Reinitializes_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_reinitializes_spelling(result);
     CAMLreturn(data);
   }
 }
@@ -11245,6 +18015,46 @@ clang_ext_ReleaseCapability_getSpelling_wrapper(value cursor_ocaml)
   {
     CAMLlocal1(data);
     data = Val_clang_ext_releasecapability_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ReleaseHandle_spelling
+Clang_ext_releasehandle_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ReleaseHandle_GNU_release_handle;
+  case 1: return clang_ext_ReleaseHandle_CXX11_clang_release_handle;
+  case 2: return clang_ext_ReleaseHandle_C2x_clang_release_handle;
+  case 3: return clang_ext_ReleaseHandle_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_releasehandle_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ReleaseHandle_GNU_release_handle;
+}
+
+value
+Val_clang_ext_releasehandle_spelling(enum clang_ext_ReleaseHandle_spelling v)
+{
+  switch (v) {
+  case clang_ext_ReleaseHandle_GNU_release_handle: return Val_int(0);
+  case clang_ext_ReleaseHandle_CXX11_clang_release_handle: return Val_int(1);
+  case clang_ext_ReleaseHandle_C2x_clang_release_handle: return Val_int(2);
+  case clang_ext_ReleaseHandle_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_releasehandle_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ReleaseHandle_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ReleaseHandle_spelling result = clang_ext_ReleaseHandle_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_releasehandle_spelling(result);
     CAMLreturn(data);
   }
 }
@@ -11306,7 +18116,8 @@ Clang_ext_restrict_spelling_val(value ocaml)
   case 0: return clang_ext_Restrict_Declspec_restrict;
   case 1: return clang_ext_Restrict_GNU_malloc;
   case 2: return clang_ext_Restrict_CXX11_gnu_malloc;
-  case 3: return clang_ext_Restrict_SpellingNotCalculated;
+  case 3: return clang_ext_Restrict_C2x_gnu_malloc;
+  case 4: return clang_ext_Restrict_SpellingNotCalculated;
   }
   failwith_fmt("invalid value for Clang_ext_restrict_spelling_val: %d", Int_val(ocaml));
   return clang_ext_Restrict_Declspec_restrict;
@@ -11319,7 +18130,8 @@ Val_clang_ext_restrict_spelling(enum clang_ext_Restrict_spelling v)
   case clang_ext_Restrict_Declspec_restrict: return Val_int(0);
   case clang_ext_Restrict_GNU_malloc: return Val_int(1);
   case clang_ext_Restrict_CXX11_gnu_malloc: return Val_int(2);
-  case clang_ext_Restrict_SpellingNotCalculated: return Val_int(3);
+  case clang_ext_Restrict_C2x_gnu_malloc: return Val_int(3);
+  case clang_ext_Restrict_SpellingNotCalculated: return Val_int(4);
   }
   failwith_fmt("invalid value for Val_clang_ext_restrict_spelling: %d", v);
   return Val_int(0);
@@ -11339,14 +18151,211 @@ clang_ext_Restrict_getSpelling_wrapper(value cursor_ocaml)
   }
 }
 
+enum clang_ext_ReturnTypestate_spelling
+Clang_ext_returntypestate_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ReturnTypestate_GNU_return_typestate;
+  case 1: return clang_ext_ReturnTypestate_CXX11_clang_return_typestate;
+  case 2: return clang_ext_ReturnTypestate_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_returntypestate_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ReturnTypestate_GNU_return_typestate;
+}
+
+value
+Val_clang_ext_returntypestate_spelling(enum clang_ext_ReturnTypestate_spelling v)
+{
+  switch (v) {
+  case clang_ext_ReturnTypestate_GNU_return_typestate: return Val_int(0);
+  case clang_ext_ReturnTypestate_CXX11_clang_return_typestate: return Val_int(1);
+  case clang_ext_ReturnTypestate_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_returntypestate_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ReturnTypestate_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ReturnTypestate_spelling result = clang_ext_ReturnTypestate_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_returntypestate_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ReturnsNonNull_spelling
+Clang_ext_returnsnonnull_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ReturnsNonNull_GNU_returns_nonnull;
+  case 1: return clang_ext_ReturnsNonNull_CXX11_gnu_returns_nonnull;
+  case 2: return clang_ext_ReturnsNonNull_C2x_gnu_returns_nonnull;
+  case 3: return clang_ext_ReturnsNonNull_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_returnsnonnull_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ReturnsNonNull_GNU_returns_nonnull;
+}
+
+value
+Val_clang_ext_returnsnonnull_spelling(enum clang_ext_ReturnsNonNull_spelling v)
+{
+  switch (v) {
+  case clang_ext_ReturnsNonNull_GNU_returns_nonnull: return Val_int(0);
+  case clang_ext_ReturnsNonNull_CXX11_gnu_returns_nonnull: return Val_int(1);
+  case clang_ext_ReturnsNonNull_C2x_gnu_returns_nonnull: return Val_int(2);
+  case clang_ext_ReturnsNonNull_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_returnsnonnull_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ReturnsNonNull_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ReturnsNonNull_spelling result = clang_ext_ReturnsNonNull_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_returnsnonnull_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ReturnsTwice_spelling
+Clang_ext_returnstwice_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ReturnsTwice_GNU_returns_twice;
+  case 1: return clang_ext_ReturnsTwice_CXX11_gnu_returns_twice;
+  case 2: return clang_ext_ReturnsTwice_C2x_gnu_returns_twice;
+  case 3: return clang_ext_ReturnsTwice_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_returnstwice_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ReturnsTwice_GNU_returns_twice;
+}
+
+value
+Val_clang_ext_returnstwice_spelling(enum clang_ext_ReturnsTwice_spelling v)
+{
+  switch (v) {
+  case clang_ext_ReturnsTwice_GNU_returns_twice: return Val_int(0);
+  case clang_ext_ReturnsTwice_CXX11_gnu_returns_twice: return Val_int(1);
+  case clang_ext_ReturnsTwice_C2x_gnu_returns_twice: return Val_int(2);
+  case clang_ext_ReturnsTwice_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_returnstwice_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ReturnsTwice_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ReturnsTwice_spelling result = clang_ext_ReturnsTwice_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_returnstwice_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_SYCLKernel_spelling
+Clang_ext_syclkernel_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_SYCLKernel_GNU_sycl_kernel;
+  case 1: return clang_ext_SYCLKernel_CXX11_clang_sycl_kernel;
+  case 2: return clang_ext_SYCLKernel_C2x_clang_sycl_kernel;
+  case 3: return clang_ext_SYCLKernel_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_syclkernel_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_SYCLKernel_GNU_sycl_kernel;
+}
+
+value
+Val_clang_ext_syclkernel_spelling(enum clang_ext_SYCLKernel_spelling v)
+{
+  switch (v) {
+  case clang_ext_SYCLKernel_GNU_sycl_kernel: return Val_int(0);
+  case clang_ext_SYCLKernel_CXX11_clang_sycl_kernel: return Val_int(1);
+  case clang_ext_SYCLKernel_C2x_clang_sycl_kernel: return Val_int(2);
+  case clang_ext_SYCLKernel_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_syclkernel_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_SYCLKernel_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_SYCLKernel_spelling result = clang_ext_SYCLKernel_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_syclkernel_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ScopedLockable_spelling
+Clang_ext_scopedlockable_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ScopedLockable_GNU_scoped_lockable;
+  case 1: return clang_ext_ScopedLockable_CXX11_clang_scoped_lockable;
+  case 2: return clang_ext_ScopedLockable_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_scopedlockable_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ScopedLockable_GNU_scoped_lockable;
+}
+
+value
+Val_clang_ext_scopedlockable_spelling(enum clang_ext_ScopedLockable_spelling v)
+{
+  switch (v) {
+  case clang_ext_ScopedLockable_GNU_scoped_lockable: return Val_int(0);
+  case clang_ext_ScopedLockable_CXX11_clang_scoped_lockable: return Val_int(1);
+  case clang_ext_ScopedLockable_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_scopedlockable_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ScopedLockable_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ScopedLockable_spelling result = clang_ext_ScopedLockable_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_scopedlockable_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_Section_spelling
 Clang_ext_section_spelling_val(value ocaml)
 {
   switch (Int_val(ocaml)) {
   case 0: return clang_ext_Section_GNU_section;
   case 1: return clang_ext_Section_CXX11_gnu_section;
-  case 2: return clang_ext_Section_Declspec_allocate;
-  case 3: return clang_ext_Section_SpellingNotCalculated;
+  case 2: return clang_ext_Section_C2x_gnu_section;
+  case 3: return clang_ext_Section_Declspec_allocate;
+  case 4: return clang_ext_Section_SpellingNotCalculated;
   }
   failwith_fmt("invalid value for Clang_ext_section_spelling_val: %d", Int_val(ocaml));
   return clang_ext_Section_GNU_section;
@@ -11358,8 +18367,9 @@ Val_clang_ext_section_spelling(enum clang_ext_Section_spelling v)
   switch (v) {
   case clang_ext_Section_GNU_section: return Val_int(0);
   case clang_ext_Section_CXX11_gnu_section: return Val_int(1);
-  case clang_ext_Section_Declspec_allocate: return Val_int(2);
-  case clang_ext_Section_SpellingNotCalculated: return Val_int(3);
+  case clang_ext_Section_C2x_gnu_section: return Val_int(2);
+  case clang_ext_Section_Declspec_allocate: return Val_int(3);
+  case clang_ext_Section_SpellingNotCalculated: return Val_int(4);
   }
   failwith_fmt("invalid value for Val_clang_ext_section_spelling: %d", v);
   return Val_int(0);
@@ -11375,6 +18385,646 @@ clang_ext_Section_getSpelling_wrapper(value cursor_ocaml)
   {
     CAMLlocal1(data);
     data = Val_clang_ext_section_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_SelectAny_spelling
+Clang_ext_selectany_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_SelectAny_Declspec_selectany;
+  case 1: return clang_ext_SelectAny_GNU_selectany;
+  case 2: return clang_ext_SelectAny_CXX11_gnu_selectany;
+  case 3: return clang_ext_SelectAny_C2x_gnu_selectany;
+  case 4: return clang_ext_SelectAny_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_selectany_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_SelectAny_Declspec_selectany;
+}
+
+value
+Val_clang_ext_selectany_spelling(enum clang_ext_SelectAny_spelling v)
+{
+  switch (v) {
+  case clang_ext_SelectAny_Declspec_selectany: return Val_int(0);
+  case clang_ext_SelectAny_GNU_selectany: return Val_int(1);
+  case clang_ext_SelectAny_CXX11_gnu_selectany: return Val_int(2);
+  case clang_ext_SelectAny_C2x_gnu_selectany: return Val_int(3);
+  case clang_ext_SelectAny_SpellingNotCalculated: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_selectany_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_SelectAny_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_SelectAny_spelling result = clang_ext_SelectAny_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_selectany_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Sentinel_spelling
+Clang_ext_sentinel_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Sentinel_GNU_sentinel;
+  case 1: return clang_ext_Sentinel_CXX11_gnu_sentinel;
+  case 2: return clang_ext_Sentinel_C2x_gnu_sentinel;
+  case 3: return clang_ext_Sentinel_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_sentinel_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Sentinel_GNU_sentinel;
+}
+
+value
+Val_clang_ext_sentinel_spelling(enum clang_ext_Sentinel_spelling v)
+{
+  switch (v) {
+  case clang_ext_Sentinel_GNU_sentinel: return Val_int(0);
+  case clang_ext_Sentinel_CXX11_gnu_sentinel: return Val_int(1);
+  case clang_ext_Sentinel_C2x_gnu_sentinel: return Val_int(2);
+  case clang_ext_Sentinel_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_sentinel_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Sentinel_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Sentinel_spelling result = clang_ext_Sentinel_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_sentinel_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_SetTypestate_spelling
+Clang_ext_settypestate_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_SetTypestate_GNU_set_typestate;
+  case 1: return clang_ext_SetTypestate_CXX11_clang_set_typestate;
+  case 2: return clang_ext_SetTypestate_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_settypestate_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_SetTypestate_GNU_set_typestate;
+}
+
+value
+Val_clang_ext_settypestate_spelling(enum clang_ext_SetTypestate_spelling v)
+{
+  switch (v) {
+  case clang_ext_SetTypestate_GNU_set_typestate: return Val_int(0);
+  case clang_ext_SetTypestate_CXX11_clang_set_typestate: return Val_int(1);
+  case clang_ext_SetTypestate_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_settypestate_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_SetTypestate_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_SetTypestate_spelling result = clang_ext_SetTypestate_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_settypestate_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_SpeculativeLoadHardening_spelling
+Clang_ext_speculativeloadhardening_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_SpeculativeLoadHardening_GNU_speculative_load_hardening;
+  case 1: return clang_ext_SpeculativeLoadHardening_CXX11_clang_speculative_load_hardening;
+  case 2: return clang_ext_SpeculativeLoadHardening_C2x_clang_speculative_load_hardening;
+  case 3: return clang_ext_SpeculativeLoadHardening_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_speculativeloadhardening_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_SpeculativeLoadHardening_GNU_speculative_load_hardening;
+}
+
+value
+Val_clang_ext_speculativeloadhardening_spelling(enum clang_ext_SpeculativeLoadHardening_spelling v)
+{
+  switch (v) {
+  case clang_ext_SpeculativeLoadHardening_GNU_speculative_load_hardening: return Val_int(0);
+  case clang_ext_SpeculativeLoadHardening_CXX11_clang_speculative_load_hardening: return Val_int(1);
+  case clang_ext_SpeculativeLoadHardening_C2x_clang_speculative_load_hardening: return Val_int(2);
+  case clang_ext_SpeculativeLoadHardening_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_speculativeloadhardening_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_SpeculativeLoadHardening_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_SpeculativeLoadHardening_spelling result = clang_ext_SpeculativeLoadHardening_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_speculativeloadhardening_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_StdCall_spelling
+Clang_ext_stdcall_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_StdCall_GNU_stdcall;
+  case 1: return clang_ext_StdCall_CXX11_gnu_stdcall;
+  case 2: return clang_ext_StdCall_C2x_gnu_stdcall;
+  case 3: return clang_ext_StdCall_Keyword_stdcall;
+  case 4: return clang_ext_StdCall_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_stdcall_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_StdCall_GNU_stdcall;
+}
+
+value
+Val_clang_ext_stdcall_spelling(enum clang_ext_StdCall_spelling v)
+{
+  switch (v) {
+  case clang_ext_StdCall_GNU_stdcall: return Val_int(0);
+  case clang_ext_StdCall_CXX11_gnu_stdcall: return Val_int(1);
+  case clang_ext_StdCall_C2x_gnu_stdcall: return Val_int(2);
+  case clang_ext_StdCall_Keyword_stdcall: return Val_int(3);
+  case clang_ext_StdCall_SpellingNotCalculated: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_stdcall_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_StdCall_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_StdCall_spelling result = clang_ext_StdCall_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_stdcall_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_SwiftCall_spelling
+Clang_ext_swiftcall_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_SwiftCall_GNU_swiftcall;
+  case 1: return clang_ext_SwiftCall_CXX11_clang_swiftcall;
+  case 2: return clang_ext_SwiftCall_C2x_clang_swiftcall;
+  case 3: return clang_ext_SwiftCall_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_swiftcall_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_SwiftCall_GNU_swiftcall;
+}
+
+value
+Val_clang_ext_swiftcall_spelling(enum clang_ext_SwiftCall_spelling v)
+{
+  switch (v) {
+  case clang_ext_SwiftCall_GNU_swiftcall: return Val_int(0);
+  case clang_ext_SwiftCall_CXX11_clang_swiftcall: return Val_int(1);
+  case clang_ext_SwiftCall_C2x_clang_swiftcall: return Val_int(2);
+  case clang_ext_SwiftCall_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_swiftcall_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_SwiftCall_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_SwiftCall_spelling result = clang_ext_SwiftCall_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_swiftcall_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_SwiftContext_spelling
+Clang_ext_swiftcontext_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_SwiftContext_GNU_swift_context;
+  case 1: return clang_ext_SwiftContext_CXX11_clang_swift_context;
+  case 2: return clang_ext_SwiftContext_C2x_clang_swift_context;
+  case 3: return clang_ext_SwiftContext_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_swiftcontext_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_SwiftContext_GNU_swift_context;
+}
+
+value
+Val_clang_ext_swiftcontext_spelling(enum clang_ext_SwiftContext_spelling v)
+{
+  switch (v) {
+  case clang_ext_SwiftContext_GNU_swift_context: return Val_int(0);
+  case clang_ext_SwiftContext_CXX11_clang_swift_context: return Val_int(1);
+  case clang_ext_SwiftContext_C2x_clang_swift_context: return Val_int(2);
+  case clang_ext_SwiftContext_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_swiftcontext_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_SwiftContext_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_SwiftContext_spelling result = clang_ext_SwiftContext_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_swiftcontext_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_SwiftErrorResult_spelling
+Clang_ext_swifterrorresult_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_SwiftErrorResult_GNU_swift_error_result;
+  case 1: return clang_ext_SwiftErrorResult_CXX11_clang_swift_error_result;
+  case 2: return clang_ext_SwiftErrorResult_C2x_clang_swift_error_result;
+  case 3: return clang_ext_SwiftErrorResult_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_swifterrorresult_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_SwiftErrorResult_GNU_swift_error_result;
+}
+
+value
+Val_clang_ext_swifterrorresult_spelling(enum clang_ext_SwiftErrorResult_spelling v)
+{
+  switch (v) {
+  case clang_ext_SwiftErrorResult_GNU_swift_error_result: return Val_int(0);
+  case clang_ext_SwiftErrorResult_CXX11_clang_swift_error_result: return Val_int(1);
+  case clang_ext_SwiftErrorResult_C2x_clang_swift_error_result: return Val_int(2);
+  case clang_ext_SwiftErrorResult_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_swifterrorresult_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_SwiftErrorResult_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_SwiftErrorResult_spelling result = clang_ext_SwiftErrorResult_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_swifterrorresult_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_SwiftIndirectResult_spelling
+Clang_ext_swiftindirectresult_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_SwiftIndirectResult_GNU_swift_indirect_result;
+  case 1: return clang_ext_SwiftIndirectResult_CXX11_clang_swift_indirect_result;
+  case 2: return clang_ext_SwiftIndirectResult_C2x_clang_swift_indirect_result;
+  case 3: return clang_ext_SwiftIndirectResult_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_swiftindirectresult_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_SwiftIndirectResult_GNU_swift_indirect_result;
+}
+
+value
+Val_clang_ext_swiftindirectresult_spelling(enum clang_ext_SwiftIndirectResult_spelling v)
+{
+  switch (v) {
+  case clang_ext_SwiftIndirectResult_GNU_swift_indirect_result: return Val_int(0);
+  case clang_ext_SwiftIndirectResult_CXX11_clang_swift_indirect_result: return Val_int(1);
+  case clang_ext_SwiftIndirectResult_C2x_clang_swift_indirect_result: return Val_int(2);
+  case clang_ext_SwiftIndirectResult_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_swiftindirectresult_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_SwiftIndirectResult_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_SwiftIndirectResult_spelling result = clang_ext_SwiftIndirectResult_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_swiftindirectresult_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_SysVABI_spelling
+Clang_ext_sysvabi_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_SysVABI_GNU_sysv_abi;
+  case 1: return clang_ext_SysVABI_CXX11_gnu_sysv_abi;
+  case 2: return clang_ext_SysVABI_C2x_gnu_sysv_abi;
+  case 3: return clang_ext_SysVABI_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_sysvabi_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_SysVABI_GNU_sysv_abi;
+}
+
+value
+Val_clang_ext_sysvabi_spelling(enum clang_ext_SysVABI_spelling v)
+{
+  switch (v) {
+  case clang_ext_SysVABI_GNU_sysv_abi: return Val_int(0);
+  case clang_ext_SysVABI_CXX11_gnu_sysv_abi: return Val_int(1);
+  case clang_ext_SysVABI_C2x_gnu_sysv_abi: return Val_int(2);
+  case clang_ext_SysVABI_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_sysvabi_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_SysVABI_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_SysVABI_spelling result = clang_ext_SysVABI_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_sysvabi_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_TLSModel_spelling
+Clang_ext_tlsmodel_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_TLSModel_GNU_tls_model;
+  case 1: return clang_ext_TLSModel_CXX11_gnu_tls_model;
+  case 2: return clang_ext_TLSModel_C2x_gnu_tls_model;
+  case 3: return clang_ext_TLSModel_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_tlsmodel_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_TLSModel_GNU_tls_model;
+}
+
+value
+Val_clang_ext_tlsmodel_spelling(enum clang_ext_TLSModel_spelling v)
+{
+  switch (v) {
+  case clang_ext_TLSModel_GNU_tls_model: return Val_int(0);
+  case clang_ext_TLSModel_CXX11_gnu_tls_model: return Val_int(1);
+  case clang_ext_TLSModel_C2x_gnu_tls_model: return Val_int(2);
+  case clang_ext_TLSModel_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_tlsmodel_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_TLSModel_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_TLSModel_spelling result = clang_ext_TLSModel_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_tlsmodel_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Target_spelling
+Clang_ext_target_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Target_GNU_target;
+  case 1: return clang_ext_Target_CXX11_gnu_target;
+  case 2: return clang_ext_Target_C2x_gnu_target;
+  case 3: return clang_ext_Target_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_target_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Target_GNU_target;
+}
+
+value
+Val_clang_ext_target_spelling(enum clang_ext_Target_spelling v)
+{
+  switch (v) {
+  case clang_ext_Target_GNU_target: return Val_int(0);
+  case clang_ext_Target_CXX11_gnu_target: return Val_int(1);
+  case clang_ext_Target_C2x_gnu_target: return Val_int(2);
+  case clang_ext_Target_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_target_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Target_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Target_spelling result = clang_ext_Target_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_target_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_TestTypestate_spelling
+Clang_ext_testtypestate_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_TestTypestate_GNU_test_typestate;
+  case 1: return clang_ext_TestTypestate_CXX11_clang_test_typestate;
+  case 2: return clang_ext_TestTypestate_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_testtypestate_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_TestTypestate_GNU_test_typestate;
+}
+
+value
+Val_clang_ext_testtypestate_spelling(enum clang_ext_TestTypestate_spelling v)
+{
+  switch (v) {
+  case clang_ext_TestTypestate_GNU_test_typestate: return Val_int(0);
+  case clang_ext_TestTypestate_CXX11_clang_test_typestate: return Val_int(1);
+  case clang_ext_TestTypestate_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_testtypestate_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_TestTypestate_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_TestTypestate_spelling result = clang_ext_TestTypestate_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_testtypestate_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_ThisCall_spelling
+Clang_ext_thiscall_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_ThisCall_GNU_thiscall;
+  case 1: return clang_ext_ThisCall_CXX11_gnu_thiscall;
+  case 2: return clang_ext_ThisCall_C2x_gnu_thiscall;
+  case 3: return clang_ext_ThisCall_Keyword_thiscall;
+  case 4: return clang_ext_ThisCall_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_thiscall_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_ThisCall_GNU_thiscall;
+}
+
+value
+Val_clang_ext_thiscall_spelling(enum clang_ext_ThisCall_spelling v)
+{
+  switch (v) {
+  case clang_ext_ThisCall_GNU_thiscall: return Val_int(0);
+  case clang_ext_ThisCall_CXX11_gnu_thiscall: return Val_int(1);
+  case clang_ext_ThisCall_C2x_gnu_thiscall: return Val_int(2);
+  case clang_ext_ThisCall_Keyword_thiscall: return Val_int(3);
+  case clang_ext_ThisCall_SpellingNotCalculated: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_thiscall_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_ThisCall_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_ThisCall_spelling result = clang_ext_ThisCall_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_thiscall_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_TransparentUnion_spelling
+Clang_ext_transparentunion_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_TransparentUnion_GNU_transparent_union;
+  case 1: return clang_ext_TransparentUnion_CXX11_gnu_transparent_union;
+  case 2: return clang_ext_TransparentUnion_C2x_gnu_transparent_union;
+  case 3: return clang_ext_TransparentUnion_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_transparentunion_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_TransparentUnion_GNU_transparent_union;
+}
+
+value
+Val_clang_ext_transparentunion_spelling(enum clang_ext_TransparentUnion_spelling v)
+{
+  switch (v) {
+  case clang_ext_TransparentUnion_GNU_transparent_union: return Val_int(0);
+  case clang_ext_TransparentUnion_CXX11_gnu_transparent_union: return Val_int(1);
+  case clang_ext_TransparentUnion_C2x_gnu_transparent_union: return Val_int(2);
+  case clang_ext_TransparentUnion_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_transparentunion_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_TransparentUnion_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_TransparentUnion_spelling result = clang_ext_TransparentUnion_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_transparentunion_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_TrivialABI_spelling
+Clang_ext_trivialabi_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_TrivialABI_GNU_trivial_abi;
+  case 1: return clang_ext_TrivialABI_CXX11_clang_trivial_abi;
+  case 2: return clang_ext_TrivialABI_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_trivialabi_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_TrivialABI_GNU_trivial_abi;
+}
+
+value
+Val_clang_ext_trivialabi_spelling(enum clang_ext_TrivialABI_spelling v)
+{
+  switch (v) {
+  case clang_ext_TrivialABI_GNU_trivial_abi: return Val_int(0);
+  case clang_ext_TrivialABI_CXX11_clang_trivial_abi: return Val_int(1);
+  case clang_ext_TrivialABI_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_trivialabi_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_TrivialABI_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_TrivialABI_spelling result = clang_ext_TrivialABI_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_trivialabi_spelling(result);
     CAMLreturn(data);
   }
 }
@@ -11421,6 +19071,164 @@ clang_ext_TryAcquireCapability_getSpelling_wrapper(value cursor_ocaml)
   }
 }
 
+enum clang_ext_TypeTagForDatatype_spelling
+Clang_ext_typetagfordatatype_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_TypeTagForDatatype_GNU_type_tag_for_datatype;
+  case 1: return clang_ext_TypeTagForDatatype_CXX11_clang_type_tag_for_datatype;
+  case 2: return clang_ext_TypeTagForDatatype_C2x_clang_type_tag_for_datatype;
+  case 3: return clang_ext_TypeTagForDatatype_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_typetagfordatatype_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_TypeTagForDatatype_GNU_type_tag_for_datatype;
+}
+
+value
+Val_clang_ext_typetagfordatatype_spelling(enum clang_ext_TypeTagForDatatype_spelling v)
+{
+  switch (v) {
+  case clang_ext_TypeTagForDatatype_GNU_type_tag_for_datatype: return Val_int(0);
+  case clang_ext_TypeTagForDatatype_CXX11_clang_type_tag_for_datatype: return Val_int(1);
+  case clang_ext_TypeTagForDatatype_C2x_clang_type_tag_for_datatype: return Val_int(2);
+  case clang_ext_TypeTagForDatatype_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_typetagfordatatype_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_TypeTagForDatatype_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_TypeTagForDatatype_spelling result = clang_ext_TypeTagForDatatype_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_typetagfordatatype_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_TypeVisibility_spelling
+Clang_ext_typevisibility_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_TypeVisibility_GNU_type_visibility;
+  case 1: return clang_ext_TypeVisibility_CXX11_clang_type_visibility;
+  case 2: return clang_ext_TypeVisibility_C2x_clang_type_visibility;
+  case 3: return clang_ext_TypeVisibility_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_typevisibility_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_TypeVisibility_GNU_type_visibility;
+}
+
+value
+Val_clang_ext_typevisibility_spelling(enum clang_ext_TypeVisibility_spelling v)
+{
+  switch (v) {
+  case clang_ext_TypeVisibility_GNU_type_visibility: return Val_int(0);
+  case clang_ext_TypeVisibility_CXX11_clang_type_visibility: return Val_int(1);
+  case clang_ext_TypeVisibility_C2x_clang_type_visibility: return Val_int(2);
+  case clang_ext_TypeVisibility_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_typevisibility_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_TypeVisibility_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_TypeVisibility_spelling result = clang_ext_TypeVisibility_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_typevisibility_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Unavailable_spelling
+Clang_ext_unavailable_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Unavailable_GNU_unavailable;
+  case 1: return clang_ext_Unavailable_CXX11_clang_unavailable;
+  case 2: return clang_ext_Unavailable_C2x_clang_unavailable;
+  case 3: return clang_ext_Unavailable_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_unavailable_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Unavailable_GNU_unavailable;
+}
+
+value
+Val_clang_ext_unavailable_spelling(enum clang_ext_Unavailable_spelling v)
+{
+  switch (v) {
+  case clang_ext_Unavailable_GNU_unavailable: return Val_int(0);
+  case clang_ext_Unavailable_CXX11_clang_unavailable: return Val_int(1);
+  case clang_ext_Unavailable_C2x_clang_unavailable: return Val_int(2);
+  case clang_ext_Unavailable_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_unavailable_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Unavailable_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Unavailable_spelling result = clang_ext_Unavailable_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_unavailable_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Uninitialized_spelling
+Clang_ext_uninitialized_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Uninitialized_GNU_uninitialized;
+  case 1: return clang_ext_Uninitialized_CXX11_clang_uninitialized;
+  case 2: return clang_ext_Uninitialized_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_uninitialized_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Uninitialized_GNU_uninitialized;
+}
+
+value
+Val_clang_ext_uninitialized_spelling(enum clang_ext_Uninitialized_spelling v)
+{
+  switch (v) {
+  case clang_ext_Uninitialized_GNU_uninitialized: return Val_int(0);
+  case clang_ext_Uninitialized_CXX11_clang_uninitialized: return Val_int(1);
+  case clang_ext_Uninitialized_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_uninitialized_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Uninitialized_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Uninitialized_spelling result = clang_ext_Uninitialized_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_uninitialized_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_Unused_spelling
 Clang_ext_unused_spelling_val(value ocaml)
 {
@@ -11428,8 +19236,9 @@ Clang_ext_unused_spelling_val(value ocaml)
   case 0: return clang_ext_Unused_CXX11_maybe_unused;
   case 1: return clang_ext_Unused_GNU_unused;
   case 2: return clang_ext_Unused_CXX11_gnu_unused;
-  case 3: return clang_ext_Unused_C2x_maybe_unused;
-  case 4: return clang_ext_Unused_SpellingNotCalculated;
+  case 3: return clang_ext_Unused_C2x_gnu_unused;
+  case 4: return clang_ext_Unused_C2x_maybe_unused;
+  case 5: return clang_ext_Unused_SpellingNotCalculated;
   }
   failwith_fmt("invalid value for Clang_ext_unused_spelling_val: %d", Int_val(ocaml));
   return clang_ext_Unused_CXX11_maybe_unused;
@@ -11442,8 +19251,9 @@ Val_clang_ext_unused_spelling(enum clang_ext_Unused_spelling v)
   case clang_ext_Unused_CXX11_maybe_unused: return Val_int(0);
   case clang_ext_Unused_GNU_unused: return Val_int(1);
   case clang_ext_Unused_CXX11_gnu_unused: return Val_int(2);
-  case clang_ext_Unused_C2x_maybe_unused: return Val_int(3);
-  case clang_ext_Unused_SpellingNotCalculated: return Val_int(4);
+  case clang_ext_Unused_C2x_gnu_unused: return Val_int(3);
+  case clang_ext_Unused_C2x_maybe_unused: return Val_int(4);
+  case clang_ext_Unused_SpellingNotCalculated: return Val_int(5);
   }
   failwith_fmt("invalid value for Val_clang_ext_unused_spelling: %d", v);
   return Val_int(0);
@@ -11463,6 +19273,284 @@ clang_ext_Unused_getSpelling_wrapper(value cursor_ocaml)
   }
 }
 
+enum clang_ext_UseHandle_spelling
+Clang_ext_usehandle_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_UseHandle_GNU_use_handle;
+  case 1: return clang_ext_UseHandle_CXX11_clang_use_handle;
+  case 2: return clang_ext_UseHandle_C2x_clang_use_handle;
+  case 3: return clang_ext_UseHandle_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_usehandle_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_UseHandle_GNU_use_handle;
+}
+
+value
+Val_clang_ext_usehandle_spelling(enum clang_ext_UseHandle_spelling v)
+{
+  switch (v) {
+  case clang_ext_UseHandle_GNU_use_handle: return Val_int(0);
+  case clang_ext_UseHandle_CXX11_clang_use_handle: return Val_int(1);
+  case clang_ext_UseHandle_C2x_clang_use_handle: return Val_int(2);
+  case clang_ext_UseHandle_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_usehandle_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_UseHandle_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_UseHandle_spelling result = clang_ext_UseHandle_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_usehandle_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Used_spelling
+Clang_ext_used_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Used_GNU_used;
+  case 1: return clang_ext_Used_CXX11_gnu_used;
+  case 2: return clang_ext_Used_C2x_gnu_used;
+  case 3: return clang_ext_Used_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_used_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Used_GNU_used;
+}
+
+value
+Val_clang_ext_used_spelling(enum clang_ext_Used_spelling v)
+{
+  switch (v) {
+  case clang_ext_Used_GNU_used: return Val_int(0);
+  case clang_ext_Used_CXX11_gnu_used: return Val_int(1);
+  case clang_ext_Used_C2x_gnu_used: return Val_int(2);
+  case clang_ext_Used_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_used_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Used_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Used_spelling result = clang_ext_Used_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_used_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Uuid_spelling
+Clang_ext_uuid_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Uuid_Declspec_uuid;
+  case 1: return clang_ext_Uuid_Microsoft_uuid;
+  case 2: return clang_ext_Uuid_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_uuid_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Uuid_Declspec_uuid;
+}
+
+value
+Val_clang_ext_uuid_spelling(enum clang_ext_Uuid_spelling v)
+{
+  switch (v) {
+  case clang_ext_Uuid_Declspec_uuid: return Val_int(0);
+  case clang_ext_Uuid_Microsoft_uuid: return Val_int(1);
+  case clang_ext_Uuid_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_uuid_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Uuid_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Uuid_spelling result = clang_ext_Uuid_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_uuid_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_VecReturn_spelling
+Clang_ext_vecreturn_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_VecReturn_GNU_vecreturn;
+  case 1: return clang_ext_VecReturn_CXX11_clang_vecreturn;
+  case 2: return clang_ext_VecReturn_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_vecreturn_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_VecReturn_GNU_vecreturn;
+}
+
+value
+Val_clang_ext_vecreturn_spelling(enum clang_ext_VecReturn_spelling v)
+{
+  switch (v) {
+  case clang_ext_VecReturn_GNU_vecreturn: return Val_int(0);
+  case clang_ext_VecReturn_CXX11_clang_vecreturn: return Val_int(1);
+  case clang_ext_VecReturn_SpellingNotCalculated: return Val_int(2);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_vecreturn_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_VecReturn_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_VecReturn_spelling result = clang_ext_VecReturn_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_vecreturn_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_VectorCall_spelling
+Clang_ext_vectorcall_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_VectorCall_GNU_vectorcall;
+  case 1: return clang_ext_VectorCall_CXX11_clang_vectorcall;
+  case 2: return clang_ext_VectorCall_C2x_clang_vectorcall;
+  case 3: return clang_ext_VectorCall_Keyword_vectorcall;
+  case 4: return clang_ext_VectorCall_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_vectorcall_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_VectorCall_GNU_vectorcall;
+}
+
+value
+Val_clang_ext_vectorcall_spelling(enum clang_ext_VectorCall_spelling v)
+{
+  switch (v) {
+  case clang_ext_VectorCall_GNU_vectorcall: return Val_int(0);
+  case clang_ext_VectorCall_CXX11_clang_vectorcall: return Val_int(1);
+  case clang_ext_VectorCall_C2x_clang_vectorcall: return Val_int(2);
+  case clang_ext_VectorCall_Keyword_vectorcall: return Val_int(3);
+  case clang_ext_VectorCall_SpellingNotCalculated: return Val_int(4);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_vectorcall_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_VectorCall_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_VectorCall_spelling result = clang_ext_VectorCall_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_vectorcall_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Visibility_spelling
+Clang_ext_visibility_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Visibility_GNU_visibility;
+  case 1: return clang_ext_Visibility_CXX11_gnu_visibility;
+  case 2: return clang_ext_Visibility_C2x_gnu_visibility;
+  case 3: return clang_ext_Visibility_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_visibility_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Visibility_GNU_visibility;
+}
+
+value
+Val_clang_ext_visibility_spelling(enum clang_ext_Visibility_spelling v)
+{
+  switch (v) {
+  case clang_ext_Visibility_GNU_visibility: return Val_int(0);
+  case clang_ext_Visibility_CXX11_gnu_visibility: return Val_int(1);
+  case clang_ext_Visibility_C2x_gnu_visibility: return Val_int(2);
+  case clang_ext_Visibility_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_visibility_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Visibility_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Visibility_spelling result = clang_ext_Visibility_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_visibility_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_WarnUnused_spelling
+Clang_ext_warnunused_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_WarnUnused_GNU_warn_unused;
+  case 1: return clang_ext_WarnUnused_CXX11_gnu_warn_unused;
+  case 2: return clang_ext_WarnUnused_C2x_gnu_warn_unused;
+  case 3: return clang_ext_WarnUnused_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_warnunused_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_WarnUnused_GNU_warn_unused;
+}
+
+value
+Val_clang_ext_warnunused_spelling(enum clang_ext_WarnUnused_spelling v)
+{
+  switch (v) {
+  case clang_ext_WarnUnused_GNU_warn_unused: return Val_int(0);
+  case clang_ext_WarnUnused_CXX11_gnu_warn_unused: return Val_int(1);
+  case clang_ext_WarnUnused_C2x_gnu_warn_unused: return Val_int(2);
+  case clang_ext_WarnUnused_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_warnunused_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_WarnUnused_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_WarnUnused_spelling result = clang_ext_WarnUnused_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_warnunused_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_WarnUnusedResult_spelling
 Clang_ext_warnunusedresult_spelling_val(value ocaml)
 {
@@ -11472,7 +19560,8 @@ Clang_ext_warnunusedresult_spelling_val(value ocaml)
   case 2: return clang_ext_WarnUnusedResult_CXX11_clang_warn_unused_result;
   case 3: return clang_ext_WarnUnusedResult_GNU_warn_unused_result;
   case 4: return clang_ext_WarnUnusedResult_CXX11_gnu_warn_unused_result;
-  case 5: return clang_ext_WarnUnusedResult_SpellingNotCalculated;
+  case 5: return clang_ext_WarnUnusedResult_C2x_gnu_warn_unused_result;
+  case 6: return clang_ext_WarnUnusedResult_SpellingNotCalculated;
   }
   failwith_fmt("invalid value for Clang_ext_warnunusedresult_spelling_val: %d", Int_val(ocaml));
   return clang_ext_WarnUnusedResult_CXX11_nodiscard;
@@ -11487,7 +19576,8 @@ Val_clang_ext_warnunusedresult_spelling(enum clang_ext_WarnUnusedResult_spelling
   case clang_ext_WarnUnusedResult_CXX11_clang_warn_unused_result: return Val_int(2);
   case clang_ext_WarnUnusedResult_GNU_warn_unused_result: return Val_int(3);
   case clang_ext_WarnUnusedResult_CXX11_gnu_warn_unused_result: return Val_int(4);
-  case clang_ext_WarnUnusedResult_SpellingNotCalculated: return Val_int(5);
+  case clang_ext_WarnUnusedResult_C2x_gnu_warn_unused_result: return Val_int(5);
+  case clang_ext_WarnUnusedResult_SpellingNotCalculated: return Val_int(6);
   }
   failwith_fmt("invalid value for Val_clang_ext_warnunusedresult_spelling: %d", v);
   return Val_int(0);
@@ -11503,6 +19593,286 @@ clang_ext_WarnUnusedResult_getSpelling_wrapper(value cursor_ocaml)
   {
     CAMLlocal1(data);
     data = Val_clang_ext_warnunusedresult_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_Weak_spelling
+Clang_ext_weak_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_Weak_GNU_weak;
+  case 1: return clang_ext_Weak_CXX11_gnu_weak;
+  case 2: return clang_ext_Weak_C2x_gnu_weak;
+  case 3: return clang_ext_Weak_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_weak_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_Weak_GNU_weak;
+}
+
+value
+Val_clang_ext_weak_spelling(enum clang_ext_Weak_spelling v)
+{
+  switch (v) {
+  case clang_ext_Weak_GNU_weak: return Val_int(0);
+  case clang_ext_Weak_CXX11_gnu_weak: return Val_int(1);
+  case clang_ext_Weak_C2x_gnu_weak: return Val_int(2);
+  case clang_ext_Weak_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_weak_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Weak_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_Weak_spelling result = clang_ext_Weak_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_weak_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_WeakImport_spelling
+Clang_ext_weakimport_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_WeakImport_GNU_weak_import;
+  case 1: return clang_ext_WeakImport_CXX11_clang_weak_import;
+  case 2: return clang_ext_WeakImport_C2x_clang_weak_import;
+  case 3: return clang_ext_WeakImport_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_weakimport_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_WeakImport_GNU_weak_import;
+}
+
+value
+Val_clang_ext_weakimport_spelling(enum clang_ext_WeakImport_spelling v)
+{
+  switch (v) {
+  case clang_ext_WeakImport_GNU_weak_import: return Val_int(0);
+  case clang_ext_WeakImport_CXX11_clang_weak_import: return Val_int(1);
+  case clang_ext_WeakImport_C2x_clang_weak_import: return Val_int(2);
+  case clang_ext_WeakImport_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_weakimport_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_WeakImport_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_WeakImport_spelling result = clang_ext_WeakImport_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_weakimport_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_WeakRef_spelling
+Clang_ext_weakref_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_WeakRef_GNU_weakref;
+  case 1: return clang_ext_WeakRef_CXX11_gnu_weakref;
+  case 2: return clang_ext_WeakRef_C2x_gnu_weakref;
+  case 3: return clang_ext_WeakRef_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_weakref_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_WeakRef_GNU_weakref;
+}
+
+value
+Val_clang_ext_weakref_spelling(enum clang_ext_WeakRef_spelling v)
+{
+  switch (v) {
+  case clang_ext_WeakRef_GNU_weakref: return Val_int(0);
+  case clang_ext_WeakRef_CXX11_gnu_weakref: return Val_int(1);
+  case clang_ext_WeakRef_C2x_gnu_weakref: return Val_int(2);
+  case clang_ext_WeakRef_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_weakref_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_WeakRef_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_WeakRef_spelling result = clang_ext_WeakRef_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_weakref_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_WebAssemblyExportName_spelling
+Clang_ext_webassemblyexportname_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_WebAssemblyExportName_GNU_export_name;
+  case 1: return clang_ext_WebAssemblyExportName_CXX11_clang_export_name;
+  case 2: return clang_ext_WebAssemblyExportName_C2x_clang_export_name;
+  case 3: return clang_ext_WebAssemblyExportName_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_webassemblyexportname_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_WebAssemblyExportName_GNU_export_name;
+}
+
+value
+Val_clang_ext_webassemblyexportname_spelling(enum clang_ext_WebAssemblyExportName_spelling v)
+{
+  switch (v) {
+  case clang_ext_WebAssemblyExportName_GNU_export_name: return Val_int(0);
+  case clang_ext_WebAssemblyExportName_CXX11_clang_export_name: return Val_int(1);
+  case clang_ext_WebAssemblyExportName_C2x_clang_export_name: return Val_int(2);
+  case clang_ext_WebAssemblyExportName_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_webassemblyexportname_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_WebAssemblyExportName_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_WebAssemblyExportName_spelling result = clang_ext_WebAssemblyExportName_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_webassemblyexportname_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_WebAssemblyImportModule_spelling
+Clang_ext_webassemblyimportmodule_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_WebAssemblyImportModule_GNU_import_module;
+  case 1: return clang_ext_WebAssemblyImportModule_CXX11_clang_import_module;
+  case 2: return clang_ext_WebAssemblyImportModule_C2x_clang_import_module;
+  case 3: return clang_ext_WebAssemblyImportModule_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_webassemblyimportmodule_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_WebAssemblyImportModule_GNU_import_module;
+}
+
+value
+Val_clang_ext_webassemblyimportmodule_spelling(enum clang_ext_WebAssemblyImportModule_spelling v)
+{
+  switch (v) {
+  case clang_ext_WebAssemblyImportModule_GNU_import_module: return Val_int(0);
+  case clang_ext_WebAssemblyImportModule_CXX11_clang_import_module: return Val_int(1);
+  case clang_ext_WebAssemblyImportModule_C2x_clang_import_module: return Val_int(2);
+  case clang_ext_WebAssemblyImportModule_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_webassemblyimportmodule_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_WebAssemblyImportModule_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_WebAssemblyImportModule_spelling result = clang_ext_WebAssemblyImportModule_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_webassemblyimportmodule_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_WebAssemblyImportName_spelling
+Clang_ext_webassemblyimportname_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_WebAssemblyImportName_GNU_import_name;
+  case 1: return clang_ext_WebAssemblyImportName_CXX11_clang_import_name;
+  case 2: return clang_ext_WebAssemblyImportName_C2x_clang_import_name;
+  case 3: return clang_ext_WebAssemblyImportName_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_webassemblyimportname_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_WebAssemblyImportName_GNU_import_name;
+}
+
+value
+Val_clang_ext_webassemblyimportname_spelling(enum clang_ext_WebAssemblyImportName_spelling v)
+{
+  switch (v) {
+  case clang_ext_WebAssemblyImportName_GNU_import_name: return Val_int(0);
+  case clang_ext_WebAssemblyImportName_CXX11_clang_import_name: return Val_int(1);
+  case clang_ext_WebAssemblyImportName_C2x_clang_import_name: return Val_int(2);
+  case clang_ext_WebAssemblyImportName_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_webassemblyimportname_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_WebAssemblyImportName_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_WebAssemblyImportName_spelling result = clang_ext_WebAssemblyImportName_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_webassemblyimportname_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_X86ForceAlignArgPointer_spelling
+Clang_ext_x86forcealignargpointer_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_X86ForceAlignArgPointer_GNU_force_align_arg_pointer;
+  case 1: return clang_ext_X86ForceAlignArgPointer_CXX11_gnu_force_align_arg_pointer;
+  case 2: return clang_ext_X86ForceAlignArgPointer_C2x_gnu_force_align_arg_pointer;
+  case 3: return clang_ext_X86ForceAlignArgPointer_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_x86forcealignargpointer_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_X86ForceAlignArgPointer_GNU_force_align_arg_pointer;
+}
+
+value
+Val_clang_ext_x86forcealignargpointer_spelling(enum clang_ext_X86ForceAlignArgPointer_spelling v)
+{
+  switch (v) {
+  case clang_ext_X86ForceAlignArgPointer_GNU_force_align_arg_pointer: return Val_int(0);
+  case clang_ext_X86ForceAlignArgPointer_CXX11_gnu_force_align_arg_pointer: return Val_int(1);
+  case clang_ext_X86ForceAlignArgPointer_C2x_gnu_force_align_arg_pointer: return Val_int(2);
+  case clang_ext_X86ForceAlignArgPointer_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_x86forcealignargpointer_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_X86ForceAlignArgPointer_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_X86ForceAlignArgPointer_spelling result = clang_ext_X86ForceAlignArgPointer_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_x86forcealignargpointer_spelling(result);
     CAMLreturn(data);
   }
 }
@@ -11549,6 +19919,46 @@ clang_ext_XRayInstrument_getSpelling_wrapper(value cursor_ocaml)
   {
     CAMLlocal1(data);
     data = Val_clang_ext_xrayinstrument_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_XRayLogArgs_spelling
+Clang_ext_xraylogargs_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_XRayLogArgs_GNU_xray_log_args;
+  case 1: return clang_ext_XRayLogArgs_CXX11_clang_xray_log_args;
+  case 2: return clang_ext_XRayLogArgs_C2x_clang_xray_log_args;
+  case 3: return clang_ext_XRayLogArgs_SpellingNotCalculated;
+  }
+  failwith_fmt("invalid value for Clang_ext_xraylogargs_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_XRayLogArgs_GNU_xray_log_args;
+}
+
+value
+Val_clang_ext_xraylogargs_spelling(enum clang_ext_XRayLogArgs_spelling v)
+{
+  switch (v) {
+  case clang_ext_XRayLogArgs_GNU_xray_log_args: return Val_int(0);
+  case clang_ext_XRayLogArgs_CXX11_clang_xray_log_args: return Val_int(1);
+  case clang_ext_XRayLogArgs_C2x_clang_xray_log_args: return Val_int(2);
+  case clang_ext_XRayLogArgs_SpellingNotCalculated: return Val_int(3);
+  }
+  failwith_fmt("invalid value for Val_clang_ext_xraylogargs_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_XRayLogArgs_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_XRayLogArgs_spelling result = clang_ext_XRayLogArgs_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_xraylogargs_spelling(result);
     CAMLreturn(data);
   }
 }
@@ -11632,26 +20042,6 @@ clang_ext_ObjCRuntimeNameAttr_getMetadataName_wrapper(value cursor_ocaml)
                     clang_disposeString(result);
     CAMLreturn(data);
   }
-}
-
-void
-clang_ext_OMPDeclareVariantAttr_getImplVendors_caml_callback_callback(CXString arg0, void * arg1)
-{
-  CAMLparam0();
-  CAMLlocal3(result, f, arg0_ocaml);
-  f = *((value *) ((value **)arg1)[0]);
-arg0_ocaml = caml_copy_string(safe_string(clang_getCString(arg0)));
-                    clang_disposeString(arg0);  caml_callback(f, arg0_ocaml);
-}
-
-CAMLprim value
-clang_ext_OMPDeclareVariantAttr_getImplVendors_wrapper(value cursor_ocaml, value caml_callback_ocaml)
-{
-  CAMLparam2(cursor_ocaml, caml_callback_ocaml);
-  CXCursor cursor;
-  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
-  clang_ext_OMPDeclareVariantAttr_getImplVendors(cursor, clang_ext_OMPDeclareVariantAttr_getImplVendors_caml_callback_callback, (value *[]){&caml_callback_ocaml,&cursor_ocaml});
-  CAMLreturn(Val_unit);
 }
 
 CAMLprim value
@@ -11889,26 +20279,6 @@ clang_ext_AnnotateAttr_getAnnotationLength_wrapper(value cursor_ocaml)
   }
 }
 
-void
-clang_ext_OMPDeclareVariantAttr_getDeviceKinds_caml_callback_callback(CXString arg0, void * arg1)
-{
-  CAMLparam0();
-  CAMLlocal3(result, f, arg0_ocaml);
-  f = *((value *) ((value **)arg1)[0]);
-arg0_ocaml = caml_copy_string(safe_string(clang_getCString(arg0)));
-                    clang_disposeString(arg0);  caml_callback(f, arg0_ocaml);
-}
-
-CAMLprim value
-clang_ext_OMPDeclareVariantAttr_getDeviceKinds_wrapper(value cursor_ocaml, value caml_callback_ocaml)
-{
-  CAMLparam2(cursor_ocaml, caml_callback_ocaml);
-  CXCursor cursor;
-  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
-  clang_ext_OMPDeclareVariantAttr_getDeviceKinds(cursor, clang_ext_OMPDeclareVariantAttr_getDeviceKinds_caml_callback_callback, (value *[]){&caml_callback_ocaml,&cursor_ocaml});
-  CAMLreturn(Val_unit);
-}
-
 CAMLprim value
 clang_ext_LayoutVersionAttr_getVersion_wrapper(value cursor_ocaml)
 {
@@ -11973,20 +20343,6 @@ clang_ext_Attrs_getArgs_Size_wrapper(value cursor_ocaml)
 }
 
 CAMLprim value
-clang_ext_OMPDeclareVariantAttr_getCtxSelectors_Size_wrapper(value cursor_ocaml)
-{
-  CAMLparam1(cursor_ocaml);
-  CXCursor cursor;
-  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
-  unsigned int result = clang_ext_OMPDeclareVariantAttr_getCtxSelectors_Size(cursor);
-  {
-    CAMLlocal1(data);
-    data = Val_int(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
 clang_ext_CUDALaunchBoundsAttr_getMinBlocks_wrapper(value cursor_ocaml)
 {
   CAMLparam1(cursor_ocaml);
@@ -12003,40 +20359,12 @@ clang_ext_CUDALaunchBoundsAttr_getMinBlocks_wrapper(value cursor_ocaml)
 }
 
 CAMLprim value
-clang_ext_OMPDeclareVariantAttr_getImplVendors_Size_wrapper(value cursor_ocaml)
-{
-  CAMLparam1(cursor_ocaml);
-  CXCursor cursor;
-  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
-  unsigned int result = clang_ext_OMPDeclareVariantAttr_getImplVendors_Size(cursor);
-  {
-    CAMLlocal1(data);
-    data = Val_int(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
 clang_ext_ExternalSourceSymbolAttr_getDefinedInLength_wrapper(value cursor_ocaml)
 {
   CAMLparam1(cursor_ocaml);
   CXCursor cursor;
   cursor = Cxcursor_val(Field(cursor_ocaml, 0));
   unsigned int result = clang_ext_ExternalSourceSymbolAttr_getDefinedInLength(cursor);
-  {
-    CAMLlocal1(data);
-    data = Val_int(result);
-    CAMLreturn(data);
-  }
-}
-
-CAMLprim value
-clang_ext_OMPCaptureKindAttr_getCaptureKind_wrapper(value cursor_ocaml)
-{
-  CAMLparam1(cursor_ocaml);
-  CXCursor cursor;
-  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
-  unsigned int result = clang_ext_OMPCaptureKindAttr_getCaptureKind(cursor);
   {
     CAMLlocal1(data);
     data = Val_int(result);
@@ -12214,6 +20542,20 @@ clang_ext_TestTypestateAttr_getTestState_wrapper(value cursor_ocaml)
   {
     CAMLlocal1(data);
     data = Val_clang_ext_testtypestateattr_consumedstate(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_OMPCaptureKindAttr_getCaptureKindVal_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  unsigned int result = clang_ext_OMPCaptureKindAttr_getCaptureKindVal(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
     CAMLreturn(data);
   }
 }
@@ -12406,25 +20748,6 @@ clang_ext_AllocSizeAttr_getNumElemsParam_wrapper(value cursor_ocaml)
   }
 }
 
-void
-clang_ext_OMPDeclareVariantAttr_getCtxSelectors_caml_callback_callback(unsigned int arg0, void * arg1)
-{
-  CAMLparam0();
-  CAMLlocal3(result, f, arg0_ocaml);
-  f = *((value *) ((value **)arg1)[0]);
-arg0_ocaml = Val_int(arg0);  caml_callback(f, arg0_ocaml);
-}
-
-CAMLprim value
-clang_ext_OMPDeclareVariantAttr_getCtxSelectors_wrapper(value cursor_ocaml, value caml_callback_ocaml)
-{
-  CAMLparam2(cursor_ocaml, caml_callback_ocaml);
-  CXCursor cursor;
-  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
-  clang_ext_OMPDeclareVariantAttr_getCtxSelectors(cursor, clang_ext_OMPDeclareVariantAttr_getCtxSelectors_caml_callback_callback, (value *[]){&caml_callback_ocaml,&cursor_ocaml});
-  CAMLreturn(Val_unit);
-}
-
 CAMLprim value
 clang_ext_IFuncAttr_getResolverLength_wrapper(value cursor_ocaml)
 {
@@ -12484,12 +20807,12 @@ clang_ext_CUDALaunchBoundsAttr_getMaxThreads_wrapper(value cursor_ocaml)
 }
 
 CAMLprim value
-clang_ext_ArmMveAliasAttr_getBuiltinName_wrapper(value cursor_ocaml)
+clang_ext_ArmBuiltinAliasAttr_getBuiltinName_wrapper(value cursor_ocaml)
 {
   CAMLparam1(cursor_ocaml);
   CXCursor cursor;
   cursor = Cxcursor_val(Field(cursor_ocaml, 0));
-  CXString result = clang_ext_ArmMveAliasAttr_getBuiltinName(cursor);
+  CXString result = clang_ext_ArmBuiltinAliasAttr_getBuiltinName(cursor);
   {
     CAMLlocal1(data);
     data = caml_copy_string(safe_string(clang_getCString(result)));
@@ -12551,6 +20874,22 @@ clang_ext_Attrs_getXDim_wrapper(value cursor_ocaml)
   {
     CAMLlocal1(data);
     data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_UuidAttr_getGuidDecl_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  CXCursor result = clang_ext_UuidAttr_getGuidDecl(cursor);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -12785,6 +21124,27 @@ clang_ext_AvailabilityAttr_getUnavailable_wrapper(value cursor_ocaml)
   {
     CAMLlocal1(data);
     data = Val_bool(result);
+    CAMLreturn(data);
+  }
+}
+
+static void finalize_clang_ext_omptraitinfo(value v) {
+  clang_ext_OMPTraitInfo_dispose(*((struct clang_ext_OMPTraitInfo *) Data_custom_val(v)));;
+}
+DECLARE_OPAQUE_EX(struct clang_ext_OMPTraitInfo, clang_ext_omptraitinfo, Clang_ext_omptraitinfo_val, Val_clang_ext_omptraitinfo, finalize_clang_ext_omptraitinfo, custom_compare_default, custom_hash_default)
+
+CAMLprim value
+clang_ext_OMPDeclareVariantAttr_getTraitInfos_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  struct clang_ext_OMPTraitInfo result = clang_ext_OMPDeclareVariantAttr_getTraitInfos(cursor);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_omptraitinfo(result));
+  Store_field(data, 1, safe_field(cursor_ocaml, 1));
     CAMLreturn(data);
   }
 }
@@ -13358,27 +21718,6 @@ clang_ext_ArgumentWithTypeTagAttr_getArgumentIdx_wrapper(value cursor_ocaml)
   }
 }
 
-void
-clang_ext_OMPDeclareVariantAttr_getScores_caml_callback_callback(CXCursor arg0, void * arg1)
-{
-  CAMLparam0();
-  CAMLlocal3(result, f, arg0_ocaml);
-  f = *((value *) ((value **)arg1)[0]);
-arg0_ocaml = caml_alloc_tuple(2);
-  Store_field(arg0_ocaml, 0, Val_cxcursor(arg0));
-  Store_field(arg0_ocaml, 1, safe_field(*((value **)arg1)[1], 1));  caml_callback(f, arg0_ocaml);
-}
-
-CAMLprim value
-clang_ext_OMPDeclareVariantAttr_getScores_wrapper(value cursor_ocaml, value caml_callback_ocaml)
-{
-  CAMLparam2(cursor_ocaml, caml_callback_ocaml);
-  CXCursor cursor;
-  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
-  clang_ext_OMPDeclareVariantAttr_getScores(cursor, clang_ext_OMPDeclareVariantAttr_getScores_caml_callback_callback, (value *[]){&caml_callback_ocaml,&cursor_ocaml});
-  CAMLreturn(Val_unit);
-}
-
 CAMLprim value
 clang_ext_AvailabilityAttr_getStrict_wrapper(value cursor_ocaml)
 {
@@ -13498,39 +21837,6 @@ clang_ext_VecTypeHintAttr_getTypeHint_wrapper(value cursor_ocaml)
   Store_field(data, 1, safe_field(cursor_ocaml, 1));
     CAMLreturn(data);
   }
-}
-
-CAMLprim value
-clang_ext_OMPDeclareVariantAttr_getCtxSelectorSets_Size_wrapper(value cursor_ocaml)
-{
-  CAMLparam1(cursor_ocaml);
-  CXCursor cursor;
-  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
-  unsigned int result = clang_ext_OMPDeclareVariantAttr_getCtxSelectorSets_Size(cursor);
-  {
-    CAMLlocal1(data);
-    data = Val_int(result);
-    CAMLreturn(data);
-  }
-}
-
-void
-clang_ext_OMPDeclareVariantAttr_getCtxSelectorSets_caml_callback_callback(unsigned int arg0, void * arg1)
-{
-  CAMLparam0();
-  CAMLlocal3(result, f, arg0_ocaml);
-  f = *((value *) ((value **)arg1)[0]);
-arg0_ocaml = Val_int(arg0);  caml_callback(f, arg0_ocaml);
-}
-
-CAMLprim value
-clang_ext_OMPDeclareVariantAttr_getCtxSelectorSets_wrapper(value cursor_ocaml, value caml_callback_ocaml)
-{
-  CAMLparam2(cursor_ocaml, caml_callback_ocaml);
-  CXCursor cursor;
-  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
-  clang_ext_OMPDeclareVariantAttr_getCtxSelectorSets(cursor, clang_ext_OMPDeclareVariantAttr_getCtxSelectorSets_caml_callback_callback, (value *[]){&caml_callback_ocaml,&cursor_ocaml});
-  CAMLreturn(Val_unit);
 }
 
 CAMLprim value
@@ -14037,20 +22343,6 @@ clang_ext_WebAssemblyImportNameAttr_getImportName_wrapper(value cursor_ocaml)
   }
 }
 
-CAMLprim value
-clang_ext_OMPDeclareVariantAttr_getDeviceKinds_Size_wrapper(value cursor_ocaml)
-{
-  CAMLparam1(cursor_ocaml);
-  CXCursor cursor;
-  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
-  unsigned int result = clang_ext_OMPDeclareVariantAttr_getDeviceKinds_Size(cursor);
-  {
-    CAMLlocal1(data);
-    data = Val_int(result);
-    CAMLreturn(data);
-  }
-}
-
 void
 clang_ext_NoSanitizeAttr_getSanitizers_caml_callback_callback(CXString arg0, void * arg1)
 {
@@ -14112,20 +22404,6 @@ clang_ext_CallableWhenAttr_getCallableStates_wrapper(value cursor_ocaml, value c
   cursor = Cxcursor_val(Field(cursor_ocaml, 0));
   clang_ext_CallableWhenAttr_getCallableStates(cursor, clang_ext_CallableWhenAttr_getCallableStates_caml_callback_callback, (value *[]){&caml_callback_ocaml,&cursor_ocaml});
   CAMLreturn(Val_unit);
-}
-
-CAMLprim value
-clang_ext_OMPDeclareVariantAttr_getScores_Size_wrapper(value cursor_ocaml)
-{
-  CAMLparam1(cursor_ocaml);
-  CXCursor cursor;
-  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
-  unsigned int result = clang_ext_OMPDeclareVariantAttr_getScores_Size(cursor);
-  {
-    CAMLlocal1(data);
-    data = Val_int(result);
-    CAMLreturn(data);
-  }
 }
 
 enum clang_ext_OMPDeclareSimdDeclAttr_BranchStateTy
@@ -14226,33 +22504,35 @@ enum clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy
 Clang_ext_ompallocatedeclattr_allocatortypety_val(value ocaml)
 {
   switch (Int_val(ocaml)) {
-  case 0: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPDefaultMemAlloc;
-  case 1: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPLargeCapMemAlloc;
-  case 2: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPConstMemAlloc;
-  case 3: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPHighBWMemAlloc;
-  case 4: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPLowLatMemAlloc;
-  case 5: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPCGroupMemAlloc;
-  case 6: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPPTeamMemAlloc;
-  case 7: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPThreadMemAlloc;
-  case 8: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPUserDefinedMemAlloc;
+  case 0: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPNullMemAlloc;
+  case 1: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPDefaultMemAlloc;
+  case 2: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPLargeCapMemAlloc;
+  case 3: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPConstMemAlloc;
+  case 4: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPHighBWMemAlloc;
+  case 5: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPLowLatMemAlloc;
+  case 6: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPCGroupMemAlloc;
+  case 7: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPPTeamMemAlloc;
+  case 8: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPThreadMemAlloc;
+  case 9: return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPUserDefinedMemAlloc;
   }
   failwith_fmt("invalid value for Clang_ext_ompallocatedeclattr_allocatortypety_val: %d", Int_val(ocaml));
-  return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPDefaultMemAlloc;
+  return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPNullMemAlloc;
 }
 
 value
 Val_clang_ext_ompallocatedeclattr_allocatortypety(enum clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy v)
 {
   switch (v) {
-  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPDefaultMemAlloc: return Val_int(0);
-  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPLargeCapMemAlloc: return Val_int(1);
-  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPConstMemAlloc: return Val_int(2);
-  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPHighBWMemAlloc: return Val_int(3);
-  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPLowLatMemAlloc: return Val_int(4);
-  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPCGroupMemAlloc: return Val_int(5);
-  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPPTeamMemAlloc: return Val_int(6);
-  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPThreadMemAlloc: return Val_int(7);
-  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPUserDefinedMemAlloc: return Val_int(8);
+  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPNullMemAlloc: return Val_int(0);
+  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPDefaultMemAlloc: return Val_int(1);
+  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPLargeCapMemAlloc: return Val_int(2);
+  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPConstMemAlloc: return Val_int(3);
+  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPHighBWMemAlloc: return Val_int(4);
+  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPLowLatMemAlloc: return Val_int(5);
+  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPCGroupMemAlloc: return Val_int(6);
+  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPPTeamMemAlloc: return Val_int(7);
+  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPThreadMemAlloc: return Val_int(8);
+  case clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPUserDefinedMemAlloc: return Val_int(9);
   }
   failwith_fmt("invalid value for Val_clang_ext_ompallocatedeclattr_allocatortypety: %d", v);
   return Val_int(0);

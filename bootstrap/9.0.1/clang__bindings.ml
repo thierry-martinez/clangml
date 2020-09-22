@@ -2204,6 +2204,14 @@ external ext_if_stmt_get_children_set :
   cxcursor -> int = "clang_ext_IfStmt_getChildrenSet_wrapper"
 external ext_if_stmt_get_init :
   cxcursor -> cxcursor = "clang_ext_IfStmt_getInit_wrapper"
+external ext_if_stmt_get_condition_variable :
+  cxcursor -> cxcursor = "clang_ext_IfStmt_getConditionVariable_wrapper"
+external ext_if_stmt_get_cond :
+  cxcursor -> cxcursor = "clang_ext_IfStmt_getCond_wrapper"
+external ext_if_stmt_get_then :
+  cxcursor -> cxcursor = "clang_ext_IfStmt_getThen_wrapper"
+external ext_if_stmt_get_else :
+  cxcursor -> cxcursor = "clang_ext_IfStmt_getElse_wrapper"
 external ext_switch_stmt_get_children_set :
   cxcursor -> int = "clang_ext_SwitchStmt_getChildrenSet_wrapper"
 external ext_switch_stmt_get_init :
@@ -3553,6 +3561,73 @@ external ext_injected_class_name_type_get_injected_specialization_type :
     "clang_ext_InjectedClassNameType_getInjectedSpecializationType_wrapper"
 external ext_type_get_unqualified_type :
   cxtype -> cxtype = "clang_ext_Type_getUnqualifiedType_wrapper"
+type clang_ext_aarch64vectorpcs_spelling =
+  | GNU_aarch64_vector_pcs 
+  | CXX11_clang_aarch64_vector_pcs 
+  | C2x_clang_aarch64_vector_pcs 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_aarch64_vector_pcs_get_spelling :
+  cxcursor -> clang_ext_aarch64vectorpcs_spelling =
+    "clang_ext_AArch64VectorPcs_getSpelling_wrapper"
+type clang_ext_amdgpuflatworkgroupsize_spelling =
+  | GNU_amdgpu_flat_work_group_size 
+  | CXX11_clang_amdgpu_flat_work_group_size 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_amdgpuflat_work_group_size_get_spelling :
+  cxcursor -> clang_ext_amdgpuflatworkgroupsize_spelling =
+    "clang_ext_AMDGPUFlatWorkGroupSize_getSpelling_wrapper"
+type clang_ext_amdgpunumsgpr_spelling =
+  | GNU_amdgpu_num_sgpr 
+  | CXX11_clang_amdgpu_num_sgpr 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_amdgpunum_sgpr_get_spelling :
+  cxcursor -> clang_ext_amdgpunumsgpr_spelling =
+    "clang_ext_AMDGPUNumSGPR_getSpelling_wrapper"
+type clang_ext_amdgpunumvgpr_spelling =
+  | GNU_amdgpu_num_vgpr 
+  | CXX11_clang_amdgpu_num_vgpr 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_amdgpunum_vgpr_get_spelling :
+  cxcursor -> clang_ext_amdgpunumvgpr_spelling =
+    "clang_ext_AMDGPUNumVGPR_getSpelling_wrapper"
+type clang_ext_amdgpuwavespereu_spelling =
+  | GNU_amdgpu_waves_per_eu 
+  | CXX11_clang_amdgpu_waves_per_eu 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_amdgpuwaves_per_eu_get_spelling :
+  cxcursor -> clang_ext_amdgpuwavespereu_spelling =
+    "clang_ext_AMDGPUWavesPerEU_getSpelling_wrapper"
+type clang_ext_arminterrupt_spelling =
+  | GNU_interrupt 
+  | CXX11_gnu_interrupt 
+  | C2x_gnu_interrupt 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_arminterrupt_get_spelling :
+  cxcursor -> clang_ext_arminterrupt_spelling =
+    "clang_ext_ARMInterrupt_getSpelling_wrapper"
+type clang_ext_avrinterrupt_spelling =
+  | GNU_interrupt 
+  | CXX11_gnu_interrupt 
+  | C2x_gnu_interrupt 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_avrinterrupt_get_spelling :
+  cxcursor -> clang_ext_avrinterrupt_spelling =
+    "clang_ext_AVRInterrupt_getSpelling_wrapper"
+type clang_ext_avrsignal_spelling =
+  | GNU_signal 
+  | CXX11_gnu_signal 
+  | C2x_gnu_signal 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_avrsignal_get_spelling :
+  cxcursor -> clang_ext_avrsignal_spelling =
+    "clang_ext_AVRSignal_getSpelling_wrapper"
+type clang_ext_abitag_spelling =
+  | GNU_abi_tag 
+  | CXX11_gnu_abi_tag 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_abi_tag_get_spelling :
+  cxcursor -> clang_ext_abitag_spelling =
+    "clang_ext_AbiTag_getSpelling_wrapper"
 type clang_ext_acquirecapability_spelling =
   | GNU_acquire_capability 
   | CXX11_clang_acquire_capability 
@@ -3564,9 +3639,34 @@ type clang_ext_acquirecapability_spelling =
 external ext_acquire_capability_get_spelling :
   cxcursor -> clang_ext_acquirecapability_spelling =
     "clang_ext_AcquireCapability_getSpelling_wrapper"
+type clang_ext_acquirehandle_spelling =
+  | GNU_acquire_handle 
+  | CXX11_clang_acquire_handle 
+  | C2x_clang_acquire_handle 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_acquire_handle_get_spelling :
+  cxcursor -> clang_ext_acquirehandle_spelling =
+    "clang_ext_AcquireHandle_getSpelling_wrapper"
+type clang_ext_addressspace_spelling =
+  | GNU_address_space 
+  | CXX11_clang_address_space 
+  | C2x_clang_address_space 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_address_space_get_spelling :
+  cxcursor -> clang_ext_addressspace_spelling =
+    "clang_ext_AddressSpace_getSpelling_wrapper"
+type clang_ext_alias_spelling =
+  | GNU_alias 
+  | CXX11_gnu_alias 
+  | C2x_gnu_alias 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_alias_get_spelling :
+  cxcursor -> clang_ext_alias_spelling =
+    "clang_ext_Alias_getSpelling_wrapper"
 type clang_ext_aligned_spelling =
   | GNU_aligned 
   | CXX11_gnu_aligned 
+  | C2x_gnu_aligned 
   | Declspec_align 
   | Keyword_alignas 
   | Keyword_Alignas 
@@ -3574,14 +3674,78 @@ type clang_ext_aligned_spelling =
 external ext_aligned_get_spelling :
   cxcursor -> clang_ext_aligned_spelling =
     "clang_ext_Aligned_getSpelling_wrapper"
+type clang_ext_allocalign_spelling =
+  | GNU_alloc_align 
+  | CXX11_gnu_alloc_align 
+  | C2x_gnu_alloc_align 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_alloc_align_get_spelling :
+  cxcursor -> clang_ext_allocalign_spelling =
+    "clang_ext_AllocAlign_getSpelling_wrapper"
+type clang_ext_allocsize_spelling =
+  | GNU_alloc_size 
+  | CXX11_gnu_alloc_size 
+  | C2x_gnu_alloc_size 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_alloc_size_get_spelling :
+  cxcursor -> clang_ext_allocsize_spelling =
+    "clang_ext_AllocSize_getSpelling_wrapper"
+type clang_ext_alwaysdestroy_spelling =
+  | GNU_always_destroy 
+  | CXX11_clang_always_destroy 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_always_destroy_get_spelling :
+  cxcursor -> clang_ext_alwaysdestroy_spelling =
+    "clang_ext_AlwaysDestroy_getSpelling_wrapper"
 type clang_ext_alwaysinline_spelling =
   | GNU_always_inline 
   | CXX11_gnu_always_inline 
+  | C2x_gnu_always_inline 
   | Keyword_forceinline 
   | SpellingNotCalculated [@@deriving refl]
 external ext_always_inline_get_spelling :
   cxcursor -> clang_ext_alwaysinline_spelling =
     "clang_ext_AlwaysInline_getSpelling_wrapper"
+type clang_ext_annotate_spelling =
+  | GNU_annotate 
+  | CXX11_clang_annotate 
+  | C2x_clang_annotate 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_annotate_get_spelling :
+  cxcursor -> clang_ext_annotate_spelling =
+    "clang_ext_Annotate_getSpelling_wrapper"
+type clang_ext_anyx86interrupt_spelling =
+  | GNU_interrupt 
+  | CXX11_gnu_interrupt 
+  | C2x_gnu_interrupt 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_any_x86_interrupt_get_spelling :
+  cxcursor -> clang_ext_anyx86interrupt_spelling =
+    "clang_ext_AnyX86Interrupt_getSpelling_wrapper"
+type clang_ext_anyx86nocallersavedregisters_spelling =
+  | GNU_no_caller_saved_registers 
+  | CXX11_gnu_no_caller_saved_registers 
+  | C2x_gnu_no_caller_saved_registers 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_any_x86_no_caller_saved_registers_get_spelling :
+  cxcursor -> clang_ext_anyx86nocallersavedregisters_spelling =
+    "clang_ext_AnyX86NoCallerSavedRegisters_getSpelling_wrapper"
+type clang_ext_anyx86nocfcheck_spelling =
+  | GNU_nocf_check 
+  | CXX11_gnu_nocf_check 
+  | C2x_gnu_nocf_check 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_any_x86_no_cf_check_get_spelling :
+  cxcursor -> clang_ext_anyx86nocfcheck_spelling =
+    "clang_ext_AnyX86NoCfCheck_getSpelling_wrapper"
+type clang_ext_arcweakrefunavailable_spelling =
+  | GNU_objc_arc_weak_reference_unavailable 
+  | CXX11_clang_objc_arc_weak_reference_unavailable 
+  | C2x_clang_objc_arc_weak_reference_unavailable 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_arc_weakref_unavailable_get_spelling :
+  cxcursor -> clang_ext_arcweakrefunavailable_spelling =
+    "clang_ext_ArcWeakrefUnavailable_getSpelling_wrapper"
 type clang_ext_argumentwithtypetag_spelling =
   | GNU_argument_with_type_tag 
   | CXX11_clang_argument_with_type_tag 
@@ -3593,6 +3757,36 @@ type clang_ext_argumentwithtypetag_spelling =
 external ext_argument_with_type_tag_get_spelling :
   cxcursor -> clang_ext_argumentwithtypetag_spelling =
     "clang_ext_ArgumentWithTypeTag_getSpelling_wrapper"
+type clang_ext_armbuiltinalias_spelling =
+  | GNU_clang_arm_builtin_alias 
+  | CXX11_clang_clang_arm_builtin_alias 
+  | C2x_clang_clang_arm_builtin_alias 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_arm_builtin_alias_get_spelling :
+  cxcursor -> clang_ext_armbuiltinalias_spelling =
+    "clang_ext_ArmBuiltinAlias_getSpelling_wrapper"
+type clang_ext_armmvestrictpolymorphism_spelling =
+  | GNU_clang_arm_mve_strict_polymorphism 
+  | CXX11_clang_clang_arm_mve_strict_polymorphism 
+  | C2x_clang_clang_arm_mve_strict_polymorphism 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_arm_mve_strict_polymorphism_get_spelling :
+  cxcursor -> clang_ext_armmvestrictpolymorphism_spelling =
+    "clang_ext_ArmMveStrictPolymorphism_getSpelling_wrapper"
+type clang_ext_artificial_spelling =
+  | GNU_artificial 
+  | CXX11_gnu_artificial 
+  | C2x_gnu_artificial 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_artificial_get_spelling :
+  cxcursor -> clang_ext_artificial_spelling =
+    "clang_ext_Artificial_getSpelling_wrapper"
+type clang_ext_asmlabel_spelling =
+  | Keyword_asm 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_asm_label_get_spelling :
+  cxcursor -> clang_ext_asmlabel_spelling =
+    "clang_ext_AsmLabel_getSpelling_wrapper"
 type clang_ext_assertcapability_spelling =
   | GNU_assert_capability 
   | CXX11_clang_assert_capability 
@@ -3602,6 +3796,184 @@ type clang_ext_assertcapability_spelling =
 external ext_assert_capability_get_spelling :
   cxcursor -> clang_ext_assertcapability_spelling =
     "clang_ext_AssertCapability_getSpelling_wrapper"
+type clang_ext_assumealigned_spelling =
+  | GNU_assume_aligned 
+  | CXX11_gnu_assume_aligned 
+  | C2x_gnu_assume_aligned 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_assume_aligned_get_spelling :
+  cxcursor -> clang_ext_assumealigned_spelling =
+    "clang_ext_AssumeAligned_getSpelling_wrapper"
+type clang_ext_availability_spelling =
+  | GNU_availability 
+  | CXX11_clang_availability 
+  | C2x_clang_availability 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_availability_get_spelling :
+  cxcursor -> clang_ext_availability_spelling =
+    "clang_ext_Availability_getSpelling_wrapper"
+type clang_ext_bpfpreserveaccessindex_spelling =
+  | GNU_preserve_access_index 
+  | CXX11_clang_preserve_access_index 
+  | C2x_clang_preserve_access_index 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_bpfpreserve_access_index_get_spelling :
+  cxcursor -> clang_ext_bpfpreserveaccessindex_spelling =
+    "clang_ext_BPFPreserveAccessIndex_getSpelling_wrapper"
+type clang_ext_blocks_spelling =
+  | GNU_blocks 
+  | CXX11_clang_blocks 
+  | C2x_clang_blocks 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_blocks_get_spelling :
+  cxcursor -> clang_ext_blocks_spelling =
+    "clang_ext_Blocks_getSpelling_wrapper"
+type clang_ext_cdecl_spelling =
+  | GNU_cdecl 
+  | CXX11_gnu_cdecl 
+  | C2x_gnu_cdecl 
+  | Keyword_cdecl 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cdecl_get_spelling :
+  cxcursor -> clang_ext_cdecl_spelling =
+    "clang_ext_CDecl_getSpelling_wrapper"
+type clang_ext_cfauditedtransfer_spelling =
+  | GNU_cf_audited_transfer 
+  | CXX11_clang_cf_audited_transfer 
+  | C2x_clang_cf_audited_transfer 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cfaudited_transfer_get_spelling :
+  cxcursor -> clang_ext_cfauditedtransfer_spelling =
+    "clang_ext_CFAuditedTransfer_getSpelling_wrapper"
+type clang_ext_cfconsumed_spelling =
+  | GNU_cf_consumed 
+  | CXX11_clang_cf_consumed 
+  | C2x_clang_cf_consumed 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cfconsumed_get_spelling :
+  cxcursor -> clang_ext_cfconsumed_spelling =
+    "clang_ext_CFConsumed_getSpelling_wrapper"
+type clang_ext_cficanonicaljumptable_spelling =
+  | GNU_cfi_canonical_jump_table 
+  | CXX11_clang_cfi_canonical_jump_table 
+  | C2x_clang_cfi_canonical_jump_table 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cficanonical_jump_table_get_spelling :
+  cxcursor -> clang_ext_cficanonicaljumptable_spelling =
+    "clang_ext_CFICanonicalJumpTable_getSpelling_wrapper"
+type clang_ext_cfreturnsnotretained_spelling =
+  | GNU_cf_returns_not_retained 
+  | CXX11_clang_cf_returns_not_retained 
+  | C2x_clang_cf_returns_not_retained 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cfreturns_not_retained_get_spelling :
+  cxcursor -> clang_ext_cfreturnsnotretained_spelling =
+    "clang_ext_CFReturnsNotRetained_getSpelling_wrapper"
+type clang_ext_cfreturnsretained_spelling =
+  | GNU_cf_returns_retained 
+  | CXX11_clang_cf_returns_retained 
+  | C2x_clang_cf_returns_retained 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cfreturns_retained_get_spelling :
+  cxcursor -> clang_ext_cfreturnsretained_spelling =
+    "clang_ext_CFReturnsRetained_getSpelling_wrapper"
+type clang_ext_cfunknowntransfer_spelling =
+  | GNU_cf_unknown_transfer 
+  | CXX11_clang_cf_unknown_transfer 
+  | C2x_clang_cf_unknown_transfer 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cfunknown_transfer_get_spelling :
+  cxcursor -> clang_ext_cfunknowntransfer_spelling =
+    "clang_ext_CFUnknownTransfer_getSpelling_wrapper"
+type clang_ext_cpudispatch_spelling =
+  | GNU_cpu_dispatch 
+  | CXX11_clang_cpu_dispatch 
+  | C2x_clang_cpu_dispatch 
+  | Declspec_cpu_dispatch 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cpudispatch_get_spelling :
+  cxcursor -> clang_ext_cpudispatch_spelling =
+    "clang_ext_CPUDispatch_getSpelling_wrapper"
+type clang_ext_cpuspecific_spelling =
+  | GNU_cpu_specific 
+  | CXX11_clang_cpu_specific 
+  | C2x_clang_cpu_specific 
+  | Declspec_cpu_specific 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cpuspecific_get_spelling :
+  cxcursor -> clang_ext_cpuspecific_spelling =
+    "clang_ext_CPUSpecific_getSpelling_wrapper"
+type clang_ext_cudaconstant_spelling =
+  | GNU_constant 
+  | Declspec_constant 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cudaconstant_get_spelling :
+  cxcursor -> clang_ext_cudaconstant_spelling =
+    "clang_ext_CUDAConstant_getSpelling_wrapper"
+type clang_ext_cudadevice_spelling =
+  | GNU_device 
+  | Declspec_device 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cudadevice_get_spelling :
+  cxcursor -> clang_ext_cudadevice_spelling =
+    "clang_ext_CUDADevice_getSpelling_wrapper"
+type clang_ext_cudadevicebuiltinsurfacetype_spelling =
+  | GNU_device_builtin_surface_type 
+  | Declspec_device_builtin_surface_type 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cudadevice_builtin_surface_type_get_spelling :
+  cxcursor -> clang_ext_cudadevicebuiltinsurfacetype_spelling =
+    "clang_ext_CUDADeviceBuiltinSurfaceType_getSpelling_wrapper"
+type clang_ext_cudadevicebuiltintexturetype_spelling =
+  | GNU_device_builtin_texture_type 
+  | Declspec_device_builtin_texture_type 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cudadevice_builtin_texture_type_get_spelling :
+  cxcursor -> clang_ext_cudadevicebuiltintexturetype_spelling =
+    "clang_ext_CUDADeviceBuiltinTextureType_getSpelling_wrapper"
+type clang_ext_cudaglobal_spelling =
+  | GNU_global 
+  | Declspec_global 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cudaglobal_get_spelling :
+  cxcursor -> clang_ext_cudaglobal_spelling =
+    "clang_ext_CUDAGlobal_getSpelling_wrapper"
+type clang_ext_cudahost_spelling =
+  | GNU_host 
+  | Declspec_host 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cudahost_get_spelling :
+  cxcursor -> clang_ext_cudahost_spelling =
+    "clang_ext_CUDAHost_getSpelling_wrapper"
+type clang_ext_cudalaunchbounds_spelling =
+  | GNU_launch_bounds 
+  | Declspec_launch_bounds 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cudalaunch_bounds_get_spelling :
+  cxcursor -> clang_ext_cudalaunchbounds_spelling =
+    "clang_ext_CUDALaunchBounds_getSpelling_wrapper"
+type clang_ext_cudashared_spelling =
+  | GNU_shared 
+  | Declspec_shared 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cudashared_get_spelling :
+  cxcursor -> clang_ext_cudashared_spelling =
+    "clang_ext_CUDAShared_getSpelling_wrapper"
+type clang_ext_callablewhen_spelling =
+  | GNU_callable_when 
+  | CXX11_clang_callable_when 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_callable_when_get_spelling :
+  cxcursor -> clang_ext_callablewhen_spelling =
+    "clang_ext_CallableWhen_getSpelling_wrapper"
+type clang_ext_callback_spelling =
+  | GNU_callback 
+  | CXX11_clang_callback 
+  | C2x_clang_callback 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_callback_get_spelling :
+  cxcursor -> clang_ext_callback_spelling =
+    "clang_ext_Callback_getSpelling_wrapper"
 type clang_ext_capability_spelling =
   | GNU_capability 
   | CXX11_clang_capability 
@@ -3611,6 +3983,44 @@ type clang_ext_capability_spelling =
 external ext_capability_get_spelling :
   cxcursor -> clang_ext_capability_spelling =
     "clang_ext_Capability_getSpelling_wrapper"
+type clang_ext_carriesdependency_spelling =
+  | GNU_carries_dependency 
+  | CXX11_carries_dependency 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_carries_dependency_get_spelling :
+  cxcursor -> clang_ext_carriesdependency_spelling =
+    "clang_ext_CarriesDependency_getSpelling_wrapper"
+type clang_ext_cleanup_spelling =
+  | GNU_cleanup 
+  | CXX11_gnu_cleanup 
+  | C2x_gnu_cleanup 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cleanup_get_spelling :
+  cxcursor -> clang_ext_cleanup_spelling =
+    "clang_ext_Cleanup_getSpelling_wrapper"
+type clang_ext_cold_spelling =
+  | GNU_cold 
+  | CXX11_gnu_cold 
+  | C2x_gnu_cold 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cold_get_spelling :
+  cxcursor -> clang_ext_cold_spelling = "clang_ext_Cold_getSpelling_wrapper"
+type clang_ext_common_spelling =
+  | GNU_common 
+  | CXX11_gnu_common 
+  | C2x_gnu_common 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_common_get_spelling :
+  cxcursor -> clang_ext_common_spelling =
+    "clang_ext_Common_getSpelling_wrapper"
+type clang_ext_const_spelling =
+  | GNU_const 
+  | CXX11_gnu_const 
+  | C2x_gnu_const 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_const_get_spelling :
+  cxcursor -> clang_ext_const_spelling =
+    "clang_ext_Const_getSpelling_wrapper"
 type clang_ext_constinit_spelling =
   | Keyword_constinit 
   | GNU_require_constant_initialization 
@@ -3619,6 +4029,132 @@ type clang_ext_constinit_spelling =
 external ext_const_init_get_spelling :
   cxcursor -> clang_ext_constinit_spelling =
     "clang_ext_ConstInit_getSpelling_wrapper"
+type clang_ext_constructor_spelling =
+  | GNU_constructor 
+  | CXX11_gnu_constructor 
+  | C2x_gnu_constructor 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_constructor_get_spelling :
+  cxcursor -> clang_ext_constructor_spelling =
+    "clang_ext_Constructor_getSpelling_wrapper"
+type clang_ext_consumable_spelling =
+  | GNU_consumable 
+  | CXX11_clang_consumable 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_consumable_get_spelling :
+  cxcursor -> clang_ext_consumable_spelling =
+    "clang_ext_Consumable_getSpelling_wrapper"
+type clang_ext_consumableautocast_spelling =
+  | GNU_consumable_auto_cast_state 
+  | CXX11_clang_consumable_auto_cast_state 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_consumable_auto_cast_get_spelling :
+  cxcursor -> clang_ext_consumableautocast_spelling =
+    "clang_ext_ConsumableAutoCast_getSpelling_wrapper"
+type clang_ext_consumablesetonread_spelling =
+  | GNU_consumable_set_state_on_read 
+  | CXX11_clang_consumable_set_state_on_read 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_consumable_set_on_read_get_spelling :
+  cxcursor -> clang_ext_consumablesetonread_spelling =
+    "clang_ext_ConsumableSetOnRead_getSpelling_wrapper"
+type clang_ext_convergent_spelling =
+  | GNU_convergent 
+  | CXX11_clang_convergent 
+  | C2x_clang_convergent 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_convergent_get_spelling :
+  cxcursor -> clang_ext_convergent_spelling =
+    "clang_ext_Convergent_getSpelling_wrapper"
+type clang_ext_dllexport_spelling =
+  | Declspec_dllexport 
+  | GNU_dllexport 
+  | CXX11_gnu_dllexport 
+  | C2x_gnu_dllexport 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_dllexport_get_spelling :
+  cxcursor -> clang_ext_dllexport_spelling =
+    "clang_ext_DLLExport_getSpelling_wrapper"
+type clang_ext_dllimport_spelling =
+  | Declspec_dllimport 
+  | GNU_dllimport 
+  | CXX11_gnu_dllimport 
+  | C2x_gnu_dllimport 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_dllimport_get_spelling :
+  cxcursor -> clang_ext_dllimport_spelling =
+    "clang_ext_DLLImport_getSpelling_wrapper"
+type clang_ext_deprecated_spelling =
+  | GNU_deprecated 
+  | CXX11_gnu_deprecated 
+  | C2x_gnu_deprecated 
+  | Declspec_deprecated 
+  | CXX11_deprecated 
+  | C2x_deprecated 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_deprecated_get_spelling :
+  cxcursor -> clang_ext_deprecated_spelling =
+    "clang_ext_Deprecated_getSpelling_wrapper"
+type clang_ext_destructor_spelling =
+  | GNU_destructor 
+  | CXX11_gnu_destructor 
+  | C2x_gnu_destructor 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_destructor_get_spelling :
+  cxcursor -> clang_ext_destructor_spelling =
+    "clang_ext_Destructor_getSpelling_wrapper"
+type clang_ext_disabletailcalls_spelling =
+  | GNU_disable_tail_calls 
+  | CXX11_clang_disable_tail_calls 
+  | C2x_clang_disable_tail_calls 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_disable_tail_calls_get_spelling :
+  cxcursor -> clang_ext_disabletailcalls_spelling =
+    "clang_ext_DisableTailCalls_getSpelling_wrapper"
+type clang_ext_enumextensibility_spelling =
+  | GNU_enum_extensibility 
+  | CXX11_clang_enum_extensibility 
+  | C2x_clang_enum_extensibility 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_enum_extensibility_get_spelling :
+  cxcursor -> clang_ext_enumextensibility_spelling =
+    "clang_ext_EnumExtensibility_getSpelling_wrapper"
+type clang_ext_excludefromexplicitinstantiation_spelling =
+  | GNU_exclude_from_explicit_instantiation 
+  | CXX11_clang_exclude_from_explicit_instantiation 
+  | C2x_clang_exclude_from_explicit_instantiation 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_exclude_from_explicit_instantiation_get_spelling :
+  cxcursor -> clang_ext_excludefromexplicitinstantiation_spelling =
+    "clang_ext_ExcludeFromExplicitInstantiation_getSpelling_wrapper"
+type clang_ext_externalsourcesymbol_spelling =
+  | GNU_external_source_symbol 
+  | CXX11_clang_external_source_symbol 
+  | C2x_clang_external_source_symbol 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_external_source_symbol_get_spelling :
+  cxcursor -> clang_ext_externalsourcesymbol_spelling =
+    "clang_ext_ExternalSourceSymbol_getSpelling_wrapper"
+type clang_ext_fallthrough_spelling =
+  | CXX11_fallthrough 
+  | C2x_fallthrough 
+  | CXX11_clang_fallthrough 
+  | GNU_fallthrough 
+  | CXX11_gnu_fallthrough 
+  | C2x_gnu_fallthrough 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_fall_through_get_spelling :
+  cxcursor -> clang_ext_fallthrough_spelling =
+    "clang_ext_FallThrough_getSpelling_wrapper"
+type clang_ext_fastcall_spelling =
+  | GNU_fastcall 
+  | CXX11_gnu_fastcall 
+  | C2x_gnu_fastcall 
+  | Keyword_fastcall 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_fast_call_get_spelling :
+  cxcursor -> clang_ext_fastcall_spelling =
+    "clang_ext_FastCall_getSpelling_wrapper"
 type clang_ext_final_spelling =
   | Keyword_final 
   | Keyword_sealed 
@@ -3626,6 +4162,137 @@ type clang_ext_final_spelling =
 external ext_final_get_spelling :
   cxcursor -> clang_ext_final_spelling =
     "clang_ext_Final_getSpelling_wrapper"
+type clang_ext_flagenum_spelling =
+  | GNU_flag_enum 
+  | CXX11_clang_flag_enum 
+  | C2x_clang_flag_enum 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_flag_enum_get_spelling :
+  cxcursor -> clang_ext_flagenum_spelling =
+    "clang_ext_FlagEnum_getSpelling_wrapper"
+type clang_ext_flatten_spelling =
+  | GNU_flatten 
+  | CXX11_gnu_flatten 
+  | C2x_gnu_flatten 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_flatten_get_spelling :
+  cxcursor -> clang_ext_flatten_spelling =
+    "clang_ext_Flatten_getSpelling_wrapper"
+type clang_ext_format_spelling =
+  | GNU_format 
+  | CXX11_gnu_format 
+  | C2x_gnu_format 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_format_get_spelling :
+  cxcursor -> clang_ext_format_spelling =
+    "clang_ext_Format_getSpelling_wrapper"
+type clang_ext_formatarg_spelling =
+  | GNU_format_arg 
+  | CXX11_gnu_format_arg 
+  | C2x_gnu_format_arg 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_format_arg_get_spelling :
+  cxcursor -> clang_ext_formatarg_spelling =
+    "clang_ext_FormatArg_getSpelling_wrapper"
+type clang_ext_gnuinline_spelling =
+  | GNU_gnu_inline 
+  | CXX11_gnu_gnu_inline 
+  | C2x_gnu_gnu_inline 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_gnuinline_get_spelling :
+  cxcursor -> clang_ext_gnuinline_spelling =
+    "clang_ext_GNUInline_getSpelling_wrapper"
+type clang_ext_guardedvar_spelling =
+  | GNU_guarded_var 
+  | CXX11_clang_guarded_var 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_guarded_var_get_spelling :
+  cxcursor -> clang_ext_guardedvar_spelling =
+    "clang_ext_GuardedVar_getSpelling_wrapper"
+type clang_ext_hot_spelling =
+  | GNU_hot 
+  | CXX11_gnu_hot 
+  | C2x_gnu_hot 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_hot_get_spelling :
+  cxcursor -> clang_ext_hot_spelling = "clang_ext_Hot_getSpelling_wrapper"
+type clang_ext_ibaction_spelling =
+  | GNU_ibaction 
+  | CXX11_clang_ibaction 
+  | C2x_clang_ibaction 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_ibaction_get_spelling :
+  cxcursor -> clang_ext_ibaction_spelling =
+    "clang_ext_IBAction_getSpelling_wrapper"
+type clang_ext_iboutlet_spelling =
+  | GNU_iboutlet 
+  | CXX11_clang_iboutlet 
+  | C2x_clang_iboutlet 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_iboutlet_get_spelling :
+  cxcursor -> clang_ext_iboutlet_spelling =
+    "clang_ext_IBOutlet_getSpelling_wrapper"
+type clang_ext_iboutletcollection_spelling =
+  | GNU_iboutletcollection 
+  | CXX11_clang_iboutletcollection 
+  | C2x_clang_iboutletcollection 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_iboutlet_collection_get_spelling :
+  cxcursor -> clang_ext_iboutletcollection_spelling =
+    "clang_ext_IBOutletCollection_getSpelling_wrapper"
+type clang_ext_ifunc_spelling =
+  | GNU_ifunc 
+  | CXX11_gnu_ifunc 
+  | C2x_gnu_ifunc 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_ifunc_get_spelling :
+  cxcursor -> clang_ext_ifunc_spelling =
+    "clang_ext_IFunc_getSpelling_wrapper"
+type clang_ext_initpriority_spelling =
+  | GNU_init_priority 
+  | CXX11_gnu_init_priority 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_init_priority_get_spelling :
+  cxcursor -> clang_ext_initpriority_spelling =
+    "clang_ext_InitPriority_getSpelling_wrapper"
+type clang_ext_inteloclbicc_spelling =
+  | GNU_intel_ocl_bicc 
+  | CXX11_clang_intel_ocl_bicc 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_intel_ocl_bicc_get_spelling :
+  cxcursor -> clang_ext_inteloclbicc_spelling =
+    "clang_ext_IntelOclBicc_getSpelling_wrapper"
+type clang_ext_internallinkage_spelling =
+  | GNU_internal_linkage 
+  | CXX11_clang_internal_linkage 
+  | C2x_clang_internal_linkage 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_internal_linkage_get_spelling :
+  cxcursor -> clang_ext_internallinkage_spelling =
+    "clang_ext_InternalLinkage_getSpelling_wrapper"
+type clang_ext_ltovisibilitypublic_spelling =
+  | GNU_lto_visibility_public 
+  | CXX11_clang_lto_visibility_public 
+  | C2x_clang_lto_visibility_public 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_ltovisibility_public_get_spelling :
+  cxcursor -> clang_ext_ltovisibilitypublic_spelling =
+    "clang_ext_LTOVisibilityPublic_getSpelling_wrapper"
+type clang_ext_lifetimebound_spelling =
+  | GNU_lifetimebound 
+  | CXX11_clang_lifetimebound 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_lifetime_bound_get_spelling :
+  cxcursor -> clang_ext_lifetimebound_spelling =
+    "clang_ext_LifetimeBound_getSpelling_wrapper"
+type clang_ext_loaderuninitialized_spelling =
+  | GNU_loader_uninitialized 
+  | CXX11_clang_loader_uninitialized 
+  | C2x_clang_loader_uninitialized 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_loader_uninitialized_get_spelling :
+  cxcursor -> clang_ext_loaderuninitialized_spelling =
+    "clang_ext_LoaderUninitialized_getSpelling_wrapper"
 type clang_ext_loophint_spelling =
   | Pragma_clang_loop 
   | Pragma_unroll 
@@ -3636,6 +4303,22 @@ type clang_ext_loophint_spelling =
 external ext_loop_hint_get_spelling :
   cxcursor -> clang_ext_loophint_spelling =
     "clang_ext_LoopHint_getSpelling_wrapper"
+type clang_ext_migserverroutine_spelling =
+  | GNU_mig_server_routine 
+  | CXX11_clang_mig_server_routine 
+  | C2x_clang_mig_server_routine 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_migserver_routine_get_spelling :
+  cxcursor -> clang_ext_migserverroutine_spelling =
+    "clang_ext_MIGServerRoutine_getSpelling_wrapper"
+type clang_ext_msabi_spelling =
+  | GNU_ms_abi 
+  | CXX11_gnu_ms_abi 
+  | C2x_gnu_ms_abi 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_msabi_get_spelling :
+  cxcursor -> clang_ext_msabi_spelling =
+    "clang_ext_MSABI_getSpelling_wrapper"
 type clang_ext_msinheritance_spelling =
   | Keyword_single_inheritance 
   | Keyword_multiple_inheritance 
@@ -3645,11 +4328,77 @@ type clang_ext_msinheritance_spelling =
 external ext_msinheritance_get_spelling :
   cxcursor -> clang_ext_msinheritance_spelling =
     "clang_ext_MSInheritance_getSpelling_wrapper"
+type clang_ext_msp430interrupt_spelling =
+  | GNU_interrupt 
+  | CXX11_gnu_interrupt 
+  | C2x_gnu_interrupt 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_msp430_interrupt_get_spelling :
+  cxcursor -> clang_ext_msp430interrupt_spelling =
+    "clang_ext_MSP430Interrupt_getSpelling_wrapper"
+type clang_ext_msstruct_spelling =
+  | GNU_ms_struct 
+  | CXX11_gnu_ms_struct 
+  | C2x_gnu_ms_struct 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_msstruct_get_spelling :
+  cxcursor -> clang_ext_msstruct_spelling =
+    "clang_ext_MSStruct_getSpelling_wrapper"
+type clang_ext_mayalias_spelling =
+  | GNU_may_alias 
+  | CXX11_gnu_may_alias 
+  | C2x_gnu_may_alias 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_may_alias_get_spelling :
+  cxcursor -> clang_ext_mayalias_spelling =
+    "clang_ext_MayAlias_getSpelling_wrapper"
+type clang_ext_micromips_spelling =
+  | GNU_micromips 
+  | CXX11_gnu_micromips 
+  | C2x_gnu_micromips 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_micro_mips_get_spelling :
+  cxcursor -> clang_ext_micromips_spelling =
+    "clang_ext_MicroMips_getSpelling_wrapper"
+type clang_ext_minsize_spelling =
+  | GNU_minsize 
+  | CXX11_clang_minsize 
+  | C2x_clang_minsize 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_min_size_get_spelling :
+  cxcursor -> clang_ext_minsize_spelling =
+    "clang_ext_MinSize_getSpelling_wrapper"
+type clang_ext_minvectorwidth_spelling =
+  | GNU_min_vector_width 
+  | CXX11_clang_min_vector_width 
+  | C2x_clang_min_vector_width 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_min_vector_width_get_spelling :
+  cxcursor -> clang_ext_minvectorwidth_spelling =
+    "clang_ext_MinVectorWidth_getSpelling_wrapper"
+type clang_ext_mips16_spelling =
+  | GNU_mips16 
+  | CXX11_gnu_mips16 
+  | C2x_gnu_mips16 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_mips16_get_spelling :
+  cxcursor -> clang_ext_mips16_spelling =
+    "clang_ext_Mips16_getSpelling_wrapper"
+type clang_ext_mipsinterrupt_spelling =
+  | GNU_interrupt 
+  | CXX11_gnu_interrupt 
+  | C2x_gnu_interrupt 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_mips_interrupt_get_spelling :
+  cxcursor -> clang_ext_mipsinterrupt_spelling =
+    "clang_ext_MipsInterrupt_getSpelling_wrapper"
 type clang_ext_mipslongcall_spelling =
   | GNU_long_call 
   | CXX11_gnu_long_call 
+  | C2x_gnu_long_call 
   | GNU_far 
   | CXX11_gnu_far 
+  | C2x_gnu_far 
   | SpellingNotCalculated [@@deriving refl]
 external ext_mips_long_call_get_spelling :
   cxcursor -> clang_ext_mipslongcall_spelling =
@@ -3657,12 +4406,488 @@ external ext_mips_long_call_get_spelling :
 type clang_ext_mipsshortcall_spelling =
   | GNU_short_call 
   | CXX11_gnu_short_call 
+  | C2x_gnu_short_call 
   | GNU_near 
   | CXX11_gnu_near 
+  | C2x_gnu_near 
   | SpellingNotCalculated [@@deriving refl]
 external ext_mips_short_call_get_spelling :
   cxcursor -> clang_ext_mipsshortcall_spelling =
     "clang_ext_MipsShortCall_getSpelling_wrapper"
+type clang_ext_mode_spelling =
+  | GNU_mode 
+  | CXX11_gnu_mode 
+  | C2x_gnu_mode 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_mode_get_spelling :
+  cxcursor -> clang_ext_mode_spelling = "clang_ext_Mode_getSpelling_wrapper"
+type clang_ext_nsconsumed_spelling =
+  | GNU_ns_consumed 
+  | CXX11_clang_ns_consumed 
+  | C2x_clang_ns_consumed 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_nsconsumed_get_spelling :
+  cxcursor -> clang_ext_nsconsumed_spelling =
+    "clang_ext_NSConsumed_getSpelling_wrapper"
+type clang_ext_nsconsumesself_spelling =
+  | GNU_ns_consumes_self 
+  | CXX11_clang_ns_consumes_self 
+  | C2x_clang_ns_consumes_self 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_nsconsumes_self_get_spelling :
+  cxcursor -> clang_ext_nsconsumesself_spelling =
+    "clang_ext_NSConsumesSelf_getSpelling_wrapper"
+type clang_ext_nsreturnsautoreleased_spelling =
+  | GNU_ns_returns_autoreleased 
+  | CXX11_clang_ns_returns_autoreleased 
+  | C2x_clang_ns_returns_autoreleased 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_nsreturns_autoreleased_get_spelling :
+  cxcursor -> clang_ext_nsreturnsautoreleased_spelling =
+    "clang_ext_NSReturnsAutoreleased_getSpelling_wrapper"
+type clang_ext_nsreturnsnotretained_spelling =
+  | GNU_ns_returns_not_retained 
+  | CXX11_clang_ns_returns_not_retained 
+  | C2x_clang_ns_returns_not_retained 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_nsreturns_not_retained_get_spelling :
+  cxcursor -> clang_ext_nsreturnsnotretained_spelling =
+    "clang_ext_NSReturnsNotRetained_getSpelling_wrapper"
+type clang_ext_nsreturnsretained_spelling =
+  | GNU_ns_returns_retained 
+  | CXX11_clang_ns_returns_retained 
+  | C2x_clang_ns_returns_retained 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_nsreturns_retained_get_spelling :
+  cxcursor -> clang_ext_nsreturnsretained_spelling =
+    "clang_ext_NSReturnsRetained_getSpelling_wrapper"
+type clang_ext_naked_spelling =
+  | GNU_naked 
+  | CXX11_gnu_naked 
+  | C2x_gnu_naked 
+  | Declspec_naked 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_naked_get_spelling :
+  cxcursor -> clang_ext_naked_spelling =
+    "clang_ext_Naked_getSpelling_wrapper"
+type clang_ext_nobuiltin_spelling =
+  | GNU_no_builtin 
+  | CXX11_clang_no_builtin 
+  | C2x_clang_no_builtin 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_builtin_get_spelling :
+  cxcursor -> clang_ext_nobuiltin_spelling =
+    "clang_ext_NoBuiltin_getSpelling_wrapper"
+type clang_ext_nocommon_spelling =
+  | GNU_nocommon 
+  | CXX11_gnu_nocommon 
+  | C2x_gnu_nocommon 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_common_get_spelling :
+  cxcursor -> clang_ext_nocommon_spelling =
+    "clang_ext_NoCommon_getSpelling_wrapper"
+type clang_ext_nodebug_spelling =
+  | GNU_nodebug 
+  | CXX11_gnu_nodebug 
+  | C2x_gnu_nodebug 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_debug_get_spelling :
+  cxcursor -> clang_ext_nodebug_spelling =
+    "clang_ext_NoDebug_getSpelling_wrapper"
+type clang_ext_noderef_spelling =
+  | GNU_noderef 
+  | CXX11_clang_noderef 
+  | C2x_clang_noderef 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_deref_get_spelling :
+  cxcursor -> clang_ext_noderef_spelling =
+    "clang_ext_NoDeref_getSpelling_wrapper"
+type clang_ext_nodestroy_spelling =
+  | GNU_no_destroy 
+  | CXX11_clang_no_destroy 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_destroy_get_spelling :
+  cxcursor -> clang_ext_nodestroy_spelling =
+    "clang_ext_NoDestroy_getSpelling_wrapper"
+type clang_ext_noduplicate_spelling =
+  | GNU_noduplicate 
+  | CXX11_clang_noduplicate 
+  | C2x_clang_noduplicate 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_duplicate_get_spelling :
+  cxcursor -> clang_ext_noduplicate_spelling =
+    "clang_ext_NoDuplicate_getSpelling_wrapper"
+type clang_ext_noescape_spelling =
+  | GNU_noescape 
+  | CXX11_clang_noescape 
+  | C2x_clang_noescape 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_escape_get_spelling :
+  cxcursor -> clang_ext_noescape_spelling =
+    "clang_ext_NoEscape_getSpelling_wrapper"
+type clang_ext_noinline_spelling =
+  | GNU_noinline 
+  | CXX11_gnu_noinline 
+  | C2x_gnu_noinline 
+  | Declspec_noinline 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_inline_get_spelling :
+  cxcursor -> clang_ext_noinline_spelling =
+    "clang_ext_NoInline_getSpelling_wrapper"
+type clang_ext_noinstrumentfunction_spelling =
+  | GNU_no_instrument_function 
+  | CXX11_gnu_no_instrument_function 
+  | C2x_gnu_no_instrument_function 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_instrument_function_get_spelling :
+  cxcursor -> clang_ext_noinstrumentfunction_spelling =
+    "clang_ext_NoInstrumentFunction_getSpelling_wrapper"
+type clang_ext_nomerge_spelling =
+  | GNU_nomerge 
+  | CXX11_clang_nomerge 
+  | C2x_clang_nomerge 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_merge_get_spelling :
+  cxcursor -> clang_ext_nomerge_spelling =
+    "clang_ext_NoMerge_getSpelling_wrapper"
+type clang_ext_nomicromips_spelling =
+  | GNU_nomicromips 
+  | CXX11_gnu_nomicromips 
+  | C2x_gnu_nomicromips 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_micro_mips_get_spelling :
+  cxcursor -> clang_ext_nomicromips_spelling =
+    "clang_ext_NoMicroMips_getSpelling_wrapper"
+type clang_ext_nomips16_spelling =
+  | GNU_nomips16 
+  | CXX11_gnu_nomips16 
+  | C2x_gnu_nomips16 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_mips16_get_spelling :
+  cxcursor -> clang_ext_nomips16_spelling =
+    "clang_ext_NoMips16_getSpelling_wrapper"
+type clang_ext_noreturn_spelling =
+  | GNU_noreturn 
+  | CXX11_gnu_noreturn 
+  | C2x_gnu_noreturn 
+  | Declspec_noreturn 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_return_get_spelling :
+  cxcursor -> clang_ext_noreturn_spelling =
+    "clang_ext_NoReturn_getSpelling_wrapper"
+type clang_ext_nosanitize_spelling =
+  | GNU_no_sanitize 
+  | CXX11_clang_no_sanitize 
+  | C2x_clang_no_sanitize 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_sanitize_get_spelling :
+  cxcursor -> clang_ext_nosanitize_spelling =
+    "clang_ext_NoSanitize_getSpelling_wrapper"
+type clang_ext_nospeculativeloadhardening_spelling =
+  | GNU_no_speculative_load_hardening 
+  | CXX11_clang_no_speculative_load_hardening 
+  | C2x_clang_no_speculative_load_hardening 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_speculative_load_hardening_get_spelling :
+  cxcursor -> clang_ext_nospeculativeloadhardening_spelling =
+    "clang_ext_NoSpeculativeLoadHardening_getSpelling_wrapper"
+type clang_ext_nosplitstack_spelling =
+  | GNU_no_split_stack 
+  | CXX11_gnu_no_split_stack 
+  | C2x_gnu_no_split_stack 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_split_stack_get_spelling :
+  cxcursor -> clang_ext_nosplitstack_spelling =
+    "clang_ext_NoSplitStack_getSpelling_wrapper"
+type clang_ext_nostackprotector_spelling =
+  | GNU_no_stack_protector 
+  | CXX11_clang_no_stack_protector 
+  | C2x_clang_no_stack_protector 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_stack_protector_get_spelling :
+  cxcursor -> clang_ext_nostackprotector_spelling =
+    "clang_ext_NoStackProtector_getSpelling_wrapper"
+type clang_ext_nothreadsafetyanalysis_spelling =
+  | GNU_no_thread_safety_analysis 
+  | CXX11_clang_no_thread_safety_analysis 
+  | C2x_clang_no_thread_safety_analysis 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_thread_safety_analysis_get_spelling :
+  cxcursor -> clang_ext_nothreadsafetyanalysis_spelling =
+    "clang_ext_NoThreadSafetyAnalysis_getSpelling_wrapper"
+type clang_ext_nothrow_spelling =
+  | GNU_nothrow 
+  | CXX11_gnu_nothrow 
+  | C2x_gnu_nothrow 
+  | Declspec_nothrow 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_throw_get_spelling :
+  cxcursor -> clang_ext_nothrow_spelling =
+    "clang_ext_NoThrow_getSpelling_wrapper"
+type clang_ext_nonnull_spelling =
+  | GNU_nonnull 
+  | CXX11_gnu_nonnull 
+  | C2x_gnu_nonnull 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_non_null_get_spelling :
+  cxcursor -> clang_ext_nonnull_spelling =
+    "clang_ext_NonNull_getSpelling_wrapper"
+type clang_ext_nottailcalled_spelling =
+  | GNU_not_tail_called 
+  | CXX11_clang_not_tail_called 
+  | C2x_clang_not_tail_called 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_not_tail_called_get_spelling :
+  cxcursor -> clang_ext_nottailcalled_spelling =
+    "clang_ext_NotTailCalled_getSpelling_wrapper"
+type clang_ext_osconsumed_spelling =
+  | GNU_os_consumed 
+  | CXX11_clang_os_consumed 
+  | C2x_clang_os_consumed 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_osconsumed_get_spelling :
+  cxcursor -> clang_ext_osconsumed_spelling =
+    "clang_ext_OSConsumed_getSpelling_wrapper"
+type clang_ext_osconsumesthis_spelling =
+  | GNU_os_consumes_this 
+  | CXX11_clang_os_consumes_this 
+  | C2x_clang_os_consumes_this 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_osconsumes_this_get_spelling :
+  cxcursor -> clang_ext_osconsumesthis_spelling =
+    "clang_ext_OSConsumesThis_getSpelling_wrapper"
+type clang_ext_osreturnsnotretained_spelling =
+  | GNU_os_returns_not_retained 
+  | CXX11_clang_os_returns_not_retained 
+  | C2x_clang_os_returns_not_retained 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_osreturns_not_retained_get_spelling :
+  cxcursor -> clang_ext_osreturnsnotretained_spelling =
+    "clang_ext_OSReturnsNotRetained_getSpelling_wrapper"
+type clang_ext_osreturnsretained_spelling =
+  | GNU_os_returns_retained 
+  | CXX11_clang_os_returns_retained 
+  | C2x_clang_os_returns_retained 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_osreturns_retained_get_spelling :
+  cxcursor -> clang_ext_osreturnsretained_spelling =
+    "clang_ext_OSReturnsRetained_getSpelling_wrapper"
+type clang_ext_osreturnsretainedonnonzero_spelling =
+  | GNU_os_returns_retained_on_non_zero 
+  | CXX11_clang_os_returns_retained_on_non_zero 
+  | C2x_clang_os_returns_retained_on_non_zero 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_osreturns_retained_on_non_zero_get_spelling :
+  cxcursor -> clang_ext_osreturnsretainedonnonzero_spelling =
+    "clang_ext_OSReturnsRetainedOnNonZero_getSpelling_wrapper"
+type clang_ext_osreturnsretainedonzero_spelling =
+  | GNU_os_returns_retained_on_zero 
+  | CXX11_clang_os_returns_retained_on_zero 
+  | C2x_clang_os_returns_retained_on_zero 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_osreturns_retained_on_zero_get_spelling :
+  cxcursor -> clang_ext_osreturnsretainedonzero_spelling =
+    "clang_ext_OSReturnsRetainedOnZero_getSpelling_wrapper"
+type clang_ext_objcboxable_spelling =
+  | GNU_objc_boxable 
+  | CXX11_clang_objc_boxable 
+  | C2x_clang_objc_boxable 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cboxable_get_spelling :
+  cxcursor -> clang_ext_objcboxable_spelling =
+    "clang_ext_ObjCBoxable_getSpelling_wrapper"
+type clang_ext_objcbridge_spelling =
+  | GNU_objc_bridge 
+  | CXX11_clang_objc_bridge 
+  | C2x_clang_objc_bridge 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cbridge_get_spelling :
+  cxcursor -> clang_ext_objcbridge_spelling =
+    "clang_ext_ObjCBridge_getSpelling_wrapper"
+type clang_ext_objcbridgemutable_spelling =
+  | GNU_objc_bridge_mutable 
+  | CXX11_clang_objc_bridge_mutable 
+  | C2x_clang_objc_bridge_mutable 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cbridge_mutable_get_spelling :
+  cxcursor -> clang_ext_objcbridgemutable_spelling =
+    "clang_ext_ObjCBridgeMutable_getSpelling_wrapper"
+type clang_ext_objcbridgerelated_spelling =
+  | GNU_objc_bridge_related 
+  | CXX11_clang_objc_bridge_related 
+  | C2x_clang_objc_bridge_related 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cbridge_related_get_spelling :
+  cxcursor -> clang_ext_objcbridgerelated_spelling =
+    "clang_ext_ObjCBridgeRelated_getSpelling_wrapper"
+type clang_ext_objcclassstub_spelling =
+  | GNU_objc_class_stub 
+  | CXX11_clang_objc_class_stub 
+  | C2x_clang_objc_class_stub 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cclass_stub_get_spelling :
+  cxcursor -> clang_ext_objcclassstub_spelling =
+    "clang_ext_ObjCClassStub_getSpelling_wrapper"
+type clang_ext_objcdesignatedinitializer_spelling =
+  | GNU_objc_designated_initializer 
+  | CXX11_clang_objc_designated_initializer 
+  | C2x_clang_objc_designated_initializer 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cdesignated_initializer_get_spelling :
+  cxcursor -> clang_ext_objcdesignatedinitializer_spelling =
+    "clang_ext_ObjCDesignatedInitializer_getSpelling_wrapper"
+type clang_ext_objcdirect_spelling =
+  | GNU_objc_direct 
+  | CXX11_clang_objc_direct 
+  | C2x_clang_objc_direct 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cdirect_get_spelling :
+  cxcursor -> clang_ext_objcdirect_spelling =
+    "clang_ext_ObjCDirect_getSpelling_wrapper"
+type clang_ext_objcdirectmembers_spelling =
+  | GNU_objc_direct_members 
+  | CXX11_clang_objc_direct_members 
+  | C2x_clang_objc_direct_members 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cdirect_members_get_spelling :
+  cxcursor -> clang_ext_objcdirectmembers_spelling =
+    "clang_ext_ObjCDirectMembers_getSpelling_wrapper"
+type clang_ext_objcexception_spelling =
+  | GNU_objc_exception 
+  | CXX11_clang_objc_exception 
+  | C2x_clang_objc_exception 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cexception_get_spelling :
+  cxcursor -> clang_ext_objcexception_spelling =
+    "clang_ext_ObjCException_getSpelling_wrapper"
+type clang_ext_objcexplicitprotocolimpl_spelling =
+  | GNU_objc_protocol_requires_explicit_implementation 
+  | CXX11_clang_objc_protocol_requires_explicit_implementation 
+  | C2x_clang_objc_protocol_requires_explicit_implementation 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cexplicit_protocol_impl_get_spelling :
+  cxcursor -> clang_ext_objcexplicitprotocolimpl_spelling =
+    "clang_ext_ObjCExplicitProtocolImpl_getSpelling_wrapper"
+type clang_ext_objcexternallyretained_spelling =
+  | GNU_objc_externally_retained 
+  | CXX11_clang_objc_externally_retained 
+  | C2x_clang_objc_externally_retained 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cexternally_retained_get_spelling :
+  cxcursor -> clang_ext_objcexternallyretained_spelling =
+    "clang_ext_ObjCExternallyRetained_getSpelling_wrapper"
+type clang_ext_objcgc_spelling =
+  | GNU_objc_gc 
+  | CXX11_clang_objc_gc 
+  | C2x_clang_objc_gc 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cgc_get_spelling :
+  cxcursor -> clang_ext_objcgc_spelling =
+    "clang_ext_ObjCGC_getSpelling_wrapper"
+type clang_ext_objcindependentclass_spelling =
+  | GNU_objc_independent_class 
+  | CXX11_clang_objc_independent_class 
+  | C2x_clang_objc_independent_class 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cindependent_class_get_spelling :
+  cxcursor -> clang_ext_objcindependentclass_spelling =
+    "clang_ext_ObjCIndependentClass_getSpelling_wrapper"
+type clang_ext_objcmethodfamily_spelling =
+  | GNU_objc_method_family 
+  | CXX11_clang_objc_method_family 
+  | C2x_clang_objc_method_family 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cmethod_family_get_spelling :
+  cxcursor -> clang_ext_objcmethodfamily_spelling =
+    "clang_ext_ObjCMethodFamily_getSpelling_wrapper"
+type clang_ext_objcnsobject_spelling =
+  | GNU_NSObject 
+  | CXX11_clang_NSObject 
+  | C2x_clang_NSObject 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cnsobject_get_spelling :
+  cxcursor -> clang_ext_objcnsobject_spelling =
+    "clang_ext_ObjCNSObject_getSpelling_wrapper"
+type clang_ext_objcnonlazyclass_spelling =
+  | GNU_objc_nonlazy_class 
+  | CXX11_clang_objc_nonlazy_class 
+  | C2x_clang_objc_nonlazy_class 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cnon_lazy_class_get_spelling :
+  cxcursor -> clang_ext_objcnonlazyclass_spelling =
+    "clang_ext_ObjCNonLazyClass_getSpelling_wrapper"
+type clang_ext_objcownership_spelling =
+  | GNU_objc_ownership 
+  | CXX11_clang_objc_ownership 
+  | C2x_clang_objc_ownership 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cownership_get_spelling :
+  cxcursor -> clang_ext_objcownership_spelling =
+    "clang_ext_ObjCOwnership_getSpelling_wrapper"
+type clang_ext_objcpreciselifetime_spelling =
+  | GNU_objc_precise_lifetime 
+  | CXX11_clang_objc_precise_lifetime 
+  | C2x_clang_objc_precise_lifetime 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cprecise_lifetime_get_spelling :
+  cxcursor -> clang_ext_objcpreciselifetime_spelling =
+    "clang_ext_ObjCPreciseLifetime_getSpelling_wrapper"
+type clang_ext_objcrequirespropertydefs_spelling =
+  | GNU_objc_requires_property_definitions 
+  | CXX11_clang_objc_requires_property_definitions 
+  | C2x_clang_objc_requires_property_definitions 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_crequires_property_defs_get_spelling :
+  cxcursor -> clang_ext_objcrequirespropertydefs_spelling =
+    "clang_ext_ObjCRequiresPropertyDefs_getSpelling_wrapper"
+type clang_ext_objcrequiressuper_spelling =
+  | GNU_objc_requires_super 
+  | CXX11_clang_objc_requires_super 
+  | C2x_clang_objc_requires_super 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_crequires_super_get_spelling :
+  cxcursor -> clang_ext_objcrequiressuper_spelling =
+    "clang_ext_ObjCRequiresSuper_getSpelling_wrapper"
+type clang_ext_objcreturnsinnerpointer_spelling =
+  | GNU_objc_returns_inner_pointer 
+  | CXX11_clang_objc_returns_inner_pointer 
+  | C2x_clang_objc_returns_inner_pointer 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_creturns_inner_pointer_get_spelling :
+  cxcursor -> clang_ext_objcreturnsinnerpointer_spelling =
+    "clang_ext_ObjCReturnsInnerPointer_getSpelling_wrapper"
+type clang_ext_objcrootclass_spelling =
+  | GNU_objc_root_class 
+  | CXX11_clang_objc_root_class 
+  | C2x_clang_objc_root_class 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_croot_class_get_spelling :
+  cxcursor -> clang_ext_objcrootclass_spelling =
+    "clang_ext_ObjCRootClass_getSpelling_wrapper"
+type clang_ext_objcruntimename_spelling =
+  | GNU_objc_runtime_name 
+  | CXX11_clang_objc_runtime_name 
+  | C2x_clang_objc_runtime_name 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cruntime_name_get_spelling :
+  cxcursor -> clang_ext_objcruntimename_spelling =
+    "clang_ext_ObjCRuntimeName_getSpelling_wrapper"
+type clang_ext_objcruntimevisible_spelling =
+  | GNU_objc_runtime_visible 
+  | CXX11_clang_objc_runtime_visible 
+  | C2x_clang_objc_runtime_visible 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cruntime_visible_get_spelling :
+  cxcursor -> clang_ext_objcruntimevisible_spelling =
+    "clang_ext_ObjCRuntimeVisible_getSpelling_wrapper"
+type clang_ext_objcsubclassingrestricted_spelling =
+  | GNU_objc_subclassing_restricted 
+  | CXX11_clang_objc_subclassing_restricted 
+  | C2x_clang_objc_subclassing_restricted 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_csubclassing_restricted_get_spelling :
+  cxcursor -> clang_ext_objcsubclassingrestricted_spelling =
+    "clang_ext_ObjCSubclassingRestricted_getSpelling_wrapper"
 type clang_ext_openclaccess_spelling =
   | Keyword_read_only 
   | Keyword_write_only 
@@ -3698,6 +4923,12 @@ type clang_ext_openclglobaladdressspace_spelling =
 external ext_open_clglobal_address_space_get_spelling :
   cxcursor -> clang_ext_openclglobaladdressspace_spelling =
     "clang_ext_OpenCLGlobalAddressSpace_getSpelling_wrapper"
+type clang_ext_openclkernel_spelling =
+  | Keyword_kernel 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_open_clkernel_get_spelling :
+  cxcursor -> clang_ext_openclkernel_spelling =
+    "clang_ext_OpenCLKernel_getSpelling_wrapper"
 type clang_ext_opencllocaladdressspace_spelling =
   | Keyword_local 
   | GNU_opencl_local 
@@ -3716,6 +4947,22 @@ type clang_ext_openclprivateaddressspace_spelling =
 external ext_open_clprivate_address_space_get_spelling :
   cxcursor -> clang_ext_openclprivateaddressspace_spelling =
     "clang_ext_OpenCLPrivateAddressSpace_getSpelling_wrapper"
+type clang_ext_optimizenone_spelling =
+  | GNU_optnone 
+  | CXX11_clang_optnone 
+  | C2x_clang_optnone 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_optimize_none_get_spelling :
+  cxcursor -> clang_ext_optimizenone_spelling =
+    "clang_ext_OptimizeNone_getSpelling_wrapper"
+type clang_ext_overloadable_spelling =
+  | GNU_overloadable 
+  | CXX11_clang_overloadable 
+  | C2x_clang_overloadable 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_overloadable_get_spelling :
+  cxcursor -> clang_ext_overloadable_spelling =
+    "clang_ext_Overloadable_getSpelling_wrapper"
 type clang_ext_ownership_spelling =
   | GNU_ownership_holds 
   | CXX11_clang_ownership_holds 
@@ -3730,6 +4977,30 @@ type clang_ext_ownership_spelling =
 external ext_ownership_get_spelling :
   cxcursor -> clang_ext_ownership_spelling =
     "clang_ext_Ownership_getSpelling_wrapper"
+type clang_ext_packed_spelling =
+  | GNU_packed 
+  | CXX11_gnu_packed 
+  | C2x_gnu_packed 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_packed_get_spelling :
+  cxcursor -> clang_ext_packed_spelling =
+    "clang_ext_Packed_getSpelling_wrapper"
+type clang_ext_paramtypestate_spelling =
+  | GNU_param_typestate 
+  | CXX11_clang_param_typestate 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_param_typestate_get_spelling :
+  cxcursor -> clang_ext_paramtypestate_spelling =
+    "clang_ext_ParamTypestate_getSpelling_wrapper"
+type clang_ext_pascal_spelling =
+  | GNU_pascal 
+  | CXX11_clang_pascal 
+  | C2x_clang_pascal 
+  | Keyword_pascal 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_pascal_get_spelling :
+  cxcursor -> clang_ext_pascal_spelling =
+    "clang_ext_Pascal_getSpelling_wrapper"
 type clang_ext_passobjectsize_spelling =
   | GNU_pass_object_size 
   | CXX11_clang_pass_object_size 
@@ -3741,6 +5012,75 @@ type clang_ext_passobjectsize_spelling =
 external ext_pass_object_size_get_spelling :
   cxcursor -> clang_ext_passobjectsize_spelling =
     "clang_ext_PassObjectSize_getSpelling_wrapper"
+type clang_ext_patchablefunctionentry_spelling =
+  | GNU_patchable_function_entry 
+  | CXX11_gnu_patchable_function_entry 
+  | C2x_gnu_patchable_function_entry 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_patchable_function_entry_get_spelling :
+  cxcursor -> clang_ext_patchablefunctionentry_spelling =
+    "clang_ext_PatchableFunctionEntry_getSpelling_wrapper"
+type clang_ext_pcs_spelling =
+  | GNU_pcs 
+  | CXX11_gnu_pcs 
+  | C2x_gnu_pcs 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_pcs_get_spelling :
+  cxcursor -> clang_ext_pcs_spelling = "clang_ext_Pcs_getSpelling_wrapper"
+type clang_ext_preserveall_spelling =
+  | GNU_preserve_all 
+  | CXX11_clang_preserve_all 
+  | C2x_clang_preserve_all 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_preserve_all_get_spelling :
+  cxcursor -> clang_ext_preserveall_spelling =
+    "clang_ext_PreserveAll_getSpelling_wrapper"
+type clang_ext_preservemost_spelling =
+  | GNU_preserve_most 
+  | CXX11_clang_preserve_most 
+  | C2x_clang_preserve_most 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_preserve_most_get_spelling :
+  cxcursor -> clang_ext_preservemost_spelling =
+    "clang_ext_PreserveMost_getSpelling_wrapper"
+type clang_ext_ptguardedvar_spelling =
+  | GNU_pt_guarded_var 
+  | CXX11_clang_pt_guarded_var 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_pt_guarded_var_get_spelling :
+  cxcursor -> clang_ext_ptguardedvar_spelling =
+    "clang_ext_PtGuardedVar_getSpelling_wrapper"
+type clang_ext_pure_spelling =
+  | GNU_pure 
+  | CXX11_gnu_pure 
+  | C2x_gnu_pure 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_pure_get_spelling :
+  cxcursor -> clang_ext_pure_spelling = "clang_ext_Pure_getSpelling_wrapper"
+type clang_ext_riscvinterrupt_spelling =
+  | GNU_interrupt 
+  | CXX11_gnu_interrupt 
+  | C2x_gnu_interrupt 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_riscvinterrupt_get_spelling :
+  cxcursor -> clang_ext_riscvinterrupt_spelling =
+    "clang_ext_RISCVInterrupt_getSpelling_wrapper"
+type clang_ext_regcall_spelling =
+  | GNU_regcall 
+  | CXX11_gnu_regcall 
+  | C2x_gnu_regcall 
+  | Keyword_regcall 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_reg_call_get_spelling :
+  cxcursor -> clang_ext_regcall_spelling =
+    "clang_ext_RegCall_getSpelling_wrapper"
+type clang_ext_reinitializes_spelling =
+  | GNU_reinitializes 
+  | CXX11_clang_reinitializes 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_reinitializes_get_spelling :
+  cxcursor -> clang_ext_reinitializes_spelling =
+    "clang_ext_Reinitializes_getSpelling_wrapper"
 type clang_ext_releasecapability_spelling =
   | GNU_release_capability 
   | CXX11_clang_release_capability 
@@ -3754,6 +5094,14 @@ type clang_ext_releasecapability_spelling =
 external ext_release_capability_get_spelling :
   cxcursor -> clang_ext_releasecapability_spelling =
     "clang_ext_ReleaseCapability_getSpelling_wrapper"
+type clang_ext_releasehandle_spelling =
+  | GNU_release_handle 
+  | CXX11_clang_release_handle 
+  | C2x_clang_release_handle 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_release_handle_get_spelling :
+  cxcursor -> clang_ext_releasehandle_spelling =
+    "clang_ext_ReleaseHandle_getSpelling_wrapper"
 type clang_ext_requirescapability_spelling =
   | GNU_requires_capability 
   | CXX11_clang_requires_capability 
@@ -3771,18 +5119,186 @@ type clang_ext_restrict_spelling =
   | Declspec_restrict 
   | GNU_malloc 
   | CXX11_gnu_malloc 
+  | C2x_gnu_malloc 
   | SpellingNotCalculated [@@deriving refl]
 external ext_restrict_get_spelling :
   cxcursor -> clang_ext_restrict_spelling =
     "clang_ext_Restrict_getSpelling_wrapper"
+type clang_ext_returntypestate_spelling =
+  | GNU_return_typestate 
+  | CXX11_clang_return_typestate 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_return_typestate_get_spelling :
+  cxcursor -> clang_ext_returntypestate_spelling =
+    "clang_ext_ReturnTypestate_getSpelling_wrapper"
+type clang_ext_returnsnonnull_spelling =
+  | GNU_returns_nonnull 
+  | CXX11_gnu_returns_nonnull 
+  | C2x_gnu_returns_nonnull 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_returns_non_null_get_spelling :
+  cxcursor -> clang_ext_returnsnonnull_spelling =
+    "clang_ext_ReturnsNonNull_getSpelling_wrapper"
+type clang_ext_returnstwice_spelling =
+  | GNU_returns_twice 
+  | CXX11_gnu_returns_twice 
+  | C2x_gnu_returns_twice 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_returns_twice_get_spelling :
+  cxcursor -> clang_ext_returnstwice_spelling =
+    "clang_ext_ReturnsTwice_getSpelling_wrapper"
+type clang_ext_syclkernel_spelling =
+  | GNU_sycl_kernel 
+  | CXX11_clang_sycl_kernel 
+  | C2x_clang_sycl_kernel 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_syclkernel_get_spelling :
+  cxcursor -> clang_ext_syclkernel_spelling =
+    "clang_ext_SYCLKernel_getSpelling_wrapper"
+type clang_ext_scopedlockable_spelling =
+  | GNU_scoped_lockable 
+  | CXX11_clang_scoped_lockable 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_scoped_lockable_get_spelling :
+  cxcursor -> clang_ext_scopedlockable_spelling =
+    "clang_ext_ScopedLockable_getSpelling_wrapper"
 type clang_ext_section_spelling =
   | GNU_section 
   | CXX11_gnu_section 
+  | C2x_gnu_section 
   | Declspec_allocate 
   | SpellingNotCalculated [@@deriving refl]
 external ext_section_get_spelling :
   cxcursor -> clang_ext_section_spelling =
     "clang_ext_Section_getSpelling_wrapper"
+type clang_ext_selectany_spelling =
+  | Declspec_selectany 
+  | GNU_selectany 
+  | CXX11_gnu_selectany 
+  | C2x_gnu_selectany 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_select_any_get_spelling :
+  cxcursor -> clang_ext_selectany_spelling =
+    "clang_ext_SelectAny_getSpelling_wrapper"
+type clang_ext_sentinel_spelling =
+  | GNU_sentinel 
+  | CXX11_gnu_sentinel 
+  | C2x_gnu_sentinel 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_sentinel_get_spelling :
+  cxcursor -> clang_ext_sentinel_spelling =
+    "clang_ext_Sentinel_getSpelling_wrapper"
+type clang_ext_settypestate_spelling =
+  | GNU_set_typestate 
+  | CXX11_clang_set_typestate 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_set_typestate_get_spelling :
+  cxcursor -> clang_ext_settypestate_spelling =
+    "clang_ext_SetTypestate_getSpelling_wrapper"
+type clang_ext_speculativeloadhardening_spelling =
+  | GNU_speculative_load_hardening 
+  | CXX11_clang_speculative_load_hardening 
+  | C2x_clang_speculative_load_hardening 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_speculative_load_hardening_get_spelling :
+  cxcursor -> clang_ext_speculativeloadhardening_spelling =
+    "clang_ext_SpeculativeLoadHardening_getSpelling_wrapper"
+type clang_ext_stdcall_spelling =
+  | GNU_stdcall 
+  | CXX11_gnu_stdcall 
+  | C2x_gnu_stdcall 
+  | Keyword_stdcall 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_std_call_get_spelling :
+  cxcursor -> clang_ext_stdcall_spelling =
+    "clang_ext_StdCall_getSpelling_wrapper"
+type clang_ext_swiftcall_spelling =
+  | GNU_swiftcall 
+  | CXX11_clang_swiftcall 
+  | C2x_clang_swiftcall 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_swift_call_get_spelling :
+  cxcursor -> clang_ext_swiftcall_spelling =
+    "clang_ext_SwiftCall_getSpelling_wrapper"
+type clang_ext_swiftcontext_spelling =
+  | GNU_swift_context 
+  | CXX11_clang_swift_context 
+  | C2x_clang_swift_context 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_swift_context_get_spelling :
+  cxcursor -> clang_ext_swiftcontext_spelling =
+    "clang_ext_SwiftContext_getSpelling_wrapper"
+type clang_ext_swifterrorresult_spelling =
+  | GNU_swift_error_result 
+  | CXX11_clang_swift_error_result 
+  | C2x_clang_swift_error_result 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_swift_error_result_get_spelling :
+  cxcursor -> clang_ext_swifterrorresult_spelling =
+    "clang_ext_SwiftErrorResult_getSpelling_wrapper"
+type clang_ext_swiftindirectresult_spelling =
+  | GNU_swift_indirect_result 
+  | CXX11_clang_swift_indirect_result 
+  | C2x_clang_swift_indirect_result 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_swift_indirect_result_get_spelling :
+  cxcursor -> clang_ext_swiftindirectresult_spelling =
+    "clang_ext_SwiftIndirectResult_getSpelling_wrapper"
+type clang_ext_sysvabi_spelling =
+  | GNU_sysv_abi 
+  | CXX11_gnu_sysv_abi 
+  | C2x_gnu_sysv_abi 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_sys_vabi_get_spelling :
+  cxcursor -> clang_ext_sysvabi_spelling =
+    "clang_ext_SysVABI_getSpelling_wrapper"
+type clang_ext_tlsmodel_spelling =
+  | GNU_tls_model 
+  | CXX11_gnu_tls_model 
+  | C2x_gnu_tls_model 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_tlsmodel_get_spelling :
+  cxcursor -> clang_ext_tlsmodel_spelling =
+    "clang_ext_TLSModel_getSpelling_wrapper"
+type clang_ext_target_spelling =
+  | GNU_target 
+  | CXX11_gnu_target 
+  | C2x_gnu_target 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_target_get_spelling :
+  cxcursor -> clang_ext_target_spelling =
+    "clang_ext_Target_getSpelling_wrapper"
+type clang_ext_testtypestate_spelling =
+  | GNU_test_typestate 
+  | CXX11_clang_test_typestate 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_test_typestate_get_spelling :
+  cxcursor -> clang_ext_testtypestate_spelling =
+    "clang_ext_TestTypestate_getSpelling_wrapper"
+type clang_ext_thiscall_spelling =
+  | GNU_thiscall 
+  | CXX11_gnu_thiscall 
+  | C2x_gnu_thiscall 
+  | Keyword_thiscall 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_this_call_get_spelling :
+  cxcursor -> clang_ext_thiscall_spelling =
+    "clang_ext_ThisCall_getSpelling_wrapper"
+type clang_ext_transparentunion_spelling =
+  | GNU_transparent_union 
+  | CXX11_gnu_transparent_union 
+  | C2x_gnu_transparent_union 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_transparent_union_get_spelling :
+  cxcursor -> clang_ext_transparentunion_spelling =
+    "clang_ext_TransparentUnion_getSpelling_wrapper"
+type clang_ext_trivialabi_spelling =
+  | GNU_trivial_abi 
+  | CXX11_clang_trivial_abi 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_trivial_abi_get_spelling :
+  cxcursor -> clang_ext_trivialabi_spelling =
+    "clang_ext_TrivialABI_getSpelling_wrapper"
 type clang_ext_tryacquirecapability_spelling =
   | GNU_try_acquire_capability 
   | CXX11_clang_try_acquire_capability 
@@ -3792,25 +5308,166 @@ type clang_ext_tryacquirecapability_spelling =
 external ext_try_acquire_capability_get_spelling :
   cxcursor -> clang_ext_tryacquirecapability_spelling =
     "clang_ext_TryAcquireCapability_getSpelling_wrapper"
+type clang_ext_typetagfordatatype_spelling =
+  | GNU_type_tag_for_datatype 
+  | CXX11_clang_type_tag_for_datatype 
+  | C2x_clang_type_tag_for_datatype 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_type_tag_for_datatype_get_spelling :
+  cxcursor -> clang_ext_typetagfordatatype_spelling =
+    "clang_ext_TypeTagForDatatype_getSpelling_wrapper"
+type clang_ext_typevisibility_spelling =
+  | GNU_type_visibility 
+  | CXX11_clang_type_visibility 
+  | C2x_clang_type_visibility 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_type_visibility_get_spelling :
+  cxcursor -> clang_ext_typevisibility_spelling =
+    "clang_ext_TypeVisibility_getSpelling_wrapper"
+type clang_ext_unavailable_spelling =
+  | GNU_unavailable 
+  | CXX11_clang_unavailable 
+  | C2x_clang_unavailable 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_unavailable_get_spelling :
+  cxcursor -> clang_ext_unavailable_spelling =
+    "clang_ext_Unavailable_getSpelling_wrapper"
+type clang_ext_uninitialized_spelling =
+  | GNU_uninitialized 
+  | CXX11_clang_uninitialized 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_uninitialized_get_spelling :
+  cxcursor -> clang_ext_uninitialized_spelling =
+    "clang_ext_Uninitialized_getSpelling_wrapper"
 type clang_ext_unused_spelling =
   | CXX11_maybe_unused 
   | GNU_unused 
   | CXX11_gnu_unused 
+  | C2x_gnu_unused 
   | C2x_maybe_unused 
   | SpellingNotCalculated [@@deriving refl]
 external ext_unused_get_spelling :
   cxcursor -> clang_ext_unused_spelling =
     "clang_ext_Unused_getSpelling_wrapper"
+type clang_ext_usehandle_spelling =
+  | GNU_use_handle 
+  | CXX11_clang_use_handle 
+  | C2x_clang_use_handle 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_use_handle_get_spelling :
+  cxcursor -> clang_ext_usehandle_spelling =
+    "clang_ext_UseHandle_getSpelling_wrapper"
+type clang_ext_used_spelling =
+  | GNU_used 
+  | CXX11_gnu_used 
+  | C2x_gnu_used 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_used_get_spelling :
+  cxcursor -> clang_ext_used_spelling = "clang_ext_Used_getSpelling_wrapper"
+type clang_ext_uuid_spelling =
+  | Declspec_uuid 
+  | Microsoft_uuid 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_uuid_get_spelling :
+  cxcursor -> clang_ext_uuid_spelling = "clang_ext_Uuid_getSpelling_wrapper"
+type clang_ext_vecreturn_spelling =
+  | GNU_vecreturn 
+  | CXX11_clang_vecreturn 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_vec_return_get_spelling :
+  cxcursor -> clang_ext_vecreturn_spelling =
+    "clang_ext_VecReturn_getSpelling_wrapper"
+type clang_ext_vectorcall_spelling =
+  | GNU_vectorcall 
+  | CXX11_clang_vectorcall 
+  | C2x_clang_vectorcall 
+  | Keyword_vectorcall 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_vector_call_get_spelling :
+  cxcursor -> clang_ext_vectorcall_spelling =
+    "clang_ext_VectorCall_getSpelling_wrapper"
+type clang_ext_visibility_spelling =
+  | GNU_visibility 
+  | CXX11_gnu_visibility 
+  | C2x_gnu_visibility 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_visibility_get_spelling :
+  cxcursor -> clang_ext_visibility_spelling =
+    "clang_ext_Visibility_getSpelling_wrapper"
+type clang_ext_warnunused_spelling =
+  | GNU_warn_unused 
+  | CXX11_gnu_warn_unused 
+  | C2x_gnu_warn_unused 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_warn_unused_get_spelling :
+  cxcursor -> clang_ext_warnunused_spelling =
+    "clang_ext_WarnUnused_getSpelling_wrapper"
 type clang_ext_warnunusedresult_spelling =
   | CXX11_nodiscard 
   | C2x_nodiscard 
   | CXX11_clang_warn_unused_result 
   | GNU_warn_unused_result 
   | CXX11_gnu_warn_unused_result 
+  | C2x_gnu_warn_unused_result 
   | SpellingNotCalculated [@@deriving refl]
 external ext_warn_unused_result_get_spelling :
   cxcursor -> clang_ext_warnunusedresult_spelling =
     "clang_ext_WarnUnusedResult_getSpelling_wrapper"
+type clang_ext_weak_spelling =
+  | GNU_weak 
+  | CXX11_gnu_weak 
+  | C2x_gnu_weak 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_weak_get_spelling :
+  cxcursor -> clang_ext_weak_spelling = "clang_ext_Weak_getSpelling_wrapper"
+type clang_ext_weakimport_spelling =
+  | GNU_weak_import 
+  | CXX11_clang_weak_import 
+  | C2x_clang_weak_import 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_weak_import_get_spelling :
+  cxcursor -> clang_ext_weakimport_spelling =
+    "clang_ext_WeakImport_getSpelling_wrapper"
+type clang_ext_weakref_spelling =
+  | GNU_weakref 
+  | CXX11_gnu_weakref 
+  | C2x_gnu_weakref 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_weak_ref_get_spelling :
+  cxcursor -> clang_ext_weakref_spelling =
+    "clang_ext_WeakRef_getSpelling_wrapper"
+type clang_ext_webassemblyexportname_spelling =
+  | GNU_export_name 
+  | CXX11_clang_export_name 
+  | C2x_clang_export_name 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_web_assembly_export_name_get_spelling :
+  cxcursor -> clang_ext_webassemblyexportname_spelling =
+    "clang_ext_WebAssemblyExportName_getSpelling_wrapper"
+type clang_ext_webassemblyimportmodule_spelling =
+  | GNU_import_module 
+  | CXX11_clang_import_module 
+  | C2x_clang_import_module 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_web_assembly_import_module_get_spelling :
+  cxcursor -> clang_ext_webassemblyimportmodule_spelling =
+    "clang_ext_WebAssemblyImportModule_getSpelling_wrapper"
+type clang_ext_webassemblyimportname_spelling =
+  | GNU_import_name 
+  | CXX11_clang_import_name 
+  | C2x_clang_import_name 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_web_assembly_import_name_get_spelling :
+  cxcursor -> clang_ext_webassemblyimportname_spelling =
+    "clang_ext_WebAssemblyImportName_getSpelling_wrapper"
+type clang_ext_x86forcealignargpointer_spelling =
+  | GNU_force_align_arg_pointer 
+  | CXX11_gnu_force_align_arg_pointer 
+  | C2x_gnu_force_align_arg_pointer 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_x86_force_align_arg_pointer_get_spelling :
+  cxcursor -> clang_ext_x86forcealignargpointer_spelling =
+    "clang_ext_X86ForceAlignArgPointer_getSpelling_wrapper"
 type clang_ext_xrayinstrument_spelling =
   | GNU_xray_always_instrument 
   | CXX11_clang_xray_always_instrument 
@@ -3822,6 +5479,14 @@ type clang_ext_xrayinstrument_spelling =
 external ext_xray_instrument_get_spelling :
   cxcursor -> clang_ext_xrayinstrument_spelling =
     "clang_ext_XRayInstrument_getSpelling_wrapper"
+type clang_ext_xraylogargs_spelling =
+  | GNU_xray_log_args 
+  | CXX11_clang_xray_log_args 
+  | C2x_clang_xray_log_args 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_xray_log_args_get_spelling :
+  cxcursor -> clang_ext_xraylogargs_spelling =
+    "clang_ext_XRayLogArgs_getSpelling_wrapper"
 external ext_ompdeclare_simd_decl_attr_get_uniforms_size :
   cxcursor -> int =
     "clang_ext_OMPDeclareSimdDeclAttr_getUniforms_Size_wrapper"
@@ -3837,9 +5502,6 @@ external ext_attrs_get_aliasee_length :
 external ext_obj_cruntime_name_attr_get_metadata_name :
   cxcursor -> string =
     "clang_ext_ObjCRuntimeNameAttr_getMetadataName_wrapper"
-external ext_ompdeclare_variant_attr_get_impl_vendors :
-  cxcursor -> (string -> unit) -> unit =
-    "clang_ext_OMPDeclareVariantAttr_getImplVendors_wrapper"
 external ext_ifunc_attr_get_resolver :
   cxcursor -> string = "clang_ext_IFuncAttr_getResolver_wrapper"
 external ext_patchable_function_entry_attr_get_offset :
@@ -3877,9 +5539,6 @@ external ext_type_tag_for_datatype_attr_get_matching_ctype :
     "clang_ext_TypeTagForDatatypeAttr_getMatchingCType_wrapper"
 external ext_annotate_attr_get_annotation_length :
   cxcursor -> int = "clang_ext_AnnotateAttr_getAnnotationLength_wrapper"
-external ext_ompdeclare_variant_attr_get_device_kinds :
-  cxcursor -> (string -> unit) -> unit =
-    "clang_ext_OMPDeclareVariantAttr_getDeviceKinds_wrapper"
 external ext_layout_version_attr_get_version :
   cxcursor -> int = "clang_ext_LayoutVersionAttr_getVersion_wrapper"
 external ext_sentinel_attr_get_null_pos :
@@ -3889,20 +5548,12 @@ external ext_ompdeclare_simd_decl_attr_get_aligneds :
     "clang_ext_OMPDeclareSimdDeclAttr_getAligneds_wrapper"
 external ext_attrs_get_args_size :
   cxcursor -> int = "clang_ext_Attrs_getArgs_Size_wrapper"
-external ext_ompdeclare_variant_attr_get_ctx_selectors_size :
-  cxcursor -> int =
-    "clang_ext_OMPDeclareVariantAttr_getCtxSelectors_Size_wrapper"
 external ext_cudalaunch_bounds_attr_get_min_blocks :
   cxcursor -> cxcursor =
     "clang_ext_CUDALaunchBoundsAttr_getMinBlocks_wrapper"
-external ext_ompdeclare_variant_attr_get_impl_vendors_size :
-  cxcursor -> int =
-    "clang_ext_OMPDeclareVariantAttr_getImplVendors_Size_wrapper"
 external ext_external_source_symbol_attr_get_defined_in_length :
   cxcursor -> int =
     "clang_ext_ExternalSourceSymbolAttr_getDefinedInLength_wrapper"
-external ext_ompcapture_kind_attr_get_capture_kind :
-  cxcursor -> int = "clang_ext_OMPCaptureKindAttr_getCaptureKind_wrapper"
 external ext_format_attr_get_type :
   cxcursor -> string = "clang_ext_FormatAttr_getType_wrapper"
 external ext_pass_object_size_attr_get_type :
@@ -3929,6 +5580,8 @@ type clang_ext_testtypestateattr_consumedstate =
 external ext_test_typestate_attr_get_test_state :
   cxcursor -> clang_ext_testtypestateattr_consumedstate =
     "clang_ext_TestTypestateAttr_getTestState_wrapper"
+external ext_ompcapture_kind_attr_get_capture_kind_val :
+  cxcursor -> int = "clang_ext_OMPCaptureKindAttr_getCaptureKindVal_wrapper"
 external ext_init_priority_attr_get_priority :
   cxcursor -> int = "clang_ext_InitPriorityAttr_getPriority_wrapper"
 external ext_attrs_get_priority :
@@ -3960,9 +5613,6 @@ external ext_external_source_symbol_attr_get_defined_in :
     "clang_ext_ExternalSourceSymbolAttr_getDefinedIn_wrapper"
 external ext_alloc_size_attr_get_num_elems_param :
   cxcursor -> int = "clang_ext_AllocSizeAttr_getNumElemsParam_wrapper"
-external ext_ompdeclare_variant_attr_get_ctx_selectors :
-  cxcursor -> (int -> unit) -> unit =
-    "clang_ext_OMPDeclareVariantAttr_getCtxSelectors_wrapper"
 external ext_ifunc_attr_get_resolver_length :
   cxcursor -> int = "clang_ext_IFuncAttr_getResolverLength_wrapper"
 external ext_asm_label_attr_get_label_length :
@@ -3972,8 +5622,8 @@ external ext_abi_tag_attr_get_tags_size :
 external ext_cudalaunch_bounds_attr_get_max_threads :
   cxcursor -> cxcursor =
     "clang_ext_CUDALaunchBoundsAttr_getMaxThreads_wrapper"
-external ext_arm_mve_alias_attr_get_builtin_name :
-  cxcursor -> string = "clang_ext_ArmMveAliasAttr_getBuiltinName_wrapper"
+external ext_arm_builtin_alias_attr_get_builtin_name :
+  cxcursor -> string = "clang_ext_ArmBuiltinAliasAttr_getBuiltinName_wrapper"
 external ext_web_assembly_import_module_attr_get_import_module :
   cxcursor -> string =
     "clang_ext_WebAssemblyImportModuleAttr_getImportModule_wrapper"
@@ -3983,6 +5633,8 @@ external ext_callback_attr_get_encoding_size :
   cxcursor -> int = "clang_ext_CallbackAttr_getEncoding_Size_wrapper"
 external ext_attrs_get_xdim :
   cxcursor -> int = "clang_ext_Attrs_getXDim_wrapper"
+external ext_uuid_attr_get_guid_decl :
+  cxcursor -> cxcursor = "clang_ext_UuidAttr_getGuidDecl_wrapper"
 external ext_attrs_get_aliasee :
   cxcursor -> string = "clang_ext_Attrs_getAliasee_wrapper"
 external ext_attrs_get_handle_type :
@@ -4020,6 +5672,10 @@ external ext_attrs_get_argument_kind :
   cxcursor -> string = "clang_ext_Attrs_getArgumentKind_wrapper"
 external ext_availability_attr_get_unavailable :
   cxcursor -> bool = "clang_ext_AvailabilityAttr_getUnavailable_wrapper"
+type clang_ext_omptraitinfo
+external ext_ompdeclare_variant_attr_get_trait_infos :
+  cxcursor -> clang_ext_omptraitinfo =
+    "clang_ext_OMPDeclareVariantAttr_getTraitInfos_wrapper"
 external ext_ompallocate_decl_attr_get_allocator :
   cxcursor -> cxcursor = "clang_ext_OMPAllocateDeclAttr_getAllocator_wrapper"
 external ext_annotate_attr_get_annotation :
@@ -4116,9 +5772,6 @@ external ext_open_clintel_reqd_sub_group_size_attr_get_sub_group_size :
 external ext_argument_with_type_tag_attr_get_argument_idx :
   cxcursor -> int =
     "clang_ext_ArgumentWithTypeTagAttr_getArgumentIdx_wrapper"
-external ext_ompdeclare_variant_attr_get_scores :
-  cxcursor -> (cxcursor -> unit) -> unit =
-    "clang_ext_OMPDeclareVariantAttr_getScores_wrapper"
 external ext_availability_attr_get_strict :
   cxcursor -> bool = "clang_ext_AvailabilityAttr_getStrict_wrapper"
 type clang_ext_cfguardattr_guardarg =
@@ -4138,12 +5791,6 @@ external ext_init_seg_attr_get_section_length :
 external ext_vec_type_hint_attr_get_type_hint :
   cxcursor -> clang_ext_typeloc =
     "clang_ext_VecTypeHintAttr_getTypeHint_wrapper"
-external ext_ompdeclare_variant_attr_get_ctx_selector_sets_size :
-  cxcursor -> int =
-    "clang_ext_OMPDeclareVariantAttr_getCtxSelectorSets_Size_wrapper"
-external ext_ompdeclare_variant_attr_get_ctx_selector_sets :
-  cxcursor -> (int -> unit) -> unit =
-    "clang_ext_OMPDeclareVariantAttr_getCtxSelectorSets_wrapper"
 external ext_external_source_symbol_attr_get_language_length :
   cxcursor -> int =
     "clang_ext_ExternalSourceSymbolAttr_getLanguageLength_wrapper"
@@ -4238,9 +5885,6 @@ external ext_obj_cbridge_related_attr_get_related_class :
 external ext_web_assembly_import_name_attr_get_import_name :
   cxcursor -> string =
     "clang_ext_WebAssemblyImportNameAttr_getImportName_wrapper"
-external ext_ompdeclare_variant_attr_get_device_kinds_size :
-  cxcursor -> int =
-    "clang_ext_OMPDeclareVariantAttr_getDeviceKinds_Size_wrapper"
 external ext_no_sanitize_attr_get_sanitizers :
   cxcursor -> (string -> unit) -> unit =
     "clang_ext_NoSanitizeAttr_getSanitizers_wrapper"
@@ -4251,8 +5895,6 @@ type clang_ext_callablewhenattr_consumedstate =
 external ext_callable_when_attr_get_callable_states :
   cxcursor -> (clang_ext_callablewhenattr_consumedstate -> unit) -> unit =
     "clang_ext_CallableWhenAttr_getCallableStates_wrapper"
-external ext_ompdeclare_variant_attr_get_scores_size :
-  cxcursor -> int = "clang_ext_OMPDeclareVariantAttr_getScores_Size_wrapper"
 type clang_ext_ompdeclaresimddeclattr_branchstatety =
   | Undefined 
   | Inbranch 
@@ -4269,6 +5911,7 @@ external ext_format_attr_get_format_idx :
 external ext_type_tag_for_datatype_attr_get_must_be_null :
   cxcursor -> bool = "clang_ext_TypeTagForDatatypeAttr_getMustBeNull_wrapper"
 type clang_ext_ompallocatedeclattr_allocatortypety =
+  | OMPNullMemAlloc 
   | OMPDefaultMemAlloc 
   | OMPLargeCapMemAlloc 
   | OMPConstMemAlloc 
