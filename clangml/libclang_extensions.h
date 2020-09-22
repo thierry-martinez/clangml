@@ -68,6 +68,12 @@
 #ifdef LLVM_VERSION_9_0_1
 #define LLVM_VERSION_BEFORE_10_0_0
 #endif
+#ifdef LLVM_VERSION_BEFORE_10_0_0
+#define LLVM_VERSION_BEFORE_11_0_0
+#endif
+#ifdef LLVM_VERSION_10_0_1
+#define LLVM_VERSION_BEFORE_11_0_0
+#endif
 
 CXVersion
 clang_ext_getVersion();
@@ -246,10 +252,22 @@ enum clang_ext_IfStmtChild {
 };
 
 unsigned
-clang_ext_IfStmt_getChildrenSet(CXCursor c);
+clang_ext_IfStmt_getChildrenSet(CXCursor);
 
 CXCursor
-clang_ext_IfStmt_getInit(CXCursor c);
+clang_ext_IfStmt_getInit(CXCursor);
+
+CXCursor
+clang_ext_IfStmt_getConditionVariable(CXCursor);
+
+CXCursor
+clang_ext_IfStmt_getCond(CXCursor);
+
+CXCursor
+clang_ext_IfStmt_getThen(CXCursor);
+
+CXCursor
+clang_ext_IfStmt_getElse(CXCursor);
 
 enum clang_ext_SwitchStmtChild {
   CLANG_EXT_SWITCH_STMT_INIT = 1,
@@ -1188,5 +1206,13 @@ clang_ext_InjectedClassNameType_getInjectedSpecializationType(CXType);
 
 CXType
 clang_ext_Type_getUnqualifiedType(CXType);
+
+struct clang_ext_OMPTraitInfo {
+  const void *data;
+  CXTranslationUnit tu;
+};
+
+void
+clang_ext_OMPTraitInfo_dispose(struct clang_ext_OMPTraitInfo);
 
 #include "libclang_extensions_attrs_headers.inc"

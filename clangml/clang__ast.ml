@@ -171,6 +171,8 @@ and asm_compiler_extension = GCC | MS
 and opaque_cxtype = cxtype [@opaque]
 
 and opaque_type_loc = clang_ext_typeloc option [@opaque]
+
+and omp_trait_info = clang_ext_omptraitinfo [@opaque]
       [@@deriving refl]
 
 module type NodeS = sig
@@ -1982,7 +1984,8 @@ and asm_operand = {
 
 and attribute = attribute_desc node
 
-and attribute_desc = (expr, qual_type, declaration_name) Attributes.t
+and attribute_desc =
+  (expr, decl, qual_type, declaration_name, omp_trait_info) Attributes.t
 (**
    [AbiTag]: ABI tags.
 
@@ -1996,7 +1999,9 @@ let () =
   check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
   [%pattern?
     [{ desc = Var {
-         attributes = [{ desc = AbiTag ["a"; "b"] }];
+         attributes = [{ desc = AbiTag {
+           spelling = GNU_abi_tag;
+           tags = ["a"; "b"] }}];
          var_type = { desc = BuiltinType Float };
          var_name = "f"; }}]]
     ]}
@@ -2136,7 +2141,9 @@ let () =
     (parse_declaration_list ~language:CXX ~standard:Cxx11) example
   [%pattern?
     [{ desc = Function {
-         attributes = [{ desc = AllocAlign 1 }];
+         attributes = [{ desc = AllocAlign {
+           spelling = GNU_alloc_align;
+           param_index = 1; }}];
          name = IdentifierName "a";
          function_type = {
            result = { desc = Pointer { desc = BuiltinType Void }};
@@ -3666,14 +3673,18 @@ let () =
             { desc = { constant_name = "A0"; constant_init = None }};
             { desc = { constant_name = "A1"; constant_init = None }}];
           complete_definition = true;
-          attributes = [{ desc = EnumExtensibility Closed }] }};
+          attributes = [{ desc = EnumExtensibility {
+            spelling = GNU_enum_extensibility;
+            extensibility = Closed }}] }};
       { desc = EnumDecl {
           name = "OpenEnum";
           constants = [
             { desc = { constant_name = "B0"; constant_init = None }};
             { desc = { constant_name = "B1"; constant_init = None }}];
           complete_definition = true;
-          attributes = [{ desc = EnumExtensibility Open }] }};
+          attributes = [{ desc = EnumExtensibility {
+            spelling = GNU_enum_extensibility;
+            extensibility = Open }}] }};
       { desc = EnumDecl {
           name = "ClosedFlagEnum";
           constants = [
@@ -3689,10 +3700,14 @@ let () =
                   rhs = { desc = IntegerLiteral (Int 1) }}}}}];
           complete_definition = true;
           attributes = ([
-            { desc = EnumExtensibility Closed };
-            { desc = Other FlagEnum }] | [
-            { desc = Other FlagEnum };
-            { desc = EnumExtensibility Closed }]) }};
+            { desc = EnumExtensibility {
+              spelling = GNU_enum_extensibility;
+              extensibility = Closed }};
+            { desc = FlagEnum GNU_flag_enum }] | [
+            { desc = FlagEnum GNU_flag_enum };
+            { desc = EnumExtensibility {
+              spelling = GNU_enum_extensibility;
+              extensibility = Closed }}]) }};
       { desc = EnumDecl {
           name = "OpenFlagEnum";
           constants = [
@@ -3708,10 +3723,14 @@ let () =
                   rhs = { desc = IntegerLiteral (Int 1) }}}}}];
           complete_definition = true;
           attributes = ([
-            { desc = EnumExtensibility Open };
-            { desc = Other FlagEnum }] | [
-            { desc = Other FlagEnum };
-            { desc = EnumExtensibility Open }]) }}]]]
+            { desc = EnumExtensibility {
+              spelling = GNU_enum_extensibility;
+              extensibility = Open }};
+            { desc = FlagEnum GNU_flag_enum }] | [
+            { desc = FlagEnum GNU_flag_enum };
+            { desc = EnumExtensibility {
+              spelling = GNU_enum_extensibility;
+              extensibility = Open }}]) }}]]]
 else Metapp.Stri.of_list []]
     ]}*)
   | RecordDecl of record_decl

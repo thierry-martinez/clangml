@@ -1,4 +1,4 @@
-let check_pattern (quoter : 'obj -> Parsetree.expression) (x : 'obj)
+let check_pattern (quoter : 'obj -> Ppxlib.expression) (x : 'obj)
     (pattern : ('obj, 'a) Pattern.matcher) =
   match pattern ~quoted:(quoter x) x with
   | Ok result -> result

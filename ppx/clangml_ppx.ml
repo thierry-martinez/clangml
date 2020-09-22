@@ -3,7 +3,7 @@ let placeholder_hashtbl_sz = 17
 type antiquotation = {
     antiquotation_type : Ppx_lexer.antiquotation_type;
     placeholder : string;
-    payload : Parsetree.payload Location.loc;
+    payload : Ppxlib.payload Location.loc;
     pos_begin : int;
     pos_end : int;
   }
@@ -54,9 +54,9 @@ let extract_antiquotations s =
                 end
           | _ -> token in
         let loc_start = lexbuf.lex_curr_p in
-        let payload : Parsetree.payload =
-          if pattern then PPat (Parser.parse_pattern lexer lexbuf, None)
-          else PStr (Parser.implementation lexer lexbuf) in
+        let payload : Ppxlib.payload =
+          if pattern then PPat (Ppxlib.Parser.parse_pattern lexer lexbuf, None)
+          else PStr (Ppxlib.Parser.implementation lexer lexbuf) in
         let loc_end = lexbuf.lex_curr_p in
         let loc = { Location.loc_start; loc_end; loc_ghost = false } in
         let payload = { Location.loc; txt = payload } in
@@ -130,12 +130,12 @@ let is_empty table =
 type extension =
   | Quotation of {
       language : Clang.language;
-      payload : Parsetree.payload;
+      payload : Ppxlib.payload;
       loc : Location.t;
     }
   | If_standard of {
       name : string;
-      expr : Parsetree.expression;
+      expr : Ppxlib.expression;
       loc : Location.t;
     }
 
@@ -160,11 +160,23 @@ let rec extract_items (items : Clang.Decl.t list) : Clang.Decl.t list =
       extract_items_aux [] tl
   | _ :: tl -> extract_items tl
 
-module Make (Target : Metapp.ValueS) = struct
+type mapper = {
+    expression : Ppxlib.expression -> Ppxlib.expression;
+    pattern : Ppxlib.pattern -> Ppxlib.pattern;
+    payload : Ppxlib.payload -> Ppxlib.payload;
+  }
+
+module type TargetS = sig
+  include Metapp.ValueS
+
+  val get_mapper : mapper -> t -> t
+end
+
+module Make (Target : TargetS) = struct
   module Lift = Refl.Lift.Make (Target)
 
-  let extract_payload language (mapper : Ast_mapper.mapper) ~loc
-      (payload : Parsetree.payload) =
+  let extract_payload language (mapper : mapper) ~loc
+      (payload : Ppxlib.payload) =
     let kind, arguments, code =
       match
         match payload with
@@ -182,7 +194,7 @@ module Make (Target : Metapp.ValueS) = struct
                   Location.raise_errorf ~loc "Code expected"
               | (_, code) :: rev_args ->
                   Metapp.string_of_arbitrary_expression code, rev_args in
-            let handle_arg arguments (_, (arg : Parsetree.expression)) =
+            let handle_arg arguments (_, (arg : Ppxlib.expression)) =
               let loc = arg.pexp_loc in
               match arg with
               | [%expr return [%e? arg ]] ->
@@ -371,7 +383,7 @@ module Make (Target : Metapp.ValueS) = struct
     antiquotations |> List.iter begin fun antiquotation ->
       String_hashtbl.add placeholder_hashtbl antiquotation.placeholder
         { antiquotation.payload with
-          txt = mapper.payload mapper antiquotation.payload.txt }
+          txt = mapper.payload antiquotation.payload.txt }
     end;
     let result = extraction ast in
     if not (is_empty placeholder_hashtbl) then
@@ -383,11 +395,11 @@ module Make (Target : Metapp.ValueS) = struct
            List.of_seq));
     result
 
-  let mapper (mapper : Ast_mapper.mapper) (t : Target.t) =
+  let mapper (mapper : mapper) (t : Target.t) =
     match
       Option.bind (Target.destruct_extension t) (fun e ->
         match e with
-        | ({ loc; txt = "if" }, payload) ->
+        | (({ loc; txt = "if" }, payload), _) ->
             begin match payload with
             | PStr [%str standard [%e? name] available [%e? expr]] ->
                 Some
@@ -396,14 +408,14 @@ module Make (Target : Metapp.ValueS) = struct
                      expr; loc })
             | _ -> None
             end
-        | ({ loc; txt }, payload) ->
+        | (({ loc; txt }, payload), _) ->
             begin match Clang.language_of_string txt with
             | exception (Invalid_argument _) -> None
             | language -> Some (Quotation { language; loc; payload })
             end)
     with
     | None ->
-        Target.mapper.get Ast_mapper.default_mapper mapper t
+        Target.get_mapper mapper t
     | Some (Quotation { language; loc; payload }) ->
         extract_payload language mapper ~loc payload
     | Some (If_standard { name; expr; loc }) ->
@@ -413,20 +425,35 @@ module Make (Target : Metapp.ValueS) = struct
           let t =
             Target.choice (fun () -> expr) (fun () ->
               failwith "\"if standard\" not available in patterns") in
-          Target.mapper.get Ast_mapper.default_mapper mapper t
+          Target.get_mapper mapper t
 end
 
-module MapperExp = Make (Metapp.Exp)
+module MapperExp = Make (struct
+  include Metapp.Exp
+  let get_mapper mapper = mapper.expression
+end)
 
-module MapperPat = Make (Metapp.Pat)
+module MapperPat = Make (struct
+  include Metapp.Pat
+  let get_mapper mapper = mapper.pattern
+end)
 
-let ppx_pattern_mapper = {
-  Ast_mapper.default_mapper with
-  expr = MapperExp.mapper;
-  pat = MapperPat.mapper
-}
+let ppx_pattern_mapper = object (self)
+  inherit Ppxlib.Ast_traverse.map as super
+
+  method! expression =
+    MapperExp.mapper {
+      expression = super#expression;
+      pattern = super#pattern;
+      payload = super#payload }
+
+  method! pattern =
+    MapperPat.mapper {
+      expression = super#expression;
+      pattern = super#pattern;
+      payload = super#payload }
+end
 
 let () =
-  Migrate_parsetree.Driver.register ~name:"clangml.ppx" ~position:(-10)
-    (module Migrate_parsetree.OCaml_current)
-    (fun _ _ -> ppx_pattern_mapper)
+  Ppxlib.Driver.register_transformation "clangml.ppx"
+    ~preprocess_impl:ppx_pattern_mapper#structure

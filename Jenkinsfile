@@ -39,36 +39,42 @@ pipeline {
         }
         stage('Configure') {
             steps {
-                sh '''
-                    eval $(opam env) && \
-                    mkdir build && cd build && \
-                    ../src/configure \
-                        --with-llvm-config=/media/llvms/10.0.1/bin/llvm-config
-                   '''
+                timeout(time: 2, unit: 'MINUTES') {
+                    sh '''
+                        eval $(opam env) && \
+                        mkdir build && cd build && \
+                        ../src/configure \
+                            --with-llvm-config=/media/llvms/11.0.0/bin/llvm-config
+                       '''
+                }
             }
         }
         stage('Build') {
             steps {
-                sh 'make -C build clangml'
-                sh 'make -C build clangml.opam && cp build/clangml.opam src/'
-                sh 'make -C build tools/stubgen'
-                sh 'make -C build tools/norm_extractor'
-                sh 'make -C build tools/generate_attrs'
+                timeout(time: 3, unit: 'MINUTES') {
+                    sh 'make -C build clangml'
+                    sh 'make -C build clangml.opam && cp build/clangml.opam src/'
+                    sh 'make -C build tools/stubgen'
+                    sh 'make -C build tools/norm_extractor'
+                    sh 'make -C build tools/generate_attrs'
+                }
             }
         }
         stage('Generate attributes') {
             steps {
-                sh '''
-                   cd build && \
-                   dune exec -- tools/generate_attrs/generate_attrs.exe \
-                     --llvm-config /media/llvms/10.0.1/bin/llvm-config \
-                     "../src/bootstrap/" && \
-                   cp ../src/bootstrap/attributes.ml clangml && \
-                   cp ../src/bootstrap/libclang_extensions_attrs.inc \
-                     clangml && \
-                   cp ../src/bootstrap/libclang_extensions_attrs_headers.inc \
-                     clangml
-                   '''
+                timeout(time: 3, unit: 'MINUTES') {
+                    sh '''
+                       cd build && \
+                       dune exec -- tools/generate_attrs/generate_attrs.exe \
+                         --llvm-config /media/llvms/11.0.0/bin/llvm-config \
+                         "../src/bootstrap/" && \
+                       cp ../src/bootstrap/attributes.ml clangml && \
+                       cp ../src/bootstrap/libclang_extensions_attrs.inc \
+                         clangml && \
+                       cp ../src/bootstrap/libclang_extensions_attrs_headers.inc \
+                         clangml
+                       '''
+                }
             }
         }
         stage('Generate stubs') {
@@ -162,8 +168,7 @@ pipeline {
             steps {
                 script {
                     opam_installations(
-                        ["4.03", "4.04", "4.05", "4.06", "4.07", "4.08", "4.09",
-                         "4.10", "4.11"],
+                        ["4.08", "4.09", "4.10", "4.11"],
                         "file:///clangml/")
                 }
             }
@@ -179,9 +184,10 @@ pipeline {
         stage('opam installation from snapshot') {
             steps {
                 script {
+                    def repo = env.JOB_NAME == "perso/master" ? "tmartine" : "memcad"
                     opam_installations(
                         ["4.10"],
-"https://gitlab.inria.fr/memcad/clangml/-/archive/snapshot/clangml-snapshot.tar.gz")
+"https://gitlab.inria.fr/$repo/clangml/-/archive/snapshot/clangml-snapshot.tar.gz")
                 }
             }
         }

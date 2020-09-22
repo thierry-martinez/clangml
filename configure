@@ -3049,6 +3049,24 @@ else
 
 fi
 fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ocamlfind package ppxlib" >&5
+$as_echo_n "checking for ocamlfind package ppxlib... " >&6; }
+   if $OCAMLFIND query ppxlib >/dev/null 2>&1; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      missing_packages="$missing_packages ppxlib"
+
+      if test "x$has_missing_packages" = "xno"; then :
+  has_missing_packages=single
+
+else
+  has_missing_packages=multiple
+
+fi
+fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ocamlfind package refl" >&5
 $as_echo_n "checking for ocamlfind package refl... " >&6; }
    if $OCAMLFIND query refl >/dev/null 2>&1; then :
@@ -7243,6 +7261,16 @@ else
   as_fn_error $? "cannot copy file" "$LINENO" 5
 fi
      if cp $srcdir/tools/stubgen_common/stubgen_common.ml tools/stubgen_common/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/tools/stubgen_common/clang_helper.ml tools/stubgen_common/; then :
+  true
+else
+  as_fn_error $? "cannot copy file" "$LINENO" 5
+fi
+     if cp $srcdir/tools/stubgen_common/string_utils.ml tools/stubgen_common/; then :
   true
 else
   as_fn_error $? "cannot copy file" "$LINENO" 5

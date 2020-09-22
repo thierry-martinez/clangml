@@ -361,7 +361,7 @@ LIBCLANGML_STUBS_A = clangml/libclang_stubs.a
 NORM_PREFIX = $(error NORM_PREFIX should be set)
 norm_files = $(shell sed -n -e 's/^\\include{\([^}]*\)}/\1/p' $(NORM_PREFIX)/std.tex)
 libraries = ppx printer
-tools = stubgen norm_extractor print_tree
+tools = stubgen norm_extractor print_tree generate_attrs
 
 # This variable is expanded for each $(library)
 library_cmxa = $(library)/clangml_$(library).cmxa

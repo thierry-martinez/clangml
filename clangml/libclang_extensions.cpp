@@ -563,6 +563,24 @@ makeVersionTuple(
   return result;
 }
 
+#ifndef LLVM_VERSION_BEFORE_11_0_0
+static struct clang_ext_OMPTraitInfo
+MakeOMPTraitInfo(
+  clang::OMPTraitInfo *traitInfo, CXTranslationUnit tu)
+{
+  struct clang_ext_OMPTraitInfo info = { traitInfo, tu };
+  return info;
+}
+#endif
+
+static struct clang_ext_OMPTraitInfo
+MakeOMPTraitInfoInvalid(
+  CXTranslationUnit tu)
+{
+  struct clang_ext_OMPTraitInfo info = { nullptr, tu };
+  return info;
+}
+
 #ifdef LLVM_VERSION_BEFORE_7_0_0
 static unsigned int
 unsigned_int_of_ParamIdx(unsigned int i)
@@ -1021,6 +1039,42 @@ extern "C" {
       return MakeCXCursor(S->getInit(), getCursorTU(c));
     }
     #endif
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  CXCursor
+  clang_ext_IfStmt_getConditionVariable(CXCursor c)
+  {
+    if (auto S = llvm::dyn_cast_or_null<clang::IfStmt>(GetCursorStmt(c))) {
+      return MakeCXCursor(S->getConditionVariable(), getCursorTU(c));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  CXCursor
+  clang_ext_IfStmt_getCond(CXCursor c)
+  {
+    if (auto S = llvm::dyn_cast_or_null<clang::IfStmt>(GetCursorStmt(c))) {
+      return MakeCXCursor(S->getCond(), getCursorTU(c));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  CXCursor
+  clang_ext_IfStmt_getThen(CXCursor c)
+  {
+    if (auto S = llvm::dyn_cast_or_null<clang::IfStmt>(GetCursorStmt(c))) {
+      return MakeCXCursor(S->getThen(), getCursorTU(c));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
+  }
+
+  CXCursor
+  clang_ext_IfStmt_getElse(CXCursor c)
+  {
+    if (auto S = llvm::dyn_cast_or_null<clang::IfStmt>(GetCursorStmt(c))) {
+      return MakeCXCursor(S->getElse(), getCursorTU(c));
+    }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(c));
   }
 
@@ -3727,6 +3781,11 @@ extern "C" {
   clang_ext_Type_getUnqualifiedType(CXType CT)
   {
     return MakeCXType(GetQualType(CT).getUnqualifiedType(), GetTU(CT));
+  }
+
+  void
+  clang_ext_OMPTraitInfo_dispose(struct clang_ext_OMPTraitInfo)
+  {
   }
 
   #include "libclang_extensions_attrs.inc"

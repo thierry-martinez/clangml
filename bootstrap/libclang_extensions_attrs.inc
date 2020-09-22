@@ -2,6 +2,100 @@
  * It should not be modified by hand and it should not be versioned
  * (except by continuous integration on the dedicated bootstrap branch). */
 enum
+clang_ext_AArch64VectorPcs_spelling clang_ext_AArch64VectorPcs_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::AArch64VectorPcsAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_AArch64VectorPcs_GNU_aarch64_vector_pcs;
+  case 1:
+  return clang_ext_AArch64VectorPcs_CXX11_clang_aarch64_vector_pcs;
+  case 2:
+  return clang_ext_AArch64VectorPcs_C2x_clang_aarch64_vector_pcs;}
+ 
+ #endif
+ 
+ return clang_ext_AArch64VectorPcs_SpellingNotCalculated;}
+enum
+clang_ext_AMDGPUFlatWorkGroupSize_spelling
+clang_ext_AMDGPUFlatWorkGroupSize_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::AMDGPUFlatWorkGroupSizeAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_AMDGPUFlatWorkGroupSize_GNU_amdgpu_flat_work_group_size;
+  case 1:
+  return
+  clang_ext_AMDGPUFlatWorkGroupSize_CXX11_clang_amdgpu_flat_work_group_size;}
+ 
+ #endif
+ 
+ return clang_ext_AMDGPUFlatWorkGroupSize_SpellingNotCalculated;}
+enum
+clang_ext_AMDGPUNumSGPR_spelling clang_ext_AMDGPUNumSGPR_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_6_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::AMDGPUNumSGPRAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_AMDGPUNumSGPR_GNU_amdgpu_num_sgpr;
+  case 1:
+  return clang_ext_AMDGPUNumSGPR_CXX11_clang_amdgpu_num_sgpr;}
+ 
+ #endif
+ 
+ return clang_ext_AMDGPUNumSGPR_SpellingNotCalculated;}
+enum
+clang_ext_AMDGPUNumVGPR_spelling clang_ext_AMDGPUNumVGPR_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_6_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::AMDGPUNumVGPRAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_AMDGPUNumVGPR_GNU_amdgpu_num_vgpr;
+  case 1:
+  return clang_ext_AMDGPUNumVGPR_CXX11_clang_amdgpu_num_vgpr;}
+ 
+ #endif
+ 
+ return clang_ext_AMDGPUNumVGPR_SpellingNotCalculated;}
+enum
+clang_ext_AMDGPUWavesPerEU_spelling clang_ext_AMDGPUWavesPerEU_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::AMDGPUWavesPerEUAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_AMDGPUWavesPerEU_GNU_amdgpu_waves_per_eu;
+  case 1:
+  return clang_ext_AMDGPUWavesPerEU_CXX11_clang_amdgpu_waves_per_eu;}
+ 
+ #endif
+ 
+ return clang_ext_AMDGPUWavesPerEU_SpellingNotCalculated;}
+enum
 clang_ext_ARMInterruptAttr_InterruptType
 convert_ARMInterruptAttr_InterruptType(
 clang::ARMInterruptAttr ::InterruptType value)
@@ -20,10 +114,81 @@ clang::ARMInterruptAttr ::InterruptType value)
   return clang_ext_ARMInterruptAttr_InterruptType_Generic;}
  return clang_ext_ARMInterruptAttr_InterruptType_IRQ;}
 enum
+clang_ext_ARMInterrupt_spelling clang_ext_ARMInterrupt_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ARMInterruptAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ARMInterrupt_GNU_interrupt;
+  case 1:
+  return clang_ext_ARMInterrupt_CXX11_gnu_interrupt;
+  case 2:
+  return clang_ext_ARMInterrupt_C2x_gnu_interrupt;}
+ 
+ #endif
+ 
+ return clang_ext_ARMInterrupt_SpellingNotCalculated;}
+enum
+clang_ext_AVRInterrupt_spelling clang_ext_AVRInterrupt_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_5_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AVRInterruptAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_AVRInterrupt_GNU_interrupt;
+  case 1:
+  return clang_ext_AVRInterrupt_CXX11_gnu_interrupt;
+  case 2:
+  return clang_ext_AVRInterrupt_C2x_gnu_interrupt;}
+ 
+ #endif
+ 
+ return clang_ext_AVRInterrupt_SpellingNotCalculated;}
+enum
+clang_ext_AVRSignal_spelling clang_ext_AVRSignal_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_5_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AVRSignalAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_AVRSignal_GNU_signal;
+  case 1:
+  return clang_ext_AVRSignal_CXX11_gnu_signal;
+  case 2:
+  return clang_ext_AVRSignal_C2x_gnu_signal;}
+ 
+ #endif
+ 
+ return clang_ext_AVRSignal_SpellingNotCalculated;}
+enum clang_ext_AbiTag_spelling clang_ext_AbiTag_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AbiTagAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_AbiTag_GNU_abi_tag;
+  case 1:
+  return clang_ext_AbiTag_CXX11_gnu_abi_tag;}
+ 
+ #endif
+ 
+ return clang_ext_AbiTag_SpellingNotCalculated;}
+enum
 clang_ext_AcquireCapability_spelling clang_ext_AcquireCapability_getSpelling(
 CXCursor cursor)
 {
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
  
  auto attr = GetCursorAttr(cursor);
  if
@@ -44,23 +209,71 @@ CXCursor cursor)
   case clang::AcquireCapabilityAttr ::Spelling ::GNU_exclusive_lock_function:
   return clang_ext_AcquireCapability_GNU_exclusive_lock_function;
   case clang::AcquireCapabilityAttr ::Spelling ::GNU_shared_lock_function:
-  return clang_ext_AcquireCapability_GNU_shared_lock_function;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::AcquireCapabilityAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_AcquireCapability_SpellingNotCalculated;
-  
-  #endif
-  }
+  return clang_ext_AcquireCapability_GNU_shared_lock_function;}
  
  #endif
  
  return clang_ext_AcquireCapability_SpellingNotCalculated;}
 enum
-clang_ext_Aligned_spelling clang_ext_Aligned_getSpelling(CXCursor cursor)
+clang_ext_AcquireHandle_spelling clang_ext_AcquireHandle_getSpelling(
+CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::AcquireHandleAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_AcquireHandle_GNU_acquire_handle;
+  case 1:
+  return clang_ext_AcquireHandle_CXX11_clang_acquire_handle;
+  case 2:
+  return clang_ext_AcquireHandle_C2x_clang_acquire_handle;}
+ 
+ #endif
+ 
+ return clang_ext_AcquireHandle_SpellingNotCalculated;}
+enum
+clang_ext_AddressSpace_spelling clang_ext_AddressSpace_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AddressSpaceAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_AddressSpace_GNU_address_space;
+  case 1:
+  return clang_ext_AddressSpace_CXX11_clang_address_space;
+  case 2:
+  return clang_ext_AddressSpace_C2x_clang_address_space;}
+ 
+ #endif
+ 
+ return clang_ext_AddressSpace_SpellingNotCalculated;}
+enum clang_ext_Alias_spelling clang_ext_Alias_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AliasAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Alias_GNU_alias;
+  case 1:
+  return clang_ext_Alias_CXX11_gnu_alias;
+  case 2:
+  return clang_ext_Alias_C2x_gnu_alias;}
+ 
+ #endif
+ 
+ return clang_ext_Alias_SpellingNotCalculated;}
+enum
+clang_ext_Aligned_spelling clang_ext_Aligned_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
  
  auto attr = GetCursorAttr(cursor);
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::AlignedAttr >(attr))
@@ -69,29 +282,84 @@ clang_ext_Aligned_spelling clang_ext_Aligned_getSpelling(CXCursor cursor)
   return clang_ext_Aligned_GNU_aligned;
   case clang::AlignedAttr ::Spelling ::CXX11_gnu_aligned:
   return clang_ext_Aligned_CXX11_gnu_aligned;
+  
+  #ifndef LLVM_VERSION_BEFORE_11_0_0
+  
+  case clang::AlignedAttr ::Spelling ::C2x_gnu_aligned:
+  return clang_ext_Aligned_C2x_gnu_aligned;
+  
+  #endif
+  
   case clang::AlignedAttr ::Spelling ::Declspec_align:
   return clang_ext_Aligned_Declspec_align;
   case clang::AlignedAttr ::Spelling ::Keyword_alignas:
   return clang_ext_Aligned_Keyword_alignas;
   case clang::AlignedAttr ::Spelling ::Keyword_Alignas:
-  return clang_ext_Aligned_Keyword_Alignas;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::AlignedAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_Aligned_SpellingNotCalculated;
-  
-  #endif
-  }
+  return clang_ext_Aligned_Keyword_Alignas;}
  
  #endif
  
  return clang_ext_Aligned_SpellingNotCalculated;}
 enum
+clang_ext_AllocAlign_spelling clang_ext_AllocAlign_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_5_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AllocAlignAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_AllocAlign_GNU_alloc_align;
+  case 1:
+  return clang_ext_AllocAlign_CXX11_gnu_alloc_align;
+  case 2:
+  return clang_ext_AllocAlign_C2x_gnu_alloc_align;}
+ 
+ #endif
+ 
+ return clang_ext_AllocAlign_SpellingNotCalculated;}
+enum
+clang_ext_AllocSize_spelling clang_ext_AllocSize_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_4_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AllocSizeAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_AllocSize_GNU_alloc_size;
+  case 1:
+  return clang_ext_AllocSize_CXX11_gnu_alloc_size;
+  case 2:
+  return clang_ext_AllocSize_C2x_gnu_alloc_size;}
+ 
+ #endif
+ 
+ return clang_ext_AllocSize_SpellingNotCalculated;}
+enum
+clang_ext_AlwaysDestroy_spelling clang_ext_AlwaysDestroy_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::AlwaysDestroyAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_AlwaysDestroy_GNU_always_destroy;
+  case 1:
+  return clang_ext_AlwaysDestroy_CXX11_clang_always_destroy;}
+ 
+ #endif
+ 
+ return clang_ext_AlwaysDestroy_SpellingNotCalculated;}
+enum
 clang_ext_AlwaysInline_spelling clang_ext_AlwaysInline_getSpelling(
 CXCursor cursor)
 {
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
  
  auto attr = GetCursorAttr(cursor);
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::AlwaysInlineAttr >(attr))
@@ -100,25 +368,131 @@ CXCursor cursor)
   return clang_ext_AlwaysInline_GNU_always_inline;
   case clang::AlwaysInlineAttr ::Spelling ::CXX11_gnu_always_inline:
   return clang_ext_AlwaysInline_CXX11_gnu_always_inline;
-  case clang::AlwaysInlineAttr ::Spelling ::Keyword_forceinline:
-  return clang_ext_AlwaysInline_Keyword_forceinline;
   
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
+  #ifndef LLVM_VERSION_BEFORE_11_0_0
   
-  case clang::AlwaysInlineAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_AlwaysInline_SpellingNotCalculated;
+  case clang::AlwaysInlineAttr ::Spelling ::C2x_gnu_always_inline:
+  return clang_ext_AlwaysInline_C2x_gnu_always_inline;
   
   #endif
-  }
+  
+  case clang::AlwaysInlineAttr ::Spelling ::Keyword_forceinline:
+  return clang_ext_AlwaysInline_Keyword_forceinline;}
  
  #endif
  
  return clang_ext_AlwaysInline_SpellingNotCalculated;}
 enum
+clang_ext_Annotate_spelling clang_ext_Annotate_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AnnotateAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Annotate_GNU_annotate;
+  case 1:
+  return clang_ext_Annotate_CXX11_clang_annotate;
+  case 2:
+  return clang_ext_Annotate_C2x_clang_annotate;}
+ 
+ #endif
+ 
+ return clang_ext_Annotate_SpellingNotCalculated;}
+enum
+clang_ext_AnyX86Interrupt_spelling clang_ext_AnyX86Interrupt_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::AnyX86InterruptAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_AnyX86Interrupt_GNU_interrupt;
+  case 1:
+  return clang_ext_AnyX86Interrupt_CXX11_gnu_interrupt;
+  case 2:
+  return clang_ext_AnyX86Interrupt_C2x_gnu_interrupt;}
+ 
+ #endif
+ 
+ return clang_ext_AnyX86Interrupt_SpellingNotCalculated;}
+enum
+clang_ext_AnyX86NoCallerSavedRegisters_spelling
+clang_ext_AnyX86NoCallerSavedRegisters_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_5_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::AnyX86NoCallerSavedRegistersAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return
+  clang_ext_AnyX86NoCallerSavedRegisters_GNU_no_caller_saved_registers;
+  case 1:
+  return
+  clang_ext_AnyX86NoCallerSavedRegisters_CXX11_gnu_no_caller_saved_registers;
+  case 2:
+  return
+  clang_ext_AnyX86NoCallerSavedRegisters_C2x_gnu_no_caller_saved_registers;}
+ 
+ #endif
+ 
+ return clang_ext_AnyX86NoCallerSavedRegisters_SpellingNotCalculated;}
+enum
+clang_ext_AnyX86NoCfCheck_spelling clang_ext_AnyX86NoCfCheck_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_7_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::AnyX86NoCfCheckAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_AnyX86NoCfCheck_GNU_nocf_check;
+  case 1:
+  return clang_ext_AnyX86NoCfCheck_CXX11_gnu_nocf_check;
+  case 2:
+  return clang_ext_AnyX86NoCfCheck_C2x_gnu_nocf_check;}
+ 
+ #endif
+ 
+ return clang_ext_AnyX86NoCfCheck_SpellingNotCalculated;}
+enum
+clang_ext_ArcWeakrefUnavailable_spelling
+clang_ext_ArcWeakrefUnavailable_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ArcWeakrefUnavailableAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return
+  clang_ext_ArcWeakrefUnavailable_GNU_objc_arc_weak_reference_unavailable;
+  case 1:
+  return
+  clang_ext_ArcWeakrefUnavailable_CXX11_clang_objc_arc_weak_reference_unavailable;
+  case 2:
+  return
+  clang_ext_ArcWeakrefUnavailable_C2x_clang_objc_arc_weak_reference_unavailable;}
+ 
+ #endif
+ 
+ return clang_ext_ArcWeakrefUnavailable_SpellingNotCalculated;}
+enum
 clang_ext_ArgumentWithTypeTag_spelling
 clang_ext_ArgumentWithTypeTag_getSpelling(CXCursor cursor)
 {
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
  
  auto attr = GetCursorAttr(cursor);
  if
@@ -128,25 +502,41 @@ clang_ext_ArgumentWithTypeTag_getSpelling(CXCursor cursor)
  {case
   clang::ArgumentWithTypeTagAttr ::Spelling ::GNU_argument_with_type_tag:
   return clang_ext_ArgumentWithTypeTag_GNU_argument_with_type_tag;
+  
+  #ifndef LLVM_VERSION_BEFORE_7_0_0
+  
   case
   clang::ArgumentWithTypeTagAttr ::Spelling ::CXX11_clang_argument_with_type_tag:
   return clang_ext_ArgumentWithTypeTag_CXX11_clang_argument_with_type_tag;
+  
+  #endif
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_7_0_0
+  
   case
   clang::ArgumentWithTypeTagAttr ::Spelling ::C2x_clang_argument_with_type_tag:
   return clang_ext_ArgumentWithTypeTag_C2x_clang_argument_with_type_tag;
+  
+  #endif
+  
   case clang::ArgumentWithTypeTagAttr ::Spelling ::GNU_pointer_with_type_tag:
   return clang_ext_ArgumentWithTypeTag_GNU_pointer_with_type_tag;
+  
+  #ifndef LLVM_VERSION_BEFORE_7_0_0
+  
   case
   clang::ArgumentWithTypeTagAttr ::Spelling ::CXX11_clang_pointer_with_type_tag:
   return clang_ext_ArgumentWithTypeTag_CXX11_clang_pointer_with_type_tag;
+  
+  #endif
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_7_0_0
+  
   case
   clang::ArgumentWithTypeTagAttr ::Spelling ::C2x_clang_pointer_with_type_tag:
   return clang_ext_ArgumentWithTypeTag_C2x_clang_pointer_with_type_tag;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::ArgumentWithTypeTagAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_ArgumentWithTypeTag_SpellingNotCalculated;
   
   #endif
   }
@@ -155,10 +545,87 @@ clang_ext_ArgumentWithTypeTag_getSpelling(CXCursor cursor)
  
  return clang_ext_ArgumentWithTypeTag_SpellingNotCalculated;}
 enum
+clang_ext_ArmBuiltinAlias_spelling clang_ext_ArmBuiltinAlias_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_11_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ArmBuiltinAliasAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ArmBuiltinAlias_GNU_clang_arm_builtin_alias;
+  case 1:
+  return clang_ext_ArmBuiltinAlias_CXX11_clang_clang_arm_builtin_alias;
+  case 2:
+  return clang_ext_ArmBuiltinAlias_C2x_clang_clang_arm_builtin_alias;}
+ 
+ #endif
+ 
+ return clang_ext_ArmBuiltinAlias_SpellingNotCalculated;}
+enum
+clang_ext_ArmMveStrictPolymorphism_spelling
+clang_ext_ArmMveStrictPolymorphism_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_11_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ArmMveStrictPolymorphismAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return
+  clang_ext_ArmMveStrictPolymorphism_GNU_clang_arm_mve_strict_polymorphism;
+  case 1:
+  return
+  clang_ext_ArmMveStrictPolymorphism_CXX11_clang_clang_arm_mve_strict_polymorphism;
+  case 2:
+  return
+  clang_ext_ArmMveStrictPolymorphism_C2x_clang_clang_arm_mve_strict_polymorphism;}
+ 
+ #endif
+ 
+ return clang_ext_ArmMveStrictPolymorphism_SpellingNotCalculated;}
+enum
+clang_ext_Artificial_spelling clang_ext_Artificial_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_7_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ArtificialAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Artificial_GNU_artificial;
+  case 1:
+  return clang_ext_Artificial_CXX11_gnu_artificial;
+  case 2:
+  return clang_ext_Artificial_C2x_gnu_artificial;}
+ 
+ #endif
+ 
+ return clang_ext_Artificial_SpellingNotCalculated;}
+enum
+clang_ext_AsmLabel_spelling clang_ext_AsmLabel_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AsmLabelAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_AsmLabel_Keyword_asm;}
+ 
+ #endif
+ 
+ return clang_ext_AsmLabel_SpellingNotCalculated;}
+enum
 clang_ext_AssertCapability_spelling clang_ext_AssertCapability_getSpelling(
 CXCursor cursor)
 {
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+ #ifndef LLVM_VERSION_BEFORE_6_0_0
  
  auto attr = GetCursorAttr(cursor);
  if
@@ -173,19 +640,71 @@ CXCursor cursor)
   return clang_ext_AssertCapability_GNU_assert_shared_capability;
   case
   clang::AssertCapabilityAttr ::Spelling ::CXX11_clang_assert_shared_capability:
-  return clang_ext_AssertCapability_CXX11_clang_assert_shared_capability;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::AssertCapabilityAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_AssertCapability_SpellingNotCalculated;
-  
-  #endif
-  }
+  return clang_ext_AssertCapability_CXX11_clang_assert_shared_capability;}
  
  #endif
  
  return clang_ext_AssertCapability_SpellingNotCalculated;}
+enum
+clang_ext_AssumeAligned_spelling clang_ext_AssumeAligned_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_6_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::AssumeAlignedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_AssumeAligned_GNU_assume_aligned;
+  case 1:
+  return clang_ext_AssumeAligned_CXX11_gnu_assume_aligned;
+  case 2:
+  return clang_ext_AssumeAligned_C2x_gnu_assume_aligned;}
+ 
+ #endif
+ 
+ return clang_ext_AssumeAligned_SpellingNotCalculated;}
+enum
+clang_ext_Availability_spelling clang_ext_Availability_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AvailabilityAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Availability_GNU_availability;
+  case 1:
+  return clang_ext_Availability_CXX11_clang_availability;
+  case 2:
+  return clang_ext_Availability_C2x_clang_availability;}
+ 
+ #endif
+ 
+ return clang_ext_Availability_SpellingNotCalculated;}
+enum
+clang_ext_BPFPreserveAccessIndex_spelling
+clang_ext_BPFPreserveAccessIndex_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::BPFPreserveAccessIndexAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_BPFPreserveAccessIndex_GNU_preserve_access_index;
+  case 1:
+  return clang_ext_BPFPreserveAccessIndex_CXX11_clang_preserve_access_index;
+  case 2:
+  return clang_ext_BPFPreserveAccessIndex_C2x_clang_preserve_access_index;}
+ 
+ #endif
+ 
+ return clang_ext_BPFPreserveAccessIndex_SpellingNotCalculated;}
 enum
 clang_ext_BlocksAttr_BlockType convert_BlocksAttr_BlockType(
 clang::BlocksAttr ::BlockType value)
@@ -193,6 +712,82 @@ clang::BlocksAttr ::BlockType value)
  {case clang::BlocksAttr ::BlockType ::ByRef:
   return clang_ext_BlocksAttr_BlockType_ByRef;}
  return clang_ext_BlocksAttr_BlockType_ByRef;}
+enum clang_ext_Blocks_spelling clang_ext_Blocks_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::BlocksAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Blocks_GNU_blocks;
+  case 1:
+  return clang_ext_Blocks_CXX11_clang_blocks;
+  case 2:
+  return clang_ext_Blocks_C2x_clang_blocks;}
+ 
+ #endif
+ 
+ return clang_ext_Blocks_SpellingNotCalculated;}
+enum clang_ext_CDecl_spelling clang_ext_CDecl_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CDeclAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_CDecl_GNU_cdecl;
+  case 1:
+  return clang_ext_CDecl_CXX11_gnu_cdecl;
+  case 2:
+  return clang_ext_CDecl_C2x_gnu_cdecl;
+  case 3:
+  return clang_ext_CDecl_Keyword_cdecl;}
+ 
+ #endif
+ 
+ return clang_ext_CDecl_SpellingNotCalculated;}
+enum
+clang_ext_CFAuditedTransfer_spelling clang_ext_CFAuditedTransfer_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::CFAuditedTransferAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_CFAuditedTransfer_GNU_cf_audited_transfer;
+  case 1:
+  return clang_ext_CFAuditedTransfer_CXX11_clang_cf_audited_transfer;
+  case 2:
+  return clang_ext_CFAuditedTransfer_C2x_clang_cf_audited_transfer;}
+ 
+ #endif
+ 
+ return clang_ext_CFAuditedTransfer_SpellingNotCalculated;}
+enum
+clang_ext_CFConsumed_spelling clang_ext_CFConsumed_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CFConsumedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_CFConsumed_GNU_cf_consumed;
+  case 1:
+  return clang_ext_CFConsumed_CXX11_clang_cf_consumed;
+  case 2:
+  return clang_ext_CFConsumed_C2x_clang_cf_consumed;}
+ 
+ #endif
+ 
+ return clang_ext_CFConsumed_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_10_0_0
  enum
@@ -204,7 +799,278 @@ clang::BlocksAttr ::BlockType value)
   return clang_ext_CFGuardAttr_GuardArg_nocf;}
 
 #endif
+ enum
+ clang_ext_CFICanonicalJumpTable_spelling
+ clang_ext_CFICanonicalJumpTable_getSpelling(CXCursor cursor)
+ {
+  #ifndef LLVM_VERSION_BEFORE_10_0_0
+  
+  auto attr = GetCursorAttr(cursor);
+  if
+  (auto qual_attr =
+   llvm::dyn_cast_or_null<clang::CFICanonicalJumpTableAttr >(attr))
+  switch (qual_attr->getSpellingListIndex())
+  {case 0:
+   return clang_ext_CFICanonicalJumpTable_GNU_cfi_canonical_jump_table;
+   case 1:
+   return
+   clang_ext_CFICanonicalJumpTable_CXX11_clang_cfi_canonical_jump_table;
+   case 2:
+   return clang_ext_CFICanonicalJumpTable_C2x_clang_cfi_canonical_jump_table;}
+  
+  #endif
+  
+  return clang_ext_CFICanonicalJumpTable_SpellingNotCalculated;}
+enum
+clang_ext_CFReturnsNotRetained_spelling
+clang_ext_CFReturnsNotRetained_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
  
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::CFReturnsNotRetainedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_CFReturnsNotRetained_GNU_cf_returns_not_retained;
+  case 1:
+  return clang_ext_CFReturnsNotRetained_CXX11_clang_cf_returns_not_retained;
+  case 2:
+  return clang_ext_CFReturnsNotRetained_C2x_clang_cf_returns_not_retained;}
+ 
+ #endif
+ 
+ return clang_ext_CFReturnsNotRetained_SpellingNotCalculated;}
+enum
+clang_ext_CFReturnsRetained_spelling clang_ext_CFReturnsRetained_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::CFReturnsRetainedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_CFReturnsRetained_GNU_cf_returns_retained;
+  case 1:
+  return clang_ext_CFReturnsRetained_CXX11_clang_cf_returns_retained;
+  case 2:
+  return clang_ext_CFReturnsRetained_C2x_clang_cf_returns_retained;}
+ 
+ #endif
+ 
+ return clang_ext_CFReturnsRetained_SpellingNotCalculated;}
+enum
+clang_ext_CFUnknownTransfer_spelling clang_ext_CFUnknownTransfer_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::CFUnknownTransferAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_CFUnknownTransfer_GNU_cf_unknown_transfer;
+  case 1:
+  return clang_ext_CFUnknownTransfer_CXX11_clang_cf_unknown_transfer;
+  case 2:
+  return clang_ext_CFUnknownTransfer_C2x_clang_cf_unknown_transfer;}
+ 
+ #endif
+ 
+ return clang_ext_CFUnknownTransfer_SpellingNotCalculated;}
+enum
+clang_ext_CPUDispatch_spelling clang_ext_CPUDispatch_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_7_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CPUDispatchAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_CPUDispatch_GNU_cpu_dispatch;
+  case 1:
+  return clang_ext_CPUDispatch_CXX11_clang_cpu_dispatch;
+  case 2:
+  return clang_ext_CPUDispatch_C2x_clang_cpu_dispatch;
+  case 3:
+  return clang_ext_CPUDispatch_Declspec_cpu_dispatch;}
+ 
+ #endif
+ 
+ return clang_ext_CPUDispatch_SpellingNotCalculated;}
+enum
+clang_ext_CPUSpecific_spelling clang_ext_CPUSpecific_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_7_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CPUSpecificAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_CPUSpecific_GNU_cpu_specific;
+  case 1:
+  return clang_ext_CPUSpecific_CXX11_clang_cpu_specific;
+  case 2:
+  return clang_ext_CPUSpecific_C2x_clang_cpu_specific;
+  case 3:
+  return clang_ext_CPUSpecific_Declspec_cpu_specific;}
+ 
+ #endif
+ 
+ return clang_ext_CPUSpecific_SpellingNotCalculated;}
+enum
+clang_ext_CUDAConstant_spelling clang_ext_CUDAConstant_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CUDAConstantAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_CUDAConstant_GNU_constant;
+  case 1:
+  return clang_ext_CUDAConstant_Declspec_constant;}
+ 
+ #endif
+ 
+ return clang_ext_CUDAConstant_SpellingNotCalculated;}
+enum
+clang_ext_CUDADevice_spelling clang_ext_CUDADevice_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CUDADeviceAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_CUDADevice_GNU_device;
+  case 1:
+  return clang_ext_CUDADevice_Declspec_device;}
+ 
+ #endif
+ 
+ return clang_ext_CUDADevice_SpellingNotCalculated;}
+enum
+clang_ext_CUDADeviceBuiltinSurfaceType_spelling
+clang_ext_CUDADeviceBuiltinSurfaceType_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_11_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::CUDADeviceBuiltinSurfaceTypeAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return
+  clang_ext_CUDADeviceBuiltinSurfaceType_GNU_device_builtin_surface_type;
+  case 1:
+  return
+  clang_ext_CUDADeviceBuiltinSurfaceType_Declspec_device_builtin_surface_type;}
+ 
+ #endif
+ 
+ return clang_ext_CUDADeviceBuiltinSurfaceType_SpellingNotCalculated;}
+enum
+clang_ext_CUDADeviceBuiltinTextureType_spelling
+clang_ext_CUDADeviceBuiltinTextureType_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_11_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::CUDADeviceBuiltinTextureTypeAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return
+  clang_ext_CUDADeviceBuiltinTextureType_GNU_device_builtin_texture_type;
+  case 1:
+  return
+  clang_ext_CUDADeviceBuiltinTextureType_Declspec_device_builtin_texture_type;}
+ 
+ #endif
+ 
+ return clang_ext_CUDADeviceBuiltinTextureType_SpellingNotCalculated;}
+enum
+clang_ext_CUDAGlobal_spelling clang_ext_CUDAGlobal_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CUDAGlobalAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_CUDAGlobal_GNU_global;
+  case 1:
+  return clang_ext_CUDAGlobal_Declspec_global;}
+ 
+ #endif
+ 
+ return clang_ext_CUDAGlobal_SpellingNotCalculated;}
+enum
+clang_ext_CUDAHost_spelling clang_ext_CUDAHost_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CUDAHostAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_CUDAHost_GNU_host;
+  case 1:
+  return clang_ext_CUDAHost_Declspec_host;}
+ 
+ #endif
+ 
+ return clang_ext_CUDAHost_SpellingNotCalculated;}
+enum
+clang_ext_CUDALaunchBounds_spelling clang_ext_CUDALaunchBounds_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_7_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::CUDALaunchBoundsAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_CUDALaunchBounds_GNU_launch_bounds;
+  case 1:
+  return clang_ext_CUDALaunchBounds_Declspec_launch_bounds;}
+ 
+ #endif
+ 
+ return clang_ext_CUDALaunchBounds_SpellingNotCalculated;}
+enum
+clang_ext_CUDAShared_spelling clang_ext_CUDAShared_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CUDASharedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_CUDAShared_GNU_shared;
+  case 1:
+  return clang_ext_CUDAShared_Declspec_shared;}
+ 
+ #endif
+ 
+ return clang_ext_CUDAShared_SpellingNotCalculated;}
+
 #ifndef LLVM_VERSION_BEFORE_3_5_0
  enum
  clang_ext_CallableWhenAttr_ConsumedState
@@ -221,34 +1087,150 @@ clang::BlocksAttr ::BlockType value)
 
 #endif
  enum
- clang_ext_Capability_spelling clang_ext_Capability_getSpelling(
+ clang_ext_CallableWhen_spelling clang_ext_CallableWhen_getSpelling(
  CXCursor cursor)
  {
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
+  #ifndef LLVM_VERSION_BEFORE_3_5_0
   
   auto attr = GetCursorAttr(cursor);
-  if (auto qual_attr = llvm::dyn_cast_or_null<clang::CapabilityAttr >(attr))
-  switch (qual_attr->getSemanticSpelling())
-  {case clang::CapabilityAttr ::Spelling ::GNU_capability:
-   return clang_ext_Capability_GNU_capability;
-   case clang::CapabilityAttr ::Spelling ::CXX11_clang_capability:
-   return clang_ext_Capability_CXX11_clang_capability;
-   case clang::CapabilityAttr ::Spelling ::GNU_shared_capability:
-   return clang_ext_Capability_GNU_shared_capability;
-   case clang::CapabilityAttr ::Spelling ::CXX11_clang_shared_capability:
-   return clang_ext_Capability_CXX11_clang_shared_capability;
-   
-   #ifndef LLVM_VERSION_BEFORE_10_0_0
-   
-   case clang::CapabilityAttr ::Spelling ::SpellingNotCalculated:
-   return clang_ext_Capability_SpellingNotCalculated;
-   
-   #endif
-   }
+  if
+  (auto qual_attr = llvm::dyn_cast_or_null<clang::CallableWhenAttr >(attr))
+  switch (qual_attr->getSpellingListIndex())
+  {case 0:
+   return clang_ext_CallableWhen_GNU_callable_when;
+   case 1:
+   return clang_ext_CallableWhen_CXX11_clang_callable_when;}
   
   #endif
   
-  return clang_ext_Capability_SpellingNotCalculated;}
+  return clang_ext_CallableWhen_SpellingNotCalculated;}
+enum
+clang_ext_Callback_spelling clang_ext_Callback_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CallbackAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Callback_GNU_callback;
+  case 1:
+  return clang_ext_Callback_CXX11_clang_callback;
+  case 2:
+  return clang_ext_Callback_C2x_clang_callback;}
+ 
+ #endif
+ 
+ return clang_ext_Callback_SpellingNotCalculated;}
+enum
+clang_ext_Capability_spelling clang_ext_Capability_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CapabilityAttr >(attr))
+ switch (qual_attr->getSemanticSpelling())
+ {case clang::CapabilityAttr ::Spelling ::GNU_capability:
+  return clang_ext_Capability_GNU_capability;
+  case clang::CapabilityAttr ::Spelling ::CXX11_clang_capability:
+  return clang_ext_Capability_CXX11_clang_capability;
+  case clang::CapabilityAttr ::Spelling ::GNU_shared_capability:
+  return clang_ext_Capability_GNU_shared_capability;
+  case clang::CapabilityAttr ::Spelling ::CXX11_clang_shared_capability:
+  return clang_ext_Capability_CXX11_clang_shared_capability;}
+ 
+ #endif
+ 
+ return clang_ext_Capability_SpellingNotCalculated;}
+enum
+clang_ext_CarriesDependency_spelling clang_ext_CarriesDependency_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::CarriesDependencyAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_CarriesDependency_GNU_carries_dependency;
+  case 1:
+  return clang_ext_CarriesDependency_CXX11_carries_dependency;}
+ 
+ #endif
+ 
+ return clang_ext_CarriesDependency_SpellingNotCalculated;}
+enum
+clang_ext_Cleanup_spelling clang_ext_Cleanup_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CleanupAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Cleanup_GNU_cleanup;
+  case 1:
+  return clang_ext_Cleanup_CXX11_gnu_cleanup;
+  case 2:
+  return clang_ext_Cleanup_C2x_gnu_cleanup;}
+ 
+ #endif
+ 
+ return clang_ext_Cleanup_SpellingNotCalculated;}
+enum clang_ext_Cold_spelling clang_ext_Cold_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ColdAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Cold_GNU_cold;
+  case 1:
+  return clang_ext_Cold_CXX11_gnu_cold;
+  case 2:
+  return clang_ext_Cold_C2x_gnu_cold;}
+ 
+ #endif
+ 
+ return clang_ext_Cold_SpellingNotCalculated;}
+enum clang_ext_Common_spelling clang_ext_Common_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::CommonAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Common_GNU_common;
+  case 1:
+  return clang_ext_Common_CXX11_gnu_common;
+  case 2:
+  return clang_ext_Common_C2x_gnu_common;}
+ 
+ #endif
+ 
+ return clang_ext_Common_SpellingNotCalculated;}
+enum clang_ext_Const_spelling clang_ext_Const_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ConstAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Const_GNU_const;
+  case 1:
+  return clang_ext_Const_CXX11_gnu_const;
+  case 2:
+  return clang_ext_Const_C2x_gnu_const;}
+ 
+ #endif
+ 
+ return clang_ext_Const_SpellingNotCalculated;}
 enum
 clang_ext_ConstInit_spelling clang_ext_ConstInit_getSpelling(CXCursor cursor)
 {
@@ -263,19 +1245,30 @@ clang_ext_ConstInit_spelling clang_ext_ConstInit_getSpelling(CXCursor cursor)
   return clang_ext_ConstInit_GNU_require_constant_initialization;
   case
   clang::ConstInitAttr ::Spelling ::CXX11_clang_require_constant_initialization:
-  return clang_ext_ConstInit_CXX11_clang_require_constant_initialization;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::ConstInitAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_ConstInit_SpellingNotCalculated;
-  
-  #endif
-  }
+  return clang_ext_ConstInit_CXX11_clang_require_constant_initialization;}
  
  #endif
  
  return clang_ext_ConstInit_SpellingNotCalculated;}
+enum
+clang_ext_Constructor_spelling clang_ext_Constructor_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ConstructorAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Constructor_GNU_constructor;
+  case 1:
+  return clang_ext_Constructor_CXX11_gnu_constructor;
+  case 2:
+  return clang_ext_Constructor_C2x_gnu_constructor;}
+ 
+ #endif
+ 
+ return clang_ext_Constructor_SpellingNotCalculated;}
 enum
 clang_ext_ConsumableAttr_ConsumedState convert_ConsumableAttr_ConsumedState(
 clang::ConsumableAttr ::ConsumedState value)
@@ -287,6 +1280,185 @@ clang::ConsumableAttr ::ConsumedState value)
   case clang::ConsumableAttr ::ConsumedState ::Unconsumed:
   return clang_ext_ConsumableAttr_ConsumedState_Unconsumed;}
  return clang_ext_ConsumableAttr_ConsumedState_Unknown;}
+enum
+clang_ext_Consumable_spelling clang_ext_Consumable_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ConsumableAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Consumable_GNU_consumable;
+  case 1:
+  return clang_ext_Consumable_CXX11_clang_consumable;}
+ 
+ #endif
+ 
+ return clang_ext_Consumable_SpellingNotCalculated;}
+enum
+clang_ext_ConsumableAutoCast_spelling
+clang_ext_ConsumableAutoCast_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ConsumableAutoCastAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ConsumableAutoCast_GNU_consumable_auto_cast_state;
+  case 1:
+  return clang_ext_ConsumableAutoCast_CXX11_clang_consumable_auto_cast_state;}
+ 
+ #endif
+ 
+ return clang_ext_ConsumableAutoCast_SpellingNotCalculated;}
+enum
+clang_ext_ConsumableSetOnRead_spelling
+clang_ext_ConsumableSetOnRead_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ConsumableSetOnReadAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ConsumableSetOnRead_GNU_consumable_set_state_on_read;
+  case 1:
+  return
+  clang_ext_ConsumableSetOnRead_CXX11_clang_consumable_set_state_on_read;}
+ 
+ #endif
+ 
+ return clang_ext_ConsumableSetOnRead_SpellingNotCalculated;}
+enum
+clang_ext_Convergent_spelling clang_ext_Convergent_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_4_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ConvergentAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Convergent_GNU_convergent;
+  case 1:
+  return clang_ext_Convergent_CXX11_clang_convergent;
+  case 2:
+  return clang_ext_Convergent_C2x_clang_convergent;}
+ 
+ #endif
+ 
+ return clang_ext_Convergent_SpellingNotCalculated;}
+enum
+clang_ext_DLLExport_spelling clang_ext_DLLExport_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::DLLExportAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_DLLExport_Declspec_dllexport;
+  case 1:
+  return clang_ext_DLLExport_GNU_dllexport;
+  case 2:
+  return clang_ext_DLLExport_CXX11_gnu_dllexport;
+  case 3:
+  return clang_ext_DLLExport_C2x_gnu_dllexport;}
+ 
+ #endif
+ 
+ return clang_ext_DLLExport_SpellingNotCalculated;}
+enum
+clang_ext_DLLImport_spelling clang_ext_DLLImport_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::DLLImportAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_DLLImport_Declspec_dllimport;
+  case 1:
+  return clang_ext_DLLImport_GNU_dllimport;
+  case 2:
+  return clang_ext_DLLImport_CXX11_gnu_dllimport;
+  case 3:
+  return clang_ext_DLLImport_C2x_gnu_dllimport;}
+ 
+ #endif
+ 
+ return clang_ext_DLLImport_SpellingNotCalculated;}
+enum
+clang_ext_Deprecated_spelling clang_ext_Deprecated_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::DeprecatedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Deprecated_GNU_deprecated;
+  case 1:
+  return clang_ext_Deprecated_CXX11_gnu_deprecated;
+  case 2:
+  return clang_ext_Deprecated_C2x_gnu_deprecated;
+  case 3:
+  return clang_ext_Deprecated_Declspec_deprecated;
+  case 4:
+  return clang_ext_Deprecated_CXX11_deprecated;
+  case 5:
+  return clang_ext_Deprecated_C2x_deprecated;}
+ 
+ #endif
+ 
+ return clang_ext_Deprecated_SpellingNotCalculated;}
+enum
+clang_ext_Destructor_spelling clang_ext_Destructor_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::DestructorAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Destructor_GNU_destructor;
+  case 1:
+  return clang_ext_Destructor_CXX11_gnu_destructor;
+  case 2:
+  return clang_ext_Destructor_C2x_gnu_destructor;}
+ 
+ #endif
+ 
+ return clang_ext_Destructor_SpellingNotCalculated;}
+enum
+clang_ext_DisableTailCalls_spelling clang_ext_DisableTailCalls_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_8_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::DisableTailCallsAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_DisableTailCalls_GNU_disable_tail_calls;
+  case 1:
+  return clang_ext_DisableTailCalls_CXX11_clang_disable_tail_calls;
+  case 2:
+  return clang_ext_DisableTailCalls_C2x_clang_disable_tail_calls;}
+ 
+ #endif
+ 
+ return clang_ext_DisableTailCalls_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_5_0_0
  enum
@@ -300,29 +1472,443 @@ clang::ConsumableAttr ::ConsumedState value)
   return clang_ext_EnumExtensibilityAttr_Kind_Closed;}
 
 #endif
- enum clang_ext_Final_spelling clang_ext_Final_getSpelling(CXCursor cursor)
+ enum
+ clang_ext_EnumExtensibility_spelling
+ clang_ext_EnumExtensibility_getSpelling(CXCursor cursor)
  {
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
+  #ifndef LLVM_VERSION_BEFORE_5_0_0
   
   auto attr = GetCursorAttr(cursor);
-  if (auto qual_attr = llvm::dyn_cast_or_null<clang::FinalAttr >(attr))
-  switch (qual_attr->getSemanticSpelling())
-  {case clang::FinalAttr ::Spelling ::Keyword_final:
-   return clang_ext_Final_Keyword_final;
-   case clang::FinalAttr ::Spelling ::Keyword_sealed:
-   return clang_ext_Final_Keyword_sealed;
-   
-   #ifndef LLVM_VERSION_BEFORE_10_0_0
-   
-   case clang::FinalAttr ::Spelling ::SpellingNotCalculated:
-   return clang_ext_Final_SpellingNotCalculated;
-   
-   #endif
-   }
+  if
+  (auto qual_attr =
+   llvm::dyn_cast_or_null<clang::EnumExtensibilityAttr >(attr))
+  switch (qual_attr->getSpellingListIndex())
+  {case 0:
+   return clang_ext_EnumExtensibility_GNU_enum_extensibility;
+   case 1:
+   return clang_ext_EnumExtensibility_CXX11_clang_enum_extensibility;
+   case 2:
+   return clang_ext_EnumExtensibility_C2x_clang_enum_extensibility;}
   
   #endif
   
-  return clang_ext_Final_SpellingNotCalculated;}
+  return clang_ext_EnumExtensibility_SpellingNotCalculated;}
+enum
+clang_ext_ExcludeFromExplicitInstantiation_spelling
+clang_ext_ExcludeFromExplicitInstantiation_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ExcludeFromExplicitInstantiationAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return
+  clang_ext_ExcludeFromExplicitInstantiation_GNU_exclude_from_explicit_instantiation;
+  case 1:
+  return
+  clang_ext_ExcludeFromExplicitInstantiation_CXX11_clang_exclude_from_explicit_instantiation;
+  case 2:
+  return
+  clang_ext_ExcludeFromExplicitInstantiation_C2x_clang_exclude_from_explicit_instantiation;}
+ 
+ #endif
+ 
+ return clang_ext_ExcludeFromExplicitInstantiation_SpellingNotCalculated;}
+enum
+clang_ext_ExternalSourceSymbol_spelling
+clang_ext_ExternalSourceSymbol_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_5_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ExternalSourceSymbolAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ExternalSourceSymbol_GNU_external_source_symbol;
+  case 1:
+  return clang_ext_ExternalSourceSymbol_CXX11_clang_external_source_symbol;
+  case 2:
+  return clang_ext_ExternalSourceSymbol_C2x_clang_external_source_symbol;}
+ 
+ #endif
+ 
+ return clang_ext_ExternalSourceSymbol_SpellingNotCalculated;}
+enum
+clang_ext_FallThrough_spelling clang_ext_FallThrough_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::FallThroughAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_FallThrough_CXX11_fallthrough;
+  case 1:
+  return clang_ext_FallThrough_C2x_fallthrough;
+  case 2:
+  return clang_ext_FallThrough_CXX11_clang_fallthrough;
+  case 3:
+  return clang_ext_FallThrough_GNU_fallthrough;
+  case 4:
+  return clang_ext_FallThrough_CXX11_gnu_fallthrough;
+  case 5:
+  return clang_ext_FallThrough_C2x_gnu_fallthrough;}
+ 
+ #endif
+ 
+ return clang_ext_FallThrough_SpellingNotCalculated;}
+enum
+clang_ext_FastCall_spelling clang_ext_FastCall_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::FastCallAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_FastCall_GNU_fastcall;
+  case 1:
+  return clang_ext_FastCall_CXX11_gnu_fastcall;
+  case 2:
+  return clang_ext_FastCall_C2x_gnu_fastcall;
+  case 3:
+  return clang_ext_FastCall_Keyword_fastcall;}
+ 
+ #endif
+ 
+ return clang_ext_FastCall_SpellingNotCalculated;}
+enum clang_ext_Final_spelling clang_ext_Final_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::FinalAttr >(attr))
+ switch (qual_attr->getSemanticSpelling())
+ {case clang::FinalAttr ::Spelling ::Keyword_final:
+  return clang_ext_Final_Keyword_final;
+  case clang::FinalAttr ::Spelling ::Keyword_sealed:
+  return clang_ext_Final_Keyword_sealed;}
+ 
+ #endif
+ 
+ return clang_ext_Final_SpellingNotCalculated;}
+enum
+clang_ext_FlagEnum_spelling clang_ext_FlagEnum_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_7_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::FlagEnumAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_FlagEnum_GNU_flag_enum;
+  case 1:
+  return clang_ext_FlagEnum_CXX11_clang_flag_enum;
+  case 2:
+  return clang_ext_FlagEnum_C2x_clang_flag_enum;}
+ 
+ #endif
+ 
+ return clang_ext_FlagEnum_SpellingNotCalculated;}
+enum
+clang_ext_Flatten_spelling clang_ext_Flatten_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::FlattenAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Flatten_GNU_flatten;
+  case 1:
+  return clang_ext_Flatten_CXX11_gnu_flatten;
+  case 2:
+  return clang_ext_Flatten_C2x_gnu_flatten;}
+ 
+ #endif
+ 
+ return clang_ext_Flatten_SpellingNotCalculated;}
+enum clang_ext_Format_spelling clang_ext_Format_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::FormatAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Format_GNU_format;
+  case 1:
+  return clang_ext_Format_CXX11_gnu_format;
+  case 2:
+  return clang_ext_Format_C2x_gnu_format;}
+ 
+ #endif
+ 
+ return clang_ext_Format_SpellingNotCalculated;}
+enum
+clang_ext_FormatArg_spelling clang_ext_FormatArg_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::FormatArgAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_FormatArg_GNU_format_arg;
+  case 1:
+  return clang_ext_FormatArg_CXX11_gnu_format_arg;
+  case 2:
+  return clang_ext_FormatArg_C2x_gnu_format_arg;}
+ 
+ #endif
+ 
+ return clang_ext_FormatArg_SpellingNotCalculated;}
+enum
+clang_ext_GNUInline_spelling clang_ext_GNUInline_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::GNUInlineAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_GNUInline_GNU_gnu_inline;
+  case 1:
+  return clang_ext_GNUInline_CXX11_gnu_gnu_inline;
+  case 2:
+  return clang_ext_GNUInline_C2x_gnu_gnu_inline;}
+ 
+ #endif
+ 
+ return clang_ext_GNUInline_SpellingNotCalculated;}
+enum
+clang_ext_GuardedVar_spelling clang_ext_GuardedVar_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::GuardedVarAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_GuardedVar_GNU_guarded_var;
+  case 1:
+  return clang_ext_GuardedVar_CXX11_clang_guarded_var;}
+ 
+ #endif
+ 
+ return clang_ext_GuardedVar_SpellingNotCalculated;}
+enum clang_ext_Hot_spelling clang_ext_Hot_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::HotAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Hot_GNU_hot;
+  case 1:
+  return clang_ext_Hot_CXX11_gnu_hot;
+  case 2:
+  return clang_ext_Hot_C2x_gnu_hot;}
+ 
+ #endif
+ 
+ return clang_ext_Hot_SpellingNotCalculated;}
+enum
+clang_ext_IBAction_spelling clang_ext_IBAction_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::IBActionAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_IBAction_GNU_ibaction;
+  case 1:
+  return clang_ext_IBAction_CXX11_clang_ibaction;
+  case 2:
+  return clang_ext_IBAction_C2x_clang_ibaction;}
+ 
+ #endif
+ 
+ return clang_ext_IBAction_SpellingNotCalculated;}
+enum
+clang_ext_IBOutlet_spelling clang_ext_IBOutlet_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::IBOutletAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_IBOutlet_GNU_iboutlet;
+  case 1:
+  return clang_ext_IBOutlet_CXX11_clang_iboutlet;
+  case 2:
+  return clang_ext_IBOutlet_C2x_clang_iboutlet;}
+ 
+ #endif
+ 
+ return clang_ext_IBOutlet_SpellingNotCalculated;}
+enum
+clang_ext_IBOutletCollection_spelling
+clang_ext_IBOutletCollection_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::IBOutletCollectionAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_IBOutletCollection_GNU_iboutletcollection;
+  case 1:
+  return clang_ext_IBOutletCollection_CXX11_clang_iboutletcollection;
+  case 2:
+  return clang_ext_IBOutletCollection_C2x_clang_iboutletcollection;}
+ 
+ #endif
+ 
+ return clang_ext_IBOutletCollection_SpellingNotCalculated;}
+enum clang_ext_IFunc_spelling clang_ext_IFunc_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::IFuncAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_IFunc_GNU_ifunc;
+  case 1:
+  return clang_ext_IFunc_CXX11_gnu_ifunc;
+  case 2:
+  return clang_ext_IFunc_C2x_gnu_ifunc;}
+ 
+ #endif
+ 
+ return clang_ext_IFunc_SpellingNotCalculated;}
+enum
+clang_ext_InitPriority_spelling clang_ext_InitPriority_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::InitPriorityAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_InitPriority_GNU_init_priority;
+  case 1:
+  return clang_ext_InitPriority_CXX11_gnu_init_priority;}
+ 
+ #endif
+ 
+ return clang_ext_InitPriority_SpellingNotCalculated;}
+enum
+clang_ext_IntelOclBicc_spelling clang_ext_IntelOclBicc_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::IntelOclBiccAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_IntelOclBicc_GNU_intel_ocl_bicc;
+  case 1:
+  return clang_ext_IntelOclBicc_CXX11_clang_intel_ocl_bicc;}
+ 
+ #endif
+ 
+ return clang_ext_IntelOclBicc_SpellingNotCalculated;}
+enum
+clang_ext_InternalLinkage_spelling clang_ext_InternalLinkage_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_8_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::InternalLinkageAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_InternalLinkage_GNU_internal_linkage;
+  case 1:
+  return clang_ext_InternalLinkage_CXX11_clang_internal_linkage;
+  case 2:
+  return clang_ext_InternalLinkage_C2x_clang_internal_linkage;}
+ 
+ #endif
+ 
+ return clang_ext_InternalLinkage_SpellingNotCalculated;}
+enum
+clang_ext_LTOVisibilityPublic_spelling
+clang_ext_LTOVisibilityPublic_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::LTOVisibilityPublicAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_LTOVisibilityPublic_GNU_lto_visibility_public;
+  case 1:
+  return clang_ext_LTOVisibilityPublic_CXX11_clang_lto_visibility_public;
+  case 2:
+  return clang_ext_LTOVisibilityPublic_C2x_clang_lto_visibility_public;}
+ 
+ #endif
+ 
+ return clang_ext_LTOVisibilityPublic_SpellingNotCalculated;}
+enum
+clang_ext_LifetimeBound_spelling clang_ext_LifetimeBound_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_7_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::LifetimeBoundAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_LifetimeBound_GNU_lifetimebound;
+  case 1:
+  return clang_ext_LifetimeBound_CXX11_clang_lifetimebound;}
+ 
+ #endif
+ 
+ return clang_ext_LifetimeBound_SpellingNotCalculated;}
+enum
+clang_ext_LoaderUninitialized_spelling
+clang_ext_LoaderUninitialized_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_11_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::LoaderUninitializedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_LoaderUninitialized_GNU_loader_uninitialized;
+  case 1:
+  return clang_ext_LoaderUninitialized_CXX11_clang_loader_uninitialized;
+  case 2:
+  return clang_ext_LoaderUninitialized_C2x_clang_loader_uninitialized;}
+ 
+ #endif
+ 
+ return clang_ext_LoaderUninitialized_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_10_0_0
  enum
@@ -373,24 +1959,53 @@ clang::ConsumableAttr ::ConsumedState value)
    case clang::LoopHintAttr ::Spelling ::Pragma_unroll_and_jam:
    return clang_ext_LoopHint_Pragma_unroll_and_jam;
    case clang::LoopHintAttr ::Spelling ::Pragma_nounroll_and_jam:
-   return clang_ext_LoopHint_Pragma_nounroll_and_jam;
-   
-   #ifndef LLVM_VERSION_BEFORE_10_0_0
-   
-   case clang::LoopHintAttr ::Spelling ::SpellingNotCalculated:
-   return clang_ext_LoopHint_SpellingNotCalculated;
-   
-   #endif
-   }
+   return clang_ext_LoopHint_Pragma_nounroll_and_jam;}
   
   #endif
   
   return clang_ext_LoopHint_SpellingNotCalculated;}
 enum
+clang_ext_MIGServerRoutine_spelling clang_ext_MIGServerRoutine_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::MIGServerRoutineAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_MIGServerRoutine_GNU_mig_server_routine;
+  case 1:
+  return clang_ext_MIGServerRoutine_CXX11_clang_mig_server_routine;
+  case 2:
+  return clang_ext_MIGServerRoutine_C2x_clang_mig_server_routine;}
+ 
+ #endif
+ 
+ return clang_ext_MIGServerRoutine_SpellingNotCalculated;}
+enum clang_ext_MSABI_spelling clang_ext_MSABI_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::MSABIAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_MSABI_GNU_ms_abi;
+  case 1:
+  return clang_ext_MSABI_CXX11_gnu_ms_abi;
+  case 2:
+  return clang_ext_MSABI_C2x_gnu_ms_abi;}
+ 
+ #endif
+ 
+ return clang_ext_MSABI_SpellingNotCalculated;}
+enum
 clang_ext_MSInheritance_spelling clang_ext_MSInheritance_getSpelling(
 CXCursor cursor)
 {
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
  
  auto attr = GetCursorAttr(cursor);
  if
@@ -403,19 +2018,140 @@ CXCursor cursor)
   case clang::MSInheritanceAttr ::Spelling ::Keyword_virtual_inheritance:
   return clang_ext_MSInheritance_Keyword_virtual_inheritance;
   case clang::MSInheritanceAttr ::Spelling ::Keyword_unspecified_inheritance:
-  return clang_ext_MSInheritance_Keyword_unspecified_inheritance;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::MSInheritanceAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_MSInheritance_SpellingNotCalculated;
-  
-  #endif
-  }
+  return clang_ext_MSInheritance_Keyword_unspecified_inheritance;}
  
  #endif
  
  return clang_ext_MSInheritance_SpellingNotCalculated;}
+enum
+clang_ext_MSP430Interrupt_spelling clang_ext_MSP430Interrupt_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::MSP430InterruptAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_MSP430Interrupt_GNU_interrupt;
+  case 1:
+  return clang_ext_MSP430Interrupt_CXX11_gnu_interrupt;
+  case 2:
+  return clang_ext_MSP430Interrupt_C2x_gnu_interrupt;}
+ 
+ #endif
+ 
+ return clang_ext_MSP430Interrupt_SpellingNotCalculated;}
+enum
+clang_ext_MSStruct_spelling clang_ext_MSStruct_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_7_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::MSStructAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_MSStruct_GNU_ms_struct;
+  case 1:
+  return clang_ext_MSStruct_CXX11_gnu_ms_struct;
+  case 2:
+  return clang_ext_MSStruct_C2x_gnu_ms_struct;}
+ 
+ #endif
+ 
+ return clang_ext_MSStruct_SpellingNotCalculated;}
+enum
+clang_ext_MayAlias_spelling clang_ext_MayAlias_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::MayAliasAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_MayAlias_GNU_may_alias;
+  case 1:
+  return clang_ext_MayAlias_CXX11_gnu_may_alias;
+  case 2:
+  return clang_ext_MayAlias_C2x_gnu_may_alias;}
+ 
+ #endif
+ 
+ return clang_ext_MayAlias_SpellingNotCalculated;}
+enum
+clang_ext_MicroMips_spelling clang_ext_MicroMips_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_5_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::MicroMipsAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_MicroMips_GNU_micromips;
+  case 1:
+  return clang_ext_MicroMips_CXX11_gnu_micromips;
+  case 2:
+  return clang_ext_MicroMips_C2x_gnu_micromips;}
+ 
+ #endif
+ 
+ return clang_ext_MicroMips_SpellingNotCalculated;}
+enum
+clang_ext_MinSize_spelling clang_ext_MinSize_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::MinSizeAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_MinSize_GNU_minsize;
+  case 1:
+  return clang_ext_MinSize_CXX11_clang_minsize;
+  case 2:
+  return clang_ext_MinSize_C2x_clang_minsize;}
+ 
+ #endif
+ 
+ return clang_ext_MinSize_SpellingNotCalculated;}
+enum
+clang_ext_MinVectorWidth_spelling clang_ext_MinVectorWidth_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_7_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::MinVectorWidthAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_MinVectorWidth_GNU_min_vector_width;
+  case 1:
+  return clang_ext_MinVectorWidth_CXX11_clang_min_vector_width;
+  case 2:
+  return clang_ext_MinVectorWidth_C2x_clang_min_vector_width;}
+ 
+ #endif
+ 
+ return clang_ext_MinVectorWidth_SpellingNotCalculated;}
+enum clang_ext_Mips16_spelling clang_ext_Mips16_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::Mips16Attr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Mips16_GNU_mips16;
+  case 1:
+  return clang_ext_Mips16_CXX11_gnu_mips16;
+  case 2:
+  return clang_ext_Mips16_C2x_gnu_mips16;}
+ 
+ #endif
+ 
+ return clang_ext_Mips16_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_3_8_0
  enum
@@ -445,40 +2181,67 @@ CXCursor cursor)
 
 #endif
  enum
- clang_ext_MipsLongCall_spelling clang_ext_MipsLongCall_getSpelling(
+ clang_ext_MipsInterrupt_spelling clang_ext_MipsInterrupt_getSpelling(
  CXCursor cursor)
  {
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
+  #ifndef LLVM_VERSION_BEFORE_3_8_0
   
   auto attr = GetCursorAttr(cursor);
   if
-  (auto qual_attr = llvm::dyn_cast_or_null<clang::MipsLongCallAttr >(attr))
-  switch (qual_attr->getSemanticSpelling())
-  {case clang::MipsLongCallAttr ::Spelling ::GNU_long_call:
-   return clang_ext_MipsLongCall_GNU_long_call;
-   case clang::MipsLongCallAttr ::Spelling ::CXX11_gnu_long_call:
-   return clang_ext_MipsLongCall_CXX11_gnu_long_call;
-   case clang::MipsLongCallAttr ::Spelling ::GNU_far:
-   return clang_ext_MipsLongCall_GNU_far;
-   case clang::MipsLongCallAttr ::Spelling ::CXX11_gnu_far:
-   return clang_ext_MipsLongCall_CXX11_gnu_far;
-   
-   #ifndef LLVM_VERSION_BEFORE_10_0_0
-   
-   case clang::MipsLongCallAttr ::Spelling ::SpellingNotCalculated:
-   return clang_ext_MipsLongCall_SpellingNotCalculated;
-   
-   #endif
-   }
+  (auto qual_attr = llvm::dyn_cast_or_null<clang::MipsInterruptAttr >(attr))
+  switch (qual_attr->getSpellingListIndex())
+  {case 0:
+   return clang_ext_MipsInterrupt_GNU_interrupt;
+   case 1:
+   return clang_ext_MipsInterrupt_CXX11_gnu_interrupt;
+   case 2:
+   return clang_ext_MipsInterrupt_C2x_gnu_interrupt;}
   
   #endif
   
-  return clang_ext_MipsLongCall_SpellingNotCalculated;}
+  return clang_ext_MipsInterrupt_SpellingNotCalculated;}
+enum
+clang_ext_MipsLongCall_spelling clang_ext_MipsLongCall_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_6_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::MipsLongCallAttr >(attr))
+ switch (qual_attr->getSemanticSpelling())
+ {case clang::MipsLongCallAttr ::Spelling ::GNU_long_call:
+  return clang_ext_MipsLongCall_GNU_long_call;
+  case clang::MipsLongCallAttr ::Spelling ::CXX11_gnu_long_call:
+  return clang_ext_MipsLongCall_CXX11_gnu_long_call;
+  
+  #ifndef LLVM_VERSION_BEFORE_11_0_0
+  
+  case clang::MipsLongCallAttr ::Spelling ::C2x_gnu_long_call:
+  return clang_ext_MipsLongCall_C2x_gnu_long_call;
+  
+  #endif
+  
+  case clang::MipsLongCallAttr ::Spelling ::GNU_far:
+  return clang_ext_MipsLongCall_GNU_far;
+  case clang::MipsLongCallAttr ::Spelling ::CXX11_gnu_far:
+  return clang_ext_MipsLongCall_CXX11_gnu_far;
+  
+  #ifndef LLVM_VERSION_BEFORE_11_0_0
+  
+  case clang::MipsLongCallAttr ::Spelling ::C2x_gnu_far:
+  return clang_ext_MipsLongCall_C2x_gnu_far;
+  
+  #endif
+  }
+ 
+ #endif
+ 
+ return clang_ext_MipsLongCall_SpellingNotCalculated;}
 enum
 clang_ext_MipsShortCall_spelling clang_ext_MipsShortCall_getSpelling(
 CXCursor cursor)
 {
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+ #ifndef LLVM_VERSION_BEFORE_6_0_0
  
  auto attr = GetCursorAttr(cursor);
  if
@@ -488,15 +2251,23 @@ CXCursor cursor)
   return clang_ext_MipsShortCall_GNU_short_call;
   case clang::MipsShortCallAttr ::Spelling ::CXX11_gnu_short_call:
   return clang_ext_MipsShortCall_CXX11_gnu_short_call;
+  
+  #ifndef LLVM_VERSION_BEFORE_11_0_0
+  
+  case clang::MipsShortCallAttr ::Spelling ::C2x_gnu_short_call:
+  return clang_ext_MipsShortCall_C2x_gnu_short_call;
+  
+  #endif
+  
   case clang::MipsShortCallAttr ::Spelling ::GNU_near:
   return clang_ext_MipsShortCall_GNU_near;
   case clang::MipsShortCallAttr ::Spelling ::CXX11_gnu_near:
   return clang_ext_MipsShortCall_CXX11_gnu_near;
   
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
+  #ifndef LLVM_VERSION_BEFORE_11_0_0
   
-  case clang::MipsShortCallAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_MipsShortCall_SpellingNotCalculated;
+  case clang::MipsShortCallAttr ::Spelling ::C2x_gnu_near:
+  return clang_ext_MipsShortCall_C2x_gnu_near;
   
   #endif
   }
@@ -504,6 +2275,548 @@ CXCursor cursor)
  #endif
  
  return clang_ext_MipsShortCall_SpellingNotCalculated;}
+enum clang_ext_Mode_spelling clang_ext_Mode_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ModeAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Mode_GNU_mode;
+  case 1:
+  return clang_ext_Mode_CXX11_gnu_mode;
+  case 2:
+  return clang_ext_Mode_C2x_gnu_mode;}
+ 
+ #endif
+ 
+ return clang_ext_Mode_SpellingNotCalculated;}
+enum
+clang_ext_NSConsumed_spelling clang_ext_NSConsumed_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NSConsumedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NSConsumed_GNU_ns_consumed;
+  case 1:
+  return clang_ext_NSConsumed_CXX11_clang_ns_consumed;
+  case 2:
+  return clang_ext_NSConsumed_C2x_clang_ns_consumed;}
+ 
+ #endif
+ 
+ return clang_ext_NSConsumed_SpellingNotCalculated;}
+enum
+clang_ext_NSConsumesSelf_spelling clang_ext_NSConsumesSelf_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::NSConsumesSelfAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NSConsumesSelf_GNU_ns_consumes_self;
+  case 1:
+  return clang_ext_NSConsumesSelf_CXX11_clang_ns_consumes_self;
+  case 2:
+  return clang_ext_NSConsumesSelf_C2x_clang_ns_consumes_self;}
+ 
+ #endif
+ 
+ return clang_ext_NSConsumesSelf_SpellingNotCalculated;}
+enum
+clang_ext_NSReturnsAutoreleased_spelling
+clang_ext_NSReturnsAutoreleased_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::NSReturnsAutoreleasedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NSReturnsAutoreleased_GNU_ns_returns_autoreleased;
+  case 1:
+  return clang_ext_NSReturnsAutoreleased_CXX11_clang_ns_returns_autoreleased;
+  case 2:
+  return clang_ext_NSReturnsAutoreleased_C2x_clang_ns_returns_autoreleased;}
+ 
+ #endif
+ 
+ return clang_ext_NSReturnsAutoreleased_SpellingNotCalculated;}
+enum
+clang_ext_NSReturnsNotRetained_spelling
+clang_ext_NSReturnsNotRetained_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::NSReturnsNotRetainedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NSReturnsNotRetained_GNU_ns_returns_not_retained;
+  case 1:
+  return clang_ext_NSReturnsNotRetained_CXX11_clang_ns_returns_not_retained;
+  case 2:
+  return clang_ext_NSReturnsNotRetained_C2x_clang_ns_returns_not_retained;}
+ 
+ #endif
+ 
+ return clang_ext_NSReturnsNotRetained_SpellingNotCalculated;}
+enum
+clang_ext_NSReturnsRetained_spelling clang_ext_NSReturnsRetained_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::NSReturnsRetainedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NSReturnsRetained_GNU_ns_returns_retained;
+  case 1:
+  return clang_ext_NSReturnsRetained_CXX11_clang_ns_returns_retained;
+  case 2:
+  return clang_ext_NSReturnsRetained_C2x_clang_ns_returns_retained;}
+ 
+ #endif
+ 
+ return clang_ext_NSReturnsRetained_SpellingNotCalculated;}
+enum clang_ext_Naked_spelling clang_ext_Naked_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NakedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Naked_GNU_naked;
+  case 1:
+  return clang_ext_Naked_CXX11_gnu_naked;
+  case 2:
+  return clang_ext_Naked_C2x_gnu_naked;
+  case 3:
+  return clang_ext_Naked_Declspec_naked;}
+ 
+ #endif
+ 
+ return clang_ext_Naked_SpellingNotCalculated;}
+enum
+clang_ext_NoBuiltin_spelling clang_ext_NoBuiltin_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoBuiltinAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoBuiltin_GNU_no_builtin;
+  case 1:
+  return clang_ext_NoBuiltin_CXX11_clang_no_builtin;
+  case 2:
+  return clang_ext_NoBuiltin_C2x_clang_no_builtin;}
+ 
+ #endif
+ 
+ return clang_ext_NoBuiltin_SpellingNotCalculated;}
+enum
+clang_ext_NoCommon_spelling clang_ext_NoCommon_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoCommonAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoCommon_GNU_nocommon;
+  case 1:
+  return clang_ext_NoCommon_CXX11_gnu_nocommon;
+  case 2:
+  return clang_ext_NoCommon_C2x_gnu_nocommon;}
+ 
+ #endif
+ 
+ return clang_ext_NoCommon_SpellingNotCalculated;}
+enum
+clang_ext_NoDebug_spelling clang_ext_NoDebug_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoDebugAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoDebug_GNU_nodebug;
+  case 1:
+  return clang_ext_NoDebug_CXX11_gnu_nodebug;
+  case 2:
+  return clang_ext_NoDebug_C2x_gnu_nodebug;}
+ 
+ #endif
+ 
+ return clang_ext_NoDebug_SpellingNotCalculated;}
+enum
+clang_ext_NoDeref_spelling clang_ext_NoDeref_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoDerefAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoDeref_GNU_noderef;
+  case 1:
+  return clang_ext_NoDeref_CXX11_clang_noderef;
+  case 2:
+  return clang_ext_NoDeref_C2x_clang_noderef;}
+ 
+ #endif
+ 
+ return clang_ext_NoDeref_SpellingNotCalculated;}
+enum
+clang_ext_NoDestroy_spelling clang_ext_NoDestroy_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoDestroyAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoDestroy_GNU_no_destroy;
+  case 1:
+  return clang_ext_NoDestroy_CXX11_clang_no_destroy;}
+ 
+ #endif
+ 
+ return clang_ext_NoDestroy_SpellingNotCalculated;}
+enum
+clang_ext_NoDuplicate_spelling clang_ext_NoDuplicate_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoDuplicateAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoDuplicate_GNU_noduplicate;
+  case 1:
+  return clang_ext_NoDuplicate_CXX11_clang_noduplicate;
+  case 2:
+  return clang_ext_NoDuplicate_C2x_clang_noduplicate;}
+ 
+ #endif
+ 
+ return clang_ext_NoDuplicate_SpellingNotCalculated;}
+enum
+clang_ext_NoEscape_spelling clang_ext_NoEscape_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_6_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoEscapeAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoEscape_GNU_noescape;
+  case 1:
+  return clang_ext_NoEscape_CXX11_clang_noescape;
+  case 2:
+  return clang_ext_NoEscape_C2x_clang_noescape;}
+ 
+ #endif
+ 
+ return clang_ext_NoEscape_SpellingNotCalculated;}
+enum
+clang_ext_NoInline_spelling clang_ext_NoInline_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoInlineAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoInline_GNU_noinline;
+  case 1:
+  return clang_ext_NoInline_CXX11_gnu_noinline;
+  case 2:
+  return clang_ext_NoInline_C2x_gnu_noinline;
+  case 3:
+  return clang_ext_NoInline_Declspec_noinline;}
+ 
+ #endif
+ 
+ return clang_ext_NoInline_SpellingNotCalculated;}
+enum
+clang_ext_NoInstrumentFunction_spelling
+clang_ext_NoInstrumentFunction_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::NoInstrumentFunctionAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoInstrumentFunction_GNU_no_instrument_function;
+  case 1:
+  return clang_ext_NoInstrumentFunction_CXX11_gnu_no_instrument_function;
+  case 2:
+  return clang_ext_NoInstrumentFunction_C2x_gnu_no_instrument_function;}
+ 
+ #endif
+ 
+ return clang_ext_NoInstrumentFunction_SpellingNotCalculated;}
+enum
+clang_ext_NoMerge_spelling clang_ext_NoMerge_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_11_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoMergeAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoMerge_GNU_nomerge;
+  case 1:
+  return clang_ext_NoMerge_CXX11_clang_nomerge;
+  case 2:
+  return clang_ext_NoMerge_C2x_clang_nomerge;}
+ 
+ #endif
+ 
+ return clang_ext_NoMerge_SpellingNotCalculated;}
+enum
+clang_ext_NoMicroMips_spelling clang_ext_NoMicroMips_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_5_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoMicroMipsAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoMicroMips_GNU_nomicromips;
+  case 1:
+  return clang_ext_NoMicroMips_CXX11_gnu_nomicromips;
+  case 2:
+  return clang_ext_NoMicroMips_C2x_gnu_nomicromips;}
+ 
+ #endif
+ 
+ return clang_ext_NoMicroMips_SpellingNotCalculated;}
+enum
+clang_ext_NoMips16_spelling clang_ext_NoMips16_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoMips16Attr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoMips16_GNU_nomips16;
+  case 1:
+  return clang_ext_NoMips16_CXX11_gnu_nomips16;
+  case 2:
+  return clang_ext_NoMips16_C2x_gnu_nomips16;}
+ 
+ #endif
+ 
+ return clang_ext_NoMips16_SpellingNotCalculated;}
+enum
+clang_ext_NoReturn_spelling clang_ext_NoReturn_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoReturnAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoReturn_GNU_noreturn;
+  case 1:
+  return clang_ext_NoReturn_CXX11_gnu_noreturn;
+  case 2:
+  return clang_ext_NoReturn_C2x_gnu_noreturn;
+  case 3:
+  return clang_ext_NoReturn_Declspec_noreturn;}
+ 
+ #endif
+ 
+ return clang_ext_NoReturn_SpellingNotCalculated;}
+enum
+clang_ext_NoSanitize_spelling clang_ext_NoSanitize_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_7_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoSanitizeAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoSanitize_GNU_no_sanitize;
+  case 1:
+  return clang_ext_NoSanitize_CXX11_clang_no_sanitize;
+  case 2:
+  return clang_ext_NoSanitize_C2x_clang_no_sanitize;}
+ 
+ #endif
+ 
+ return clang_ext_NoSanitize_SpellingNotCalculated;}
+enum
+clang_ext_NoSpeculativeLoadHardening_spelling
+clang_ext_NoSpeculativeLoadHardening_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::NoSpeculativeLoadHardeningAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return
+  clang_ext_NoSpeculativeLoadHardening_GNU_no_speculative_load_hardening;
+  case 1:
+  return
+  clang_ext_NoSpeculativeLoadHardening_CXX11_clang_no_speculative_load_hardening;
+  case 2:
+  return
+  clang_ext_NoSpeculativeLoadHardening_C2x_clang_no_speculative_load_hardening;}
+ 
+ #endif
+ 
+ return clang_ext_NoSpeculativeLoadHardening_SpellingNotCalculated;}
+enum
+clang_ext_NoSplitStack_spelling clang_ext_NoSplitStack_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoSplitStackAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoSplitStack_GNU_no_split_stack;
+  case 1:
+  return clang_ext_NoSplitStack_CXX11_gnu_no_split_stack;
+  case 2:
+  return clang_ext_NoSplitStack_C2x_gnu_no_split_stack;}
+ 
+ #endif
+ 
+ return clang_ext_NoSplitStack_SpellingNotCalculated;}
+enum
+clang_ext_NoStackProtector_spelling clang_ext_NoStackProtector_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_7_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::NoStackProtectorAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoStackProtector_GNU_no_stack_protector;
+  case 1:
+  return clang_ext_NoStackProtector_CXX11_clang_no_stack_protector;
+  case 2:
+  return clang_ext_NoStackProtector_C2x_clang_no_stack_protector;}
+ 
+ #endif
+ 
+ return clang_ext_NoStackProtector_SpellingNotCalculated;}
+enum
+clang_ext_NoThreadSafetyAnalysis_spelling
+clang_ext_NoThreadSafetyAnalysis_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::NoThreadSafetyAnalysisAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoThreadSafetyAnalysis_GNU_no_thread_safety_analysis;
+  case 1:
+  return
+  clang_ext_NoThreadSafetyAnalysis_CXX11_clang_no_thread_safety_analysis;
+  case 2:
+  return
+  clang_ext_NoThreadSafetyAnalysis_C2x_clang_no_thread_safety_analysis;}
+ 
+ #endif
+ 
+ return clang_ext_NoThreadSafetyAnalysis_SpellingNotCalculated;}
+enum
+clang_ext_NoThrow_spelling clang_ext_NoThrow_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoThrowAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoThrow_GNU_nothrow;
+  case 1:
+  return clang_ext_NoThrow_CXX11_gnu_nothrow;
+  case 2:
+  return clang_ext_NoThrow_C2x_gnu_nothrow;
+  case 3:
+  return clang_ext_NoThrow_Declspec_nothrow;}
+ 
+ #endif
+ 
+ return clang_ext_NoThrow_SpellingNotCalculated;}
+enum
+clang_ext_NonNull_spelling clang_ext_NonNull_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NonNullAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NonNull_GNU_nonnull;
+  case 1:
+  return clang_ext_NonNull_CXX11_gnu_nonnull;
+  case 2:
+  return clang_ext_NonNull_C2x_gnu_nonnull;}
+ 
+ #endif
+ 
+ return clang_ext_NonNull_SpellingNotCalculated;}
+enum
+clang_ext_NotTailCalled_spelling clang_ext_NotTailCalled_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_8_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::NotTailCalledAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NotTailCalled_GNU_not_tail_called;
+  case 1:
+  return clang_ext_NotTailCalled_CXX11_clang_not_tail_called;
+  case 2:
+  return clang_ext_NotTailCalled_C2x_clang_not_tail_called;}
+ 
+ #endif
+ 
+ return clang_ext_NotTailCalled_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_9_0_0
  enum
@@ -511,7 +2824,15 @@ CXCursor cursor)
  convert_OMPAllocateDeclAttr_AllocatorTypeTy(
  clang::OMPAllocateDeclAttr ::AllocatorTypeTy value)
  {switch (value)
-  {case clang::OMPAllocateDeclAttr ::AllocatorTypeTy ::OMPDefaultMemAlloc:
+  {
+   #ifndef LLVM_VERSION_BEFORE_11_0_0
+   
+   case clang::OMPAllocateDeclAttr ::AllocatorTypeTy ::OMPNullMemAlloc:
+   return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPNullMemAlloc;
+   
+   #endif
+   
+   case clang::OMPAllocateDeclAttr ::AllocatorTypeTy ::OMPDefaultMemAlloc:
    return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPDefaultMemAlloc;
    case clang::OMPAllocateDeclAttr ::AllocatorTypeTy ::OMPLargeCapMemAlloc:
    return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPLargeCapMemAlloc;
@@ -531,7 +2852,7 @@ CXCursor cursor)
    clang::OMPAllocateDeclAttr ::AllocatorTypeTy ::OMPUserDefinedMemAlloc:
    return
    clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPUserDefinedMemAlloc;}
-  return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPDefaultMemAlloc;}
+  return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPNullMemAlloc;}
 
 #endif
  
@@ -565,28 +2886,675 @@ CXCursor cursor)
 
 #endif
  enum
- clang_ext_ObjCMethodFamilyAttr_FamilyKind
- convert_ObjCMethodFamilyAttr_FamilyKind(
- clang::ObjCMethodFamilyAttr ::FamilyKind value)
- {switch (value)
-  {case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_None:
-   return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_None;
-   case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_alloc:
-   return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_alloc;
-   case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_copy:
-   return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_copy;
-   case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_init:
-   return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_init;
-   case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_mutableCopy:
-   return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_mutableCopy;
-   case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_new:
-   return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_new;}
-  return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_None;}
+ clang_ext_OSConsumed_spelling clang_ext_OSConsumed_getSpelling(
+ CXCursor cursor)
+ {
+  #ifndef LLVM_VERSION_BEFORE_8_0_0
+  
+  auto attr = GetCursorAttr(cursor);
+  if (auto qual_attr = llvm::dyn_cast_or_null<clang::OSConsumedAttr >(attr))
+  switch (qual_attr->getSpellingListIndex())
+  {case 0:
+   return clang_ext_OSConsumed_GNU_os_consumed;
+   case 1:
+   return clang_ext_OSConsumed_CXX11_clang_os_consumed;
+   case 2:
+   return clang_ext_OSConsumed_C2x_clang_os_consumed;}
+  
+  #endif
+  
+  return clang_ext_OSConsumed_SpellingNotCalculated;}
+enum
+clang_ext_OSConsumesThis_spelling clang_ext_OSConsumesThis_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::OSConsumesThisAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_OSConsumesThis_GNU_os_consumes_this;
+  case 1:
+  return clang_ext_OSConsumesThis_CXX11_clang_os_consumes_this;
+  case 2:
+  return clang_ext_OSConsumesThis_C2x_clang_os_consumes_this;}
+ 
+ #endif
+ 
+ return clang_ext_OSConsumesThis_SpellingNotCalculated;}
+enum
+clang_ext_OSReturnsNotRetained_spelling
+clang_ext_OSReturnsNotRetained_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OSReturnsNotRetainedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_OSReturnsNotRetained_GNU_os_returns_not_retained;
+  case 1:
+  return clang_ext_OSReturnsNotRetained_CXX11_clang_os_returns_not_retained;
+  case 2:
+  return clang_ext_OSReturnsNotRetained_C2x_clang_os_returns_not_retained;}
+ 
+ #endif
+ 
+ return clang_ext_OSReturnsNotRetained_SpellingNotCalculated;}
+enum
+clang_ext_OSReturnsRetained_spelling clang_ext_OSReturnsRetained_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OSReturnsRetainedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_OSReturnsRetained_GNU_os_returns_retained;
+  case 1:
+  return clang_ext_OSReturnsRetained_CXX11_clang_os_returns_retained;
+  case 2:
+  return clang_ext_OSReturnsRetained_C2x_clang_os_returns_retained;}
+ 
+ #endif
+ 
+ return clang_ext_OSReturnsRetained_SpellingNotCalculated;}
+enum
+clang_ext_OSReturnsRetainedOnNonZero_spelling
+clang_ext_OSReturnsRetainedOnNonZero_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OSReturnsRetainedOnNonZeroAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return
+  clang_ext_OSReturnsRetainedOnNonZero_GNU_os_returns_retained_on_non_zero;
+  case 1:
+  return
+  clang_ext_OSReturnsRetainedOnNonZero_CXX11_clang_os_returns_retained_on_non_zero;
+  case 2:
+  return
+  clang_ext_OSReturnsRetainedOnNonZero_C2x_clang_os_returns_retained_on_non_zero;}
+ 
+ #endif
+ 
+ return clang_ext_OSReturnsRetainedOnNonZero_SpellingNotCalculated;}
+enum
+clang_ext_OSReturnsRetainedOnZero_spelling
+clang_ext_OSReturnsRetainedOnZero_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OSReturnsRetainedOnZeroAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_OSReturnsRetainedOnZero_GNU_os_returns_retained_on_zero;
+  case 1:
+  return
+  clang_ext_OSReturnsRetainedOnZero_CXX11_clang_os_returns_retained_on_zero;
+  case 2:
+  return
+  clang_ext_OSReturnsRetainedOnZero_C2x_clang_os_returns_retained_on_zero;}
+ 
+ #endif
+ 
+ return clang_ext_OSReturnsRetainedOnZero_SpellingNotCalculated;}
+enum
+clang_ext_ObjCBoxable_spelling clang_ext_ObjCBoxable_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_7_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ObjCBoxableAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCBoxable_GNU_objc_boxable;
+  case 1:
+  return clang_ext_ObjCBoxable_CXX11_clang_objc_boxable;
+  case 2:
+  return clang_ext_ObjCBoxable_C2x_clang_objc_boxable;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCBoxable_SpellingNotCalculated;}
+enum
+clang_ext_ObjCBridge_spelling clang_ext_ObjCBridge_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ObjCBridgeAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCBridge_GNU_objc_bridge;
+  case 1:
+  return clang_ext_ObjCBridge_CXX11_clang_objc_bridge;
+  case 2:
+  return clang_ext_ObjCBridge_C2x_clang_objc_bridge;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCBridge_SpellingNotCalculated;}
+enum
+clang_ext_ObjCBridgeMutable_spelling clang_ext_ObjCBridgeMutable_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ObjCBridgeMutableAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCBridgeMutable_GNU_objc_bridge_mutable;
+  case 1:
+  return clang_ext_ObjCBridgeMutable_CXX11_clang_objc_bridge_mutable;
+  case 2:
+  return clang_ext_ObjCBridgeMutable_C2x_clang_objc_bridge_mutable;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCBridgeMutable_SpellingNotCalculated;}
+enum
+clang_ext_ObjCBridgeRelated_spelling clang_ext_ObjCBridgeRelated_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ObjCBridgeRelatedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCBridgeRelated_GNU_objc_bridge_related;
+  case 1:
+  return clang_ext_ObjCBridgeRelated_CXX11_clang_objc_bridge_related;
+  case 2:
+  return clang_ext_ObjCBridgeRelated_C2x_clang_objc_bridge_related;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCBridgeRelated_SpellingNotCalculated;}
+enum
+clang_ext_ObjCClassStub_spelling clang_ext_ObjCClassStub_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ObjCClassStubAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCClassStub_GNU_objc_class_stub;
+  case 1:
+  return clang_ext_ObjCClassStub_CXX11_clang_objc_class_stub;
+  case 2:
+  return clang_ext_ObjCClassStub_C2x_clang_objc_class_stub;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCClassStub_SpellingNotCalculated;}
+enum
+clang_ext_ObjCDesignatedInitializer_spelling
+clang_ext_ObjCDesignatedInitializer_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ObjCDesignatedInitializerAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCDesignatedInitializer_GNU_objc_designated_initializer;
+  case 1:
+  return
+  clang_ext_ObjCDesignatedInitializer_CXX11_clang_objc_designated_initializer;
+  case 2:
+  return
+  clang_ext_ObjCDesignatedInitializer_C2x_clang_objc_designated_initializer;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCDesignatedInitializer_SpellingNotCalculated;}
+enum
+clang_ext_ObjCDirect_spelling clang_ext_ObjCDirect_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ObjCDirectAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCDirect_GNU_objc_direct;
+  case 1:
+  return clang_ext_ObjCDirect_CXX11_clang_objc_direct;
+  case 2:
+  return clang_ext_ObjCDirect_C2x_clang_objc_direct;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCDirect_SpellingNotCalculated;}
+enum
+clang_ext_ObjCDirectMembers_spelling clang_ext_ObjCDirectMembers_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ObjCDirectMembersAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCDirectMembers_GNU_objc_direct_members;
+  case 1:
+  return clang_ext_ObjCDirectMembers_CXX11_clang_objc_direct_members;
+  case 2:
+  return clang_ext_ObjCDirectMembers_C2x_clang_objc_direct_members;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCDirectMembers_SpellingNotCalculated;}
+enum
+clang_ext_ObjCException_spelling clang_ext_ObjCException_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ObjCExceptionAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCException_GNU_objc_exception;
+  case 1:
+  return clang_ext_ObjCException_CXX11_clang_objc_exception;
+  case 2:
+  return clang_ext_ObjCException_C2x_clang_objc_exception;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCException_SpellingNotCalculated;}
+enum
+clang_ext_ObjCExplicitProtocolImpl_spelling
+clang_ext_ObjCExplicitProtocolImpl_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ObjCExplicitProtocolImplAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return
+  clang_ext_ObjCExplicitProtocolImpl_GNU_objc_protocol_requires_explicit_implementation;
+  case 1:
+  return
+  clang_ext_ObjCExplicitProtocolImpl_CXX11_clang_objc_protocol_requires_explicit_implementation;
+  case 2:
+  return
+  clang_ext_ObjCExplicitProtocolImpl_C2x_clang_objc_protocol_requires_explicit_implementation;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCExplicitProtocolImpl_SpellingNotCalculated;}
+enum
+clang_ext_ObjCExternallyRetained_spelling
+clang_ext_ObjCExternallyRetained_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ObjCExternallyRetainedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCExternallyRetained_GNU_objc_externally_retained;
+  case 1:
+  return
+  clang_ext_ObjCExternallyRetained_CXX11_clang_objc_externally_retained;
+  case 2:
+  return clang_ext_ObjCExternallyRetained_C2x_clang_objc_externally_retained;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCExternallyRetained_SpellingNotCalculated;}
+enum clang_ext_ObjCGC_spelling clang_ext_ObjCGC_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ObjCGCAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCGC_GNU_objc_gc;
+  case 1:
+  return clang_ext_ObjCGC_CXX11_clang_objc_gc;
+  case 2:
+  return clang_ext_ObjCGC_C2x_clang_objc_gc;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCGC_SpellingNotCalculated;}
+enum
+clang_ext_ObjCIndependentClass_spelling
+clang_ext_ObjCIndependentClass_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_7_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ObjCIndependentClassAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCIndependentClass_GNU_objc_independent_class;
+  case 1:
+  return clang_ext_ObjCIndependentClass_CXX11_clang_objc_independent_class;
+  case 2:
+  return clang_ext_ObjCIndependentClass_C2x_clang_objc_independent_class;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCIndependentClass_SpellingNotCalculated;}
+enum
+clang_ext_ObjCMethodFamilyAttr_FamilyKind
+convert_ObjCMethodFamilyAttr_FamilyKind(
+clang::ObjCMethodFamilyAttr ::FamilyKind value)
+{switch (value)
+ {case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_None:
+  return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_None;
+  case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_alloc:
+  return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_alloc;
+  case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_copy:
+  return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_copy;
+  case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_init:
+  return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_init;
+  case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_mutableCopy:
+  return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_mutableCopy;
+  case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_new:
+  return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_new;}
+ return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_None;}
+enum
+clang_ext_ObjCMethodFamily_spelling clang_ext_ObjCMethodFamily_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ObjCMethodFamilyAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCMethodFamily_GNU_objc_method_family;
+  case 1:
+  return clang_ext_ObjCMethodFamily_CXX11_clang_objc_method_family;
+  case 2:
+  return clang_ext_ObjCMethodFamily_C2x_clang_objc_method_family;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCMethodFamily_SpellingNotCalculated;}
+enum
+clang_ext_ObjCNSObject_spelling clang_ext_ObjCNSObject_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ObjCNSObjectAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCNSObject_GNU_NSObject;
+  case 1:
+  return clang_ext_ObjCNSObject_CXX11_clang_NSObject;
+  case 2:
+  return clang_ext_ObjCNSObject_C2x_clang_NSObject;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCNSObject_SpellingNotCalculated;}
+enum
+clang_ext_ObjCNonLazyClass_spelling clang_ext_ObjCNonLazyClass_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ObjCNonLazyClassAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCNonLazyClass_GNU_objc_nonlazy_class;
+  case 1:
+  return clang_ext_ObjCNonLazyClass_CXX11_clang_objc_nonlazy_class;
+  case 2:
+  return clang_ext_ObjCNonLazyClass_C2x_clang_objc_nonlazy_class;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCNonLazyClass_SpellingNotCalculated;}
+enum
+clang_ext_ObjCOwnership_spelling clang_ext_ObjCOwnership_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ObjCOwnershipAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCOwnership_GNU_objc_ownership;
+  case 1:
+  return clang_ext_ObjCOwnership_CXX11_clang_objc_ownership;
+  case 2:
+  return clang_ext_ObjCOwnership_C2x_clang_objc_ownership;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCOwnership_SpellingNotCalculated;}
+enum
+clang_ext_ObjCPreciseLifetime_spelling
+clang_ext_ObjCPreciseLifetime_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ObjCPreciseLifetimeAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCPreciseLifetime_GNU_objc_precise_lifetime;
+  case 1:
+  return clang_ext_ObjCPreciseLifetime_CXX11_clang_objc_precise_lifetime;
+  case 2:
+  return clang_ext_ObjCPreciseLifetime_C2x_clang_objc_precise_lifetime;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCPreciseLifetime_SpellingNotCalculated;}
+enum
+clang_ext_ObjCRequiresPropertyDefs_spelling
+clang_ext_ObjCRequiresPropertyDefs_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ObjCRequiresPropertyDefsAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return
+  clang_ext_ObjCRequiresPropertyDefs_GNU_objc_requires_property_definitions;
+  case 1:
+  return
+  clang_ext_ObjCRequiresPropertyDefs_CXX11_clang_objc_requires_property_definitions;
+  case 2:
+  return
+  clang_ext_ObjCRequiresPropertyDefs_C2x_clang_objc_requires_property_definitions;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCRequiresPropertyDefs_SpellingNotCalculated;}
+enum
+clang_ext_ObjCRequiresSuper_spelling clang_ext_ObjCRequiresSuper_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ObjCRequiresSuperAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCRequiresSuper_GNU_objc_requires_super;
+  case 1:
+  return clang_ext_ObjCRequiresSuper_CXX11_clang_objc_requires_super;
+  case 2:
+  return clang_ext_ObjCRequiresSuper_C2x_clang_objc_requires_super;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCRequiresSuper_SpellingNotCalculated;}
+enum
+clang_ext_ObjCReturnsInnerPointer_spelling
+clang_ext_ObjCReturnsInnerPointer_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ObjCReturnsInnerPointerAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCReturnsInnerPointer_GNU_objc_returns_inner_pointer;
+  case 1:
+  return
+  clang_ext_ObjCReturnsInnerPointer_CXX11_clang_objc_returns_inner_pointer;
+  case 2:
+  return
+  clang_ext_ObjCReturnsInnerPointer_C2x_clang_objc_returns_inner_pointer;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCReturnsInnerPointer_SpellingNotCalculated;}
+enum
+clang_ext_ObjCRootClass_spelling clang_ext_ObjCRootClass_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ObjCRootClassAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCRootClass_GNU_objc_root_class;
+  case 1:
+  return clang_ext_ObjCRootClass_CXX11_clang_objc_root_class;
+  case 2:
+  return clang_ext_ObjCRootClass_C2x_clang_objc_root_class;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCRootClass_SpellingNotCalculated;}
+enum
+clang_ext_ObjCRuntimeName_spelling clang_ext_ObjCRuntimeName_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ObjCRuntimeNameAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCRuntimeName_GNU_objc_runtime_name;
+  case 1:
+  return clang_ext_ObjCRuntimeName_CXX11_clang_objc_runtime_name;
+  case 2:
+  return clang_ext_ObjCRuntimeName_C2x_clang_objc_runtime_name;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCRuntimeName_SpellingNotCalculated;}
+enum
+clang_ext_ObjCRuntimeVisible_spelling
+clang_ext_ObjCRuntimeVisible_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ObjCRuntimeVisibleAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCRuntimeVisible_GNU_objc_runtime_visible;
+  case 1:
+  return clang_ext_ObjCRuntimeVisible_CXX11_clang_objc_runtime_visible;
+  case 2:
+  return clang_ext_ObjCRuntimeVisible_C2x_clang_objc_runtime_visible;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCRuntimeVisible_SpellingNotCalculated;}
+enum
+clang_ext_ObjCSubclassingRestricted_spelling
+clang_ext_ObjCSubclassingRestricted_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_4_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ObjCSubclassingRestrictedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ObjCSubclassingRestricted_GNU_objc_subclassing_restricted;
+  case 1:
+  return
+  clang_ext_ObjCSubclassingRestricted_CXX11_clang_objc_subclassing_restricted;
+  case 2:
+  return
+  clang_ext_ObjCSubclassingRestricted_C2x_clang_objc_subclassing_restricted;}
+ 
+ #endif
+ 
+ return clang_ext_ObjCSubclassingRestricted_SpellingNotCalculated;}
 enum
 clang_ext_OpenCLAccess_spelling clang_ext_OpenCLAccess_getSpelling(
 CXCursor cursor)
 {
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
  
  auto attr = GetCursorAttr(cursor);
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::OpenCLAccessAttr >(attr))
@@ -596,15 +3564,7 @@ CXCursor cursor)
   case clang::OpenCLAccessAttr ::Spelling ::Keyword_write_only:
   return clang_ext_OpenCLAccess_Keyword_write_only;
   case clang::OpenCLAccessAttr ::Spelling ::Keyword_read_write:
-  return clang_ext_OpenCLAccess_Keyword_read_write;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::OpenCLAccessAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_OpenCLAccess_SpellingNotCalculated;
-  
-  #endif
-  }
+  return clang_ext_OpenCLAccess_Keyword_read_write;}
  
  #endif
  
@@ -630,16 +3590,7 @@ clang_ext_OpenCLConstantAddressSpace_getSpelling(CXCursor cursor)
   return clang_ext_OpenCLConstantAddressSpace_CXX11_clang_opencl_constant;
   case
   clang::OpenCLConstantAddressSpaceAttr ::Spelling ::C2x_clang_opencl_constant:
-  return clang_ext_OpenCLConstantAddressSpace_C2x_clang_opencl_constant;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case
-  clang::OpenCLConstantAddressSpaceAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_OpenCLConstantAddressSpace_SpellingNotCalculated;
-  
-  #endif
-  }
+  return clang_ext_OpenCLConstantAddressSpace_C2x_clang_opencl_constant;}
  
  #endif
  
@@ -664,16 +3615,7 @@ clang_ext_OpenCLGenericAddressSpace_getSpelling(CXCursor cursor)
   return clang_ext_OpenCLGenericAddressSpace_CXX11_clang_opencl_generic;
   case
   clang::OpenCLGenericAddressSpaceAttr ::Spelling ::C2x_clang_opencl_generic:
-  return clang_ext_OpenCLGenericAddressSpace_C2x_clang_opencl_generic;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case
-  clang::OpenCLGenericAddressSpaceAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_OpenCLGenericAddressSpace_SpellingNotCalculated;
-  
-  #endif
-  }
+  return clang_ext_OpenCLGenericAddressSpace_C2x_clang_opencl_generic;}
  
  #endif
  
@@ -698,20 +3640,26 @@ clang_ext_OpenCLGlobalAddressSpace_getSpelling(CXCursor cursor)
   return clang_ext_OpenCLGlobalAddressSpace_CXX11_clang_opencl_global;
   case
   clang::OpenCLGlobalAddressSpaceAttr ::Spelling ::C2x_clang_opencl_global:
-  return clang_ext_OpenCLGlobalAddressSpace_C2x_clang_opencl_global;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case
-  clang::OpenCLGlobalAddressSpaceAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_OpenCLGlobalAddressSpace_SpellingNotCalculated;
-  
-  #endif
-  }
+  return clang_ext_OpenCLGlobalAddressSpace_C2x_clang_opencl_global;}
  
  #endif
  
  return clang_ext_OpenCLGlobalAddressSpace_SpellingNotCalculated;}
+enum
+clang_ext_OpenCLKernel_spelling clang_ext_OpenCLKernel_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::OpenCLKernelAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_OpenCLKernel_Keyword_kernel;}
+ 
+ #endif
+ 
+ return clang_ext_OpenCLKernel_SpellingNotCalculated;}
 enum
 clang_ext_OpenCLLocalAddressSpace_spelling
 clang_ext_OpenCLLocalAddressSpace_getSpelling(CXCursor cursor)
@@ -732,15 +3680,7 @@ clang_ext_OpenCLLocalAddressSpace_getSpelling(CXCursor cursor)
   return clang_ext_OpenCLLocalAddressSpace_CXX11_clang_opencl_local;
   case
   clang::OpenCLLocalAddressSpaceAttr ::Spelling ::C2x_clang_opencl_local:
-  return clang_ext_OpenCLLocalAddressSpace_C2x_clang_opencl_local;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::OpenCLLocalAddressSpaceAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_OpenCLLocalAddressSpace_SpellingNotCalculated;
-  
-  #endif
-  }
+  return clang_ext_OpenCLLocalAddressSpace_C2x_clang_opencl_local;}
  
  #endif
  
@@ -765,51 +3705,108 @@ clang_ext_OpenCLPrivateAddressSpace_getSpelling(CXCursor cursor)
   return clang_ext_OpenCLPrivateAddressSpace_CXX11_clang_opencl_private;
   case
   clang::OpenCLPrivateAddressSpaceAttr ::Spelling ::C2x_clang_opencl_private:
-  return clang_ext_OpenCLPrivateAddressSpace_C2x_clang_opencl_private;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case
-  clang::OpenCLPrivateAddressSpaceAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_OpenCLPrivateAddressSpace_SpellingNotCalculated;
-  
-  #endif
-  }
+  return clang_ext_OpenCLPrivateAddressSpace_C2x_clang_opencl_private;}
  
  #endif
  
  return clang_ext_OpenCLPrivateAddressSpace_SpellingNotCalculated;}
 enum
+clang_ext_OptimizeNone_spelling clang_ext_OptimizeNone_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::OptimizeNoneAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_OptimizeNone_GNU_optnone;
+  case 1:
+  return clang_ext_OptimizeNone_CXX11_clang_optnone;
+  case 2:
+  return clang_ext_OptimizeNone_C2x_clang_optnone;}
+ 
+ #endif
+ 
+ return clang_ext_OptimizeNone_SpellingNotCalculated;}
+enum
+clang_ext_Overloadable_spelling clang_ext_Overloadable_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::OverloadableAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Overloadable_GNU_overloadable;
+  case 1:
+  return clang_ext_Overloadable_CXX11_clang_overloadable;
+  case 2:
+  return clang_ext_Overloadable_C2x_clang_overloadable;}
+ 
+ #endif
+ 
+ return clang_ext_Overloadable_SpellingNotCalculated;}
+enum
 clang_ext_Ownership_spelling clang_ext_Ownership_getSpelling(CXCursor cursor)
 {
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+ #ifndef LLVM_VERSION_BEFORE_3_7_0
  
  auto attr = GetCursorAttr(cursor);
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::OwnershipAttr >(attr))
  switch (qual_attr->getSemanticSpelling())
  {case clang::OwnershipAttr ::Spelling ::GNU_ownership_holds:
   return clang_ext_Ownership_GNU_ownership_holds;
+  
+  #ifndef LLVM_VERSION_BEFORE_6_0_0
+  
   case clang::OwnershipAttr ::Spelling ::CXX11_clang_ownership_holds:
   return clang_ext_Ownership_CXX11_clang_ownership_holds;
+  
+  #endif
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_7_0_0
+  
   case clang::OwnershipAttr ::Spelling ::C2x_clang_ownership_holds:
   return clang_ext_Ownership_C2x_clang_ownership_holds;
+  
+  #endif
+  
   case clang::OwnershipAttr ::Spelling ::GNU_ownership_returns:
   return clang_ext_Ownership_GNU_ownership_returns;
+  
+  #ifndef LLVM_VERSION_BEFORE_6_0_0
+  
   case clang::OwnershipAttr ::Spelling ::CXX11_clang_ownership_returns:
   return clang_ext_Ownership_CXX11_clang_ownership_returns;
+  
+  #endif
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_7_0_0
+  
   case clang::OwnershipAttr ::Spelling ::C2x_clang_ownership_returns:
   return clang_ext_Ownership_C2x_clang_ownership_returns;
+  
+  #endif
+  
   case clang::OwnershipAttr ::Spelling ::GNU_ownership_takes:
   return clang_ext_Ownership_GNU_ownership_takes;
+  
+  #ifndef LLVM_VERSION_BEFORE_6_0_0
+  
   case clang::OwnershipAttr ::Spelling ::CXX11_clang_ownership_takes:
   return clang_ext_Ownership_CXX11_clang_ownership_takes;
+  
+  #endif
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_7_0_0
+  
   case clang::OwnershipAttr ::Spelling ::C2x_clang_ownership_takes:
   return clang_ext_Ownership_C2x_clang_ownership_takes;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::OwnershipAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_Ownership_SpellingNotCalculated;
   
   #endif
   }
@@ -817,6 +3814,23 @@ clang_ext_Ownership_spelling clang_ext_Ownership_getSpelling(CXCursor cursor)
  #endif
  
  return clang_ext_Ownership_SpellingNotCalculated;}
+enum clang_ext_Packed_spelling clang_ext_Packed_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::PackedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Packed_GNU_packed;
+  case 1:
+  return clang_ext_Packed_CXX11_gnu_packed;
+  case 2:
+  return clang_ext_Packed_C2x_gnu_packed;}
+ 
+ #endif
+ 
+ return clang_ext_Packed_SpellingNotCalculated;}
 enum
 clang_ext_ParamTypestateAttr_ConsumedState
 convert_ParamTypestateAttr_ConsumedState(
@@ -830,10 +3844,47 @@ clang::ParamTypestateAttr ::ConsumedState value)
   return clang_ext_ParamTypestateAttr_ConsumedState_Unconsumed;}
  return clang_ext_ParamTypestateAttr_ConsumedState_Unknown;}
 enum
+clang_ext_ParamTypestate_spelling clang_ext_ParamTypestate_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ParamTypestateAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ParamTypestate_GNU_param_typestate;
+  case 1:
+  return clang_ext_ParamTypestate_CXX11_clang_param_typestate;}
+ 
+ #endif
+ 
+ return clang_ext_ParamTypestate_SpellingNotCalculated;}
+enum clang_ext_Pascal_spelling clang_ext_Pascal_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::PascalAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Pascal_GNU_pascal;
+  case 1:
+  return clang_ext_Pascal_CXX11_clang_pascal;
+  case 2:
+  return clang_ext_Pascal_C2x_clang_pascal;
+  case 3:
+  return clang_ext_Pascal_Keyword_pascal;}
+ 
+ #endif
+ 
+ return clang_ext_Pascal_SpellingNotCalculated;}
+enum
 clang_ext_PassObjectSize_spelling clang_ext_PassObjectSize_getSpelling(
 CXCursor cursor)
 {
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+ #ifndef LLVM_VERSION_BEFORE_9_0_0
  
  auto attr = GetCursorAttr(cursor);
  if
@@ -852,19 +3903,32 @@ CXCursor cursor)
   return clang_ext_PassObjectSize_CXX11_clang_pass_dynamic_object_size;
   case
   clang::PassObjectSizeAttr ::Spelling ::C2x_clang_pass_dynamic_object_size:
-  return clang_ext_PassObjectSize_C2x_clang_pass_dynamic_object_size;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::PassObjectSizeAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_PassObjectSize_SpellingNotCalculated;
-  
-  #endif
-  }
+  return clang_ext_PassObjectSize_C2x_clang_pass_dynamic_object_size;}
  
  #endif
  
  return clang_ext_PassObjectSize_SpellingNotCalculated;}
+enum
+clang_ext_PatchableFunctionEntry_spelling
+clang_ext_PatchableFunctionEntry_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::PatchableFunctionEntryAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_PatchableFunctionEntry_GNU_patchable_function_entry;
+  case 1:
+  return clang_ext_PatchableFunctionEntry_CXX11_gnu_patchable_function_entry;
+  case 2:
+  return clang_ext_PatchableFunctionEntry_C2x_gnu_patchable_function_entry;}
+ 
+ #endif
+ 
+ return clang_ext_PatchableFunctionEntry_SpellingNotCalculated;}
 enum
 clang_ext_PcsAttr_PCSType convert_PcsAttr_PCSType(
 clang::PcsAttr ::PCSType value)
@@ -874,6 +3938,95 @@ clang::PcsAttr ::PCSType value)
   case clang::PcsAttr ::PCSType ::AAPCS_VFP:
   return clang_ext_PcsAttr_PCSType_AAPCS_VFP;}
  return clang_ext_PcsAttr_PCSType_AAPCS;}
+enum clang_ext_Pcs_spelling clang_ext_Pcs_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::PcsAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Pcs_GNU_pcs;
+  case 1:
+  return clang_ext_Pcs_CXX11_gnu_pcs;
+  case 2:
+  return clang_ext_Pcs_C2x_gnu_pcs;}
+ 
+ #endif
+ 
+ return clang_ext_Pcs_SpellingNotCalculated;}
+enum
+clang_ext_PreserveAll_spelling clang_ext_PreserveAll_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::PreserveAllAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_PreserveAll_GNU_preserve_all;
+  case 1:
+  return clang_ext_PreserveAll_CXX11_clang_preserve_all;
+  case 2:
+  return clang_ext_PreserveAll_C2x_clang_preserve_all;}
+ 
+ #endif
+ 
+ return clang_ext_PreserveAll_SpellingNotCalculated;}
+enum
+clang_ext_PreserveMost_spelling clang_ext_PreserveMost_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::PreserveMostAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_PreserveMost_GNU_preserve_most;
+  case 1:
+  return clang_ext_PreserveMost_CXX11_clang_preserve_most;
+  case 2:
+  return clang_ext_PreserveMost_C2x_clang_preserve_most;}
+ 
+ #endif
+ 
+ return clang_ext_PreserveMost_SpellingNotCalculated;}
+enum
+clang_ext_PtGuardedVar_spelling clang_ext_PtGuardedVar_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::PtGuardedVarAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_PtGuardedVar_GNU_pt_guarded_var;
+  case 1:
+  return clang_ext_PtGuardedVar_CXX11_clang_pt_guarded_var;}
+ 
+ #endif
+ 
+ return clang_ext_PtGuardedVar_SpellingNotCalculated;}
+enum clang_ext_Pure_spelling clang_ext_Pure_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::PureAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Pure_GNU_pure;
+  case 1:
+  return clang_ext_Pure_CXX11_gnu_pure;
+  case 2:
+  return clang_ext_Pure_C2x_gnu_pure;}
+ 
+ #endif
+ 
+ return clang_ext_Pure_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_7_0_0
  enum
@@ -891,55 +4044,130 @@ clang::PcsAttr ::PCSType value)
 
 #endif
  enum
- clang_ext_ReleaseCapability_spelling
- clang_ext_ReleaseCapability_getSpelling(CXCursor cursor)
+ clang_ext_RISCVInterrupt_spelling clang_ext_RISCVInterrupt_getSpelling(
+ CXCursor cursor)
  {
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
+  #ifndef LLVM_VERSION_BEFORE_7_0_0
   
   auto attr = GetCursorAttr(cursor);
   if
-  (auto qual_attr =
-   llvm::dyn_cast_or_null<clang::ReleaseCapabilityAttr >(attr))
-  switch (qual_attr->getSemanticSpelling())
-  {case clang::ReleaseCapabilityAttr ::Spelling ::GNU_release_capability:
-   return clang_ext_ReleaseCapability_GNU_release_capability;
-   case
-   clang::ReleaseCapabilityAttr ::Spelling ::CXX11_clang_release_capability:
-   return clang_ext_ReleaseCapability_CXX11_clang_release_capability;
-   case
-   clang::ReleaseCapabilityAttr ::Spelling ::GNU_release_shared_capability:
-   return clang_ext_ReleaseCapability_GNU_release_shared_capability;
-   case
-   clang::ReleaseCapabilityAttr ::Spelling ::CXX11_clang_release_shared_capability:
-   return clang_ext_ReleaseCapability_CXX11_clang_release_shared_capability;
-   case
-   clang::ReleaseCapabilityAttr ::Spelling ::GNU_release_generic_capability:
-   return clang_ext_ReleaseCapability_GNU_release_generic_capability;
-   case
-   clang::ReleaseCapabilityAttr ::Spelling ::CXX11_clang_release_generic_capability:
-   return clang_ext_ReleaseCapability_CXX11_clang_release_generic_capability;
-   case clang::ReleaseCapabilityAttr ::Spelling ::GNU_unlock_function:
-   return clang_ext_ReleaseCapability_GNU_unlock_function;
-   case
-   clang::ReleaseCapabilityAttr ::Spelling ::CXX11_clang_unlock_function:
-   return clang_ext_ReleaseCapability_CXX11_clang_unlock_function;
-   
-   #ifndef LLVM_VERSION_BEFORE_10_0_0
-   
-   case clang::ReleaseCapabilityAttr ::Spelling ::SpellingNotCalculated:
-   return clang_ext_ReleaseCapability_SpellingNotCalculated;
-   
-   #endif
-   }
+  (auto qual_attr = llvm::dyn_cast_or_null<clang::RISCVInterruptAttr >(attr))
+  switch (qual_attr->getSpellingListIndex())
+  {case 0:
+   return clang_ext_RISCVInterrupt_GNU_interrupt;
+   case 1:
+   return clang_ext_RISCVInterrupt_CXX11_gnu_interrupt;
+   case 2:
+   return clang_ext_RISCVInterrupt_C2x_gnu_interrupt;}
   
   #endif
   
-  return clang_ext_ReleaseCapability_SpellingNotCalculated;}
+  return clang_ext_RISCVInterrupt_SpellingNotCalculated;}
+enum
+clang_ext_RegCall_spelling clang_ext_RegCall_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_4_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::RegCallAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_RegCall_GNU_regcall;
+  case 1:
+  return clang_ext_RegCall_CXX11_gnu_regcall;
+  case 2:
+  return clang_ext_RegCall_C2x_gnu_regcall;
+  case 3:
+  return clang_ext_RegCall_Keyword_regcall;}
+ 
+ #endif
+ 
+ return clang_ext_RegCall_SpellingNotCalculated;}
+enum
+clang_ext_Reinitializes_spelling clang_ext_Reinitializes_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ReinitializesAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Reinitializes_GNU_reinitializes;
+  case 1:
+  return clang_ext_Reinitializes_CXX11_clang_reinitializes;}
+ 
+ #endif
+ 
+ return clang_ext_Reinitializes_SpellingNotCalculated;}
+enum
+clang_ext_ReleaseCapability_spelling clang_ext_ReleaseCapability_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::ReleaseCapabilityAttr >(attr))
+ switch (qual_attr->getSemanticSpelling())
+ {case clang::ReleaseCapabilityAttr ::Spelling ::GNU_release_capability:
+  return clang_ext_ReleaseCapability_GNU_release_capability;
+  case
+  clang::ReleaseCapabilityAttr ::Spelling ::CXX11_clang_release_capability:
+  return clang_ext_ReleaseCapability_CXX11_clang_release_capability;
+  case
+  clang::ReleaseCapabilityAttr ::Spelling ::GNU_release_shared_capability:
+  return clang_ext_ReleaseCapability_GNU_release_shared_capability;
+  case
+  clang::ReleaseCapabilityAttr ::Spelling ::CXX11_clang_release_shared_capability:
+  return clang_ext_ReleaseCapability_CXX11_clang_release_shared_capability;
+  case
+  clang::ReleaseCapabilityAttr ::Spelling ::GNU_release_generic_capability:
+  return clang_ext_ReleaseCapability_GNU_release_generic_capability;
+  case
+  clang::ReleaseCapabilityAttr ::Spelling ::CXX11_clang_release_generic_capability:
+  return clang_ext_ReleaseCapability_CXX11_clang_release_generic_capability;
+  case clang::ReleaseCapabilityAttr ::Spelling ::GNU_unlock_function:
+  return clang_ext_ReleaseCapability_GNU_unlock_function;
+  
+  #ifndef LLVM_VERSION_BEFORE_6_0_0
+  
+  case clang::ReleaseCapabilityAttr ::Spelling ::CXX11_clang_unlock_function:
+  return clang_ext_ReleaseCapability_CXX11_clang_unlock_function;
+  
+  #endif
+  }
+ 
+ #endif
+ 
+ return clang_ext_ReleaseCapability_SpellingNotCalculated;}
+enum
+clang_ext_ReleaseHandle_spelling clang_ext_ReleaseHandle_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ReleaseHandleAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ReleaseHandle_GNU_release_handle;
+  case 1:
+  return clang_ext_ReleaseHandle_CXX11_clang_release_handle;
+  case 2:
+  return clang_ext_ReleaseHandle_C2x_clang_release_handle;}
+ 
+ #endif
+ 
+ return clang_ext_ReleaseHandle_SpellingNotCalculated;}
 enum
 clang_ext_RequiresCapability_spelling
 clang_ext_RequiresCapability_getSpelling(CXCursor cursor)
 {
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
  
  auto attr = GetCursorAttr(cursor);
  if
@@ -954,9 +4182,15 @@ clang_ext_RequiresCapability_getSpelling(CXCursor cursor)
   case
   clang::RequiresCapabilityAttr ::Spelling ::GNU_exclusive_locks_required:
   return clang_ext_RequiresCapability_GNU_exclusive_locks_required;
+  
+  #ifndef LLVM_VERSION_BEFORE_6_0_0
+  
   case
   clang::RequiresCapabilityAttr ::Spelling ::CXX11_clang_exclusive_locks_required:
   return clang_ext_RequiresCapability_CXX11_clang_exclusive_locks_required;
+  
+  #endif
+  
   case
   clang::RequiresCapabilityAttr ::Spelling ::GNU_requires_shared_capability:
   return clang_ext_RequiresCapability_GNU_requires_shared_capability;
@@ -965,14 +4199,12 @@ clang_ext_RequiresCapability_getSpelling(CXCursor cursor)
   return clang_ext_RequiresCapability_CXX11_clang_requires_shared_capability;
   case clang::RequiresCapabilityAttr ::Spelling ::GNU_shared_locks_required:
   return clang_ext_RequiresCapability_GNU_shared_locks_required;
+  
+  #ifndef LLVM_VERSION_BEFORE_6_0_0
+  
   case
   clang::RequiresCapabilityAttr ::Spelling ::CXX11_clang_shared_locks_required:
   return clang_ext_RequiresCapability_CXX11_clang_shared_locks_required;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::RequiresCapabilityAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_RequiresCapability_SpellingNotCalculated;
   
   #endif
   }
@@ -983,7 +4215,7 @@ clang_ext_RequiresCapability_getSpelling(CXCursor cursor)
 enum
 clang_ext_Restrict_spelling clang_ext_Restrict_getSpelling(CXCursor cursor)
 {
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+ #ifndef LLVM_VERSION_BEFORE_3_7_0
  
  auto attr = GetCursorAttr(cursor);
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::RestrictAttr >(attr))
@@ -995,10 +4227,10 @@ clang_ext_Restrict_spelling clang_ext_Restrict_getSpelling(CXCursor cursor)
   case clang::RestrictAttr ::Spelling ::CXX11_gnu_malloc:
   return clang_ext_Restrict_CXX11_gnu_malloc;
   
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
+  #ifndef LLVM_VERSION_BEFORE_11_0_0
   
-  case clang::RestrictAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_Restrict_SpellingNotCalculated;
+  case clang::RestrictAttr ::Spelling ::C2x_gnu_malloc:
+  return clang_ext_Restrict_C2x_gnu_malloc;
   
   #endif
   }
@@ -1019,9 +4251,103 @@ clang::ReturnTypestateAttr ::ConsumedState value)
   return clang_ext_ReturnTypestateAttr_ConsumedState_Unconsumed;}
  return clang_ext_ReturnTypestateAttr_ConsumedState_Unknown;}
 enum
-clang_ext_Section_spelling clang_ext_Section_getSpelling(CXCursor cursor)
+clang_ext_ReturnTypestate_spelling clang_ext_ReturnTypestate_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ReturnTypestateAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ReturnTypestate_GNU_return_typestate;
+  case 1:
+  return clang_ext_ReturnTypestate_CXX11_clang_return_typestate;}
+ 
+ #endif
+ 
+ return clang_ext_ReturnTypestate_SpellingNotCalculated;}
+enum
+clang_ext_ReturnsNonNull_spelling clang_ext_ReturnsNonNull_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ReturnsNonNullAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ReturnsNonNull_GNU_returns_nonnull;
+  case 1:
+  return clang_ext_ReturnsNonNull_CXX11_gnu_returns_nonnull;
+  case 2:
+  return clang_ext_ReturnsNonNull_C2x_gnu_returns_nonnull;}
+ 
+ #endif
+ 
+ return clang_ext_ReturnsNonNull_SpellingNotCalculated;}
+enum
+clang_ext_ReturnsTwice_spelling clang_ext_ReturnsTwice_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ReturnsTwiceAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ReturnsTwice_GNU_returns_twice;
+  case 1:
+  return clang_ext_ReturnsTwice_CXX11_gnu_returns_twice;
+  case 2:
+  return clang_ext_ReturnsTwice_C2x_gnu_returns_twice;}
+ 
+ #endif
+ 
+ return clang_ext_ReturnsTwice_SpellingNotCalculated;}
+enum
+clang_ext_SYCLKernel_spelling clang_ext_SYCLKernel_getSpelling(
+CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::SYCLKernelAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_SYCLKernel_GNU_sycl_kernel;
+  case 1:
+  return clang_ext_SYCLKernel_CXX11_clang_sycl_kernel;
+  case 2:
+  return clang_ext_SYCLKernel_C2x_clang_sycl_kernel;}
+ 
+ #endif
+ 
+ return clang_ext_SYCLKernel_SpellingNotCalculated;}
+enum
+clang_ext_ScopedLockable_spelling clang_ext_ScopedLockable_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ScopedLockableAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ScopedLockable_GNU_scoped_lockable;
+  case 1:
+  return clang_ext_ScopedLockable_CXX11_clang_scoped_lockable;}
+ 
+ #endif
+ 
+ return clang_ext_ScopedLockable_SpellingNotCalculated;}
+enum
+clang_ext_Section_spelling clang_ext_Section_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
  
  auto attr = GetCursorAttr(cursor);
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::SectionAttr >(attr))
@@ -1030,20 +4356,58 @@ clang_ext_Section_spelling clang_ext_Section_getSpelling(CXCursor cursor)
   return clang_ext_Section_GNU_section;
   case clang::SectionAttr ::Spelling ::CXX11_gnu_section:
   return clang_ext_Section_CXX11_gnu_section;
-  case clang::SectionAttr ::Spelling ::Declspec_allocate:
-  return clang_ext_Section_Declspec_allocate;
   
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
+  #ifndef LLVM_VERSION_BEFORE_11_0_0
   
-  case clang::SectionAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_Section_SpellingNotCalculated;
+  case clang::SectionAttr ::Spelling ::C2x_gnu_section:
+  return clang_ext_Section_C2x_gnu_section;
   
   #endif
-  }
+  
+  case clang::SectionAttr ::Spelling ::Declspec_allocate:
+  return clang_ext_Section_Declspec_allocate;}
  
  #endif
  
  return clang_ext_Section_SpellingNotCalculated;}
+enum
+clang_ext_SelectAny_spelling clang_ext_SelectAny_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::SelectAnyAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_SelectAny_Declspec_selectany;
+  case 1:
+  return clang_ext_SelectAny_GNU_selectany;
+  case 2:
+  return clang_ext_SelectAny_CXX11_gnu_selectany;
+  case 3:
+  return clang_ext_SelectAny_C2x_gnu_selectany;}
+ 
+ #endif
+ 
+ return clang_ext_SelectAny_SpellingNotCalculated;}
+enum
+clang_ext_Sentinel_spelling clang_ext_Sentinel_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::SentinelAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Sentinel_GNU_sentinel;
+  case 1:
+  return clang_ext_Sentinel_CXX11_gnu_sentinel;
+  case 2:
+  return clang_ext_Sentinel_C2x_gnu_sentinel;}
+ 
+ #endif
+ 
+ return clang_ext_Sentinel_SpellingNotCalculated;}
 enum
 clang_ext_SetTypestateAttr_ConsumedState
 convert_SetTypestateAttr_ConsumedState(
@@ -1057,6 +4421,197 @@ clang::SetTypestateAttr ::ConsumedState value)
   return clang_ext_SetTypestateAttr_ConsumedState_Unconsumed;}
  return clang_ext_SetTypestateAttr_ConsumedState_Unknown;}
 enum
+clang_ext_SetTypestate_spelling clang_ext_SetTypestate_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::SetTypestateAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_SetTypestate_GNU_set_typestate;
+  case 1:
+  return clang_ext_SetTypestate_CXX11_clang_set_typestate;}
+ 
+ #endif
+ 
+ return clang_ext_SetTypestate_SpellingNotCalculated;}
+enum
+clang_ext_SpeculativeLoadHardening_spelling
+clang_ext_SpeculativeLoadHardening_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::SpeculativeLoadHardeningAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_SpeculativeLoadHardening_GNU_speculative_load_hardening;
+  case 1:
+  return
+  clang_ext_SpeculativeLoadHardening_CXX11_clang_speculative_load_hardening;
+  case 2:
+  return
+  clang_ext_SpeculativeLoadHardening_C2x_clang_speculative_load_hardening;}
+ 
+ #endif
+ 
+ return clang_ext_SpeculativeLoadHardening_SpellingNotCalculated;}
+enum
+clang_ext_StdCall_spelling clang_ext_StdCall_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::StdCallAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_StdCall_GNU_stdcall;
+  case 1:
+  return clang_ext_StdCall_CXX11_gnu_stdcall;
+  case 2:
+  return clang_ext_StdCall_C2x_gnu_stdcall;
+  case 3:
+  return clang_ext_StdCall_Keyword_stdcall;}
+ 
+ #endif
+ 
+ return clang_ext_StdCall_SpellingNotCalculated;}
+enum
+clang_ext_SwiftCall_spelling clang_ext_SwiftCall_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::SwiftCallAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_SwiftCall_GNU_swiftcall;
+  case 1:
+  return clang_ext_SwiftCall_CXX11_clang_swiftcall;
+  case 2:
+  return clang_ext_SwiftCall_C2x_clang_swiftcall;}
+ 
+ #endif
+ 
+ return clang_ext_SwiftCall_SpellingNotCalculated;}
+enum
+clang_ext_SwiftContext_spelling clang_ext_SwiftContext_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::SwiftContextAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_SwiftContext_GNU_swift_context;
+  case 1:
+  return clang_ext_SwiftContext_CXX11_clang_swift_context;
+  case 2:
+  return clang_ext_SwiftContext_C2x_clang_swift_context;}
+ 
+ #endif
+ 
+ return clang_ext_SwiftContext_SpellingNotCalculated;}
+enum
+clang_ext_SwiftErrorResult_spelling clang_ext_SwiftErrorResult_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::SwiftErrorResultAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_SwiftErrorResult_GNU_swift_error_result;
+  case 1:
+  return clang_ext_SwiftErrorResult_CXX11_clang_swift_error_result;
+  case 2:
+  return clang_ext_SwiftErrorResult_C2x_clang_swift_error_result;}
+ 
+ #endif
+ 
+ return clang_ext_SwiftErrorResult_SpellingNotCalculated;}
+enum
+clang_ext_SwiftIndirectResult_spelling
+clang_ext_SwiftIndirectResult_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::SwiftIndirectResultAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_SwiftIndirectResult_GNU_swift_indirect_result;
+  case 1:
+  return clang_ext_SwiftIndirectResult_CXX11_clang_swift_indirect_result;
+  case 2:
+  return clang_ext_SwiftIndirectResult_C2x_clang_swift_indirect_result;}
+ 
+ #endif
+ 
+ return clang_ext_SwiftIndirectResult_SpellingNotCalculated;}
+enum
+clang_ext_SysVABI_spelling clang_ext_SysVABI_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::SysVABIAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_SysVABI_GNU_sysv_abi;
+  case 1:
+  return clang_ext_SysVABI_CXX11_gnu_sysv_abi;
+  case 2:
+  return clang_ext_SysVABI_C2x_gnu_sysv_abi;}
+ 
+ #endif
+ 
+ return clang_ext_SysVABI_SpellingNotCalculated;}
+enum
+clang_ext_TLSModel_spelling clang_ext_TLSModel_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::TLSModelAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_TLSModel_GNU_tls_model;
+  case 1:
+  return clang_ext_TLSModel_CXX11_gnu_tls_model;
+  case 2:
+  return clang_ext_TLSModel_C2x_gnu_tls_model;}
+ 
+ #endif
+ 
+ return clang_ext_TLSModel_SpellingNotCalculated;}
+enum clang_ext_Target_spelling clang_ext_Target_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_8_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::TargetAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Target_GNU_target;
+  case 1:
+  return clang_ext_Target_CXX11_gnu_target;
+  case 2:
+  return clang_ext_Target_C2x_gnu_target;}
+ 
+ #endif
+ 
+ return clang_ext_Target_SpellingNotCalculated;}
+enum
 clang_ext_TestTypestateAttr_ConsumedState
 convert_TestTypestateAttr_ConsumedState(
 clang::TestTypestateAttr ::ConsumedState value)
@@ -1067,10 +4622,85 @@ clang::TestTypestateAttr ::ConsumedState value)
   return clang_ext_TestTypestateAttr_ConsumedState_Unconsumed;}
  return clang_ext_TestTypestateAttr_ConsumedState_Consumed;}
 enum
+clang_ext_TestTypestate_spelling clang_ext_TestTypestate_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::TestTypestateAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_TestTypestate_GNU_test_typestate;
+  case 1:
+  return clang_ext_TestTypestate_CXX11_clang_test_typestate;}
+ 
+ #endif
+ 
+ return clang_ext_TestTypestate_SpellingNotCalculated;}
+enum
+clang_ext_ThisCall_spelling clang_ext_ThisCall_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::ThisCallAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_ThisCall_GNU_thiscall;
+  case 1:
+  return clang_ext_ThisCall_CXX11_gnu_thiscall;
+  case 2:
+  return clang_ext_ThisCall_C2x_gnu_thiscall;
+  case 3:
+  return clang_ext_ThisCall_Keyword_thiscall;}
+ 
+ #endif
+ 
+ return clang_ext_ThisCall_SpellingNotCalculated;}
+enum
+clang_ext_TransparentUnion_spelling clang_ext_TransparentUnion_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::TransparentUnionAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_TransparentUnion_GNU_transparent_union;
+  case 1:
+  return clang_ext_TransparentUnion_CXX11_gnu_transparent_union;
+  case 2:
+  return clang_ext_TransparentUnion_C2x_gnu_transparent_union;}
+ 
+ #endif
+ 
+ return clang_ext_TransparentUnion_SpellingNotCalculated;}
+enum
+clang_ext_TrivialABI_spelling clang_ext_TrivialABI_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_7_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::TrivialABIAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_TrivialABI_GNU_trivial_abi;
+  case 1:
+  return clang_ext_TrivialABI_CXX11_clang_trivial_abi;}
+ 
+ #endif
+ 
+ return clang_ext_TrivialABI_SpellingNotCalculated;}
+enum
 clang_ext_TryAcquireCapability_spelling
 clang_ext_TryAcquireCapability_getSpelling(CXCursor cursor)
 {
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
  
  auto attr = GetCursorAttr(cursor);
  if
@@ -1089,19 +4719,32 @@ clang_ext_TryAcquireCapability_getSpelling(CXCursor cursor)
   case
   clang::TryAcquireCapabilityAttr ::Spelling ::CXX11_clang_try_acquire_shared_capability:
   return
-  clang_ext_TryAcquireCapability_CXX11_clang_try_acquire_shared_capability;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::TryAcquireCapabilityAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_TryAcquireCapability_SpellingNotCalculated;
-  
-  #endif
-  }
+  clang_ext_TryAcquireCapability_CXX11_clang_try_acquire_shared_capability;}
  
  #endif
  
  return clang_ext_TryAcquireCapability_SpellingNotCalculated;}
+enum
+clang_ext_TypeTagForDatatype_spelling
+clang_ext_TypeTagForDatatype_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::TypeTagForDatatypeAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_TypeTagForDatatype_GNU_type_tag_for_datatype;
+  case 1:
+  return clang_ext_TypeTagForDatatype_CXX11_clang_type_tag_for_datatype;
+  case 2:
+  return clang_ext_TypeTagForDatatype_C2x_clang_type_tag_for_datatype;}
+ 
+ #endif
+ 
+ return clang_ext_TypeTagForDatatype_SpellingNotCalculated;}
 enum
 clang_ext_TypeVisibilityAttr_VisibilityType
 convert_TypeVisibilityAttr_VisibilityType(
@@ -1114,9 +4757,66 @@ clang::TypeVisibilityAttr ::VisibilityType value)
   case clang::TypeVisibilityAttr ::VisibilityType ::Protected:
   return clang_ext_TypeVisibilityAttr_VisibilityType_Protected;}
  return clang_ext_TypeVisibilityAttr_VisibilityType_Default;}
+enum
+clang_ext_TypeVisibility_spelling clang_ext_TypeVisibility_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::TypeVisibilityAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_TypeVisibility_GNU_type_visibility;
+  case 1:
+  return clang_ext_TypeVisibility_CXX11_clang_type_visibility;
+  case 2:
+  return clang_ext_TypeVisibility_C2x_clang_type_visibility;}
+ 
+ #endif
+ 
+ return clang_ext_TypeVisibility_SpellingNotCalculated;}
+enum
+clang_ext_Unavailable_spelling clang_ext_Unavailable_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::UnavailableAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Unavailable_GNU_unavailable;
+  case 1:
+  return clang_ext_Unavailable_CXX11_clang_unavailable;
+  case 2:
+  return clang_ext_Unavailable_C2x_clang_unavailable;}
+ 
+ #endif
+ 
+ return clang_ext_Unavailable_SpellingNotCalculated;}
+enum
+clang_ext_Uninitialized_spelling clang_ext_Uninitialized_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::UninitializedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Uninitialized_GNU_uninitialized;
+  case 1:
+  return clang_ext_Uninitialized_CXX11_clang_uninitialized;}
+ 
+ #endif
+ 
+ return clang_ext_Uninitialized_SpellingNotCalculated;}
 enum clang_ext_Unused_spelling clang_ext_Unused_getSpelling(CXCursor cursor)
 {
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
  
  auto attr = GetCursorAttr(cursor);
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::UnusedAttr >(attr))
@@ -1127,13 +4827,19 @@ enum clang_ext_Unused_spelling clang_ext_Unused_getSpelling(CXCursor cursor)
   return clang_ext_Unused_GNU_unused;
   case clang::UnusedAttr ::Spelling ::CXX11_gnu_unused:
   return clang_ext_Unused_CXX11_gnu_unused;
+  
+  #ifndef LLVM_VERSION_BEFORE_11_0_0
+  
+  case clang::UnusedAttr ::Spelling ::C2x_gnu_unused:
+  return clang_ext_Unused_C2x_gnu_unused;
+  
+  #endif
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_6_0_0
+  
   case clang::UnusedAttr ::Spelling ::C2x_maybe_unused:
   return clang_ext_Unused_C2x_maybe_unused;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::UnusedAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_Unused_SpellingNotCalculated;
   
   #endif
   }
@@ -1141,6 +4847,93 @@ enum clang_ext_Unused_spelling clang_ext_Unused_getSpelling(CXCursor cursor)
  #endif
  
  return clang_ext_Unused_SpellingNotCalculated;}
+enum
+clang_ext_UseHandle_spelling clang_ext_UseHandle_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::UseHandleAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_UseHandle_GNU_use_handle;
+  case 1:
+  return clang_ext_UseHandle_CXX11_clang_use_handle;
+  case 2:
+  return clang_ext_UseHandle_C2x_clang_use_handle;}
+ 
+ #endif
+ 
+ return clang_ext_UseHandle_SpellingNotCalculated;}
+enum clang_ext_Used_spelling clang_ext_Used_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::UsedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Used_GNU_used;
+  case 1:
+  return clang_ext_Used_CXX11_gnu_used;
+  case 2:
+  return clang_ext_Used_C2x_gnu_used;}
+ 
+ #endif
+ 
+ return clang_ext_Used_SpellingNotCalculated;}
+enum clang_ext_Uuid_spelling clang_ext_Uuid_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_11_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::UuidAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Uuid_Declspec_uuid;
+  case 1:
+  return clang_ext_Uuid_Microsoft_uuid;}
+ 
+ #endif
+ 
+ return clang_ext_Uuid_SpellingNotCalculated;}
+enum
+clang_ext_VecReturn_spelling clang_ext_VecReturn_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::VecReturnAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_VecReturn_GNU_vecreturn;
+  case 1:
+  return clang_ext_VecReturn_CXX11_clang_vecreturn;}
+ 
+ #endif
+ 
+ return clang_ext_VecReturn_SpellingNotCalculated;}
+enum
+clang_ext_VectorCall_spelling clang_ext_VectorCall_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_6_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::VectorCallAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_VectorCall_GNU_vectorcall;
+  case 1:
+  return clang_ext_VectorCall_CXX11_clang_vectorcall;
+  case 2:
+  return clang_ext_VectorCall_C2x_clang_vectorcall;
+  case 3:
+  return clang_ext_VectorCall_Keyword_vectorcall;}
+ 
+ #endif
+ 
+ return clang_ext_VectorCall_SpellingNotCalculated;}
 enum
 clang_ext_VisibilityAttr_VisibilityType
 convert_VisibilityAttr_VisibilityType(
@@ -1153,6 +4946,44 @@ clang::VisibilityAttr ::VisibilityType value)
   case clang::VisibilityAttr ::VisibilityType ::Protected:
   return clang_ext_VisibilityAttr_VisibilityType_Protected;}
  return clang_ext_VisibilityAttr_VisibilityType_Default;}
+enum
+clang_ext_Visibility_spelling clang_ext_Visibility_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::VisibilityAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Visibility_GNU_visibility;
+  case 1:
+  return clang_ext_Visibility_CXX11_gnu_visibility;
+  case 2:
+  return clang_ext_Visibility_C2x_gnu_visibility;}
+ 
+ #endif
+ 
+ return clang_ext_Visibility_SpellingNotCalculated;}
+enum
+clang_ext_WarnUnused_spelling clang_ext_WarnUnused_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::WarnUnusedAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_WarnUnused_GNU_warn_unused;
+  case 1:
+  return clang_ext_WarnUnused_CXX11_gnu_warn_unused;
+  case 2:
+  return clang_ext_WarnUnused_C2x_gnu_warn_unused;}
+ 
+ #endif
+ 
+ return clang_ext_WarnUnused_SpellingNotCalculated;}
 enum
 clang_ext_WarnUnusedResult_spelling clang_ext_WarnUnusedResult_getSpelling(
 CXCursor cursor)
@@ -1175,10 +5006,10 @@ CXCursor cursor)
   case clang::WarnUnusedResultAttr ::Spelling ::CXX11_gnu_warn_unused_result:
   return clang_ext_WarnUnusedResult_CXX11_gnu_warn_unused_result;
   
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
+  #ifndef LLVM_VERSION_BEFORE_11_0_0
   
-  case clang::WarnUnusedResultAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_WarnUnusedResult_SpellingNotCalculated;
+  case clang::WarnUnusedResultAttr ::Spelling ::C2x_gnu_warn_unused_result:
+  return clang_ext_WarnUnusedResult_C2x_gnu_warn_unused_result;
   
   #endif
   }
@@ -1186,11 +5017,149 @@ CXCursor cursor)
  #endif
  
  return clang_ext_WarnUnusedResult_SpellingNotCalculated;}
+enum clang_ext_Weak_spelling clang_ext_Weak_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::WeakAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Weak_GNU_weak;
+  case 1:
+  return clang_ext_Weak_CXX11_gnu_weak;
+  case 2:
+  return clang_ext_Weak_C2x_gnu_weak;}
+ 
+ #endif
+ 
+ return clang_ext_Weak_SpellingNotCalculated;}
+enum
+clang_ext_WeakImport_spelling clang_ext_WeakImport_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::WeakImportAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_WeakImport_GNU_weak_import;
+  case 1:
+  return clang_ext_WeakImport_CXX11_clang_weak_import;
+  case 2:
+  return clang_ext_WeakImport_C2x_clang_weak_import;}
+ 
+ #endif
+ 
+ return clang_ext_WeakImport_SpellingNotCalculated;}
+enum
+clang_ext_WeakRef_spelling clang_ext_WeakRef_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::WeakRefAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_WeakRef_GNU_weakref;
+  case 1:
+  return clang_ext_WeakRef_CXX11_gnu_weakref;
+  case 2:
+  return clang_ext_WeakRef_C2x_gnu_weakref;}
+ 
+ #endif
+ 
+ return clang_ext_WeakRef_SpellingNotCalculated;}
+enum
+clang_ext_WebAssemblyExportName_spelling
+clang_ext_WebAssemblyExportName_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_10_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::WebAssemblyExportNameAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_WebAssemblyExportName_GNU_export_name;
+  case 1:
+  return clang_ext_WebAssemblyExportName_CXX11_clang_export_name;
+  case 2:
+  return clang_ext_WebAssemblyExportName_C2x_clang_export_name;}
+ 
+ #endif
+ 
+ return clang_ext_WebAssemblyExportName_SpellingNotCalculated;}
+enum
+clang_ext_WebAssemblyImportModule_spelling
+clang_ext_WebAssemblyImportModule_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::WebAssemblyImportModuleAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_WebAssemblyImportModule_GNU_import_module;
+  case 1:
+  return clang_ext_WebAssemblyImportModule_CXX11_clang_import_module;
+  case 2:
+  return clang_ext_WebAssemblyImportModule_C2x_clang_import_module;}
+ 
+ #endif
+ 
+ return clang_ext_WebAssemblyImportModule_SpellingNotCalculated;}
+enum
+clang_ext_WebAssemblyImportName_spelling
+clang_ext_WebAssemblyImportName_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_8_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::WebAssemblyImportNameAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_WebAssemblyImportName_GNU_import_name;
+  case 1:
+  return clang_ext_WebAssemblyImportName_CXX11_clang_import_name;
+  case 2:
+  return clang_ext_WebAssemblyImportName_C2x_clang_import_name;}
+ 
+ #endif
+ 
+ return clang_ext_WebAssemblyImportName_SpellingNotCalculated;}
+enum
+clang_ext_X86ForceAlignArgPointer_spelling
+clang_ext_X86ForceAlignArgPointer_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::X86ForceAlignArgPointerAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_X86ForceAlignArgPointer_GNU_force_align_arg_pointer;
+  case 1:
+  return clang_ext_X86ForceAlignArgPointer_CXX11_gnu_force_align_arg_pointer;
+  case 2:
+  return clang_ext_X86ForceAlignArgPointer_C2x_gnu_force_align_arg_pointer;}
+ 
+ #endif
+ 
+ return clang_ext_X86ForceAlignArgPointer_SpellingNotCalculated;}
 enum
 clang_ext_XRayInstrument_spelling clang_ext_XRayInstrument_getSpelling(
 CXCursor cursor)
 {
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+ #ifndef LLVM_VERSION_BEFORE_3_9_0
  
  auto attr = GetCursorAttr(cursor);
  if
@@ -1201,22 +5170,26 @@ CXCursor cursor)
   case
   clang::XRayInstrumentAttr ::Spelling ::CXX11_clang_xray_always_instrument:
   return clang_ext_XRayInstrument_CXX11_clang_xray_always_instrument;
+  
+  #ifndef LLVM_VERSION_BEFORE_7_0_0
+  
   case
   clang::XRayInstrumentAttr ::Spelling ::C2x_clang_xray_always_instrument:
   return clang_ext_XRayInstrument_C2x_clang_xray_always_instrument;
+  
+  #endif
+  
   case clang::XRayInstrumentAttr ::Spelling ::GNU_xray_never_instrument:
   return clang_ext_XRayInstrument_GNU_xray_never_instrument;
   case
   clang::XRayInstrumentAttr ::Spelling ::CXX11_clang_xray_never_instrument:
   return clang_ext_XRayInstrument_CXX11_clang_xray_never_instrument;
+  
+  #ifndef LLVM_VERSION_BEFORE_7_0_0
+  
   case
   clang::XRayInstrumentAttr ::Spelling ::C2x_clang_xray_never_instrument:
   return clang_ext_XRayInstrument_C2x_clang_xray_never_instrument;
-  
-  #ifndef LLVM_VERSION_BEFORE_10_0_0
-  
-  case clang::XRayInstrumentAttr ::Spelling ::SpellingNotCalculated:
-  return clang_ext_XRayInstrument_SpellingNotCalculated;
   
   #endif
   }
@@ -1224,6 +5197,25 @@ CXCursor cursor)
  #endif
  
  return clang_ext_XRayInstrument_SpellingNotCalculated;}
+enum
+clang_ext_XRayLogArgs_spelling clang_ext_XRayLogArgs_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_5_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::XRayLogArgsAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_XRayLogArgs_GNU_xray_log_args;
+  case 1:
+  return clang_ext_XRayLogArgs_CXX11_clang_xray_log_args;
+  case 2:
+  return clang_ext_XRayLogArgs_C2x_clang_xray_log_args;}
+ 
+ #endif
+ 
+ return clang_ext_XRayLogArgs_SpellingNotCalculated;}
 unsigned int clang_ext_OMPDeclareSimdDeclAttr_getUniforms_Size(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -1272,22 +5264,6 @@ CXString clang_ext_ObjCRuntimeNameAttr_getMetadataName(CXCursor cursor)
  #endif
  
  return cxstring_createRef("");}
-void clang_ext_OMPDeclareVariantAttr_getImplVendors(
-CXCursor cursor, void (*callback)(CXString , void *), void *data)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
- for (auto iter = qual_attr->implVendors_begin();
- iter != qual_attr->implVendors_end(); ++ iter)
- {auto const &item = * iter;
-  callback(cxstring_createDup(item), data);}
- 
- #endif
- }
 CXString clang_ext_IFuncAttr_getResolver(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -1484,22 +5460,6 @@ unsigned int clang_ext_AnnotateAttr_getAnnotationLength(CXCursor cursor)
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::AnnotateAttr >(attr))
  return qual_attr->getAnnotationLength();
  return 0;}
-void clang_ext_OMPDeclareVariantAttr_getDeviceKinds(
-CXCursor cursor, void (*callback)(CXString , void *), void *data)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
- for (auto iter = qual_attr->deviceKinds_begin();
- iter != qual_attr->deviceKinds_end(); ++ iter)
- {auto const &item = * iter;
-  callback(cxstring_createDup(item), data);}
- 
- #endif
- }
 unsigned int clang_ext_LayoutVersionAttr_getVersion(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -1652,20 +5612,6 @@ unsigned int clang_ext_Attrs_getArgs_Size(CXCursor cursor)
   default:
   ;}
  return 0;}
-unsigned int clang_ext_OMPDeclareVariantAttr_getCtxSelectors_Size(
-CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
- return qual_attr->ctxSelectors_size();
- 
- #endif
- 
- return 0;}
 CXCursor clang_ext_CUDALaunchBoundsAttr_getMinBlocks(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -1678,20 +5624,6 @@ CXCursor clang_ext_CUDALaunchBoundsAttr_getMinBlocks(CXCursor cursor)
  #endif
  
  return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
-unsigned int clang_ext_OMPDeclareVariantAttr_getImplVendors_Size(
-CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
- return qual_attr->implVendors_size();
- 
- #endif
- 
- return 0;}
 unsigned int clang_ext_ExternalSourceSymbolAttr_getDefinedInLength(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -1702,18 +5634,6 @@ CXCursor cursor)
  (auto qual_attr =
   llvm::dyn_cast_or_null<clang::ExternalSourceSymbolAttr >(attr))
  return qual_attr->getDefinedInLength();
- 
- #endif
- 
- return 0;}
-unsigned int clang_ext_OMPCaptureKindAttr_getCaptureKind(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_6_0_0
- 
- if
- (auto qual_attr = llvm::dyn_cast_or_null<clang::OMPCaptureKindAttr >(attr))
- return qual_attr->getCaptureKind();
  
  #endif
  
@@ -1824,6 +5744,18 @@ clang_ext_TestTypestateAttr_getTestState(CXCursor cursor)
  (auto qual_attr = llvm::dyn_cast_or_null<clang::TestTypestateAttr >(attr))
  return convert_TestTypestateAttr_ConsumedState(qual_attr->getTestState());
  return clang_ext_TestTypestateAttr_ConsumedState_Consumed;}
+unsigned int clang_ext_OMPCaptureKindAttr_getCaptureKindVal(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_11_0_0
+ 
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::OMPCaptureKindAttr >(attr))
+ return qual_attr->getCaptureKindVal();
+ 
+ #endif
+ 
+ return 0;}
 unsigned int clang_ext_InitPriorityAttr_getPriority(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::InitPriorityAttr >(attr))
@@ -1944,22 +5876,6 @@ unsigned int clang_ext_AllocSizeAttr_getNumElemsParam(CXCursor cursor)
  #endif
  
  return 0;}
-void clang_ext_OMPDeclareVariantAttr_getCtxSelectors(
-CXCursor cursor, void (*callback)(unsigned int , void *), void *data)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
- for (auto iter = qual_attr->ctxSelectors_begin();
- iter != qual_attr->ctxSelectors_end(); ++ iter)
- {auto const &item = * iter;
-  callback(item, data);}
- 
- #endif
- }
 unsigned int clang_ext_IFuncAttr_getResolverLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -2005,12 +5921,13 @@ CXCursor clang_ext_CUDALaunchBoundsAttr_getMaxThreads(CXCursor cursor)
  #endif
  
  return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
-CXString clang_ext_ArmMveAliasAttr_getBuiltinName(CXCursor cursor)
+CXString clang_ext_ArmBuiltinAliasAttr_getBuiltinName(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+ #ifndef LLVM_VERSION_BEFORE_11_0_0
  
- if (auto qual_attr = llvm::dyn_cast_or_null<clang::ArmMveAliasAttr >(attr))
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::ArmBuiltinAliasAttr >(attr))
  return cxstring_createDup(qual_attr->getBuiltinName()->getName());
  
  #endif
@@ -2070,6 +5987,17 @@ unsigned int clang_ext_Attrs_getXDim(CXCursor cursor)
   default:
   ;}
  return 0;}
+CXCursor clang_ext_UuidAttr_getGuidDecl(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_11_0_0
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::UuidAttr >(attr))
+ return MakeCXCursor(qual_attr->getGuidDecl(), getCursorTU(cursor));
+ 
+ #endif
+ 
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 CXString clang_ext_Attrs_getAliasee(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  switch (attr->getKind())
@@ -2187,8 +6115,14 @@ bool clang_ext_ArgumentWithTypeTagAttr_getIsPointer(CXCursor cursor)
  return false;}
 unsigned int clang_ext_UuidAttr_getGuidLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_11_0_0
+ 
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::UuidAttr >(attr))
  return qual_attr->getGuidLength();
+ 
+ #endif
+ 
  return 0;}
 unsigned int clang_ext_OMPDeclareSimdDeclAttr_getAligneds_Size(
 CXCursor cursor)
@@ -2315,6 +6249,21 @@ bool clang_ext_AvailabilityAttr_getUnavailable(CXCursor cursor)
  #endif
  
  return false;}
+struct
+clang_ext_OMPTraitInfo clang_ext_OMPDeclareVariantAttr_getTraitInfos(
+CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_11_0_0
+ 
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
+ return MakeOMPTraitInfo(qual_attr->getTraitInfos(), getCursorTU(cursor));
+ 
+ #endif
+ 
+ return MakeOMPTraitInfoInvalid(getCursorTU(cursor));}
 CXCursor clang_ext_OMPAllocateDeclAttr_getAllocator(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -2335,7 +6284,7 @@ CXString clang_ext_AnnotateAttr_getAnnotation(CXCursor cursor)
 CXCursor clang_ext_OMPDeclareVariantAttr_getVariantFuncRef(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
- #ifndef LLVM_VERSION_BEFORE_10_0_0
+ #ifndef LLVM_VERSION_BEFORE_11_0_0
  
  if
  (auto qual_attr =
@@ -2718,22 +6667,6 @@ CXCursor cursor)
   llvm::dyn_cast_or_null<clang::ArgumentWithTypeTagAttr >(attr))
  return unsigned_int_of_ParamIdx(qual_attr->getArgumentIdx());
  return 0;}
-void clang_ext_OMPDeclareVariantAttr_getScores(
-CXCursor cursor, void (*callback)(CXCursor , void *), void *data)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
- for (auto iter = qual_attr->scores_begin(); iter != qual_attr->scores_end();
- ++ iter)
- {auto const &item = * iter;
-  callback(MakeCXCursor(item, getCursorTU(cursor)), data);}
- 
- #endif
- }
 bool clang_ext_AvailabilityAttr_getStrict(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -2806,36 +6739,6 @@ clang_ext_TypeLoc clang_ext_VecTypeHintAttr_getTypeHint(CXCursor cursor)
  return
  MakeTypeLoc(qual_attr->getTypeHintLoc()->getTypeLoc(), getCursorTU(cursor));
  return MakeTypeLocInvalid(getCursorTU(cursor));}
-unsigned int clang_ext_OMPDeclareVariantAttr_getCtxSelectorSets_Size(
-CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
- return qual_attr->ctxSelectorSets_size();
- 
- #endif
- 
- return 0;}
-void clang_ext_OMPDeclareVariantAttr_getCtxSelectorSets(
-CXCursor cursor, void (*callback)(unsigned int , void *), void *data)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
- for (auto iter = qual_attr->ctxSelectorSets_begin();
- iter != qual_attr->ctxSelectorSets_end(); ++ iter)
- {auto const &item = * iter;
-  callback(item, data);}
- 
- #endif
- }
 unsigned int clang_ext_ExternalSourceSymbolAttr_getLanguageLength(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -3116,8 +7019,14 @@ unsigned int clang_ext_ArgumentWithTypeTagAttr_getTypeTagIdx(CXCursor cursor)
  return 0;}
 CXString clang_ext_UuidAttr_getGuid(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_11_0_0
+ 
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::UuidAttr >(attr))
  return cxstring_createDup(qual_attr->getGuid());
+ 
+ #endif
+ 
  return cxstring_createRef("");}
 unsigned int clang_ext_Attrs_getZDim(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -3230,20 +7139,6 @@ CXString clang_ext_WebAssemblyImportNameAttr_getImportName(CXCursor cursor)
  #endif
  
  return cxstring_createRef("");}
-unsigned int clang_ext_OMPDeclareVariantAttr_getDeviceKinds_Size(
-CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
- return qual_attr->deviceKinds_size();
- 
- #endif
- 
- return 0;}
 void clang_ext_NoSanitizeAttr_getSanitizers(
 CXCursor cursor, void (*callback)(CXString , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -3274,19 +7169,6 @@ void *data)
  
  #endif
  }
-unsigned int clang_ext_OMPDeclareVariantAttr_getScores_Size(CXCursor cursor)
-{auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_10_0_0
- 
- if
- (auto qual_attr =
-  llvm::dyn_cast_or_null<clang::OMPDeclareVariantAttr >(attr))
- return qual_attr->scores_size();
- 
- #endif
- 
- return 0;}
 enum
 clang_ext_OMPDeclareSimdDeclAttr_BranchStateTy
 clang_ext_OMPDeclareSimdDeclAttr_getBranchState(CXCursor cursor)
@@ -3345,7 +7227,7 @@ clang_ext_OMPAllocateDeclAttr_getAllocatorType(CXCursor cursor)
  
  #endif
  
- return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPDefaultMemAlloc;}
+ return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPNullMemAlloc;}
 unsigned int clang_ext_Attrs_getNameLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  switch (attr->getKind())

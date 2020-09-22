@@ -1,3 +1,5 @@
+module H = Stubgen_common.Clang_helper
+
 module HashtblExt (Key : Hashtbl.HashedType) = struct
   include Hashtbl.Make (Key)
 
@@ -20,139 +22,6 @@ end)
 
 module TypeHashtbl = HashtblExt (Clang.Type)
 
-let has_suffix ~suffix s =
-  let suffix_len = String.length suffix in
-  let len = String.length s in
-  suffix_len <= len && String.sub s (len - suffix_len) suffix_len = suffix
-
-let elaborated ?nested_name_specifier keyword named_type =
-  Clang.Type.make (Elaborated { keyword; nested_name_specifier; named_type })
-
-let function_decl fun_decl =
-  Clang.Ast.node (Clang.Ast.Function fun_decl)
-
-let function_type ?calling_conv ?parameters ?exception_spec result =
-  Clang.Type.make (FunctionType (Clang.Ast.function_type
-    ?calling_conv ?parameters ?exception_spec result))
-
-let record ident_ref =
-  Clang.Type.make (Record ident_ref)
-
-let typedef name = Clang.Type.make (Typedef name)
-
-let enum name = Clang.Type.make (Enum name)
-
-let cxcursor = typedef (Clang.Ast.identifier_name "CXCursor")
-
-let pointer ty = Clang.Type.make (Pointer ty)
-
-let void = Clang.Type.make (BuiltinType Void)
-
-let int = Clang.Type.make (BuiltinType Int)
-
-let unsigned_int = Clang.Type.make (BuiltinType UInt)
-
-let bool = Clang.Type.make (BuiltinType Bool)
-
-let auto = Clang.Type.make Auto
-
-let callback = "callback"
-
-let call callee args = Clang.Ast.node (Clang.Ast.Call { callee; args })
-
-let decl_ref decl_ref = Clang.Ast.node (Clang.Ast.DeclRef decl_ref)
-
-let decl_of_string ?nested_name_specifier s =
-  decl_ref (Clang.Ast.identifier_name ?nested_name_specifier s)
-
-let string s =
-  Clang.Ast.node (Clang.Ast.StringLiteral (Clang.Ast.literal_of_string s))
-
-let const_int i = Clang.Ast.node (Clang.Ast.IntegerLiteral (Int i))
-
-let const_bool b = Clang.Ast.node (Clang.Ast.BoolLiteral b)
-
-let compound list = Clang.Ast.node (Clang.Ast.Compound list)
-
-let decl list = Clang.Ast.node (Clang.Ast.Decl list)
-
-let expr e = Clang.Ast.node (Clang.Ast.Expr e)
-
-let unary_operator kind operand =
-  Clang.Ast.node (Clang.Ast.UnaryOperator { kind; operand })
-
-let binary_operator lhs kind rhs =
-  Clang.Ast.node (Clang.Ast.BinaryOperator { lhs; kind; rhs })
-
-let member ?base ?(arrow = false) field =
-  Clang.Ast.node (Clang.Ast.Member { base; arrow; field })
-
-let arrow base field =
-  member ~base ~arrow:true field
-
-let field_name s =
-  Clang.Ast.FieldName (Clang.Ast.node s)
-
-let field_of_string s =
-  field_name (Clang.Ast.identifier_name s)
-
-let var ~init qual_type name =
-  Clang.Ast.node (Clang.Ast.Var (Clang.Ast.var ~var_init:init name qual_type))
-
-let directive directive =
-  Clang.Ast.node (Clang.Ast.Directive directive)
-
-let const (qual_type : Clang.Type.t) =
-  { qual_type with const = true }
-
-let lvalue_reference qual_type =
-  Clang.Type.make (LValueReference qual_type)
-
-let rvalue_reference qual_type =
-  Clang.Type.make (RValueReference qual_type)
-
-let return e =
-  Clang.Ast.node (Clang.Ast.Return e)
-
-let array_subscript base index =
-  Clang.Ast.node (Clang.Ast.ArraySubscript { base; index })
-
-let conditional_operator cond ?then_branch else_branch =
-  Clang.Ast.node (
-    Clang.Ast.ConditionalOperator { cond; then_branch; else_branch })
-
-let parameter qual_type name =
-  Clang.Ast.node (Clang.Ast.parameter qual_type name)
-
-let switch ?init ?condition_variable cond body =
-  Clang.Ast.node (Clang.Ast.Switch { init; condition_variable; cond; body })
-
-let for_ ?init ?condition_variable ?cond ?inc body =
-  Clang.Ast.node (Clang.Ast.For { init; condition_variable; cond; inc; body })
-
-let for_range var range body =
-  Clang.Ast.node (Clang.Ast.ForRange { var; range; body })
-
-let case ?rhs lhs body =
-  Clang.Ast.node (Clang.Ast.Case { lhs; rhs; body })
-
-let default stmt =
-  Clang.Ast.node (Clang.Ast.Default stmt)
-
-let break =
-  Clang.Ast.node (Clang.Ast.Break)
-
-let null_stmt =
-  Clang.Ast.node (Clang.Ast.Null)
-
-let enum_decl ?(complete_definition = false) name constants =
-  Clang.Ast.node (Clang.Ast.EnumDecl
-    { name; constants; complete_definition; attributes = [] })
-
-let enum_constant ?constant_init constant_name : Clang.Ast.enum_constant =
-  Clang.Ast.node
-    ({ constant_name; constant_init } : Clang.Ast.enum_constant_desc)
-
 type enum_constant = {
     constant_name : string;
     converted_name : string;
@@ -169,11 +38,13 @@ type enum_decl = {
 type ocaml_type_conversion =
   | NoConversion
   | Expr
+  | Decl
+  | OMPTraitInfo
   | TypeLoc
   | DeclarationName
 
 type type_info = {
-    ocaml_type : Parsetree.core_type;
+    ocaml_type : Ppxlib.core_type;
     type_conversion : ocaml_type_conversion;
     interface_type : Clang.Type.t;
     multiple : bool;
@@ -188,122 +59,147 @@ let clang__bindings = "Clang__bindings"
 let rec get_type_info (qual_type : Clang.Lazy.Type.t)
     (enums : enum_decl StringMap.t) : type_info =
   let get_cursor_tu =
-    lazy (call (decl_ref (Clang.Ast.identifier_name "getCursorTU"))
-      [decl_ref (Clang.Ast.identifier_name "cursor")]) in
+    lazy (H.call (H.decl_of_string "getCursorTU")
+      [H.decl_of_string "cursor"]) in
   match Lazy.force qual_type.desc with
   | Pointer { desc = lazy (Record { name = IdentifierName "Expr"})} ->
       { ocaml_type = [%type: 'expr];
         type_conversion = Expr;
-        interface_type = cxcursor;
+        interface_type = H.cxcursor;
         multiple = false;
         access = (fun e ->
-          call (decl_ref (Clang.Ast.identifier_name "MakeCXCursor"))
+          H.call (H.decl_of_string "MakeCXCursor")
             [e; Lazy.force get_cursor_tu]);
         default =
-          call (decl_ref (Clang.Ast.identifier_name "MakeCXCursorInvalid"))
-            [decl_ref (Clang.Ast.identifier_name "CXCursor_InvalidCode");
+          H.call (H.decl_of_string "MakeCXCursorInvalid")
+            [H.decl_of_string "CXCursor_InvalidCode";
               Lazy.force get_cursor_tu]}
   | Record { name = IdentifierName "VersionTuple" } ->
       { ocaml_type = [%type: Clang__bindings.clang_ext_versiontuple];
         type_conversion = NoConversion;
         interface_type =
-          elaborated Struct
-            (record (Clang.Ast.identifier_name "clang_ext_VersionTuple"));
+          H.elaborated Struct
+            (H.record (Clang.Ast.identifier_name "clang_ext_VersionTuple"));
         multiple = false;
         access = (fun e ->
-          call (decl_ref
-              (Clang.Ast.identifier_name "makeVersionTuple")) [e]);
-        default = decl_ref (Clang.Ast.identifier_name "zeroVersionTuple")}
+          H.call (H.decl_of_string "makeVersionTuple") [e]);
+        default = H.decl_of_string "zeroVersionTuple"}
   | Record { name = IdentifierName "StringRef" }
   | Pointer { desc = lazy (BuiltinType Char_S) } ->
       { ocaml_type = [%type: string];
         type_conversion = NoConversion;
         interface_type =
-          typedef (Clang.Ast.identifier_name "CXString");
+          H.typedef (Clang.Ast.identifier_name "CXString");
         multiple = false;
         access = (fun e ->
-          call (decl_ref (Clang.Ast.identifier_name "cxstring_createDup"))
+          H.call (H.decl_of_string "cxstring_createDup")
             [e]);
         default =
-          call (decl_ref (Clang.Ast.identifier_name "cxstring_createRef"))
-            [string ""] }
+          H.call (H.decl_of_string "cxstring_createRef")
+            [H.string ""] }
   | Pointer { desc = lazy (
         Record { name = IdentifierName "IdentifierInfo" }) } ->
       { ocaml_type = [%type: string];
         type_conversion = NoConversion;
         interface_type =
-          typedef (Clang.Ast.identifier_name "CXString");
+          H.typedef (Clang.Ast.identifier_name "CXString");
         multiple = false;
         access = (fun e ->
-          call (decl_ref (Clang.Ast.identifier_name "cxstring_createDup"))
-            [call (arrow e (field_name
+          H.call (H.decl_of_string "cxstring_createDup")
+            [H.call (H.arrow e (H.field_name
               (Clang.Ast.identifier_name "getName"))) []]);
         default =
-          call (decl_ref (Clang.Ast.identifier_name "cxstring_createRef"))
-            [string ""] }
+          H.call (H.decl_of_string "cxstring_createRef")
+            [H.string ""] }
   | Pointer { desc = lazy (
         Record { name = IdentifierName "FunctionDecl" }) } ->
       { ocaml_type = [%type: 'declaration_name];
         type_conversion = DeclarationName;
         interface_type =
-          elaborated Struct
-            (record (Clang.Ast.identifier_name "clang_ext_DeclarationName"));
+          H.elaborated Struct
+            (H.record
+              (Clang.Ast.identifier_name "clang_ext_DeclarationName"));
         multiple = false;
         access = (fun e ->
-          call (decl_ref (Clang.Ast.identifier_name "MakeDeclarationName"))
-            [call (arrow e (field_name
+          H.call (H.decl_of_string "MakeDeclarationName")
+            [H.call (H.arrow e (H.field_name
               (Clang.Ast.identifier_name "getDeclName"))) [];
              Lazy.force get_cursor_tu]);
         default =
-          call (decl_ref
-                  (Clang.Ast.identifier_name "MakeDeclarationNameInvalid"))
+          H.call (H.decl_of_string "MakeDeclarationNameInvalid")
             [Lazy.force get_cursor_tu] }
   | Pointer { desc = lazy (
         Record { name = IdentifierName "TypeSourceInfo" }) } ->
       { ocaml_type = [%type: 'qual_type];
         type_conversion = TypeLoc;
         interface_type =
-          elaborated Struct
-            (record (Clang.Ast.identifier_name "clang_ext_TypeLoc"));
+          H.elaborated Struct
+            (H.record (Clang.Ast.identifier_name "clang_ext_TypeLoc"));
         multiple = false;
         access = (fun e ->
-          call (decl_ref (Clang.Ast.identifier_name "MakeTypeLoc"))
-            [call (arrow e (field_name
+          H.call (H.decl_of_string "MakeTypeLoc")
+            [H.call (H.arrow e (H.field_name
               (Clang.Ast.identifier_name "getTypeLoc"))) [];
              Lazy.force get_cursor_tu]);
         default =
-          call (decl_ref
-                  (Clang.Ast.identifier_name "MakeTypeLocInvalid"))
+          H.call (H.decl_of_string "MakeTypeLocInvalid")
             [Lazy.force get_cursor_tu] }
+  | Pointer { desc = lazy (
+        Record { name = IdentifierName "OMPTraitInfo" }) } ->
+      { ocaml_type = [%type: 'omp_trait_info];
+        type_conversion = OMPTraitInfo;
+        interface_type =
+          H.elaborated Struct
+            (H.record (Clang.Ast.identifier_name "clang_ext_OMPTraitInfo"));
+        multiple = false;
+        access = (fun e ->
+          H.call (H.decl_of_string "MakeOMPTraitInfo")
+            [e; Lazy.force get_cursor_tu]);
+        default =
+          H.call (H.decl_of_string "MakeOMPTraitInfoInvalid")
+            [Lazy.force get_cursor_tu] }
+  | Pointer { desc = lazy (
+        Record { name = IdentifierName "MSGuidDecl" }) } ->
+      { ocaml_type = [%type: 'decl];
+        type_conversion = Decl;
+        interface_type = H.cxcursor;
+        multiple = false;
+        access = (fun e ->
+          H.call (H.decl_of_string "MakeCXCursor")
+            [e; Lazy.force get_cursor_tu]);
+        default =
+          H.call (H.decl_of_string "MakeCXCursorInvalid")
+            [H.decl_of_string "CXCursor_InvalidCode";
+              Lazy.force get_cursor_tu]}
   | Record { name = IdentifierName "ParamIdx" } ->
       { ocaml_type =  [%type: int];
         type_conversion = NoConversion;
-        interface_type = unsigned_int;
+        interface_type = H.unsigned_int;
         multiple = false;
         access =
-          (fun e -> call (decl_of_string "unsigned_int_of_ParamIdx") [e]);
-        default = const_int 0; }
+          (fun e -> H.call (H.decl_of_string "unsigned_int_of_ParamIdx") [e]);
+        default = H.const_int 0; }
   | BuiltinType Int ->
       { ocaml_type =  [%type: int];
         type_conversion = NoConversion;
-        interface_type = int;
+        interface_type = H.int;
         multiple = false;
         access = Fun.id;
-        default = const_int 0; }
+        default = H.const_int 0; }
   | BuiltinType UInt ->
       { ocaml_type =  [%type: int];
         type_conversion = NoConversion;
-        interface_type = unsigned_int;
+        interface_type = H.unsigned_int;
         multiple = false;
         access = Fun.id;
-        default = const_int 0; }
+        default = H.const_int 0; }
   | BuiltinType Bool ->
       { ocaml_type =  [%type: bool];
         type_conversion = NoConversion;
-        interface_type = bool;
+        interface_type = H.bool;
         multiple = false;
         access = Fun.id;
-        default = const_bool false; }
+        default = H.const_bool false; }
   | Pointer qual_type ->
       let type_info = get_type_info qual_type enums in
       { type_info with
@@ -314,18 +210,18 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t)
       begin match StringMap.find_opt name enums with
       | Some enum_decl ->
           { ocaml_type =
-            Ast_helper.Typ.constr
+            Ppxlib.Ast_helper.Typ.constr
               (Metapp.mklid ~prefix:(Lident clang__bindings)
                  enum_decl.ocaml_type_name) [];
             type_conversion = NoConversion;
             interface_type =
-            elaborated Enum
-              (enum (Clang.Ast.identifier_name enum_decl.c_type_name));
+            H.elaborated Enum
+              (H.enum (Clang.Ast.identifier_name enum_decl.c_type_name));
             multiple = false;
             access = (fun e ->
-              call (decl_of_string enum_decl.c_type_conversion_function) [e]);
+              H.call (H.decl_of_string enum_decl.c_type_conversion_function) [e]);
             default =
-            decl_of_string (List.hd enum_decl.constants).converted_name;
+            H.decl_of_string (List.hd enum_decl.constants).converted_name;
           }
       | None -> assert false
       end
@@ -334,10 +230,10 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t)
         (Refl.pp [%refl:Clang.Lazy.Ast.qual_type] []) qual_type;
       { ocaml_type =  [%type: bool];
         type_conversion = NoConversion;
-        interface_type = bool;
+        interface_type = H.bool;
         multiple = false;
         access = Fun.id;
-        default = const_bool false; }
+        default = H.const_bool false; }
 
 type argument_decl = {
     name : string;
@@ -362,7 +258,7 @@ type argument_desc = {
 
 type ocaml_argument = {
     name : string;
-    ty : Parsetree.core_type;
+    ty : Ppxlib.core_type;
     type_conversion : ocaml_type_conversion;
     multiple : bool;
     getter_name_ref : string ref;
@@ -375,7 +271,7 @@ type ocaml_attribute = {
 
 type context = {
     argument_table : argument_desc TypeHashtbl.t StringHashtbl.t;
-    mutable constructors : Parsetree.constructor_declaration list;
+    mutable constructors : Ppxlib.constructor_declaration list;
     mutable decls : Clang.Decl.t list;
     mutable protos : Clang.Decl.t list;
     mutable attributes : ocaml_attribute list;
@@ -395,65 +291,72 @@ let register_argument context name reduced_name
     { name; reduced_name; getter; getter_result_type } :: desc.attributes;
   desc.getter_name_ref
 
-type annotated_field = Clang.Ast.cxx_access_specifier * Clang.Lazy.Ast.decl
+type constant = {
+    name : string;
+    value : int;
+  }
 
-let annotate_access_specifier
-    (default_specifier : Clang.Ast.cxx_access_specifier)
-    (fields : Clang.Lazy.Ast.decl list) : annotated_field list =
-  let annotate_field (specifier, rev) (field : Clang.Lazy.Ast.decl) =
-    match Lazy.force field.desc with
-    | AccessSpecifier specifier -> (specifier, rev)
-    | _ -> (specifier, (specifier, field) :: rev) in
-  let _specifier, rev =
-    List.fold_left annotate_field (default_specifier, []) fields in
-  List.rev rev
-
-let get_constant_names
-    (constants : Clang.Lazy.Ast.enum_constant list) : string list =
+let get_constants
+    (constants : Clang.Lazy.Ast.enum_constant list) : constant list =
    constants |>
-   List.map (fun ({ desc = lazy constant } : Clang.Lazy.Ast.enum_constant) ->
-     constant.constant_name)
+   List.map (fun (enum_constant : Clang.Lazy.Ast.enum_constant) ->
+     { name = (Lazy.force enum_constant.desc).constant_name;
+       value = Clang.Lazy.Enum_constant.get_value enum_constant })
 
-let find_spelling (fields : annotated_field list) : string list option =
-  let get_spelling ((specifier, field) : annotated_field) =
-    match specifier with
-    | CXXPublic ->
-        begin match Lazy.force field.desc with
-        | EnumDecl { name = "Spelling"; constants; _ } ->
-            Some (get_constant_names constants)
-        | _ -> None
-        end
+let get_public_fields (fields : Clang.Lazy.Decl.annotated_field list) :
+    Clang.Lazy.Ast.decl list =
+  let filter (annotated_field : Clang.Lazy.Decl.annotated_field) =
+    match annotated_field.specifier with
+    | CXXPublic -> Some annotated_field.decl
     | _ -> None in
-  List.find_map get_spelling fields
+  List.filter_map filter fields
 
-let enumerate_public_methods (fields : annotated_field list) :
+type spelling = {
+    has_get_semantic_spelling : bool;
+    constants : constant list;
+  }
+
+let find_spelling (fields : Clang.Lazy.Ast.decl list) : spelling option =
+  let is_get_semantic_spelling (field : Clang.Lazy.Ast.decl) =
+    match Lazy.force field.desc with
+    | CXXMethod { function_decl = {
+          name = IdentifierName "getSemanticSpelling"; _ }; _ } ->
+        true
+    | _ -> false in
+  let get_spelling (field : Clang.Lazy.Ast.decl) =
+    match Lazy.force field.desc with
+    | EnumDecl { name = "Spelling"; constants; _ } ->
+        Some (get_constants constants)
+    | _ -> None in
+  List.find_map get_spelling fields |> Option.map (fun constants ->
+    { has_get_semantic_spelling = List.exists is_get_semantic_spelling fields;
+      constants })
+
+let enumerate_methods (fields : Clang.Lazy.Ast.decl list) :
     (string * Clang.Lazy.Type.t) StringHashtbl.t =
   let table = StringHashtbl.create 17 in
-  let add_field ((specifier, field) : annotated_field) =
-    match specifier with
-    | CXXPublic ->
-        begin match Lazy.force field.desc with
-        | CXXMethod {
-          function_decl = { name = IdentifierName name; function_type }; _ } ->
-            let normalized_name =
-              String.lowercase name |>
-              Stubgen_common.option_apply
-                (Stubgen_common.string_remove_prefix ~prefix:"get") |>
-              Stubgen_common.option_apply
-                (Stubgen_common.string_remove_suffix ~suffix:"loc") in
-            StringHashtbl.add table normalized_name (name, function_type.result)
-        | _ -> ()
-        end
+  let add_field (field : Clang.Lazy.Ast.decl) =
+    match Lazy.force field.desc with
+    | CXXMethod {
+      function_decl = { name = IdentifierName name; function_type }; _ } ->
+        let normalized_name =
+          String.lowercase_ascii name |>
+          Stubgen_common.option_apply
+            (Stubgen_common.String_utils.remove_prefix ~prefix:"get") |>
+          Stubgen_common.option_apply
+            (Stubgen_common.String_utils.remove_suffix ~suffix:"loc") in
+        StringHashtbl.add table normalized_name (name, function_type.result)
     | _ -> () in
   fields |> List.iter add_field;
   table
 
 let get_reduced_attribute_name attribute =
-  Option.get (Stubgen_common.string_remove_suffix attribute ~suffix:"Attr")
+  Option.get
+    (Stubgen_common.String_utils.remove_suffix attribute ~suffix:"Attr")
 
 let remove_trailing_underscore argument =
   Stubgen_common.option_apply
-    (Stubgen_common.string_remove_suffix ~suffix:"_") argument
+    (Stubgen_common.String_utils.remove_suffix ~suffix:"_") argument
 
 let get_type_spelling_name name =
   Printf.sprintf "clang_ext_%s_spelling" name
@@ -464,19 +367,19 @@ let attr = "attr"
 
 let qual_attr = "qual_attr"
 
-let parameter_cursor = parameter cxcursor cursor
+let parameter_cursor = H.parameter H.cxcursor cursor
 
 let get_cursor_attr =
   Clang.Ast.node (Clang.Ast.Decl [
-    var auto attr ~init:(call
-      (decl_ref (Clang.Ast.identifier_name "GetCursorAttr"))
-      [decl_ref (Clang.Ast.identifier_name cursor)])])
+    H.var H.auto attr ~init:(H.call
+      (H.decl_of_string "GetCursorAttr")
+      [H.decl_of_string cursor])])
 
 let cast attr qual_attr class_name body =
   Clang.Ast.node (Clang.Ast.if_
         ~condition_variable:(Clang.Ast.node (Clang.Ast.var
-          qual_attr auto
-          ~var_init:(call
+          qual_attr H.auto
+          ~var_init:(H.call
              (Clang.Ast.node (Clang.Ast.DeclRef
                (Clang.Ast.identifier_name "dyn_cast_or_null"
                  ~nested_name_specifier:[Clang.Ast.NamespaceName "llvm"]
@@ -485,16 +388,16 @@ let cast attr qual_attr class_name body =
                      (Clang.Ast.identifier_name class_name
                      ~nested_name_specifier:[
                        Clang.Ast.NamespaceName "clang"])))])))
-             [decl_ref (Clang.Ast.identifier_name attr)])))
+             [H.decl_of_string attr])))
         (Clang.Ast.node (Clang.Ast.DeclRef
           (Clang.Ast.identifier_name qual_attr))) body)
 
 let namespace_clang = Clang.Ast.NamespaceName "clang"
 
 let add_fun_decl context fun_decl =
-  context.decls <- function_decl fun_decl :: context.decls;
+  context.decls <- H.function_decl fun_decl :: context.decls;
   context.protos <-
-    function_decl { fun_decl with body = None } :: context.protos
+    H.function_decl { fun_decl with body = None } :: context.protos
 
 let unkeyword name =
   match name with
@@ -503,31 +406,29 @@ let unkeyword name =
   | _ -> name
 
 let restrict_decl_version (major, minor) body =
-  directive (Ifndef (
+  H.directive (Ifndef (
     Printf.sprintf "LLVM_VERSION_BEFORE_%d_%d_0" major minor)) ::
-  body @ [directive Endif]
+  body @ [H.directive Endif]
 
 let restrict_statement_version (major, minor) body =
-  decl [directive (Ifndef (
+  H.decl [H.directive (Ifndef (
     Printf.sprintf "LLVM_VERSION_BEFORE_%d_%d_0" major minor))] ::
-  body @ [decl [directive Endif]]
+  body @ [H.decl [H.directive Endif]]
 
 let find_version_constraint versions attribute =
   match StringMap.find_opt attribute versions with
-  | None ->
-      prerr_endline attribute;
-      assert false
+  | None
   | Some (3, 4) -> None
   | result -> result
 
 let generate_attribute context versions name reduced_name public_methods
-    spelling (arguments : argument_decl list) =
+    (spelling : spelling option) (arguments : argument_decl list) =
   let arguments =
     arguments |> List.map @@ fun (argument : argument_decl) ->
       let arg_name = remove_trailing_underscore argument.name in
       let argument = { argument with name = arg_name } in
       match
-        StringHashtbl.find_opt public_methods (String.lowercase arg_name)
+        StringHashtbl.find_opt public_methods (String.lowercase_ascii arg_name)
       with
       | None ->
           Format.fprintf Format.err_formatter
@@ -539,14 +440,14 @@ let generate_attribute context versions name reduced_name public_methods
           argument, getter_info, getter_name_ref in
   let make_ocaml_argument
       ((argument : argument_decl), _getter_info, getter_name_ref) =
-    if has_suffix ~suffix:"_Size" argument.name
-        || has_suffix ~suffix:"Length" argument.name then
+    if Stubgen_common.String_utils.has_suffix ~suffix:"_Size" argument.name
+        || Stubgen_common.String_utils.has_suffix ~suffix:"Length" argument.name then
       None
     else
       let name =
         argument.name |>
         Stubgen_common.option_apply
-          (Stubgen_common.string_remove_suffix ~suffix:"Param") |>
+          (Stubgen_common.String_utils.remove_suffix ~suffix:"Param") |>
         Stubgen_common.uncamelcase |>
         unkeyword in
       Some { name;
@@ -566,60 +467,80 @@ let generate_attribute context versions name reduced_name public_methods
     | None -> arguments
     | Some (_, type_spelling_name, spelling_getter_name) ->
       { name = "spelling";
-        ty = Ast_helper.Typ.constr
+        ty = Ppxlib.Ast_helper.Typ.constr
           (Metapp.mklid ~prefix:(Lident clang__bindings)
-             (String.lowercase type_spelling_name)) [];
+             (String.lowercase_ascii type_spelling_name)) [];
         type_conversion = NoConversion;
         multiple = false;
         getter_name_ref = ref spelling_getter_name } :: arguments in
-  let args : Parsetree.constructor_arguments =
+  let args : Ppxlib.constructor_arguments =
     match arguments with
     | [argument] ->
         Pcstr_tuple [argument.ty]
     | _ ->
         Pcstr_record (arguments |> List.map (
         fun (argument : ocaml_argument) ->
-          Ast_helper.Type.field (Metapp.mkloc argument.name) argument.ty)) in
+          Ppxlib.Ast_helper.Type.field (Metapp.mkloc argument.name) argument.ty)) in
   let constructor =
-    Ast_helper.Type.constructor (Metapp.mkloc reduced_name) ~args in
+    Ppxlib.Ast_helper.Type.constructor (Metapp.mkloc reduced_name) ~args in
   context.constructors <- constructor :: context.constructors;
   spelling |> Option.iter (
   fun (spelling, type_spelling_name, spelling_getter_name) ->
-    let constant_names = spelling |> List.map (fun constant ->
-      constant, Printf.sprintf "clang_ext_%s_%s" reduced_name constant) in
+    let constant_names = spelling.constants |> List.map
+      (fun (constant : constant) ->
+      constant, Printf.sprintf "clang_ext_%s_%s" reduced_name constant.name) in
     let last_constant = snd (List.hd (List.rev constant_names)) in
     let enum_constants = constant_names |> List.map (fun (_, constant) ->
-      enum_constant constant) in
-    let spelling_enum = enum_decl type_spelling_name enum_constants in
+      H.enum_constant constant) in
+    let spelling_enum = H.enum_decl type_spelling_name enum_constants in
     let cases =
       constant_names |> List.concat_map (fun (orig, prefixed) ->
-        let case =
-          case (decl_ref (Clang.Ast.identifier_name orig
-            ~nested_name_specifier:[
-              namespace_clang;
-              TypeSpec (record (Clang.Ast.identifier_name name));
-              TypeSpec (record (Clang.Ast.identifier_name "Spelling"))]))
-            (return (Some (decl_ref (Clang.Ast.identifier_name prefixed)))) in
-        if orig = "SpellingNotCalculated" then
-          restrict_statement_version (10, 0) [case]
+        if orig.name = "SpellingNotCalculated" then
+          []
         else
-          [case]) in
+          begin
+            let case_expr =
+              if spelling.has_get_semantic_spelling then
+                H.decl_of_string orig.name
+                  ~nested_name_specifier:[
+                namespace_clang;
+                TypeSpec (H.record (Clang.Ast.identifier_name name));
+                TypeSpec (H.record (Clang.Ast.identifier_name "Spelling"))]
+              else
+                H.const_int orig.value in
+            let case =
+              H.case case_expr
+                (H.return (Some (H.decl_of_string prefixed))) in
+            Option.fold (find_version_constraint versions prefixed)
+              ~none:Fun.id ~some:restrict_statement_version [case]
+          end) in
+    let field_name =
+      if spelling.has_get_semantic_spelling then
+        "getSemanticSpelling"
+      else
+        "getSpellingListIndex" in
     let switch =
       cast attr qual_attr name
-        (switch (call (arrow (decl_ref (Clang.Ast.identifier_name qual_attr))
-          (field_name (Clang.Ast.identifier_name "getSemanticSpelling"))) [])
-          (compound cases)) in
+        (H.switch (H.call (H.arrow (H.decl_of_string qual_attr)
+          (H.field_name (Clang.Ast.identifier_name field_name))) [])
+          (H.compound cases)) in
     let return_default =
-      return (Some (decl_ref (Clang.Ast.identifier_name last_constant))) in
-    let list =
-      restrict_statement_version (10, 0) [get_cursor_attr; switch]
-      @ [return_default] in
+      H.return (Some (H.decl_of_string last_constant)) in
+    let version_constraint =
+      max (Some (3, 5)) (max
+        (find_version_constraint versions reduced_name)
+        (find_version_constraint versions type_spelling_name)) in
+    let body =
+      Option.fold version_constraint
+        ~none:Fun.id ~some:restrict_statement_version
+        [get_cursor_attr; switch] in
+    let list = body @ [return_default] in
     let result =
-      elaborated Enum (enum (Clang.Ast.identifier_name type_spelling_name)) in
+      H.elaborated Enum (H.enum (Clang.Ast.identifier_name type_spelling_name)) in
     let spelling_getter =
       Clang.Ast.function_decl (Clang.Ast.function_type
         ~parameters:(Clang.Ast.parameters [parameter_cursor]) result)
-        (IdentifierName spelling_getter_name) ~body:(compound list) in
+        (IdentifierName spelling_getter_name) ~body:(H.compound list) in
     context.protos <- spelling_enum :: context.protos;
     add_fun_decl context spelling_getter);
   context.attributes <- { name = reduced_name; arguments } :: context.attributes
@@ -650,7 +571,7 @@ let do_decl context versions (decl : Clang.Lazy.Decl.t) =
                   { constant_name; converted_name }) in
             let enum_decl = {
               name = enum_name;
-              ocaml_type_name = String.lowercase c_type_name;
+              ocaml_type_name = String.lowercase_ascii c_type_name;
               c_type_name;
               c_type_conversion_function =
                 Printf.sprintf "convert_%s_%s" name enum_name;
@@ -687,35 +608,42 @@ let do_decl context versions (decl : Clang.Lazy.Decl.t) =
             [make_argument_decl "alignmentExpr" expr_type enums], fields
         | _ ->
             Clang.extract_prefix_from_list extract_simple_field fields in
-      let annotated_fields = annotate_access_specifier CXXPrivate fields in
-      let spelling = find_spelling annotated_fields in
+      let annotated_fields =
+        Clang.Lazy.Decl.annotate_access_specifier CXXPrivate fields in
+      let public_fields = get_public_fields annotated_fields in
+      let spelling = find_spelling public_fields in
       let reduced_name = get_reduced_attribute_name name in
       enums |> StringMap.iter (fun _ (enum_decl' : enum_decl) ->
         let constants =
           enum_decl'.constants |> List.map (fun constant ->
             constant.converted_name) in
         let result =
-          elaborated Enum
-            (enum (Clang.Ast.identifier_name enum_decl'.c_type_name)) in
+          H.elaborated Enum
+            (H.enum (Clang.Ast.identifier_name enum_decl'.c_type_name)) in
         let nested_name_specifier = [
           namespace_clang;
-          TypeSpec (record (Clang.Ast.identifier_name name))] in
+          TypeSpec (H.record (Clang.Ast.identifier_name name))] in
         let value = "value" in
         let parameter =
-          parameter (typedef (Clang.Ast.identifier_name enum_decl'.name
+          H.parameter (H.typedef (Clang.Ast.identifier_name enum_decl'.name
             ~nested_name_specifier)) value in
         let nested_name_specifier =
           nested_name_specifier @
-          [TypeSpec (record (Clang.Ast.identifier_name enum_decl'.name))] in
-        let body = compound [switch (decl_of_string value) (compound
-          (enum_decl'.constants |> List.map
+          [TypeSpec (H.record (Clang.Ast.identifier_name enum_decl'.name))] in
+        let body = H.compound [H.switch (H.decl_of_string value) (H.compound
+          (enum_decl'.constants |> List.concat_map
           (fun (constant : enum_constant) ->
-            case (decl_of_string ~nested_name_specifier constant.constant_name)
-              (return (Some (decl_of_string constant.converted_name))))));
-          return (Some
-            (decl_of_string (List.hd enum_decl'.constants).converted_name))] in
+            Option.fold
+              (find_version_constraint versions constant.converted_name)
+              ~none:Fun.id ~some:restrict_statement_version
+              [H.case (H.decl_of_string ~nested_name_specifier
+                constant.constant_name)
+                (H.return
+                  (Some (H.decl_of_string constant.converted_name)))])));
+          H.return (Some
+            (H.decl_of_string (List.hd enum_decl'.constants).converted_name))] in
         let convert_function =
-          function_decl (Clang.Ast.function_decl (Clang.Ast.function_type
+          H.function_decl (Clang.Ast.function_decl (Clang.Ast.function_type
             ~parameters:(Clang.Ast.parameters [parameter]) result)
             (IdentifierName enum_decl'.c_type_conversion_function)
             ~body) in
@@ -723,11 +651,11 @@ let do_decl context versions (decl : Clang.Lazy.Decl.t) =
           Option.fold (find_version_constraint versions reduced_name)
             ~none:Fun.id ~some:restrict_decl_version [convert_function] in
         context.protos <-
-          enum_decl enum_decl'.c_type_name (List.map enum_constant constants) ::
+          H.enum_decl enum_decl'.c_type_name (List.map H.enum_constant constants) ::
           context.protos;
         context.decls <- List.rev_append decls context.decls);
       if arguments <> [] || spelling <> None then
-        let public_methods = enumerate_public_methods annotated_fields in
+        let public_methods = enumerate_methods public_fields in
         generate_attribute context versions name reduced_name public_methods
           spelling arguments
   | _ -> ()
@@ -758,45 +686,47 @@ let filter_singleton (key, (desc : argument_desc)) =
 
 let data = "data"
 
+let callback = "callback"
+
 let generate_code context versions argument type_name_attr ty
     (argument_desc : argument_desc) =
   let parameter_list = [parameter_cursor] in
   let parameter_list, result =
     if argument_desc.type_info.multiple then
-      parameter_list @ [parameter (pointer (function_type void
+      parameter_list @ [H.parameter (H.pointer (H.function_type H.void
         ~parameters:(Clang.Ast.parameters [
-          parameter argument_desc.type_info.interface_type "";
-          parameter (pointer void) ""]))) callback;
-        parameter (pointer void) data],
-      void
+          H.parameter argument_desc.type_info.interface_type "";
+          H.parameter (H.pointer H.void) ""]))) callback;
+        H.parameter (H.pointer H.void) data],
+      H.void
     else
       parameter_list, argument_desc.type_info.interface_type in
   let parameters = Clang.Ast.parameters parameter_list in
   let name =
     Printf.sprintf "clang_ext_%s_get%s" type_name_attr
-      (String.capitalize argument) in
+      (String.capitalize_ascii argument) in
   argument_desc.getter_name_ref := name;
   let make_attribute_cast attribute =
     let param suffix =
-      call (arrow (decl_ref (Clang.Ast.identifier_name qual_attr)) (FieldName
+      H.call (H.arrow (H.decl_of_string qual_attr) (FieldName
         (Clang.Ast.node
           (Clang.Ast.identifier_name (attribute.getter ^ suffix))))) [] in
     cast attr qual_attr attribute.name
       (if argument_desc.type_info.multiple then
          let iter = "iter" in
          let item = "item" in
-         for_
-           ~init:(decl [var auto iter ~init:(param "_begin")])
-           ~cond:(binary_operator (decl_of_string iter) NE (param "_end"))
-           ~inc:(expr (unary_operator PreInc (decl_of_string iter)))
-           (compound [
-             decl [var (lvalue_reference (const auto)) item
-               ~init:(unary_operator Deref (decl_of_string iter))];
-             expr (call (decl_of_string callback)
-               [argument_desc.type_info.access (decl_of_string item);
-                 decl_of_string data])])
+         H.for_
+           ~init:(H.decl [H.var H.auto iter ~init:(param "_begin")])
+           ~cond:(H.binary_operator (H.decl_of_string iter) NE (param "_end"))
+           ~inc:(H.expr (H.unary_operator PreInc (H.decl_of_string iter)))
+           (H.compound [
+             H.decl [H.var (H.lvalue_reference (H.const H.auto)) item
+               ~init:(H.unary_operator Deref (H.decl_of_string iter))];
+             H.expr (H.call (H.decl_of_string callback)
+               [argument_desc.type_info.access (H.decl_of_string item);
+                 H.decl_of_string data])])
        else
-         return
+         H.return
            (Some (argument_desc.type_info.access (param "")))) in
   let make_attribute decorate attribute : Clang.Stmt.t list =
     let body = decorate (make_attribute_cast attribute) in
@@ -808,31 +738,36 @@ let generate_code context versions argument type_name_attr ty
     | attributes ->
         let make_case (attribute : argument_attribute) =
           make_attribute (fun x ->
-          [case (decl_ref
-             (Clang.Ast.identifier_name
-                (get_reduced_attribute_name attribute.name)
+          [H.case (H.decl_of_string (get_reduced_attribute_name attribute.name)
                  ~nested_name_specifier:[
                    namespace_clang;
-                   Clang.Ast.NamespaceName "attr"]))
-             x; break]) attribute in
+                   Clang.Ast.NamespaceName "attr"])
+             x; H.break]) attribute in
         let cases =
-          compound
-            (List.concat_map make_case attributes @ [default null_stmt]) in
-        [switch (call (arrow (decl_ref (Clang.Ast.identifier_name attr))
-          (field_name (Clang.Ast.identifier_name "getKind"))) [])
+          H.compound
+            (List.concat_map make_case attributes @ [H.default H.null_stmt]) in
+        [H.switch (H.call (H.arrow (H.decl_of_string attr)
+          (H.field_name (Clang.Ast.identifier_name "getKind"))) [])
           cases] in
   let list = [get_cursor_attr] @
     switch @
     if argument_desc.type_info.multiple then
       []
     else
-      [return (Some argument_desc.type_info.default)] in
+      [H.return (Some argument_desc.type_info.default)] in
   let fun_decl =
     Clang.Ast.function_decl (Clang.Ast.function_type ~parameters result)
-      (IdentifierName name) ~body:(compound list) in
+      (IdentifierName name) ~body:(H.compound list) in
   add_fun_decl context fun_decl
 
 let tool_name = "generate_attrs"
+
+let parse_ml_file filename =
+  let channel = open_in filename in
+  Fun.protect (fun () ->
+    let lexbuf = Lexing.from_channel channel in
+    Ppxlib.Parse.implementation lexbuf)
+    ~finally:(fun () -> close_in channel)
 
 let find_attributes_among_clang_versions dir : (int * int) StringMap.t =
   let bindings =
@@ -842,7 +777,7 @@ let find_attributes_among_clang_versions dir : (int * int) StringMap.t =
       | [Some major; Some minor; Some _subminor]
         when Sys.is_directory full_filename ->
           let bindings =
-            Pparse.parse_implementation ~tool_name
+            parse_ml_file
               (Filename.concat full_filename "clang__bindings.ml") in
           let minor =
             if major >= 4 then
@@ -855,17 +790,17 @@ let find_attributes_among_clang_versions dir : (int * int) StringMap.t =
     List.sort (fun (a, _) (b, _) -> compare a b) bindings in
   List.fold_left (fun previous (version, bindings) ->
     let attributes =
-      bindings |> List.find_map (fun (item : Parsetree.structure_item) ->
+      bindings |> List.find_map (fun (item : Ppxlib.structure_item) ->
         match item.pstr_desc with
         | Pstr_type (Recursive, type_declarations) ->
             begin
               type_declarations |> List.find_map (
-              fun (decl : Parsetree.type_declaration) ->
+              fun (decl : Ppxlib.type_declaration) ->
                 if decl.ptype_name.txt = "clang_ext_attrkind" then
                   match decl.ptype_kind with
                   | Ptype_variant constructors ->
                       Some (constructors |> List.map (fun
-                        (constructor : Parsetree.constructor_declaration) ->
+                        (constructor : Ppxlib.constructor_declaration) ->
                         constructor.pcd_name.txt))
                   | _ -> assert false
                 else None)
@@ -905,7 +840,83 @@ let main cflags llvm_config prefix =
     (* fields are misnamed *)
     StringMap.add "CallableWhen" (3, 5) |>
     (* some constants are missing *)
-    StringMap.add "LoopHint" (10, 0) in
+    StringMap.add "LoopHint" (10, 0) |>
+    (* some spelling are missing *)
+    StringMap.add "clang_ext_Aligned_C2x_gnu_aligned" (11, 0) |>
+    StringMap.add "clang_ext_AlwaysInline_C2x_gnu_always_inline" (11, 0) |>
+    StringMap.add "clang_ext_MipsLongCall_C2x_gnu_long_call" (11, 0) |>
+    StringMap.add "clang_ext_MipsLongCall_C2x_gnu_far" (11, 0) |>
+    StringMap.add "clang_ext_MipsShortCall_C2x_gnu_short_call" (11, 0) |>
+    StringMap.add "clang_ext_MipsShortCall_C2x_gnu_near" (11, 0) |>
+    StringMap.add "clang_ext_Restrict_C2x_gnu_malloc" (11, 0) |>
+    StringMap.add "clang_ext_Section_C2x_gnu_section" (11, 0) |>
+    StringMap.add "clang_ext_Unused_C2x_gnu_unused" (11, 0) |>
+    StringMap.add "clang_ext_WarnUnusedResult_C2x_gnu_warn_unused_result"
+      (11, 0) |>
+    StringMap.add
+        "clang_ext_ArgumentWithTypeTag_CXX11_clang_argument_with_type_tag"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_ArgumentWithTypeTag_C2x_clang_argument_with_type_tag"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_ArgumentWithTypeTag_CXX11_clang_pointer_with_type_tag"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_ArgumentWithTypeTag_C2x_clang_pointer_with_type_tag"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_Ownership_C2x_clang_ownership_holds"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_Ownership_C2x_clang_ownership_returns"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_Ownership_C2x_clang_ownership_takes"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_XRayInstrument_C2x_clang_xray_always_instrument"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_XRayInstrument_C2x_clang_xray_never_instrument"
+        (7, 0) |>
+    StringMap.add
+        "clang_ext_ReleaseCapability_CXX11_clang_unlock_function"
+        (6, 0) |>
+    StringMap.add
+    "clang_ext_RequiresCapability_CXX11_clang_exclusive_locks_required"
+        (6, 0) |>
+    StringMap.add
+    "clang_ext_RequiresCapability_CXX11_clang_shared_locks_required"
+        (6, 0) |>
+    StringMap.add "clang_ext_Unused_C2x_maybe_unused" (6, 0) |>
+    StringMap.add
+        "clang_ext_Ownership_CXX11_clang_ownership_holds"
+        (6, 0) |>
+    StringMap.add
+        "clang_ext_Ownership_CXX11_clang_ownership_returns"
+        (6, 0) |>
+    StringMap.add
+        "clang_ext_Ownership_CXX11_clang_ownership_takes"
+        (6, 0) |>
+    (* some constants are missing *)
+    StringMap.add
+        "clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPNullMemAlloc"
+        (11, 0) |>
+    (* getCaptureKind becomes getCaptureKindVal *)
+    StringMap.add "OMPCaptureKind" (11, 0) |>
+    (* getGuid becomes getGuidDecl *)
+    StringMap.add "Uuid" (11, 0) |>
+    (* OMPDeclareVariant uses OMPTraitInfo *)
+    StringMap.add "OMPDeclareVariant" (11, 0) |>
+    (* Spelling is missing *)
+    StringMap.add "clang_ext_OpenCLConstantAddressSpace_spelling" (10, 0) |>
+    StringMap.add "clang_ext_OpenCLGenericAddressSpace_spelling" (10, 0) |>
+    StringMap.add "clang_ext_OpenCLGlobalAddressSpace_spelling" (10, 0) |>
+    StringMap.add "clang_ext_OpenCLLocalAddressSpace_spelling" (10, 0) |>
+    StringMap.add "clang_ext_OpenCLPrivateAddressSpace_spelling" (10, 0) |>
+    StringMap.add "clang_ext_PassObjectSize_spelling" (9, 0) |>
+    StringMap.add "clang_ext_Unused_spelling" (3, 9) in
   let command_line_args, _llvm_version =
     Stubgen_common.prepare_clang_options cflags llvm_config in
   let tu =
@@ -940,17 +951,46 @@ let main cflags llvm_config prefix =
           generate_code context versions argument type_attr_name key
             argument_desc));
   let other =
-    Ast_helper.Type.constructor (Metapp.mkloc "Other")
+    Ppxlib.Ast_helper.Type.constructor (Metapp.mkloc "Other")
       ~args:(Pcstr_tuple [[%type: Clang__bindings.clang_ext_attrkind]]) in
+  let groups = [
+    "AMD"; "AVR"; "AnyX86"; "CPU"; "CUDA"; "IB"; "NS"; "OMP"; "OS"; "ObjC";
+    "OpenCL"; "PragmaClang"; "Swift"; "WebAssembly"] in
+  let groups = List.map (fun group -> group, ref []) groups in
   let constructors = List.rev (other :: context.constructors) in
-  let ty =
-    Ast_helper.Type.mk (Metapp.mkloc "t")
-      ~kind:(Ptype_variant constructors)
-      ~params:[[%type: 'expr], Invariant; [%type: 'qual_type], Invariant;
-        [%type: 'declaration_name], Invariant]
+  let constructors = constructors |> List.filter
+    (fun (constructor : Ppxlib.constructor_declaration) ->
+      match List.find_map (fun (prefix, list) -> Option.map (fun suffix -> suffix, list) (Stubgen_common.String_utils.remove_prefix prefix constructor.pcd_name.txt)) groups with
+      | None -> true
+      | Some (suffix, list) ->
+          list := { constructor with pcd_name = { constructor.pcd_name with txt = suffix }} :: !list;
+          false) in
+  let groups =
+    groups |> List.filter_map (fun (prefix, list) ->
+      let list = !list in
+      match list with
+      | [] -> None
+      | _ -> Some (prefix, List.rev list)) in
+  let parameters =
+    [[%type: 'expr]; [%type: 'decl]; [%type: 'qual_type];
+      [%type: 'declaration_name]; [%type: 'omp_trait_info]] in
+  let constructors =
+    (groups |> List.map (fun (prefix, _) ->
+      Ppxlib.Ast_helper.Type.constructor (Metapp.mkloc prefix)
+        ~args:(Pcstr_tuple [Ppxlib.Ast_helper.Typ.constr (Metapp.mklid (Stubgen_common.uncamelcase prefix))
+          parameters])))
+    @ constructors in
+  let make_type_declaration name list =
+    Ppxlib.Ast_helper.Type.mk (Metapp.mkloc name)
+      ~kind:(Ptype_variant list)
+      ~params:(List.map (fun ty -> ty, Ppxlib.Asttypes.Invariant) parameters)
       ~attrs:[Metapp.Attr.mk (Metapp.mkloc "deriving") (PStr [%str refl])] in
+  let ty =
+    make_type_declaration "t" constructors in
   let type_decl =
-    Ast_helper.Str.type_ Recursive [ty] in
+    ((groups |> List.map (fun (prefix, list) ->
+      make_type_declaration (Stubgen_common.uncamelcase prefix) list))
+    @ [ty]) |> List.map (fun decl -> Ppxlib.Ast_helper.Str.type_ Recursive [decl]) in
   let cases =
     context.attributes |> List.map (
     fun (attribute : ocaml_attribute) ->
@@ -973,25 +1013,27 @@ let main cflags llvm_config prefix =
                    (3, [%e Metapp.Exp.of_int minor])]]
             else
               assert false in
-      let pattern = Ast_helper.Pat.construct lid None ~attrs in
+      let pattern = Ppxlib.Ast_helper.Pat.construct lid None ~attrs in
       let expr =
         let args =
           attribute.arguments |> List.map (fun (argument : ocaml_argument) ->
             let getter_name =
               !(argument.getter_name_ref) |>
               Stubgen_common.option_apply
-                (Stubgen_common.string_remove_prefix ~prefix:"clang_") |>
+                (Stubgen_common.String_utils.remove_prefix ~prefix:"clang_") |>
               Stubgen_common.uncamelcase in
             let converter =
               match argument.type_conversion with
               | NoConversion -> None
               | Expr -> Some [%expr expr_of_cxcursor]
+              | Decl -> Some [%expr decl_of_cxcursor]
               | TypeLoc -> Some [%expr of_type_loc]
+              | OMPTraitInfo -> Some [%expr omp_trait_info_of_cxcursor]
               | DeclarationName ->
                  Some [%expr convert_declaration_name] in
             let getter =
               let ident =
-                Ast_helper.Exp.ident
+                Ppxlib.Ast_helper.Exp.ident
                   (Metapp.mklid ~prefix:(Lident "Clang__bindings")
                      getter_name) in
               if argument.multiple then
@@ -1008,28 +1050,33 @@ let main cflags llvm_config prefix =
         let args =
           match args with
           | [(_, arg)] -> arg
-          | _ -> Ast_helper.Exp.record args None in
-        Ast_helper.Exp.construct lid (Some args) in
-      Ast_helper.Exp.case pattern expr) in
-  let cases = Ast_helper.Exp.case [%pat? other] [%expr Other other] :: cases in
+          | _ -> Ppxlib.Ast_helper.Exp.record args None in
+        let construct =
+          match List.find_map (fun (prefix, _) -> Option.map (fun suffix -> prefix, suffix) (Stubgen_common.String_utils.remove_prefix prefix attribute.name)) groups with
+          | Some (prefix, suffix) ->
+              (fun args -> Ppxlib.Ast_helper.Exp.construct (Metapp.mklid prefix) (Some (Ppxlib.Ast_helper.Exp.construct (Metapp.mklid suffix) args)))
+          | None -> Ppxlib.Ast_helper.Exp.construct lid in
+        construct (Some args) in
+      Ppxlib.Ast_helper.Exp.case pattern expr) in
+  let cases = Ppxlib.Ast_helper.Exp.case [%pat? other] [%expr Other other] :: cases in
   let convert =
     let pattern_matching =
-      Ast_helper.Exp.match_ [%expr Clang__bindings.ext_attr_get_kind cursor]
+      Ppxlib.Ast_helper.Exp.match_ [%expr Clang__bindings.ext_attr_get_kind cursor]
         (List.rev cases) in
     [%stri
-       [%%meta Metapp.filter.structure_item Metapp.filter [%stri
-       let convert
-           cursor expr_of_cxcursor of_type_loc convert_declaration_name =
+       [%%meta (new Metapp.filter)#structure_item [%stri
+       let convert cursor expr_of_cxcursor decl_of_cxcursor of_type_loc
+             convert_declaration_name omp_trait_info_of_cxcursor =
          [%e pattern_matching]]]] in
   let chan = open_out (prefix ^ "attributes.ml") in
   Fun.protect ~finally:(fun () -> close_out chan) (fun () ->
     Stubgen_common.output_warning_ml chan tool_name;
     let fmt = Format.formatter_of_out_channel chan in
-    Format.fprintf fmt "%a@." Pprintast.structure
+    Format.fprintf fmt "%a@." Ppxlib.Pprintast.structure
       ([%str
           [%%metapackage "metapp"]
           [%%metadir "config/.clangml_config.objs/byte"]] @
-        [type_decl; convert]));
+        type_decl @ [convert]));
   let chan = open_out (prefix ^ "libclang_extensions_attrs.inc") in
   Fun.protect ~finally:(fun () -> close_out chan) (fun () ->
     Stubgen_common.output_warning_c chan tool_name;

@@ -4,7 +4,7 @@
 module type S = Ast_sig.S
 
 [%%metadef
-let node_module s = Ast_helper.Mod.structure [%str
+let node_module s = Ppxlib.Ast_helper.Mod.structure [%str
   module Self = struct
     [%%meta Metapp.Stri.of_list s]
 
@@ -155,7 +155,7 @@ end
 
 module Custom (Node : Clang__ast.NodeS) = struct
 
-[%%meta Metapp.Stri.of_list (Metapp.filter.structure Metapp.filter [%str
+[%%meta Metapp.Stri.of_list ((new Metapp.filter)#structure [%str
 module Ast = struct
   include Clang__ast.Common
 
@@ -1195,8 +1195,8 @@ module Ast = struct
 
     and attribute_of_cxcursor (cursor : cxcursor) : attribute =
       let desc () =
-        Attributes.convert cursor expr_of_cxcursor of_type_loc
-          convert_declaration_name in
+        Attributes.convert cursor expr_of_cxcursor decl_of_cxcursor of_type_loc
+          convert_declaration_name Fun.id in
       node ~cursor (Node.from_fun desc)
 
     and attribute_of_cxcursor_opt cursor : attribute option =
@@ -1284,27 +1284,21 @@ module Ast = struct
               assert (Queue.is_empty queue);
               For { init; condition_variable; cond; inc; body }
           | IfStmt ->
-              let children_set = ext_if_stmt_get_children_set cursor in
-              let queue = Queue.create () in
-              cursor |> iter_children (fun cur -> Queue.add cur queue);
               let init =
-                if children_set land 1 <> 0 then
-                  Some (ext_if_stmt_get_init cursor |> stmt_of_cxcursor)
-                else
-                  None in
+                ext_if_stmt_get_init cursor |>
+                option_cursor stmt_of_cxcursor in
               let condition_variable =
-                if children_set land 2 <> 0 then
-                  Some (var_decl_of_cxcursor (Queue.pop queue))
-                else
-                  None in
-              let cond = expr_of_cxcursor (Queue.pop queue) in
-              let then_branch = stmt_of_cxcursor (Queue.pop queue) in
+                ext_if_stmt_get_condition_variable cursor |>
+                option_cursor var_decl_of_cxcursor in
+              let cond =
+                ext_if_stmt_get_cond cursor |>
+                expr_of_cxcursor in
+              let then_branch =
+                ext_if_stmt_get_then cursor |>
+                stmt_of_cxcursor in
               let else_branch =
-                if children_set land 4 <> 0 then
-                  Some (stmt_of_cxcursor (Queue.pop queue))
-                else
-                  None in
-              assert (Queue.is_empty queue);
+                ext_if_stmt_get_else cursor |>
+                option_cursor stmt_of_cxcursor in
               If { init; condition_variable; cond; then_branch; else_branch }
           | SwitchStmt ->
               let children_set = ext_switch_stmt_get_children_set cursor in
