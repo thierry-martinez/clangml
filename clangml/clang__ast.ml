@@ -395,7 +395,7 @@ let () =
   check pp_decl parse_declaration_list example @@
   fun ast -> match ast with
   | [{ desc = Var { var_name = "s"; var_type = { desc =
-      Pointer { desc = BuiltinType Char_S }}}}] -> ()
+      Pointer { desc = BuiltinType (Char_S | Char_U) }}}}] -> ()
   | _ -> assert false
     ]}*)
   | LValueReference of qual_type
@@ -414,7 +414,7 @@ let () =
   check_pattern quote_decl_list parse_declaration_list example
   [%pattern?
     [{ desc = Var { var_name = "s"; var_type = { desc = ConstantArray {
-      element = { desc = BuiltinType Char_S };
+      element = { desc = BuiltinType (Char_S | Char_U) };
       size = 42;
       size_as_expr = Some { desc = BinaryOperator {
         lhs = { desc = IntegerLiteral (Int 21)};
@@ -429,7 +429,7 @@ let () =
     [{ desc = Function { function_type = {
       parameters = Some { non_variadic = [{ desc = {
         qual_type = { desc = ConstantArray {
-          element = { desc = BuiltinType Char_S };
+          element = { desc = BuiltinType (Char_S | Char_U) };
           size = 42;
           size_as_expr = Some { desc = BinaryOperator {
             lhs = { desc = IntegerLiteral (Int 21)};
@@ -470,7 +470,7 @@ let () =
   | [{ desc = RecordDecl { keyword = Struct; name = "s"; fields = [
       { desc = Field { name = "i"; qual_type = { desc = BuiltinType Int}}};
       { desc = Field { name = "array"; qual_type = { desc =
-        IncompleteArray { desc = BuiltinType Char_S }}}}] }}] -> ()
+        IncompleteArray { desc = BuiltinType (Char_S | Char_U) }}}}] }}] -> ()
   | _ -> assert false
     ]}*)
   | VariableArray of {
@@ -490,7 +490,7 @@ let () =
           non_variadic = [
             { desc = { name = "i"; qual_type = { desc = BuiltinType Int }}};
             { desc = { name = "array"; qual_type = { desc = VariableArray {
-               element = { desc = BuiltinType Char_S };
+               element = { desc = BuiltinType (Char_S | Char_U) };
                size = { desc = DeclRef ({ name = IdentifierName "i" }) }}}}}];
           variadic = false }}}}] -> ()
   | _ -> assert false
@@ -733,7 +733,7 @@ let () =
         parameters = Some {
           non_variadic = [
             { desc = { qual_type = { desc = Pointer { desc = ParenType
-              { desc = IncompleteArray { desc = BuiltinType Char_S }}}}}}] }};
+              { desc = IncompleteArray { desc = BuiltinType (Char_S | Char_U) }}}}}}] }};
       name = IdentifierName "f";
       body = None }}]]
 
@@ -2877,7 +2877,7 @@ let () =
       name = IdentifierName "myfunc";
       body = Some { desc = Compound [{
         desc = Decl [{ desc = Var {
-          var_type = { desc = Pointer { desc = BuiltinType Char_S }};
+          var_type = { desc = Pointer { desc = BuiltinType (Char_S | Char_U) }};
           var_name = "_s";
           var_init = Some { desc = Predefined {
             kind = Func;
@@ -3489,7 +3489,7 @@ let () =
               parameters = Some { non_variadic = [
                 { desc = {
                     name = "";
-                    qual_type = { desc = BuiltinType Char_S }}}] }};
+                    qual_type = { desc = BuiltinType (Char_S | Char_U) }}}] }};
             body = None; }}};
         { desc = CXXMethod {
           type_ref = { desc = Record ({ name = IdentifierName "C" }) };
@@ -3562,7 +3562,7 @@ let () =
             result = { desc = BuiltinType Int };
             parameters = Some { non_variadic = [{ desc = {
               name = "c";
-              qual_type = { desc = BuiltinType Char_S }}}] }};
+              qual_type = { desc = BuiltinType (Char_S | Char_U) }}}] }};
           body = Some { desc = Compound [
             { desc = Return (Some { desc = IntegerLiteral (Int 0) })}] }}}}]]
     ]}*)
