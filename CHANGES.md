@@ -1,3 +1,7 @@
+# Next release
+
+- Support for Clang/LLVM 11.0.1
+
 # 2020-09-22, 4.3.0
 
 - Port to ppxlib 0.16 / ocaml-migrate-parsetree 2.0.0
