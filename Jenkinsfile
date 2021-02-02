@@ -65,6 +65,7 @@ pipeline {
             steps {
                 timeout(time: 3, unit: 'MINUTES') {
                     sh '''
+                       eval $(opam env) && \
                        cd build && \
                        dune exec -- tools/generate_attrs/generate_attrs.exe \
                          --llvm-config /media/llvms/11.1.0/bin/llvm-config \
