@@ -171,6 +171,19 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t)
           H.call (H.decl_of_string "MakeCXCursorInvalid")
             [H.decl_of_string "CXCursor_InvalidCode";
               Lazy.force get_cursor_tu]}
+  | Pointer { desc = lazy (
+        Record { name = IdentifierName "VarDecl" }) } ->
+      { ocaml_type = [%type: 'decl];
+        type_conversion = Decl;
+        interface_type = H.cxcursor;
+        multiple = false;
+        access = (fun e ->
+          H.call (H.decl_of_string "MakeCXCursor")
+            [e; Lazy.force get_cursor_tu]);
+        default =
+          H.call (H.decl_of_string "MakeCXCursorInvalid")
+            [H.decl_of_string "CXCursor_InvalidCode";
+              Lazy.force get_cursor_tu]}
   | Record { name = IdentifierName "ParamIdx" } ->
       { ocaml_type =  [%type: int];
         type_conversion = NoConversion;

@@ -763,9 +763,15 @@ module Ast = struct
         | CXXMethod
         | ConversionFunction -> cxxmethod_decl_of_cxcursor cursor
         | VarDecl -> Var (var_decl_desc_of_cxcursor cursor)
-        | StructDecl -> record_decl_of_cxcursor Struct cursor
-        | UnionDecl -> record_decl_of_cxcursor Union cursor
-        | ClassDecl -> record_decl_of_cxcursor Class cursor
+        | StructDecl ->
+            record_decl_of_cxcursor (Struct : clang_ext_elaboratedtypekeyword)
+              cursor
+        | UnionDecl ->
+            record_decl_of_cxcursor (Union : clang_ext_elaboratedtypekeyword)
+              cursor
+        | ClassDecl ->
+            record_decl_of_cxcursor (Class : clang_ext_elaboratedtypekeyword)
+              cursor
         | ClassTemplate ->
             let keyword =
               ext_template_decl_get_templated_decl cursor |>
@@ -1202,7 +1208,8 @@ module Ast = struct
       else
         None
 
-    and record_decl_of_cxcursor keyword cursor =
+    and record_decl_of_cxcursor (keyword : clang_ext_elaboratedtypekeyword)
+        cursor =
       let attributes, children =
         list_of_children cursor |>
         extract attribute_of_cxcursor_opt in
