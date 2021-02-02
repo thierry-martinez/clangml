@@ -74,6 +74,12 @@
 #ifdef LLVM_VERSION_10_0_1
 #define LLVM_VERSION_BEFORE_11_0_0
 #endif
+#ifdef LLVM_VERSION_BEFORE_11_0_0
+#define LLVM_VERSION_BEFORE_12_0_0
+#endif
+#ifdef LLVM_VERSION_11_0_0
+#define LLVM_VERSION_BEFORE_12_0_0
+#endif
 
 CXVersion
 clang_ext_getVersion();
