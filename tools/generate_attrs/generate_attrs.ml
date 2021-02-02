@@ -939,7 +939,8 @@ let main cflags llvm_config prefix =
     StringMap.add "clang_ext_PassObjectSize_spelling" (9, 0) |>
     StringMap.add "clang_ext_Unused_spelling" (3, 9) |>
     (* args is missing *)
-    StringMap.add "Annotate:args" (12, 0) in
+    StringMap.add "Annotate:args" (12, 0) |>
+    StringMap.add "Annotate:args_Size" (12, 0) in
   let command_line_args, _llvm_version =
     Stubgen_common.prepare_clang_options cflags llvm_config in
   let tu =
