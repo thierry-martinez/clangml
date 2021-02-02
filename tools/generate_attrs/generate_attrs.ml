@@ -743,7 +743,9 @@ let generate_code context versions argument type_name_attr ty
            (Some (argument_desc.type_info.access (param "")))) in
   let make_attribute decorate attribute : Clang.Stmt.t list =
     let body = decorate (make_attribute_cast attribute) in
-    Option.fold (find_version_constraint versions attribute.reduced_name)
+    let full_argument_name =
+      Printf.sprintf "%s:%s" attribute.reduced_name argument in
+    Option.fold (find_version_constraint versions full_argument_name)
       ~none:Fun.id ~some:restrict_statement_version body in
   let switch =
     match argument_desc.attributes with
@@ -933,7 +935,9 @@ let main cflags llvm_config prefix =
     StringMap.add "clang_ext_OpenCLLocalAddressSpace_spelling" (10, 0) |>
     StringMap.add "clang_ext_OpenCLPrivateAddressSpace_spelling" (10, 0) |>
     StringMap.add "clang_ext_PassObjectSize_spelling" (9, 0) |>
-    StringMap.add "clang_ext_Unused_spelling" (3, 9) in
+    StringMap.add "clang_ext_Unused_spelling" (3, 9) |>
+    (* args is missing *)
+    StringMap.add "Annotate:args" (12, 0) in
   let command_line_args, _llvm_version =
     Stubgen_common.prepare_clang_options cflags llvm_config in
   let tu =
