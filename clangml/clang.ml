@@ -513,10 +513,6 @@ module Ast = struct
         match get_type_kind cxtype with
         | Invalid -> InvalidType
         | ConstantArray ->
-            let paren, type_loc =
-              match ext_type_loc_get_class type_loc with
-              | Paren -> true, ext_paren_type_loc_get_inner_loc type_loc
-              | _ -> false, type_loc in
             let size = cxtype |> get_array_size in
             let element =
               ext_array_type_loc_get_element_loc type_loc |> of_type_loc in
