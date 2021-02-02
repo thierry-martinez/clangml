@@ -29,6 +29,7 @@ pipeline {
                 sh 'mkdir src'
                 sh 'mv * src/ || true'
                 sh '''
+                    eval $(opam env) && \
                     cd src && \
                     rm -rf bootstrap/ && \
                     tar -xf ~/bootstrap.tar.xz && \
