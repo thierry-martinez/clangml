@@ -745,7 +745,9 @@ let generate_code context versions argument type_name_attr ty
     let body = decorate (make_attribute_cast attribute) in
     let full_argument_name =
       Printf.sprintf "%s:%s" attribute.reduced_name argument in
-    Option.fold (find_version_constraint versions full_argument_name)
+    Option.fold (max
+        (find_version_constraint versions full_argument_name)
+        (find_version_constraint versions attribute.reduced_name))
       ~none:Fun.id ~some:restrict_statement_version body in
   let switch =
     match argument_desc.attributes with
