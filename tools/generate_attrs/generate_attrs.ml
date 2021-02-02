@@ -774,13 +774,17 @@ let find_attributes_among_clang_versions dir : (int * int) StringMap.t =
     Sys.readdir dir |> Array.to_list |> List.filter_map (fun filename ->
       let full_filename = Filename.concat dir filename in
       match List.map int_of_string_opt (String.split_on_char '.' filename) with
-      | [Some major; Some minor; Some _subminor]
+      | [Some major; Some minor; Some subminor]
         when Sys.is_directory full_filename ->
           let bindings =
             parse_ml_file
               (Filename.concat full_filename "clang__bindings.ml") in
           let minor =
-            if major >= 4 then
+            if major = 11 then
+              match minor, subminor with
+              | 1, 0 | 0, 1 -> 1
+              | _ -> 0
+            else if major >= 4 then
               0
             else
               minor in
