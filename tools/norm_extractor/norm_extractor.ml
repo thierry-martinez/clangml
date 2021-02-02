@@ -1,3 +1,5 @@
+open Ppxlib
+
 let search_ill_formed = Kmp.On_string.find "ill-formed"
 
 let section_table_sz = 17
