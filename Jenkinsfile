@@ -104,7 +104,7 @@ pipeline {
                         branches[llvm_version] = {
                             node {
                                 sh """
-                                    eval $(opam env) && \
+                                    eval \$(opam env) && \
                                     cd $pwd && \
                                     mkdir -p $bootstrap_dir && \
                                 build/_build/default/tools/stubgen/stubgen.exe \
@@ -113,7 +113,7 @@ pipeline {
                                         $bootstrap_dir/
                                    """
                                 sh """
-                                    eval $(opam env) && \
+                                    eval \$(opam env) && \
                                     cd $pwd && \
                                     mkdir $llvm_version/ && \
                                     cd $llvm_version/ && \
@@ -122,11 +122,11 @@ pipeline {
                                     make clangml
                                    """
                                 sh """
-                                    eval $(opam env) && \
+                                    eval \$(opam env) && \
                                     cd $pwd/$llvm_version/ && make test
                                    """
                                 sh """
-                                    eval $(opam env) && \
+                                    eval \$(opam env) && \
                                     cd $pwd/$llvm_version/ && \
                                     make tools/stubgen && \
                                     mkdir current && \
