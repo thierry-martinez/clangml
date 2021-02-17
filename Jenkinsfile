@@ -29,6 +29,7 @@ pipeline {
                 sh 'mkdir src'
                 sh 'mv * src/ || true'
                 sh '''
+                    eval $(opam env) && \
                     cd src && \
                     rm -rf bootstrap/ && \
                     tar -xf ~/bootstrap.tar.xz && \
@@ -44,7 +45,7 @@ pipeline {
                         eval $(opam env) && \
                         mkdir build && cd build && \
                         ../src/configure \
-                            --with-llvm-config=/media/llvms/11.0.0/bin/llvm-config
+                            --with-llvm-config=/media/llvms/12.0.0/bin/llvm-config
                        '''
                 }
             }
@@ -64,9 +65,10 @@ pipeline {
             steps {
                 timeout(time: 3, unit: 'MINUTES') {
                     sh '''
+                       eval $(opam env) && \
                        cd build && \
                        dune exec -- tools/generate_attrs/generate_attrs.exe \
-                         --llvm-config /media/llvms/11.0.0/bin/llvm-config \
+                         --llvm-config /media/llvms/12.0.0/bin/llvm-config \
                          "../src/bootstrap/" && \
                        cp ../src/bootstrap/attributes.ml clangml && \
                        cp ../src/bootstrap/libclang_extensions_attrs.inc \
@@ -102,6 +104,7 @@ pipeline {
                         branches[llvm_version] = {
                             node {
                                 sh """
+                                    eval \$(opam env) && \
                                     cd $pwd && \
                                     mkdir -p $bootstrap_dir && \
                                 build/_build/default/tools/stubgen/stubgen.exe \
@@ -110,6 +113,7 @@ pipeline {
                                         $bootstrap_dir/
                                    """
                                 sh """
+                                    eval \$(opam env) && \
                                     cd $pwd && \
                                     mkdir $llvm_version/ && \
                                     cd $llvm_version/ && \
@@ -117,8 +121,12 @@ pipeline {
                                         --with-llvm-config=$llvm_config && \
                                     make clangml
                                    """
-                                sh "cd $pwd/$llvm_version/ && make test"
                                 sh """
+                                    eval \$(opam env) && \
+                                    cd $pwd/$llvm_version/ && make test
+                                   """
+                                sh """
+                                    eval \$(opam env) && \
                                     cd $pwd/$llvm_version/ && \
                                     make tools/stubgen && \
                                     mkdir current && \

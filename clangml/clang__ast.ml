@@ -4970,24 +4970,44 @@ let () =
 let example = "const int i = 1; void f(int a[][i + 1]);"
 
 let () =
-  check_pattern quote_decl_list parse_declaration_list example
-  [%pattern?
-    [_; { desc = Function { name = IdentifierName "f"; function_type =
-      { result = { desc = BuiltinType Void };
-        parameters = Some {
-          non_variadic = [array];
-          variadic = false }}}}]]
-  ~result:begin fun bindings ->
-    check_result (Pattern.check quote_type_loc
-      (Clang.Parameter.get_type_loc bindings#array)
-      [%pattern? { desc = IncompleteArrayTypeLoc {
-        element = { desc = ConstantArrayTypeLoc {
-          size = { desc = BinaryOperator {
-            lhs = { desc = DeclRef { name = IdentifierName "i" }};
-            kind = Add;
-            rhs = { desc = IntegerLiteral (Int 1)}}};
-          element = { desc = BuiltinTypeLoc Int }}}}}])
-  end
+  if Clang.version () >= { major = 12; minor = 0; subminor = 0 } then
+    check_pattern quote_decl_list parse_declaration_list example
+    [%pattern?
+      [_; { desc = Function { name = IdentifierName "f"; function_type =
+        { result = { desc = BuiltinType Void };
+          parameters = Some {
+            non_variadic = [array];
+            variadic = false }}}}]]
+    ~result:begin fun bindings ->
+      check_result (Pattern.check quote_type_loc
+        (Clang.Parameter.get_type_loc bindings#array)
+        [%pattern? { desc = IncompleteArrayTypeLoc {
+          element = { desc = VariableArrayTypeLoc {
+            size = { desc = BinaryOperator {
+              lhs = { desc = DeclRef { name = IdentifierName "i" }};
+              kind = Add;
+              rhs = { desc = IntegerLiteral (Int 1)}}};
+            element = { desc = BuiltinTypeLoc Int }}}}}])
+    end
+  else
+    check_pattern quote_decl_list parse_declaration_list example
+    [%pattern?
+      [_; { desc = Function { name = IdentifierName "f"; function_type =
+        { result = { desc = BuiltinType Void };
+          parameters = Some {
+            non_variadic = [array];
+            variadic = false }}}}]]
+    ~result:begin fun bindings ->
+      check_result (Pattern.check quote_type_loc
+        (Clang.Parameter.get_type_loc bindings#array)
+        [%pattern? { desc = IncompleteArrayTypeLoc {
+          element = { desc = ConstantArrayTypeLoc {
+            size = { desc = BinaryOperator {
+              lhs = { desc = DeclRef { name = IdentifierName "i" }};
+              kind = Add;
+              rhs = { desc = IntegerLiteral (Int 1)}}};
+            element = { desc = BuiltinTypeLoc Int }}}}}])
+    end
     ]}*)
   | PointerTypeLoc of {
       pointee : type_loc;
