@@ -44,7 +44,7 @@ external module_map_descriptor_set_framework_module_name :
 external module_map_descriptor_set_umbrella_header :
   cxmodulemapdescriptor -> string -> (unit, cxerrorcode) result =
     "clang_ModuleMapDescriptor_setUmbrellaHeader_wrapper"[@@ocaml.doc
-                                                           "Sets the umbrealla header name that the module.map describes."]
+                                                           "Sets the umbrella header name that the module.map describes."]
 external module_map_descriptor_write_to_buffer :
   cxmodulemapdescriptor -> int -> (string, cxerrorcode) result =
     "clang_ModuleMapDescriptor_writeToBuffer_wrapper"[@@ocaml.doc
@@ -336,6 +336,10 @@ sig
   val keep_going : t
   val single_file_parse : t
   val limit_skip_function_bodies_to_preamble : t
+  val include_attributed_types : t
+  val visit_implicit_attributes : t
+  val ignore_non_errors_from_included_files : t
+  val retain_excluded_conditional_blocks : t
 end
 external default_editing_translation_unit_options :
   unit -> Cxtranslationunit_flags.t =
@@ -623,9 +627,15 @@ type cxcursorkind =
   | ObjCBoolLiteralExpr [@ocaml.doc "Objective-c Boolean Literal."]
   | ObjCSelfExpr
   [@ocaml.doc "Represents the \"self\" expression in an Objective-C method."]
-  | OMPArraySectionExpr [@ocaml.doc "OpenMP 4.0 \\[2.4, Array Section\\]."]
+  | OMPArraySectionExpr
+  [@ocaml.doc "OpenMP 5.0 \\[2.1.5, Array Section\\]."]
   | ObjCAvailabilityCheckExpr [@ocaml.doc "Represents an (...) check."]
   | FixedPointLiteral [@ocaml.doc "Fixed point literal"]
+  | OMPArrayShapingExpr
+  [@ocaml.doc "OpenMP 5.0 \\[2.1.4, Array Shaping\\]."]
+  | OMPIteratorExpr [@ocaml.doc "OpenMP 5.0 \\[2.1.6 Iterators\\]"]
+  | CXXAddrspaceCastExpr
+  [@ocaml.doc "OpenCL's addrspace_cast<> expression."]
   | UnexposedStmt
   [@ocaml.doc
     "A statement whose specific kind is not exposed via this interface."]
@@ -737,6 +747,19 @@ type cxcursorkind =
   [@ocaml.doc "OpenMP target teams distribute parallel for simd directive."]
   | OMPTargetTeamsDistributeSimdDirective
   [@ocaml.doc "OpenMP target teams distribute simd directive."]
+  | BuiltinBitCastExpr [@ocaml.doc "C++2a std::bit_cast expression."]
+  | OMPMasterTaskLoopDirective
+  [@ocaml.doc "OpenMP master taskloop directive."]
+  | OMPParallelMasterTaskLoopDirective
+  [@ocaml.doc "OpenMP parallel master taskloop directive."]
+  | OMPMasterTaskLoopSimdDirective
+  [@ocaml.doc "OpenMP master taskloop simd directive."]
+  | OMPParallelMasterTaskLoopSimdDirective
+  [@ocaml.doc "OpenMP parallel master taskloop simd directive."]
+  | OMPParallelMasterDirective
+  [@ocaml.doc "OpenMP parallel master directive."]
+  | OMPDepobjDirective [@ocaml.doc "OpenMP depobj directive."]
+  | OMPScanDirective [@ocaml.doc "OpenMP scan directive."]
   | TranslationUnit
   [@ocaml.doc "Cursor that represents the translation unit itself."]
   | UnexposedAttr
@@ -797,6 +820,72 @@ type cxcursorkind =
   [@ocaml.doc
     "An attribute whose specific kind is not exposed via this interface."]
   | DLLImport
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | NSReturnsRetained
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | NSReturnsNotRetained
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | NSReturnsAutoreleased
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | NSConsumesSelf
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | NSConsumed
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | ObjCException
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | ObjCNSObject
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | ObjCIndependentClass
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | ObjCPreciseLifetime
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | ObjCReturnsInnerPointer
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | ObjCRequiresSuper
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | ObjCRootClass
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | ObjCSubclassingRestricted
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | ObjCExplicitProtocolImpl
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | ObjCDesignatedInitializer
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | ObjCRuntimeVisible
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | ObjCBoxable
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | FlagEnum
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | ConvergentAttr
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | WarnUnusedAttr
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | WarnUnusedResultAttr
+  [@ocaml.doc
+    "An attribute whose specific kind is not exposed via this interface."]
+  | AlignedAttr
   [@ocaml.doc
     "An attribute whose specific kind is not exposed via this interface."]
   | PreprocessingDirective
@@ -1087,6 +1176,9 @@ type cxtypekind =
   | ULongAccum
   [@ocaml.doc
     "A type whose specific kind is not exposed via this interface."]
+  | BFloat16
+  [@ocaml.doc
+    "A type whose specific kind is not exposed via this interface."]
   | Complex
   [@ocaml.doc
     "A type whose specific kind is not exposed via this interface."]
@@ -1270,6 +1362,57 @@ type cxtypekind =
   | OCLReserveID
   [@ocaml.doc
     "Represents a type that was referred to using an elaborated type keyword."]
+  | ObjCObject
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
+  | ObjCTypeParam
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
+  | Attributed
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
+  | OCLIntelSubgroupAVCMcePayload
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
+  | OCLIntelSubgroupAVCImePayload
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
+  | OCLIntelSubgroupAVCRefPayload
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
+  | OCLIntelSubgroupAVCSicPayload
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
+  | OCLIntelSubgroupAVCMceResult
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
+  | OCLIntelSubgroupAVCImeResult
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
+  | OCLIntelSubgroupAVCRefResult
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
+  | OCLIntelSubgroupAVCSicResult
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
+  | OCLIntelSubgroupAVCImeResultSingleRefStreamout
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
+  | OCLIntelSubgroupAVCImeResultDualRefStreamout
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
+  | OCLIntelSubgroupAVCImeSingleRefStreamin
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
+  | OCLIntelSubgroupAVCImeDualRefStreamin
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
+  | ExtVector
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
+  | Atomic
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
 [@@deriving refl][@@ocaml.doc "Describes the kind of type"]
 type cxtype[@@ocaml.doc
              "The type of an element in the abstract syntax tree."]
@@ -1389,6 +1532,7 @@ type cxcallingconv =
   | Swift 
   | PreserveMost 
   | PreserveAll 
+  | AArch64VectorCall 
   | Invalid 
   | Unexposed [@@deriving refl][@@ocaml.doc
                                  "Describes the calling convention of a function type"]
@@ -1406,6 +1550,22 @@ external get_num_arg_types : cxtype -> int = "clang_getNumArgTypes_wrapper"
   "Retrieve the number of non-variadic parameters associated with a function type."]
 external get_arg_type : cxtype -> int -> cxtype = "clang_getArgType_wrapper"
 [@@ocaml.doc "Retrieve the type of a parameter of a function type."]
+external type_get_obj_cobject_base_type :
+  cxtype -> cxtype = "clang_Type_getObjCObjectBaseType_wrapper"[@@ocaml.doc
+                                                                 "Retrieves the base type of the ObjCObjectType."]
+external type_get_num_obj_cprotocol_refs :
+  cxtype -> int = "clang_Type_getNumObjCProtocolRefs_wrapper"[@@ocaml.doc
+                                                               "Retrieve the number of protocol references associated with an ObjC object/id."]
+external type_get_obj_cprotocol_decl :
+  cxtype -> int -> cxcursor = "clang_Type_getObjCProtocolDecl_wrapper"
+[@@ocaml.doc
+  "Retrieve the decl for a protocol reference for an ObjC object/id."]
+external type_get_num_obj_ctype_args :
+  cxtype -> int = "clang_Type_getNumObjCTypeArgs_wrapper"[@@ocaml.doc
+                                                           "Retrieve the number of type arguments associated with an ObjC object."]
+external type_get_obj_ctype_arg :
+  cxtype -> int -> cxtype = "clang_Type_getObjCTypeArg_wrapper"[@@ocaml.doc
+                                                                 "Retrieve a type argument associated with an ObjC object."]
 external is_function_type_variadic :
   cxtype -> bool = "clang_isFunctionTypeVariadic_wrapper"[@@ocaml.doc
                                                            "Return 1 if the CXType is a variadic function type, and 0 otherwise."]
@@ -1433,6 +1593,17 @@ external type_get_named_type :
 external type_is_transparent_tag_typedef :
   cxtype -> bool = "clang_Type_isTransparentTagTypedef_wrapper"[@@ocaml.doc
                                                                  "Determine if a typedef is 'transparent' tag."]
+type cxtypenullabilitykind =
+  | NonNull [@ocaml.doc "Values of this type can never be null."]
+  | Nullable [@ocaml.doc "Values of this type can be null."]
+  | Unspecified
+  [@ocaml.doc
+    "Whether values of this type can be null is (explicitly) unspecified. This captures a (fairly rare) case where we can't conclude anything about the nullability of the type even though it has been considered."]
+  | Invalid [@ocaml.doc "Nullability is not applicable to this type."]
+[@@deriving refl]
+external type_get_nullability :
+  cxtype -> cxtypenullabilitykind = "clang_Type_getNullability_wrapper"
+[@@ocaml.doc "Retrieve the nullability kind of a pointer type."]
 external type_get_align_of : cxtype -> int = "clang_Type_getAlignOf_wrapper"
 [@@ocaml.doc
   "Return the alignment of a type in bytes as per C++\\[expr.alignof\\] standard."]
@@ -1445,12 +1616,24 @@ external type_get_size_of : cxtype -> int = "clang_Type_getSizeOf_wrapper"
 external type_get_offset_of :
   cxtype -> string -> int = "clang_Type_getOffsetOf_wrapper"[@@ocaml.doc
                                                               "Return the offset of a field named S in a record of type T in bits as it would be returned by __offsetof__ as per C++11\\[18.2p4\\]"]
+external type_get_modified_type :
+  cxtype -> cxtype = "clang_Type_getModifiedType_wrapper"[@@ocaml.doc
+                                                           "Return the type that was modified by this attributed type."]
+external type_get_value_type :
+  cxtype -> cxtype = "clang_Type_getValueType_wrapper"[@@ocaml.doc
+                                                        "Gets the type contained by this atomic type."]
 external cursor_get_offset_of_field :
   cxcursor -> int = "clang_Cursor_getOffsetOfField_wrapper"[@@ocaml.doc
                                                              "Return the offset of the field represented by the Cursor."]
 external cursor_is_anonymous :
   cxcursor -> bool = "clang_Cursor_isAnonymous_wrapper"[@@ocaml.doc
-                                                         "Determine whether the given cursor represents an anonymous record declaration."]
+                                                         "Determine whether the given cursor represents an anonymous tag or namespace"]
+external cursor_is_anonymous_record_decl :
+  cxcursor -> bool = "clang_Cursor_isAnonymousRecordDecl_wrapper"[@@ocaml.doc
+                                                                   "Determine whether the given cursor represents an anonymous record declaration."]
+external cursor_is_inline_namespace :
+  cxcursor -> bool = "clang_Cursor_isInlineNamespace_wrapper"[@@ocaml.doc
+                                                               "Determine whether the given cursor represents an inline namespace declaration."]
 external type_get_num_template_arguments :
   cxtype -> int = "clang_Type_getNumTemplateArguments_wrapper"[@@ocaml.doc
                                                                 "Returns the number of template arguments for given template specialization, or -1 if type T is not a template specialization."]
@@ -1600,6 +1783,14 @@ external cursor_get_obj_cproperty_attributes :
   cxcursor -> int -> int = "clang_Cursor_getObjCPropertyAttributes_wrapper"
 [@@ocaml.doc
   "Given a cursor that represents a property declaration, return the associated property attributes. The bits are formed from CXObjCPropertyAttrKind."]
+external cursor_get_obj_cproperty_getter_name :
+  cxcursor -> string = "clang_Cursor_getObjCPropertyGetterName_wrapper"
+[@@ocaml.doc
+  "Given a cursor that represents a property declaration, return the name of the method that implements the getter."]
+external cursor_get_obj_cproperty_setter_name :
+  cxcursor -> string = "clang_Cursor_getObjCPropertySetterName_wrapper"
+[@@ocaml.doc
+  "Given a cursor that represents a property declaration, return the name of the method that implements the setter, if any."]
 external cursor_get_obj_cdecl_qualifiers :
   cxcursor -> int = "clang_Cursor_getObjCDeclQualifiers_wrapper"[@@ocaml.doc
                                                                   "Given a cursor that represents an Objective-C method or parameter declaration, return the associated Objective-C qualifiers for the return type or the parameter respectively. The bits are formed from CXObjCDeclQualifierKind."]
@@ -1834,7 +2025,7 @@ external toggle_crash_recovery :
 type cxevalresult
 external cursor_evaluate :
   cxcursor -> cxevalresult = "clang_Cursor_Evaluate_wrapper"[@@ocaml.doc
-                                                              "If cursor is a statement declaration tries to evaluate the statement and if its variable, tries to evaluate its initializer, into its corresponding type."]
+                                                              "If cursor is a statement declaration tries to evaluate the statement and if its variable, tries to evaluate its initializer, into its corresponding type. If it's an expression, tries to evaluate the expression."]
 type cxevalresultkind =
   | Int 
   | Float 
@@ -2101,6 +2292,7 @@ type clang_ext_declkind =
   | Friend 
   | FriendTemplate 
   | Import 
+  | LifetimeExtendedTemporary 
   | LinkageSpec 
   | Label 
   | Namespace 
@@ -2114,6 +2306,7 @@ type clang_ext_declkind =
   | ObjCMethod 
   | ObjCProperty 
   | BuiltinTemplate 
+  | Concept 
   | ClassTemplate 
   | FunctionTemplate 
   | TypeAliasTemplate 
@@ -2155,12 +2348,17 @@ type clang_ext_declkind =
   | VarTemplatePartialSpecialization 
   | EnumConstant 
   | IndirectField 
+  | MSGuid 
+  | OMPDeclareMapper 
   | OMPDeclareReduction 
   | UnresolvedUsingValue 
+  | OMPAllocate 
+  | OMPRequires 
   | OMPThreadPrivate 
   | ObjCPropertyImpl 
   | PragmaComment 
   | PragmaDetectMismatch 
+  | RequiresExprBody 
   | StaticAssert 
   | TranslationUnit 
   | UnknownDecl [@@deriving refl]
@@ -2170,7 +2368,6 @@ type clang_ext_stmtkind =
   | InvalidStmt 
   | GCCAsmStmt 
   | MSAsmStmt 
-  | AttributedStmt 
   | BreakStmt 
   | CXXCatchStmt 
   | CXXForRangeStmt 
@@ -2182,122 +2379,10 @@ type clang_ext_stmtkind =
   | CoroutineBodyStmt 
   | DeclStmt 
   | DoStmt 
-  | BinaryConditionalOperator 
-  | ConditionalOperator 
-  | AddrLabelExpr 
-  | ArrayInitIndexExpr 
-  | ArrayInitLoopExpr 
-  | ArraySubscriptExpr 
-  | ArrayTypeTraitExpr 
-  | AsTypeExpr 
-  | AtomicExpr 
-  | BinaryOperator 
-  | CompoundAssignOperator 
-  | BlockExpr 
-  | CXXBindTemporaryExpr 
-  | CXXBoolLiteralExpr 
-  | CXXConstructExpr 
-  | CXXTemporaryObjectExpr 
-  | CXXDefaultArgExpr 
-  | CXXDefaultInitExpr 
-  | CXXDeleteExpr 
-  | CXXDependentScopeMemberExpr 
-  | CXXFoldExpr 
-  | CXXInheritedCtorInitExpr 
-  | CXXNewExpr 
-  | CXXNoexceptExpr 
-  | CXXNullPtrLiteralExpr 
-  | CXXPseudoDestructorExpr 
-  | CXXScalarValueInitExpr 
-  | CXXStdInitializerListExpr 
-  | CXXThisExpr 
-  | CXXThrowExpr 
-  | CXXTypeidExpr 
-  | CXXUnresolvedConstructExpr 
-  | CXXUuidofExpr 
-  | CallExpr 
-  | CUDAKernelCallExpr 
-  | CXXMemberCallExpr 
-  | CXXOperatorCallExpr 
-  | UserDefinedLiteral 
-  | CStyleCastExpr 
-  | CXXFunctionalCastExpr 
-  | CXXConstCastExpr 
-  | CXXDynamicCastExpr 
-  | CXXReinterpretCastExpr 
-  | CXXStaticCastExpr 
-  | ObjCBridgedCastExpr 
-  | ImplicitCastExpr 
-  | CharacterLiteral 
-  | ChooseExpr 
-  | CompoundLiteralExpr 
-  | ConvertVectorExpr 
-  | CoawaitExpr 
-  | CoyieldExpr 
-  | DeclRefExpr 
-  | DependentCoawaitExpr 
-  | DependentScopeDeclRefExpr 
-  | DesignatedInitExpr 
-  | DesignatedInitUpdateExpr 
-  | ExprWithCleanups 
-  | ExpressionTraitExpr 
-  | ExtVectorElementExpr 
-  | FixedPointLiteral 
-  | FloatingLiteral 
-  | FunctionParmPackExpr 
-  | GNUNullExpr 
-  | GenericSelectionExpr 
-  | ImaginaryLiteral 
-  | ImplicitValueInitExpr 
-  | InitListExpr 
-  | IntegerLiteral 
-  | LambdaExpr 
-  | MSPropertyRefExpr 
-  | MSPropertySubscriptExpr 
-  | MaterializeTemporaryExpr 
-  | MemberExpr 
-  | NoInitExpr 
-  | OMPArraySectionExpr 
-  | ObjCArrayLiteral 
-  | ObjCAvailabilityCheckExpr 
-  | ObjCBoolLiteralExpr 
-  | ObjCBoxedExpr 
-  | ObjCDictionaryLiteral 
-  | ObjCEncodeExpr 
-  | ObjCIndirectCopyRestoreExpr 
-  | ObjCIsaExpr 
-  | ObjCIvarRefExpr 
-  | ObjCMessageExpr 
-  | ObjCPropertyRefExpr 
-  | ObjCProtocolExpr 
-  | ObjCSelectorExpr 
-  | ObjCStringLiteral 
-  | ObjCSubscriptRefExpr 
-  | OffsetOfExpr 
-  | OpaqueValueExpr 
-  | UnresolvedLookupExpr 
-  | UnresolvedMemberExpr 
-  | PackExpansionExpr 
-  | ParenExpr 
-  | ParenListExpr 
-  | PredefinedExpr 
-  | PseudoObjectExpr 
-  | ShuffleVectorExpr 
-  | SizeOfPackExpr 
-  | StmtExpr 
-  | StringLiteral 
-  | SubstNonTypeTemplateParmExpr 
-  | SubstNonTypeTemplateParmPackExpr 
-  | TypeTraitExpr 
-  | TypoExpr 
-  | UnaryExprOrTypeTraitExpr 
-  | UnaryOperator 
-  | VAArgExpr 
   | ForStmt 
   | GotoStmt 
   | IfStmt 
   | IndirectGotoStmt 
-  | LabelStmt 
   | MSDependentExistsStmt 
   | NullStmt 
   | OMPAtomicDirective 
@@ -2305,6 +2390,7 @@ type clang_ext_stmtkind =
   | OMPCancelDirective 
   | OMPCancellationPointDirective 
   | OMPCriticalDirective 
+  | OMPDepobjDirective 
   | OMPFlushDirective 
   | OMPDistributeDirective 
   | OMPDistributeParallelForDirective 
@@ -2312,8 +2398,12 @@ type clang_ext_stmtkind =
   | OMPDistributeSimdDirective 
   | OMPForDirective 
   | OMPForSimdDirective 
+  | OMPMasterTaskLoopDirective 
+  | OMPMasterTaskLoopSimdDirective 
   | OMPParallelForDirective 
   | OMPParallelForSimdDirective 
+  | OMPParallelMasterTaskLoopDirective 
+  | OMPParallelMasterTaskLoopSimdDirective 
   | OMPSimdDirective 
   | OMPTargetParallelForSimdDirective 
   | OMPTargetSimdDirective 
@@ -2330,7 +2420,9 @@ type clang_ext_stmtkind =
   | OMPMasterDirective 
   | OMPOrderedDirective 
   | OMPParallelDirective 
+  | OMPParallelMasterDirective 
   | OMPParallelSectionsDirective 
+  | OMPScanDirective 
   | OMPSectionDirective 
   | OMPSectionsDirective 
   | OMPSingleDirective 
@@ -2362,59 +2454,188 @@ type clang_ext_stmtkind =
   | CaseStmt 
   | DefaultStmt 
   | SwitchStmt 
+  | AttributedStmt 
+  | BinaryConditionalOperator 
+  | ConditionalOperator 
+  | AddrLabelExpr 
+  | ArrayInitIndexExpr 
+  | ArrayInitLoopExpr 
+  | ArraySubscriptExpr 
+  | ArrayTypeTraitExpr 
+  | AsTypeExpr 
+  | AtomicExpr 
+  | BinaryOperator 
+  | CompoundAssignOperator 
+  | BlockExpr 
+  | CXXBindTemporaryExpr 
+  | CXXBoolLiteralExpr 
+  | CXXConstructExpr 
+  | CXXTemporaryObjectExpr 
+  | CXXDefaultArgExpr 
+  | CXXDefaultInitExpr 
+  | CXXDeleteExpr 
+  | CXXDependentScopeMemberExpr 
+  | CXXFoldExpr 
+  | CXXInheritedCtorInitExpr 
+  | CXXNewExpr 
+  | CXXNoexceptExpr 
+  | CXXNullPtrLiteralExpr 
+  | CXXPseudoDestructorExpr 
+  | CXXRewrittenBinaryOperator 
+  | CXXScalarValueInitExpr 
+  | CXXStdInitializerListExpr 
+  | CXXThisExpr 
+  | CXXThrowExpr 
+  | CXXTypeidExpr 
+  | CXXUnresolvedConstructExpr 
+  | CXXUuidofExpr 
+  | CallExpr 
+  | CUDAKernelCallExpr 
+  | CXXMemberCallExpr 
+  | CXXOperatorCallExpr 
+  | UserDefinedLiteral 
+  | BuiltinBitCastExpr 
+  | CStyleCastExpr 
+  | CXXFunctionalCastExpr 
+  | CXXAddrspaceCastExpr 
+  | CXXConstCastExpr 
+  | CXXDynamicCastExpr 
+  | CXXReinterpretCastExpr 
+  | CXXStaticCastExpr 
+  | ObjCBridgedCastExpr 
+  | ImplicitCastExpr 
+  | CharacterLiteral 
+  | ChooseExpr 
+  | CompoundLiteralExpr 
+  | ConceptSpecializationExpr 
+  | ConvertVectorExpr 
+  | CoawaitExpr 
+  | CoyieldExpr 
+  | DeclRefExpr 
+  | DependentCoawaitExpr 
+  | DependentScopeDeclRefExpr 
+  | DesignatedInitExpr 
+  | DesignatedInitUpdateExpr 
+  | ExpressionTraitExpr 
+  | ExtVectorElementExpr 
+  | FixedPointLiteral 
+  | FloatingLiteral 
+  | ConstantExpr 
+  | ExprWithCleanups 
+  | FunctionParmPackExpr 
+  | GNUNullExpr 
+  | GenericSelectionExpr 
+  | ImaginaryLiteral 
+  | ImplicitValueInitExpr 
+  | InitListExpr 
+  | IntegerLiteral 
+  | LambdaExpr 
+  | MSPropertyRefExpr 
+  | MSPropertySubscriptExpr 
+  | MaterializeTemporaryExpr 
+  | MatrixSubscriptExpr 
+  | MemberExpr 
+  | NoInitExpr 
+  | OMPArraySectionExpr 
+  | OMPArrayShapingExpr 
+  | OMPIteratorExpr 
+  | ObjCArrayLiteral 
+  | ObjCAvailabilityCheckExpr 
+  | ObjCBoolLiteralExpr 
+  | ObjCBoxedExpr 
+  | ObjCDictionaryLiteral 
+  | ObjCEncodeExpr 
+  | ObjCIndirectCopyRestoreExpr 
+  | ObjCIsaExpr 
+  | ObjCIvarRefExpr 
+  | ObjCMessageExpr 
+  | ObjCPropertyRefExpr 
+  | ObjCProtocolExpr 
+  | ObjCSelectorExpr 
+  | ObjCStringLiteral 
+  | ObjCSubscriptRefExpr 
+  | OffsetOfExpr 
+  | OpaqueValueExpr 
+  | UnresolvedLookupExpr 
+  | UnresolvedMemberExpr 
+  | PackExpansionExpr 
+  | ParenExpr 
+  | ParenListExpr 
+  | PredefinedExpr 
+  | PseudoObjectExpr 
+  | RecoveryExpr 
+  | RequiresExpr 
+  | ShuffleVectorExpr 
+  | SizeOfPackExpr 
+  | SourceLocExpr 
+  | StmtExpr 
+  | StringLiteral 
+  | SubstNonTypeTemplateParmExpr 
+  | SubstNonTypeTemplateParmPackExpr 
+  | TypeTraitExpr 
+  | TypoExpr 
+  | UnaryExprOrTypeTraitExpr 
+  | UnaryOperator 
+  | VAArgExpr 
+  | LabelStmt 
   | WhileStmt 
   | UnknownStmt [@@deriving refl]
 external ext_stmt_get_kind :
   cxcursor -> clang_ext_stmtkind = "clang_ext_Stmt_GetKind_wrapper"
 type clang_ext_typekind =
   | InvalidType 
-  | Builtin 
-  | Complex 
-  | Pointer 
-  | BlockPointer 
-  | LValueReference 
-  | RValueReference 
-  | MemberPointer 
-  | ConstantArray 
-  | IncompleteArray 
-  | VariableArray 
-  | DependentSizedArray 
-  | DependentSizedExtVector 
-  | DependentAddressSpace 
-  | Vector 
-  | DependentVector 
-  | ExtVector 
-  | FunctionProto 
-  | FunctionNoProto 
-  | UnresolvedUsing 
-  | Paren 
-  | Typedef 
   | Adjusted 
   | Decayed 
-  | TypeOfExpr 
-  | TypeOf 
-  | Decltype 
-  | UnaryTransform 
-  | Record 
-  | Enum 
-  | Elaborated 
+  | ConstantArray 
+  | DependentSizedArray 
+  | IncompleteArray 
+  | VariableArray 
+  | Atomic 
   | Attributed 
-  | TemplateTypeParm 
-  | SubstTemplateTypeParm 
-  | SubstTemplateTypeParmPack 
-  | TemplateSpecialization 
+  | BlockPointer 
+  | Builtin 
+  | Complex 
+  | Decltype 
   | Auto 
   | DeducedTemplateSpecialization 
-  | InjectedClassName 
+  | DependentAddressSpace 
+  | DependentExtInt 
   | DependentName 
+  | DependentSizedExtVector 
   | DependentTemplateSpecialization 
-  | PackExpansion 
-  | ObjCTypeParam 
+  | DependentVector 
+  | Elaborated 
+  | ExtInt 
+  | FunctionNoProto 
+  | FunctionProto 
+  | InjectedClassName 
+  | MacroQualified 
+  | ConstantMatrix 
+  | DependentSizedMatrix 
+  | MemberPointer 
+  | ObjCObjectPointer 
   | ObjCObject 
   | ObjCInterface 
-  | ObjCObjectPointer 
+  | ObjCTypeParam 
+  | PackExpansion 
+  | Paren 
   | Pipe 
-  | Atomic 
+  | Pointer 
+  | LValueReference 
+  | RValueReference 
+  | SubstTemplateTypeParmPack 
+  | SubstTemplateTypeParm 
+  | Enum 
+  | Record 
+  | TemplateSpecialization 
+  | TemplateTypeParm 
+  | TypeOfExpr 
+  | TypeOf 
+  | Typedef 
+  | UnaryTransform 
+  | UnresolvedUsing 
+  | Vector 
+  | ExtVector 
   | UnknownType [@@deriving refl]
 external ext_type_get_kind :
   cxtype -> clang_ext_typekind = "clang_ext_Type_GetKind_wrapper"
@@ -2449,8 +2670,48 @@ external ext_type_get_named_type :
   cxtype -> cxtype = "clang_ext_Type_getNamedType_wrapper"
 type clang_ext_attrkind =
   | NoAttr 
+  | AddressSpace 
+  | ArmMveStrictPolymorphism 
+  | CmseNSCall 
+  | NoDeref 
+  | ObjCGC 
+  | ObjCInertUnsafeUnretained 
+  | ObjCKindOf 
+  | OpenCLConstantAddressSpace 
+  | OpenCLGenericAddressSpace 
+  | OpenCLGlobalAddressSpace 
+  | OpenCLLocalAddressSpace 
+  | OpenCLPrivateAddressSpace 
+  | Ptr32 
+  | Ptr64 
+  | SPtr 
+  | TypeNonNull 
+  | TypeNullUnspecified 
+  | TypeNullable 
+  | UPtr 
   | FallThrough 
+  | NoMerge 
   | Suppress 
+  | AArch64VectorPcs 
+  | AcquireHandle 
+  | AnyX86NoCfCheck 
+  | CDecl 
+  | FastCall 
+  | IntelOclBicc 
+  | LifetimeBound 
+  | MSABI 
+  | NSReturnsRetained 
+  | ObjCOwnership 
+  | Pascal 
+  | Pcs 
+  | PreserveAll 
+  | PreserveMost 
+  | RegCall 
+  | StdCall 
+  | SwiftCall 
+  | SysVABI 
+  | ThisCall 
+  | VectorCall 
   | SwiftContext 
   | SwiftErrorResult 
   | SwiftIndirectResult 
@@ -2459,7 +2720,10 @@ type clang_ext_attrkind =
   | CarriesDependency 
   | NSConsumed 
   | NonNull 
+  | OSConsumed 
   | PassObjectSize 
+  | ReleaseHandle 
+  | UseHandle 
   | AMDGPUFlatWorkGroupSize 
   | AMDGPUNumSGPR 
   | AMDGPUNumVGPR 
@@ -2474,13 +2738,14 @@ type clang_ext_attrkind =
   | Aligned 
   | AllocAlign 
   | AllocSize 
+  | AlwaysDestroy 
   | AlwaysInline 
   | AnalyzerNoReturn 
   | AnyX86Interrupt 
   | AnyX86NoCallerSavedRegisters 
-  | AnyX86NoCfCheck 
   | ArcWeakrefUnavailable 
   | ArgumentWithTypeTag 
+  | ArmBuiltinAlias 
   | Artificial 
   | AsmLabel 
   | AssertCapability 
@@ -2488,10 +2753,13 @@ type clang_ext_attrkind =
   | AssertSharedLock 
   | AssumeAligned 
   | Availability 
+  | BPFPreserveAccessIndex 
   | Blocks 
+  | Builtin 
   | C11NoReturn 
-  | CDecl 
   | CFAuditedTransfer 
+  | CFGuard 
+  | CFICanonicalJumpTable 
   | CFReturnsNotRetained 
   | CFReturnsRetained 
   | CFUnknownTransfer 
@@ -2499,6 +2767,8 @@ type clang_ext_attrkind =
   | CPUSpecific 
   | CUDAConstant 
   | CUDADevice 
+  | CUDADeviceBuiltinSurfaceType 
+  | CUDADeviceBuiltinTextureType 
   | CUDAGlobal 
   | CUDAHost 
   | CUDAInvalidTarget 
@@ -2506,20 +2776,25 @@ type clang_ext_attrkind =
   | CUDAShared 
   | CXX11NoReturn 
   | CallableWhen 
+  | Callback 
   | Capability 
   | CapturedRecord 
   | Cleanup 
+  | CmseNSEntry 
   | CodeSeg 
   | Cold 
   | Common 
   | Const 
+  | ConstInit 
   | Constructor 
   | Consumable 
   | ConsumableAutoCast 
   | ConsumableSetOnRead 
   | Convergent 
   | DLLExport 
+  | DLLExportStaticLocal 
   | DLLImport 
+  | DLLImportStaticLocal 
   | Deprecated 
   | Destructor 
   | DiagnoseIf 
@@ -2527,9 +2802,9 @@ type clang_ext_attrkind =
   | EmptyBases 
   | EnableIf 
   | EnumExtensibility 
+  | ExcludeFromExplicitInstantiation 
   | ExclusiveTrylockFunction 
   | ExternalSourceSymbol 
-  | FastCall 
   | Final 
   | FlagEnum 
   | Flatten 
@@ -2543,14 +2818,13 @@ type clang_ext_attrkind =
   | IBOutlet 
   | IBOutletCollection 
   | InitPriority 
-  | IntelOclBicc 
   | InternalLinkage 
   | LTOVisibilityPublic 
   | LayoutVersion 
-  | LifetimeBound 
   | LockReturned 
   | LocksExcluded 
-  | MSABI 
+  | MIGServerRoutine 
+  | MSAllocator 
   | MSInheritance 
   | MSNoVTable 
   | MSP430Interrupt 
@@ -2568,11 +2842,11 @@ type clang_ext_attrkind =
   | NSConsumesSelf 
   | NSReturnsAutoreleased 
   | NSReturnsNotRetained 
-  | NSReturnsRetained 
   | Naked 
   | NoAlias 
   | NoCommon 
   | NoDebug 
+  | NoDestroy 
   | NoDuplicate 
   | NoInline 
   | NoInstrumentFunction 
@@ -2580,19 +2854,29 @@ type clang_ext_attrkind =
   | NoMips16 
   | NoReturn 
   | NoSanitize 
+  | NoSpeculativeLoadHardening 
   | NoSplitStack 
   | NoStackProtector 
   | NoThreadSafetyAnalysis 
   | NoThrow 
+  | NoUniqueAddress 
   | NotTailCalled 
+  | OMPAllocateDecl 
   | OMPCaptureNoInit 
   | OMPDeclareTargetDecl 
+  | OMPDeclareVariant 
   | OMPThreadPrivateDecl 
+  | OSConsumesThis 
+  | OSReturnsNotRetained 
+  | OSReturnsRetained 
+  | OSReturnsRetainedOnNonZero 
+  | OSReturnsRetainedOnZero 
   | ObjCBridge 
   | ObjCBridgeMutable 
   | ObjCBridgeRelated 
   | ObjCException 
   | ObjCExplicitProtocolImpl 
+  | ObjCExternallyRetained 
   | ObjCIndependentClass 
   | ObjCMethodFamily 
   | ObjCNSObject 
@@ -2607,61 +2891,61 @@ type clang_ext_attrkind =
   | OpenCLUnrollHint 
   | OptimizeNone 
   | Override 
+  | Owner 
   | Ownership 
   | Packed 
   | ParamTypestate 
-  | Pascal 
-  | Pcs 
+  | PatchableFunctionEntry 
+  | Pointer 
   | PragmaClangBSSSection 
   | PragmaClangDataSection 
+  | PragmaClangRelroSection 
   | PragmaClangRodataSection 
   | PragmaClangTextSection 
-  | PreserveAll 
-  | PreserveMost 
   | PtGuardedBy 
   | PtGuardedVar 
   | Pure 
   | RISCVInterrupt 
-  | RegCall 
+  | Reinitializes 
   | ReleaseCapability 
   | ReqdWorkGroupSize 
-  | RequireConstantInit 
   | RequiresCapability 
   | Restrict 
   | ReturnTypestate 
   | ReturnsNonNull 
   | ReturnsTwice 
+  | SYCLKernel 
   | ScopedLockable 
   | Section 
   | SelectAny 
   | Sentinel 
   | SetTypestate 
   | SharedTrylockFunction 
-  | StdCall 
-  | SwiftCall 
-  | SysVABI 
+  | SpeculativeLoadHardening 
   | TLSModel 
   | Target 
   | TestTypestate 
-  | ThisCall 
   | TransparentUnion 
   | TrivialABI 
   | TryAcquireCapability 
   | TypeTagForDatatype 
   | TypeVisibility 
   | Unavailable 
+  | Uninitialized 
   | Unused 
   | Used 
   | Uuid 
   | VecReturn 
   | VecTypeHint 
-  | VectorCall 
   | Visibility 
   | WarnUnused 
   | WarnUnusedResult 
   | Weak 
   | WeakImport 
   | WeakRef 
+  | WebAssemblyExportName 
+  | WebAssemblyImportModule 
+  | WebAssemblyImportName 
   | WorkGroupSizeHint 
   | X86ForceAlignArgPointer 
   | XRayInstrument 
@@ -2671,14 +2955,20 @@ type clang_ext_attrkind =
   | AlignValue 
   | IFunc 
   | InitSeg 
+  | LoaderUninitialized 
   | LoopHint 
   | Mode 
+  | NoBuiltin 
   | NoEscape 
   | OMPCaptureKind 
   | OMPDeclareSimdDecl 
   | OMPReferencedVar 
   | ObjCBoxable 
+  | ObjCClassStub 
   | ObjCDesignatedInitializer 
+  | ObjCDirect 
+  | ObjCDirectMembers 
+  | ObjCNonLazyClass 
   | ObjCRuntimeName 
   | ObjCRuntimeVisible 
   | OpenCLAccess 
@@ -2879,6 +3169,8 @@ type clang_ext_langstandards =
   | Gnu11 
   | C17 
   | Gnu17 
+  | C2x 
+  | Gnu2x 
   | Cxx98 
   | Gnucxx98 
   | Cxx11 
@@ -2887,8 +3179,8 @@ type clang_ext_langstandards =
   | Gnucxx14 
   | Cxx17 
   | Gnucxx17 
-  | Cxx2a 
-  | Gnucxx2a 
+  | Cxx20 
+  | Gnucxx20 
   | Opencl10 
   | Opencl11 
   | Opencl12 
@@ -3141,53 +3433,58 @@ external ext_declarator_decl_get_type_loc :
     "clang_ext_DeclaratorDecl_getTypeLoc_wrapper"
 type clang_ext_typeloc_class =
   | Qualified 
-  | Builtin 
-  | Complex 
-  | Pointer 
-  | BlockPointer 
-  | LValueReference 
-  | RValueReference 
-  | MemberPointer 
-  | ConstantArray 
-  | IncompleteArray 
-  | VariableArray 
-  | DependentSizedArray 
-  | DependentSizedExtVector 
-  | DependentAddressSpace 
-  | Vector 
-  | DependentVector 
-  | ExtVector 
-  | FunctionProto 
-  | FunctionNoProto 
-  | UnresolvedUsing 
-  | Paren 
-  | Typedef 
   | Adjusted 
   | Decayed 
-  | TypeOfExpr 
-  | TypeOf 
-  | Decltype 
-  | UnaryTransform 
-  | Record 
-  | Enum 
-  | Elaborated 
+  | ConstantArray 
+  | DependentSizedArray 
+  | IncompleteArray 
+  | VariableArray 
+  | Atomic 
   | Attributed 
-  | TemplateTypeParm 
-  | SubstTemplateTypeParm 
-  | SubstTemplateTypeParmPack 
-  | TemplateSpecialization 
+  | BlockPointer 
+  | Builtin 
+  | Complex 
+  | Decltype 
   | Auto 
   | DeducedTemplateSpecialization 
-  | InjectedClassName 
+  | DependentAddressSpace 
+  | DependentExtInt 
   | DependentName 
+  | DependentSizedExtVector 
   | DependentTemplateSpecialization 
-  | PackExpansion 
-  | ObjCTypeParam 
+  | DependentVector 
+  | Elaborated 
+  | ExtInt 
+  | FunctionNoProto 
+  | FunctionProto 
+  | InjectedClassName 
+  | MacroQualified 
+  | ConstantMatrix 
+  | DependentSizedMatrix 
+  | MemberPointer 
+  | ObjCObjectPointer 
   | ObjCObject 
   | ObjCInterface 
-  | ObjCObjectPointer 
+  | ObjCTypeParam 
+  | PackExpansion 
+  | Paren 
   | Pipe 
-  | Atomic 
+  | Pointer 
+  | LValueReference 
+  | RValueReference 
+  | SubstTemplateTypeParmPack 
+  | SubstTemplateTypeParm 
+  | Enum 
+  | Record 
+  | TemplateSpecialization 
+  | TemplateTypeParm 
+  | TypeOfExpr 
+  | TypeOf 
+  | Typedef 
+  | UnaryTransform 
+  | UnresolvedUsing 
+  | Vector 
+  | ExtVector 
   | InvalidTypeLoc [@@deriving refl]
 external ext_type_loc_get_class :
   clang_ext_typeloc -> clang_ext_typeloc_class =

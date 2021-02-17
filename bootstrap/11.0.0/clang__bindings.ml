@@ -2755,6 +2755,7 @@ type clang_ext_attrkind =
   | Availability 
   | BPFPreserveAccessIndex 
   | Blocks 
+  | Builtin 
   | C11NoReturn 
   | CFAuditedTransfer 
   | CFGuard 
