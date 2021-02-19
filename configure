@@ -709,6 +709,9 @@ ENDIF_CLANG_FROM_3_5
 IF_CLANG_FROM_3_5
 ENDIF_CLANG_BEFORE_3_5
 IF_CLANG_BEFORE_3_5
+EQUIVALENT_LLVM_VERSION_SUBMINOR
+EQUIVALENT_LLVM_VERSION_MINOR
+EQUIVALENT_LLVM_VERSION_MAJOR
 EQUIVALENT_LLVM_VERSION
 LLVM_VERSION_SUBMINOR
 LLVM_VERSION_MINOR
@@ -4308,6 +4311,16 @@ if test "x$EQUIVALENT_LLVM_VERSION" = "x11.0.1"; then :
   EQUIVALENT_LLVM_VERSION=11.1.0
 
 fi
+
+EQUIVALENT_LLVM_VERSION_MAJOR=`echo $EQUIVALENT_LLVM_VERSION | \
+  sed 's/^\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)/\1/'`
+
+EQUIVALENT_LLVM_VERSION_MINOR=`echo $EQUIVALENT_LLVM_VERSION | \
+  sed 's/^\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)/\2/'`
+
+EQUIVALENT_LLVM_VERSION_SUBMINOR=`echo $EQUIVALENT_LLVM_VERSION | \
+  sed 's/^\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)/\3/'`
+
 
 
 # Check whether --with-llvm-version was given.

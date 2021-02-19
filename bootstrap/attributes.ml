@@ -739,14 +739,16 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AArch64VectorPcs)[@if
                                 [%meta
                                   Metapp.Exp.of_bool
-                                    (Clangml_config.version.major >= 8)]])
+                                    (Clangml_config.equivalent_version.major
+                                       >= 8)]])
              ->
              AArch64VectorPcs
                (Clang__bindings.ext_aarch64_vector_pcs_get_spelling cursor)
          | ((AMDGPUFlatWorkGroupSize)[@if
                                        [%meta
                                          Metapp.Exp.of_bool
-                                           (Clangml_config.version.major >= 9)]])
+                                           (Clangml_config.equivalent_version.major
+                                              >= 9)]])
              ->
              AMD
                (GPUFlatWorkGroupSize
@@ -764,9 +766,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AMDGPUNumSGPR)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (((Clangml_config.version.major),
-                                    (Clangml_config.version.minor)) >= 
-                                    (3, 6))]])
+                                 (((Clangml_config.equivalent_version.major),
+                                    (Clangml_config.equivalent_version.minor))
+                                    >= (3, 6))]])
              ->
              AMD
                (GPUNumSGPR
@@ -780,9 +782,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AMDGPUNumVGPR)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (((Clangml_config.version.major),
-                                    (Clangml_config.version.minor)) >= 
-                                    (3, 6))]])
+                                 (((Clangml_config.equivalent_version.major),
+                                    (Clangml_config.equivalent_version.minor))
+                                    >= (3, 6))]])
              ->
              AMD
                (GPUNumVGPR
@@ -796,7 +798,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AMDGPUWavesPerEU)[@if
                                 [%meta
                                   Metapp.Exp.of_bool
-                                    (Clangml_config.version.major >= 9)]])
+                                    (Clangml_config.equivalent_version.major
+                                       >= 9)]])
              ->
              AMD
                (GPUWavesPerEU
@@ -823,7 +826,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AVRInterrupt)[@if
                             [%meta
                               Metapp.Exp.of_bool
-                                (Clangml_config.version.major >= 5)]])
+                                (Clangml_config.equivalent_version.major >= 5)]])
              ->
              AVR
                (Interrupt
@@ -831,14 +834,15 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AVRSignal)[@if
                          [%meta
                            Metapp.Exp.of_bool
-                             (Clangml_config.version.major >= 5)]])
+                             (Clangml_config.equivalent_version.major >= 5)]])
              ->
              AVR (Signal (Clang__bindings.ext_avrsignal_get_spelling cursor))
          | ((AbiTag)[@if
                       [%meta
                         Metapp.Exp.of_bool
-                          (((Clangml_config.version.major),
-                             (Clangml_config.version.minor)) >= (3, 9))]])
+                          (((Clangml_config.equivalent_version.major),
+                             (Clangml_config.equivalent_version.minor)) >=
+                             (3, 9))]])
              ->
              AbiTag
                {
@@ -850,9 +854,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AcquireCapability)[@if
                                  [%meta
                                    Metapp.Exp.of_bool
-                                     (((Clangml_config.version.major),
-                                        (Clangml_config.version.minor)) >=
-                                        (3, 5))]])
+                                     (((Clangml_config.equivalent_version.major),
+                                        (Clangml_config.equivalent_version.minor))
+                                        >= (3, 5))]])
              ->
              AcquireCapability
                {
@@ -868,7 +872,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AcquireHandle)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (Clangml_config.version.major >= 10)]])
+                                 (Clangml_config.equivalent_version.major >=
+                                    10)]])
              ->
              AcquireHandle
                {
@@ -892,7 +897,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AddressSpace)[@if
                             [%meta
                               Metapp.Exp.of_bool
-                                (Clangml_config.version.major >= 8)]])
+                                (Clangml_config.equivalent_version.major >= 8)]])
              ->
              AddressSpace
                {
@@ -911,8 +916,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AlignValue)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (((Clangml_config.version.major),
-                                 (Clangml_config.version.minor)) >= (3, 6))]])
+                              (((Clangml_config.equivalent_version.major),
+                                 (Clangml_config.equivalent_version.minor))
+                                 >= (3, 6))]])
              ->
              AlignValue
                (expr_of_cxcursor
@@ -929,7 +935,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AllocAlign)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (Clangml_config.version.major >= 5)]])
+                              (Clangml_config.equivalent_version.major >= 5)]])
              ->
              AllocAlign
                {
@@ -942,7 +948,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AllocSize)[@if
                          [%meta
                            Metapp.Exp.of_bool
-                             (Clangml_config.version.major >= 4)]])
+                             (Clangml_config.equivalent_version.major >= 4)]])
              ->
              AllocSize
                {
@@ -958,7 +964,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AlwaysDestroy)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (Clangml_config.version.major >= 8)]])
+                                 (Clangml_config.equivalent_version.major >=
+                                    8)]])
              ->
              AlwaysDestroy
                (Clang__bindings.ext_always_destroy_get_spelling cursor)
@@ -981,9 +988,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AnyX86Interrupt)[@if
                                [%meta
                                  Metapp.Exp.of_bool
-                                   (((Clangml_config.version.major),
-                                      (Clangml_config.version.minor)) >=
-                                      (3, 9))]])
+                                   (((Clangml_config.equivalent_version.major),
+                                      (Clangml_config.equivalent_version.minor))
+                                      >= (3, 9))]])
              ->
              AnyX86
                (Interrupt
@@ -991,7 +998,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AnyX86NoCallerSavedRegisters)[@if
                                             [%meta
                                               Metapp.Exp.of_bool
-                                                (Clangml_config.version.major
+                                                (Clangml_config.equivalent_version.major
                                                    >= 5)]])
              ->
              AnyX86
@@ -1001,7 +1008,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AnyX86NoCfCheck)[@if
                                [%meta
                                  Metapp.Exp.of_bool
-                                   (Clangml_config.version.major >= 7)]])
+                                   (Clangml_config.equivalent_version.major
+                                      >= 7)]])
              ->
              AnyX86
                (NoCfCheck
@@ -1032,7 +1040,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ArmBuiltinAlias)[@if
                                [%meta
                                  Metapp.Exp.of_bool
-                                   (Clangml_config.version.major >= 11)]])
+                                   (((Clangml_config.equivalent_version.major),
+                                      (Clangml_config.equivalent_version.minor))
+                                      >= (11, 0))]])
              ->
              ArmBuiltinAlias
                {
@@ -1045,8 +1055,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ArmMveStrictPolymorphism)[@if
                                         [%meta
                                           Metapp.Exp.of_bool
-                                            (Clangml_config.version.major >=
-                                               11)]])
+                                            (((Clangml_config.equivalent_version.major),
+                                               (Clangml_config.equivalent_version.minor))
+                                               >= (11, 0))]])
              ->
              ArmMveStrictPolymorphism
                (Clang__bindings.ext_arm_mve_strict_polymorphism_get_spelling
@@ -1054,13 +1065,13 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((Artificial)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (Clangml_config.version.major >= 7)]])
+                              (Clangml_config.equivalent_version.major >= 7)]])
              ->
              Artificial (Clang__bindings.ext_artificial_get_spelling cursor)
          | ((AsmLabel)[@if
                         [%meta
                           Metapp.Exp.of_bool
-                            (Clangml_config.version.major >= 10)]])
+                            (Clangml_config.equivalent_version.major >= 10)]])
              ->
              AsmLabel
                {
@@ -1075,7 +1086,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AssertCapability)[@if
                                 [%meta
                                   Metapp.Exp.of_bool
-                                    (Clangml_config.version.major >= 6)]])
+                                    (Clangml_config.equivalent_version.major
+                                       >= 6)]])
              ->
              AssertCapability
                {
@@ -1102,9 +1114,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((AssumeAligned)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (((Clangml_config.version.major),
-                                    (Clangml_config.version.minor)) >= 
-                                    (3, 6))]])
+                                 (((Clangml_config.equivalent_version.major),
+                                    (Clangml_config.equivalent_version.minor))
+                                    >= (3, 6))]])
              ->
              AssumeAligned
                {
@@ -1121,7 +1133,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((Assumption)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (Clangml_config.version.major >= 12)]])
+                              (Clangml_config.equivalent_version.major >= 12)]])
              ->
              Assumption
                {
@@ -1133,7 +1145,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((Availability)[@if
                             [%meta
                               Metapp.Exp.of_bool
-                                (Clangml_config.version.major >= 9)]])
+                                (Clangml_config.equivalent_version.major >= 9)]])
              ->
              Availability
                {
@@ -1163,7 +1175,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((BPFPreserveAccessIndex)[@if
                                       [%meta
                                         Metapp.Exp.of_bool
-                                          (Clangml_config.version.major >= 10)]])
+                                          (Clangml_config.equivalent_version.major
+                                             >= 10)]])
              ->
              BPFPreserveAccessIndex
                (Clang__bindings.ext_bpfpreserve_access_index_get_spelling
@@ -1177,7 +1190,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((Builtin)[@if
                        [%meta
                          Metapp.Exp.of_bool
-                           (Clangml_config.version.major >= 11)]])
+                           (((Clangml_config.equivalent_version.major),
+                              (Clangml_config.equivalent_version.minor)) >=
+                              (11, 1))]])
              -> Builtin (Clang__bindings.ext_builtin_attr_get_id cursor)
          | CDecl -> CDecl (Clang__bindings.ext_cdecl_get_spelling cursor)
          | CFAuditedTransfer ->
@@ -1188,12 +1203,13 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((CFGuard)[@if
                        [%meta
                          Metapp.Exp.of_bool
-                           (Clangml_config.version.major >= 10)]])
+                           (Clangml_config.equivalent_version.major >= 10)]])
              -> CFGuard (Clang__bindings.ext_cfguard_attr_get_guard cursor)
          | ((CFICanonicalJumpTable)[@if
                                      [%meta
                                        Metapp.Exp.of_bool
-                                         (Clangml_config.version.major >= 10)]])
+                                         (Clangml_config.equivalent_version.major
+                                            >= 10)]])
              ->
              CFICanonicalJumpTable
                (Clang__bindings.ext_cficanonical_jump_table_get_spelling
@@ -1211,7 +1227,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((CPUDispatch)[@if
                            [%meta
                              Metapp.Exp.of_bool
-                               (Clangml_config.version.major >= 7)]])
+                               (Clangml_config.equivalent_version.major >= 7)]])
              ->
              CPU
                (Dispatch
@@ -1225,7 +1241,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((CPUSpecific)[@if
                            [%meta
                              Metapp.Exp.of_bool
-                               (Clangml_config.version.major >= 7)]])
+                               (Clangml_config.equivalent_version.major >= 7)]])
              ->
              CPU
                (Specific
@@ -1246,8 +1262,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((CUDADeviceBuiltinSurfaceType)[@if
                                             [%meta
                                               Metapp.Exp.of_bool
-                                                (Clangml_config.version.major
-                                                   >= 11)]])
+                                                (((Clangml_config.equivalent_version.major),
+                                                   (Clangml_config.equivalent_version.minor))
+                                                   >= (11, 0))]])
              ->
              CUDA
                (DeviceBuiltinSurfaceType
@@ -1256,8 +1273,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((CUDADeviceBuiltinTextureType)[@if
                                             [%meta
                                               Metapp.Exp.of_bool
-                                                (Clangml_config.version.major
-                                                   >= 11)]])
+                                                (((Clangml_config.equivalent_version.major),
+                                                   (Clangml_config.equivalent_version.minor))
+                                                   >= (11, 0))]])
              ->
              CUDA
                (DeviceBuiltinTextureType
@@ -1271,9 +1289,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((CUDALaunchBounds)[@if
                                 [%meta
                                   Metapp.Exp.of_bool
-                                    (((Clangml_config.version.major),
-                                       (Clangml_config.version.minor)) >=
-                                       (3, 7))]])
+                                    (((Clangml_config.equivalent_version.major),
+                                       (Clangml_config.equivalent_version.minor))
+                                       >= (3, 7))]])
              ->
              CUDA
                (LaunchBounds
@@ -1296,9 +1314,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((CallableWhen)[@if
                             [%meta
                               Metapp.Exp.of_bool
-                                (((Clangml_config.version.major),
-                                   (Clangml_config.version.minor)) >= 
-                                   (3, 5))]])
+                                (((Clangml_config.equivalent_version.major),
+                                   (Clangml_config.equivalent_version.minor))
+                                   >= (3, 5))]])
              ->
              CallableWhen
                {
@@ -1312,7 +1330,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((Callback)[@if
                         [%meta
                           Metapp.Exp.of_bool
-                            (Clangml_config.version.major >= 9)]])
+                            (Clangml_config.equivalent_version.major >= 9)]])
              ->
              Callback
                {
@@ -1325,14 +1343,15 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((CalledOnce)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (Clangml_config.version.major >= 12)]])
+                              (Clangml_config.equivalent_version.major >= 12)]])
              ->
              CalledOnce (Clang__bindings.ext_called_once_get_spelling cursor)
          | ((Capability)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (((Clangml_config.version.major),
-                                 (Clangml_config.version.minor)) >= (3, 5))]])
+                              (((Clangml_config.equivalent_version.major),
+                                 (Clangml_config.equivalent_version.minor))
+                                 >= (3, 5))]])
              ->
              Capability
                {
@@ -1355,7 +1374,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((CodeSeg)[@if
                        [%meta
                          Metapp.Exp.of_bool
-                           (Clangml_config.version.major >= 7)]])
+                           (Clangml_config.equivalent_version.major >= 7)]])
              -> CodeSeg (Clang__bindings.ext_attrs_get_name cursor)
          | Cold -> Cold (Clang__bindings.ext_cold_get_spelling cursor)
          | Common -> Common (Clang__bindings.ext_common_get_spelling cursor)
@@ -1363,7 +1382,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ConstInit)[@if
                          [%meta
                            Metapp.Exp.of_bool
-                             (Clangml_config.version.major >= 10)]])
+                             (Clangml_config.equivalent_version.major >= 10)]])
              ->
              ConstInit (Clang__bindings.ext_const_init_get_spelling cursor)
          | Constructor ->
@@ -1385,18 +1404,18 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ConsumableAutoCast)[@if
                                   [%meta
                                     Metapp.Exp.of_bool
-                                      (((Clangml_config.version.major),
-                                         (Clangml_config.version.minor)) >=
-                                         (3, 5))]])
+                                      (((Clangml_config.equivalent_version.major),
+                                         (Clangml_config.equivalent_version.minor))
+                                         >= (3, 5))]])
              ->
              ConsumableAutoCast
                (Clang__bindings.ext_consumable_auto_cast_get_spelling cursor)
          | ((ConsumableSetOnRead)[@if
                                    [%meta
                                      Metapp.Exp.of_bool
-                                       (((Clangml_config.version.major),
-                                          (Clangml_config.version.minor)) >=
-                                          (3, 5))]])
+                                       (((Clangml_config.equivalent_version.major),
+                                          (Clangml_config.equivalent_version.minor))
+                                          >= (3, 5))]])
              ->
              ConsumableSetOnRead
                (Clang__bindings.ext_consumable_set_on_read_get_spelling
@@ -1404,7 +1423,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((Convergent)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (Clangml_config.version.major >= 4)]])
+                              (Clangml_config.equivalent_version.major >= 4)]])
              ->
              Convergent (Clang__bindings.ext_convergent_get_spelling cursor)
          | DLLExport ->
@@ -1414,8 +1433,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((Deprecated)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (((Clangml_config.version.major),
-                                 (Clangml_config.version.minor)) >= (3, 9))]])
+                              (((Clangml_config.equivalent_version.major),
+                                 (Clangml_config.equivalent_version.minor))
+                                 >= (3, 9))]])
              ->
              Deprecated
                {
@@ -1435,7 +1455,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((DiagnoseIf)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (Clangml_config.version.major >= 4)]])
+                              (Clangml_config.equivalent_version.major >= 4)]])
              ->
              DiagnoseIf
                {
@@ -1447,17 +1467,18 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((DisableTailCalls)[@if
                                 [%meta
                                   Metapp.Exp.of_bool
-                                    (((Clangml_config.version.major),
-                                       (Clangml_config.version.minor)) >=
-                                       (3, 8))]])
+                                    (((Clangml_config.equivalent_version.major),
+                                       (Clangml_config.equivalent_version.minor))
+                                       >= (3, 8))]])
              ->
              DisableTailCalls
                (Clang__bindings.ext_disable_tail_calls_get_spelling cursor)
          | ((EnableIf)[@if
                         [%meta
                           Metapp.Exp.of_bool
-                            (((Clangml_config.version.major),
-                               (Clangml_config.version.minor)) >= (3, 5))]])
+                            (((Clangml_config.equivalent_version.major),
+                               (Clangml_config.equivalent_version.minor)) >=
+                               (3, 5))]])
              ->
              EnableIf
                {
@@ -1469,7 +1490,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((EnforceTCB)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (Clangml_config.version.major >= 12)]])
+                              (Clangml_config.equivalent_version.major >= 12)]])
              ->
              EnforceTCB
                {
@@ -1480,7 +1501,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((EnforceTCBLeaf)[@if
                               [%meta
                                 Metapp.Exp.of_bool
-                                  (Clangml_config.version.major >= 12)]])
+                                  (Clangml_config.equivalent_version.major >=
+                                     12)]])
              ->
              EnforceTCBLeaf
                {
@@ -1491,7 +1513,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((EnumExtensibility)[@if
                                  [%meta
                                    Metapp.Exp.of_bool
-                                     (Clangml_config.version.major >= 5)]])
+                                     (Clangml_config.equivalent_version.major
+                                        >= 5)]])
              ->
              EnumExtensibility
                {
@@ -1505,7 +1528,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ExcludeFromExplicitInstantiation)[@if
                                                 [%meta
                                                   Metapp.Exp.of_bool
-                                                    (Clangml_config.version.major
+                                                    (Clangml_config.equivalent_version.major
                                                        >= 8)]])
              ->
              ExcludeFromExplicitInstantiation
@@ -1526,7 +1549,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ExternalSourceSymbol)[@if
                                     [%meta
                                       Metapp.Exp.of_bool
-                                        (Clangml_config.version.major >= 5)]])
+                                        (Clangml_config.equivalent_version.major
+                                           >= 5)]])
              ->
              ExternalSourceSymbol
                {
@@ -1552,14 +1576,16 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((FlagEnum)[@if
                         [%meta
                           Metapp.Exp.of_bool
-                            (((Clangml_config.version.major),
-                               (Clangml_config.version.minor)) >= (3, 7))]])
+                            (((Clangml_config.equivalent_version.major),
+                               (Clangml_config.equivalent_version.minor)) >=
+                               (3, 7))]])
              -> FlagEnum (Clang__bindings.ext_flag_enum_get_spelling cursor)
          | ((Flatten)[@if
                        [%meta
                          Metapp.Exp.of_bool
-                           (((Clangml_config.version.major),
-                              (Clangml_config.version.minor)) >= (3, 5))]])
+                           (((Clangml_config.equivalent_version.major),
+                              (Clangml_config.equivalent_version.minor)) >=
+                              (3, 5))]])
              -> Flatten (Clang__bindings.ext_flatten_get_spelling cursor)
          | Format ->
              Format
@@ -1589,7 +1615,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((HIPManaged)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (Clangml_config.version.major >= 12)]])
+                              (Clangml_config.equivalent_version.major >= 12)]])
              ->
              HIPManaged (Clang__bindings.ext_hipmanaged_get_spelling cursor)
          | Hot -> Hot (Clang__bindings.ext_hot_get_spelling cursor)
@@ -1612,8 +1638,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((IFunc)[@if
                      [%meta
                        Metapp.Exp.of_bool
-                         (((Clangml_config.version.major),
-                            (Clangml_config.version.minor)) >= (3, 9))]])
+                         (((Clangml_config.equivalent_version.major),
+                            (Clangml_config.equivalent_version.minor)) >=
+                            (3, 9))]])
              ->
              IFunc
                {
@@ -1633,8 +1660,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((InitSeg)[@if
                        [%meta
                          Metapp.Exp.of_bool
-                           (((Clangml_config.version.major),
-                              (Clangml_config.version.minor)) >= (3, 5))]])
+                           (((Clangml_config.equivalent_version.major),
+                              (Clangml_config.equivalent_version.minor)) >=
+                              (3, 5))]])
              ->
              InitSeg (Clang__bindings.ext_init_seg_attr_get_section cursor)
          | IntelOclBicc ->
@@ -1643,50 +1671,54 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((InternalLinkage)[@if
                                [%meta
                                  Metapp.Exp.of_bool
-                                   (((Clangml_config.version.major),
-                                      (Clangml_config.version.minor)) >=
-                                      (3, 8))]])
+                                   (((Clangml_config.equivalent_version.major),
+                                      (Clangml_config.equivalent_version.minor))
+                                      >= (3, 8))]])
              ->
              InternalLinkage
                (Clang__bindings.ext_internal_linkage_get_spelling cursor)
          | ((LTOVisibilityPublic)[@if
                                    [%meta
                                      Metapp.Exp.of_bool
-                                       (((Clangml_config.version.major),
-                                          (Clangml_config.version.minor)) >=
-                                          (3, 9))]])
+                                       (((Clangml_config.equivalent_version.major),
+                                          (Clangml_config.equivalent_version.minor))
+                                          >= (3, 9))]])
              ->
              LTOVisibilityPublic
                (Clang__bindings.ext_ltovisibility_public_get_spelling cursor)
          | ((LayoutVersion)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (((Clangml_config.version.major),
-                                    (Clangml_config.version.minor)) >= 
-                                    (3, 9))]])
+                                 (((Clangml_config.equivalent_version.major),
+                                    (Clangml_config.equivalent_version.minor))
+                                    >= (3, 9))]])
              ->
              LayoutVersion
                (Clang__bindings.ext_layout_version_attr_get_version cursor)
          | ((Leaf)[@if
                     [%meta
-                      Metapp.Exp.of_bool (Clangml_config.version.major >= 12)]])
+                      Metapp.Exp.of_bool
+                        (Clangml_config.equivalent_version.major >= 12)]])
              -> Leaf (Clang__bindings.ext_leaf_get_spelling cursor)
          | ((LifetimeBound)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (Clangml_config.version.major >= 7)]])
+                                 (Clangml_config.equivalent_version.major >=
+                                    7)]])
              ->
              LifetimeBound
                (Clang__bindings.ext_lifetime_bound_get_spelling cursor)
          | ((Likely)[@if
                       [%meta
                         Metapp.Exp.of_bool
-                          (Clangml_config.version.major >= 12)]])
+                          (Clangml_config.equivalent_version.major >= 12)]])
              -> Likely (Clang__bindings.ext_likely_get_spelling cursor)
          | ((LoaderUninitialized)[@if
                                    [%meta
                                      Metapp.Exp.of_bool
-                                       (Clangml_config.version.major >= 11)]])
+                                       (((Clangml_config.equivalent_version.major),
+                                          (Clangml_config.equivalent_version.minor))
+                                          >= (11, 0))]])
              ->
              LoaderUninitialized
                (Clang__bindings.ext_loader_uninitialized_get_spelling cursor)
@@ -1702,7 +1734,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((LoopHint)[@if
                         [%meta
                           Metapp.Exp.of_bool
-                            (Clangml_config.version.major >= 10)]])
+                            (Clangml_config.equivalent_version.major >= 10)]])
              ->
              LoopHint
                {
@@ -1714,7 +1746,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((MIGServerRoutine)[@if
                                 [%meta
                                   Metapp.Exp.of_bool
-                                    (Clangml_config.version.major >= 9)]])
+                                    (Clangml_config.equivalent_version.major
+                                       >= 9)]])
              ->
              MIGServerRoutine
                (Clang__bindings.ext_migserver_routine_get_spelling cursor)
@@ -1722,9 +1755,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((MSInheritance)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (((Clangml_config.version.major),
-                                    (Clangml_config.version.minor)) >= 
-                                    (3, 5))]])
+                                 (((Clangml_config.equivalent_version.major),
+                                    (Clangml_config.equivalent_version.minor))
+                                    >= (3, 5))]])
              ->
              MSInheritance
                {
@@ -1746,14 +1779,16 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((MSStruct)[@if
                         [%meta
                           Metapp.Exp.of_bool
-                            (((Clangml_config.version.major),
-                               (Clangml_config.version.minor)) >= (3, 7))]])
+                            (((Clangml_config.equivalent_version.major),
+                               (Clangml_config.equivalent_version.minor)) >=
+                               (3, 7))]])
              -> MSStruct (Clang__bindings.ext_msstruct_get_spelling cursor)
          | ((MSVtorDisp)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (((Clangml_config.version.major),
-                                 (Clangml_config.version.minor)) >= (3, 5))]])
+                              (((Clangml_config.equivalent_version.major),
+                                 (Clangml_config.equivalent_version.minor))
+                                 >= (3, 5))]])
              ->
              MSVtorDisp (Clang__bindings.ext_msvtor_disp_attr_get_vdm cursor)
          | MaxFieldAlignment ->
@@ -1765,7 +1800,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((MicroMips)[@if
                          [%meta
                            Metapp.Exp.of_bool
-                             (Clangml_config.version.major >= 5)]])
+                             (Clangml_config.equivalent_version.major >= 5)]])
              ->
              MicroMips (Clang__bindings.ext_micro_mips_get_spelling cursor)
          | MinSize ->
@@ -1773,7 +1808,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((MinVectorWidth)[@if
                               [%meta
                                 Metapp.Exp.of_bool
-                                  (Clangml_config.version.major >= 7)]])
+                                  (Clangml_config.equivalent_version.major >=
+                                     7)]])
              ->
              MinVectorWidth
                {
@@ -1787,9 +1823,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((MipsInterrupt)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (((Clangml_config.version.major),
-                                    (Clangml_config.version.minor)) >= 
-                                    (3, 8))]])
+                                 (((Clangml_config.equivalent_version.major),
+                                    (Clangml_config.equivalent_version.minor))
+                                    >= (3, 8))]])
              ->
              MipsInterrupt
                {
@@ -1802,14 +1838,15 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((MipsLongCall)[@if
                             [%meta
                               Metapp.Exp.of_bool
-                                (Clangml_config.version.major >= 6)]])
+                                (Clangml_config.equivalent_version.major >= 6)]])
              ->
              MipsLongCall
                (Clang__bindings.ext_mips_long_call_get_spelling cursor)
          | ((MipsShortCall)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (Clangml_config.version.major >= 6)]])
+                                 (Clangml_config.equivalent_version.major >=
+                                    6)]])
              ->
              MipsShortCall
                (Clang__bindings.ext_mips_short_call_get_spelling cursor)
@@ -1829,7 +1866,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((NSErrorDomain)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (Clangml_config.version.major >= 12)]])
+                                 (Clangml_config.equivalent_version.major >=
+                                    12)]])
              ->
              NS
                (ErrorDomain
@@ -1854,7 +1892,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((NoBuiltin)[@if
                          [%meta
                            Metapp.Exp.of_bool
-                             (Clangml_config.version.major >= 10)]])
+                             (Clangml_config.equivalent_version.major >= 10)]])
              ->
              NoBuiltin
                {
@@ -1872,27 +1910,27 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((NoDeref)[@if
                        [%meta
                          Metapp.Exp.of_bool
-                           (Clangml_config.version.major >= 8)]])
+                           (Clangml_config.equivalent_version.major >= 8)]])
              -> NoDeref (Clang__bindings.ext_no_deref_get_spelling cursor)
          | ((NoDestroy)[@if
                          [%meta
                            Metapp.Exp.of_bool
-                             (Clangml_config.version.major >= 8)]])
+                             (Clangml_config.equivalent_version.major >= 8)]])
              ->
              NoDestroy (Clang__bindings.ext_no_destroy_get_spelling cursor)
          | ((NoDuplicate)[@if
                            [%meta
                              Metapp.Exp.of_bool
-                               (((Clangml_config.version.major),
-                                  (Clangml_config.version.minor)) >= 
-                                  (3, 5))]])
+                               (((Clangml_config.equivalent_version.major),
+                                  (Clangml_config.equivalent_version.minor))
+                                  >= (3, 5))]])
              ->
              NoDuplicate
                (Clang__bindings.ext_no_duplicate_get_spelling cursor)
          | ((NoEscape)[@if
                         [%meta
                           Metapp.Exp.of_bool
-                            (Clangml_config.version.major >= 6)]])
+                            (Clangml_config.equivalent_version.major >= 6)]])
              -> NoEscape (Clang__bindings.ext_no_escape_get_spelling cursor)
          | NoInline ->
              NoInline (Clang__bindings.ext_no_inline_get_spelling cursor)
@@ -1903,7 +1941,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((NoMicroMips)[@if
                            [%meta
                              Metapp.Exp.of_bool
-                               (Clangml_config.version.major >= 5)]])
+                               (Clangml_config.equivalent_version.major >= 5)]])
              ->
              NoMicroMips
                (Clang__bindings.ext_no_micro_mips_get_spelling cursor)
@@ -1914,8 +1952,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((NoSanitize)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (((Clangml_config.version.major),
-                                 (Clangml_config.version.minor)) >= (3, 7))]])
+                              (((Clangml_config.equivalent_version.major),
+                                 (Clangml_config.equivalent_version.minor))
+                                 >= (3, 7))]])
              ->
              NoSanitize
                {
@@ -1929,7 +1968,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((NoSpeculativeLoadHardening)[@if
                                           [%meta
                                             Metapp.Exp.of_bool
-                                              (Clangml_config.version.major
+                                              (Clangml_config.equivalent_version.major
                                                  >= 9)]])
              ->
              NoSpeculativeLoadHardening
@@ -1938,16 +1977,17 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((NoSplitStack)[@if
                             [%meta
                               Metapp.Exp.of_bool
-                                (((Clangml_config.version.major),
-                                   (Clangml_config.version.minor)) >= 
-                                   (3, 5))]])
+                                (((Clangml_config.equivalent_version.major),
+                                   (Clangml_config.equivalent_version.minor))
+                                   >= (3, 5))]])
              ->
              NoSplitStack
                (Clang__bindings.ext_no_split_stack_get_spelling cursor)
          | ((NoStackProtector)[@if
                                 [%meta
                                   Metapp.Exp.of_bool
-                                    (Clangml_config.version.major >= 7)]])
+                                    (Clangml_config.equivalent_version.major
+                                       >= 7)]])
              ->
              NoStackProtector
                (Clang__bindings.ext_no_stack_protector_get_spelling cursor)
@@ -1969,16 +2009,17 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((NotTailCalled)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (((Clangml_config.version.major),
-                                    (Clangml_config.version.minor)) >= 
-                                    (3, 8))]])
+                                 (((Clangml_config.equivalent_version.major),
+                                    (Clangml_config.equivalent_version.minor))
+                                    >= (3, 8))]])
              ->
              NotTailCalled
                (Clang__bindings.ext_not_tail_called_get_spelling cursor)
          | ((OMPAllocateDecl)[@if
                                [%meta
                                  Metapp.Exp.of_bool
-                                   (Clangml_config.version.major >= 9)]])
+                                   (Clangml_config.equivalent_version.major
+                                      >= 9)]])
              ->
              OMP
                (AllocateDecl
@@ -1994,7 +2035,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OMPCaptureKind)[@if
                               [%meta
                                 Metapp.Exp.of_bool
-                                  (Clangml_config.version.major >= 11)]])
+                                  (((Clangml_config.equivalent_version.major),
+                                     (Clangml_config.equivalent_version.minor))
+                                     >= (11, 0))]])
              ->
              OMP
                (CaptureKind
@@ -2003,9 +2046,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OMPDeclareSimdDecl)[@if
                                   [%meta
                                     Metapp.Exp.of_bool
-                                      (((Clangml_config.version.major),
-                                         (Clangml_config.version.minor)) >=
-                                         (3, 9))]])
+                                      (((Clangml_config.equivalent_version.major),
+                                         (Clangml_config.equivalent_version.minor))
+                                         >= (3, 9))]])
              ->
              OMP
                (DeclareSimdDecl
@@ -2050,9 +2093,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OMPDeclareTargetDecl)[@if
                                     [%meta
                                       Metapp.Exp.of_bool
-                                        (((Clangml_config.version.major),
-                                           (Clangml_config.version.minor)) >=
-                                           (3, 9))]])
+                                        (((Clangml_config.equivalent_version.major),
+                                           (Clangml_config.equivalent_version.minor))
+                                           >= (3, 9))]])
              ->
              OMP
                (DeclareTargetDecl
@@ -2061,7 +2104,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OMPDeclareVariant)[@if
                                  [%meta
                                    Metapp.Exp.of_bool
-                                     (Clangml_config.version.major >= 11)]])
+                                     (((Clangml_config.equivalent_version.major),
+                                        (Clangml_config.equivalent_version.minor))
+                                        >= (11, 0))]])
              ->
              OMP
                (DeclareVariant
@@ -2078,7 +2123,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OMPReferencedVar)[@if
                                 [%meta
                                   Metapp.Exp.of_bool
-                                    (Clangml_config.version.major >= 7)]])
+                                    (Clangml_config.equivalent_version.major
+                                       >= 7)]])
              ->
              OMP
                (ReferencedVar
@@ -2088,14 +2134,15 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OSConsumed)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (Clangml_config.version.major >= 8)]])
+                              (Clangml_config.equivalent_version.major >= 8)]])
              ->
              OS
                (Consumed (Clang__bindings.ext_osconsumed_get_spelling cursor))
          | ((OSConsumesThis)[@if
                               [%meta
                                 Metapp.Exp.of_bool
-                                  (Clangml_config.version.major >= 8)]])
+                                  (Clangml_config.equivalent_version.major >=
+                                     8)]])
              ->
              OS
                (ConsumesThis
@@ -2103,7 +2150,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OSReturnsNotRetained)[@if
                                     [%meta
                                       Metapp.Exp.of_bool
-                                        (Clangml_config.version.major >= 8)]])
+                                        (Clangml_config.equivalent_version.major
+                                           >= 8)]])
              ->
              OS
                (ReturnsNotRetained
@@ -2112,7 +2160,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OSReturnsRetained)[@if
                                  [%meta
                                    Metapp.Exp.of_bool
-                                     (Clangml_config.version.major >= 8)]])
+                                     (Clangml_config.equivalent_version.major
+                                        >= 8)]])
              ->
              OS
                (ReturnsRetained
@@ -2120,7 +2169,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OSReturnsRetainedOnNonZero)[@if
                                           [%meta
                                             Metapp.Exp.of_bool
-                                              (Clangml_config.version.major
+                                              (Clangml_config.equivalent_version.major
                                                  >= 8)]])
              ->
              OS
@@ -2130,7 +2179,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OSReturnsRetainedOnZero)[@if
                                        [%meta
                                          Metapp.Exp.of_bool
-                                           (Clangml_config.version.major >= 8)]])
+                                           (Clangml_config.equivalent_version.major
+                                              >= 8)]])
              ->
              OS
                (ReturnsRetainedOnZero
@@ -2139,9 +2189,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ObjCBoxable)[@if
                            [%meta
                              Metapp.Exp.of_bool
-                               (((Clangml_config.version.major),
-                                  (Clangml_config.version.minor)) >= 
-                                  (3, 7))]])
+                               (((Clangml_config.equivalent_version.major),
+                                  (Clangml_config.equivalent_version.minor))
+                                  >= (3, 7))]])
              ->
              ObjC
                (Boxable
@@ -2158,9 +2208,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ObjCBridgeMutable)[@if
                                  [%meta
                                    Metapp.Exp.of_bool
-                                     (((Clangml_config.version.major),
-                                        (Clangml_config.version.minor)) >=
-                                        (3, 5))]])
+                                     (((Clangml_config.equivalent_version.major),
+                                        (Clangml_config.equivalent_version.minor))
+                                        >= (3, 5))]])
              ->
              ObjC
                (BridgeMutable
@@ -2174,9 +2224,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ObjCBridgeRelated)[@if
                                  [%meta
                                    Metapp.Exp.of_bool
-                                     (((Clangml_config.version.major),
-                                        (Clangml_config.version.minor)) >=
-                                        (3, 5))]])
+                                     (((Clangml_config.equivalent_version.major),
+                                        (Clangml_config.equivalent_version.minor))
+                                        >= (3, 5))]])
              ->
              ObjC
                (BridgeRelated
@@ -2197,7 +2247,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ObjCClassStub)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (Clangml_config.version.major >= 9)]])
+                                 (Clangml_config.equivalent_version.major >=
+                                    9)]])
              ->
              ObjC
                (ClassStub
@@ -2205,8 +2256,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ObjCDesignatedInitializer)[@if
                                          [%meta
                                            Metapp.Exp.of_bool
-                                             (((Clangml_config.version.major),
-                                                (Clangml_config.version.minor))
+                                             (((Clangml_config.equivalent_version.major),
+                                                (Clangml_config.equivalent_version.minor))
                                                 >= (3, 5))]])
              ->
              ObjC
@@ -2216,14 +2267,15 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ObjCDirect)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (Clangml_config.version.major >= 10)]])
+                              (Clangml_config.equivalent_version.major >= 10)]])
              ->
              ObjC
                (Direct (Clang__bindings.ext_obj_cdirect_get_spelling cursor))
          | ((ObjCDirectMembers)[@if
                                  [%meta
                                    Metapp.Exp.of_bool
-                                     (Clangml_config.version.major >= 10)]])
+                                     (Clangml_config.equivalent_version.major
+                                        >= 10)]])
              ->
              ObjC
                (DirectMembers
@@ -2236,8 +2288,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ObjCExplicitProtocolImpl)[@if
                                         [%meta
                                           Metapp.Exp.of_bool
-                                            (((Clangml_config.version.major),
-                                               (Clangml_config.version.minor))
+                                            (((Clangml_config.equivalent_version.major),
+                                               (Clangml_config.equivalent_version.minor))
                                                >= (3, 5))]])
              ->
              ObjC
@@ -2247,7 +2299,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ObjCExternallyRetained)[@if
                                       [%meta
                                         Metapp.Exp.of_bool
-                                          (Clangml_config.version.major >= 8)]])
+                                          (Clangml_config.equivalent_version.major
+                                             >= 8)]])
              ->
              ObjC
                (ExternallyRetained
@@ -2256,7 +2309,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ObjCGC)[@if
                       [%meta
                         Metapp.Exp.of_bool
-                          (Clangml_config.version.major >= 8)]])
+                          (Clangml_config.equivalent_version.major >= 8)]])
              ->
              ObjC
                (GC
@@ -2268,9 +2321,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ObjCIndependentClass)[@if
                                     [%meta
                                       Metapp.Exp.of_bool
-                                        (((Clangml_config.version.major),
-                                           (Clangml_config.version.minor)) >=
-                                           (3, 7))]])
+                                        (((Clangml_config.equivalent_version.major),
+                                           (Clangml_config.equivalent_version.minor))
+                                           >= (3, 7))]])
              ->
              ObjC
                (IndependentClass
@@ -2294,7 +2347,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ObjCNonLazyClass)[@if
                                 [%meta
                                   Metapp.Exp.of_bool
-                                    (Clangml_config.version.major >= 9)]])
+                                    (Clangml_config.equivalent_version.major
+                                       >= 9)]])
              ->
              ObjC
                (NonLazyClass
@@ -2303,7 +2357,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ObjCNonRuntimeProtocol)[@if
                                       [%meta
                                         Metapp.Exp.of_bool
-                                          (Clangml_config.version.major >= 12)]])
+                                          (Clangml_config.equivalent_version.major
+                                             >= 12)]])
              ->
              ObjC
                (NonRuntimeProtocol
@@ -2312,7 +2367,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ObjCOwnership)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (Clangml_config.version.major >= 8)]])
+                                 (Clangml_config.equivalent_version.major >=
+                                    8)]])
              ->
              ObjC
                (Ownership
@@ -2348,9 +2404,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ObjCRuntimeName)[@if
                                [%meta
                                  Metapp.Exp.of_bool
-                                   (((Clangml_config.version.major),
-                                      (Clangml_config.version.minor)) >=
-                                      (3, 5))]])
+                                   (((Clangml_config.equivalent_version.major),
+                                      (Clangml_config.equivalent_version.minor))
+                                      >= (3, 5))]])
              ->
              ObjC
                (RuntimeName
@@ -2365,9 +2421,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ObjCRuntimeVisible)[@if
                                   [%meta
                                     Metapp.Exp.of_bool
-                                      (((Clangml_config.version.major),
-                                         (Clangml_config.version.minor)) >=
-                                         (3, 9))]])
+                                      (((Clangml_config.equivalent_version.major),
+                                         (Clangml_config.equivalent_version.minor))
+                                         >= (3, 9))]])
              ->
              ObjC
                (RuntimeVisible
@@ -2376,8 +2432,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ObjCSubclassingRestricted)[@if
                                          [%meta
                                            Metapp.Exp.of_bool
-                                             (Clangml_config.version.major >=
-                                                4)]])
+                                             (Clangml_config.equivalent_version.major
+                                                >= 4)]])
              ->
              ObjC
                (SubclassingRestricted
@@ -2386,9 +2442,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OpenCLAccess)[@if
                             [%meta
                               Metapp.Exp.of_bool
-                                (((Clangml_config.version.major),
-                                   (Clangml_config.version.minor)) >= 
-                                   (3, 9))]])
+                                (((Clangml_config.equivalent_version.major),
+                                   (Clangml_config.equivalent_version.minor))
+                                   >= (3, 9))]])
              ->
              OpenCL
                (Access
@@ -2396,7 +2452,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OpenCLConstantAddressSpace)[@if
                                           [%meta
                                             Metapp.Exp.of_bool
-                                              (Clangml_config.version.major
+                                              (Clangml_config.equivalent_version.major
                                                  >= 8)]])
              ->
              OpenCL
@@ -2406,8 +2462,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OpenCLGenericAddressSpace)[@if
                                          [%meta
                                            Metapp.Exp.of_bool
-                                             (Clangml_config.version.major >=
-                                                8)]])
+                                             (Clangml_config.equivalent_version.major
+                                                >= 8)]])
              ->
              OpenCL
                (GenericAddressSpace
@@ -2416,8 +2472,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OpenCLGlobalAddressSpace)[@if
                                         [%meta
                                           Metapp.Exp.of_bool
-                                            (Clangml_config.version.major >=
-                                               8)]])
+                                            (Clangml_config.equivalent_version.major
+                                               >= 8)]])
              ->
              OpenCL
                (GlobalAddressSpace
@@ -2426,7 +2482,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OpenCLGlobalDeviceAddressSpace)[@if
                                               [%meta
                                                 Metapp.Exp.of_bool
-                                                  (Clangml_config.version.major
+                                                  (Clangml_config.equivalent_version.major
                                                      >= 12)]])
              ->
              OpenCL
@@ -2436,7 +2492,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OpenCLGlobalHostAddressSpace)[@if
                                             [%meta
                                               Metapp.Exp.of_bool
-                                                (Clangml_config.version.major
+                                                (Clangml_config.equivalent_version.major
                                                    >= 12)]])
              ->
              OpenCL
@@ -2446,7 +2502,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OpenCLIntelReqdSubGroupSize)[@if
                                            [%meta
                                              Metapp.Exp.of_bool
-                                               (Clangml_config.version.major
+                                               (Clangml_config.equivalent_version.major
                                                   >= 5)]])
              ->
              OpenCL
@@ -2460,7 +2516,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OpenCLLocalAddressSpace)[@if
                                        [%meta
                                          Metapp.Exp.of_bool
-                                           (Clangml_config.version.major >= 8)]])
+                                           (Clangml_config.equivalent_version.major
+                                              >= 8)]])
              ->
              OpenCL
                (LocalAddressSpace
@@ -2469,8 +2526,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OpenCLPrivateAddressSpace)[@if
                                          [%meta
                                            Metapp.Exp.of_bool
-                                             (Clangml_config.version.major >=
-                                                8)]])
+                                             (Clangml_config.equivalent_version.major
+                                                >= 8)]])
              ->
              OpenCL
                (PrivateAddressSpace
@@ -2479,9 +2536,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OpenCLUnrollHint)[@if
                                 [%meta
                                   Metapp.Exp.of_bool
-                                    (((Clangml_config.version.major),
-                                       (Clangml_config.version.minor)) >=
-                                       (3, 9))]])
+                                    (((Clangml_config.equivalent_version.major),
+                                       (Clangml_config.equivalent_version.minor))
+                                       >= (3, 9))]])
              ->
              OpenCL
                (UnrollHint
@@ -2490,9 +2547,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((OptimizeNone)[@if
                             [%meta
                               Metapp.Exp.of_bool
-                                (((Clangml_config.version.major),
-                                   (Clangml_config.version.minor)) >= 
-                                   (3, 5))]])
+                                (((Clangml_config.equivalent_version.major),
+                                   (Clangml_config.equivalent_version.minor))
+                                   >= (3, 5))]])
              ->
              OptimizeNone
                (Clang__bindings.ext_optimize_none_get_spelling cursor)
@@ -2502,15 +2559,16 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((Owner)[@if
                      [%meta
                        Metapp.Exp.of_bool
-                         (Clangml_config.version.major >= 10)]])
+                         (Clangml_config.equivalent_version.major >= 10)]])
              ->
              Owner
                (of_type_loc (Clang__bindings.ext_attrs_get_deref_type cursor))
          | ((Ownership)[@if
                          [%meta
                            Metapp.Exp.of_bool
-                             (((Clangml_config.version.major),
-                                (Clangml_config.version.minor)) >= (3, 7))]])
+                             (((Clangml_config.equivalent_version.major),
+                                (Clangml_config.equivalent_version.minor)) >=
+                                (3, 7))]])
              ->
              Ownership
                {
@@ -2536,9 +2594,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((PassObjectSize)[@if
                               [%meta
                                 Metapp.Exp.of_bool
-                                  (((Clangml_config.version.major),
-                                     (Clangml_config.version.minor)) >=
-                                     (3, 8))]])
+                                  (((Clangml_config.equivalent_version.major),
+                                     (Clangml_config.equivalent_version.minor))
+                                     >= (3, 8))]])
              ->
              PassObjectSize
                {
@@ -2550,7 +2608,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((PatchableFunctionEntry)[@if
                                       [%meta
                                         Metapp.Exp.of_bool
-                                          (Clangml_config.version.major >= 10)]])
+                                          (Clangml_config.equivalent_version.major
+                                             >= 10)]])
              ->
              PatchableFunctionEntry
                {
@@ -2573,51 +2632,55 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((Pointer)[@if
                        [%meta
                          Metapp.Exp.of_bool
-                           (Clangml_config.version.major >= 10)]])
+                           (Clangml_config.equivalent_version.major >= 10)]])
              ->
              Pointer
                (of_type_loc (Clang__bindings.ext_attrs_get_deref_type cursor))
          | ((PragmaClangBSSSection)[@if
                                      [%meta
                                        Metapp.Exp.of_bool
-                                         (Clangml_config.version.major >= 5)]])
+                                         (Clangml_config.equivalent_version.major
+                                            >= 5)]])
              ->
              PragmaClang
                (BSSSection (Clang__bindings.ext_attrs_get_name cursor))
          | ((PragmaClangDataSection)[@if
                                       [%meta
                                         Metapp.Exp.of_bool
-                                          (Clangml_config.version.major >= 5)]])
+                                          (Clangml_config.equivalent_version.major
+                                             >= 5)]])
              ->
              PragmaClang
                (DataSection (Clang__bindings.ext_attrs_get_name cursor))
          | ((PragmaClangRelroSection)[@if
                                        [%meta
                                          Metapp.Exp.of_bool
-                                           (Clangml_config.version.major >=
-                                              10)]])
+                                           (Clangml_config.equivalent_version.major
+                                              >= 10)]])
              ->
              PragmaClang
                (RelroSection (Clang__bindings.ext_attrs_get_name cursor))
          | ((PragmaClangRodataSection)[@if
                                         [%meta
                                           Metapp.Exp.of_bool
-                                            (Clangml_config.version.major >=
-                                               5)]])
+                                            (Clangml_config.equivalent_version.major
+                                               >= 5)]])
              ->
              PragmaClang
                (RodataSection (Clang__bindings.ext_attrs_get_name cursor))
          | ((PragmaClangTextSection)[@if
                                       [%meta
                                         Metapp.Exp.of_bool
-                                          (Clangml_config.version.major >= 5)]])
+                                          (Clangml_config.equivalent_version.major
+                                             >= 5)]])
              ->
              PragmaClang
                (TextSection (Clang__bindings.ext_attrs_get_name cursor))
          | ((PreferredName)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (Clangml_config.version.major >= 12)]])
+                                 (Clangml_config.equivalent_version.major >=
+                                    12)]])
              ->
              PreferredName
                {
@@ -2631,18 +2694,18 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((PreserveAll)[@if
                            [%meta
                              Metapp.Exp.of_bool
-                               (((Clangml_config.version.major),
-                                  (Clangml_config.version.minor)) >= 
-                                  (3, 9))]])
+                               (((Clangml_config.equivalent_version.major),
+                                  (Clangml_config.equivalent_version.minor))
+                                  >= (3, 9))]])
              ->
              PreserveAll
                (Clang__bindings.ext_preserve_all_get_spelling cursor)
          | ((PreserveMost)[@if
                             [%meta
                               Metapp.Exp.of_bool
-                                (((Clangml_config.version.major),
-                                   (Clangml_config.version.minor)) >= 
-                                   (3, 9))]])
+                                (((Clangml_config.equivalent_version.major),
+                                   (Clangml_config.equivalent_version.minor))
+                                   >= (3, 9))]])
              ->
              PreserveMost
                (Clang__bindings.ext_preserve_most_get_spelling cursor)
@@ -2656,7 +2719,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((RISCVInterrupt)[@if
                               [%meta
                                 Metapp.Exp.of_bool
-                                  (Clangml_config.version.major >= 7)]])
+                                  (Clangml_config.equivalent_version.major >=
+                                     7)]])
              ->
              RISCVInterrupt
                {
@@ -2669,21 +2733,22 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((RegCall)[@if
                        [%meta
                          Metapp.Exp.of_bool
-                           (Clangml_config.version.major >= 4)]])
+                           (Clangml_config.equivalent_version.major >= 4)]])
              -> RegCall (Clang__bindings.ext_reg_call_get_spelling cursor)
          | ((Reinitializes)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (Clangml_config.version.major >= 8)]])
+                                 (Clangml_config.equivalent_version.major >=
+                                    8)]])
              ->
              Reinitializes
                (Clang__bindings.ext_reinitializes_get_spelling cursor)
          | ((ReleaseCapability)[@if
                                  [%meta
                                    Metapp.Exp.of_bool
-                                     (((Clangml_config.version.major),
-                                        (Clangml_config.version.minor)) >=
-                                        (3, 5))]])
+                                     (((Clangml_config.equivalent_version.major),
+                                        (Clangml_config.equivalent_version.minor))
+                                        >= (3, 5))]])
              ->
              ReleaseCapability
                {
@@ -2699,7 +2764,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ReleaseHandle)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (Clangml_config.version.major >= 10)]])
+                                 (Clangml_config.equivalent_version.major >=
+                                    10)]])
              ->
              ReleaseHandle
                {
@@ -2718,9 +2784,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((RequiresCapability)[@if
                                   [%meta
                                     Metapp.Exp.of_bool
-                                      (((Clangml_config.version.major),
-                                         (Clangml_config.version.minor)) >=
-                                         (3, 5))]])
+                                      (((Clangml_config.equivalent_version.major),
+                                         (Clangml_config.equivalent_version.minor))
+                                         >= (3, 5))]])
              ->
              RequiresCapability
                {
@@ -2736,8 +2802,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((Restrict)[@if
                         [%meta
                           Metapp.Exp.of_bool
-                            (((Clangml_config.version.major),
-                               (Clangml_config.version.minor)) >= (3, 7))]])
+                            (((Clangml_config.equivalent_version.major),
+                               (Clangml_config.equivalent_version.minor)) >=
+                               (3, 7))]])
              -> Restrict (Clang__bindings.ext_restrict_get_spelling cursor)
          | ReturnTypestate ->
              ReturnTypestate
@@ -2751,9 +2818,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((ReturnsNonNull)[@if
                               [%meta
                                 Metapp.Exp.of_bool
-                                  (((Clangml_config.version.major),
-                                     (Clangml_config.version.minor)) >=
-                                     (3, 5))]])
+                                  (((Clangml_config.equivalent_version.major),
+                                     (Clangml_config.equivalent_version.minor))
+                                     >= (3, 5))]])
              ->
              ReturnsNonNull
                (Clang__bindings.ext_returns_non_null_get_spelling cursor)
@@ -2763,7 +2830,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((SYCLKernel)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (Clangml_config.version.major >= 10)]])
+                              (Clangml_config.equivalent_version.major >= 10)]])
              ->
              SYCLKernel (Clang__bindings.ext_syclkernel_get_spelling cursor)
          | ScopedLockable ->
@@ -2811,8 +2878,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((SpeculativeLoadHardening)[@if
                                         [%meta
                                           Metapp.Exp.of_bool
-                                            (Clangml_config.version.major >=
-                                               8)]])
+                                            (Clangml_config.equivalent_version.major
+                                               >= 8)]])
              ->
              SpeculativeLoadHardening
                (Clang__bindings.ext_speculative_load_hardening_get_spelling
@@ -2822,7 +2889,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((Suppress)[@if
                         [%meta
                           Metapp.Exp.of_bool
-                            (Clangml_config.version.major >= 5)]])
+                            (Clangml_config.equivalent_version.major >= 5)]])
              ->
              Suppress
                (Clang__utils.list_of_iter
@@ -2831,7 +2898,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((SwiftAsync)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (Clangml_config.version.major >= 12)]])
+                              (Clangml_config.equivalent_version.major >= 12)]])
              ->
              Swift
                (Async
@@ -2847,12 +2914,13 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((SwiftAsyncName)[@if
                               [%meta
                                 Metapp.Exp.of_bool
-                                  (Clangml_config.version.major >= 12)]])
+                                  (Clangml_config.equivalent_version.major >=
+                                     12)]])
              -> Swift (AsyncName (Clang__bindings.ext_attrs_get_name cursor))
          | ((SwiftAttr)[@if
                          [%meta
                            Metapp.Exp.of_bool
-                             (Clangml_config.version.major >= 12)]])
+                             (Clangml_config.equivalent_version.major >= 12)]])
              ->
              Swift
                (Attr
@@ -2860,7 +2928,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((SwiftBridge)[@if
                            [%meta
                              Metapp.Exp.of_bool
-                               (Clangml_config.version.major >= 12)]])
+                               (Clangml_config.equivalent_version.major >= 12)]])
              ->
              Swift
                (Bridge
@@ -2869,17 +2937,18 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((SwiftCall)[@if
                          [%meta
                            Metapp.Exp.of_bool
-                             (((Clangml_config.version.major),
-                                (Clangml_config.version.minor)) >= (3, 9))]])
+                             (((Clangml_config.equivalent_version.major),
+                                (Clangml_config.equivalent_version.minor)) >=
+                                (3, 9))]])
              ->
              Swift
                (Call (Clang__bindings.ext_swift_call_get_spelling cursor))
          | ((SwiftContext)[@if
                             [%meta
                               Metapp.Exp.of_bool
-                                (((Clangml_config.version.major),
-                                   (Clangml_config.version.minor)) >= 
-                                   (3, 9))]])
+                                (((Clangml_config.equivalent_version.major),
+                                   (Clangml_config.equivalent_version.minor))
+                                   >= (3, 9))]])
              ->
              Swift
                (Context
@@ -2887,7 +2956,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((SwiftError)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (Clangml_config.version.major >= 12)]])
+                              (Clangml_config.equivalent_version.major >= 12)]])
              ->
              Swift
                (Error
@@ -2895,9 +2964,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((SwiftErrorResult)[@if
                                 [%meta
                                   Metapp.Exp.of_bool
-                                    (((Clangml_config.version.major),
-                                       (Clangml_config.version.minor)) >=
-                                       (3, 9))]])
+                                    (((Clangml_config.equivalent_version.major),
+                                       (Clangml_config.equivalent_version.minor))
+                                       >= (3, 9))]])
              ->
              Swift
                (ErrorResult
@@ -2905,9 +2974,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((SwiftIndirectResult)[@if
                                    [%meta
                                      Metapp.Exp.of_bool
-                                       (((Clangml_config.version.major),
-                                          (Clangml_config.version.minor)) >=
-                                          (3, 9))]])
+                                       (((Clangml_config.equivalent_version.major),
+                                          (Clangml_config.equivalent_version.minor))
+                                          >= (3, 9))]])
              ->
              Swift
                (IndirectResult
@@ -2916,12 +2985,13 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((SwiftName)[@if
                          [%meta
                            Metapp.Exp.of_bool
-                             (Clangml_config.version.major >= 12)]])
+                             (Clangml_config.equivalent_version.major >= 12)]])
              -> Swift (Name (Clang__bindings.ext_attrs_get_name cursor))
          | ((SwiftNewType)[@if
                             [%meta
                               Metapp.Exp.of_bool
-                                (Clangml_config.version.major >= 12)]])
+                                (Clangml_config.equivalent_version.major >=
+                                   12)]])
              ->
              Swift
                (NewType
@@ -2944,8 +3014,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((Target)[@if
                       [%meta
                         Metapp.Exp.of_bool
-                          (((Clangml_config.version.major),
-                             (Clangml_config.version.minor)) >= (3, 8))]])
+                          (((Clangml_config.equivalent_version.major),
+                             (Clangml_config.equivalent_version.minor)) >=
+                             (3, 8))]])
              ->
              Target
                {
@@ -2970,15 +3041,15 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((TrivialABI)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (Clangml_config.version.major >= 7)]])
+                              (Clangml_config.equivalent_version.major >= 7)]])
              ->
              TrivialABI (Clang__bindings.ext_trivial_abi_get_spelling cursor)
          | ((TryAcquireCapability)[@if
                                     [%meta
                                       Metapp.Exp.of_bool
-                                        (((Clangml_config.version.major),
-                                           (Clangml_config.version.minor)) >=
-                                           (3, 5))]])
+                                        (((Clangml_config.equivalent_version.major),
+                                           (Clangml_config.equivalent_version.minor))
+                                           >= (3, 5))]])
              ->
              TryAcquireCapability
                {
@@ -3032,20 +3103,21 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((Uninitialized)[@if
                              [%meta
                                Metapp.Exp.of_bool
-                                 (Clangml_config.version.major >= 8)]])
+                                 (Clangml_config.equivalent_version.major >=
+                                    8)]])
              ->
              Uninitialized
                (Clang__bindings.ext_uninitialized_get_spelling cursor)
          | ((Unlikely)[@if
                         [%meta
                           Metapp.Exp.of_bool
-                            (Clangml_config.version.major >= 12)]])
+                            (Clangml_config.equivalent_version.major >= 12)]])
              -> Unlikely (Clang__bindings.ext_unlikely_get_spelling cursor)
          | Unused -> Unused (Clang__bindings.ext_unused_get_spelling cursor)
          | ((UseHandle)[@if
                          [%meta
                            Metapp.Exp.of_bool
-                             (Clangml_config.version.major >= 10)]])
+                             (Clangml_config.equivalent_version.major >= 10)]])
              ->
              UseHandle
                {
@@ -3057,7 +3129,10 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | Used -> Used (Clang__bindings.ext_used_get_spelling cursor)
          | ((Uuid)[@if
                     [%meta
-                      Metapp.Exp.of_bool (Clangml_config.version.major >= 11)]])
+                      Metapp.Exp.of_bool
+                        (((Clangml_config.equivalent_version.major),
+                           (Clangml_config.equivalent_version.minor)) >=
+                           (11, 0))]])
              ->
              Uuid
                {
@@ -3077,8 +3152,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((VectorCall)[@if
                           [%meta
                             Metapp.Exp.of_bool
-                              (((Clangml_config.version.major),
-                                 (Clangml_config.version.minor)) >= (3, 6))]])
+                              (((Clangml_config.equivalent_version.major),
+                                 (Clangml_config.equivalent_version.minor))
+                                 >= (3, 6))]])
              ->
              VectorCall (Clang__bindings.ext_vector_call_get_spelling cursor)
          | Visibility ->
@@ -3094,7 +3170,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((WarnUnusedResult)[@if
                                 [%meta
                                   Metapp.Exp.of_bool
-                                    (Clangml_config.version.major >= 10)]])
+                                    (Clangml_config.equivalent_version.major
+                                       >= 10)]])
              ->
              WarnUnusedResult
                {
@@ -3116,7 +3193,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((WebAssemblyExportName)[@if
                                      [%meta
                                        Metapp.Exp.of_bool
-                                         (Clangml_config.version.major >= 10)]])
+                                         (Clangml_config.equivalent_version.major
+                                            >= 10)]])
              ->
              WebAssembly
                (ExportName
@@ -3131,7 +3209,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((WebAssemblyImportModule)[@if
                                        [%meta
                                          Metapp.Exp.of_bool
-                                           (Clangml_config.version.major >= 8)]])
+                                           (Clangml_config.equivalent_version.major
+                                              >= 8)]])
              ->
              WebAssembly
                (ImportModule
@@ -3146,7 +3225,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((WebAssemblyImportName)[@if
                                      [%meta
                                        Metapp.Exp.of_bool
-                                         (Clangml_config.version.major >= 8)]])
+                                         (Clangml_config.equivalent_version.major
+                                            >= 8)]])
              ->
              WebAssembly
                (ImportName
@@ -3172,16 +3252,16 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | ((XRayInstrument)[@if
                               [%meta
                                 Metapp.Exp.of_bool
-                                  (((Clangml_config.version.major),
-                                     (Clangml_config.version.minor)) >=
-                                     (3, 9))]])
+                                  (((Clangml_config.equivalent_version.major),
+                                     (Clangml_config.equivalent_version.minor))
+                                     >= (3, 9))]])
              ->
              XRayInstrument
                (Clang__bindings.ext_xray_instrument_get_spelling cursor)
          | ((XRayLogArgs)[@if
                            [%meta
                              Metapp.Exp.of_bool
-                               (Clangml_config.version.major >= 5)]])
+                               (Clangml_config.equivalent_version.major >= 5)]])
              ->
              XRayLogArgs
                {

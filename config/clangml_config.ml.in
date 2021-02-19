@@ -14,4 +14,10 @@ let version = {
   subminor = @LLVM_VERSION_SUBMINOR@;
 }
 
+let equivalent_version = {
+  major = @EQUIVALENT_LLVM_VERSION_MAJOR@;
+  minor = @EQUIVALENT_LLVM_VERSION_MINOR@;
+  subminor = @EQUIVALENT_LLVM_VERSION_SUBMINOR@;
+}
+
 let includedir = "@LLVM_INCLUDEDIR@"
