@@ -1026,15 +1026,16 @@ let main cflags llvm_config prefix =
             let make_condition_attr condition =
               Metapp.Attr.mk (Metapp.mkloc "if") (PStr [%str [%meta
                 Metapp.Exp.of_bool [%e condition]]]) in
-            if major >= 4 then
+            if major = 3 || major = 11 then
               [make_condition_attr
-                 [%expr Clangml_config.version.major >=
+                 [%expr (Clangml_config.equivalent_version.major,
+                   Clangml_config.equivalent_version.minor) >=
+                   ([%e Metapp.Exp.of_int major],
+                     [%e Metapp.Exp.of_int minor])]]
+            else if major >= 4 then
+              [make_condition_attr
+                 [%expr Clangml_config.equivalent_version.major >=
                    [%e Metapp.Exp.of_int major]]]
-            else if major = 3 then
-              [make_condition_attr
-                 [%expr (Clangml_config.version.major,
-                   Clangml_config.version.minor) >=
-                   (3, [%e Metapp.Exp.of_int minor])]]
             else
               assert false in
       let pattern = Ppxlib.Ast_helper.Pat.construct lid None ~attrs in

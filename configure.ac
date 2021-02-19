@@ -216,6 +216,13 @@ AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x10.0.0"],
 AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x11.0.1"],
   [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[11.1.0]])])
 
+AC_SUBST([EQUIVALENT_LLVM_VERSION_MAJOR], [[`echo $EQUIVALENT_LLVM_VERSION | \
+  sed 's/^\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)/\1/'`]])
+AC_SUBST([EQUIVALENT_LLVM_VERSION_MINOR], [[`echo $EQUIVALENT_LLVM_VERSION | \
+  sed 's/^\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)/\2/'`]])
+AC_SUBST([EQUIVALENT_LLVM_VERSION_SUBMINOR], [[`echo $EQUIVALENT_LLVM_VERSION | \
+  sed 's/^\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)/\3/'`]])
+
 AC_ARG_WITH([llvm-version],
   AS_HELP_STRING([--with-llvm-version=VERSION],
     [Sets the LLVM version.]),

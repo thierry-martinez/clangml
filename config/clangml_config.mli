@@ -10,4 +10,6 @@ val version_string : string
 
 val version : version
 
+val equivalent_version : version
+
 val includedir : string
