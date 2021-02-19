@@ -7195,7 +7195,7 @@ clang_ext_ConsumableAttr_getDefaultState(CXCursor cursor)
 unsigned int clang_ext_BuiltinAttr_getID(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
- #ifndef LLVM_VERSION_BEFORE_11_0_0
+ #ifndef LLVM_VERSION_BEFORE_11_1_0
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::BuiltinAttr >(attr))
  return qual_attr->getID();
