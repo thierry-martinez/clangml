@@ -342,11 +342,13 @@ let () =
 
 let () =
   let ast = parse_string {|
+    #include <cstdlib>
+
     struct T {
-      static void* operator new(unsigned long sz);
-      static void* operator new(unsigned long sz, int arg, void (*f)());
-      static void* operator new[](unsigned long sz);
-      static void* operator new[](unsigned long sz, int arg, void (*f)());
+      static void* operator new(std::size_t sz);
+      static void* operator new(std::size_t sz, int arg, void (*f)());
+      static void* operator new[](std::size_t sz);
+      static void* operator new[](std::size_t sz, int arg, void (*f)());
     };
     void f() {}
     void g() {
