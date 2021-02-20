@@ -2,7 +2,7 @@
 
 - Support for Clang/LLVM 11.0.1, 11.1.0 and 12.0.0.
 
-- Support for OCaml 4.12
+- Support for OCaml 4.12.
 
 # 2020-09-22, 4.3.0
 
