@@ -326,24 +326,28 @@ let int64_of_cxint ?(signed = true) cxint =
   else
     invalid_arg "int64_of_cxint"
 
-let int_of_cxint_opt ?(signed = true) cxint =
+let int_of_cxint_opt ?(signed = true) cxint : int option =
+  (* The result type is always signed, therefore the bit sign is lost when
+     storing an unsigned value. *)
+  let sign_bit = if signed then 0 else 1 in
   let bits = get_bits ~signed cxint in
-  if bits <= (if signed then 32 else 31) then
-    let result =
-      if signed then
-        ext_int_get_sext_value cxint
-      else
-        ext_int_get_zext_value cxint in
-    Some result
-  else if bits <= Sys.int_size then
-    let result =
-      if signed then
-        ext_int_get_sext_value64 cxint
-      else
-        ext_int_get_zext_value64 cxint in
-    Some (Int64.to_int result)
-  else
+  if bits > Sys.int_size - sign_bit then
     None
+  else
+    let result =
+      if bits <= 32 - sign_bit then
+        if signed then
+          ext_int_get_sext_value cxint
+        else
+          ext_int_get_zext_value cxint
+      else
+        let result =
+          if signed then
+            ext_int_get_sext_value64 cxint
+          else
+            ext_int_get_zext_value64 cxint in
+        Int64.to_int result in
+    Some result
 
 let int_of_cxint ?(signed = true) cxint =
   match int_of_cxint_opt ~signed cxint with
