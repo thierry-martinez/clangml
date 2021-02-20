@@ -1,8 +1,10 @@
-# 2021-02-19, 4.4.0
+# 2021-02-21, 4.4.0
 
 - Support for Clang/LLVM 11.0.1, 11.1.0 and 12.0.0.
 
-- Support for OCaml 4.12
+- Support for OCaml 4.12.
+
+- Fix integer overflow on 32-bit platforms.
 
 # 2020-09-22, 4.3.0
 

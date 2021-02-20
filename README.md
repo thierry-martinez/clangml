@@ -105,7 +105,7 @@ The module [`Clang.Ast`] includes in particular the module [`Clang__ast`]
 which declares the algebraic data types that represent the AST.
 The documentation of most of the nodes contains examples that can be used as references
 for how syntactic constructions are parsed, and that are extracted with [`ocamlcodoc`]
-and serve as unit tests with `dune runtest` (or, equivalently, `make tests`).
+and serve as unit tests with `dune runtest` (or, equivalently, `make test`).
 Moreover, the git branch [`norms`] contains the AST corresponding to the examples
 automatically extracted from C++14, C++17, and C++20 norms.
 
