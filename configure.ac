@@ -124,6 +124,10 @@ AS_IF([test "x$LLVM_CONFIG" = "x"],
        [AC_SUBST([LLVM_CONFIG], [[`which llvm-config`]])])],
     [AC_SUBST([LLVM_CONFIG], [[`which llvm-config`]])
      AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([12])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([11])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
        [AC_CHECK_LLVM_VERSION([10])
      AS_IF([test "x$LLVM_CONFIG" = "x"],
        [AC_CHECK_LLVM_VERSION([9])
