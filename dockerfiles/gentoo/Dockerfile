@@ -1,5 +1,6 @@
 FROM gentoo/stage3-amd64
 RUN emerge --sync
+RUN echo FEATURES=\"-sandbox -usersandbox -pid-sandbox -ipc-sandbox -network-sandbox\" >> /etc/portage/make.conf
 RUN emerge -uD @world
 RUN emerge sudo dev-vcs/git
 #RUN emerge opam --autounmask-write || ( \
