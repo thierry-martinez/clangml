@@ -594,8 +594,6 @@ type cxcursorkind =
   | CXXFunctionalCastExpr
   [@ocaml.doc
     "Represents an explicit C++ type conversion that uses \"functional\" notion (C++ \\[expr.type.conv\\])."]
-  | CXXAddrspaceCastExpr
-  [@ocaml.doc "OpenCL's addrspace_cast<> expression."]
   | CXXTypeidExpr
   [@ocaml.doc "A C++ typeid expression (C++ \\[expr.typeid\\])."]
   | CXXBoolLiteralExpr [@ocaml.doc "\\[C++ 2.13.5\\] C++ Boolean Literal."]
@@ -636,6 +634,8 @@ type cxcursorkind =
   | OMPArrayShapingExpr
   [@ocaml.doc "OpenMP 5.0 \\[2.1.4, Array Shaping\\]."]
   | OMPIteratorExpr [@ocaml.doc "OpenMP 5.0 \\[2.1.6 Iterators\\]"]
+  | CXXAddrspaceCastExpr
+  [@ocaml.doc "OpenCL's addrspace_cast<> expression."]
   | UnexposedStmt
   [@ocaml.doc
     "A statement whose specific kind is not exposed via this interface."]
@@ -1008,6 +1008,16 @@ external get_cursor_availability :
   cxcursor -> cxavailabilitykind = "clang_getCursorAvailability_wrapper"
 [@@ocaml.doc
   "Determine the availability of the entity that this cursor refers to, taking the current target platform into account."]
+external cursor_get_var_decl_initializer :
+  cxcursor -> cxcursor = "clang_Cursor_getVarDeclInitializer_wrapper"
+[@@ocaml.doc
+  "If cursor refers to a variable declaration and it has initializer returns cursor referring to the initializer otherwise return null cursor."]
+external cursor_has_var_decl_global_storage :
+  cxcursor -> int = "clang_Cursor_hasVarDeclGlobalStorage_wrapper"[@@ocaml.doc
+                                                                    "If cursor refers to a variable declaration that has global storage returns 1. If cursor refers to a variable declaration that doesn't have global storage returns 0. Otherwise returns -1."]
+external cursor_has_var_decl_external_storage :
+  cxcursor -> int = "clang_Cursor_hasVarDeclExternalStorage_wrapper"[@@ocaml.doc
+                                                                    "If cursor refers to a variable declaration that has external storage returns 1. If cursor refers to a variable declaration that doesn't have external storage returns 0. Otherwise returns -1."]
 type cxlanguagekind =
   | Invalid 
   | C 
@@ -1600,6 +1610,9 @@ type cxtypenullabilitykind =
   [@ocaml.doc
     "Whether values of this type can be null is (explicitly) unspecified. This captures a (fairly rare) case where we can't conclude anything about the nullability of the type even though it has been considered."]
   | Invalid [@ocaml.doc "Nullability is not applicable to this type."]
+  | NullableResult
+  [@ocaml.doc
+    "Generally behaves like Nullable, except when used in a block parameter that was imported into a swift async method. There, swift will assume that the parameter can get null even if no error occured. _Nullable parameters are assumed to only get null on error."]
 [@@deriving refl]
 external type_get_nullability :
   cxtype -> cxtypenullabilitykind = "clang_Type_getNullability_wrapper"
@@ -2351,6 +2364,7 @@ type clang_ext_declkind =
   | MSGuid 
   | OMPDeclareMapper 
   | OMPDeclareReduction 
+  | TemplateParamObject 
   | UnresolvedUsingValue 
   | OMPAllocate 
   | OMPRequires 
@@ -2680,6 +2694,8 @@ type clang_ext_attrkind =
   | OpenCLConstantAddressSpace 
   | OpenCLGenericAddressSpace 
   | OpenCLGlobalAddressSpace 
+  | OpenCLGlobalDeviceAddressSpace 
+  | OpenCLGlobalHostAddressSpace 
   | OpenCLLocalAddressSpace 
   | OpenCLPrivateAddressSpace 
   | Ptr32 
@@ -2688,10 +2704,13 @@ type clang_ext_attrkind =
   | TypeNonNull 
   | TypeNullUnspecified 
   | TypeNullable 
+  | TypeNullableResult 
   | UPtr 
   | FallThrough 
-  | NoMerge 
+  | Likely 
   | Suppress 
+  | Unlikely 
+  | NoMerge 
   | AArch64VectorPcs 
   | AcquireHandle 
   | AnyX86NoCfCheck 
@@ -2735,6 +2754,7 @@ type clang_ext_attrkind =
   | AcquiredAfter 
   | AcquiredBefore 
   | AlignMac68k 
+  | AlignNatural 
   | Aligned 
   | AllocAlign 
   | AllocSize 
@@ -2752,6 +2772,7 @@ type clang_ext_attrkind =
   | AssertExclusiveLock 
   | AssertSharedLock 
   | AssumeAligned 
+  | Assumption 
   | Availability 
   | BPFPreserveAccessIndex 
   | Blocks 
@@ -2801,6 +2822,8 @@ type clang_ext_attrkind =
   | DisableTailCalls 
   | EmptyBases 
   | EnableIf 
+  | EnforceTCB 
+  | EnforceTCBLeaf 
   | EnumExtensibility 
   | ExcludeFromExplicitInstantiation 
   | ExclusiveTrylockFunction 
@@ -2813,6 +2836,7 @@ type clang_ext_attrkind =
   | GNUInline 
   | GuardedBy 
   | GuardedVar 
+  | HIPManaged 
   | Hot 
   | IBAction 
   | IBOutlet 
@@ -2821,6 +2845,7 @@ type clang_ext_attrkind =
   | InternalLinkage 
   | LTOVisibilityPublic 
   | LayoutVersion 
+  | Leaf 
   | LockReturned 
   | LocksExcluded 
   | MIGServerRoutine 
@@ -2840,6 +2865,7 @@ type clang_ext_attrkind =
   | MipsLongCall 
   | MipsShortCall 
   | NSConsumesSelf 
+  | NSErrorDomain 
   | NSReturnsAutoreleased 
   | NSReturnsNotRetained 
   | Naked 
@@ -2902,6 +2928,7 @@ type clang_ext_attrkind =
   | PragmaClangRelroSection 
   | PragmaClangRodataSection 
   | PragmaClangTextSection 
+  | PreferredName 
   | PtGuardedBy 
   | PtGuardedVar 
   | Pure 
@@ -2922,6 +2949,16 @@ type clang_ext_attrkind =
   | SetTypestate 
   | SharedTrylockFunction 
   | SpeculativeLoadHardening 
+  | StrictFP 
+  | SwiftAsync 
+  | SwiftAsyncName 
+  | SwiftAttr 
+  | SwiftBridge 
+  | SwiftBridgedTypedef 
+  | SwiftError 
+  | SwiftName 
+  | SwiftNewType 
+  | SwiftPrivate 
   | TLSModel 
   | Target 
   | TestTypestate 
@@ -2953,6 +2990,7 @@ type clang_ext_attrkind =
   | AbiTag 
   | Alias 
   | AlignValue 
+  | CalledOnce 
   | IFunc 
   | InitSeg 
   | LoaderUninitialized 
@@ -2969,11 +3007,13 @@ type clang_ext_attrkind =
   | ObjCDirect 
   | ObjCDirectMembers 
   | ObjCNonLazyClass 
+  | ObjCNonRuntimeProtocol 
   | ObjCRuntimeName 
   | ObjCRuntimeVisible 
   | OpenCLAccess 
   | Overloadable 
   | RenderScriptKernel 
+  | SwiftObjCMembers 
   | Thread [@@deriving refl]
 external ext_attr_kind_get_spelling :
   clang_ext_attrkind -> string = "clang_ext_AttrKind_GetSpelling_wrapper"
@@ -3181,10 +3221,13 @@ type clang_ext_langstandards =
   | Gnucxx17 
   | Cxx20 
   | Gnucxx20 
+  | Cxx2b 
+  | Gnucxx2b 
   | Opencl10 
   | Opencl11 
   | Opencl12 
   | Opencl20 
+  | Opencl30 
   | Openclcpp 
   | Cuda 
   | Hip 
@@ -3882,6 +3925,14 @@ type clang_ext_assumealigned_spelling =
 external ext_assume_aligned_get_spelling :
   cxcursor -> clang_ext_assumealigned_spelling =
     "clang_ext_AssumeAligned_getSpelling_wrapper"
+type clang_ext_assumption_spelling =
+  | GNU_assume 
+  | CXX11_clang_assume 
+  | C2x_clang_assume 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_assumption_get_spelling :
+  cxcursor -> clang_ext_assumption_spelling =
+    "clang_ext_Assumption_getSpelling_wrapper"
 type clang_ext_availability_spelling =
   | GNU_availability 
   | CXX11_clang_availability 
@@ -4052,6 +4103,14 @@ type clang_ext_callback_spelling =
 external ext_callback_get_spelling :
   cxcursor -> clang_ext_callback_spelling =
     "clang_ext_Callback_getSpelling_wrapper"
+type clang_ext_calledonce_spelling =
+  | GNU_called_once 
+  | CXX11_clang_called_once 
+  | C2x_clang_called_once 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_called_once_get_spelling :
+  cxcursor -> clang_ext_calledonce_spelling =
+    "clang_ext_CalledOnce_getSpelling_wrapper"
 type clang_ext_capability_spelling =
   | GNU_capability 
   | CXX11_clang_capability 
@@ -4189,6 +4248,22 @@ type clang_ext_disabletailcalls_spelling =
 external ext_disable_tail_calls_get_spelling :
   cxcursor -> clang_ext_disabletailcalls_spelling =
     "clang_ext_DisableTailCalls_getSpelling_wrapper"
+type clang_ext_enforcetcb_spelling =
+  | GNU_enforce_tcb 
+  | CXX11_clang_enforce_tcb 
+  | C2x_clang_enforce_tcb 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_enforce_tcb_get_spelling :
+  cxcursor -> clang_ext_enforcetcb_spelling =
+    "clang_ext_EnforceTCB_getSpelling_wrapper"
+type clang_ext_enforcetcbleaf_spelling =
+  | GNU_enforce_tcb_leaf 
+  | CXX11_clang_enforce_tcb_leaf 
+  | C2x_clang_enforce_tcb_leaf 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_enforce_tcbleaf_get_spelling :
+  cxcursor -> clang_ext_enforcetcbleaf_spelling =
+    "clang_ext_EnforceTCBLeaf_getSpelling_wrapper"
 type clang_ext_enumextensibility_spelling =
   | GNU_enum_extensibility 
   | CXX11_clang_enum_extensibility 
@@ -4287,6 +4362,13 @@ type clang_ext_guardedvar_spelling =
 external ext_guarded_var_get_spelling :
   cxcursor -> clang_ext_guardedvar_spelling =
     "clang_ext_GuardedVar_getSpelling_wrapper"
+type clang_ext_hipmanaged_spelling =
+  | GNU_managed 
+  | Declspec_managed 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_hipmanaged_get_spelling :
+  cxcursor -> clang_ext_hipmanaged_spelling =
+    "clang_ext_HIPManaged_getSpelling_wrapper"
 type clang_ext_hot_spelling =
   | GNU_hot 
   | CXX11_gnu_hot 
@@ -4356,6 +4438,13 @@ type clang_ext_ltovisibilitypublic_spelling =
 external ext_ltovisibility_public_get_spelling :
   cxcursor -> clang_ext_ltovisibilitypublic_spelling =
     "clang_ext_LTOVisibilityPublic_getSpelling_wrapper"
+type clang_ext_leaf_spelling =
+  | GNU_leaf 
+  | CXX11_gnu_leaf 
+  | C2x_gnu_leaf 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_leaf_get_spelling :
+  cxcursor -> clang_ext_leaf_spelling = "clang_ext_Leaf_getSpelling_wrapper"
 type clang_ext_lifetimebound_spelling =
   | GNU_lifetimebound 
   | CXX11_clang_lifetimebound 
@@ -4363,6 +4452,13 @@ type clang_ext_lifetimebound_spelling =
 external ext_lifetime_bound_get_spelling :
   cxcursor -> clang_ext_lifetimebound_spelling =
     "clang_ext_LifetimeBound_getSpelling_wrapper"
+type clang_ext_likely_spelling =
+  | CXX11_likely 
+  | C2x_clang_likely 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_likely_get_spelling :
+  cxcursor -> clang_ext_likely_spelling =
+    "clang_ext_Likely_getSpelling_wrapper"
 type clang_ext_loaderuninitialized_spelling =
   | GNU_loader_uninitialized 
   | CXX11_clang_loader_uninitialized 
@@ -4620,14 +4716,6 @@ type clang_ext_noinstrumentfunction_spelling =
 external ext_no_instrument_function_get_spelling :
   cxcursor -> clang_ext_noinstrumentfunction_spelling =
     "clang_ext_NoInstrumentFunction_getSpelling_wrapper"
-type clang_ext_nomerge_spelling =
-  | GNU_nomerge 
-  | CXX11_clang_nomerge 
-  | C2x_clang_nomerge 
-  | SpellingNotCalculated [@@deriving refl]
-external ext_no_merge_get_spelling :
-  cxcursor -> clang_ext_nomerge_spelling =
-    "clang_ext_NoMerge_getSpelling_wrapper"
 type clang_ext_nomicromips_spelling =
   | GNU_nomicromips 
   | CXX11_gnu_nomicromips 
@@ -4894,6 +4982,14 @@ type clang_ext_objcnonlazyclass_spelling =
 external ext_obj_cnon_lazy_class_get_spelling :
   cxcursor -> clang_ext_objcnonlazyclass_spelling =
     "clang_ext_ObjCNonLazyClass_getSpelling_wrapper"
+type clang_ext_objcnonruntimeprotocol_spelling =
+  | GNU_objc_non_runtime_protocol 
+  | CXX11_clang_objc_non_runtime_protocol 
+  | C2x_clang_objc_non_runtime_protocol 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_obj_cnon_runtime_protocol_get_spelling :
+  cxcursor -> clang_ext_objcnonruntimeprotocol_spelling =
+    "clang_ext_ObjCNonRuntimeProtocol_getSpelling_wrapper"
 type clang_ext_objcownership_spelling =
   | GNU_objc_ownership 
   | CXX11_clang_objc_ownership 
@@ -5001,6 +5097,22 @@ type clang_ext_openclglobaladdressspace_spelling =
 external ext_open_clglobal_address_space_get_spelling :
   cxcursor -> clang_ext_openclglobaladdressspace_spelling =
     "clang_ext_OpenCLGlobalAddressSpace_getSpelling_wrapper"
+type clang_ext_openclglobaldeviceaddressspace_spelling =
+  | GNU_opencl_global_device 
+  | CXX11_clang_opencl_global_device 
+  | C2x_clang_opencl_global_device 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_open_clglobal_device_address_space_get_spelling :
+  cxcursor -> clang_ext_openclglobaldeviceaddressspace_spelling =
+    "clang_ext_OpenCLGlobalDeviceAddressSpace_getSpelling_wrapper"
+type clang_ext_openclglobalhostaddressspace_spelling =
+  | GNU_opencl_global_host 
+  | CXX11_clang_opencl_global_host 
+  | C2x_clang_opencl_global_host 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_open_clglobal_host_address_space_get_spelling :
+  cxcursor -> clang_ext_openclglobalhostaddressspace_spelling =
+    "clang_ext_OpenCLGlobalHostAddressSpace_getSpelling_wrapper"
 type clang_ext_openclkernel_spelling =
   | Keyword_kernel 
   | SpellingNotCalculated [@@deriving refl]
@@ -5105,6 +5217,13 @@ type clang_ext_pcs_spelling =
   | SpellingNotCalculated [@@deriving refl]
 external ext_pcs_get_spelling :
   cxcursor -> clang_ext_pcs_spelling = "clang_ext_Pcs_getSpelling_wrapper"
+type clang_ext_preferredname_spelling =
+  | GNU_preferred_name 
+  | CXX11_clang_preferred_name 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_preferred_name_get_spelling :
+  cxcursor -> clang_ext_preferredname_spelling =
+    "clang_ext_PreferredName_getSpelling_wrapper"
 type clang_ext_preserveall_spelling =
   | GNU_preserve_all 
   | CXX11_clang_preserve_all 
@@ -5290,6 +5409,14 @@ type clang_ext_stdcall_spelling =
 external ext_std_call_get_spelling :
   cxcursor -> clang_ext_stdcall_spelling =
     "clang_ext_StdCall_getSpelling_wrapper"
+type clang_ext_swiftasync_spelling =
+  | GNU_swift_async 
+  | CXX11_clang_swift_async 
+  | C2x_clang_swift_async 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_swift_async_get_spelling :
+  cxcursor -> clang_ext_swiftasync_spelling =
+    "clang_ext_SwiftAsync_getSpelling_wrapper"
 type clang_ext_swiftcall_spelling =
   | GNU_swiftcall 
   | CXX11_clang_swiftcall 
@@ -5322,6 +5449,13 @@ type clang_ext_swiftindirectresult_spelling =
 external ext_swift_indirect_result_get_spelling :
   cxcursor -> clang_ext_swiftindirectresult_spelling =
     "clang_ext_SwiftIndirectResult_getSpelling_wrapper"
+type clang_ext_swiftnewtype_spelling =
+  | GNU_swift_newtype 
+  | GNU_swift_wrapper 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_swift_new_type_get_spelling :
+  cxcursor -> clang_ext_swiftnewtype_spelling =
+    "clang_ext_SwiftNewType_getSpelling_wrapper"
 type clang_ext_sysvabi_spelling =
   | GNU_sysv_abi 
   | CXX11_gnu_sysv_abi 
@@ -5417,6 +5551,13 @@ type clang_ext_uninitialized_spelling =
 external ext_uninitialized_get_spelling :
   cxcursor -> clang_ext_uninitialized_spelling =
     "clang_ext_Uninitialized_getSpelling_wrapper"
+type clang_ext_unlikely_spelling =
+  | CXX11_unlikely 
+  | C2x_clang_unlikely 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_unlikely_get_spelling :
+  cxcursor -> clang_ext_unlikely_spelling =
+    "clang_ext_Unlikely_getSpelling_wrapper"
 type clang_ext_unused_spelling =
   | CXX11_maybe_unused 
   | GNU_unused 
@@ -5580,6 +5721,15 @@ external ext_attrs_get_aliasee_length :
 external ext_obj_cruntime_name_attr_get_metadata_name :
   cxcursor -> string =
     "clang_ext_ObjCRuntimeNameAttr_getMetadataName_wrapper"
+type clang_ext_swifterrorattr_conventionkind =
+  | None 
+  | NonNullError 
+  | NullResult 
+  | ZeroResult 
+  | NonZeroResult [@@deriving refl]
+external ext_swift_error_attr_get_convention :
+  cxcursor -> clang_ext_swifterrorattr_conventionkind =
+    "clang_ext_SwiftErrorAttr_getConvention_wrapper"
 external ext_ifunc_attr_get_resolver :
   cxcursor -> string = "clang_ext_IFuncAttr_getResolver_wrapper"
 external ext_patchable_function_entry_attr_get_offset :
@@ -5624,11 +5774,16 @@ external ext_sentinel_attr_get_null_pos :
 external ext_ompdeclare_simd_decl_attr_get_aligneds :
   cxcursor -> (cxcursor -> unit) -> unit =
     "clang_ext_OMPDeclareSimdDeclAttr_getAligneds_wrapper"
+external ext_swift_async_attr_get_completion_handler_index :
+  cxcursor -> int =
+    "clang_ext_SwiftAsyncAttr_getCompletionHandlerIndex_wrapper"
 external ext_attrs_get_args_size :
   cxcursor -> int = "clang_ext_Attrs_getArgs_Size_wrapper"
 external ext_cudalaunch_bounds_attr_get_min_blocks :
   cxcursor -> cxcursor =
     "clang_ext_CUDALaunchBoundsAttr_getMinBlocks_wrapper"
+external ext_swift_bridge_attr_get_swift_type_length :
+  cxcursor -> int = "clang_ext_SwiftBridgeAttr_getSwiftTypeLength_wrapper"
 external ext_external_source_symbol_attr_get_defined_in_length :
   cxcursor -> int =
     "clang_ext_ExternalSourceSymbolAttr_getDefinedInLength_wrapper"
@@ -5641,8 +5796,12 @@ type clang_ext_blocksattr_blocktype =
 external ext_blocks_attr_get_type :
   cxcursor -> clang_ext_blocksattr_blocktype =
     "clang_ext_BlocksAttr_getType_wrapper"
+external ext_assumption_attr_get_assumption_length :
+  cxcursor -> int = "clang_ext_AssumptionAttr_getAssumptionLength_wrapper"
 external ext_asm_label_attr_get_label :
   cxcursor -> string = "clang_ext_AsmLabelAttr_getLabel_wrapper"
+external ext_swift_attr_attr_get_attribute :
+  cxcursor -> string = "clang_ext_SwiftAttrAttr_getAttribute_wrapper"
 external ext_availability_attr_get_platform :
   cxcursor -> string = "clang_ext_AvailabilityAttr_getPlatform_wrapper"
 external ext_attrs_get_max :
@@ -5705,6 +5864,12 @@ external ext_arm_builtin_alias_attr_get_builtin_name :
 external ext_web_assembly_import_module_attr_get_import_module :
   cxcursor -> string =
     "clang_ext_WebAssemblyImportModuleAttr_getImportModule_wrapper"
+type clang_ext_swiftnewtypeattr_newtypekind =
+  | Struct 
+  | Enum [@@deriving refl]
+external ext_swift_new_type_attr_get_newtype_kind :
+  cxcursor -> clang_ext_swiftnewtypeattr_newtypekind =
+    "clang_ext_SwiftNewTypeAttr_getNewtypeKind_wrapper"
 external ext_no_sanitize_attr_get_sanitizers_size :
   cxcursor -> int = "clang_ext_NoSanitizeAttr_getSanitizers_Size_wrapper"
 external ext_callback_attr_get_encoding_size :
@@ -5726,6 +5891,9 @@ external ext_ompdeclare_simd_decl_attr_get_linears :
 external ext_availability_attr_get_deprecated :
   cxcursor -> clang_ext_versiontuple =
     "clang_ext_AvailabilityAttr_getDeprecated_wrapper"
+external ext_preferred_name_attr_get_typedef_type :
+  cxcursor -> clang_ext_typeloc =
+    "clang_ext_PreferredNameAttr_getTypedefType_wrapper"
 external ext_web_assembly_export_name_attr_get_export_name :
   cxcursor -> string =
     "clang_ext_WebAssemblyExportNameAttr_getExportName_wrapper"
@@ -5869,6 +6037,8 @@ external ext_init_seg_attr_get_section_length :
 external ext_vec_type_hint_attr_get_type_hint :
   cxcursor -> clang_ext_typeloc =
     "clang_ext_VecTypeHintAttr_getTypeHint_wrapper"
+external ext_attrs_get_tcbname_length :
+  cxcursor -> int = "clang_ext_Attrs_getTCBNameLength_wrapper"
 external ext_external_source_symbol_attr_get_language_length :
   cxcursor -> int =
     "clang_ext_ExternalSourceSymbolAttr_getLanguageLength_wrapper"
@@ -5882,11 +6052,17 @@ type clang_ext_consumableattr_consumedstate =
 external ext_consumable_attr_get_default_state :
   cxcursor -> clang_ext_consumableattr_consumedstate =
     "clang_ext_ConsumableAttr_getDefaultState_wrapper"
+external ext_builtin_attr_get_id :
+  cxcursor -> int = "clang_ext_BuiltinAttr_getID_wrapper"
+external ext_assumption_attr_get_assumption :
+  cxcursor -> string = "clang_ext_AssumptionAttr_getAssumption_wrapper"
 external ext_attrs_get_bridged_type :
   cxcursor -> string = "clang_ext_Attrs_getBridgedType_wrapper"
 external ext_ompdeclare_simd_decl_attr_get_modifiers_size :
   cxcursor -> int =
     "clang_ext_OMPDeclareSimdDeclAttr_getModifiers_Size_wrapper"
+external ext_swift_attr_attr_get_attribute_length :
+  cxcursor -> int = "clang_ext_SwiftAttrAttr_getAttributeLength_wrapper"
 type clang_ext_settypestateattr_consumedstate =
   | Unknown 
   | Consumed 
@@ -5926,6 +6102,8 @@ external ext_ompdeclare_simd_decl_attr_get_alignments_size :
 external ext_ompdeclare_simd_decl_attr_get_linears_size :
   cxcursor -> int =
     "clang_ext_OMPDeclareSimdDeclAttr_getLinears_Size_wrapper"
+external ext_nserror_domain_attr_get_error_domain :
+  cxcursor -> cxcursor = "clang_ext_NSErrorDomainAttr_getErrorDomain_wrapper"
 external ext_xray_log_args_attr_get_argument_count :
   cxcursor -> int = "clang_ext_XRayLogArgsAttr_getArgumentCount_wrapper"
 external ext_attrs_get_message :
@@ -5982,6 +6160,8 @@ external ext_ompdeclare_simd_decl_attr_get_branch_state :
     "clang_ext_OMPDeclareSimdDeclAttr_getBranchState_wrapper"
 external ext_asm_label_attr_get_is_literal_label :
   cxcursor -> bool = "clang_ext_AsmLabelAttr_getIsLiteralLabel_wrapper"
+external ext_swift_bridge_attr_get_swift_type :
+  cxcursor -> string = "clang_ext_SwiftBridgeAttr_getSwiftType_wrapper"
 external ext_format_arg_attr_get_format_idx :
   cxcursor -> int = "clang_ext_FormatArgAttr_getFormatIdx_wrapper"
 external ext_format_attr_get_format_idx :
@@ -6034,6 +6214,13 @@ type clang_ext_objcmethodfamilyattr_familykind =
 external ext_obj_cmethod_family_attr_get_family :
   cxcursor -> clang_ext_objcmethodfamilyattr_familykind =
     "clang_ext_ObjCMethodFamilyAttr_getFamily_wrapper"
+type clang_ext_swiftasyncattr_kind =
+  | None 
+  | SwiftPrivate 
+  | NotSwiftPrivate [@@deriving refl]
+external ext_swift_async_attr_get_kind :
+  cxcursor -> clang_ext_swiftasyncattr_kind =
+    "clang_ext_SwiftAsyncAttr_getKind_wrapper"
 external ext_attrs_get_kind :
   cxcursor -> string = "clang_ext_Attrs_getKind_wrapper"
 external ext_patchable_function_entry_attr_get_count :
@@ -6043,6 +6230,8 @@ external ext_abi_tag_attr_get_tags :
     "clang_ext_AbiTagAttr_getTags_wrapper"
 external ext_msp430_interrupt_attr_get_number :
   cxcursor -> int = "clang_ext_MSP430InterruptAttr_getNumber_wrapper"
+external ext_attrs_get_tcbname :
+  cxcursor -> string = "clang_ext_Attrs_getTCBName_wrapper"
 external ext_open_clunroll_hint_attr_get_unroll_hint :
   cxcursor -> int = "clang_ext_OpenCLUnrollHintAttr_getUnrollHint_wrapper"
 external ext_no_builtin_attr_get_builtin_names :
