@@ -3607,6 +3607,96 @@ else
   LLVM_CONFIG=`which llvm-config`
 
      if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"12"`
+
+   if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"12".0`
+
+      if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config"12"0`
+
+         if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"12"`
+
+            if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"12".0`
+
+               if test "x$LLVM_CONFIG" = "x"; then :
+  GENTOO_LLVM_CONFIG=/usr/lib64/llvm/12/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  LLVM_CONFIG=$GENTOO_LLVM_CONFIG
+
+else
+  GENTOO_LLVM_CONFIG=/usr/lib/llvm/12/bin/llvm-config
+
+                     if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  LLVM_CONFIG=$GENTOO_LLVM_CONFIG
+
+else
+  if test "x$BREW" != "x"; then :
+  BREW_CELLAR=`$BREW --cellar`
+
+                         BREW_LLVM_CONFIG=$BREW_CELLAR/llvm*/12*/bin/llvm-config
+
+                         if test "x$BREW_LLVM_CONFIG" != "x"; then :
+  LLVM_CONFIG=$BREW_LLVM_CONFIG
+
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+     if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"11"`
+
+   if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-"11".0`
+
+      if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config"11"0`
+
+         if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"11"`
+
+            if test "x$LLVM_CONFIG" = "x"; then :
+  LLVM_CONFIG=`which llvm-config-mp-"11".0`
+
+               if test "x$LLVM_CONFIG" = "x"; then :
+  GENTOO_LLVM_CONFIG=/usr/lib64/llvm/11/bin/llvm-config
+
+                  if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  LLVM_CONFIG=$GENTOO_LLVM_CONFIG
+
+else
+  GENTOO_LLVM_CONFIG=/usr/lib/llvm/11/bin/llvm-config
+
+                     if $GENTOO_LLVM_CONFIG --version >/dev/null 2>/dev/null; then :
+  LLVM_CONFIG=$GENTOO_LLVM_CONFIG
+
+else
+  if test "x$BREW" != "x"; then :
+  BREW_CELLAR=`$BREW --cellar`
+
+                         BREW_LLVM_CONFIG=$BREW_CELLAR/llvm*/11*/bin/llvm-config
+
+                         if test "x$BREW_LLVM_CONFIG" != "x"; then :
+  LLVM_CONFIG=$BREW_LLVM_CONFIG
+
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+     if test "x$LLVM_CONFIG" = "x"; then :
   LLVM_CONFIG=`which llvm-config-"10"`
 
    if test "x$LLVM_CONFIG" = "x"; then :
@@ -4182,6 +4272,8 @@ else
                          if test "x$BREW_LLVM_CONFIG" != "x"; then :
   LLVM_CONFIG=$BREW_LLVM_CONFIG
 
+fi
+fi
 fi
 fi
 fi
