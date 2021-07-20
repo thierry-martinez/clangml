@@ -6,6 +6,7 @@ RUN emerge sudo dev-vcs/git
 #RUN emerge opam --autounmask-write || ( \
 #      etc-update --automode -3 && \
 #      emerge opam )
+COPY package.use /etc/portage/package.use
 RUN echo ACCEPT_KEYWORDS="~amd64" >> /etc/portage/make.conf && emerge opam
 RUN useradd -m -s /bin/bash ci
 RUN echo ci      ALL=\(ALL\) NOPASSWD:ALL >/etc/sudoers
@@ -21,6 +22,7 @@ RUN opam init --auto-setup --dot-profile=/home/ci/.bash_env
 SHELL ["/bin/bash", "-c"]
 ENV BASH_ENV /home/ci/.bash_env
 RUN opam install -y depext
+#RUN sudo emerge sys-devel/llvm
 RUN sudo emerge sys-devel/clang
 #RUN opam depext -y clangml
 RUN opam update
