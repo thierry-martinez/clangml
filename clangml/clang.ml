@@ -2214,11 +2214,6 @@ ext_expr_requirement_return_type_get_type_constraint_template_parameter_list
 
   let has_severity filter tu =
     has_severity filter (tu |> to_cxtranslationunit)
-
-  let concrete_of_source_location kind location =
-    match location with
-    | Clang location -> concrete_of_cxsourcelocation kind location
-    | Concrete location -> location
 end])]
 
 module Expr = [%meta node_module [%str

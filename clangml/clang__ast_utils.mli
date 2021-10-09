@@ -73,3 +73,16 @@ val ids_of_language :  Clang__types.language -> Clang_ext_languageids.t
 val literal_of_string :
     ?byte_width:int -> ?string_kind:clang_ext_stringkind -> string ->
       string_literal
+
+val concrete_of_source_location :
+    Clang__types.location_kind -> source_location ->
+      Clang__types.concrete_location
+(** [concrete_of_source_location kind location] returns the concrete location
+    associated to [location].
+    If [location] is concrete, it is returned directly.
+    If [location] is libclang's, [concrete_of_cxsourcelocation] is called. *)
+
+val pp_source_location :
+    ?options:Clang__types.Display_source_location.t ->
+      ?ranges:(unit -> (source_location * source_location) list) ->
+      Format.formatter -> source_location -> unit

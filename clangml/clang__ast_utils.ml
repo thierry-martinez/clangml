@@ -109,3 +109,17 @@ let literal_of_string ?(byte_width = 8) ?(string_kind = Ascii)
   bytes;
   string_kind;
 }
+
+let concrete_of_source_location kind location =
+  match location with
+  | Clang location -> concrete_of_cxsourcelocation kind location
+  | Concrete location -> location
+
+let pp_source_location ?(options = Clang__types.Display_source_location.default)
+    ?(ranges = fun () -> []) fmt source_location =
+  pp_concrete_location
+    ~ranges:(fun () ->
+      List.map (fun (range_start, range_end) ->
+        (concrete_of_source_location options.kind range_start,
+          concrete_of_source_location options.kind range_end)) (ranges ())) fmt
+    (concrete_of_source_location options.kind source_location)

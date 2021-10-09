@@ -155,40 +155,48 @@ let string_of_severity (severity : cxdiagnosticseverity) : string =
   | Error -> "error"
   | Fatal -> "fatal error"
 
+let pp_concrete_location ?(options = Display_source_location.default)
+    ?(ranges = fun () -> []) fmt concrete_location =
+  let { filename; line; column } = concrete_location in
+  Format.fprintf fmt "@[%s:%d:" filename line;
+  if options.column then
+    Format.fprintf fmt "%d:" column;
+  if options.ranges then
+    begin
+      let ranges = ranges () in
+      if ranges <> [] then
+        begin
+          ranges |> List.iter (fun (start, end_) ->
+            Format.fprintf fmt "@[{%d:%d-%d:%d}@]"
+              start.line start.column end_.line end_.column);
+          Format.fprintf fmt ":"
+        end;
+    end;
+  Format.fprintf fmt "@]"
+
 let pp_diagnostic ?(options = Diagnostic_display_options.default) fmt
     diagnostic =
   begin match options.source_location with
   | None -> ()
-  | Some { kind; column = display_column; ranges = display_ranges } ->
-      let location = get_diagnostic_location diagnostic in
-      let { filename; line; column } =
-        concrete_of_cxsourcelocation kind location in
-      Format.fprintf fmt "@[%s:%d:" filename line;
-      if display_column then
-        Format.fprintf fmt "%d:" column;
-      if display_ranges then
-        begin
-          let get_range i =
-            let range = get_diagnostic_range diagnostic i in
-            let start =
-              concrete_of_cxsourcelocation kind (get_range_start range) in
-            let end_ =
-              concrete_of_cxsourcelocation kind (get_range_end range) in
-            (start, end_) in
-          let keep_range (start, end_) =
-            start.filename = end_.filename && start.filename = filename in
-          let ranges =
-            List.init (get_diagnostic_num_ranges diagnostic) get_range |>
-            List.filter keep_range in
-          if ranges <> [] then
-            begin
-              ranges |> List.iter (fun (start, end_) ->
-                Format.fprintf fmt "@[{%d:%d-%d:%d}@]"
-                  start.line start.column end_.line end_.column);
-              Format.fprintf fmt ":"
-            end;
-        end;
-      Format.fprintf fmt "@]@ "
+  | Some options ->
+      let location =
+        concrete_of_cxsourcelocation options.kind
+          (get_diagnostic_location diagnostic) in
+      let ranges () =
+        let get_range i =
+          let range = get_diagnostic_range diagnostic i in
+          let start =
+            concrete_of_cxsourcelocation options.kind (get_range_start range) in
+          let end_ =
+            concrete_of_cxsourcelocation options.kind (get_range_end range) in
+          (start, end_) in
+        let keep_range (start, end_) =
+          start.filename = end_.filename &&
+          start.filename = location.filename in
+        List.init (get_diagnostic_num_ranges diagnostic) get_range |>
+        List.filter keep_range in
+      pp_concrete_location ~options ~ranges fmt location;
+      Format.pp_print_space fmt ()
   end;
   let severity =
     string_of_severity (get_diagnostic_severity diagnostic) in
@@ -427,7 +435,9 @@ let extern_of_language language =
   | CXX -> "C++"
   | _ -> invalid_arg "extern_of_language"
 
-let parse_file_res ?(index = create_index true true)
+let parse_file_res
+    ?(index = create_index ~exclude_declarations_from_pch:true
+      ~display_diagnostics:true)
     ?(command_line_args = []) ?(unsaved_files = [])
     ?(options = default_editing_translation_unit_options ()) filename =
   parse_translation_unit2 index filename (Array.of_list command_line_args)

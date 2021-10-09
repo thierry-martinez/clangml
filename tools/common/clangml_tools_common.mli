@@ -1,6 +1,6 @@
 type 'a options =
     string option -> string option -> string list -> bool -> bool ->
-      string list -> 'a
+      string list -> string list -> 'a
 
 val command_line : (Clang.language -> string list -> 'a) -> 'a options
 
