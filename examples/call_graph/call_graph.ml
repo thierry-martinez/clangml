@@ -81,7 +81,6 @@ and VisitFunctions : Refl.Visit.VisitS with
       Refl.Visit.Make (FunctionVisitor)
 
 let analyze tu =
-  Clang.format_diagnostics Clang.warning_or_error Format.err_formatter tu;
   VisitFunctions.visit [%refl: Clang.Ast.translation_unit] []
     (Clang.Ast.of_cxtranslationunit tu)
 
@@ -91,7 +90,7 @@ let main files =
     files |> List.iter (fun file ->
       let tu = Clang.parse_file ~command_line_args file ~options in
       let call_graph = analyze tu in
-      Format.printf "@[<v>%a@]@." CallGraph.pp call_graph))
+      Format.printf "@[<v2>%s:@,@[%a@]@]@." file CallGraph.pp call_graph))
 
 let files =
   let doc = "C source files to analyze" in
