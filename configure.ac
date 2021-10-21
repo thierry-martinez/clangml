@@ -323,7 +323,7 @@ AC_TRY_LINK(
   [#include <llvm/ADT/APInt.h>],
   [
     llvm::APInt i;
-    i.countLeadingZeros();
+    i.countLeadingOnes();
   ],
   [
     AC_MSG_CHECKING([for disabling GLIBCXX_USE_CXX11_ABI])
@@ -336,12 +336,12 @@ AC_TRY_LINK(
       [#include <llvm/ADT/APInt.h>],
       [
         llvm::APInt i;
-        i.countLeadingZeros();
+        i.countLeadingOnes();
       ],
       [AC_MSG_RESULT([required])],
       [
         AC_MSG_RESULT([cannot compile test])
-        AC_MSG_ERROR([Cannot compile test for APInt::countLeadingZeros])
+        AC_MSG_ERROR([Cannot compile test for APInt::countLeadingOnes])
       ])
   ])
 
