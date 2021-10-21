@@ -1,3 +1,7 @@
+# In development
+
+- Support for Clang/LLVM 12.0.1 and 13.0.0.
+
 # 2021-02-21, 4.4.0
 
 - Support for Clang/LLVM 11.0.1, 11.1.0 and 12.0.0.

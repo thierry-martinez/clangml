@@ -669,7 +669,8 @@ extern "C" {
   clang_ext_Int_toString(CXInt c, unsigned Radix, bool isSigned)
   {
     if (auto i = static_cast<llvm::APInt *>(c.data)) {
-      std::string s = i->toString(Radix, isSigned);
+      llvm::SmallString<40> s;
+      i->toString(s, Radix, isSigned);
       return cxstring_createDup(s);
     }
     return cxstring_createRef("");
