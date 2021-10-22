@@ -320,10 +320,14 @@ AC_SUBST([LIBS],
 AC_LANG_CPLUSPLUS
 
 AC_TRY_LINK(
-  [#include <llvm/ADT/APInt.h>],
+  [
+    #include <llvm/ADT/APInt.h>
+    #include <llvm/ADT/SmallString.h>
+  ],
   [
     llvm::APInt i;
-    i.countLeadingOnes();
+    llvm::SmallString<40> s;
+    i.toString(s, 0, false);
   ],
   [
     AC_MSG_CHECKING([for disabling GLIBCXX_USE_CXX11_ABI])
@@ -333,14 +337,19 @@ AC_TRY_LINK(
     AC_MSG_CHECKING([for disabling GLIBCXX_USE_CXX11_ABI])
     AC_SUBST([CXXFLAGS], [["$CXXFLAGS -D_GLIBCXX_USE_CXX11_ABI=0"]])
     AC_TRY_LINK(
-      [#include <clang/AST/Expr.h>],
       [
-        clang::PredefinedExpr::ComputeName(0, NULL);
+        #include <llvm/ADT/APInt.h>
+        #include <llvm/ADT/SmallString.h>
+      ],
+      [
+        llvm::APInt i;
+        llvm::SmallString<40> s;
+        i.toString(s, 0, false);
       ],
       [AC_MSG_RESULT([required])],
       [
         AC_MSG_RESULT([cannot compile test])
-        AC_MSG_ERROR([Cannot compile test for clang::PredefinedExpr::ComputeName])
+        AC_MSG_ERROR([Cannot compile test for APInt::toString])
       ])
   ])
 
