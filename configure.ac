@@ -333,15 +333,14 @@ AC_TRY_LINK(
     AC_MSG_CHECKING([for disabling GLIBCXX_USE_CXX11_ABI])
     AC_SUBST([CXXFLAGS], [["$CXXFLAGS -D_GLIBCXX_USE_CXX11_ABI=0"]])
     AC_TRY_LINK(
-      [#include <llvm/ADT/APInt.h>],
+      [#include <clang/AST/Expr.h>],
       [
-        llvm::APInt i;
-        i.countLeadingOnes();
+        clang::PredefinedExpr::ComputeName(0, NULL);
       ],
       [AC_MSG_RESULT([required])],
       [
         AC_MSG_RESULT([cannot compile test])
-        AC_MSG_ERROR([Cannot compile test for APInt::countLeadingOnes])
+        AC_MSG_ERROR([Cannot compile test for clang::PredefinedExpr::ComputeName])
       ])
   ])
 
