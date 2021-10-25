@@ -74,14 +74,14 @@ let includedir =
      "include"]
 
 let default_include_directories () =
-  let cpp_lib = make_include_dir ["c++"; "v1"] in
+  (*let cpp_lib = make_include_dir ["c++"; "v1"] in*)
   let macos_sdk =
     "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/" in
   let gentoo_dir =
     "/usr/lib/clang/" ^ Clangml_config.version_string ^ "/include/" in
   let centos_dir =
     "/usr/lib64/clang/" ^ Clangml_config.version_string ^ "/include/" in
-  [macos_sdk; cpp_lib; includedir; gentoo_dir; centos_dir]
+  [macos_sdk; (*cpp_lib; includedir;*) gentoo_dir; centos_dir]
 
 let option_cursor_bind f cursor : 'a option =
   if get_cursor_kind cursor = InvalidCode then
