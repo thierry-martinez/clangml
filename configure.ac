@@ -221,6 +221,8 @@ AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x11.0.1"],
   [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[11.1.0]])])
 AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x12.0.0"],
   [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[12.0.1]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x13.0.1"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[13.0.0]])])
 
 AC_SUBST([EQUIVALENT_LLVM_VERSION_MAJOR], [[`echo $EQUIVALENT_LLVM_VERSION | \
   sed 's/^\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)/\1/'`]])
@@ -318,10 +320,12 @@ AC_SUBST([LIBS],
 AC_LANG_CPLUSPLUS
 
 AC_TRY_LINK(
-  [#include <llvm/ADT/APInt.h>],
   [
-    llvm::APInt i;
-    i.toString(10, false);
+    #include <llvm/ADT/Twine.h>
+  ],
+  [
+    llvm::Twine t;
+    t.str();
   ],
   [
     AC_MSG_CHECKING([for disabling GLIBCXX_USE_CXX11_ABI])
@@ -331,15 +335,17 @@ AC_TRY_LINK(
     AC_MSG_CHECKING([for disabling GLIBCXX_USE_CXX11_ABI])
     AC_SUBST([CXXFLAGS], [["$CXXFLAGS -D_GLIBCXX_USE_CXX11_ABI=0"]])
     AC_TRY_LINK(
-      [#include <llvm/ADT/APInt.h>],
       [
-        llvm::APInt i;
-        i.toString(10, false);
+        #include <llvm/ADT/Twine.h>
+      ],
+      [
+        llvm::Twine t;
+        t.str();
       ],
       [AC_MSG_RESULT([required])],
       [
         AC_MSG_RESULT([cannot compile test])
-        AC_MSG_ERROR([Cannot compile test for APInt::toString])
+        AC_MSG_ERROR([Cannot compile test for Twine::str])
       ])
   ])
 

@@ -4419,6 +4419,10 @@ if test "x$EQUIVALENT_LLVM_VERSION" = "x12.0.0"; then :
   EQUIVALENT_LLVM_VERSION=12.0.1
 
 fi
+if test "x$EQUIVALENT_LLVM_VERSION" = "x13.0.1"; then :
+  EQUIVALENT_LLVM_VERSION=13.0.0
+
+fi
 
 EQUIVALENT_LLVM_VERSION_MAJOR=`echo $EQUIVALENT_LLVM_VERSION | \
   sed 's/^\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)/\1/'`
@@ -7200,13 +7204,15 @@ fi
 
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include <llvm/ADT/APInt.h>
+
+    #include <llvm/ADT/Twine.h>
+
 int
 main ()
 {
 
-    llvm::APInt i;
-    i.toString(10, false);
+    llvm::Twine t;
+    t.str();
 
   ;
   return 0;
@@ -7227,13 +7233,15 @@ $as_echo_n "checking for disabling GLIBCXX_USE_CXX11_ABI... " >&6; }
 
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include <llvm/ADT/APInt.h>
+
+        #include <llvm/ADT/Twine.h>
+
 int
 main ()
 {
 
-        llvm::APInt i;
-        i.toString(10, false);
+        llvm::Twine t;
+        t.str();
 
   ;
   return 0;
@@ -7246,7 +7254,7 @@ else
 
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: cannot compile test" >&5
 $as_echo "cannot compile test" >&6; }
-        as_fn_error $? "Cannot compile test for APInt::toString" "$LINENO" 5
+        as_fn_error $? "Cannot compile test for Twine::str" "$LINENO" 5
 
 fi
 rm -f core conftest.err conftest.$ac_objext \

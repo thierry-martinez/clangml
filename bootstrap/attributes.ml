@@ -202,6 +202,13 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) swift =
   spelling: Clang__bindings.clang_ext_swiftasync_spelling ;
   kind: Clang__bindings.clang_ext_swiftasyncattr_kind ;
   completion_handler_index: int } 
+  | AsyncCall of Clang__bindings.clang_ext_swiftasynccall_spelling 
+  | AsyncContext of Clang__bindings.clang_ext_swiftasynccontext_spelling 
+  | AsyncError of
+  {
+  spelling: Clang__bindings.clang_ext_swiftasyncerror_spelling ;
+  convention: Clang__bindings.clang_ext_swiftasyncerrorattr_conventionkind ;
+  handler_param_idx: int } 
   | AsyncName of string 
   | Attr of string 
   | Bridge of string 
@@ -360,6 +367,10 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   spelling: Clang__bindings.clang_ext_blocks_spelling ;
   type_: Clang__bindings.clang_ext_blocksattr_blocktype } 
   | Builtin of int 
+  | BuiltinAlias of
+  {
+  spelling: Clang__bindings.clang_ext_builtinalias_spelling ;
+  builtin_name: string } 
   | CDecl of Clang__bindings.clang_ext_cdecl_spelling 
   | CFAuditedTransfer of Clang__bindings.clang_ext_cfauditedtransfer_spelling
   
@@ -498,6 +509,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   {
   spelling: Clang__bindings.clang_ext_loophint_spelling ;
   option: Clang__bindings.clang_ext_loophintattr_optiontype } 
+  | M68kInterrupt of int 
   | MIGServerRoutine of Clang__bindings.clang_ext_migserverroutine_spelling 
   | MSABI of Clang__bindings.clang_ext_msabi_spelling 
   | MSInheritance of
@@ -529,6 +541,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   {
   spelling: Clang__bindings.clang_ext_mode_spelling ;
   mode: string } 
+  | MustTail of Clang__bindings.clang_ext_musttail_spelling 
   | Naked of Clang__bindings.clang_ext_naked_spelling 
   | NoBuiltin of
   {
@@ -545,6 +558,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   Clang__bindings.clang_ext_noinstrumentfunction_spelling 
   | NoMicroMips of Clang__bindings.clang_ext_nomicromips_spelling 
   | NoMips16 of Clang__bindings.clang_ext_nomips16_spelling 
+  | NoProfileFunction of Clang__bindings.clang_ext_noprofilefunction_spelling
+  
   | NoReturn of Clang__bindings.clang_ext_noreturn_spelling 
   | NoSanitize of
   {
@@ -622,6 +637,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   spelling: Clang__bindings.clang_ext_requirescapability_spelling ;
   args: 'expr list } 
   | Restrict of Clang__bindings.clang_ext_restrict_spelling 
+  | Retain of Clang__bindings.clang_ext_retain_spelling 
   | ReturnTypestate of
   {
   spelling: Clang__bindings.clang_ext_returntypestate_spelling ;
@@ -649,6 +665,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   args: 'expr list } 
   | SpeculativeLoadHardening of
   Clang__bindings.clang_ext_speculativeloadhardening_spelling 
+  | StandaloneDebug of Clang__bindings.clang_ext_standalonedebug_spelling 
   | StdCall of Clang__bindings.clang_ext_stdcall_spelling 
   | Suppress of string list 
   | SysVABI of Clang__bindings.clang_ext_sysvabi_spelling 
@@ -695,6 +712,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   spelling: Clang__bindings.clang_ext_usehandle_spelling ;
   handle_type: string } 
   | Used of Clang__bindings.clang_ext_used_spelling 
+  | UsingIfExists of Clang__bindings.clang_ext_usingifexists_spelling 
   | Uuid of
   {
   spelling: Clang__bindings.clang_ext_uuid_spelling ;
@@ -1049,8 +1067,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                  spelling =
                    (Clang__bindings.ext_arm_builtin_alias_get_spelling cursor);
                  builtin_name =
-                   (Clang__bindings.ext_arm_builtin_alias_attr_get_builtin_name
-                      cursor)
+                   (Clang__bindings.ext_attrs_get_builtin_name cursor)
                }
          | ((ArmMveStrictPolymorphism)[@if
                                         [%meta
@@ -1194,6 +1211,19 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                               (Clangml_config.equivalent_version.minor)) >=
                               (11, 1))]])
              -> Builtin (Clang__bindings.ext_builtin_attr_get_id cursor)
+         | ((BuiltinAlias)[@if
+                            [%meta
+                              Metapp.Exp.of_bool
+                                (Clangml_config.equivalent_version.major >=
+                                   13)]])
+             ->
+             BuiltinAlias
+               {
+                 spelling =
+                   (Clang__bindings.ext_builtin_alias_get_spelling cursor);
+                 builtin_name =
+                   (Clang__bindings.ext_attrs_get_builtin_name cursor)
+               }
          | CDecl -> CDecl (Clang__bindings.ext_cdecl_get_spelling cursor)
          | CFAuditedTransfer ->
              CFAuditedTransfer
@@ -1743,6 +1773,12 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                  option =
                    (Clang__bindings.ext_loop_hint_attr_get_option cursor)
                }
+         | ((M68kInterrupt)[@if
+                             [%meta
+                               Metapp.Exp.of_bool
+                                 (Clangml_config.equivalent_version.major >=
+                                    13)]])
+             -> M68kInterrupt (Clang__bindings.ext_attrs_get_number cursor)
          | ((MIGServerRoutine)[@if
                                 [%meta
                                   Metapp.Exp.of_bool
@@ -1772,9 +1808,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                {
                  spelling =
                    (Clang__bindings.ext_msp430_interrupt_get_spelling cursor);
-                 number =
-                   (Clang__bindings.ext_msp430_interrupt_attr_get_number
-                      cursor)
+                 number = (Clang__bindings.ext_attrs_get_number cursor)
                }
          | ((MSStruct)[@if
                         [%meta
@@ -1856,6 +1890,11 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                  spelling = (Clang__bindings.ext_mode_get_spelling cursor);
                  mode = (Clang__bindings.ext_mode_attr_get_mode cursor)
                }
+         | ((MustTail)[@if
+                        [%meta
+                          Metapp.Exp.of_bool
+                            (Clangml_config.equivalent_version.major >= 13)]])
+             -> MustTail (Clang__bindings.ext_must_tail_get_spelling cursor)
          | NSConsumed ->
              NS
                (Consumed (Clang__bindings.ext_nsconsumed_get_spelling cursor))
@@ -1947,6 +1986,14 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                (Clang__bindings.ext_no_micro_mips_get_spelling cursor)
          | NoMips16 ->
              NoMips16 (Clang__bindings.ext_no_mips16_get_spelling cursor)
+         | ((NoProfileFunction)[@if
+                                 [%meta
+                                   Metapp.Exp.of_bool
+                                     (Clangml_config.equivalent_version.major
+                                        >= 13)]])
+             ->
+             NoProfileFunction
+               (Clang__bindings.ext_no_profile_function_get_spelling cursor)
          | NoReturn ->
              NoReturn (Clang__bindings.ext_no_return_get_spelling cursor)
          | ((NoSanitize)[@if
@@ -2806,6 +2853,11 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                                (Clangml_config.equivalent_version.minor)) >=
                                (3, 7))]])
              -> Restrict (Clang__bindings.ext_restrict_get_spelling cursor)
+         | ((Retain)[@if
+                      [%meta
+                        Metapp.Exp.of_bool
+                          (Clangml_config.equivalent_version.major >= 13)]])
+             -> Retain (Clang__bindings.ext_retain_get_spelling cursor)
          | ReturnTypestate ->
              ReturnTypestate
                {
@@ -2884,6 +2936,14 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
              SpeculativeLoadHardening
                (Clang__bindings.ext_speculative_load_hardening_get_spelling
                   cursor)
+         | ((StandaloneDebug)[@if
+                               [%meta
+                                 Metapp.Exp.of_bool
+                                   (Clangml_config.equivalent_version.major
+                                      >= 13)]])
+             ->
+             StandaloneDebug
+               (Clang__bindings.ext_standalone_debug_get_spelling cursor)
          | StdCall ->
              StdCall (Clang__bindings.ext_std_call_get_spelling cursor)
          | ((Suppress)[@if
@@ -2909,6 +2969,44 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                       (Clang__bindings.ext_swift_async_attr_get_kind cursor);
                     completion_handler_index =
                       (Clang__bindings.ext_swift_async_attr_get_completion_handler_index
+                         cursor)
+                  })
+         | ((SwiftAsyncCall)[@if
+                              [%meta
+                                Metapp.Exp.of_bool
+                                  (Clangml_config.equivalent_version.major >=
+                                     13)]])
+             ->
+             Swift
+               (AsyncCall
+                  (Clang__bindings.ext_swift_async_call_get_spelling cursor))
+         | ((SwiftAsyncContext)[@if
+                                 [%meta
+                                   Metapp.Exp.of_bool
+                                     (Clangml_config.equivalent_version.major
+                                        >= 13)]])
+             ->
+             Swift
+               (AsyncContext
+                  (Clang__bindings.ext_swift_async_context_get_spelling
+                     cursor))
+         | ((SwiftAsyncError)[@if
+                               [%meta
+                                 Metapp.Exp.of_bool
+                                   (Clangml_config.equivalent_version.major
+                                      >= 13)]])
+             ->
+             Swift
+               (AsyncError
+                  {
+                    spelling =
+                      (Clang__bindings.ext_swift_async_error_get_spelling
+                         cursor);
+                    convention =
+                      (Clang__bindings.ext_swift_async_error_attr_get_convention
+                         cursor);
+                    handler_param_idx =
+                      (Clang__bindings.ext_swift_async_error_attr_get_handler_param_idx
                          cursor)
                   })
          | ((SwiftAsyncName)[@if
@@ -3127,6 +3225,14 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                    (Clang__bindings.ext_attrs_get_handle_type cursor)
                }
          | Used -> Used (Clang__bindings.ext_used_get_spelling cursor)
+         | ((UsingIfExists)[@if
+                             [%meta
+                               Metapp.Exp.of_bool
+                                 (Clangml_config.equivalent_version.major >=
+                                    13)]])
+             ->
+             UsingIfExists
+               (Clang__bindings.ext_using_if_exists_get_spelling cursor)
          | ((Uuid)[@if
                     [%meta
                       Metapp.Exp.of_bool

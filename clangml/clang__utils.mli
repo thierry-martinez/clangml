@@ -213,6 +213,11 @@ val string_of_severity : cxdiagnosticseverity -> string
 (** [string_of_severity severity] returns a string describing the severity:
     this string is used as prefix for the diagnostic in {!val:pp_diagnostic}. *)
 
+val pp_concrete_location :
+    ?options:Display_source_location.t ->
+      ?ranges:(unit -> (concrete_location * concrete_location) list) ->
+      Format.formatter -> concrete_location -> unit
+
 val pp_diagnostic : ?options:Diagnostic_display_options.t -> Format.formatter ->
   cxdiagnostic -> unit
 (** [pp_diagnostic ?options fmt diag] formats diagnostic [diag], mimicking

@@ -274,6 +274,14 @@ clang_ext_Blocks_CXX11_clang_blocks,
 clang_ext_Blocks_C2x_clang_blocks,
 clang_ext_Blocks_SpellingNotCalculated};
 enum clang_ext_Blocks_spelling clang_ext_Blocks_getSpelling(CXCursor cursor);
+enum clang_ext_BuiltinAlias_spelling {
+clang_ext_BuiltinAlias_CXX11_clang_builtin_alias,
+clang_ext_BuiltinAlias_C2x_clang_builtin_alias,
+clang_ext_BuiltinAlias_GNU_clang_builtin_alias,
+clang_ext_BuiltinAlias_SpellingNotCalculated};
+enum
+clang_ext_BuiltinAlias_spelling clang_ext_BuiltinAlias_getSpelling(
+CXCursor cursor);
 enum clang_ext_CDecl_spelling {
 clang_ext_CDecl_GNU_cdecl,
 clang_ext_CDecl_CXX11_gnu_cdecl,
@@ -908,6 +916,13 @@ clang_ext_Mode_CXX11_gnu_mode,
 clang_ext_Mode_C2x_gnu_mode,
 clang_ext_Mode_SpellingNotCalculated};
 enum clang_ext_Mode_spelling clang_ext_Mode_getSpelling(CXCursor cursor);
+enum clang_ext_MustTail_spelling {
+clang_ext_MustTail_GNU_musttail,
+clang_ext_MustTail_CXX11_clang_musttail,
+clang_ext_MustTail_C2x_clang_musttail,
+clang_ext_MustTail_SpellingNotCalculated};
+enum
+clang_ext_MustTail_spelling clang_ext_MustTail_getSpelling(CXCursor cursor);
 enum clang_ext_NSConsumed_spelling {
 clang_ext_NSConsumed_GNU_ns_consumed,
 clang_ext_NSConsumed_CXX11_clang_ns_consumed,
@@ -1035,6 +1050,14 @@ clang_ext_NoMips16_C2x_gnu_nomips16,
 clang_ext_NoMips16_SpellingNotCalculated};
 enum
 clang_ext_NoMips16_spelling clang_ext_NoMips16_getSpelling(CXCursor cursor);
+enum clang_ext_NoProfileFunction_spelling {
+clang_ext_NoProfileFunction_GNU_no_profile_instrument_function,
+clang_ext_NoProfileFunction_CXX11_gnu_no_profile_instrument_function,
+clang_ext_NoProfileFunction_C2x_gnu_no_profile_instrument_function,
+clang_ext_NoProfileFunction_SpellingNotCalculated};
+enum
+clang_ext_NoProfileFunction_spelling clang_ext_NoProfileFunction_getSpelling(
+CXCursor cursor);
 enum clang_ext_NoReturn_spelling {
 clang_ext_NoReturn_GNU_noreturn,
 clang_ext_NoReturn_CXX11_gnu_noreturn,
@@ -1646,6 +1669,12 @@ clang_ext_Restrict_C2x_gnu_malloc,
 clang_ext_Restrict_SpellingNotCalculated};
 enum
 clang_ext_Restrict_spelling clang_ext_Restrict_getSpelling(CXCursor cursor);
+enum clang_ext_Retain_spelling {
+clang_ext_Retain_GNU_retain,
+clang_ext_Retain_CXX11_gnu_retain,
+clang_ext_Retain_C2x_gnu_retain,
+clang_ext_Retain_SpellingNotCalculated};
+enum clang_ext_Retain_spelling clang_ext_Retain_getSpelling(CXCursor cursor);
 enum clang_ext_ReturnTypestateAttr_ConsumedState {
 clang_ext_ReturnTypestateAttr_ConsumedState_Unknown,
 clang_ext_ReturnTypestateAttr_ConsumedState_Consumed,
@@ -1730,6 +1759,13 @@ clang_ext_SpeculativeLoadHardening_SpellingNotCalculated};
 enum
 clang_ext_SpeculativeLoadHardening_spelling
 clang_ext_SpeculativeLoadHardening_getSpelling(CXCursor cursor);
+enum clang_ext_StandaloneDebug_spelling {
+clang_ext_StandaloneDebug_GNU_standalone_debug,
+clang_ext_StandaloneDebug_CXX11_clang_standalone_debug,
+clang_ext_StandaloneDebug_SpellingNotCalculated};
+enum
+clang_ext_StandaloneDebug_spelling clang_ext_StandaloneDebug_getSpelling(
+CXCursor cursor);
 enum clang_ext_StdCall_spelling {
 clang_ext_StdCall_GNU_stdcall,
 clang_ext_StdCall_CXX11_gnu_stdcall,
@@ -1749,6 +1785,35 @@ clang_ext_SwiftAsync_C2x_clang_swift_async,
 clang_ext_SwiftAsync_SpellingNotCalculated};
 enum
 clang_ext_SwiftAsync_spelling clang_ext_SwiftAsync_getSpelling(
+CXCursor cursor);
+enum clang_ext_SwiftAsyncCall_spelling {
+clang_ext_SwiftAsyncCall_GNU_swiftasynccall,
+clang_ext_SwiftAsyncCall_CXX11_clang_swiftasynccall,
+clang_ext_SwiftAsyncCall_C2x_clang_swiftasynccall,
+clang_ext_SwiftAsyncCall_SpellingNotCalculated};
+enum
+clang_ext_SwiftAsyncCall_spelling clang_ext_SwiftAsyncCall_getSpelling(
+CXCursor cursor);
+enum clang_ext_SwiftAsyncContext_spelling {
+clang_ext_SwiftAsyncContext_GNU_swift_async_context,
+clang_ext_SwiftAsyncContext_CXX11_clang_swift_async_context,
+clang_ext_SwiftAsyncContext_C2x_clang_swift_async_context,
+clang_ext_SwiftAsyncContext_SpellingNotCalculated};
+enum
+clang_ext_SwiftAsyncContext_spelling clang_ext_SwiftAsyncContext_getSpelling(
+CXCursor cursor);
+enum clang_ext_SwiftAsyncErrorAttr_ConventionKind {
+clang_ext_SwiftAsyncErrorAttr_ConventionKind_None,
+clang_ext_SwiftAsyncErrorAttr_ConventionKind_NonNullError,
+clang_ext_SwiftAsyncErrorAttr_ConventionKind_ZeroArgument,
+clang_ext_SwiftAsyncErrorAttr_ConventionKind_NonZeroArgument};
+enum clang_ext_SwiftAsyncError_spelling {
+clang_ext_SwiftAsyncError_GNU_swift_async_error,
+clang_ext_SwiftAsyncError_CXX11_clang_swift_async_error,
+clang_ext_SwiftAsyncError_C2x_clang_swift_async_error,
+clang_ext_SwiftAsyncError_SpellingNotCalculated};
+enum
+clang_ext_SwiftAsyncError_spelling clang_ext_SwiftAsyncError_getSpelling(
 CXCursor cursor);
 enum clang_ext_SwiftCall_spelling {
 clang_ext_SwiftCall_GNU_swiftcall,
@@ -1921,6 +1986,13 @@ clang_ext_Used_CXX11_gnu_used,
 clang_ext_Used_C2x_gnu_used,
 clang_ext_Used_SpellingNotCalculated};
 enum clang_ext_Used_spelling clang_ext_Used_getSpelling(CXCursor cursor);
+enum clang_ext_UsingIfExists_spelling {
+clang_ext_UsingIfExists_GNU_using_if_exists,
+clang_ext_UsingIfExists_CXX11_clang_using_if_exists,
+clang_ext_UsingIfExists_SpellingNotCalculated};
+enum
+clang_ext_UsingIfExists_spelling clang_ext_UsingIfExists_getSpelling(
+CXCursor cursor);
 enum clang_ext_Uuid_spelling {
 clang_ext_Uuid_Declspec_uuid,
 clang_ext_Uuid_Microsoft_uuid,
@@ -2054,6 +2126,9 @@ CXString clang_ext_ObjCRuntimeNameAttr_getMetadataName(CXCursor cursor);
 enum
 clang_ext_SwiftErrorAttr_ConventionKind
 clang_ext_SwiftErrorAttr_getConvention(CXCursor cursor);
+enum
+clang_ext_SwiftAsyncErrorAttr_ConventionKind
+clang_ext_SwiftAsyncErrorAttr_getConvention(CXCursor cursor);
 CXString clang_ext_IFuncAttr_getResolver(CXCursor cursor);
 int clang_ext_PatchableFunctionEntryAttr_getOffset(CXCursor cursor);
 CXCursor clang_ext_AssumeAlignedAttr_getOffset(CXCursor cursor);
@@ -2117,7 +2192,7 @@ unsigned int clang_ext_IFuncAttr_getResolverLength(CXCursor cursor);
 unsigned int clang_ext_AsmLabelAttr_getLabelLength(CXCursor cursor);
 unsigned int clang_ext_AbiTagAttr_getTags_Size(CXCursor cursor);
 CXCursor clang_ext_CUDALaunchBoundsAttr_getMaxThreads(CXCursor cursor);
-CXString clang_ext_ArmBuiltinAliasAttr_getBuiltinName(CXCursor cursor);
+CXString clang_ext_Attrs_getBuiltinName(CXCursor cursor);
 CXString clang_ext_WebAssemblyImportModuleAttr_getImportModule(
 CXCursor cursor);
 enum
@@ -2286,13 +2361,15 @@ CXCursor cursor);
 enum
 clang_ext_ObjCMethodFamilyAttr_FamilyKind
 clang_ext_ObjCMethodFamilyAttr_getFamily(CXCursor cursor);
+unsigned int clang_ext_SwiftAsyncErrorAttr_getHandlerParamIdx(
+CXCursor cursor);
 enum
 clang_ext_SwiftAsyncAttr_Kind clang_ext_SwiftAsyncAttr_getKind(
 CXCursor cursor); CXString clang_ext_Attrs_getKind(CXCursor cursor);
 unsigned int clang_ext_PatchableFunctionEntryAttr_getCount(CXCursor cursor);
 void clang_ext_AbiTagAttr_getTags(
 CXCursor cursor, void (*callback)(CXString , void *), void *data);
-unsigned int clang_ext_MSP430InterruptAttr_getNumber(CXCursor cursor);
+unsigned int clang_ext_Attrs_getNumber(CXCursor cursor);
 CXString clang_ext_Attrs_getTCBName(CXCursor cursor);
 unsigned int clang_ext_OpenCLUnrollHintAttr_getUnrollHint(CXCursor cursor);
 void clang_ext_NoBuiltinAttr_getBuiltinNames(

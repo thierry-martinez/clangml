@@ -166,13 +166,6 @@ module Ast : sig
   (** [tokens_of_node node] returns the token at the beginning of [node] if
       available. *)
 
-  val concrete_of_source_location :
-      location_kind -> source_location -> concrete_location
-  (** [concrete_of_source_location kind location] returns the concrete location
-      associated to [location].
-      If [location] is concrete, it is returned directly.
-      If [location] is libclang's, [concrete_of_cxsourcelocation] is called. *)
-
   val seq_of_diagnostics : translation_unit -> cxdiagnostic Seq.t
   (** [seq_of_diagnostics tu] returns the diagnostics
       (notes, warnings, errors, ...)

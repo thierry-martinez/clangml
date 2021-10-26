@@ -3329,6 +3329,14 @@ type clang_ext_blocks_spelling =
 external ext_blocks_get_spelling :
   cxcursor -> clang_ext_blocks_spelling =
     "clang_ext_Blocks_getSpelling_wrapper"
+type clang_ext_builtinalias_spelling =
+  | CXX11_clang_builtin_alias 
+  | C2x_clang_builtin_alias 
+  | GNU_clang_builtin_alias 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_builtin_alias_get_spelling :
+  cxcursor -> clang_ext_builtinalias_spelling =
+    "clang_ext_BuiltinAlias_getSpelling_wrapper"
 type clang_ext_cdecl_spelling =
   | GNU_cdecl 
   | CXX11_gnu_cdecl 
@@ -3967,6 +3975,14 @@ type clang_ext_mode_spelling =
   | SpellingNotCalculated [@@deriving refl]
 external ext_mode_get_spelling :
   cxcursor -> clang_ext_mode_spelling = "clang_ext_Mode_getSpelling_wrapper"
+type clang_ext_musttail_spelling =
+  | GNU_musttail 
+  | CXX11_clang_musttail 
+  | C2x_clang_musttail 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_must_tail_get_spelling :
+  cxcursor -> clang_ext_musttail_spelling =
+    "clang_ext_MustTail_getSpelling_wrapper"
 type clang_ext_nsconsumed_spelling =
   | GNU_ns_consumed 
   | CXX11_clang_ns_consumed 
@@ -4104,6 +4120,14 @@ type clang_ext_nomips16_spelling =
 external ext_no_mips16_get_spelling :
   cxcursor -> clang_ext_nomips16_spelling =
     "clang_ext_NoMips16_getSpelling_wrapper"
+type clang_ext_noprofilefunction_spelling =
+  | GNU_no_profile_instrument_function 
+  | CXX11_gnu_no_profile_instrument_function 
+  | C2x_gnu_no_profile_instrument_function 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_profile_function_get_spelling :
+  cxcursor -> clang_ext_noprofilefunction_spelling =
+    "clang_ext_NoProfileFunction_getSpelling_wrapper"
 type clang_ext_noreturn_spelling =
   | GNU_noreturn 
   | CXX11_gnu_noreturn 
@@ -4693,6 +4717,14 @@ type clang_ext_restrict_spelling =
 external ext_restrict_get_spelling :
   cxcursor -> clang_ext_restrict_spelling =
     "clang_ext_Restrict_getSpelling_wrapper"
+type clang_ext_retain_spelling =
+  | GNU_retain 
+  | CXX11_gnu_retain 
+  | C2x_gnu_retain 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_retain_get_spelling :
+  cxcursor -> clang_ext_retain_spelling =
+    "clang_ext_Retain_getSpelling_wrapper"
 type clang_ext_returntypestate_spelling =
   | GNU_return_typestate 
   | CXX11_clang_return_typestate 
@@ -4772,6 +4804,13 @@ type clang_ext_speculativeloadhardening_spelling =
 external ext_speculative_load_hardening_get_spelling :
   cxcursor -> clang_ext_speculativeloadhardening_spelling =
     "clang_ext_SpeculativeLoadHardening_getSpelling_wrapper"
+type clang_ext_standalonedebug_spelling =
+  | GNU_standalone_debug 
+  | CXX11_clang_standalone_debug 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_standalone_debug_get_spelling :
+  cxcursor -> clang_ext_standalonedebug_spelling =
+    "clang_ext_StandaloneDebug_getSpelling_wrapper"
 type clang_ext_stdcall_spelling =
   | GNU_stdcall 
   | CXX11_gnu_stdcall 
@@ -4789,6 +4828,30 @@ type clang_ext_swiftasync_spelling =
 external ext_swift_async_get_spelling :
   cxcursor -> clang_ext_swiftasync_spelling =
     "clang_ext_SwiftAsync_getSpelling_wrapper"
+type clang_ext_swiftasynccall_spelling =
+  | GNU_swiftasynccall 
+  | CXX11_clang_swiftasynccall 
+  | C2x_clang_swiftasynccall 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_swift_async_call_get_spelling :
+  cxcursor -> clang_ext_swiftasynccall_spelling =
+    "clang_ext_SwiftAsyncCall_getSpelling_wrapper"
+type clang_ext_swiftasynccontext_spelling =
+  | GNU_swift_async_context 
+  | CXX11_clang_swift_async_context 
+  | C2x_clang_swift_async_context 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_swift_async_context_get_spelling :
+  cxcursor -> clang_ext_swiftasynccontext_spelling =
+    "clang_ext_SwiftAsyncContext_getSpelling_wrapper"
+type clang_ext_swiftasyncerror_spelling =
+  | GNU_swift_async_error 
+  | CXX11_clang_swift_async_error 
+  | C2x_clang_swift_async_error 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_swift_async_error_get_spelling :
+  cxcursor -> clang_ext_swiftasyncerror_spelling =
+    "clang_ext_SwiftAsyncError_getSpelling_wrapper"
 type clang_ext_swiftcall_spelling =
   | GNU_swiftcall 
   | CXX11_clang_swiftcall 
@@ -4955,6 +5018,13 @@ type clang_ext_used_spelling =
   | SpellingNotCalculated [@@deriving refl]
 external ext_used_get_spelling :
   cxcursor -> clang_ext_used_spelling = "clang_ext_Used_getSpelling_wrapper"
+type clang_ext_usingifexists_spelling =
+  | GNU_using_if_exists 
+  | CXX11_clang_using_if_exists 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_using_if_exists_get_spelling :
+  cxcursor -> clang_ext_usingifexists_spelling =
+    "clang_ext_UsingIfExists_getSpelling_wrapper"
 type clang_ext_uuid_spelling =
   | Declspec_uuid 
   | Microsoft_uuid 
@@ -5102,6 +5172,14 @@ type clang_ext_swifterrorattr_conventionkind =
 external ext_swift_error_attr_get_convention :
   cxcursor -> clang_ext_swifterrorattr_conventionkind =
     "clang_ext_SwiftErrorAttr_getConvention_wrapper"
+type clang_ext_swiftasyncerrorattr_conventionkind =
+  | None 
+  | NonNullError 
+  | ZeroArgument 
+  | NonZeroArgument [@@deriving refl]
+external ext_swift_async_error_attr_get_convention :
+  cxcursor -> clang_ext_swiftasyncerrorattr_conventionkind =
+    "clang_ext_SwiftAsyncErrorAttr_getConvention_wrapper"
 external ext_ifunc_attr_get_resolver :
   cxcursor -> string = "clang_ext_IFuncAttr_getResolver_wrapper"
 external ext_patchable_function_entry_attr_get_offset :
@@ -5231,8 +5309,8 @@ external ext_abi_tag_attr_get_tags_size :
 external ext_cudalaunch_bounds_attr_get_max_threads :
   cxcursor -> cxcursor =
     "clang_ext_CUDALaunchBoundsAttr_getMaxThreads_wrapper"
-external ext_arm_builtin_alias_attr_get_builtin_name :
-  cxcursor -> string = "clang_ext_ArmBuiltinAliasAttr_getBuiltinName_wrapper"
+external ext_attrs_get_builtin_name :
+  cxcursor -> string = "clang_ext_Attrs_getBuiltinName_wrapper"
 external ext_web_assembly_import_module_attr_get_import_module :
   cxcursor -> string =
     "clang_ext_WebAssemblyImportModuleAttr_getImportModule_wrapper"
@@ -5586,6 +5664,9 @@ type clang_ext_objcmethodfamilyattr_familykind =
 external ext_obj_cmethod_family_attr_get_family :
   cxcursor -> clang_ext_objcmethodfamilyattr_familykind =
     "clang_ext_ObjCMethodFamilyAttr_getFamily_wrapper"
+external ext_swift_async_error_attr_get_handler_param_idx :
+  cxcursor -> int =
+    "clang_ext_SwiftAsyncErrorAttr_getHandlerParamIdx_wrapper"
 type clang_ext_swiftasyncattr_kind =
   | None 
   | SwiftPrivate 
@@ -5600,8 +5681,8 @@ external ext_patchable_function_entry_attr_get_count :
 external ext_abi_tag_attr_get_tags :
   cxcursor -> (string -> unit) -> unit =
     "clang_ext_AbiTagAttr_getTags_wrapper"
-external ext_msp430_interrupt_attr_get_number :
-  cxcursor -> int = "clang_ext_MSP430InterruptAttr_getNumber_wrapper"
+external ext_attrs_get_number :
+  cxcursor -> int = "clang_ext_Attrs_getNumber_wrapper"
 external ext_attrs_get_tcbname :
   cxcursor -> string = "clang_ext_Attrs_getTCBName_wrapper"
 external ext_open_clunroll_hint_attr_get_unroll_hint :

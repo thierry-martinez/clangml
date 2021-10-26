@@ -20,6 +20,9 @@ for package in metapp metaquot traverse refl pattern; do
 done
 
 opam pin add --yes --no-action "$URL"
-sudo apt-get update
+# --allow-releaseinfo-change-suite to circumvent error
+#   E: Repository 'http://deb.debian.org/debian buster InRelease' changed its 'Suite' value from 'stable' to 'oldstable'
+# (see https://stackoverflow.com/questions/68802802/repository-http-security-debian-org-debian-security-buster-updates-inrelease)
+sudo apt-get update --allow-releaseinfo-change-suite
 opam depext --yes --verbose clangml
 opam install --yes --with-test clangml

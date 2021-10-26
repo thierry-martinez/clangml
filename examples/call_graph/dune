@@ -1,0 +1,4 @@
+(executable
+  (name call_graph)
+  (preprocess (pps refl.ppx))
+  (libraries clangml clangml_tools_common cmdliner refl))

@@ -1,3 +1,5 @@
+[%%metapackage metapp]
+
 let placeholder_hashtbl_sz = 17
 
 type antiquotation = {
@@ -7,6 +9,32 @@ type antiquotation = {
     pos_begin : int;
     pos_end : int;
   }
+
+[%%meta
+    let ocaml_minor_version =
+      int_of_string (String.sub Sys.ocaml_version 2 2) in
+    let make_converter field_name e =
+      let rec convert minor_version e =
+        if minor_version = 12 then
+          e
+        else
+          let next_version =
+            if minor_version < 12 then
+              minor_version + 1
+            else
+              minor_version - 1 in
+          let converter_name =
+            Format.asprintf "Migrate_4%.2d_4%.2d"
+              minor_version next_version in
+          let converter =
+            Metapp.Exp.ident
+              (Ldot (Ldot (Lident "Astlib", converter_name),
+                field_name)) in
+          convert next_version [%e [%meta converter] [%meta e]] in
+      convert ocaml_minor_version e in
+    [%stri
+      let copy_structure s = [%meta make_converter "copy_structure" [%e s]]
+      and copy_pattern p = [%meta make_converter "copy_pattern" [%e p]]]]
 
 let extract_antiquotations s =
   let code_buffer = Buffer.create (String.length s) in
@@ -55,8 +83,12 @@ let extract_antiquotations s =
           | _ -> token in
         let loc_start = lexbuf.lex_curr_p in
         let payload : Ppxlib.payload =
-          if pattern then PPat (Ppxlib.Parser.parse_pattern lexer lexbuf, None)
-          else PStr (Ppxlib.Parser.implementation lexer lexbuf) in
+          if pattern then
+            PPat (copy_pattern (
+              Ocaml_common.Parser.parse_pattern lexer lexbuf), None)
+          else
+            PStr (copy_structure (
+              Ocaml_common.Parser.implementation lexer lexbuf)) in
         let loc_end = lexbuf.lex_curr_p in
         let loc = { Location.loc_start; loc_end; loc_ghost = false } in
         let payload = { Location.loc; txt = payload } in

@@ -2232,7 +2232,9 @@ let main cflags llvm_config prefix =
       (empty_function_interface |>
         add_result (empty_type_interface |>
           reinterpret_as (Set_of "clang_ext_LanguageIDs"))) in
-  let idx = Clang.create_index true true in
+  let idx =
+    Clang.create_index ~exclude_declarations_from_pch:true
+      ~display_diagnostics:true in
   Format.printf "%a@." (Format.pp_print_list
     ~pp_sep:(fun fmt () -> Format.pp_print_string fmt " ")
       Format.pp_print_string)

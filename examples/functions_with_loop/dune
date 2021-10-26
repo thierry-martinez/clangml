@@ -1,0 +1,4 @@
+(executable
+  (name functions_with_loop)
+  (preprocess (pps refl.ppx))
+  (libraries clangml clangml_tools_common cmdliner refl))

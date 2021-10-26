@@ -27,6 +27,7 @@ clangml provides bindings to call the Clang API from OCaml.
   (ocamlfind (and :build (>= 1.8.0)))
   (ocamlcodoc (and :with-test (>= 1.0.1)))
   (pattern (and :with-test (>= 0.2.0)))
+  (ppxlib (>= 0.23))
   (metapp (>= 0.3.0))
   (metaquot (>= 0.3.0))
   (refl (>= 0.3.0))

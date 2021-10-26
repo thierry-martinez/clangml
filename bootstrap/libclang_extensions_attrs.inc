@@ -748,6 +748,25 @@ enum clang_ext_Blocks_spelling clang_ext_Blocks_getSpelling(CXCursor cursor)
  #endif
  
  return clang_ext_Blocks_SpellingNotCalculated;}
+enum
+clang_ext_BuiltinAlias_spelling clang_ext_BuiltinAlias_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_13_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::BuiltinAliasAttr >(attr))
+ switch (qual_attr->getSemanticSpelling())
+ {case clang::BuiltinAliasAttr ::Spelling ::CXX11_clang_builtin_alias:
+  return clang_ext_BuiltinAlias_CXX11_clang_builtin_alias;
+  case clang::BuiltinAliasAttr ::Spelling ::C2x_clang_builtin_alias:
+  return clang_ext_BuiltinAlias_C2x_clang_builtin_alias;
+  case clang::BuiltinAliasAttr ::Spelling ::GNU_clang_builtin_alias:
+  return clang_ext_BuiltinAlias_GNU_clang_builtin_alias;}
+ 
+ #endif
+ 
+ return clang_ext_BuiltinAlias_SpellingNotCalculated;}
 enum clang_ext_CDecl_spelling clang_ext_CDecl_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -2419,6 +2438,24 @@ enum clang_ext_Mode_spelling clang_ext_Mode_getSpelling(CXCursor cursor)
  
  return clang_ext_Mode_SpellingNotCalculated;}
 enum
+clang_ext_MustTail_spelling clang_ext_MustTail_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_13_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::MustTailAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_MustTail_GNU_musttail;
+  case 1:
+  return clang_ext_MustTail_CXX11_clang_musttail;
+  case 2:
+  return clang_ext_MustTail_C2x_clang_musttail;}
+ 
+ #endif
+ 
+ return clang_ext_MustTail_SpellingNotCalculated;}
+enum
 clang_ext_NSConsumed_spelling clang_ext_NSConsumed_getSpelling(
 CXCursor cursor)
 {
@@ -2742,6 +2779,28 @@ clang_ext_NoMips16_spelling clang_ext_NoMips16_getSpelling(CXCursor cursor)
  #endif
  
  return clang_ext_NoMips16_SpellingNotCalculated;}
+enum
+clang_ext_NoProfileFunction_spelling clang_ext_NoProfileFunction_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_13_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::NoProfileFunctionAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoProfileFunction_GNU_no_profile_instrument_function;
+  case 1:
+  return
+  clang_ext_NoProfileFunction_CXX11_gnu_no_profile_instrument_function;
+  case 2:
+  return clang_ext_NoProfileFunction_C2x_gnu_no_profile_instrument_function;}
+ 
+ #endif
+ 
+ return clang_ext_NoProfileFunction_SpellingNotCalculated;}
 enum
 clang_ext_NoReturn_spelling clang_ext_NoReturn_getSpelling(CXCursor cursor)
 {
@@ -4432,6 +4491,23 @@ clang_ext_Restrict_spelling clang_ext_Restrict_getSpelling(CXCursor cursor)
  #endif
  
  return clang_ext_Restrict_SpellingNotCalculated;}
+enum clang_ext_Retain_spelling clang_ext_Retain_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_13_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::RetainAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_Retain_GNU_retain;
+  case 1:
+  return clang_ext_Retain_CXX11_gnu_retain;
+  case 2:
+  return clang_ext_Retain_C2x_gnu_retain;}
+ 
+ #endif
+ 
+ return clang_ext_Retain_SpellingNotCalculated;}
 enum
 clang_ext_ReturnTypestateAttr_ConsumedState
 convert_ReturnTypestateAttr_ConsumedState(
@@ -4655,6 +4731,24 @@ clang_ext_SpeculativeLoadHardening_getSpelling(CXCursor cursor)
  
  return clang_ext_SpeculativeLoadHardening_SpellingNotCalculated;}
 enum
+clang_ext_StandaloneDebug_spelling clang_ext_StandaloneDebug_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_13_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::StandaloneDebugAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_StandaloneDebug_GNU_standalone_debug;
+  case 1:
+  return clang_ext_StandaloneDebug_CXX11_clang_standalone_debug;}
+ 
+ #endif
+ 
+ return clang_ext_StandaloneDebug_SpellingNotCalculated;}
+enum
 clang_ext_StdCall_spelling clang_ext_StdCall_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -4708,6 +4802,85 @@ clang_ext_StdCall_spelling clang_ext_StdCall_getSpelling(CXCursor cursor)
   #endif
   
   return clang_ext_SwiftAsync_SpellingNotCalculated;}
+enum
+clang_ext_SwiftAsyncCall_spelling clang_ext_SwiftAsyncCall_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_13_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::SwiftAsyncCallAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_SwiftAsyncCall_GNU_swiftasynccall;
+  case 1:
+  return clang_ext_SwiftAsyncCall_CXX11_clang_swiftasynccall;
+  case 2:
+  return clang_ext_SwiftAsyncCall_C2x_clang_swiftasynccall;}
+ 
+ #endif
+ 
+ return clang_ext_SwiftAsyncCall_SpellingNotCalculated;}
+enum
+clang_ext_SwiftAsyncContext_spelling clang_ext_SwiftAsyncContext_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_13_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr =
+  llvm::dyn_cast_or_null<clang::SwiftAsyncContextAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_SwiftAsyncContext_GNU_swift_async_context;
+  case 1:
+  return clang_ext_SwiftAsyncContext_CXX11_clang_swift_async_context;
+  case 2:
+  return clang_ext_SwiftAsyncContext_C2x_clang_swift_async_context;}
+ 
+ #endif
+ 
+ return clang_ext_SwiftAsyncContext_SpellingNotCalculated;}
+
+#ifndef LLVM_VERSION_BEFORE_13_0_0
+ enum
+ clang_ext_SwiftAsyncErrorAttr_ConventionKind
+ convert_SwiftAsyncErrorAttr_ConventionKind(
+ clang::SwiftAsyncErrorAttr ::ConventionKind value)
+ {switch (value)
+  {case clang::SwiftAsyncErrorAttr ::ConventionKind ::None:
+   return clang_ext_SwiftAsyncErrorAttr_ConventionKind_None;
+   case clang::SwiftAsyncErrorAttr ::ConventionKind ::NonNullError:
+   return clang_ext_SwiftAsyncErrorAttr_ConventionKind_NonNullError;
+   case clang::SwiftAsyncErrorAttr ::ConventionKind ::ZeroArgument:
+   return clang_ext_SwiftAsyncErrorAttr_ConventionKind_ZeroArgument;
+   case clang::SwiftAsyncErrorAttr ::ConventionKind ::NonZeroArgument:
+   return clang_ext_SwiftAsyncErrorAttr_ConventionKind_NonZeroArgument;}
+  return clang_ext_SwiftAsyncErrorAttr_ConventionKind_None;}
+
+#endif
+ enum
+ clang_ext_SwiftAsyncError_spelling clang_ext_SwiftAsyncError_getSpelling(
+ CXCursor cursor)
+ {
+  #ifndef LLVM_VERSION_BEFORE_13_0_0
+  
+  auto attr = GetCursorAttr(cursor);
+  if
+  (auto qual_attr = llvm::dyn_cast_or_null<clang::SwiftAsyncErrorAttr >(attr))
+  switch (qual_attr->getSpellingListIndex())
+  {case 0:
+   return clang_ext_SwiftAsyncError_GNU_swift_async_error;
+   case 1:
+   return clang_ext_SwiftAsyncError_CXX11_clang_swift_async_error;
+   case 2:
+   return clang_ext_SwiftAsyncError_C2x_clang_swift_async_error;}
+  
+  #endif
+  
+  return clang_ext_SwiftAsyncError_SpellingNotCalculated;}
 enum
 clang_ext_SwiftCall_spelling clang_ext_SwiftCall_getSpelling(CXCursor cursor)
 {
@@ -5178,6 +5351,24 @@ enum clang_ext_Used_spelling clang_ext_Used_getSpelling(CXCursor cursor)
  #endif
  
  return clang_ext_Used_SpellingNotCalculated;}
+enum
+clang_ext_UsingIfExists_spelling clang_ext_UsingIfExists_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_13_0_0
+ 
+ auto attr = GetCursorAttr(cursor);
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::UsingIfExistsAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_UsingIfExists_GNU_using_if_exists;
+  case 1:
+  return clang_ext_UsingIfExists_CXX11_clang_using_if_exists;}
+ 
+ #endif
+ 
+ return clang_ext_UsingIfExists_SpellingNotCalculated;}
 enum clang_ext_Uuid_spelling clang_ext_Uuid_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_11_0_0
@@ -5573,6 +5764,21 @@ clang_ext_SwiftErrorAttr_getConvention(CXCursor cursor)
  #endif
  
  return clang_ext_SwiftErrorAttr_ConventionKind_None;}
+enum
+clang_ext_SwiftAsyncErrorAttr_ConventionKind
+clang_ext_SwiftAsyncErrorAttr_getConvention(CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_13_0_0
+ 
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::SwiftAsyncErrorAttr >(attr))
+ return
+ convert_SwiftAsyncErrorAttr_ConventionKind(qual_attr->getConvention());
+ 
+ #endif
+ 
+ return clang_ext_SwiftAsyncErrorAttr_ConventionKind_None;}
 CXString clang_ext_IFuncAttr_getResolver(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -6285,17 +6491,33 @@ CXCursor clang_ext_CUDALaunchBoundsAttr_getMaxThreads(CXCursor cursor)
  #endif
  
  return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
-CXString clang_ext_ArmBuiltinAliasAttr_getBuiltinName(CXCursor cursor)
+CXString clang_ext_Attrs_getBuiltinName(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
- 
- #ifndef LLVM_VERSION_BEFORE_11_0_0
- 
- if
- (auto qual_attr = llvm::dyn_cast_or_null<clang::ArmBuiltinAliasAttr >(attr))
- return cxstring_createDup(qual_attr->getBuiltinName()->getName());
- 
- #endif
- 
+ switch (attr->getKind())
+ {
+  #ifndef LLVM_VERSION_BEFORE_13_0_0
+  
+  case clang::attr::BuiltinAlias:
+  if
+  (auto qual_attr = llvm::dyn_cast_or_null<clang::BuiltinAliasAttr >(attr))
+  return cxstring_createDup(qual_attr->getBuiltinName()->getName());
+  break;
+  
+  #endif
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_11_0_0
+  
+  case clang::attr::ArmBuiltinAlias:
+  if
+  (auto qual_attr = llvm::dyn_cast_or_null<clang::ArmBuiltinAliasAttr >(attr))
+  return cxstring_createDup(qual_attr->getBuiltinName()->getName());
+  break;
+  
+  #endif
+  
+  default:
+  ;}
  return cxstring_createRef("");}
 CXString clang_ext_WebAssemblyImportModuleAttr_getImportModule(
 CXCursor cursor)
@@ -8035,6 +8257,19 @@ clang_ext_ObjCMethodFamilyAttr_getFamily(CXCursor cursor)
  (auto qual_attr = llvm::dyn_cast_or_null<clang::ObjCMethodFamilyAttr >(attr))
  return convert_ObjCMethodFamilyAttr_FamilyKind(qual_attr->getFamily());
  return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_None;}
+unsigned int clang_ext_SwiftAsyncErrorAttr_getHandlerParamIdx(
+CXCursor cursor)
+{auto attr = GetCursorAttr(cursor);
+ 
+ #ifndef LLVM_VERSION_BEFORE_13_0_0
+ 
+ if
+ (auto qual_attr = llvm::dyn_cast_or_null<clang::SwiftAsyncErrorAttr >(attr))
+ return qual_attr->getHandlerParamIdx();
+ 
+ #endif
+ 
+ return 0;}
 enum
 clang_ext_SwiftAsyncAttr_Kind clang_ext_SwiftAsyncAttr_getKind(
 CXCursor cursor)
@@ -8102,11 +8337,27 @@ CXCursor cursor, void (*callback)(CXString , void *), void *data)
  
  #endif
  }
-unsigned int clang_ext_MSP430InterruptAttr_getNumber(CXCursor cursor)
+unsigned int clang_ext_Attrs_getNumber(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
- if
- (auto qual_attr = llvm::dyn_cast_or_null<clang::MSP430InterruptAttr >(attr))
- return qual_attr->getNumber();
+ switch (attr->getKind())
+ {case clang::attr::MSP430Interrupt:
+  if
+  (auto qual_attr = llvm::dyn_cast_or_null<clang::MSP430InterruptAttr >(attr))
+  return qual_attr->getNumber();
+  break;
+  
+  #ifndef LLVM_VERSION_BEFORE_13_0_0
+  
+  case clang::attr::M68kInterrupt:
+  if
+  (auto qual_attr = llvm::dyn_cast_or_null<clang::M68kInterruptAttr >(attr))
+  return qual_attr->getNumber();
+  break;
+  
+  #endif
+  
+  default:
+  ;}
  return 0;}
 CXString clang_ext_Attrs_getTCBName(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);

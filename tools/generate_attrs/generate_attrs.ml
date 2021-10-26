@@ -1007,7 +1007,7 @@ let main cflags llvm_config prefix =
   let make_type_declaration name list =
     Ppxlib.Ast_helper.Type.mk (Metapp.mkloc name)
       ~kind:(Ptype_variant list)
-      ~params:(List.map (fun ty -> ty, Ppxlib.Asttypes.Invariant) parameters)
+      ~params:(List.map (fun ty -> ty, (Ppxlib.Asttypes.NoVariance, Ppxlib.Asttypes.NoInjectivity)) parameters)
       ~attrs:[Metapp.Attr.mk (Metapp.mkloc "deriving") (PStr [%str refl])] in
   let ty =
     make_type_declaration "t" constructors in

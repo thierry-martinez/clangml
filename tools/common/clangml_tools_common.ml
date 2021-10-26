@@ -1,6 +1,6 @@
 type 'a options =
     string option -> string option -> string list -> bool -> bool ->
-      string list -> 'a
+      string list -> string list -> 'a
 
 let option_language =
   let doc = "Language selection." in
@@ -27,6 +27,11 @@ let option_trigraphs =
   Cmdliner.Arg.(
     value & flag & info ["trigraphs"] ~doc)
 
+let option_define =
+  let doc = "Pass define to Clang." in
+  Cmdliner.Arg.(
+    value & opt_all string [] & info ["D"] ~doc)
+
 let option_clang =
   let doc = "Pass option to Clang." in
   Cmdliner.Arg.(
@@ -35,13 +40,14 @@ let option_clang =
 let options term =
   Cmdliner.Term.(term $ option_language $ option_standard $
     option_include_path $ option_include_clang $ option_trigraphs $
-    option_clang)
+    option_define $ option_clang)
 
 let command_line k language standard include_paths include_clang trigraphs
-    clang =
+    defines clang =
   let command_line_args =
     List.map Clang.Command_line.include_directory include_paths @
-    List.map (fun opt -> "-" ^ opt) clang in
+    List.map (fun d -> "-D" ^ d) defines @
+    clang in
   let command_line_args =
     match language with
     | None -> command_line_args
