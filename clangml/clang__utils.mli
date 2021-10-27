@@ -124,8 +124,16 @@ val iter_decl_context : (cxcursor -> unit) -> cxcursor -> unit
     declaration context [c]. *)
 
 val list_of_decl_context : cxcursor -> cxcursor list
-(** [list_of_decl_context f ty] returns the list of all the declaration nodes
+(** [list_of_decl_context f c] returns the list of all the declaration nodes
     of declaration context [c]. *)
+
+val iter_indirect_field_decl_chain : (cxcursor -> unit) -> cxcursor -> unit
+(** [iter_indirect_field_decl_chain f c] calls [f] over the chain of
+    indirect field declaration [c]. *)
+
+val list_of_indirect_field_decl_chain : cxcursor -> cxcursor list
+(** [list_of_indirect_field_decl_chain f c] returns the list of the declarations
+    in the chain of indirect field declaration [c]. *)
 
 val list_of_iter : (('a -> unit) -> unit) -> 'a list
 (** [list_of_iter iter] calls [iter f] and returns all the values which [f] has
