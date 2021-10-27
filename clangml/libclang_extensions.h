@@ -1157,6 +1157,10 @@ unsigned
 clang_ext_DeclContext_visitDecls(
   CXCursor parent, CXCursorVisitor visitor, CXClientData client_data);
 
+unsigned
+clang_ext_IndirectFieldDecl_visitChain(
+  CXCursor parent, CXCursorVisitor visitor, CXClientData client_data);
+
 enum clang_ext_ElaboratedTypeKeyword
 clang_ext_TagDecl_getTagKind(CXCursor);
 

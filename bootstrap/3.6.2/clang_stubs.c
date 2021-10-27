@@ -10404,6 +10404,28 @@ clang_ext_DeclContext_visitDecls_wrapper(value parent_ocaml, value visitor_ocaml
   }
 }
 
+DECLARE_OPAQUE_EX(CXCursorVisitor, cxcursorvisitor, Cxcursorvisitor_val, Val_cxcursorvisitor, custom_finalize_default, custom_compare_default, custom_hash_default)
+
+DECLARE_OPAQUE_EX(CXClientData, cxclientdata, Cxclientdata_val, Val_cxclientdata, custom_finalize_default, custom_compare_default, custom_hash_default)
+
+CAMLprim value
+clang_ext_IndirectFieldDecl_visitChain_wrapper(value parent_ocaml, value visitor_ocaml, value client_data_ocaml)
+{
+  CAMLparam3(parent_ocaml, visitor_ocaml, client_data_ocaml);
+  CXCursor parent;
+  parent = Cxcursor_val(Field(parent_ocaml, 0));
+  CXCursorVisitor visitor;
+  visitor = Cxcursorvisitor_val(visitor_ocaml);
+  CXClientData client_data;
+  client_data = Cxclientdata_val(client_data_ocaml);
+  unsigned int result = clang_ext_IndirectFieldDecl_visitChain(parent, visitor, client_data);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
 CAMLprim value
 clang_ext_TagDecl_getTagKind_wrapper(value arg_ocaml)
 {
