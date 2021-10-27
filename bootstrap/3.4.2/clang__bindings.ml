@@ -2677,6 +2677,11 @@ external ext_requires_expr_get_requirement :
 external ext_decl_context_visit_decls :
   cxcursor -> (cxcursor -> cxcursor -> cxchildvisitresult) -> bool =
     "clang_ext_DeclContext_visitDecls_wrapper"
+type cxcursorvisitor
+type cxclientdata
+external ext_indirect_field_decl_visit_chain :
+  cxcursor -> cxcursorvisitor -> cxclientdata -> int =
+    "clang_ext_IndirectFieldDecl_visitChain_wrapper"
 external ext_tag_decl_get_tag_kind :
   cxcursor -> clang_ext_elaboratedtypekeyword =
     "clang_ext_TagDecl_getTagKind_wrapper"
