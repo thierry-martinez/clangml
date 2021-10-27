@@ -176,7 +176,7 @@ pipeline {
             steps {
                 script {
                     opam_installations(
-                        ["4.08", "4.09", "4.10", "4.11"],
+                        ["4.08", "4.09", "4.10", "4.11", "4.12", "4.13"],
                         "file:///clangml/")
                 }
             }
