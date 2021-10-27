@@ -2088,6 +2088,14 @@ let main cflags llvm_config prefix =
           data_caller = Name "client_data";
           data_callee = Index 2;
           references = [Name "parent"] })) |>
+    add_function (Pcre.regexp "^clang_ext_IndirectFieldDecl_visitChain$")
+      (empty_function_interface |>
+        add_result (empty_type_interface |> integer_zero_is_true) |>
+        add_argument (Closure {
+          pointer = Name "visitor";
+          data_caller = Name "client_data";
+          data_callee = Index 2;
+          references = [Name "parent"] })) |>
     add_function (Pcre.regexp "^clang_getInclusions$")
       (empty_function_interface |>
         add_result (empty_type_interface |> integer_boolean) |>
