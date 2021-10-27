@@ -22,6 +22,8 @@ extern "C" {
 #include <llvm/Support/ErrorHandling.h>
 #include <caml/fail.h>
 
+#include <iostream>
+
 // Copied from clang source tree: tools/libclang/CXString.cpp
 enum CXStringFlag {
   /// CXString contains a 'const char *' that it doesn't own.
@@ -3549,18 +3551,51 @@ extern "C" {
   clang_ext_DeclContext_visitDecls(
     CXCursor parent, CXCursorVisitor visitor, CXClientData client_data)
   {
-    #ifndef LLVM_VERSION_BEFORE_3_5_0
     auto d = GetCursorDecl(parent);
     if (auto dc = llvm::dyn_cast_or_null<clang::DeclContext>(d)) {
       CXTranslationUnit tu = getCursorTU(parent);
-      for (auto sd : dc->decls()) {
-        if (visitor(MakeCXCursor(sd, tu), parent, client_data)
-            == CXChildVisit_Break) {
-          return 1;
+      #ifdef LLVM_VERSION_BEFORE_3_5_0
+        for (auto di = dc->decls_begin(); di != dc->decls_end(); di++) {
+          if (visitor(MakeCXCursor(*di, tu), parent, client_data)
+              == CXChildVisit_Break) {
+            return 1;
+          }
         }
-      }
+      #else
+        for (auto sd : dc->decls()) {
+          if (visitor(MakeCXCursor(sd, tu), parent, client_data)
+              == CXChildVisit_Break) {
+            return 1;
+          }
+        }
+      #endif
     }
-    #endif
+    return 0;
+  }
+
+  unsigned
+  clang_ext_IndirectFieldDecl_visitChain(
+    CXCursor parent, CXCursorVisitor visitor, CXClientData client_data)
+  {
+    auto d = GetCursorDecl(parent);
+    if (auto ifd = llvm::dyn_cast_or_null<clang::IndirectFieldDecl>(d)) {
+      CXTranslationUnit tu = getCursorTU(parent);
+      #ifdef LLVM_VERSION_BEFORE_3_5_0
+        for (auto ci = ifd->chain_begin(); ci != ifd->chain_end(); ci++) {
+          if (visitor(MakeCXCursor(*ci, tu), parent, client_data)
+              == CXChildVisit_Break) {
+            return 1;
+          }
+        }
+      #else
+        for (auto nd : ifd->chain()) {
+          if (visitor(MakeCXCursor(nd, tu), parent, client_data)
+              == CXChildVisit_Break) {
+            return 1;
+          }
+        }
+      #endif
+    }
     return 0;
   }
 
