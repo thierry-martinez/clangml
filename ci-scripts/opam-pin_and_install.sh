@@ -6,7 +6,8 @@ fi
 set -ex
 URL="$1"
 cd ~/opam-repository
-git pull
+git fetch
+git reset --hard origin/master
 opam update
 
 ## Pin dependencies
