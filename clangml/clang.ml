@@ -923,6 +923,9 @@ module Ast = struct
                     get_typedef_decl_underlying_type |> of_cxtype in
                   TypeAlias { ident_ref; qual_type }
                 end
+            | IndirectField ->
+                IndirectField (List.map decl_of_cxcursor
+                  (list_of_indirect_field_decl_chain cursor))
             | Decomposition
                 [@if [%meta Metapp.Exp.of_bool
                   (Clangml_config.version.major >= 4)]] ->
@@ -1242,14 +1245,18 @@ module Ast = struct
                  | _ -> false) in
       let bases, children =
         extract_prefix_from_list base_specifier_of_cxcursor_opt children in
-      let fields = fields_of_children children in
+      let fields = List.map decl_of_cxcursor children in
+      let indirect_fields =
+        list_of_decl_context cursor |> List.filter_map (fun cursor ->
+          if ext_decl_get_kind cursor = IndirectField then
+            Some (decl_of_cxcursor cursor)
+          else
+            None) in
+      let fields = fields @ indirect_fields in
       let complete_definition = ext_tag_decl_is_complete_definition cursor in
       RecordDecl {
         keyword; attributes; nested_name_specifier; name; bases; fields; final;
         complete_definition }
-
-    and fields_of_children children =
-      children |> List.map decl_of_cxcursor
 
     and stmt_of_cxcursor cursor =
       let desc () =

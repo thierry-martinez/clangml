@@ -70,16 +70,11 @@ let iter_visitor f visitor =
   | None -> ()
   | Some exn -> raise exn
 
-let list_of_iter iter =
-  let children_ref = ref [] in
-  iter begin fun cur ->
-    children_ref := cur :: !children_ref
-  end;
-  List.rev !children_ref
-
-let iter_children f c =
+let iter_child_visit_result_visitor
+      (visit_fun :
+         _ -> (cxcursor -> cxcursor -> cxchildvisitresult) -> bool) f c =
   iter_visitor f begin fun f ->
-    ignore (visit_children c begin fun cur _par ->
+    ignore (visit_fun c begin fun cur _par ->
       if f cur then
         Continue
       else
@@ -87,39 +82,45 @@ let iter_children f c =
     end)
   end
 
-let list_of_children c =
-  list_of_iter (fun f -> iter_children f c)
-
-let iter_type_fields f ty =
+let iter_visitor_result_visitor
+      (visit_fun : _ -> (cxcursor -> cxvisitorresult) -> bool) f c =
   iter_visitor f begin fun f ->
-    ignore (type_visit_fields ty begin fun cur ->
+    ignore (visit_fun c begin fun cur ->
       if f cur then
         Continue
       else
         Break
     end)
   end
-
-let list_of_type_fields ty =
-  list_of_iter (fun f -> iter_type_fields f ty)
-
-let iter_decl_context f c =
-  iter_visitor f begin fun f ->
-    ignore (ext_decl_context_visit_decls c begin fun cur _par ->
-      if f cur then
-        Continue
-      else
-        Break
-    end)
-  end
-
-let list_of_decl_context c =
-  list_of_iter (fun f -> iter_decl_context f c)
 
 let list_of_iter iter =
   let accu = ref [] in
   iter (fun item -> accu := item :: !accu);
   List.rev !accu
+
+let iter_children f c =
+  iter_child_visit_result_visitor visit_children f c
+
+let list_of_children c =
+  list_of_iter (fun f -> iter_children f c)
+
+let iter_type_fields f ty =
+  iter_visitor_result_visitor type_visit_fields f ty
+
+let list_of_type_fields ty =
+  list_of_iter (fun f -> iter_type_fields f ty)
+
+let iter_decl_context f c =
+  iter_child_visit_result_visitor ext_decl_context_visit_decls f c
+
+let list_of_decl_context c =
+  list_of_iter (fun f -> iter_decl_context f c)
+
+let iter_indirect_field_decl_chain f c =
+  iter_child_visit_result_visitor ext_indirect_field_decl_visit_chain f c
+
+let list_of_indirect_field_decl_chain c =
+  list_of_iter (fun f -> iter_indirect_field_decl_chain f c)
 
 let seq_of_diagnostics tu =
   let count = get_num_diagnostics tu in

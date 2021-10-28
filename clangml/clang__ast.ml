@@ -3811,9 +3811,9 @@ let () =
 let example = {| struct s { int label; union { int i; float f; };}; |}
 
 let () =
-  check pp_decl parse_declaration_list example
-  @@ fun ast -> match ast with
-  | [{ desc = RecordDecl {
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = RecordDecl {
       keyword = Struct;
       name = "s";
       fields = [
@@ -3823,15 +3823,30 @@ let () =
           { desc = Field { name = "i";
             qual_type = { desc = BuiltinType Int}}};
           { desc = Field { name = "f";
-            qual_type = { desc = BuiltinType Float}}}] }}] }}] -> ()
-  | _ -> assert false
+            qual_type = { desc = BuiltinType Float}}}] }};
+        { desc = IndirectField [
+          { desc = Field {
+              name = "";
+              qual_type = {
+                desc = Elaborated { named_type = { desc = Record _ }}}}};
+          { desc = Field {
+              name = "i";
+              qual_type = { desc = BuiltinType Int }}}] };
+        { desc = IndirectField [
+          { desc = Field {
+              name = "";
+              qual_type = {
+                desc = Elaborated { named_type = { desc = Record _ }}}}};
+          { desc = Field {
+              name = "f";
+              qual_type = { desc = BuiltinType Float }}}] }] }}]]
 
 let example = {| union s { int single; struct { int i; float f; };}; |}
 
 let () =
-  check pp_decl parse_declaration_list example
-  @@ fun ast -> match ast with
-  | [{ desc = RecordDecl {
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = RecordDecl {
       keyword = Union;
       name = "s";
       fields = [
@@ -3841,8 +3856,23 @@ let () =
           { desc = Field { name = "i";
             qual_type = { desc = BuiltinType Int}}};
           { desc = Field { name = "f";
-            qual_type = { desc = BuiltinType Float}}}] }}] }}] -> ()
-  | _ -> assert false
+            qual_type = { desc = BuiltinType Float}}}] }};
+        { desc = IndirectField [
+          { desc = Field {
+              name = "";
+              qual_type = {
+                desc = Elaborated { named_type = { desc = Record _ }}}}};
+          { desc = Field {
+              name = "i";
+              qual_type = { desc = BuiltinType Int }}}] };
+        { desc = IndirectField [
+          { desc = Field {
+              name = "";
+              qual_type = {
+                desc = Elaborated { named_type = { desc = Record _ }}}}};
+          { desc = Field {
+              name = "f";
+              qual_type = { desc = BuiltinType Float }}}] }] }}]]
     ]}*)
   | TypedefDecl of {
       name : string;
@@ -4033,6 +4063,41 @@ template<typename T, typename Alloc> struct my_vector {
                   qual_type = { desc = TemplateTypeParm "Alloc" };
                   attributes = [{ desc = Other NoUniqueAddress }] }}] }}}}]]]
   else Metapp.Stri.of_list []]
+    ]}*)
+  | IndirectField of decl list
+(** Field injected from an anonymous union/struct into the parent scope.
+
+    {[
+let example = {|
+struct {
+  struct {
+    int a;
+  };
+} b;
+|}
+
+let () =
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = RecordDecl {
+     keyword = Struct;
+      name = "";
+      fields = [
+        { desc = RecordDecl { keyword = Struct; name = ""; fields = [
+          { desc = Field { name = "a";
+            qual_type = { desc = BuiltinType Int };
+            bitwidth = None;
+            init = None; }}] }};
+        { desc = IndirectField [
+          { desc = Field {
+              name = "";
+              qual_type = {
+                desc = Elaborated { named_type = { desc = Record _ }}}}};
+          { desc = Field {
+              name = "a";
+              qual_type = { desc = BuiltinType Int }}}] }] }};
+     { desc = Var { var_name = "b"; var_type = {
+         desc = Elaborated { named_type = { desc = Record _ }}}}}]]
     ]}*)
   | AccessSpecifier of cxx_access_specifier
 (** C++ access specifier.

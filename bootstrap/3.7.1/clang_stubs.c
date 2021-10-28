@@ -9904,24 +9904,35 @@ clang_ext_DeclContext_visitDecls_wrapper(value parent_ocaml, value visitor_ocaml
   }
 }
 
-DECLARE_OPAQUE_EX(CXCursorVisitor, cxcursorvisitor, Cxcursorvisitor_val, Val_cxcursorvisitor, custom_finalize_default, custom_compare_default, custom_hash_default)
-
-DECLARE_OPAQUE_EX(CXClientData, cxclientdata, Cxclientdata_val, Val_cxclientdata, custom_finalize_default, custom_compare_default, custom_hash_default)
-
-CAMLprim value
-clang_ext_IndirectFieldDecl_visitChain_wrapper(value parent_ocaml, value visitor_ocaml, value client_data_ocaml)
+enum CXChildVisitResult
+clang_ext_IndirectFieldDecl_visitChain_visitor_callback(CXCursor arg0, CXCursor arg1, CXClientData arg2)
 {
-  CAMLparam3(parent_ocaml, visitor_ocaml, client_data_ocaml);
-  CXCursor parent;
-  parent = Cxcursor_val(Field(parent_ocaml, 0));
-  CXCursorVisitor visitor;
-  visitor = Cxcursorvisitor_val(visitor_ocaml);
-  CXClientData client_data;
-  client_data = Cxclientdata_val(client_data_ocaml);
-  unsigned int result = clang_ext_IndirectFieldDecl_visitChain(parent, visitor, client_data);
+  CAMLparam0();
+  CAMLlocal4(result, f, arg0_ocaml, arg1_ocaml);
+  f = *((value *) ((value **)arg2)[0]);
+arg0_ocaml = caml_alloc_tuple(2);
+  Store_field(arg0_ocaml, 0, Val_cxcursor(arg0));
+  Store_field(arg0_ocaml, 1, safe_field(*((value **)arg2)[1], 1));arg1_ocaml = caml_alloc_tuple(2);
+  Store_field(arg1_ocaml, 0, Val_cxcursor(arg1));
+  Store_field(arg1_ocaml, 1, safe_field(*((value **)arg2)[1], 1));  result = caml_callback2(f, arg0_ocaml, arg1_ocaml);
   {
     CAMLlocal1(data);
-    data = Val_int(result);
+    data = Cxchildvisitresult_val(result);
+    CAMLreturnT(enum CXChildVisitResult, data);
+  }
+
+}
+
+CAMLprim value
+clang_ext_IndirectFieldDecl_visitChain_wrapper(value parent_ocaml, value visitor_ocaml)
+{
+  CAMLparam2(parent_ocaml, visitor_ocaml);
+  CXCursor parent;
+  parent = Cxcursor_val(Field(parent_ocaml, 0));
+  unsigned int result = clang_ext_IndirectFieldDecl_visitChain(parent, clang_ext_IndirectFieldDecl_visitChain_visitor_callback, (value *[]){&visitor_ocaml,&parent_ocaml});
+  {
+    CAMLlocal1(data);
+    data = Val_not_bool(result);
     CAMLreturn(data);
   }
 }

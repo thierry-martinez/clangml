@@ -10,7 +10,7 @@ def opam_installations(ocamlversions, url) {
             node {
                 sh """
                     docker run --rm -v $pwd/src:/clangml \
-                        ocaml/opam2:$ocamlversion \
+                        ocaml/opam:debian-11-ocaml-$ocamlversion \
                         /clangml/ci-scripts/opam-pin_and_install.sh $url
                     """
             }
@@ -176,7 +176,7 @@ pipeline {
             steps {
                 script {
                     opam_installations(
-                        ["4.08", "4.09", "4.10", "4.11"],
+                        ["4.08", "4.09", "4.10", "4.11", "4.12", "4.13"],
                         "file:///clangml/")
                 }
             }
