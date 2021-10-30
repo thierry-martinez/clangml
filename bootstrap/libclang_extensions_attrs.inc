@@ -5940,7 +5940,9 @@ struct clang_ext_TypeLoc clang_ext_Attrs_getDerefType(CXCursor cursor)
   case clang::attr::Pointer:
   if (auto qual_attr = llvm::dyn_cast_or_null<clang::PointerAttr >(attr))
   return
-  MakeTypeLoc(qual_attr->getDerefTypeLoc()->getTypeLoc(), getCursorTU(cursor));
+  qual_attr->getDerefTypeLoc() ? MakeTypeLoc(qual_attr->getDerefTypeLoc()->getTypeLoc(
+                                             ), getCursorTU(cursor)) : 
+  MakeTypeLocInvalid(getCursorTU(cursor));
   break;
   
   #endif
@@ -5951,7 +5953,9 @@ struct clang_ext_TypeLoc clang_ext_Attrs_getDerefType(CXCursor cursor)
   case clang::attr::Owner:
   if (auto qual_attr = llvm::dyn_cast_or_null<clang::OwnerAttr >(attr))
   return
-  MakeTypeLoc(qual_attr->getDerefTypeLoc()->getTypeLoc(), getCursorTU(cursor));
+  qual_attr->getDerefTypeLoc() ? MakeTypeLoc(qual_attr->getDerefTypeLoc()->getTypeLoc(
+                                             ), getCursorTU(cursor)) : 
+  MakeTypeLocInvalid(getCursorTU(cursor));
   break;
   
   #endif
@@ -5967,8 +5971,10 @@ CXCursor cursor)
  (auto qual_attr =
   llvm::dyn_cast_or_null<clang::TypeTagForDatatypeAttr >(attr))
  return
- MakeTypeLoc(qual_attr->getMatchingCTypeLoc()->getTypeLoc(),
-             getCursorTU(cursor));
+ qual_attr->getMatchingCTypeLoc() ? MakeTypeLoc(qual_attr->getMatchingCTypeLoc(
+                                                )->getTypeLoc(),
+                                                getCursorTU(cursor)) : 
+ MakeTypeLocInvalid(getCursorTU(cursor));
  return MakeTypeLocInvalid(getCursorTU(cursor));}
 unsigned int clang_ext_AnnotateAttr_getAnnotationLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -6701,8 +6707,9 @@ clang_ext_TypeLoc clang_ext_PreferredNameAttr_getTypedefType(CXCursor cursor)
  if
  (auto qual_attr = llvm::dyn_cast_or_null<clang::PreferredNameAttr >(attr))
  return
- MakeTypeLoc(qual_attr->getTypedefTypeLoc()->getTypeLoc(),
-             getCursorTU(cursor));
+ qual_attr->getTypedefTypeLoc() ? MakeTypeLoc(qual_attr->getTypedefTypeLoc()->getTypeLoc(
+                                              ), getCursorTU(cursor)) : 
+ MakeTypeLocInvalid(getCursorTU(cursor));
  
  #endif
  
@@ -7351,7 +7358,9 @@ clang_ext_TypeLoc clang_ext_VecTypeHintAttr_getTypeHint(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::VecTypeHintAttr >(attr))
  return
- MakeTypeLoc(qual_attr->getTypeHintLoc()->getTypeLoc(), getCursorTU(cursor));
+ qual_attr->getTypeHintLoc() ? MakeTypeLoc(qual_attr->getTypeHintLoc()->getTypeLoc(
+                                           ), getCursorTU(cursor)) : 
+ MakeTypeLocInvalid(getCursorTU(cursor));
  return MakeTypeLocInvalid(getCursorTU(cursor));}
 unsigned int clang_ext_Attrs_getTCBNameLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -8247,7 +8256,9 @@ CXCursor cursor)
  (auto qual_attr =
   llvm::dyn_cast_or_null<clang::IBOutletCollectionAttr >(attr))
  return
- MakeTypeLoc(qual_attr->getInterfaceLoc()->getTypeLoc(), getCursorTU(cursor));
+ qual_attr->getInterfaceLoc() ? MakeTypeLoc(qual_attr->getInterfaceLoc()->getTypeLoc(
+                                            ), getCursorTU(cursor)) : 
+ MakeTypeLocInvalid(getCursorTU(cursor));
  return MakeTypeLocInvalid(getCursorTU(cursor));}
 enum
 clang_ext_ObjCMethodFamilyAttr_FamilyKind
