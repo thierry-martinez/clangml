@@ -137,10 +137,15 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t)
             (H.record (Clang.Ast.identifier_name "clang_ext_TypeLoc"));
         multiple = false;
         access = (fun e ->
-          H.call (H.decl_of_string "MakeTypeLoc")
-            [H.call (H.arrow e (H.field_name
-              (Clang.Ast.identifier_name "getTypeLoc"))) [];
-             Lazy.force get_cursor_tu]);
+          H.conditional_operator
+            e
+            ~then_branch:(
+              H.call (H.decl_of_string "MakeTypeLoc")
+                [H.call (H.arrow e (H.field_name
+                  (Clang.Ast.identifier_name "getTypeLoc"))) [];
+                 Lazy.force get_cursor_tu])
+            (H.call (H.decl_of_string "MakeTypeLocInvalid")
+              [Lazy.force get_cursor_tu]));
         default =
           H.call (H.decl_of_string "MakeTypeLocInvalid")
             [Lazy.force get_cursor_tu] }
