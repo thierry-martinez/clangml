@@ -125,12 +125,16 @@ val list_of_children : cxcursor -> cxcursor list
 (** [list_of_children cur] returns the list of all the direct child nodes of
     [cur]. *)
 
-val option_of_cursor_map : (cxcursor -> 'a) -> cxcursor -> 'a option
-(** [option_of_cursor_map f cur] returns [None] if [cur] is null,
+val option_cursor_bind : (cxcursor -> 'a option) -> cxcursor -> 'a option
+(** [option_cursor_bind f cur] returns [None] if [cur] is null,
+    [f cur] otherwise. *)
+
+val option_cursor_map : (cxcursor -> 'a) -> cxcursor -> 'a option
+(** [option_cursor_map f cur] returns [None] if [cur] is null,
     [Some (f cur)] otherwise. *)
 
-val option_of_cursor : cxcursor -> cxcursor option
-(** [option_of_cursor cur] returns [None] if [cur] is null,
+val option_cursor : cxcursor -> cxcursor option
+(** [option_cursor cur] returns [None] if [cur] is null,
     [Some cur] otherwise. *)
 
 val first_child : cxcursor -> cxcursor option

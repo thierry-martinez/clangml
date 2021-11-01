@@ -83,15 +83,6 @@ let default_include_directories () =
     "/usr/lib64/clang/" ^ Clangml_config.version_string ^ "/include/" in
   [macos_sdk; (*cpp_lib;*) includedir; gentoo_dir; centos_dir]
 
-let option_cursor_bind f cursor : 'a option =
-  if get_cursor_kind cursor = InvalidCode then
-    None
-  else
-    f cursor
-
-let option_cursor f cursor : 'a option =
-  option_cursor_bind (fun x -> Some (f x)) cursor
-
 let rec filter_out_prefix_from_list p list =
   match list with
   | hd :: tl when p hd -> filter_out_prefix_from_list p tl
@@ -790,7 +781,7 @@ module Ast = struct
                 None in
             let init =
               ext_field_decl_get_in_class_initializer cursor |>
-              option_cursor expr_of_cxcursor in
+              option_cursor_map expr_of_cxcursor in
             let attributes = attributes_of_decl cursor in
             Field { name; qual_type; bitwidth; init; attributes }
         | CXXAccessSpecifier ->
@@ -1270,10 +1261,10 @@ module Ast = struct
           | IfStmt ->
               let init =
                 ext_if_stmt_get_init cursor |>
-                option_cursor stmt_of_cxcursor in
+                option_cursor_map stmt_of_cxcursor in
               let condition_variable =
                 ext_if_stmt_get_condition_variable cursor |>
-                option_cursor var_decl_of_cxcursor in
+                option_cursor_map var_decl_of_cxcursor in
               let cond =
                 ext_if_stmt_get_cond cursor |>
                 expr_of_cxcursor in
@@ -1282,7 +1273,7 @@ module Ast = struct
                 stmt_of_cxcursor in
               let else_branch =
                 ext_if_stmt_get_else cursor |>
-                option_cursor stmt_of_cxcursor in
+                option_cursor_map stmt_of_cxcursor in
               If { init; condition_variable; cond; then_branch; else_branch }
           | SwitchStmt ->
               let children_set = ext_switch_stmt_get_children_set cursor in
@@ -1664,7 +1655,7 @@ module Ast = struct
                 of_type_loc in
               let array_size =
                 cursor |> ext_cxxnew_expr_get_array_size |>
-                option_cursor expr_of_cxcursor in
+                option_cursor_map expr_of_cxcursor in
               let init =
                 cursor |> ext_cxxnew_expr_get_initializer |>
                 option_call_expr_of_cxcursor in
@@ -1925,7 +1916,7 @@ module Ast = struct
         match capture_kind with
         | ByCopy | ByRef ->
             capture |> ext_lambda_capture_get_captured_var |>
-            option_cursor get_cursor_spelling
+            option_cursor_map get_cursor_spelling
         | This | StarThis | VLAType -> None in
       { implicit = ext_lambda_capture_is_implicit capture;
         capture_kind;
@@ -2000,7 +1991,7 @@ module Ast = struct
         end;
       requires_clause =
         ext_template_parameter_list_get_requires_clause list |>
-        option_cursor expr_of_cxcursor;
+        option_cursor_map expr_of_cxcursor;
     }
 
     and extract_template_arguments cursor =
@@ -2023,7 +2014,7 @@ module Ast = struct
     and extract_expr_requirement requirement =
       let return_type_type_constraint =
         ext_expr_requirement_return_type_get_type_constraint requirement |>
-        option_cursor expr_of_cxcursor in
+        option_cursor_map expr_of_cxcursor in
       { expr = ext_expr_requirement_get_expr requirement |> expr_of_cxcursor;
         return_type_type_constraint =
           return_type_type_constraint |> Option.map (fun type_constraint ->

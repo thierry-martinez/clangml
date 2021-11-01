@@ -126,14 +126,17 @@ let iter_decl_attributes f c =
 let iter_cxxrecorddecl_bases f c =
   iter_child_visit_result_visitor ext_cxxrecord_decl_visit_bases f c
 
-let option_of_cursor_map f c : _ option =
-  if cursor_is_null c then
+let option_cursor_bind f cursor : 'a option =
+  if cursor_is_null cursor || get_cursor_kind cursor = InvalidCode then
     None
   else
-    Some (f c)
+    f cursor
 
-let option_of_cursor c =
-  option_of_cursor_map Fun.id c
+let option_cursor_map f cursor : 'a option =
+  option_cursor_bind (fun x -> Some (f x)) cursor
+
+let option_cursor cursor : 'a option =
+  option_cursor_map Fun.id cursor
 
 exception Cursor of cxcursor
 
@@ -147,7 +150,7 @@ let first_child c : cxcursor option =
 let last_child c =
   let last = ref (get_null_cursor ()) in
   iter_children (fun c -> last := c) c;
-  option_of_cursor !last
+  option_cursor !last
 
 let iter_type_fields f ty =
   iter_visitor_result_visitor type_visit_fields f ty
