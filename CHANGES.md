@@ -17,6 +17,8 @@
 - Fields for injected class nameds can now be represented in the AST
   by disabling `options.ignore_injected_class_names`.
 
+- Fix segmentation fault issue when accessing NULL TypeInfoLoc* in attributes
+
 # 2021-02-21, 4.4.0
 
 - Support for Clang/LLVM 11.0.1, 11.1.0 and 12.0.0.

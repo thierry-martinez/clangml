@@ -41,10 +41,6 @@ open Clang__types
   if Clangml_config.version >= { major = 3; minor = 7; subminor = 0 } then
     []
   else [%str
-    type cxvisitorresult =
-      | Break
-      | Continue
-
     let type_visit_fields ty visitor =
       visit_children (ty |> get_type_declaration) (fun cur _parent ->
         match get_cursor_kind cur with

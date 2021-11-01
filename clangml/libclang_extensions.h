@@ -790,6 +790,10 @@ clang_ext_DecltypeType_getUnderlyingExpr(CXType t);
 bool
 clang_ext_NamespaceDecl_isInline(CXCursor);
 
+#ifdef LLVM_VERSION_BEFORE_3_7_0
+  enum CXVisitorResult { CXVisit_Break, CXVisit_Continue };
+#endinf
+
 typedef enum CXVisitorResult (*CXDeclContextVisitor)(
   CXCursor, CXClientData client_data);
 

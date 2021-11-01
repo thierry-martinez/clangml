@@ -43,10 +43,6 @@ val predefined_expr_get_function_name : cxcursor -> cxcursor -> string
   if Clangml_config.version >= { major = 3; minor = 7; subminor = 0 } then
     []
   else [%sig:
-    type cxvisitorresult =
-      | Break
-      | Continue
-
     val type_visit_fields : cxtype -> (cxcursor -> cxvisitorresult) -> bool])]
 
 (** {2 Parsing files and strings } *)
