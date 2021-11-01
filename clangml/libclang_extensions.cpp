@@ -1629,6 +1629,18 @@ extern "C" {
     return MakeCXTypeInvalid(getCursorTU(C));
   }
 
+  CXCursor
+  clang_ext_NonTypeTemplateParmDecl_getDefaultArgument(CXCursor C)
+  {
+    auto *D = GetCursorDecl(C);
+    if (auto NTPD = llvm::dyn_cast_or_null<clang::NonTypeTemplateParmDecl>(D)) {
+      if (auto expr = NTPD->getDefaultArgument()) {
+        return MakeCXCursor(expr, getCursorTU(C));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(C));
+  }
+
   void
   clang_ext_TemplateName_dispose(struct clang_ext_TemplateName CTN)
   {

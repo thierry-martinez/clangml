@@ -104,74 +104,74 @@ typedef struct {
 } CXInt;
 
 bool
-clang_equal_cxint(CXInt a, CXInt b);
+clang_equal_cxint(CXInt, CXInt);
 
 int
-clang_compare_cxint(CXInt a, CXInt b);
+clang_compare_cxint(CXInt, CXInt);
 
 CXInt
-clang_ext_IntegerLiteral_getValue(CXCursor c);
+clang_ext_IntegerLiteral_getValue(CXCursor);
 
 void
-clang_ext_Int_dispose(CXInt c);
+clang_ext_Int_dispose(CXInt);
 
 bool
-clang_ext_Int_isValid(CXInt c);
+clang_ext_Int_isValid(CXInt);
 
 CXString
-clang_ext_Int_toString(CXInt c, unsigned Radix, bool isSigned);
+clang_ext_Int_toString(CXInt, unsigned Radix, bool isSigned);
 
 double
-clang_ext_Int_roundToDouble(CXInt c, bool isSigned);
+clang_ext_Int_roundToDouble(CXInt, bool isSigned);
 
 float
-clang_ext_Int_bitsToFloat(CXInt c);
+clang_ext_Int_bitsToFloat(CXInt);
 
 unsigned
-clang_ext_Int_getBitWidth(CXInt c);
+clang_ext_Int_getBitWidth(CXInt);
 
 unsigned
-clang_ext_Int_getActiveBits(CXInt c);
+clang_ext_Int_getActiveBits(CXInt);
 
 unsigned
-clang_ext_Int_getMinSignedBits(CXInt c);
+clang_ext_Int_getMinSignedBits(CXInt);
 
 bool
-clang_ext_Int_getBoolValue(CXInt c);
+clang_ext_Int_getBoolValue(CXInt);
 
 int
-clang_ext_Int_getZExtValue(CXInt c);
+clang_ext_Int_getZExtValue(CXInt);
 
 int
-clang_ext_Int_getSExtValue(CXInt c);
+clang_ext_Int_getSExtValue(CXInt);
 
 uint64_t
-clang_ext_Int_getZExtValue64(CXInt c);
+clang_ext_Int_getZExtValue64(CXInt);
 
 int64_t
-clang_ext_Int_getSExtValue64(CXInt c);
+clang_ext_Int_getSExtValue64(CXInt);
 
 typedef struct {
   void *data;
 } CXFloat;
 
 bool
-clang_equal_cxfloat(CXFloat a, CXFloat b);
+clang_equal_cxfloat(CXFloat, CXFloat);
 
 int
-clang_compare_cxfloat(CXFloat a, CXFloat b);
+clang_compare_cxfloat(CXFloat, CXFloat);
 
 CXFloat
-clang_ext_FloatingLiteral_getValue(CXCursor c);
+clang_ext_FloatingLiteral_getValue(CXCursor);
 
 void
-clang_ext_Float_dispose(CXFloat c);
+clang_ext_Float_dispose(CXFloat);
 
 bool
-clang_ext_Float_isValid(CXFloat f);
+clang_ext_Float_isValid(CXFloat);
 
 CXString
-clang_ext_Float_toString(CXFloat f);
+clang_ext_Float_toString(CXFloat);
 
 enum clang_ext_fltSemantics {
   CLANG_EXT_fltSemantics_IEEEhalf,
@@ -185,25 +185,25 @@ enum clang_ext_fltSemantics {
 };
 
 enum clang_ext_fltSemantics
-clang_ext_Float_getSemantics(CXFloat f);
+clang_ext_Float_getSemantics(CXFloat);
 
 float
-clang_ext_Float_convertToFloat(CXFloat f);
+clang_ext_Float_convertToFloat(CXFloat);
 
 double
-clang_ext_Float_convertToDouble(CXFloat f);
+clang_ext_Float_convertToDouble(CXFloat);
 
 CXString
-clang_ext_StringLiteral_GetString(CXCursor c);
+clang_ext_StringLiteral_GetString(CXCursor);
 
 CXString
-clang_ext_StringLiteral_getBytes(CXCursor c);
+clang_ext_StringLiteral_getBytes(CXCursor);
 
 unsigned int
-clang_ext_StringLiteral_getByteLength(CXCursor c);
+clang_ext_StringLiteral_getByteLength(CXCursor);
 
 unsigned int
-clang_ext_StringLiteral_getCharByteWidth(CXCursor c);
+clang_ext_StringLiteral_getCharByteWidth(CXCursor);
 
 /* Copied from Expr.h:StringLiteral:StringKind */
 enum clang_ext_StringKind {
@@ -216,7 +216,7 @@ enum clang_ext_StringKind {
 };
 
 enum clang_ext_StringKind
-clang_ext_StringLiteral_getKind(CXCursor c);
+clang_ext_StringLiteral_getKind(CXCursor);
 
 #ifdef LLVM_VERSION_BEFORE_3_9_0
 #define CLANG_EXT_UNARY_OPERATOR_InvalidUnaryOperator \
@@ -231,7 +231,7 @@ enum clang_ext_UnaryOperatorKind {
 };
 
 enum clang_ext_UnaryOperatorKind
-clang_ext_UnaryOperator_getOpcode(CXCursor c);
+clang_ext_UnaryOperator_getOpcode(CXCursor);
 
 CXString
 clang_ext_UnaryOperator_getOpcodeSpelling(
@@ -250,7 +250,7 @@ enum clang_ext_BinaryOperatorKind {
 
 enum clang_ext_BinaryOperatorKind
 clang_ext_BinaryOperator_getOpcode(
-  CXCursor c);
+  CXCursor);
 
 CXString
 clang_ext_BinaryOperator_getOpcodeSpelling(
@@ -264,7 +264,7 @@ enum clang_ext_ForStmtChild {
 };
 
 unsigned
-clang_ext_ForStmt_getChildrenSet(CXCursor c);
+clang_ext_ForStmt_getChildrenSet(CXCursor);
 
 enum clang_ext_IfStmtChild {
   CLANG_EXT_IF_STMT_INIT = 1,
@@ -296,17 +296,17 @@ enum clang_ext_SwitchStmtChild {
 };
 
 unsigned
-clang_ext_SwitchStmt_getChildrenSet(CXCursor c);
+clang_ext_SwitchStmt_getChildrenSet(CXCursor);
 
 CXCursor
-clang_ext_SwitchStmt_getInit(CXCursor c);
+clang_ext_SwitchStmt_getInit(CXCursor);
 
 enum clang_ext_WhileStmtChild {
   CLANG_EXT_WHILE_STMT_CONDITION_VARIABLE = 1
 };
 
 unsigned
-clang_ext_WhileStmt_getChildrenSet(CXCursor c);
+clang_ext_WhileStmt_getChildrenSet(CXCursor);
 
 /* From clang/AST/Type.h */
 enum clang_ext_ElaboratedTypeKeyword {
@@ -327,19 +327,19 @@ clang_ext_ElaboratedType_getKeywordSpelling(
   enum clang_ext_ElaboratedTypeKeyword keyword);
 
 bool
-clang_ext_VarDecl_hasInit(CXCursor c);
+clang_ext_VarDecl_hasInit(CXCursor);
 
 bool
-clang_ext_VarDecl_isConstexpr(CXCursor c);
+clang_ext_VarDecl_isConstexpr(CXCursor);
 
 bool
-clang_ext_MemberRefExpr_isArrow(CXCursor c);
+clang_ext_MemberRefExpr_isArrow(CXCursor);
 
 CXString
-clang_ext_Stmt_GetClassName(CXCursor c);
+clang_ext_Stmt_GetClassName(CXCursor);
 
 int
-clang_ext_Stmt_GetClassKind(CXCursor c);
+clang_ext_Stmt_GetClassKind(CXCursor);
 
 enum clang_ext_CursorKind {
   ECK_ImplicitCastExpr,
@@ -351,7 +351,7 @@ enum clang_ext_CursorKind {
 };
 
 enum clang_ext_CursorKind
-clang_ext_GetCursorKind(CXCursor c);
+clang_ext_GetCursorKind(CXCursor);
 
 enum clang_ext_DeclKind {
   CLANG_EXT_DECL_InvalidDecl,
@@ -413,16 +413,16 @@ CXType
 clang_ext_GetInnerType(CXType c);
 
 CXCursor
-clang_ext_DeclaratorDecl_GetSizeExpr(CXCursor c);
+clang_ext_DeclaratorDecl_GetSizeExpr(CXCursor);
 
 CXCursor
 clang_ext_VariableArrayType_GetSizeExpr(CXType c);
 
 enum clang_ext_StringKind
-clang_ext_CharacterLiteral_GetCharacterKind(CXCursor c);
+clang_ext_CharacterLiteral_GetCharacterKind(CXCursor);
 
 unsigned
-clang_ext_CharacterLiteral_GetValue(CXCursor c);
+clang_ext_CharacterLiteral_GetValue(CXCursor);
 
 /* From clang/Basic/TypeTraits.h */
 enum clang_ext_UnaryExpr {
@@ -460,25 +460,25 @@ CXString
 clang_ext_AttrKind_GetSpelling(enum clang_ext_AttrKind AttrKind);
 
 unsigned
-clang_ext_CXXMethod_isDefaulted(CXCursor C);
+clang_ext_CXXMethod_isDefaulted(CXCursor);
 
 unsigned
-clang_ext_CXXMethod_isConst(CXCursor C);
+clang_ext_CXXMethod_isConst(CXCursor);
 
 unsigned
-clang_ext_CXXConstructor_isExplicit(CXCursor C);
+clang_ext_CXXConstructor_isExplicit(CXCursor);
 
 unsigned
-clang_ext_FunctionDecl_isDeleted(CXCursor C);
+clang_ext_FunctionDecl_isDeleted(CXCursor);
 
 unsigned
-clang_ext_FunctionDecl_getNumParams(CXCursor C);
+clang_ext_FunctionDecl_getNumParams(CXCursor);
 
 CXCursor
-clang_ext_FunctionDecl_getParamDecl(CXCursor C, unsigned i);
+clang_ext_FunctionDecl_getParamDecl(CXCursor, unsigned int);
 
 bool
-clang_ext_FunctionDecl_isConstexpr(CXCursor c);
+clang_ext_FunctionDecl_isConstexpr(CXCursor);
 
 bool
 clang_ext_FunctionDecl_hasWrittenPrototype(CXCursor);
@@ -503,10 +503,13 @@ enum clang_ext_LanguageIDs {
 #endif
 
 unsigned
-clang_ext_LinkageSpecDecl_getLanguageIDs(CXCursor C);
+clang_ext_LinkageSpecDecl_getLanguageIDs(CXCursor);
 
 CXType
-clang_ext_TemplateTypeParmDecl_getDefaultArgument(CXCursor C);
+clang_ext_TemplateTypeParmDecl_getDefaultArgument(CXCursor);
+
+CXCursor
+clang_ext_NonTypeTemplateParmDecl_getDefaultArgument(CXCursor);
 
 struct clang_ext_TemplateName {
   const void *data;
@@ -598,22 +601,22 @@ unsigned
 clang_ext_TemplateSpecializationType_getNumArgs(CXType);
 
 struct clang_ext_TemplateArgument
-clang_ext_TemplateSpecializationType_getArgument(CXType, unsigned);
+clang_ext_TemplateSpecializationType_getArgument(CXType, unsigned int);
 
 CXCursor
-clang_ext_FriendDecl_getFriendDecl(CXCursor c);
+clang_ext_FriendDecl_getFriendDecl(CXCursor);
 
 CXType
-clang_ext_FriendDecl_getFriendType(CXCursor c);
+clang_ext_FriendDecl_getFriendType(CXCursor);
 
 CXCursor
-clang_ext_FieldDecl_getInClassInitializer(CXCursor c);
+clang_ext_FieldDecl_getInClassInitializer(CXCursor);
 
 CXType
-clang_ext_GenericSelectionExpr_getAssocType(CXCursor c, unsigned i);
+clang_ext_GenericSelectionExpr_getAssocType(CXCursor, unsigned int);
 
 bool
-clang_ext_TemplateParm_isParameterPack(CXCursor c);
+clang_ext_TemplateParm_isParameterPack(CXCursor);
 
 CXCursor
 clang_ext_TemplateDecl_getTemplatedDecl(CXCursor);
@@ -632,11 +635,11 @@ enum clang_ext_PredefinedExpr_IdentKind {
 };
 
 enum clang_ext_PredefinedExpr_IdentKind
-clang_ext_PredefinedExpr_getIdentKind(CXCursor c);
+clang_ext_PredefinedExpr_getIdentKind(CXCursor);
 
 #ifndef LLVM_VERSION_BEFORE_3_6_0
 CXString
-clang_ext_PredefinedExpr_getFunctionName(CXCursor c);
+clang_ext_PredefinedExpr_getFunctionName(CXCursor);
 #endif
 
 CXString
@@ -645,13 +648,13 @@ clang_ext_PredefinedExpr_ComputeName(
   CXCursor decl);
 
 bool
-clang_ext_LambdaExpr_isMutable(CXCursor c);
+clang_ext_LambdaExpr_isMutable(CXCursor);
 
 bool
-clang_ext_LambdaExpr_hasExplicitParameters(CXCursor c);
+clang_ext_LambdaExpr_hasExplicitParameters(CXCursor);
 
 bool
-clang_ext_LambdaExpr_hasExplicitResultType(CXCursor c);
+clang_ext_LambdaExpr_hasExplicitResultType(CXCursor);
 
 /* Copied from Basic/Lambda.h.
    clang_ext_LCD_None is renamed clang_ext_LCD_CaptureNone to avoid name clash */
@@ -662,7 +665,7 @@ enum clang_ext_LambdaCaptureDefault {
 };
 
 enum clang_ext_LambdaCaptureDefault
-clang_ext_LambdaExpr_getCaptureDefault(CXCursor c);
+clang_ext_LambdaExpr_getCaptureDefault(CXCursor);
 
 struct clang_ext_LambdaCapture {
   const void *data;
@@ -674,7 +677,7 @@ clang_ext_LambdaExpr_getCaptures(
   CXCursor, void (*)(struct clang_ext_LambdaCapture, void *), void *);
 
 CXCursor
-clang_ext_LambdaExpr_getCallOperator(CXCursor c);
+clang_ext_LambdaExpr_getCallOperator(CXCursor);
 
 /* Copied from Basic/Lambda.h */
 enum clang_ext_LambdaCaptureKind {
@@ -704,31 +707,31 @@ struct clang_ext_TypeLoc
 clang_ext_CXXNewExpr_getAllocatedTypeLoc(CXCursor);
 
 CXCursor
-clang_ext_CXXNewExpr_getArraySize(CXCursor c);
+clang_ext_CXXNewExpr_getArraySize(CXCursor);
 
 unsigned int
-clang_ext_CXXNewExpr_getNumPlacementArgs(CXCursor c);
+clang_ext_CXXNewExpr_getNumPlacementArgs(CXCursor);
 
 CXCursor
-clang_ext_CXXNewExpr_getPlacementArg(CXCursor c, unsigned int i);
+clang_ext_CXXNewExpr_getPlacementArg(CXCursor, unsigned int);
 
 CXCursor
-clang_ext_CXXNewExpr_getInitializer(CXCursor c);
+clang_ext_CXXNewExpr_getInitializer(CXCursor);
 
 bool
-clang_ext_CXXDeleteExpr_isGlobalDelete(CXCursor c);
+clang_ext_CXXDeleteExpr_isGlobalDelete(CXCursor);
 
 bool
-clang_ext_CXXDeleteExpr_isArrayForm(CXCursor c);
+clang_ext_CXXDeleteExpr_isArrayForm(CXCursor);
 
 bool
-clang_ext_CXXTypeidExpr_isTypeOperand(CXCursor c);
+clang_ext_CXXTypeidExpr_isTypeOperand(CXCursor);
 
 struct clang_ext_TypeLoc
 clang_ext_CXXTypeidExpr_getTypeOperand(CXCursor);
 
 CXCursor
-clang_ext_CXXTypeidExpr_getExprOperand(CXCursor c);
+clang_ext_CXXTypeidExpr_getExprOperand(CXCursor);
 
 #ifdef LLVM_VERSION_BEFORE_10_0_0
   #define LANGSTANDARDS_DEF <clang/Frontend/LangStandards.def>
@@ -767,25 +770,25 @@ enum clang_ext_BinaryOperatorKind
 clang_ext_CXXFoldExpr_getOperator(CXCursor);
 
 bool
-clang_ext_CXXBoolLiteralExpr_getValue(CXCursor c);
+clang_ext_CXXBoolLiteralExpr_getValue(CXCursor);
 
 CXCursor
-clang_ext_CallExpr_getCallee(CXCursor c);
+clang_ext_CallExpr_getCallee(CXCursor);
 
 unsigned int
-clang_ext_CallExpr_getNumArgs(CXCursor c);
+clang_ext_CallExpr_getNumArgs(CXCursor);
 
 CXCursor
-clang_ext_CallExpr_getArg(CXCursor c, unsigned int i);
+clang_ext_CallExpr_getArg(CXCursor, unsigned int i);
 
 CXCursor
-clang_ext_SizeOfPackExpr_getPack(CXCursor c);
+clang_ext_SizeOfPackExpr_getPack(CXCursor);
 
 CXCursor
 clang_ext_DecltypeType_getUnderlyingExpr(CXType t);
 
 bool
-clang_ext_NamespaceDecl_isInline(CXCursor c);
+clang_ext_NamespaceDecl_isInline(CXCursor);
 
 typedef enum CXVisitorResult (*CXDeclContextVisitor)(
   CXCursor, CXClientData client_data);
@@ -853,7 +856,7 @@ struct clang_ext_DeclarationName
 clang_ext_Decl_getName(CXCursor);
 
 CXCursor
-clang_ext_UsingDirectiveDecl_getNominatedNamespace(CXCursor c);
+clang_ext_UsingDirectiveDecl_getNominatedNamespace(CXCursor);
 
 struct clang_ext_NestedNameSpecifier {
   const void *data;
@@ -1017,25 +1020,25 @@ CXCursor
 clang_ext_FunctionProtoType_getNoexceptExpr(CXType);
 
 CXString
-clang_ext_AsmStmt_GetAsmString(CXCursor c);
+clang_ext_AsmStmt_GetAsmString(CXCursor);
 
 unsigned int
 clang_ext_AsmStmt_getNumOutputs(CXCursor);
 
 CXString
-clang_ext_AsmStmt_getOutputConstraint(CXCursor, unsigned);
+clang_ext_AsmStmt_getOutputConstraint(CXCursor, unsigned int);
 
 CXCursor
-clang_ext_AsmStmt_getOutputExpr(CXCursor, unsigned);
+clang_ext_AsmStmt_getOutputExpr(CXCursor, unsigned int);
 
 unsigned int
 clang_ext_AsmStmt_getNumInputs(CXCursor);
 
 CXString
-clang_ext_AsmStmt_getInputConstraint(CXCursor, unsigned);
+clang_ext_AsmStmt_getInputConstraint(CXCursor, unsigned int);
 
 CXCursor
-clang_ext_AsmStmt_getInputExpr(CXCursor, unsigned);
+clang_ext_AsmStmt_getInputExpr(CXCursor, unsigned int);
 
 enum clang_ext_TypeLoc_Class {
   #define TYPELOC(Class, Base) CLANG_EXT_TYPELOC_##Class,
@@ -1191,7 +1194,7 @@ unsigned
 clang_ext_Decl_getAttrCount(CXCursor);
 
 CXCursor
-clang_ext_Decl_getAttr(CXCursor, unsigned);
+clang_ext_Decl_getAttr(CXCursor, unsigned int);
 
 bool
 clang_ext_CursorKind_isAttr(enum CXCursorKind);

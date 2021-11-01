@@ -1959,8 +1959,12 @@ module Ast = struct
             Some (Class { default } : template_parameter_kind)
         | NonTypeTemplateParameter ->
             let parameter_type = get_cursor_type cursor |> of_cxtype in
+            let default =
+              ext_non_type_template_parm_decl_get_default_argument cursor in
             let default : expr option =
-              Option.map expr_of_cxcursor (last_child cursor) in
+              match get_cursor_kind default with
+              | InvalidCode -> None
+              | _ -> Some (expr_of_cxcursor default) in
             Some (NonType { parameter_type; default })
         | TemplateTemplateParameter ->
             let parameters = extract_template_parameters cursor in

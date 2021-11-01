@@ -541,11 +541,14 @@ let () =
           non_variadic = [{ desc = {
             qual_type = { desc = BuiltinType Bool };
             name = "b" }}]};
-        initializer_list = [("m", {
-          desc = ConditionalOperator {
-            cond = { desc = DeclRef ({ name = IdentifierName "b" })};
-            then_branch = Some { desc = IntegerLiteral (Int 42)};
-            else_branch = { desc = DeclRef ({ name = IdentifierName "x" })}}})];
+        initializer_list = [{
+          kind = Member { field = { desc = "m" }};
+          init = {
+            desc = ConditionalOperator {
+              cond = { desc = DeclRef ({ name = IdentifierName "b" })};
+              then_branch = Some { desc = IntegerLiteral (Int 42)};
+              else_branch =
+                { desc = DeclRef ({ name = IdentifierName "x" })}}}}];
         body = Some { desc = Compound []};
         constexpr = true; }}];
     check_pattern_decl bindings#v [%pattern? {
