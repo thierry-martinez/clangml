@@ -1104,6 +1104,7 @@ let main cflags llvm_config prefix =
     let fmt = Format.formatter_of_out_channel chan in
     Format.fprintf fmt "%a@." Ppxlib.Pprintast.structure
       ([%str
+          [@@@ocaml.warning "-27"] (* unused-var-strict *)
           [%%metapackage "metapp"]
           [%%metadir "config/.clangml_config.objs/byte"]] @
         type_decl @ [convert]));
