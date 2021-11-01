@@ -15,7 +15,7 @@ module type S = sig
 
   type letter
 
-  val find : word -> ?offset:int -> letter Seq.t -> int Seq.t
+  val find : word -> letter Seq.t -> int Seq.t
 end
 
 module Make (Word : WORD)
@@ -55,7 +55,7 @@ struct
 
   let find (w : Word.t) =
     let t = table w in
-    fun ?(offset = 0) (s : Word.letter Seq.t) : int Seq.t->
+    fun (s : Word.letter Seq.t) : int Seq.t->
       let rec find_next j k (s : Word.letter Seq.t) () : int Seq.node =
         match s () with
         | Nil -> Nil
@@ -99,5 +99,5 @@ let seq_of_in_channel (chan : in_channel) : char Seq.t =
     | exception End_of_file -> Nil in
   loop
 
-let test () =
+let _test () =
   assert (List.of_seq (On_string.find "ababc" (String.to_seq "cabababcababc")) = [3; 8])

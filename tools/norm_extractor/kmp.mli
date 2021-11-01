@@ -15,7 +15,7 @@ module type S = sig
 
   type letter
 
-  val find : word -> ?offset:int -> letter Seq.t -> int Seq.t
+  val find : word -> letter Seq.t -> int Seq.t
 end
 
 module Make (Word : WORD)

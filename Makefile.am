@@ -81,8 +81,11 @@ $(library) : $(DUNE_PREFIX)/$(library_cmxa)
 endef
 $(foreach library, $(libraries), $(eval $(foreach_library)))
 
+.PHONY : tools
+
 define foreach_tool
 .PHONY : tools/$(tool)
+tools : tools/$(tool)
 tools/$(tool) : $(DUNE_PREFIX)/$(tool_exe)
 endef
 $(foreach tool, $(tools), $(eval $(foreach_tool)))
