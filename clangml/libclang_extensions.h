@@ -364,6 +364,20 @@ enum clang_ext_DeclKind {
 enum clang_ext_DeclKind
 clang_ext_Decl_GetKind(CXCursor);
 
+unsigned
+clang_ext_Decl_visitAttributes(
+  CXCursor parent, CXCursorVisitor visitor, CXClientData client_data);
+
+bool
+clang_ext_Decl_isImplicit(CXCursor);
+
+bool
+clang_ext_RecordDecl_isInjectedClassName(CXCursor);
+
+unsigned
+clang_ext_CXXRecordDecl_visitBases(
+  CXCursor parent, CXCursorVisitor visitor, CXClientData client_data);
+
 enum clang_ext_StmtKind {
   CLANG_EXT_STMT_InvalidStmt,
   #define STMT(Class, _Base) CLANG_EXT_STMT_##Class,
@@ -468,6 +482,12 @@ clang_ext_FunctionDecl_isConstexpr(CXCursor c);
 
 bool
 clang_ext_FunctionDecl_hasWrittenPrototype(CXCursor);
+
+bool
+clang_ext_FunctionDecl_doesThisDeclarationHaveABody(CXCursor);
+
+CXCursor
+clang_ext_FunctionDecl_getBody(CXCursor);
 
 /* Adapted from DeclCXX.h:LinkageSpecDecl:LanguageIDs */
 #ifdef LLVM_VERSION_BEFORE_10_0_0
@@ -768,7 +788,7 @@ bool
 clang_ext_NamespaceDecl_isInline(CXCursor c);
 
 typedef enum CXVisitorResult (*CXDeclContextVisitor)(
-  CXCursor , CXClientData client_data);
+  CXCursor, CXClientData client_data);
 
 enum clang_ext_OverloadedOperatorKind {
   CLANG_EXT_OVERLOADED_OPERATOR_InvalidOverloadedOperator,
@@ -1239,5 +1259,47 @@ struct clang_ext_OMPTraitInfo {
 
 void
 clang_ext_OMPTraitInfo_dispose(struct clang_ext_OMPTraitInfo);
+
+struct clang_ext_CXXCtorInitializer {
+  const void *data;
+  CXTranslationUnit tu;
+};
+
+typedef enum CXVisitorResult (*CXXCtorInitializerVisitor)(
+  struct clang_ext_CXXCtorInitializer, CXClientData client_data);
+
+unsigned
+clang_ext_CXXConstructorDecl_visitInitializers(
+  CXCursor parent, CXXCtorInitializerVisitor visitor, CXClientData client_data);
+
+void
+clang_ext_CXXCtorInitializer_dispose(struct clang_ext_CXXCtorInitializer);
+
+bool
+clang_ext_CXXCtorInitializer_isBaseInitializer(struct clang_ext_CXXCtorInitializer);
+
+bool
+clang_ext_CXXCtorInitializer_isPackExpansion(struct clang_ext_CXXCtorInitializer);
+
+bool
+clang_ext_CXXCtorInitializer_isMemberInitializer(struct clang_ext_CXXCtorInitializer);
+
+bool
+clang_ext_CXXCtorInitializer_isIndirectMemberInitializer(struct clang_ext_CXXCtorInitializer);
+
+bool
+clang_ext_CXXCtorInitializer_isDelegatingInitializer(struct clang_ext_CXXCtorInitializer);
+
+struct clang_ext_TypeLoc
+clang_ext_CXXCtorInitializer_getTypeSourceInfo(struct clang_ext_CXXCtorInitializer);
+
+CXCursor
+clang_ext_CXXCtorInitializer_getMember(struct clang_ext_CXXCtorInitializer);
+
+CXCursor
+clang_ext_CXXCtorInitializer_getAnyMember(struct clang_ext_CXXCtorInitializer);
+
+CXCursor
+clang_ext_CXXCtorInitializer_getInit(struct clang_ext_CXXCtorInitializer);
 
 #include "libclang_extensions_attrs_headers.inc"

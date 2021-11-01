@@ -77,17 +77,19 @@ and print_tree indent cursor history =
     print_tree sub_indent cur history;
     Continue)
 
-let print ast tu =
+let print options ast tu =
   Clang.format_diagnostics Clang.warning_or_error Format.err_formatter tu;
   if ast then
     Format.printf "@[%a@]@." Clang.Translation_unit.pp
-      (Clang.Ast.of_cxtranslationunit tu)
+      (Clang.Ast.of_cxtranslationunit ~options tu)
   else
     print_tree "" (Clang.get_translation_unit_cursor tu) []
 
 let main ast exprs files =
   Clangml_tools_common.command_line begin fun language command_line_args ->
     let options = Clang.default_editing_translation_unit_options () in
+    let ast_options =
+      { Clang.Ast.Options.default with ignore_implicit_methods = false } in
   (*
     let options =
       Clang.Cxtranslationunit_flags.(
@@ -99,11 +101,11 @@ let main ast exprs files =
       let filename = "string" ^ suffix in
       prerr_endline filename;
       let tu = Clang.parse_string ~command_line_args ~filename expr ~options in
-      print ast tu
+      print ast_options ast tu
     end;
     files |> List.iter begin fun file ->
       let tu = Clang.parse_file ~command_line_args file ~options in
-      print ast tu
+      print ast_options ast tu
     end
   end
 

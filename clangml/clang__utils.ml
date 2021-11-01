@@ -83,7 +83,7 @@ let iter_child_visit_result_visitor
   end
 
 let iter_visitor_result_visitor
-      (visit_fun : _ -> (cxcursor -> cxvisitorresult) -> bool) f c =
+      (visit_fun : _ -> (_ -> cxvisitorresult) -> bool) f c =
   iter_visitor f begin fun f ->
     ignore (visit_fun c begin fun cur ->
       if f cur then
@@ -93,16 +93,61 @@ let iter_visitor_result_visitor
     end)
   end
 
-let list_of_iter iter =
+let list_of_iter_filter_map (f : _ -> _ option) iter =
   let accu = ref [] in
-  iter (fun item -> accu := item :: !accu);
+  iter (fun item ->
+    match f item with
+    | None -> ()
+    | Some item -> accu := item :: !accu);
   List.rev !accu
+
+let list_of_iter_map f iter =
+  let accu = ref [] in
+  iter (fun item -> accu := f item :: !accu);
+  List.rev !accu
+
+let list_of_iter iter = list_of_iter_map Fun.id iter
 
 let iter_children f c =
   iter_child_visit_result_visitor visit_children f c
 
+let list_of_children_filter_map f c =
+  list_of_iter_filter_map f (fun f -> iter_children f c)
+
+let list_of_children_map f c =
+  list_of_iter_map f (fun f -> iter_children f c)
+
 let list_of_children c =
   list_of_iter (fun f -> iter_children f c)
+
+let iter_decl_attributes f c =
+  iter_child_visit_result_visitor ext_decl_visit_attributes f c
+
+let iter_cxxrecorddecl_bases f c =
+  iter_child_visit_result_visitor ext_cxxrecord_decl_visit_bases f c
+
+let option_of_cursor_map f c : _ option =
+  if cursor_is_null c then
+    None
+  else
+    Some (f c)
+
+let option_of_cursor c =
+  option_of_cursor_map Fun.id c
+
+exception Cursor of cxcursor
+
+let first_child c : cxcursor option =
+  try
+    iter_children (fun c -> raise (Cursor c)) c;
+    None
+  with Cursor c ->
+    Some c
+
+let last_child c =
+  let last = ref (get_null_cursor ()) in
+  iter_children (fun c -> last := c) c;
+  option_of_cursor !last
 
 let iter_type_fields f ty =
   iter_visitor_result_visitor type_visit_fields f ty
@@ -113,14 +158,29 @@ let list_of_type_fields ty =
 let iter_decl_context f c =
   iter_child_visit_result_visitor ext_decl_context_visit_decls f c
 
+let list_of_decl_context_map f c =
+  list_of_iter_map f (fun f -> iter_decl_context f c)
+
 let list_of_decl_context c =
   list_of_iter (fun f -> iter_decl_context f c)
 
 let iter_indirect_field_decl_chain f c =
   iter_child_visit_result_visitor ext_indirect_field_decl_visit_chain f c
 
+let list_of_indirect_field_decl_chain_map f c =
+  list_of_iter_map f (fun f -> iter_indirect_field_decl_chain f c)
+
 let list_of_indirect_field_decl_chain c =
   list_of_iter (fun f -> iter_indirect_field_decl_chain f c)
+
+let iter_cxxconstructor_initializers f c =
+  iter_visitor_result_visitor ext_cxxconstructor_decl_visit_initializers f c
+
+let list_of_cxxconstructor_initializers_map f c =
+  list_of_iter_map f (fun f -> iter_cxxconstructor_initializers f c)
+
+let list_of_cxxconstructor_initializers c =
+  list_of_cxxconstructor_initializers_map Fun.id c
 
 let seq_of_diagnostics tu =
   let count = get_num_diagnostics tu in

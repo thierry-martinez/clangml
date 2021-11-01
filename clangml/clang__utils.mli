@@ -105,9 +105,41 @@ val iter_children : (cxcursor -> unit) -> cxcursor -> unit
 (** [iter_children f cur] calls [f] over all the direct child nodes of
     [cur]. *)
 
+val iter_decl_attributes : (cxcursor -> unit) -> cxcursor -> unit
+(** [iter_decl_attributes f cur] calls [f] over all the attributes of
+    the declaration [cur]. *)
+
+val iter_cxxrecorddecl_bases : (cxcursor -> unit) -> cxcursor -> unit
+(** [iter_decl_attributes f cur] calls [f] over all the bases of
+    the CXX class [cur]. *)
+
+val list_of_children_filter_map : (cxcursor -> 'a option) -> cxcursor -> 'a list
+(** [list_of_children_map f cur] applies f to all the direct child nodes of
+    [cur] and returns the list of [Some _] results. *)
+
+val list_of_children_map : (cxcursor -> 'a) -> cxcursor -> 'a list
+(** [list_of_children_map f cur] applies f to all the direct child nodes of
+    [cur] and returns the list of results. *)
+
 val list_of_children : cxcursor -> cxcursor list
 (** [list_of_children cur] returns the list of all the direct child nodes of
     [cur]. *)
+
+val option_of_cursor_map : (cxcursor -> 'a) -> cxcursor -> 'a option
+(** [option_of_cursor_map f cur] returns [None] if [cur] is null,
+    [Some (f cur)] otherwise. *)
+
+val option_of_cursor : cxcursor -> cxcursor option
+(** [option_of_cursor cur] returns [None] if [cur] is null,
+    [Some cur] otherwise. *)
+
+val first_child : cxcursor -> cxcursor option
+(** [first_child cur] returns the first direct child node of [cur], or [None]
+    if there is no child. *)
+
+val last_child : cxcursor -> cxcursor option
+(** [last_child cur] returns the last direct child node of [cur], or [None]
+    if there is no child. *)
 
 val iter_type_fields : (cxcursor -> unit) -> cxtype -> unit
 (** [iter_type_fields f ty] calls [f] over all the declaration nodes of the
@@ -123,21 +155,55 @@ val iter_decl_context : (cxcursor -> unit) -> cxcursor -> unit
 (** [iter_decl_context f c] calls [f] over all the declaration nodes of
     declaration context [c]. *)
 
+val list_of_decl_context_map : (cxcursor -> 'a) -> cxcursor -> 'a list
+(** [list_of_decl_context_map f c] applies [f] to all the declaration nodes
+    of declaration context [c] and returns the list of results. *)
+
 val list_of_decl_context : cxcursor -> cxcursor list
-(** [list_of_decl_context f c] returns the list of all the declaration nodes
+(** [list_of_decl_context c] returns the list of all the declaration nodes
     of declaration context [c]. *)
 
 val iter_indirect_field_decl_chain : (cxcursor -> unit) -> cxcursor -> unit
 (** [iter_indirect_field_decl_chain f c] calls [f] over the chain of
     indirect field declaration [c]. *)
 
+val list_of_indirect_field_decl_chain_map :
+  (cxcursor -> 'a) -> cxcursor -> 'a list
+(** [list_of_indirect_field_decl_chain_map f c] applies [f] to all declarations
+    in the chain of indirect field declaration [c] and returns the list of
+    results. *)
+
 val list_of_indirect_field_decl_chain : cxcursor -> cxcursor list
 (** [list_of_indirect_field_decl_chain f c] returns the list of the declarations
     in the chain of indirect field declaration [c]. *)
 
+val iter_cxxconstructor_initializers :
+  (clang_ext_cxxctorinitializer -> unit) -> cxcursor -> unit
+(** [iter_cxxconstructor_initializers f c] calls [f] over the initializers
+    of constructor [c]. *)
+
+val list_of_cxxconstructor_initializers_map :
+  (clang_ext_cxxctorinitializer -> 'a) -> cxcursor -> 'a list
+(** [list_of_cxxconstructor_initializers_map f c] calls [f] over the
+    initializers of constructor [c] and returns the list of results. *)
+
+val list_of_cxxconstructor_initializers :
+  cxcursor -> clang_ext_cxxctorinitializer list
+(** [list_of_cxxconstructor_initializers_map c] returns the list of
+    the initializers of constructor [c]. *)
+
 val list_of_iter : (('a -> unit) -> unit) -> 'a list
 (** [list_of_iter iter] calls [iter f] and returns all the values which [f] has
     been applied to. *)
+
+val list_of_iter_filter_map :
+  ('a -> 'b option) -> (('a -> unit) -> unit) -> 'b list
+(** [list_of_iter g iter] calls [iter f] and applies [g] to all the values
+    which [f] has been applied to and returns the [Some _] results. *)
+
+val list_of_iter_map : ('a -> 'b) -> (('a -> unit) -> unit) -> 'b list
+(** [list_of_iter g iter] calls [iter f] and applies [g] to all the values
+    which [f] has been applied to and returns the results. *)
 
 (** {2 Integer or floating point types} *)
 val is_integer : cxtypekind -> bool

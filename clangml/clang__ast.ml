@@ -870,6 +870,44 @@ and record_decl = {
     fields : decl list;
     final : bool; (** C++11 *)
     complete_definition : bool;
+    is_injected_class_name : bool;
+(** Determine whether this declaration represents the name of the class
+    that appears inside the class itself.
+
+    By default, injected class names are ignored unless
+    {!field:Clang.ignore_injected_class_names} option is turned to false.
+
+   {[
+let example = {|
+  struct T {
+    int i;
+  };
+|}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = RecordDecl { keyword = Struct; name = "T"; fields = [
+      { desc = Field
+        { name = "i";
+          qual_type = { desc = BuiltinType Int }}}] }}]]
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX
+    ~options:({ Clang.Ast.Options.default with
+      ignore_injected_class_names = false })) example
+  [%pattern?
+    [{ desc = RecordDecl { keyword = Struct; name = "T"; fields = [
+      { desc = RecordDecl
+        { is_injected_class_name = true;
+          keyword = Struct;
+          name = "T";
+          fields = [];
+          complete_definition = false; }};
+      { desc = Field
+        { name = "i";
+          qual_type = { desc = BuiltinType Int }}}] }}]]
+ ]}*)
   }
 
 and function_decl = {
@@ -1333,11 +1371,11 @@ let () =
           default = Some { desc = IntegerLiteral (Int 1) }}}];
         variadic = false }}}}] -> ()
   | _ -> assert false
-    ]}
- *)
+    ]}*)
   variadic : bool;
 (** True if the function type is variadic.
     {[
+
 let example = "void f(int i, ...);"
 
 let () =
@@ -1353,8 +1391,7 @@ let () =
       List.iter (fun decl -> Format.eprintf "%a@." pp_decl decl)
         decls;
       assert false
-    ]}
- *)
+    ]}*)
 }
 
 and parameter = parameter_desc node
@@ -3448,6 +3485,7 @@ let () =
       static : bool;
       binding : cxx_method_binding_kind;
       const : bool;
+      implicit : bool;
     }
 (** C++ method.
 
@@ -3565,7 +3603,86 @@ let () =
               qual_type = { desc = BuiltinType (Char_S | Char_U) }}}] }};
           body = Some { desc = Compound [
             { desc = Return (Some { desc = IntegerLiteral (Int 0) })}] }}}}]]
-    ]}*)
+    ]}
+
+    By default, implicit methods such as implicit assignment operators
+    in virtual classes are ignored unless
+    {!field:Clang.ignore_implicit_methods} option is turned to false.
+
+    {[
+let example = {|
+    class C {
+      virtual void virtual_method();
+    };
+ |}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = RecordDecl {
+      keyword = Class;
+      name = "C";
+      fields = [
+        { desc = CXXMethod {
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
+          binding = Virtual;
+          function_decl = {
+            name = IdentifierName "virtual_method";
+            function_type = {
+              result = { desc = BuiltinType Void };
+              parameters = Some { non_variadic = [] }};
+            body = None; };
+          implicit = false; }}] }}]]
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX ~options:
+    { Clang.Ast.Options.default with ignore_implicit_methods = false }) example
+  [%pattern?
+    [{ desc = RecordDecl {
+      keyword = Class;
+      name = "C";
+      fields = [
+        { desc = CXXMethod {
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
+          binding = Virtual;
+          function_decl = {
+            name = IdentifierName "virtual_method";
+            function_type = {
+              result = { desc = BuiltinType Void };
+              parameters = Some { non_variadic = [] }};
+            body = None; };
+          implicit = false; }};
+        { desc = CXXMethod {
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
+          binding = NonVirtual;
+          function_decl = {
+            name = OperatorName Equal;
+            constexpr = true;
+            function_type = {
+              result = { desc = LValueReference { desc =
+                Record { name = IdentifierName "C" }}};
+              parameters = Some { non_variadic = [
+                { desc = { qual_type = { desc = LValueReference { desc =
+                  Record { name = IdentifierName "C" }}}}}] }};
+            body = None; };
+          implicit = true; }};
+        { desc = CXXMethod {
+          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
+          binding = NonVirtual;
+          function_decl = {
+            name = OperatorName Equal;
+            constexpr = true;
+            function_type = {
+              result = { desc = LValueReference { desc =
+                Record { name = IdentifierName "C" }}};
+              parameters = Some { non_variadic = [
+                { desc = { qual_type = { desc = RValueReference { desc =
+                  Record { name = IdentifierName "C" }}}}}] }};
+            body = None; };
+          implicit = true; }}] }}]]
+    ]}
+
+*)
   | Var of var_decl_desc
 (** Variable declaration.
 
@@ -3823,23 +3940,7 @@ let () =
           { desc = Field { name = "i";
             qual_type = { desc = BuiltinType Int}}};
           { desc = Field { name = "f";
-            qual_type = { desc = BuiltinType Float}}}] }};
-        { desc = IndirectField [
-          { desc = Field {
-              name = "";
-              qual_type = {
-                desc = Elaborated { named_type = { desc = Record _ }}}}};
-          { desc = Field {
-              name = "i";
-              qual_type = { desc = BuiltinType Int }}}] };
-        { desc = IndirectField [
-          { desc = Field {
-              name = "";
-              qual_type = {
-                desc = Elaborated { named_type = { desc = Record _ }}}}};
-          { desc = Field {
-              name = "f";
-              qual_type = { desc = BuiltinType Float }}}] }] }}]]
+            qual_type = { desc = BuiltinType Float}}}] }}] }}]]
 
 let example = {| union s { int single; struct { int i; float f; };}; |}
 
@@ -3856,23 +3957,7 @@ let () =
           { desc = Field { name = "i";
             qual_type = { desc = BuiltinType Int}}};
           { desc = Field { name = "f";
-            qual_type = { desc = BuiltinType Float}}}] }};
-        { desc = IndirectField [
-          { desc = Field {
-              name = "";
-              qual_type = {
-                desc = Elaborated { named_type = { desc = Record _ }}}}};
-          { desc = Field {
-              name = "i";
-              qual_type = { desc = BuiltinType Int }}}] };
-        { desc = IndirectField [
-          { desc = Field {
-              name = "";
-              qual_type = {
-                desc = Elaborated { named_type = { desc = Record _ }}}}};
-          { desc = Field {
-              name = "f";
-              qual_type = { desc = BuiltinType Float }}}] }] }}]]
+            qual_type = { desc = BuiltinType Float}}}] }}] }}]]
     ]}*)
   | TypedefDecl of {
       name : string;
@@ -4067,6 +4152,12 @@ template<typename T, typename Alloc> struct my_vector {
   | IndirectField of decl list
 (** Field injected from an anonymous union/struct into the parent scope.
 
+    By default, injected fields are ignored unless
+    {!field:Clang.ignore_indirect_fields} option is turned to false.
+
+    By default, the fields associated to anonymous unions/strucsts are ignored
+    unless {!field:Clang.ignore_anonymous_fields} option is turned to false.
+
     {[
 let example = {|
 struct {
@@ -4087,6 +4178,22 @@ let () =
           { desc = Field { name = "a";
             qual_type = { desc = BuiltinType Int };
             bitwidth = None;
+            init = None; }}] }}] }};
+     { desc = Var { var_name = "b"; var_type = {
+         desc = Elaborated { named_type = { desc = Record _ }}}}}]]
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~options:(
+    { Clang.Ast.Options.default with ignore_indirect_fields = false })) example
+  [%pattern?
+    [{ desc = RecordDecl {
+     keyword = Struct;
+      name = "";
+      fields = [
+        { desc = RecordDecl { keyword = Struct; name = ""; fields = [
+          { desc = Field { name = "a";
+            qual_type = { desc = BuiltinType Int };
+            bitwidth = None;
             init = None; }}] }};
         { desc = IndirectField [
           { desc = Field {
@@ -4096,6 +4203,27 @@ let () =
           { desc = Field {
               name = "a";
               qual_type = { desc = BuiltinType Int }}}] }] }};
+     { desc = Var { var_name = "b"; var_type = {
+         desc = Elaborated { named_type = { desc = Record _ }}}}}]]
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~options:(
+    { Clang.Ast.Options.default with
+      ignore_anonymous_fields = false })) example
+  [%pattern?
+    [{ desc = RecordDecl {
+     keyword = Struct;
+      name = "";
+      fields = [
+        { desc = RecordDecl { keyword = Struct; name = ""; fields = [
+          { desc = Field { name = "a";
+            qual_type = { desc = BuiltinType Int };
+            bitwidth = None;
+            init = None; }}] }};
+        { desc = Field
+          { qual_type = { desc = Elaborated { named_type =
+            { desc = Record { name = IdentifierName "" }}}};
+            name = ""; }}] }};
      { desc = Var { var_name = "b"; var_type = {
          desc = Elaborated { named_type = { desc = Record _ }}}}}]]
     ]}*)
@@ -4211,8 +4339,31 @@ let () =
   | Constructor of {
       class_name : string;
       parameters : parameters;
-      initializer_list : (string * expr) list;
+      initializer_list : constructor_initializer list;
       body : stmt option;
+      implicit : bool;
+(** Determine whether this constructor is implicit.
+
+    By default, implicit constructors are ignored unless
+    {!field:Clang.ignore_implicit_constructors} option is turned to false.
+
+   {[
+let example = {|
+  struct T {};
+|}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = RecordDecl { keyword = Struct; name = "T"; fields = [] }}]]
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX
+    ~options:({ Clang.Ast.Options.default with
+      ignore_implicit_constructors = false })) example
+  [%pattern?
+    [{ desc = RecordDecl { keyword = Struct; name = "T"; fields = [] }}]]
+ ]}*)
       explicit : bool;
       defaulted : bool;
       deleted : bool;
@@ -4260,7 +4411,8 @@ let () =
                  variadic = false;
                };
                initializer_list =
-                 ["i", { desc = DeclRef ({ name = IdentifierName "v" }) }];
+                 [{ kind = Member { field = { desc = "i"; _ }; _ };
+                    init = { desc = DeclRef ({ name = IdentifierName "v" }) }}];
                body = Some { desc = Compound [] };
                explicit = true;
                defaulted = false;
@@ -4584,6 +4736,148 @@ let () =
     ]}*)
 
   | UnknownDecl of cxcursorkind * clang_ext_declkind
+
+and constructor_initializer = {
+  kind : constructor_initializer_kind;
+  init : expr;
+}
+
+and constructor_initializer_kind =
+  | Base of {
+      qual_type : qual_type;
+      pack_expansion : bool;
+    }
+(**
+  Initializer for a base class.
+
+    {[
+let example = {|
+  class A {};
+
+  class B : A {
+    B() : A() {};
+  };
+    |}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = RecordDecl { keyword = Class; name = "A" }};
+     { desc = RecordDecl
+       { keyword = Class; name = "B";
+         bases = [{ qual_type =
+           { desc = Record { name = IdentifierName "A" }}}];
+         fields = [
+           { desc = Constructor { class_name = "B";
+             initializer_list = [{
+               kind = Base { qual_type =
+                 { desc = Record { name = IdentifierName "A" }}};
+               init = { desc = Construct {
+                 qual_type = { desc = Record { name = IdentifierName "A" }};
+                 args = [] }}}];
+             body = Some { desc = Compound [] }}}] }}]]
+    ]}*)
+  | Delegating of qual_type
+(**
+  Delegating constructor.
+
+    {[
+let example = {|
+  class C {
+    C(int x) {};
+    C() : C(1) {};
+  };
+    |}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = RecordDecl
+       { keyword = Class; name = "C";
+         fields = [
+           { desc = Constructor { class_name = "C";
+             parameters = {
+                 non_variadic = [{ desc = {
+                   name = "x";
+                   qual_type = { desc = BuiltinType Int }}}];
+                 variadic = false;
+               };
+             initializer_list = [];
+             body = Some { desc = Compound [] }}};
+           { desc = Constructor { class_name = "C";
+             parameters = {
+                 non_variadic = [];
+                 variadic = false;
+               };
+             initializer_list = [{
+               kind = Delegating
+                 { desc = Record { name = IdentifierName "C" }};
+               init = { desc = Construct {
+                 qual_type = { desc = Record { name = IdentifierName "C" }};
+                 args = [{ desc = IntegerLiteral (Int 1) }] }}}];
+             body = Some { desc = Compound [] }}}] }}]]
+    ]}*)
+  | Member of {
+      indirect : bool;
+      field : decl_ref;
+    }
+(**
+  Member initializer.
+
+    {[
+let example = {|
+  class C {
+    int i;
+    C() : i(0) {};
+  };
+    |}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = RecordDecl
+       { keyword = Class; name = "C";
+         fields = [
+           { desc = Field {
+               qual_type = { desc = BuiltinType Int };
+               name = "i" }};
+           { desc = Constructor { class_name = "C";
+             initializer_list = [{
+               kind = Member
+                 { indirect = false; field = { desc = "i" }};
+               init = { desc = IntegerLiteral (Int 0) }}];
+             body = Some { desc = Compound [] }}}] }}]]
+
+let example = {|
+  class C {
+    struct {
+      int i;
+    };
+    C() : i(0) {};
+  };
+    |}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = RecordDecl
+       { keyword = Class; name = "C";
+         fields = [
+           { desc = RecordDecl
+             { keyword = Struct;
+               name = "";
+               fields = [{ desc = Field
+                 { qual_type = { desc = BuiltinType Int };
+                   name = "i" }}] }};
+           { desc = Constructor { class_name = "C";
+             initializer_list = [{
+               kind = Member
+                 { indirect = true; field = { desc = "i" }};
+               init = { desc = IntegerLiteral (Int 0) }}];
+             body = Some { desc = Compound [] }}}] }}]]
+    ]}*)
+
+and decl_ref = string node
 
 and directive =
   | Include of {

@@ -1,9 +1,5 @@
 open Clang__bindings
 
-open Clang__types
-
-open Clang__utils
-
 (** Common part of AST node signatures *)
 module type S = sig
   type t

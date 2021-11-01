@@ -29,6 +29,26 @@ type t = {
 
     ignore_bind_temporary_expr : bool;
 
+    ignore_injected_class_names : bool;
+    (** Ignore injected class name.
+        See {!type:Clang__ast.record_decl} for examples. *)
+
+    ignore_implicit_constructors : bool;
+    (** Ignore implicit constructors.
+        See {!constructor:Clang__ast.Constructor} for examples. *)
+
+    ignore_implicit_methods : bool;
+    (** Ignore implicit methods.
+        See {!constructor:Clang__ast.CXXMethod} for examples. *)
+
+    ignore_anonymous_fields : bool;
+    (** Ignore anonymous fields.
+        See {!constructor:Clang__ast.IndirectField} for examples. *)
+
+    ignore_indirect_fields : bool;
+    (** Ignore indirect fields.
+        See {!constructor:Clang__ast.IndirectField} for examples. *)
+
     convert_integer_literals : bool;
     (** Convert integer literals into {!constructor:Clang__ast.Int}.
         See {!constructor:Clang__ast.IntegerLiteral} for examples. *)
@@ -51,6 +71,11 @@ let default = {
   ignore_expr_with_cleanups = true;
   ignore_materialize_temporary_expr = true;
   ignore_bind_temporary_expr = true;
+  ignore_injected_class_names = true;
+  ignore_implicit_constructors = true;
+  ignore_implicit_methods = true;
+  ignore_anonymous_fields = true;
+  ignore_indirect_fields = true;
   convert_integer_literals = true;
   convert_floating_literals = true;
   init_list_form = Syntactic;
