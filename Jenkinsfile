@@ -194,7 +194,7 @@ pipeline {
                 script {
                     def repo = env.JOB_NAME == "perso/master" ? "tmartine" : "memcad"
                     opam_installations(
-                        ["4.11"],
+                        ["4.13"],
 "https://gitlab.inria.fr/$repo/clangml/-/archive/snapshot/clangml-snapshot.tar.gz")
                 }
             }
