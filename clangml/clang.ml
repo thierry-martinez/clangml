@@ -1822,6 +1822,29 @@ module Ast = struct
               | RequiresExpr
                 [@if [%meta Metapp.Exp.of_bool
                   (Clangml_config.version.major >= 10)]] ->
+    let extract_expr_requirement requirement =
+      let return_type_type_constraint =
+        ext_expr_requirement_return_type_get_type_constraint requirement |>
+        option_cursor_map expr_of_cxcursor in
+      { expr = ext_expr_requirement_get_expr requirement |> expr_of_cxcursor;
+        return_type_type_constraint =
+          return_type_type_constraint |> Option.map (fun type_constraint ->
+            { type_constraint;
+              parameters =
+ext_expr_requirement_return_type_get_type_constraint_template_parameter_list
+                requirement |> extract_template_parameter_list; })} in
+
+    let extract_requirement requirement : requirement =
+      match ext_requirement_get_kind requirement with
+      | Type -> Type (ext_type_requirement_get_type requirement |> of_type_loc)
+      | Simple -> Simple (extract_expr_requirement requirement)
+      | Compound -> Compound (extract_expr_requirement requirement)
+      | Nested ->
+          let expr =
+            ext_nested_requirement_get_constraint_expr requirement |>
+            expr_of_cxcursor in
+          Nested expr in
+
                   Requires {
                     local_parameters =
                       List.init
@@ -1999,29 +2022,6 @@ module Ast = struct
         ext_cursor_get_template_arg cursor i |>
         make_template_argument
       end
-
-    and extract_requirement requirement : requirement =
-      match ext_requirement_get_kind requirement with
-      | Type -> Type (ext_type_requirement_get_type requirement |> of_type_loc)
-      | Simple -> Simple (extract_expr_requirement requirement)
-      | Compound -> Compound (extract_expr_requirement requirement)
-      | Nested ->
-          let expr =
-            ext_nested_requirement_get_constraint_expr requirement |>
-            expr_of_cxcursor in
-          Nested expr
-
-    and extract_expr_requirement requirement =
-      let return_type_type_constraint =
-        ext_expr_requirement_return_type_get_type_constraint requirement |>
-        option_cursor_map expr_of_cxcursor in
-      { expr = ext_expr_requirement_get_expr requirement |> expr_of_cxcursor;
-        return_type_type_constraint =
-          return_type_type_constraint |> Option.map (fun type_constraint ->
-            { type_constraint;
-              parameters =
-ext_expr_requirement_return_type_get_type_constraint_template_parameter_list
-                requirement |> extract_template_parameter_list; })}
 
     and make_template ?(optional = false) cursor body =
       let parameters = extract_template_parameters cursor in
