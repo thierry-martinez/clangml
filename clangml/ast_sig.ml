@@ -1,6 +1,7 @@
 open Clang__bindings
 
 open Clang__utils
+   [@@ocaml.warning "-33"] (* unused-open: cxerrorcode with clang <3.5.0 *)
 
 (** Common part of AST node signatures *)
 module type S = sig
