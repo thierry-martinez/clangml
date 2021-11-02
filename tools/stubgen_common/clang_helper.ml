@@ -56,7 +56,7 @@ let binary_operator lhs kind rhs =
   Clang.Ast.node (Clang.Ast.BinaryOperator { lhs; kind; rhs })
 
 let member ?base ?(arrow = false) field =
-  Clang.Ast.node (Clang.Ast.Member { base; arrow; field })
+  Clang.Ast.node (Clang.Ast.Member { base; arrow; field } : Clang.Ast.expr_desc)
 
 let arrow base field =
   member ~base ~arrow:true field

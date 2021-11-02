@@ -124,8 +124,17 @@ let rec decl fmt (d : Clang__ast.decl) =
           | _ ->
               Format.fprintf fmt "@ :@ ";
               Format.pp_print_list ~pp_sep:pp_comma
-                (fun fmt (name, value) ->
-                  Format.fprintf fmt "%s(%a)" name expr value)
+                (fun fmt ({ kind; init } : Clang__ast.constructor_initializer) ->
+                  let name fmt =
+                    match kind with
+                    | Base { qual_type; _ } | Delegating qual_type ->
+                        begin
+                          match qual_type.desc with
+                          | Record name -> pp_ident_ref fmt name
+                          | _ -> assert false
+                        end
+                    | Member { field; _ } -> Format.pp_print_string fmt field.desc in
+                  Format.fprintf fmt "%t(%a)" name expr init)
                 fmt initializer_list)
         (fun fmt ->
           if defaulted then
@@ -182,7 +191,7 @@ and expr_prec prec fmt (e : Clang__ast.expr) =
         | Ascii -> Format.fprintf fmt "'%a'" c_escape_char (char_of_int value)
         | _ -> failwith "Not implemented character kind"
       end
-  | StringLiteral { bytes } ->
+  | StringLiteral { bytes; _ } ->
       Format.pp_print_string fmt "\"";
       String.iter (c_escape_char fmt) bytes;
       Format.pp_print_string fmt "\""
@@ -193,7 +202,7 @@ and expr_prec prec fmt (e : Clang__ast.expr) =
         Format.fprintf fmt "@[%a[@[%a@]]@]" (expr_prec 1) base (expr_prec 15)
           index)
   | Call {
-        callee = { desc = DeclRef { name = OperatorName kind }; _ };
+        callee = { desc = DeclRef { name = OperatorName kind; _ }; _ };
         args = [lhs; rhs]} ->
       let kind = Clang__utils.binary_of_overloaded_operator_kind kind in
       expr_prec prec fmt { e with desc = BinaryOperator { lhs; kind; rhs }}
@@ -227,7 +236,7 @@ and expr_prec prec fmt (e : Clang__ast.expr) =
           (expr_prec right_prec) rhs)
   | DeclRef ident_ref ->
       pp_ident_ref fmt ident_ref
-  | Member { base = None; field = FieldName field } ->
+  | Member { base = None; field = FieldName field; _ } ->
       pp_ident_ref fmt field.desc
   | Member { base = Some base; arrow; field } ->
       let arrow_str =
@@ -249,7 +258,7 @@ and expr_prec prec fmt (e : Clang__ast.expr) =
         | Some { desc = Construct { args; _ }; _ } ->
             Format.fprintf fmt "@[(%a)@]"
               (Format.pp_print_list ~pp_sep:pp_comma expr) args
-        | Some expr ->
+        | Some _expr ->
             failwith
               (Format.asprintf "Unexpected constructor argument %a"
                  (Refl.pp [%refl: Clang__ast.expr] []) e) in
@@ -305,7 +314,7 @@ and stmt fmt (s : Clang__ast.stmt) =
           pp_condition_variable fmt (condition_variable, cond))
         (fun fmt -> inc |> Option.iter @@ stmt_without_semicolon fmt)
         stmt body
-  | ForRange { var = { desc = { var_name; var_type; _ }}; range; body } ->
+  | ForRange { var = { desc = { var_name; var_type; _ }; _}; range; body } ->
       Format.fprintf fmt "@[for@ (@[%a@ :@ %a@])@ %a@]"
         (typed_value (fun fmt -> Format.pp_print_string fmt var_name)) var_type
         expr range stmt body
@@ -323,7 +332,7 @@ and stmt fmt (s : Clang__ast.stmt) =
 
 and stmt_without_semicolon fmt (s : Clang__ast.stmt) =
   match s.desc with
-  | Decl [{desc = Var var_decl}] ->
+  | Decl [{ desc = Var var_decl; _ }] ->
       pp_var_decl fmt var_decl
   | Expr e ->
       expr fmt e
@@ -353,7 +362,7 @@ and pp_parameters fmt parameters =
   let pp_parameter fmt (parameter : Clang__ast.parameter option) =
     match parameter with
     | None -> Format.pp_print_string fmt "..."
-    | Some { desc = { name; qual_type = ty; _ }} ->
+    | Some { desc = { name; qual_type = ty; _ }; _ } ->
         typed_value (fun fmt -> Format.pp_print_string fmt name) fmt ty in
   Format.pp_print_list
     ~pp_sep:pp_comma
@@ -433,7 +442,7 @@ and typed_value fmt_value fmt t =
       typed_value
         (fun fmt -> Format.fprintf fmt "@[%t[%d]@]" fmt_value size) fmt
         element
-  | Elaborated { keyword; named_type } ->
+  | Elaborated { keyword; named_type; _ } ->
       Format.fprintf fmt "@[%s@ %a@]"
         (Clang__bindings.ext_elaborated_type_get_keyword_spelling keyword)
         (typed_value fmt_value) named_type
@@ -452,7 +461,7 @@ and typed_value fmt_value fmt t =
         (Refl.pp [%refl: Clang__ast.qual_type] []) t
 
 and pp_qual_type fmt t =
-  typed_value (fun fmt -> ()) fmt t
+  typed_value (fun _fmt -> ()) fmt t
 
 and decls fmt decls =
   Format.fprintf fmt "@[%a@]"

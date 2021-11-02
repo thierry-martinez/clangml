@@ -190,7 +190,7 @@ let rec find_map f list =
       | result -> result
 
 let parse_code context contents =
-  let { target; command_line_args } = context in
+  let { target; command_line_args; _ } = context in
   let tu = Clang.parse_string ~command_line_args contents in
   let alternative_contexts =
         [(fun s -> "void in_a_function() {\n" ^ s ^ "\n}");
@@ -275,7 +275,7 @@ let rec loop context title_buffer lexbuf =
   | EOF -> ()
   | Begin_codeblock ->
       Gc.full_major ();
-      let { target; section_table } = context in
+      let { target; section_table; _ } = context in
       title_buffer |> List.rev |> List.iter begin fun
         ({ title; ident; _ } : Tex_lexer.section_title) ->
           match String_hashtbl.find_opt section_table ident with

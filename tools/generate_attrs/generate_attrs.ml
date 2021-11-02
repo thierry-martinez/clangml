@@ -62,7 +62,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t)
     lazy (H.call (H.decl_of_string "getCursorTU")
       [H.decl_of_string "cursor"]) in
   match Lazy.force qual_type.desc with
-  | Pointer { desc = lazy (Record { name = IdentifierName "Expr"})} ->
+  | Pointer { desc = lazy (Record { name = IdentifierName "Expr"; _ }); _} ->
       { ocaml_type = [%type: 'expr];
         type_conversion = Expr;
         interface_type = H.cxcursor;
@@ -74,7 +74,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t)
           H.call (H.decl_of_string "MakeCXCursorInvalid")
             [H.decl_of_string "CXCursor_InvalidCode";
               Lazy.force get_cursor_tu]}
-  | Record { name = IdentifierName "VersionTuple" } ->
+  | Record { name = IdentifierName "VersionTuple"; _ } ->
       { ocaml_type = [%type: Clang__bindings.clang_ext_versiontuple];
         type_conversion = NoConversion;
         interface_type =
@@ -84,8 +84,8 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t)
         access = (fun e ->
           H.call (H.decl_of_string "makeVersionTuple") [e]);
         default = H.decl_of_string "zeroVersionTuple"}
-  | Record { name = IdentifierName "StringRef" }
-  | Pointer { desc = lazy (BuiltinType Char_S) } ->
+  | Record { name = IdentifierName "StringRef"; _ }
+  | Pointer { desc = lazy (BuiltinType Char_S); _ } ->
       { ocaml_type = [%type: string];
         type_conversion = NoConversion;
         interface_type =
@@ -98,7 +98,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t)
           H.call (H.decl_of_string "cxstring_createRef")
             [H.string ""] }
   | Pointer { desc = lazy (
-        Record { name = IdentifierName "IdentifierInfo" }) } ->
+        Record { name = IdentifierName "IdentifierInfo"; _ }) ; _ } ->
       { ocaml_type = [%type: string];
         type_conversion = NoConversion;
         interface_type =
@@ -112,7 +112,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t)
           H.call (H.decl_of_string "cxstring_createRef")
             [H.string ""] }
   | Pointer { desc = lazy (
-        Record { name = IdentifierName "FunctionDecl" }) } ->
+        Record { name = IdentifierName "FunctionDecl"; _ }); _ } ->
       { ocaml_type = [%type: 'declaration_name];
         type_conversion = DeclarationName;
         interface_type =
@@ -129,7 +129,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t)
           H.call (H.decl_of_string "MakeDeclarationNameInvalid")
             [Lazy.force get_cursor_tu] }
   | Pointer { desc = lazy (
-        Record { name = IdentifierName "TypeSourceInfo" }) } ->
+        Record { name = IdentifierName "TypeSourceInfo"; _ }); _ } ->
       { ocaml_type = [%type: 'qual_type];
         type_conversion = TypeLoc;
         interface_type =
@@ -150,7 +150,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t)
           H.call (H.decl_of_string "MakeTypeLocInvalid")
             [Lazy.force get_cursor_tu] }
   | Pointer { desc = lazy (
-        Record { name = IdentifierName "OMPTraitInfo" }) } ->
+        Record { name = IdentifierName "OMPTraitInfo"; _ }); _ } ->
       { ocaml_type = [%type: 'omp_trait_info];
         type_conversion = OMPTraitInfo;
         interface_type =
@@ -164,7 +164,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t)
           H.call (H.decl_of_string "MakeOMPTraitInfoInvalid")
             [Lazy.force get_cursor_tu] }
   | Pointer { desc = lazy (
-        Record { name = IdentifierName "MSGuidDecl" }) } ->
+        Record { name = IdentifierName "MSGuidDecl"; _ }); _ } ->
       { ocaml_type = [%type: 'decl];
         type_conversion = Decl;
         interface_type = H.cxcursor;
@@ -177,7 +177,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t)
             [H.decl_of_string "CXCursor_InvalidCode";
               Lazy.force get_cursor_tu]}
   | Pointer { desc = lazy (
-        Record { name = IdentifierName "VarDecl" }) } ->
+        Record { name = IdentifierName "VarDecl"; _ }); _ } ->
       { ocaml_type = [%type: 'decl];
         type_conversion = Decl;
         interface_type = H.cxcursor;
@@ -189,7 +189,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t)
           H.call (H.decl_of_string "MakeCXCursorInvalid")
             [H.decl_of_string "CXCursor_InvalidCode";
               Lazy.force get_cursor_tu]}
-  | Record { name = IdentifierName "ParamIdx" } ->
+  | Record { name = IdentifierName "ParamIdx"; _ } ->
       { ocaml_type =  [%type: int];
         type_conversion = NoConversion;
         interface_type = H.unsigned_int;
@@ -356,7 +356,7 @@ let enumerate_methods (fields : Clang.Lazy.Ast.decl list) :
   let add_field (field : Clang.Lazy.Ast.decl) =
     match Lazy.force field.desc with
     | CXXMethod {
-      function_decl = { name = IdentifierName name; function_type }; _ } ->
+      function_decl = { name = IdentifierName name; function_type; _ }; _ } ->
         let normalized_name =
           String.lowercase_ascii name |>
           Stubgen_common.option_apply
@@ -582,7 +582,7 @@ let do_decl context versions (decl : Clang.Lazy.Decl.t) =
         | EnumDecl { name = enum_name; constants; _ } ->
             let c_type_name = Printf.sprintf "clang_ext_%s_%s" name enum_name in
             let constants =
-              constants |> List.map (fun ({ desc = lazy { constant_name; _ }}
+              constants |> List.map (fun ({ desc = lazy { constant_name; _ }; _ }
                   : Clang.Lazy.Ast.enum_constant) ->
                   let converted_name =
                     Printf.sprintf "%s_%s" c_type_name constant_name in
@@ -599,11 +599,11 @@ let do_decl context versions (decl : Clang.Lazy.Decl.t) =
         | _ -> None in
       let enums, fields =
         match fields with
-        | { desc = lazy (AccessSpecifier CXXPublic) } :: tail ->
+        | { desc = lazy (AccessSpecifier CXXPublic); _ } :: tail ->
             let enums, tail =
               Clang.extract_prefix_from_list extract_enum tail in
             begin match tail with
-            | { desc = lazy (AccessSpecifier CXXPrivate) } :: tail ->
+            | { desc = lazy (AccessSpecifier CXXPrivate); _ } :: tail ->
                 enums, tail
             | _ ->
                 [], fields
@@ -706,7 +706,7 @@ let data = "data"
 
 let callback = "callback"
 
-let generate_code context versions argument type_name_attr ty
+let generate_code context versions argument type_name_attr _ty
     (argument_desc : argument_desc) =
   let parameter_list = [parameter_cursor] in
   let parameter_list, result =
@@ -989,7 +989,7 @@ let main cflags llvm_config prefix =
   let constructors = List.rev (other :: context.constructors) in
   let constructors = constructors |> List.filter
     (fun (constructor : Ppxlib.constructor_declaration) ->
-      match List.find_map (fun (prefix, list) -> Option.map (fun suffix -> suffix, list) (Stubgen_common.String_utils.remove_prefix prefix constructor.pcd_name.txt)) groups with
+      match List.find_map (fun (prefix, list) -> Option.map (fun suffix -> suffix, list) (Stubgen_common.String_utils.remove_prefix ~prefix constructor.pcd_name.txt)) groups with
       | None -> true
       | Some (suffix, list) ->
           list := { constructor with pcd_name = { constructor.pcd_name with txt = suffix }} :: !list;
@@ -1082,7 +1082,7 @@ let main cflags llvm_config prefix =
           | [(_, arg)] -> arg
           | _ -> Ppxlib.Ast_helper.Exp.record args None in
         let construct =
-          match List.find_map (fun (prefix, _) -> Option.map (fun suffix -> prefix, suffix) (Stubgen_common.String_utils.remove_prefix prefix attribute.name)) groups with
+          match List.find_map (fun (prefix, _) -> Option.map (fun suffix -> prefix, suffix) (Stubgen_common.String_utils.remove_prefix ~prefix attribute.name)) groups with
           | Some (prefix, suffix) ->
               (fun args -> Ppxlib.Ast_helper.Exp.construct (Metapp.mklid prefix) (Some (Ppxlib.Ast_helper.Exp.construct (Metapp.mklid suffix) args)))
           | None -> Ppxlib.Ast_helper.Exp.construct lid in
@@ -1104,6 +1104,7 @@ let main cflags llvm_config prefix =
     let fmt = Format.formatter_of_out_channel chan in
     Format.fprintf fmt "%a@." Ppxlib.Pprintast.structure
       ([%str
+          [@@@ocaml.warning "-27"] (* unused-var-strict *)
           [%%metapackage "metapp"]
           [%%metadir "config/.clangml_config.objs/byte"]] @
         type_decl @ [convert]));

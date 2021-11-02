@@ -52,7 +52,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                timeout(time: 3, unit: 'MINUTES') {
+                timeout(time: 4, unit: 'MINUTES') {
                     sh 'make -C build clangml'
                     sh 'make -C build clangml.opam && cp build/clangml.opam src/'
                     sh 'make -C build tools/stubgen'
@@ -63,7 +63,7 @@ pipeline {
         }
         stage('Generate attributes') {
             steps {
-                timeout(time: 3, unit: 'MINUTES') {
+                timeout(time: 4, unit: 'MINUTES') {
                     sh '''
                        eval $(opam env) && \
                        cd build && \
@@ -194,7 +194,7 @@ pipeline {
                 script {
                     def repo = env.JOB_NAME == "perso/master" ? "tmartine" : "memcad"
                     opam_installations(
-                        ["4.11"],
+                        ["4.13"],
 "https://gitlab.inria.fr/$repo/clangml/-/archive/snapshot/clangml-snapshot.tar.gz")
                 }
             }

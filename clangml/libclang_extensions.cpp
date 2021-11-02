@@ -22,8 +22,6 @@ extern "C" {
 #include <llvm/Support/ErrorHandling.h>
 #include <caml/fail.h>
 
-#include <iostream>
-
 // Copied from clang source tree: tools/libclang/CXString.cpp
 enum CXStringFlag {
   /// CXString contains a 'const char *' that it doesn't own.
@@ -249,6 +247,14 @@ MakeCXCursor(const clang::Decl *T, CXTranslationUnit TU)
   CXCursor C = { CXCursor_UnexposedStmt, 0, { T, nullptr, TU }};
   CXCursor D = clang_getCursorSemanticParent(C);
   return D;
+}
+
+/* Called MakeCursorCXXBaseSpecifier in libclang */
+static CXCursor
+MakeCXCursor(const clang::CXXBaseSpecifier *B, CXTranslationUnit TU)
+{
+  CXCursor C = { CXCursor_CXXBaseSpecifier, 0, { B, nullptr, TU }};
+  return C;
 }
 
 /* MakeCXType is not exported in libclang.
@@ -581,6 +587,24 @@ MakeOMPTraitInfoInvalid(
 {
   struct clang_ext_OMPTraitInfo info = { nullptr, tu };
   return info;
+}
+
+static struct clang_ext_CXXCtorInitializer
+MakeCXXCtorInitializer(
+  const clang::CXXCtorInitializer *init, CXTranslationUnit TU)
+{
+  struct clang_ext_CXXCtorInitializer init_box = { init, TU };
+  return init_box;
+}
+
+static const clang::CXXCtorInitializer *
+getCXXCtorInitializer(struct clang_ext_CXXCtorInitializer init_box) {
+  return static_cast<const clang::CXXCtorInitializer *>(init_box.data);
+}
+
+static CXTranslationUnit
+getCXXCtorInitializerTU(struct clang_ext_CXXCtorInitializer init_box) {
+  return init_box.tu;
 }
 
 #ifdef LLVM_VERSION_BEFORE_7_0_0
@@ -1256,6 +1280,75 @@ extern "C" {
     }
   }
 
+  unsigned
+  clang_ext_Decl_visitAttributes(
+    CXCursor parent, CXCursorVisitor visitor, CXClientData client_data)
+  {
+    auto d = GetCursorDecl(parent);
+    CXTranslationUnit tu = getCursorTU(parent);
+    #ifdef LLVM_VERSION_BEFORE_3_5_0
+      for (auto i = d->attr_begin(); i != d->attr_end(); i++) {
+        if (visitor(MakeCXCursor(*i, tu), parent, client_data)
+            == CXChildVisit_Break) {
+          return 1;
+        }
+      }
+    #else
+      for (auto attr : d->attrs()) {
+        if (visitor(MakeCXCursor(attr, tu), parent, client_data)
+            == CXChildVisit_Break) {
+          return 1;
+        }
+      }
+    #endif
+    return 0;
+  }
+
+  bool
+  clang_ext_Decl_isImplicit(CXCursor cursor)
+  {
+    auto d = GetCursorDecl(cursor);
+    return d->isImplicit();
+  } 
+
+  bool
+  clang_ext_RecordDecl_isInjectedClassName(CXCursor cursor)
+  {
+    auto d = GetCursorDecl(cursor);
+    if (auto rd = llvm::dyn_cast_or_null<clang::RecordDecl>(d)) {
+      return rd->isInjectedClassName();
+    }
+    return false;
+  } 
+
+  unsigned
+  clang_ext_CXXRecordDecl_visitBases(
+    CXCursor parent, CXCursorVisitor visitor, CXClientData client_data)
+  {
+    auto d = GetCursorDecl(parent);
+    if (auto rd = llvm::dyn_cast_or_null<clang::CXXRecordDecl>(d)) {
+      if (rd->hasDefinition()) {
+        CXTranslationUnit tu = getCursorTU(parent);
+        #ifdef LLVM_VERSION_BEFORE_3_5_0
+          for (auto i = rd->bases_begin(); i != rd->bases_end(); i++) {
+            if (visitor(MakeCXCursor(&*i, tu), parent, client_data)
+                == CXChildVisit_Break) {
+              return 1;
+            }
+          }
+        #else
+          for (const auto &base : rd->bases()) {
+            if (visitor(MakeCXCursor(&base, tu), parent, client_data)
+                == CXChildVisit_Break) {
+              return 1;
+            }
+          }
+        #endif
+      }
+    }
+    return 0;
+  }
+
   enum clang_ext_StmtKind
   clang_ext_Stmt_GetKind(CXCursor cursor)
   {
@@ -1505,6 +1598,15 @@ extern "C" {
     return false;
   }
 
+  bool
+  clang_ext_FunctionDecl_doesThisDeclarationHaveABody(CXCursor c)
+  {
+    if (auto *Function = getFunctionDecl(c)) {
+      return Function->doesThisDeclarationHaveABody();
+    }
+    return false;
+  }
+
   unsigned
   clang_ext_LinkageSpecDecl_getLanguageIDs(CXCursor C)
   {
@@ -1525,6 +1627,18 @@ extern "C" {
       }
     }
     return MakeCXTypeInvalid(getCursorTU(C));
+  }
+
+  CXCursor
+  clang_ext_NonTypeTemplateParmDecl_getDefaultArgument(CXCursor C)
+  {
+    auto *D = GetCursorDecl(C);
+    if (auto NTPD = llvm::dyn_cast_or_null<clang::NonTypeTemplateParmDecl>(D)) {
+      if (auto expr = NTPD->getDefaultArgument()) {
+        return MakeCXCursor(expr, getCursorTU(C));
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(C));
   }
 
   void
@@ -2940,28 +3054,31 @@ extern "C" {
   enum clang_ext_ExceptionSpecificationType
   clang_ext_FunctionProtoType_getExceptionSpecType(CXType t)
   {
-    if (auto *fpt = GetQualType(t)->getAs<clang::FunctionProtoType>()) {
-      switch (fpt->getExceptionSpecType()) {
-      case clang::EST_None: return CLANG_EXT_EST_NoExceptionSpecification;
-      case clang::EST_DynamicNone: return CLANG_EXT_EST_DynamicNone;
-      case clang::EST_Dynamic: return CLANG_EXT_EST_Dynamic;
-      case clang::EST_MSAny: return CLANG_EXT_EST_MSAny;
-    #ifndef LLVM_VERSION_BEFORE_9_0_0
-      case clang::EST_NoThrow: return CLANG_EXT_EST_NoThrow;
-    #endif
-      case clang::EST_BasicNoexcept: return CLANG_EXT_EST_BasicNoexcept;
-    #ifdef LLVM_VERSION_BEFORE_7_0_0
-      case clang::EST_ComputedNoexcept: return CLANG_EXT_EST_DependentNoexcept;
-    #else
-      case clang::EST_DependentNoexcept: return CLANG_EXT_EST_DependentNoexcept;
-      case clang::EST_NoexceptFalse: return CLANG_EXT_EST_NoexceptFalse;
-      case clang::EST_NoexceptTrue: return CLANG_EXT_EST_NoexceptTrue;
-    #endif
-      case clang::EST_Unevaluated: return CLANG_EXT_EST_Unevaluated;
-      case clang::EST_Uninstantiated: return CLANG_EXT_EST_Uninstantiated;
-    #ifndef LLVM_VERSION_BEFORE_3_6_0
-      case clang::EST_Unparsed: return CLANG_EXT_EST_Unparsed;
-    #endif
+    clang::QualType qual_type = GetQualType(t);
+    if (!qual_type.isNull()) {
+      if (auto *fpt = qual_type->getAs<clang::FunctionProtoType>()) {
+        switch (fpt->getExceptionSpecType()) {
+        case clang::EST_None: return CLANG_EXT_EST_NoExceptionSpecification;
+        case clang::EST_DynamicNone: return CLANG_EXT_EST_DynamicNone;
+        case clang::EST_Dynamic: return CLANG_EXT_EST_Dynamic;
+        case clang::EST_MSAny: return CLANG_EXT_EST_MSAny;
+      #ifndef LLVM_VERSION_BEFORE_9_0_0
+        case clang::EST_NoThrow: return CLANG_EXT_EST_NoThrow;
+      #endif
+        case clang::EST_BasicNoexcept: return CLANG_EXT_EST_BasicNoexcept;
+      #ifdef LLVM_VERSION_BEFORE_7_0_0
+        case clang::EST_ComputedNoexcept: return CLANG_EXT_EST_DependentNoexcept;
+      #else
+        case clang::EST_DependentNoexcept: return CLANG_EXT_EST_DependentNoexcept;
+        case clang::EST_NoexceptFalse: return CLANG_EXT_EST_NoexceptFalse;
+        case clang::EST_NoexceptTrue: return CLANG_EXT_EST_NoexceptTrue;
+      #endif
+        case clang::EST_Unevaluated: return CLANG_EXT_EST_Unevaluated;
+        case clang::EST_Uninstantiated: return CLANG_EXT_EST_Uninstantiated;
+      #ifndef LLVM_VERSION_BEFORE_3_6_0
+        case clang::EST_Unparsed: return CLANG_EXT_EST_Unparsed;
+      #endif
+        }
       }
     }
     return CLANG_EXT_EST_NoExceptionSpecification;
@@ -3076,21 +3193,21 @@ extern "C" {
   clang_ext_DeclaratorDecl_getTypeLoc(CXCursor c)
   {
     if (is_valid_decl(c.kind)) {
-    if (auto d = getDeclaratorDecl(c)) {
-      if (auto tsi = d->getTypeSourceInfo()) {
-        if (auto t = tsi->getTypeLoc()) {
-          return MakeTypeLoc(t, getCursorTU(c));
+      if (auto d = getDeclaratorDecl(c)) {
+        if (auto tsi = d->getTypeSourceInfo()) {
+          if (auto t = tsi->getTypeLoc()) {
+            return MakeTypeLoc(t, getCursorTU(c));
+          }
         }
       }
-    }
-    else {
-      auto cd = GetCursorDecl(c);
-      if (auto td = llvm::dyn_cast_or_null<clang::TypedefNameDecl>(cd)) {
-        if (auto t = td->getTypeSourceInfo()->getTypeLoc()) {
-          return MakeTypeLoc(t, getCursorTU(c));
+      else {
+        auto cd = GetCursorDecl(c);
+        if (auto td = llvm::dyn_cast_or_null<clang::TypedefNameDecl>(cd)) {
+          if (auto t = td->getTypeSourceInfo()->getTypeLoc()) {
+            return MakeTypeLoc(t, getCursorTU(c));
+          }
         }
       }
-    }
     }
     return MakeTypeLocInvalid(getCursorTU(c));
   }
@@ -3556,19 +3673,18 @@ extern "C" {
       CXTranslationUnit tu = getCursorTU(parent);
       #ifdef LLVM_VERSION_BEFORE_3_5_0
         for (auto di = dc->decls_begin(); di != dc->decls_end(); di++) {
-          if (visitor(MakeCXCursor(*di, tu), parent, client_data)
-              == CXChildVisit_Break) {
-            return 1;
-          }
-        }
+          auto sd = *di;
       #else
         for (auto sd : dc->decls()) {
-          if (visitor(MakeCXCursor(sd, tu), parent, client_data)
-              == CXChildVisit_Break) {
-            return 1;
-          }
-        }
       #endif
+        if (sd->getLexicalDeclContext() != dc) {
+          continue;
+        }
+        if (visitor(MakeCXCursor(sd, tu), parent, client_data)
+            == CXChildVisit_Break) {
+          return 1;
+        }
+      }
     }
     return 0;
   }
@@ -3582,19 +3698,15 @@ extern "C" {
       CXTranslationUnit tu = getCursorTU(parent);
       #ifdef LLVM_VERSION_BEFORE_3_5_0
         for (auto ci = ifd->chain_begin(); ci != ifd->chain_end(); ci++) {
-          if (visitor(MakeCXCursor(*ci, tu), parent, client_data)
-              == CXChildVisit_Break) {
-            return 1;
-          }
-        }
+          auto nd = *ci;
       #else
         for (auto nd : ifd->chain()) {
-          if (visitor(MakeCXCursor(nd, tu), parent, client_data)
-              == CXChildVisit_Break) {
-            return 1;
-          }
-        }
       #endif
+        if (visitor(MakeCXCursor(nd, tu), parent, client_data)
+            == CXChildVisit_Break) {
+          return 1;
+        }
+      }
     }
     return 0;
   }
@@ -3658,6 +3770,21 @@ extern "C" {
       return function->isInlined();
     }
     return false;
+  }
+
+  CXCursor
+  clang_ext_FunctionDecl_getBody(CXCursor cursor)
+  {
+    if (auto *function = getFunctionDecl(cursor)) {
+      auto body = function->getBody();
+      if (body) {
+        return MakeCXCursor(body, getCursorTU(cursor));
+      }
+      else {
+        return clang_getNullCursor();
+      }
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
   }
 
   struct clang_ext_TypeLoc
@@ -3822,6 +3949,103 @@ extern "C" {
   void
   clang_ext_OMPTraitInfo_dispose(struct clang_ext_OMPTraitInfo)
   {
+  }
+
+  unsigned
+  clang_ext_CXXConstructorDecl_visitInitializers(
+    CXCursor cursor, CXXCtorInitializerVisitor visitor, CXClientData client_data)
+  {
+    auto d = GetCursorDecl(cursor);
+    if (auto cd = llvm::dyn_cast_or_null<clang::CXXConstructorDecl>(d)) {
+      #ifdef LLVM_VERSION_BEFORE_3_5_0
+        for (auto i = cd->init_begin(); i != cd->init_end(); i++) {
+          auto init = *i;
+      #else
+        for (auto init : cd->inits()) {
+      #endif
+        if (visitor(MakeCXXCtorInitializer(init, getCursorTU(cursor)), client_data) == CXVisit_Break) {
+          return 1;
+        }
+      }
+    }
+    return 0;
+  }
+
+  void
+    clang_ext_CXXCtorInitializer_dispose(struct clang_ext_CXXCtorInitializer box)
+  {
+  }
+
+  bool
+  clang_ext_CXXCtorInitializer_isBaseInitializer(struct clang_ext_CXXCtorInitializer box)
+  {
+    auto init = getCXXCtorInitializer(box);
+    return init->isBaseInitializer();
+  }
+
+  bool
+  clang_ext_CXXCtorInitializer_isPackExpansion(struct clang_ext_CXXCtorInitializer box)
+  {
+    auto init = getCXXCtorInitializer(box);
+    return init->isPackExpansion();
+  }
+
+  bool
+  clang_ext_CXXCtorInitializer_isMemberInitializer(struct clang_ext_CXXCtorInitializer box)
+  {
+    auto init = getCXXCtorInitializer(box);
+    return init->isMemberInitializer();
+  }
+
+  bool
+  clang_ext_CXXCtorInitializer_isIndirectMemberInitializer(struct clang_ext_CXXCtorInitializer box)
+  {
+    auto init = getCXXCtorInitializer(box);
+    return init->isIndirectMemberInitializer();
+  }
+
+  bool
+  clang_ext_CXXCtorInitializer_isDelegatingInitializer(struct clang_ext_CXXCtorInitializer box)
+  {
+    auto init = getCXXCtorInitializer(box);
+    return init->isDelegatingInitializer();
+  }
+
+  struct clang_ext_TypeLoc
+  clang_ext_CXXCtorInitializer_getTypeSourceInfo(struct clang_ext_CXXCtorInitializer box)
+  {
+    auto init = getCXXCtorInitializer(box);
+    if (auto type = init->getTypeSourceInfo()) {
+      return MakeTypeLoc(type->getTypeLoc(), getCXXCtorInitializerTU(box));
+    }
+    return MakeTypeLocInvalid(getCXXCtorInitializerTU(box));
+  }
+
+  CXCursor
+  clang_ext_CXXCtorInitializer_getMember(struct clang_ext_CXXCtorInitializer box)
+  {
+    auto init = getCXXCtorInitializer(box);
+    if (init->isMemberInitializer()) {
+      return MakeCXCursor(init->getMember(), getCXXCtorInitializerTU(box));
+    }
+    else if (init->isIndirectMemberInitializer()) {
+      return MakeCXCursor(init->getIndirectMember(), getCXXCtorInitializerTU(box));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, getCXXCtorInitializerTU(box));
+  }
+
+  CXCursor
+  clang_ext_CXXCtorInitializer_getAnyMember(struct clang_ext_CXXCtorInitializer box)
+  {
+    auto init = getCXXCtorInitializer(box);
+    return MakeCXCursor(init->getAnyMember(), getCXXCtorInitializerTU(box));
+  }
+
+  CXCursor
+  clang_ext_CXXCtorInitializer_getInit(struct clang_ext_CXXCtorInitializer box)
+  {
+    auto init = getCXXCtorInitializer(box);
+    return MakeCXCursor(init->getInit(), getCXXCtorInitializerTU(box));
   }
 
   #include "libclang_extensions_attrs.inc"

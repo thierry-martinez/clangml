@@ -2,8 +2,22 @@
 
 - Support for Clang/LLVM 12.0.1 and 13.0.0.
 
-- Fix representation for IndirectFieldDecl
+- *[compatibility break]* `initializer_list` for constructors now contains
+  items with a dedicated type `constructor_initializer`.
+
+- Fields for anonymous struct/unions and indirect fields can now be represented
+  in the AST by disabling `options.ignore_indirect_fields` and
+  `options.ignore_anonymous_fields`.
   (reported by Seungwan Kwon)
+
+- Fields for implicit constructors and methods can now be represented in the AST
+  by disabling `options.ignore_implicit_constructors` and
+  `options.ignore_implicit_methods`.
+
+- Fields for injected class nameds can now be represented in the AST
+  by disabling `options.ignore_injected_class_names`.
+
+- Fix segmentation fault issue when accessing NULL TypeInfoLoc* in attributes
 
 # 2021-02-21, 4.4.0
 
