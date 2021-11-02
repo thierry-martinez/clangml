@@ -3635,54 +3635,90 @@ let () =
           implicit = false; }}] }}]]
 
 let () =
-  check_pattern quote_decl_list (parse_declaration_list ~language:CXX ~options:
-    { Clang.Ast.Options.default with ignore_implicit_methods = false }) example
-  [%pattern?
-    [{ desc = RecordDecl {
-      keyword = Class;
-      name = "C";
-      fields = [
-        { desc = CXXMethod {
-          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
-          binding = Virtual;
-          function_decl = {
-            name = IdentifierName "virtual_method";
-            function_type = {
-              result = { desc = BuiltinType Void };
-              parameters = Some { non_variadic = [] }};
-            body = None; };
-          implicit = false; }};
-        { desc = CXXMethod {
-          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
-          binding = NonVirtual;
-          function_decl = {
-            name = OperatorName Equal;
-            constexpr = true;
-            function_type = {
-              result = { desc = LValueReference { desc =
-                Record { name = IdentifierName "C" }}};
-              parameters = Some { non_variadic = [
-                { desc = { qual_type = { desc = LValueReference { desc =
-                  Record { name = IdentifierName "C" }}}}}] }};
-            body = None; };
-          implicit = true; }};
-        { desc = CXXMethod {
-          type_ref = { desc = Record ({ name = IdentifierName "C" }) };
-          binding = NonVirtual;
-          function_decl = {
-            name = OperatorName Equal;
-            constexpr = true;
-            function_type = {
-              result = { desc = LValueReference { desc =
-                Record { name = IdentifierName "C" }}};
-              parameters = Some { non_variadic = [
-                { desc = { qual_type = { desc = RValueReference { desc =
-                  Record { name = IdentifierName "C" }}}}}] }};
-            body = None; };
-          implicit = true; }}] }}]]
-    ]}
-
-*)
+  if Clang.version () >= { major = 6; minor = 0; subminor = 0 } then
+    check_pattern quote_decl_list (parse_declaration_list ~language:CXX
+      ~options:
+        { Clang.Ast.Options.default with ignore_implicit_methods = false })
+      example
+    [%pattern?
+      [{ desc = RecordDecl {
+        keyword = Class;
+        name = "C";
+        fields = [
+          { desc = CXXMethod {
+            type_ref = { desc = Record ({ name = IdentifierName "C" }) };
+            binding = Virtual;
+            function_decl = {
+              name = IdentifierName "virtual_method";
+              function_type = {
+                result = { desc = BuiltinType Void };
+                parameters = Some { non_variadic = [] }};
+              body = None; };
+            implicit = false; }};
+          { desc = CXXMethod {
+            type_ref = { desc = Record ({ name = IdentifierName "C" }) };
+            binding = NonVirtual;
+            function_decl = {
+              name = OperatorName Equal;
+              constexpr = true;
+              function_type = {
+                result = { desc = LValueReference { desc =
+                  Record { name = IdentifierName "C" }}};
+                parameters = Some { non_variadic = [
+                  { desc = { qual_type = { desc = LValueReference { desc =
+                    Record { name = IdentifierName "C" }}}}}] }};
+              body = None; };
+            implicit = true; }};
+          { desc = CXXMethod {
+            type_ref = { desc = Record ({ name = IdentifierName "C" }) };
+            binding = NonVirtual;
+            function_decl = {
+              name = OperatorName Equal;
+              constexpr = true;
+              function_type = {
+                result = { desc = LValueReference { desc =
+                  Record { name = IdentifierName "C" }}};
+                parameters = Some { non_variadic = [
+                  { desc = { qual_type = { desc = RValueReference { desc =
+                    Record { name = IdentifierName "C" }}}}}] }};
+              body = None; };
+            implicit = true; }}] }}]]
+      ]}
+  else
+    check_pattern quote_decl_list (parse_declaration_list ~language:CXX
+      ~options:
+        { Clang.Ast.Options.default with ignore_implicit_methods = false })
+      example
+    [%pattern?
+      [{ desc = RecordDecl {
+        keyword = Class;
+        name = "C";
+        fields = [
+          { desc = CXXMethod {
+            type_ref = { desc = Record ({ name = IdentifierName "C" }) };
+            binding = Virtual;
+            function_decl = {
+              name = IdentifierName "virtual_method";
+              function_type = {
+                result = { desc = BuiltinType Void };
+                parameters = Some { non_variadic = [] }};
+              body = None; };
+            implicit = false; }};
+          { desc = CXXMethod {
+            type_ref = { desc = Record ({ name = IdentifierName "C" }) };
+            binding = NonVirtual;
+            function_decl = {
+              name = OperatorName Equal;
+              constexpr = true;
+              function_type = {
+                result = { desc = LValueReference { desc =
+                  Record { name = IdentifierName "C" }}};
+                parameters = Some { non_variadic = [
+                  { desc = { qual_type = { desc = LValueReference { desc =
+                    Record { name = IdentifierName "C" }}}}}] }};
+              body = None; };
+            implicit = true; }}] }}]]
+      ]}*)
   | Var of var_decl_desc
 (** Variable declaration.
 
