@@ -2364,6 +2364,16 @@ type clang_ext_declkind =
   | UnknownDecl [@@deriving refl]
 external ext_decl_get_kind :
   cxcursor -> clang_ext_declkind = "clang_ext_Decl_GetKind_wrapper"
+external ext_decl_visit_attributes :
+  cxcursor -> (cxcursor -> cxcursor -> cxchildvisitresult) -> bool =
+    "clang_ext_Decl_visitAttributes_wrapper"
+external ext_decl_is_implicit :
+  cxcursor -> bool = "clang_ext_Decl_isImplicit_wrapper"
+external ext_record_decl_is_injected_class_name :
+  cxcursor -> bool = "clang_ext_RecordDecl_isInjectedClassName_wrapper"
+external ext_cxxrecord_decl_visit_bases :
+  cxcursor -> (cxcursor -> cxcursor -> cxchildvisitresult) -> bool =
+    "clang_ext_CXXRecordDecl_visitBases_wrapper"
 type clang_ext_stmtkind =
   | InvalidStmt 
   | GCCAsmStmt 
@@ -2992,6 +3002,11 @@ external ext_function_decl_is_constexpr :
   cxcursor -> bool = "clang_ext_FunctionDecl_isConstexpr_wrapper"
 external ext_function_decl_has_written_prototype :
   cxcursor -> bool = "clang_ext_FunctionDecl_hasWrittenPrototype_wrapper"
+external ext_function_decl_does_this_declaration_have_abody :
+  cxcursor -> bool =
+    "clang_ext_FunctionDecl_doesThisDeclarationHaveABody_wrapper"
+external ext_function_decl_get_body :
+  cxcursor -> cxcursor = "clang_ext_FunctionDecl_getBody_wrapper"
 module Clang_ext_languageids =
   struct
     type t = int
@@ -3010,6 +3025,9 @@ external ext_linkage_spec_decl_get_language_ids :
 external ext_template_type_parm_decl_get_default_argument :
   cxcursor -> cxtype =
     "clang_ext_TemplateTypeParmDecl_getDefaultArgument_wrapper"
+external ext_non_type_template_parm_decl_get_default_argument :
+  cxcursor -> cxcursor =
+    "clang_ext_NonTypeTemplateParmDecl_getDefaultArgument_wrapper"
 type clang_ext_templatename_namekind =
   | Template 
   | OverloadedTemplate 
@@ -3641,6 +3659,37 @@ external ext_injected_class_name_type_get_injected_specialization_type :
     "clang_ext_InjectedClassNameType_getInjectedSpecializationType_wrapper"
 external ext_type_get_unqualified_type :
   cxtype -> cxtype = "clang_ext_Type_getUnqualifiedType_wrapper"
+type clang_ext_cxxctorinitializer
+external ext_cxxconstructor_decl_visit_initializers :
+  cxcursor -> (clang_ext_cxxctorinitializer -> cxvisitorresult) -> bool =
+    "clang_ext_CXXConstructorDecl_visitInitializers_wrapper"
+external ext_cxxctor_initializer_is_base_initializer :
+  clang_ext_cxxctorinitializer -> bool =
+    "clang_ext_CXXCtorInitializer_isBaseInitializer_wrapper"
+external ext_cxxctor_initializer_is_pack_expansion :
+  clang_ext_cxxctorinitializer -> bool =
+    "clang_ext_CXXCtorInitializer_isPackExpansion_wrapper"
+external ext_cxxctor_initializer_is_member_initializer :
+  clang_ext_cxxctorinitializer -> bool =
+    "clang_ext_CXXCtorInitializer_isMemberInitializer_wrapper"
+external ext_cxxctor_initializer_is_indirect_member_initializer :
+  clang_ext_cxxctorinitializer -> bool =
+    "clang_ext_CXXCtorInitializer_isIndirectMemberInitializer_wrapper"
+external ext_cxxctor_initializer_is_delegating_initializer :
+  clang_ext_cxxctorinitializer -> bool =
+    "clang_ext_CXXCtorInitializer_isDelegatingInitializer_wrapper"
+external ext_cxxctor_initializer_get_type_source_info :
+  clang_ext_cxxctorinitializer -> clang_ext_typeloc =
+    "clang_ext_CXXCtorInitializer_getTypeSourceInfo_wrapper"
+external ext_cxxctor_initializer_get_member :
+  clang_ext_cxxctorinitializer -> cxcursor =
+    "clang_ext_CXXCtorInitializer_getMember_wrapper"
+external ext_cxxctor_initializer_get_any_member :
+  clang_ext_cxxctorinitializer -> cxcursor =
+    "clang_ext_CXXCtorInitializer_getAnyMember_wrapper"
+external ext_cxxctor_initializer_get_init :
+  clang_ext_cxxctorinitializer -> cxcursor =
+    "clang_ext_CXXCtorInitializer_getInit_wrapper"
 type clang_ext_aarch64vectorpcs_spelling =
   | GNU_aarch64_vector_pcs 
   | CXX11_clang_aarch64_vector_pcs 
