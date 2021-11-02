@@ -1287,7 +1287,7 @@ extern "C" {
     auto d = GetCursorDecl(parent);
     CXTranslationUnit tu = getCursorTU(parent);
     #ifdef LLVM_VERSION_BEFORE_3_5_0
-      for (auto i = d->attrs_begin(); i != d->attrs_end(); i++) {
+      for (auto i = d->attr_begin(); i != d->attr_end(); i++) {
         if (visitor(MakeCXCursor(*i, tu), parent, client_data)
             == CXChildVisit_Break) {
           return 1;
