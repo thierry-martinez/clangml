@@ -4779,7 +4779,7 @@ let () =
     ]}*)
   | Delegating of qual_type
 (**
-  Delegating constructor.
+  Delegating constructor (C++11).
 
     {[
 let example = {|
@@ -4790,7 +4790,8 @@ let example = {|
     |}
 
 let () =
-  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX
+    ~standard:Cxx11) example
   [%pattern?
     [{ desc = RecordDecl
        { keyword = Class; name = "C";
