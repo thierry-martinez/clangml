@@ -9,7 +9,7 @@
 (homepage "https://memcad.gitlabpages.inria.fr/clangml/")
 (bug_reports "https://gitlab.inria.fr/memcad/clangml/issues")
 (documentation "https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/index.html")
-(version "4.4.0")
+(version "4.5.0")
 
 (package
  (name clangml)

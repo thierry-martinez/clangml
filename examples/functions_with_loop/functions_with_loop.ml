@@ -93,7 +93,8 @@ let info =
       `S Cmdliner.Manpage.s_bugs;
       `P "Email bug reports to <thierry.martinez@inria.fr>.";
     ] in
-  Cmdliner.Term.info "print_tree" ~doc ~exits:Cmdliner.Term.default_exits ~man
+  Cmdliner.Term.info "functions_with_loop" ~doc
+    ~exits:Cmdliner.Term.default_exits ~man
 
 let () =
   Cmdliner.Term.eval (options, info) |>
