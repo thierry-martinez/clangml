@@ -26,6 +26,7 @@ depends: [
   "metaquot" {>= "0.3.0"}
   "refl" {>= "0.3.0"}
   "odoc" {with-doc & >= "1.5.1"}
+  "ocaml-migrate-parsetree" {>= "2.2.0"}
 ]
 dev-repo: "git+https://gitlab.inria.fr/memcad/clangml"
 build: [
