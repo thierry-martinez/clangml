@@ -31,4 +31,5 @@ clangml provides bindings to call the Clang API from OCaml.
   (metapp (>= 0.3.0))
   (metaquot (>= 0.3.0))
   (refl (>= 0.3.0))
-  (odoc (and :with-doc (>= 1.5.1)))))
+  (odoc (and :with-doc (>= 1.5.1)))
+  (ocaml-migrate-parsetree (>= 2.2.0))))
