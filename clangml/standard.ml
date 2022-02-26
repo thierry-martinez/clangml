@@ -27,7 +27,8 @@ type t =
   | Opencl11
   | Opencl12
   | Opencl20
-  | Openclcpp
+  | Openclcpp10
+  | Openclcpp2021
   | Cuda
   | Hip
       [@@deriving refl]
@@ -126,11 +127,18 @@ let to_clang : t -> Clang__bindings.clang_ext_langstandards = function
         Opencl20]
       else [%expr
         raise (Unavailable Opencl20)]]
-  | Openclcpp ->
-      [%meta if Clangml_config.version.major >= 7 then [%expr
+  | Openclcpp10 ->
+      [%meta if Clangml_config.version.major >= 14 then [%expr
+        Openclcpp10]
+      else if Clangml_config.version.major >= 7 then [%expr
         Openclcpp]
       else [%expr
-        raise (Unavailable Openclcpp)]]
+        raise (Unavailable Openclcpp10)]]
+  | Openclcpp2021 ->
+      [%meta if Clangml_config.version.major >= 14 then [%expr
+        Openclcpp2021]
+      else [%expr
+        raise (Unavailable Openclcpp2021)]]
   | Cuda -> Cuda
   | Hip ->
       [%meta if Clangml_config.version.major >= 7 then [%expr

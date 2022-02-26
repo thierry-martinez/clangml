@@ -802,6 +802,8 @@ let () =
       var_init = Some { desc = IntegerLiteral (Int 1)}}}]]
     ]}*)
   | InjectedClassName of qual_type
+  | Using of qual_type
+  (** Introduced in clang 14.0.0. *)
   | UnexposedType of clang_ext_typekind
   | InvalidType
 

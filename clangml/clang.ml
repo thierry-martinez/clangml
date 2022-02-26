@@ -600,6 +600,14 @@ module Ast = struct
                       cxtype |>
                     of_cxtype in
                   InjectedClassName sub
+              | Using
+                  [@if [%meta Metapp.Exp.of_bool
+                    (Clangml_config.version.major >= 14)]] ->
+                  let sub = of_cxtype (ext_type_desugar cxtype) in
+                  if options.ignore_using_types then
+                    Node.force sub.desc
+                  else
+                    Using sub
               | kind -> UnexposedType kind
             end in
       make_paren (make_qual_type cxtype type_loc (Node.from_fun desc))
