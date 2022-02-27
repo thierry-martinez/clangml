@@ -447,19 +447,21 @@ let add_primitive context v =
   context.sig_accu <- Ppxlib.Ast_helper.Sig.value v :: context.sig_accu;
   context.struct_accu <- Ppxlib.Ast_helper.Str.primitive v :: context.struct_accu
 
-let escape_doc doc =
-  if Clangml_config.version >= { major = 14; minor = 0; subminor = 0 } then
+let escape_doc ~func doc =
+  if func &&
+       Clangml_config.version >= { major = 14; minor = 0; subminor = 0 } then
     Pcre.replace ~pat:"[][{}]" ~templ:"\\$&" doc
   else
     Pcre.replace ~pat:"[][@{}]" ~templ:"\\$&" doc
 
-let make_doc_attributes cur =
+let make_doc_attributes ~func cur =
   match Clang.cursor_get_brief_comment_text cur with
   | None -> []
   | Some doc ->
       [Ppxlib.Ast_helper.Attr.mk (loc "ocaml.doc")
          (Ppxlib.PStr [Ppxlib.Ast_helper.Str.eval
-           (Ppxlib.Ast_helper.Exp.constant (Ppxlib.Ast_helper.Const.string (escape_doc doc)))])]
+           (Ppxlib.Ast_helper.Exp.constant (Ppxlib.Ast_helper.Const.string
+             (escape_doc ~func doc)))])]
 
 let rec find_type_info ?(declare_abstract = true) ?parameters context type_interface ty =
   let find_enum_info type_name =
@@ -1166,11 +1168,11 @@ static %s __attribute__((unused))
 }
 " type_name;
           let fields = fields |> List.map @@ fun (field, cur) ->
-            let attrs = make_doc_attributes cur in
+            let attrs = make_doc_attributes ~func:false cur in
             Ppxlib.Ast_helper.Type.field (loc (String.lowercase_ascii (field_name field)))
               (translate_field_type field) ~attrs in
                 Ptype_record fields, None in
-    let attrs = make_doc_attributes cur in
+    let attrs = make_doc_attributes ~func:false cur in
     let attrs =
       match kind with
       | Ptype_abstract -> attrs
@@ -1306,7 +1308,7 @@ let translate_enum_decl context cur =
           constructors in
   let ocaml_constructors =
     List.map (fun (_, name, (_, cur)) ->
-      let attrs = make_doc_attributes cur in
+      let attrs = make_doc_attributes ~func:false cur in
       Ppxlib.Ast_helper.Type.constructor (loc (String.capitalize_ascii name)) ~attrs)
       constructors in
   let common_info = make_common_type_info ~type_interface ocaml_type_name in
@@ -1351,7 +1353,7 @@ let translate_enum_decl context cur =
   return Val_int(0);
 }\n\n"
       (name_of_ocaml_of_c ocaml_type_name);
-    let doc_attributes = make_doc_attributes cur in
+    let doc_attributes = make_doc_attributes ~func:false cur in
     let type_decl =
       Ppxlib.Ast_helper.Type.mk ~kind:(Ptype_variant ocaml_constructors)
         ~attrs:(deriving_attr () :: doc_attributes @ interface.attributes)
@@ -1911,7 +1913,7 @@ let translate_function_decl context cur =
             print_list (List.init nb_args
               (fun i -> Printf.sprintf "argv[%d]" i)));
       [bytecode_name; wrapper_name] in
-  let attrs = make_doc_attributes cur in
+  let attrs = make_doc_attributes ~func:true cur in
   let desc = Ppxlib.Ast_helper.Val.mk pval_name pval_type ~prim ~attrs in
   add_primitive context desc
 
