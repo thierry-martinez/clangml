@@ -448,7 +448,10 @@ let add_primitive context v =
   context.struct_accu <- Ppxlib.Ast_helper.Str.primitive v :: context.struct_accu
 
 let escape_doc doc =
-  Pcre.replace ~pat:"[][@{}]" ~templ:"\\$&" doc
+  if Clangml_config.version >= { major = 14; minor = 0; subminor = 0 } then
+    Pcre.replace ~pat:"[][{}]" ~templ:"\\$&" doc
+  else
+    Pcre.replace ~pat:"[][@{}]" ~templ:"\\$&" doc
 
 let make_doc_attributes cur =
   match Clang.cursor_get_brief_comment_text cur with
