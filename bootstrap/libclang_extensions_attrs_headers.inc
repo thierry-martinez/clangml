@@ -266,6 +266,22 @@ clang_ext_BPFPreserveAccessIndex_SpellingNotCalculated};
 enum
 clang_ext_BPFPreserveAccessIndex_spelling
 clang_ext_BPFPreserveAccessIndex_getSpelling(CXCursor cursor);
+enum clang_ext_BTFDeclTag_spelling {
+clang_ext_BTFDeclTag_GNU_btf_decl_tag,
+clang_ext_BTFDeclTag_CXX11_clang_btf_decl_tag,
+clang_ext_BTFDeclTag_C2x_clang_btf_decl_tag,
+clang_ext_BTFDeclTag_SpellingNotCalculated};
+enum
+clang_ext_BTFDeclTag_spelling clang_ext_BTFDeclTag_getSpelling(
+CXCursor cursor);
+enum clang_ext_BTFTypeTag_spelling {
+clang_ext_BTFTypeTag_GNU_btf_type_tag,
+clang_ext_BTFTypeTag_CXX11_clang_btf_type_tag,
+clang_ext_BTFTypeTag_C2x_clang_btf_type_tag,
+clang_ext_BTFTypeTag_SpellingNotCalculated};
+enum
+clang_ext_BTFTypeTag_spelling clang_ext_BTFTypeTag_getSpelling(
+CXCursor cursor);
 enum clang_ext_BlocksAttr_BlockType {
 clang_ext_BlocksAttr_BlockType_ByRef};
 enum clang_ext_Blocks_spelling {
@@ -562,6 +578,22 @@ clang_ext_Destructor_SpellingNotCalculated};
 enum
 clang_ext_Destructor_spelling clang_ext_Destructor_getSpelling(
 CXCursor cursor);
+enum clang_ext_DiagnoseAsBuiltin_spelling {
+clang_ext_DiagnoseAsBuiltin_GNU_diagnose_as_builtin,
+clang_ext_DiagnoseAsBuiltin_CXX11_clang_diagnose_as_builtin,
+clang_ext_DiagnoseAsBuiltin_C2x_clang_diagnose_as_builtin,
+clang_ext_DiagnoseAsBuiltin_SpellingNotCalculated};
+enum
+clang_ext_DiagnoseAsBuiltin_spelling clang_ext_DiagnoseAsBuiltin_getSpelling(
+CXCursor cursor);
+enum clang_ext_DisableSanitizerInstrumentation_spelling {
+clang_ext_DisableSanitizerInstrumentation_GNU_disable_sanitizer_instrumentation,
+clang_ext_DisableSanitizerInstrumentation_CXX11_clang_disable_sanitizer_instrumentation,
+clang_ext_DisableSanitizerInstrumentation_C2x_clang_disable_sanitizer_instrumentation,
+clang_ext_DisableSanitizerInstrumentation_SpellingNotCalculated};
+enum
+clang_ext_DisableSanitizerInstrumentation_spelling
+clang_ext_DisableSanitizerInstrumentation_getSpelling(CXCursor cursor);
 enum clang_ext_DisableTailCalls_spelling {
 clang_ext_DisableTailCalls_GNU_disable_tail_calls,
 clang_ext_DisableTailCalls_CXX11_clang_disable_tail_calls,
@@ -597,6 +629,15 @@ clang_ext_EnumExtensibility_SpellingNotCalculated};
 enum
 clang_ext_EnumExtensibility_spelling clang_ext_EnumExtensibility_getSpelling(
 CXCursor cursor);
+enum clang_ext_Error_spelling {
+clang_ext_Error_GNU_error,
+clang_ext_Error_CXX11_gnu_error,
+clang_ext_Error_C2x_gnu_error,
+clang_ext_Error_GNU_warning,
+clang_ext_Error_CXX11_gnu_warning,
+clang_ext_Error_C2x_gnu_warning,
+clang_ext_Error_SpellingNotCalculated};
+enum clang_ext_Error_spelling clang_ext_Error_getSpelling(CXCursor cursor);
 enum clang_ext_ExcludeFromExplicitInstantiation_spelling {
 clang_ext_ExcludeFromExplicitInstantiation_GNU_exclude_from_explicit_instantiation,
 clang_ext_ExcludeFromExplicitInstantiation_CXX11_clang_exclude_from_explicit_instantiation,
@@ -1710,6 +1751,14 @@ clang_ext_SYCLKernel_SpellingNotCalculated};
 enum
 clang_ext_SYCLKernel_spelling clang_ext_SYCLKernel_getSpelling(
 CXCursor cursor);
+enum clang_ext_SYCLSpecialClass_spelling {
+clang_ext_SYCLSpecialClass_GNU_sycl_special_class,
+clang_ext_SYCLSpecialClass_CXX11_clang_sycl_special_class,
+clang_ext_SYCLSpecialClass_C2x_clang_sycl_special_class,
+clang_ext_SYCLSpecialClass_SpellingNotCalculated};
+enum
+clang_ext_SYCLSpecialClass_spelling clang_ext_SYCLSpecialClass_getSpelling(
+CXCursor cursor);
 enum clang_ext_ScopedLockable_spelling {
 clang_ext_ScopedLockable_GNU_scoped_lockable,
 clang_ext_ScopedLockable_CXX11_clang_scoped_lockable,
@@ -1882,6 +1931,14 @@ clang_ext_Target_CXX11_gnu_target,
 clang_ext_Target_C2x_gnu_target,
 clang_ext_Target_SpellingNotCalculated};
 enum clang_ext_Target_spelling clang_ext_Target_getSpelling(CXCursor cursor);
+enum clang_ext_TargetClones_spelling {
+clang_ext_TargetClones_GNU_target_clones,
+clang_ext_TargetClones_CXX11_gnu_target_clones,
+clang_ext_TargetClones_C2x_gnu_target_clones,
+clang_ext_TargetClones_SpellingNotCalculated};
+enum
+clang_ext_TargetClones_spelling clang_ext_TargetClones_getSpelling(
+CXCursor cursor);
 enum clang_ext_TestTypestateAttr_ConsumedState {
 clang_ext_TestTypestateAttr_ConsumedState_Consumed,
 clang_ext_TestTypestateAttr_ConsumedState_Unconsumed};
@@ -2132,6 +2189,7 @@ clang_ext_SwiftAsyncErrorAttr_getConvention(CXCursor cursor);
 CXString clang_ext_IFuncAttr_getResolver(CXCursor cursor);
 int clang_ext_PatchableFunctionEntryAttr_getOffset(CXCursor cursor);
 CXCursor clang_ext_AssumeAlignedAttr_getOffset(CXCursor cursor);
+unsigned int clang_ext_BTFTypeTagAttr_getBTFTypeTagLength(CXCursor cursor);
 unsigned int clang_ext_WebAssemblyImportNameAttr_getImportNameLength(
 CXCursor cursor); int clang_ext_SentinelAttr_getSentinel(CXCursor cursor);
 CXCursor clang_ext_Attrs_getSuccessValue(CXCursor cursor);
@@ -2143,8 +2201,10 @@ clang_ext_ParamTypestateAttr_getParamState(CXCursor cursor);
 bool clang_ext_ExternalSourceSymbolAttr_getGeneratedDeclaration(
 CXCursor cursor);
 void clang_ext_SuppressAttr_getDiagnosticIdentifiers(
-CXCursor cursor, void (*callback)(CXString , void *), void *data);
+CXCursor cursor, void (*callback_value)(CXString , void *), void *data);
 struct clang_ext_TypeLoc clang_ext_Attrs_getDerefType(CXCursor cursor);
+unsigned int clang_ext_OMPDeclareVariantAttr_getAdjustArgsNeedDevicePtr_Size(
+CXCursor cursor);
 struct
 clang_ext_TypeLoc clang_ext_TypeTagForDatatypeAttr_getMatchingCType(
 CXCursor cursor);
@@ -2152,10 +2212,11 @@ unsigned int clang_ext_AnnotateAttr_getAnnotationLength(CXCursor cursor);
 unsigned int clang_ext_LayoutVersionAttr_getVersion(CXCursor cursor);
 int clang_ext_SentinelAttr_getNullPos(CXCursor cursor);
 void clang_ext_OMPDeclareSimdDeclAttr_getAligneds(
-CXCursor cursor, void (*callback)(CXCursor , void *), void *data);
+CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data);
 unsigned int clang_ext_SwiftAsyncAttr_getCompletionHandlerIndex(
 CXCursor cursor); unsigned int clang_ext_Attrs_getArgs_Size(CXCursor cursor);
 CXCursor clang_ext_CUDALaunchBoundsAttr_getMinBlocks(CXCursor cursor);
+unsigned int clang_ext_BTFDeclTagAttr_getBTFDeclTagLength(CXCursor cursor);
 unsigned int clang_ext_SwiftBridgeAttr_getSwiftTypeLength(CXCursor cursor);
 unsigned int clang_ext_ExternalSourceSymbolAttr_getDefinedInLength(
 CXCursor cursor); CXString clang_ext_FormatAttr_getType(CXCursor cursor);
@@ -2186,6 +2247,7 @@ CXCursor cursor);
 struct
 clang_ext_VersionTuple clang_ext_AvailabilityAttr_getObsoleted(
 CXCursor cursor); CXString clang_ext_InitSegAttr_getSection(CXCursor cursor);
+CXString clang_ext_BTFDeclTagAttr_getBTFDeclTag(CXCursor cursor);
 CXString clang_ext_ExternalSourceSymbolAttr_getDefinedIn(CXCursor cursor);
 unsigned int clang_ext_AllocSizeAttr_getNumElemsParam(CXCursor cursor);
 unsigned int clang_ext_IFuncAttr_getResolverLength(CXCursor cursor);
@@ -2207,12 +2269,16 @@ CXString clang_ext_Attrs_getHandleType(CXCursor cursor);
 unsigned int clang_ext_WebAssemblyImportModuleAttr_getImportModuleLength(
 CXCursor cursor);
 void clang_ext_OMPDeclareSimdDeclAttr_getLinears(
-CXCursor cursor, void (*callback)(CXCursor , void *), void *data);
+CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data);
 struct
 clang_ext_VersionTuple clang_ext_AvailabilityAttr_getDeprecated(
 CXCursor cursor);
 struct
 clang_ext_TypeLoc clang_ext_PreferredNameAttr_getTypedefType(CXCursor cursor);
+void clang_ext_DiagnoseAsBuiltinAttr_getArgIndices(
+CXCursor cursor, void (*callback_value)(unsigned int , void *), void *data);
+unsigned int clang_ext_TargetClonesAttr_getFeaturesStrs_Size(CXCursor cursor);
+unsigned int clang_ext_ErrorAttr_getUserDiagnosticLength(CXCursor cursor);
 CXString clang_ext_WebAssemblyExportNameAttr_getExportName(CXCursor cursor);
 bool clang_ext_ArgumentWithTypeTagAttr_getIsPointer(CXCursor cursor);
 unsigned int clang_ext_UuidAttr_getGuidLength(CXCursor cursor);
@@ -2221,7 +2287,7 @@ CXCursor cursor);
 unsigned int clang_ext_Attrs_getMessageLength(CXCursor cursor);
 enum clang_ext_PcsAttr_PCSType clang_ext_PcsAttr_getPCS(CXCursor cursor);
 void clang_ext_CallbackAttr_getEncoding(
-CXCursor cursor, void (*callback)(int , void *), void *data);
+CXCursor cursor, void (*callback_value)(int , void *), void *data);
 CXString clang_ext_Attrs_getArgumentKind(CXCursor cursor);
 bool clang_ext_AvailabilityAttr_getUnavailable(CXCursor cursor);
 struct
@@ -2231,17 +2297,21 @@ CXCursor clang_ext_OMPAllocateDeclAttr_getAllocator(CXCursor cursor);
 CXString clang_ext_AnnotateAttr_getAnnotation(CXCursor cursor);
 CXCursor clang_ext_OMPDeclareVariantAttr_getVariantFuncRef(CXCursor cursor);
 unsigned int clang_ext_NoBuiltinAttr_getBuiltinNames_Size(CXCursor cursor);
+void clang_ext_TargetClonesAttr_getFeaturesStrs(
+CXCursor cursor, void (*callback_value)(CXString , void *), void *data);
 CXString clang_ext_Attrs_getReplacement(CXCursor cursor);
 unsigned int clang_ext_AMDGPUNumSGPRAttr_getNumSGPR(CXCursor cursor);
 CXString clang_ext_ObjCBridgeRelatedAttr_getInstanceMethod(CXCursor cursor);
+void clang_ext_OMPDeclareVariantAttr_getAdjustArgsNeedDevicePtr(
+CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data);
 CXCursor clang_ext_OMPDeclareSimdDeclAttr_getSimdlen(CXCursor cursor);
 unsigned int clang_ext_TargetAttr_getFeaturesStrLength(CXCursor cursor);
 CXCursor clang_ext_AlignedAttr_getAlignmentExpr(CXCursor cursor);
 void clang_ext_OMPDeclareSimdDeclAttr_getSteps(
-CXCursor cursor, void (*callback)(CXCursor , void *), void *data);
+CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data);
 CXString clang_ext_TLSModelAttr_getModel(CXCursor cursor);
 void clang_ext_OMPDeclareSimdDeclAttr_getModifiers(
-CXCursor cursor, void (*callback)(unsigned int , void *), void *data);
+CXCursor cursor, void (*callback_value)(unsigned int , void *), void *data);
 int clang_ext_FormatAttr_getFirstArg(CXCursor cursor);
 unsigned int clang_ext_AMDGPUNumVGPRAttr_getNumVGPR(CXCursor cursor);
 enum
@@ -2258,6 +2328,8 @@ enum
 clang_ext_EnumExtensibilityAttr_Kind
 clang_ext_EnumExtensibilityAttr_getExtensibility(CXCursor cursor);
 unsigned int clang_ext_AllocAlignAttr_getParamIndex(CXCursor cursor);
+unsigned int clang_ext_DiagnoseAsBuiltinAttr_getArgIndices_Size(
+CXCursor cursor);
 struct
 clang_ext_VersionTuple clang_ext_AvailabilityAttr_getIntroduced(
 CXCursor cursor);
@@ -2267,7 +2339,8 @@ int clang_ext_AddressSpaceAttr_getAddressSpace(CXCursor cursor);
 CXString clang_ext_ModeAttr_getMode(CXCursor cursor);
 CXCursor clang_ext_Attrs_getArg(CXCursor cursor);
 void clang_ext_Attrs_getCpus(
-CXCursor cursor, void (*callback)(CXString , void *), void *data);
+CXCursor cursor, void (*callback_value)(CXString , void *), void *data);
+CXString clang_ext_BTFTypeTagAttr_getBTFTypeTag(CXCursor cursor);
 unsigned int clang_ext_OpenCLIntelReqdSubGroupSizeAttr_getSubGroupSize(
 CXCursor cursor);
 unsigned int clang_ext_ArgumentWithTypeTagAttr_getArgumentIdx(
@@ -2278,10 +2351,14 @@ CXCursor cursor);
 CXString clang_ext_OwnershipAttr_getModule(CXCursor cursor);
 unsigned int clang_ext_MinVectorWidthAttr_getVectorWidth(CXCursor cursor);
 bool clang_ext_TypeTagForDatatypeAttr_getLayoutCompatible(CXCursor cursor);
+void clang_ext_OMPDeclareVariantAttr_getAdjustArgsNothing(
+CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data);
 unsigned int clang_ext_InitSegAttr_getSectionLength(CXCursor cursor);
 struct
 clang_ext_TypeLoc clang_ext_VecTypeHintAttr_getTypeHint(CXCursor cursor);
 unsigned int clang_ext_Attrs_getTCBNameLength(CXCursor cursor);
+unsigned int clang_ext_OMPDeclareVariantAttr_getAdjustArgsNothing_Size(
+CXCursor cursor);
 unsigned int clang_ext_ExternalSourceSymbolAttr_getLanguageLength(
 CXCursor cursor);
 unsigned int clang_ext_ObjCRuntimeNameAttr_getMetadataNameLength(
@@ -2314,6 +2391,7 @@ CXCursor cursor);
 unsigned int clang_ext_OMPDeclareSimdDeclAttr_getLinears_Size(
 CXCursor cursor);
 CXCursor clang_ext_NSErrorDomainAttr_getErrorDomain(CXCursor cursor);
+CXString clang_ext_ErrorAttr_getUserDiagnostic(CXCursor cursor);
 unsigned int clang_ext_XRayLogArgsAttr_getArgumentCount(CXCursor cursor);
 CXString clang_ext_Attrs_getMessage(CXCursor cursor);
 unsigned int clang_ext_ArgumentWithTypeTagAttr_getTypeTagIdx(CXCursor cursor);
@@ -2321,17 +2399,18 @@ CXString clang_ext_UuidAttr_getGuid(CXCursor cursor);
 unsigned int clang_ext_Attrs_getZDim(CXCursor cursor);
 unsigned int clang_ext_Attrs_getHandleTypeLength(CXCursor cursor);
 void clang_ext_OMPDeclareSimdDeclAttr_getUniforms(
-CXCursor cursor, void (*callback)(CXCursor , void *), void *data);
+CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data);
 enum
 clang_ext_LoopHintAttr_OptionType clang_ext_LoopHintAttr_getOption(
 CXCursor cursor);
 CXString clang_ext_ObjCBridgeRelatedAttr_getRelatedClass(CXCursor cursor);
 CXString clang_ext_WebAssemblyImportNameAttr_getImportName(CXCursor cursor);
 void clang_ext_NoSanitizeAttr_getSanitizers(
-CXCursor cursor, void (*callback)(CXString , void *), void *data);
+CXCursor cursor, void (*callback_value)(CXString , void *), void *data);
 void clang_ext_CallableWhenAttr_getCallableStates(
 CXCursor cursor,
-void (*callback)(enum clang_ext_CallableWhenAttr_ConsumedState , void *),
+void
+(*callback_value)(enum clang_ext_CallableWhenAttr_ConsumedState , void *),
 void *data);
 enum
 clang_ext_OMPDeclareSimdDeclAttr_BranchStateTy
@@ -2352,7 +2431,7 @@ unsigned int clang_ext_OMPDeclareSimdDeclAttr_getSteps_Size(CXCursor cursor);
 unsigned int clang_ext_WebAssemblyExportNameAttr_getExportNameLength(
 CXCursor cursor);
 void clang_ext_OMPDeclareSimdDeclAttr_getAlignments(
-CXCursor cursor, void (*callback)(CXCursor , void *), void *data);
+CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data);
 unsigned int clang_ext_MSVtorDispAttr_getVdm(CXCursor cursor);
 CXCursor clang_ext_Attrs_getCond(CXCursor cursor);
 struct
@@ -2367,15 +2446,18 @@ enum
 clang_ext_SwiftAsyncAttr_Kind clang_ext_SwiftAsyncAttr_getKind(
 CXCursor cursor); CXString clang_ext_Attrs_getKind(CXCursor cursor);
 unsigned int clang_ext_PatchableFunctionEntryAttr_getCount(CXCursor cursor);
+struct
+clang_ext_DeclarationName clang_ext_DiagnoseAsBuiltinAttr_getFunction(
+CXCursor cursor);
 void clang_ext_AbiTagAttr_getTags(
-CXCursor cursor, void (*callback)(CXString , void *), void *data);
+CXCursor cursor, void (*callback_value)(CXString , void *), void *data);
 unsigned int clang_ext_Attrs_getNumber(CXCursor cursor);
 CXString clang_ext_Attrs_getTCBName(CXCursor cursor);
 unsigned int clang_ext_OpenCLUnrollHintAttr_getUnrollHint(CXCursor cursor);
 void clang_ext_NoBuiltinAttr_getBuiltinNames(
-CXCursor cursor, void (*callback)(CXString , void *), void *data);
+CXCursor cursor, void (*callback_value)(CXString , void *), void *data);
 bool clang_ext_MSInheritanceAttr_getBestCase(CXCursor cursor);
 void clang_ext_NonNullAttr_getArgs(
-CXCursor cursor, void (*callback)(unsigned int , void *), void *data);
+CXCursor cursor, void (*callback_value)(unsigned int , void *), void *data);
 void clang_ext_AcquireCapabilityAttr_getArgs(
-CXCursor cursor, void (*callback)(CXCursor , void *), void *data);
+CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data);
