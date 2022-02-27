@@ -3953,17 +3953,21 @@ extern "C" {
     switch (T->getTypeClass()) {
     case clang::Type::Paren:
       return T->getAs<clang::ParenType>()->isSugared();
+    #ifndef LLVM_VERSION_BEFORE_3_5_0
     case clang::Type::Adjusted:
     case clang::Type::Decayed:
       return T->getAs<clang::AdjustedType>()->isSugared();
+    #endif
     #ifndef LLVM_VERSION_BEFORE_14_0_0
     case clang::Type::Using:
       return T->getAs<clang::UsingType>()->isSugared();
     #endif
     case clang::Type::Typedef:
       return T->getAs<clang::TypedefType>()->isSugared();
+    #ifndef LLVM_VERSION_BEFORE_9_0_0
     case clang::Type::MacroQualified:
       return T->getAs<clang::MacroQualifiedType>()->isSugared();
+    #endif
     case clang::Type::TypeOfExpr:
       return T->getAs<clang::TypeOfExprType>()->isSugared();
     case clang::Type::TypeOf:
@@ -3976,15 +3980,19 @@ extern "C" {
       return T->getAs<clang::AttributedType>()->isSugared();
     case clang::Type::SubstTemplateTypeParm:
       return T->getAs<clang::SubstTemplateTypeParmType>()->isSugared();
+    #ifndef LLVM_VERSION_BEFORE_5_0_0
     case clang::Type::Auto:
     case clang::Type::DeducedTemplateSpecialization:
       return T->getAs<clang::DeducedType>()->isSugared();
+    #endif
     case clang::Type::TemplateSpecialization:
       return T->getAs<clang::TemplateSpecializationType>()->isSugared();
     case clang::Type::Elaborated:
       return T->getAs<clang::ElaboratedType>()->isSugared();
+    #ifndef LLVM_VERSION_BEFORE_4_0_0
     case clang::Type::ObjCTypeParam:
       return T->getAs<clang::ObjCTypeParamType>()->isSugared();
+    #endif
     default:
       return false;
     }
@@ -3999,10 +4007,12 @@ extern "C" {
     case clang::Type::Paren:
       result = T->getAs<clang::ParenType>()->desugar();
       break;
+    #ifndef LLVM_VERSION_BEFORE_3_5_0
     case clang::Type::Adjusted:
     case clang::Type::Decayed:
       result = T->getAs<clang::AdjustedType>()->desugar();
       break;
+    #endif
     #ifndef LLVM_VERSION_BEFORE_14_0_0
     case clang::Type::Using:
       result = T->getAs<clang::UsingType>()->desugar();
@@ -4011,9 +4021,11 @@ extern "C" {
     case clang::Type::Typedef:
       result = T->getAs<clang::TypedefType>()->desugar();
       break;
+    #ifndef LLVM_VERSION_BEFORE_9_0_0
     case clang::Type::MacroQualified:
       result = T->getAs<clang::MacroQualifiedType>()->desugar();
       break;
+    #endif
     case clang::Type::TypeOfExpr:
       result = T->getAs<clang::TypeOfExprType>()->desugar();
       break;
@@ -4032,19 +4044,23 @@ extern "C" {
     case clang::Type::SubstTemplateTypeParm:
       result = T->getAs<clang::SubstTemplateTypeParmType>()->desugar();
       break;
+    #ifndef LLVM_VERSION_BEFORE_5_0_0
     case clang::Type::Auto:
     case clang::Type::DeducedTemplateSpecialization:
       result = T->getAs<clang::DeducedType>()->desugar();
       break;
+    #endif
     case clang::Type::TemplateSpecialization:
       result = T->getAs<clang::TemplateSpecializationType>()->desugar();
       break;
     case clang::Type::Elaborated:
       result = T->getAs<clang::ElaboratedType>()->desugar();
       break;
+    #ifndef LLVM_VERSION_BEFORE_4_0_0
     case clang::Type::ObjCTypeParam:
       result = T->getAs<clang::ObjCTypeParamType>()->desugar();
       break;
+    #endif
     default:
       return MakeCXTypeInvalid(GetTU(CT));
     }
