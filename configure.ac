@@ -298,6 +298,9 @@ AC_SUBST([LLVM_CFLAGS], [["`echo $LLVM_CFLAGS \
 
 AC_SUBST([CFLAGS], [["$LLVM_CFLAGS -D$LLVM_VERSION_MACRO -I$srcdir/clangml"]])
 
+AS_IF([test `printf "$OCAMLVERSION\n4.14" | sort | head -n1` != 4.14],
+  [AC_SUBST([CFLAGS], [["$CFLAGS -DOCAML_BEFORE_4_14"]])])
+
 AC_SUBST([CXXFLAGS], [["$CFLAGS --std=c++14"]])
 
 AC_CHECK_HEADERS([clang-c/Index.h], [],

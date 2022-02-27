@@ -11,18 +11,26 @@
 #include <stdcompat.h>
 #include <stdio.h> /* vsnprintf */
 
+#ifdef OCAML_BEFORE_4_14
+#define caml_failwith failwith
+#define caml_copy_int64 copy_int64
+#endif
+
+/* Transitory */
+#define failwith_fmt caml_failwith_fmt
+
 static void *
 xmalloc(size_t size)
 {
     void *ptr = malloc(size);
     if (!ptr) {
-        failwith("Virtual memory exhausted");
+        caml_failwith("Virtual memory exhausted");
     }
     return ptr;
 }
 
 void
-failwith_fmt(const char* format, ...)
+caml_failwith_fmt(const char* format, ...)
 {
     va_list argptr;
     ssize_t length = 255;
@@ -32,15 +40,15 @@ failwith_fmt(const char* format, ...)
     ssize_t length;
     length = vsnprintf(NULL, 0, format, argptr);
     if (length < 0) {
-      failwith("Unable to measure error format");
+      caml_failwith("Unable to measure error format");
     }
     buffer = xmalloc(length + 1);
 */
     if (vsnprintf(buffer, length + 1, format, argptr) < 0) {
-      failwith("Unable to format error");
+      caml_failwith("Unable to format error");
     }
     va_end(argptr);
-    failwith(buffer);
+    caml_failwith(buffer);
 }
 
 #define DECLARE_OPAQUE_EX(C_TYPE, OCAML_TYPE, C_OF_OCAML, OCAML_OF_C,   \

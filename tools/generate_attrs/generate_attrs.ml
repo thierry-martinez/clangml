@@ -710,7 +710,8 @@ let filter_singleton (key, (desc : argument_desc)) =
 
 let data = "data"
 
-let callback = "callback"
+(* callback lexeme is deprecated with OCaml 4.14 *)
+let callback = "callback_value"
 
 let generate_code context versions argument type_name_attr _ty
     (argument_desc : argument_desc) =
@@ -1139,7 +1140,7 @@ let info =
       `S Cmdliner.Manpage.s_bugs;
       `P "Email bug reports to <thierry.martinez@inria.fr>.";
     ] in
-  Cmdliner.Term.info tool_name ~doc ~exits:Cmdliner.Term.default_exits ~man
+  Cmdliner.Cmd.info tool_name ~doc ~man
 
 let () =
-  Cmdliner.Term.exit (Cmdliner.Term.eval (Stubgen_common.options main, info))
+  exit (Cmdliner.Cmd.eval (Cmdliner.Cmd.v info (Stubgen_common.options main)))

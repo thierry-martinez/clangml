@@ -435,7 +435,7 @@ let string_type_info =
 let int64_type_info =
   { ocamltype = Ppxlib.Ast_helper.Typ.constr (loc (Longident.Ldot (Longident.Lident "Int64", "t"))) [];
     c_of_ocaml = simple_converter "Int64_val";
-    ocaml_of_c = simple_converter "copy_int64"; }, Regular
+    ocaml_of_c = simple_converter "caml_copy_int64"; }, Regular
 
 let defined_set_of = String_hashtbl.create 17
 
@@ -454,14 +454,15 @@ let escape_doc ~func doc =
   else
     Pcre.replace ~pat:"[][@{}]" ~templ:"\\$&" doc
 
+let doc_attribute_of_string s =
+  [Ppxlib.Ast_helper.Attr.mk (loc "ocaml.doc")
+     (Ppxlib.PStr [Ppxlib.Ast_helper.Str.eval
+       (Ppxlib.Ast_helper.Exp.constant (Ppxlib.Ast_helper.Const.string s))])]
+
 let make_doc_attributes ~func cur =
   match Clang.cursor_get_brief_comment_text cur with
   | None -> []
-  | Some doc ->
-      [Ppxlib.Ast_helper.Attr.mk (loc "ocaml.doc")
-         (Ppxlib.PStr [Ppxlib.Ast_helper.Str.eval
-           (Ppxlib.Ast_helper.Exp.constant (Ppxlib.Ast_helper.Const.string
-             (escape_doc ~func doc)))])]
+  | Some doc -> doc_attribute_of_string (escape_doc ~func doc)
 
 let rec find_type_info ?(declare_abstract = true) ?parameters context type_interface ty =
   let find_enum_info type_name =
@@ -1329,7 +1330,7 @@ let translate_enum_decl context cur =
         "  case %i: return %s;\n" i constructor);
     Printf.fprintf context.chan_stubs
       "  }
-  failwith_fmt(\"invalid value for %s: %%d\", Int_val(ocaml));
+  caml_failwith_fmt(\"invalid value for %s: %%d\", Int_val(ocaml));
   return %s;
 }\n\n"
       (name_of_c_of_ocaml ocaml_type_name) (match first_constructor with (name, _, _) -> name);
@@ -1344,12 +1345,12 @@ let translate_enum_decl context cur =
       | None -> ()
       | Some result ->
           Printf.fprintf context.chan_stubs
-            "  case %s: failwith(\"unexpected success value\");\n"
+            "  case %s: caml_failwith(\"unexpected success value\");\n"
             result
     end;
     Printf.fprintf context.chan_stubs
       "  }
-  failwith_fmt(\"invalid value for %s: %%d\", v);
+  caml_failwith_fmt(\"invalid value for %s: %%d\", v);
   return Val_int(0);
 }\n\n"
       (name_of_ocaml_of_c ocaml_type_name);
@@ -1913,7 +1914,15 @@ let translate_function_decl context cur =
             print_list (List.init nb_args
               (fun i -> Printf.sprintf "argv[%d]" i)));
       [bytecode_name; wrapper_name] in
-  let attrs = make_doc_attributes ~func:true cur in
+  let attrs =
+    if name = "clang_Cursor_isObjCOptional" then
+      (* \@optional and \@required were not properly escaped in Clang <5 *)
+      doc_attribute_of_string {|
+Given a cursor that represents an ObjC method or property declaration,
+return non-zero if the declaration was affected by "\@optional".
+Returns zero if the cursor is not such a declaration or it is "\@required". |}
+    else
+      make_doc_attributes ~func:true cur in
   let desc = Ppxlib.Ast_helper.Val.mk pval_name pval_type ~prim ~attrs in
   add_primitive context desc
 
@@ -2338,7 +2347,7 @@ let info =
       `S Cmdliner.Manpage.s_bugs;
       `P "Email bug reports to <thierry.martinez@inria.fr>.";
     ] in
-  Cmdliner.Term.info tool_name ~doc ~exits:Cmdliner.Term.default_exits ~man
+  Cmdliner.Cmd.info tool_name ~doc ~man
 
 let () =
-  Cmdliner.Term.exit (Cmdliner.Term.eval (Stubgen_common.options main, info))
+  exit (Cmdliner.Cmd.eval (Cmdliner.Cmd.v info (Stubgen_common.options main)))
