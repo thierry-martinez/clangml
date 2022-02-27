@@ -11,11 +11,6 @@
 #include <stdcompat.h>
 #include <stdio.h> /* vsnprintf */
 
-#ifdef OCAML_BEFORE_4_14
-#define caml_failwith failwith
-#define caml_copy_int64 copy_int64
-#endif
-
 /* Transitory */
 #define failwith_fmt caml_failwith_fmt
 
