@@ -1,0 +1,4 @@
+(test
+  (name compound_expressions)
+  (preprocess (pps refl.ppx))
+  (libraries clangml refl))

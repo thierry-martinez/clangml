@@ -1613,7 +1613,12 @@ module Ast = struct
         | CompoundLiteralExpr ->
             let qual_type = cursor |> get_cursor_type |> of_cxtype in
             let init =
-              match list_of_children cursor with
+              match list_of_children cursor |> filter_out_prefix_from_list begin
+                  fun cursor ->
+                    match get_cursor_kind cursor with
+                    | TypeRef -> true
+                    | _ -> false
+                end with
               | [init] -> init |> expr_of_cxcursor
               | _ -> raise Invalid_structure in
             CompoundLiteral { qual_type; init }
