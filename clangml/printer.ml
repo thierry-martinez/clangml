@@ -2,10 +2,16 @@ let string_of_builtin_type (ty : Clang__ast.builtin_type) =
   match ty with
   | Void -> "void"
   | Bool -> "bool"
-  | Char_S -> "char"
+  | Char_S
+  | SChar -> "char"
+  | UChar -> "unsigned char"
   | Float -> "float"
   | Int -> "int"
   | UInt -> "unsigned int"
+  | Long -> "long"
+  | ULong -> "unsigned long"
+  | Short -> "short"
+  | UShort -> "unsigned short"
   | _ ->
       Printf.sprintf "<unknown builtin type:%s>"
         (Clang__bindings.get_type_kind_spelling ty)
@@ -81,6 +87,9 @@ let prec_of_binary_operator (kind : Clang__ast.binary_operator_kind) =
 let pp_comma fmt () =
   Format.fprintf fmt ",@ "
 
+let pp_typedef pp_sub fmt name =
+  Format.fprintf fmt "@[typedef@ %t@ %s@]" pp_sub name
+
 let rec decl fmt (d : Clang__ast.decl) =
   match d.desc with
   | Function { linkage; function_type; name; body; _ } ->
@@ -89,22 +98,22 @@ let rec decl fmt (d : Clang__ast.decl) =
         pp_function_type (function_type, name)
         pp_function_body body
   | Var var_decl ->
-      Format.fprintf fmt "@[%a;@]" pp_var_decl var_decl
+      Format.fprintf fmt "@[%a@]" pp_var_decl var_decl
   | EnumDecl { name; constants; _ } ->
       let pp_constant fmt (constant : Clang__ast.enum_constant) =
         Format.pp_print_string fmt constant.desc.constant_name;
         constant.desc.constant_init |> Option.iter (fun init ->
           Format.fprintf fmt "@ =@ %a" expr init) in
-      Format.fprintf fmt "@[<v>@[enum@ %s@ {@]@,%a};@]" name
+      Format.fprintf fmt "@[<v>@[enum@ %s@ {@]@,%a}@]" name
         (Format.pp_print_list ~pp_sep:pp_comma pp_constant) constants
   | RecordDecl { keyword; name; fields; _ } ->
-      Format.fprintf fmt "@[<v>@[%s@ %s@ {@]@,%a};@]"
+      Format.fprintf fmt "@[<v>@[%s@ %s@ {@]@,%a}@]"
         (Clang__bindings.ext_elaborated_type_get_keyword_spelling keyword)
         name
-        (Format.pp_print_list decl)
+        decls
         fields
   | Field { name; qual_type = ty; bitwidth; _ } ->
-      Format.fprintf fmt "@[%a%t;@]"
+      Format.fprintf fmt "@[%a%t@]"
         (typed_value (fun fmt -> Format.pp_print_string fmt name)) ty
         (fun fmt ->
           match bitwidth with
@@ -159,6 +168,8 @@ let rec decl fmt (d : Clang__ast.decl) =
       Format.fprintf fmt "@[extern@ \"%s\"@ {@ @[%a@]@ }@]"
         (Clang__utils.extern_of_language language)
         decls list
+  | TypedefDecl { name; underlying_type } ->
+      pp_typedef (fun fmt -> pp_qual_type fmt underlying_type) fmt name
   | _ ->
       Format.fprintf fmt {|@[\<not implemented decl: %a>@]|}
         (Refl.pp [%refl: Clang__ast.decl] []) d
@@ -323,7 +334,7 @@ and stmt fmt (s : Clang__ast.stmt) =
   | Return (Some value) ->
       Format.fprintf fmt "@[return@ %a;@]" expr value
   | Decl d ->
-      Format.pp_print_list decl fmt d
+      decls fmt d
   | Expr e ->
       Format.fprintf fmt "@[%a;@]" expr e
   | _ ->
@@ -463,9 +474,33 @@ and typed_value fmt_value fmt t =
 and pp_qual_type fmt t =
   typed_value (fun _fmt -> ()) fmt t
 
-and decls fmt decls =
-  Format.fprintf fmt "@[%a@]"
-    (Format.pp_print_list ~pp_sep:Format.pp_print_space decl) decls
+and decls fmt list =
+  let rec aux fmt (list : Clang__ast.decl list) =
+    match list with
+    | [] -> ()
+    | ({ desc = EnumDecl { name = enum_name; _ }; _} as enum) ::
+      { desc = TypedefDecl { name = typedef_name; underlying_type =
+        { desc = Elaborated { keyword = Enum;
+          named_type = { desc = Enum { name = IdentifierName ref_name; _ };
+        _ }; _ } ; _ }; _ }; _ } :: tl
+      when enum_name = ref_name ->
+        Format.fprintf fmt "@[%a;@]@ "
+          (pp_typedef (fun fmt -> decl fmt enum)) typedef_name;
+        Format.pp_print_space fmt ();
+        aux fmt tl
+    | ({ desc = RecordDecl { keyword = Struct; name = struct_name; _ }; _ } as struct_) ::
+      { desc = TypedefDecl { name = typedef_name; underlying_type =
+        { desc = Elaborated { keyword = Struct;
+          named_type = { desc = Record { name = IdentifierName ref_name; _ }; _ };
+        _ }; _ }; _ }; _ } :: tl
+      when struct_name = ref_name ->
+        Format.fprintf fmt "@[%a;@]@ "
+          (pp_typedef (fun fmt -> decl fmt struct_)) typedef_name;
+        aux fmt tl
+    | hd :: tl ->
+        Format.fprintf fmt "@[%a;@]@ " decl hd;
+        aux fmt tl in
+  Format.fprintf fmt "@[<v>%a@]" aux list
 
 let translation_unit fmt (tu : Clang__ast.translation_unit) =
   decls fmt tu.desc.items
