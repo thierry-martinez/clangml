@@ -1,5 +1,5 @@
 build: [
   ["./configure" "--prefix=%{prefix}%" "--with-llvm-config=%{conf-libclang:config}%"]
-  ["dune" "build" "-p" name "-j" jobs "@install"
+  ["./build_with_bigger_stack_size.sh" "dune" "build" "-p" name "-j" jobs "@install"
     "@runtest" {with-test}
     "@doc" {with-doc}]]
