@@ -92,8 +92,11 @@
 #ifdef LLVM_VERSION_12_0_1
 #define LLVM_VERSION_BEFORE_13_0_0
 #endif
+#ifdef LLVM_VERSION_BEFORE_13_0_0
+#define LLVM_VERSION_BEFORE_14_0_0
+#endif
 #ifdef LLVM_VERSION_13_0_1
-#define LLVM_VERSION_13_0_0
+#define LLVM_VERSION_BEFORE_14_0_0
 #endif
 
 CXVersion
@@ -1255,6 +1258,12 @@ clang_ext_InjectedClassNameType_getInjectedSpecializationType(CXType);
 CXType
 clang_ext_Type_getUnqualifiedType(CXType);
 
+bool
+clang_ext_Type_isSugared(CXType);
+
+CXType
+clang_ext_Type_desugar(CXType);
+
 struct clang_ext_OMPTraitInfo {
   const void *data;
   CXTranslationUnit tu;
@@ -1304,5 +1313,6 @@ clang_ext_CXXCtorInitializer_getAnyMember(struct clang_ext_CXXCtorInitializer);
 
 CXCursor
 clang_ext_CXXCtorInitializer_getInit(struct clang_ext_CXXCtorInitializer);
+
 
 #include "libclang_extensions_attrs_headers.inc"

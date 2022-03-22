@@ -322,7 +322,8 @@ let extract_code command_line_args target filename =
   open_lexbuf filename (loop { section_table; target; command_line_args } [])
 
 let main files target =
-  Clangml_tools_common.command_line begin fun _language command_line_args ->
+  Clangml_tools_common.command_line
+  begin fun _language command_line_args : unit ->
     let target =
       match target with
       | None -> failwith "Missing target name"
@@ -331,7 +332,7 @@ let main files target =
     Fun.protect begin fun () ->
       let target_fmt = Format.formatter_of_out_channel target_channel in
       files |> List.iter (extract_code command_line_args target_fmt);
-      Format.pp_print_flush target_fmt
+      Format.pp_print_flush target_fmt ()
     end
     ~finally:begin fun () ->
       close_out target_channel
@@ -348,7 +349,7 @@ let target =
   Cmdliner.Arg.(
     value & opt (some string) None & info ["o"] ~docv:"TARGET" ~doc)
 
-let options =
+let options : unit Cmdliner.Term.t =
   Clangml_tools_common.options Cmdliner.Term.(const main $ files $ target)
 
 let info =
@@ -357,6 +358,6 @@ let info =
       `S Cmdliner.Manpage.s_bugs;
       `P "Email bug reports to <thierry.martinez@inria.fr>.";
     ] in
-  Cmdliner.Term.info "norm_extractor" ~doc ~exits:Cmdliner.Term.default_exits ~man
+  Cmdliner.Cmd.info "norm_extractor" ~doc ~man
 
-let () = Cmdliner.Term.exit (Cmdliner.Term.eval (options, info))
+let () = exit (Cmdliner.Cmd.eval (Cmdliner.Cmd.v info options))

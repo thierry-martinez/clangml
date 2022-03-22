@@ -79,7 +79,8 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) omp =
   {
   allocator_type:
     Clang__bindings.clang_ext_ompallocatedeclattr_allocatortypety ;
-  allocator: 'expr } 
+  allocator: 'expr ;
+  alignment: 'expr } 
   | CaptureKind of int 
   | DeclareSimdDecl of
   {
@@ -97,7 +98,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) omp =
   | DeclareVariant of
   {
   variant_func_ref: 'expr ;
-  trait_infos: 'omp_trait_info } 
+  trait_infos: 'omp_trait_info ;
+  adjust_args_nothing: 'expr list ;
+  adjust_args_need_device_ptr: 'expr list } 
   | ReferencedVar of 'expr [@@deriving refl]
 type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) os =
   | Consumed of Clang__bindings.clang_ext_osconsumed_spelling 
@@ -363,6 +366,14 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   priority: int } 
   | BPFPreserveAccessIndex of
   Clang__bindings.clang_ext_bpfpreserveaccessindex_spelling 
+  | BTFDeclTag of
+  {
+  spelling: Clang__bindings.clang_ext_btfdecltag_spelling ;
+  b_tfdecl_tag: string } 
+  | BTFTypeTag of
+  {
+  spelling: Clang__bindings.clang_ext_btftypetag_spelling ;
+  b_tftype_tag: string } 
   | Blocks of
   {
   spelling: Clang__bindings.clang_ext_blocks_spelling ;
@@ -435,9 +446,16 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   {
   spelling: Clang__bindings.clang_ext_destructor_spelling ;
   priority: int } 
+  | DiagnoseAsBuiltin of
+  {
+  spelling: Clang__bindings.clang_ext_diagnoseasbuiltin_spelling ;
+  function_: 'declaration_name ;
+  arg_indices: int list } 
   | DiagnoseIf of {
   cond: 'expr ;
   message: string } 
+  | DisableSanitizerInstrumentation of
+  Clang__bindings.clang_ext_disablesanitizerinstrumentation_spelling 
   | DisableTailCalls of Clang__bindings.clang_ext_disabletailcalls_spelling 
   | EnableIf of {
   cond: 'expr ;
@@ -454,6 +472,10 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   {
   spelling: Clang__bindings.clang_ext_enumextensibility_spelling ;
   extensibility: Clang__bindings.clang_ext_enumextensibilityattr_kind } 
+  | Error of
+  {
+  spelling: Clang__bindings.clang_ext_error_spelling ;
+  user_diagnostic: string } 
   | ExcludeFromExplicitInstantiation of
   Clang__bindings.clang_ext_excludefromexplicitinstantiation_spelling 
   | ExclusiveTrylockFunction of {
@@ -646,6 +668,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   | ReturnsNonNull of Clang__bindings.clang_ext_returnsnonnull_spelling 
   | ReturnsTwice of Clang__bindings.clang_ext_returnstwice_spelling 
   | SYCLKernel of Clang__bindings.clang_ext_syclkernel_spelling 
+  | SYCLSpecialClass of Clang__bindings.clang_ext_syclspecialclass_spelling 
   | ScopedLockable of Clang__bindings.clang_ext_scopedlockable_spelling 
   | Section of
   {
@@ -678,6 +701,10 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   {
   spelling: Clang__bindings.clang_ext_target_spelling ;
   features_str: string } 
+  | TargetClones of
+  {
+  spelling: Clang__bindings.clang_ext_targetclones_spelling ;
+  features_strs: string list } 
   | TestTypestate of
   {
   spelling: Clang__bindings.clang_ext_testtypestate_spelling ;
@@ -1199,6 +1226,32 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
              BPFPreserveAccessIndex
                (Clang__bindings.ext_bpfpreserve_access_index_get_spelling
                   cursor)
+         | ((BTFDeclTag)[@if
+                          [%meta
+                            Metapp.Exp.of_bool
+                              (Clangml_config.equivalent_version.major >= 14)]])
+             ->
+             BTFDeclTag
+               {
+                 spelling =
+                   (Clang__bindings.ext_btfdecl_tag_get_spelling cursor);
+                 b_tfdecl_tag =
+                   (Clang__bindings.ext_btfdecl_tag_attr_get_btfdecl_tag
+                      cursor)
+               }
+         | ((BTFTypeTag)[@if
+                          [%meta
+                            Metapp.Exp.of_bool
+                              (Clangml_config.equivalent_version.major >= 14)]])
+             ->
+             BTFTypeTag
+               {
+                 spelling =
+                   (Clang__bindings.ext_btftype_tag_get_spelling cursor);
+                 b_tftype_tag =
+                   (Clang__bindings.ext_btftype_tag_attr_get_btftype_tag
+                      cursor)
+               }
          | Blocks ->
              Blocks
                {
@@ -1483,6 +1536,26 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                    (Clang__bindings.ext_destructor_get_spelling cursor);
                  priority = (Clang__bindings.ext_attrs_get_priority cursor)
                }
+         | ((DiagnoseAsBuiltin)[@if
+                                 [%meta
+                                   Metapp.Exp.of_bool
+                                     (Clangml_config.equivalent_version.major
+                                        >= 14)]])
+             ->
+             DiagnoseAsBuiltin
+               {
+                 spelling =
+                   (Clang__bindings.ext_diagnose_as_builtin_get_spelling
+                      cursor);
+                 function_ =
+                   (convert_declaration_name
+                      (Clang__bindings.ext_diagnose_as_builtin_attr_get_function
+                         cursor));
+                 arg_indices =
+                   (Clang__utils.list_of_iter
+                      (Clang__bindings.ext_diagnose_as_builtin_attr_get_arg_indices
+                         cursor))
+               }
          | ((DiagnoseIf)[@if
                           [%meta
                             Metapp.Exp.of_bool
@@ -1495,6 +1568,15 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                       (Clang__bindings.ext_attrs_get_cond cursor));
                  message = (Clang__bindings.ext_attrs_get_message cursor)
                }
+         | ((DisableSanitizerInstrumentation)[@if
+                                               [%meta
+                                                 Metapp.Exp.of_bool
+                                                   (Clangml_config.equivalent_version.major
+                                                      >= 14)]])
+             ->
+             DisableSanitizerInstrumentation
+               (Clang__bindings.ext_disable_sanitizer_instrumentation_get_spelling
+                  cursor)
          | ((DisableTailCalls)[@if
                                 [%meta
                                   Metapp.Exp.of_bool
@@ -1555,6 +1637,17 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                  extensibility =
                    (Clang__bindings.ext_enum_extensibility_attr_get_extensibility
                       cursor)
+               }
+         | ((Error)[@if
+                     [%meta
+                       Metapp.Exp.of_bool
+                         (Clangml_config.equivalent_version.major >= 14)]])
+             ->
+             Error
+               {
+                 spelling = (Clang__bindings.ext_error_get_spelling cursor);
+                 user_diagnostic =
+                   (Clang__bindings.ext_error_attr_get_user_diagnostic cursor)
                }
          | ((ExcludeFromExplicitInstantiation)[@if
                                                 [%meta
@@ -2078,7 +2171,10 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                     allocator =
                       (expr_of_cxcursor
                          (Clang__bindings.ext_ompallocate_decl_attr_get_allocator
-                            cursor))
+                            cursor));
+                    alignment =
+                      (expr_of_cxcursor
+                         (Clang__bindings.ext_attrs_get_alignment cursor))
                   })
          | ((OMPCaptureKind)[@if
                               [%meta
@@ -2166,7 +2262,17 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                     trait_infos =
                       (omp_trait_info_of_cxcursor
                          (Clang__bindings.ext_ompdeclare_variant_attr_get_trait_infos
-                            cursor))
+                            cursor));
+                    adjust_args_nothing =
+                      ((Clang__utils.list_of_iter
+                          (Clang__bindings.ext_ompdeclare_variant_attr_get_adjust_args_nothing
+                             cursor))
+                         |> (List.map expr_of_cxcursor));
+                    adjust_args_need_device_ptr =
+                      ((Clang__utils.list_of_iter
+                          (Clang__bindings.ext_ompdeclare_variant_attr_get_adjust_args_need_device_ptr
+                             cursor))
+                         |> (List.map expr_of_cxcursor))
                   })
          | ((OMPReferencedVar)[@if
                                 [%meta
@@ -2886,6 +2992,14 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                               (Clangml_config.equivalent_version.major >= 10)]])
              ->
              SYCLKernel (Clang__bindings.ext_syclkernel_get_spelling cursor)
+         | ((SYCLSpecialClass)[@if
+                                [%meta
+                                  Metapp.Exp.of_bool
+                                    (Clangml_config.equivalent_version.major
+                                       >= 14)]])
+             ->
+             SYCLSpecialClass
+               (Clang__bindings.ext_syclspecial_class_get_spelling cursor)
          | ScopedLockable ->
              ScopedLockable
                (Clang__bindings.ext_scoped_lockable_get_spelling cursor)
@@ -3122,6 +3236,21 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                  spelling = (Clang__bindings.ext_target_get_spelling cursor);
                  features_str =
                    (Clang__bindings.ext_target_attr_get_features_str cursor)
+               }
+         | ((TargetClones)[@if
+                            [%meta
+                              Metapp.Exp.of_bool
+                                (Clangml_config.equivalent_version.major >=
+                                   14)]])
+             ->
+             TargetClones
+               {
+                 spelling =
+                   (Clang__bindings.ext_target_clones_get_spelling cursor);
+                 features_strs =
+                   (Clang__utils.list_of_iter
+                      (Clang__bindings.ext_target_clones_attr_get_features_strs
+                         cursor))
                }
          | TestTypestate ->
              TestTypestate

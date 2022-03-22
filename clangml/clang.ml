@@ -600,6 +600,14 @@ module Ast = struct
                       cxtype |>
                     of_cxtype in
                   InjectedClassName sub
+              | Using
+                  [@if [%meta Metapp.Exp.of_bool
+                    (Clangml_config.version.major >= 14)]] ->
+                  let sub = of_cxtype (ext_type_desugar cxtype) in
+                  if options.ignore_using_types then
+                    Node.force sub.desc
+                  else
+                    Using sub
               | kind -> UnexposedType kind
             end in
       make_paren (make_qual_type cxtype type_loc (Node.from_fun desc))
@@ -1605,7 +1613,12 @@ module Ast = struct
         | CompoundLiteralExpr ->
             let qual_type = cursor |> get_cursor_type |> of_cxtype in
             let init =
-              match list_of_children cursor with
+              match list_of_children cursor |> filter_out_prefix_from_list begin
+                  fun cursor ->
+                    match get_cursor_kind cursor with
+                    | TypeRef -> true
+                    | _ -> false
+                end with
               | [init] -> init |> expr_of_cxcursor
               | _ -> raise Invalid_structure in
             CompoundLiteral { qual_type; init }
@@ -2216,7 +2229,7 @@ void f(void) {
 #line %d "%s"
 %s;
 }
-      |} (Format.pp_print_list Printer.decl) context line filename s in
+      |} Printer.decls context line filename s in
     let ast = Ast.parse_string ?index ?clang_options ?options code in
     let expr =
       match (Node.force ast.desc).items with

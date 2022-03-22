@@ -56,7 +56,7 @@ module StringMap = Map.Make (String)
 
 let clang__bindings = "Clang__bindings"
 
-let rec get_type_info (qual_type : Clang.Lazy.Type.t)
+let rec get_type_info name (qual_type : Clang.Lazy.Type.t)
     (enums : enum_decl StringMap.t) : type_info =
   let get_cursor_tu =
     lazy (H.call (H.decl_of_string "getCursorTU")
@@ -219,7 +219,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t)
         access = Fun.id;
         default = H.const_bool false; }
   | Pointer qual_type ->
-      let type_info = get_type_info qual_type enums in
+      let type_info = get_type_info name qual_type enums in
       { type_info with
         ocaml_type = [%type: [%t type_info.ocaml_type] list];
         multiple = true;
@@ -244,7 +244,7 @@ let rec get_type_info (qual_type : Clang.Lazy.Type.t)
       | None -> assert false
       end
   | _ ->
-      Format.eprintf "Unsupported type %a@."
+      Format.eprintf "Unsupported type in %s: %a@." name
         (Refl.pp [%refl:Clang.Lazy.Ast.qual_type] []) qual_type;
       { ocaml_type =  [%type: bool];
         type_conversion = NoConversion;
@@ -259,7 +259,7 @@ type argument_decl = {
   }
 
 let make_argument_decl name qual_type enums =
-  { name; type_info = get_type_info qual_type enums }
+  { name; type_info = get_type_info name qual_type enums }
 
 type argument_attribute = {
     name : string;
@@ -420,7 +420,8 @@ let add_fun_decl context fun_decl =
 let unkeyword name =
   match name with
   | "type"
-  | "module" -> name ^ "_"
+  | "module"
+  | "function" -> name ^ "_"
   | _ -> name
 
 let restrict_decl_version (major, minor) body =
@@ -449,8 +450,13 @@ let generate_attribute context versions name reduced_name public_methods
         StringHashtbl.find_opt public_methods (String.lowercase_ascii arg_name)
       with
       | None ->
+          let available_methods =
+            List.of_seq (StringHashtbl.to_seq_keys public_methods) in
           Format.fprintf Format.err_formatter
-            "No getter for %s in %s@." arg_name name;
+            "No getter for %s in %s (available methods: %a)@." arg_name name
+              (Format.pp_print_list
+                ~pp_sep:(fun fmt () -> Format.pp_print_string fmt ", ")
+                Format.pp_print_string) available_methods;
           assert false
       | Some getter_info ->
           let getter_name_ref =
@@ -572,7 +578,7 @@ let is_parameter_base_class name =
 let do_decl context versions (decl : Clang.Lazy.Decl.t) =
   match Lazy.force decl.desc with
   | RecordDecl {
-        keyword = Class; name; fields = fields; bases = [
+        keyword = Class; name; fields = (_ :: _) as fields; bases = [
           { qual_type = { desc = lazy (Record {
               name = IdentifierName base_class; _ }); _}; _}]; _} when
     is_parameter_base_class base_class && not (is_parameter_base_class name) ->
@@ -704,7 +710,8 @@ let filter_singleton (key, (desc : argument_desc)) =
 
 let data = "data"
 
-let callback = "callback"
+(* callback lexeme is deprecated with OCaml 4.14 *)
+let callback = "callback_value"
 
 let generate_code context versions argument type_name_attr _ty
     (argument_desc : argument_desc) =
@@ -945,7 +952,15 @@ let main cflags llvm_config prefix =
     StringMap.add "clang_ext_Unused_spelling" (3, 9) |>
     (* args is missing *)
     StringMap.add "Annotate:args" (12, 0) |>
-    StringMap.add "Annotate:args_Size" (12, 0) in
+    StringMap.add "Annotate:args_Size" (12, 0) |>
+    (* OMPAllocateDeclAttr::alignment* introduced in 14.0.0 *)
+    StringMap.add "OMPAllocateDecl:alignment" (14, 0) |>
+    (* OMPDeclareVariantAttr::adjustArgs* introduced in 14.0.0 *)
+    StringMap.add "OMPDeclareVariant:adjustArgsNothing_Size" (14, 0) |>
+    StringMap.add "OMPDeclareVariant:adjustArgsNothing" (14, 0) |>
+    StringMap.add "OMPDeclareVariant:adjustArgsNeedDevicePtr_Size" (14, 0) |>
+    StringMap.add "OMPDeclareVariant:adjustArgsNeedDevicePtr" (14, 0) |>
+    Fun.id in
   let command_line_args, _llvm_version =
     Stubgen_common.prepare_clang_options cflags llvm_config in
   let tu =
@@ -1125,7 +1140,7 @@ let info =
       `S Cmdliner.Manpage.s_bugs;
       `P "Email bug reports to <thierry.martinez@inria.fr>.";
     ] in
-  Cmdliner.Term.info tool_name ~doc ~exits:Cmdliner.Term.default_exits ~man
+  Cmdliner.Cmd.info tool_name ~doc ~man
 
 let () =
-  Cmdliner.Term.exit (Cmdliner.Term.eval (Stubgen_common.options main, info))
+  exit (Cmdliner.Cmd.eval (Cmdliner.Cmd.v info (Stubgen_common.options main)))

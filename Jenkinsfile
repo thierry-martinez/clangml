@@ -9,7 +9,7 @@ def opam_installations(ocamlversions, url) {
         branches[ocamlversion] = {
             node {
                 sh """
-                    docker run --rm -v $pwd/src:/clangml \
+                    docker run --pull=always --rm -v $pwd/src:/clangml \
                         ocaml/opam:debian-11-ocaml-$ocamlversion \
                         /clangml/ci-scripts/opam-pin_and_install.sh $url
                     """
@@ -40,19 +40,19 @@ pipeline {
         }
         stage('Configure') {
             steps {
-                timeout(time: 2, unit: 'MINUTES') {
+                timeout(time: 3, unit: 'MINUTES') {
                     sh '''
                         eval $(opam env) && \
                         mkdir build && cd build && \
                         ../src/configure \
-                            --with-llvm-config=/media/llvms/13.0.0/bin/llvm-config
+                            --with-llvm-config=/media/llvms/14.0.0/bin/llvm-config
                        '''
                 }
             }
         }
         stage('Build') {
             steps {
-                timeout(time: 4, unit: 'MINUTES') {
+                timeout(time: 5, unit: 'MINUTES') {
                     sh 'make -C build clangml'
                     sh 'make -C build clangml.opam && cp build/clangml.opam src/'
                     sh 'make -C build tools/stubgen'
@@ -63,12 +63,12 @@ pipeline {
         }
         stage('Generate attributes') {
             steps {
-                timeout(time: 4, unit: 'MINUTES') {
+                timeout(time: 5, unit: 'MINUTES') {
                     sh '''
                        eval $(opam env) && \
                        cd build && \
                        dune exec -- tools/generate_attrs/generate_attrs.exe \
-                         --llvm-config /media/llvms/13.0.0/bin/llvm-config \
+                         --llvm-config /media/llvms/14.0.0/bin/llvm-config \
                          "../src/bootstrap/" && \
                        cp ../src/bootstrap/attributes.ml clangml && \
                        cp ../src/bootstrap/libclang_extensions_attrs.inc \
@@ -159,6 +159,7 @@ pipeline {
                         script: 'git rev-parse HEAD',
                         returnStdout: true
                     ).trim()
+                    sh 'git fetch origin'
                     sh 'git checkout origin/bootstrap'
                     sh 'tar -xf src/bootstrap.tar.xz'
                     sh 'git add bootstrap'
@@ -238,6 +239,7 @@ pipeline {
         stage('Commit to norms branch') {
             when { branch 'master' }
             steps {
+                sh 'git fetch origin'
                 sh 'git checkout origin/norms'
                 sh 'cp build/norm_c++14.ml norms/'
                 sh 'cp build/norm_c++17.ml norms/'

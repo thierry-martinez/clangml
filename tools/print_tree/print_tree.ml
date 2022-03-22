@@ -135,8 +135,7 @@ let info =
       `S Cmdliner.Manpage.s_bugs;
       `P "Email bug reports to <thierry.martinez@inria.fr>.";
     ] in
-  Cmdliner.Term.info "print_tree" ~doc ~exits:Cmdliner.Term.default_exits ~man
+  Cmdliner.Cmd.info "print_tree" ~doc ~man
 
 let () =
-  Cmdliner.Term.eval (options, info) |>
-  Cmdliner.Term.exit
+  exit (Cmdliner.Cmd.eval (Cmdliner.Cmd.v info options))

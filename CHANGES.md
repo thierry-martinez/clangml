@@ -1,3 +1,11 @@
+# 2022-03-22, 4.6.0
+
+- Support for Clang/LLVM 14.0.0
+
+- Fix bug with compound literals: when compound literals refer to a defined type,
+  the AST was UnknownExpr.
+  (reported by Arthur Charguéraud, https://gitlab.inria.fr/tmartine/clangml/-/issues/2)
+
 # 2021-11-11, 4.5.0
 
 - Support for Clang/LLVM 12.0.1 and 13.0.0.

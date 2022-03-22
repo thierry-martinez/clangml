@@ -221,8 +221,10 @@ AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x11.0.1"],
   [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[11.1.0]])])
 AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x12.0.0"],
   [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[12.0.1]])])
-AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x13.0.1"],
-  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[13.0.0]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x13.0.0"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[13.0.1]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x14.0.1"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[14.0.0]])])
 
 AC_SUBST([EQUIVALENT_LLVM_VERSION_MAJOR], [[`echo $EQUIVALENT_LLVM_VERSION | \
   sed 's/^\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)/\1/'`]])
@@ -267,6 +269,8 @@ AC_VERSION_BLOCK(10, 0)
 AC_VERSION_BLOCK(11, 0)
 AC_VERSION_BLOCK(11, 1)
 AC_VERSION_BLOCK(12, 0)
+AC_VERSION_BLOCK(13, 0)
+AC_VERSION_BLOCK(14, 0)
 
 AC_SUBST([LLVM_CFLAGS], [[`$LLVM_CONFIG --cflags`]])
 
@@ -293,6 +297,9 @@ AC_SUBST([LLVM_CFLAGS], [["`echo $LLVM_CFLAGS \
   | sed s/-Wdelete-non-virtual-dtor\\ //`"]])
 
 AC_SUBST([CFLAGS], [["$LLVM_CFLAGS -D$LLVM_VERSION_MACRO -I$srcdir/clangml"]])
+
+# AS_IF([test `printf "$OCAMLVERSION\n4.14" | sort | head -n1` != 4.14],
+#   [AC_SUBST([CFLAGS], [["$CFLAGS -DOCAML_BEFORE_4_14"]])])
 
 AC_SUBST([CXXFLAGS], [["$CFLAGS --std=c++14"]])
 

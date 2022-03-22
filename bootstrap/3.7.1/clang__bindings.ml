@@ -1249,7 +1249,7 @@ external cursor_get_obj_cdecl_qualifiers :
                                                                   "Given a cursor that represents an Objective-C method or parameter declaration, return the associated Objective-C qualifiers for the return type or the parameter respectively. The bits are formed from CXObjCDeclQualifierKind."]
 external cursor_is_obj_coptional :
   cxcursor -> bool = "clang_Cursor_isObjCOptional_wrapper"[@@ocaml.doc
-                                                            "Given a cursor that represents an Objective-C method or property declaration, return non-zero if the declaration was affected by \"\". Returns zero if the cursor is not such a declaration or it is \"\"."]
+                                                            "\nGiven a cursor that represents an ObjC method or property declaration,\nreturn non-zero if the declaration was affected by \"\\@optional\".\nReturns zero if the cursor is not such a declaration or it is \"\\@required\". "]
 external cursor_is_variadic :
   cxcursor -> bool = "clang_Cursor_isVariadic_wrapper"[@@ocaml.doc
                                                         "Returns non-zero if the given cursor is a variadic function or method."]
@@ -2827,6 +2827,10 @@ external ext_injected_class_name_type_get_injected_specialization_type :
     "clang_ext_InjectedClassNameType_getInjectedSpecializationType_wrapper"
 external ext_type_get_unqualified_type :
   cxtype -> cxtype = "clang_ext_Type_getUnqualifiedType_wrapper"
+external ext_type_is_sugared :
+  cxtype -> bool = "clang_ext_Type_isSugared_wrapper"
+external ext_type_desugar :
+  cxtype -> cxtype = "clang_ext_Type_desugar_wrapper"
 type clang_ext_cxxctorinitializer
 external ext_cxxconstructor_decl_visit_initializers :
   cxcursor -> (clang_ext_cxxctorinitializer -> cxvisitorresult) -> bool =
@@ -3125,6 +3129,22 @@ type clang_ext_bpfpreserveaccessindex_spelling =
 external ext_bpfpreserve_access_index_get_spelling :
   cxcursor -> clang_ext_bpfpreserveaccessindex_spelling =
     "clang_ext_BPFPreserveAccessIndex_getSpelling_wrapper"
+type clang_ext_btfdecltag_spelling =
+  | GNU_btf_decl_tag 
+  | CXX11_clang_btf_decl_tag 
+  | C2x_clang_btf_decl_tag 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_btfdecl_tag_get_spelling :
+  cxcursor -> clang_ext_btfdecltag_spelling =
+    "clang_ext_BTFDeclTag_getSpelling_wrapper"
+type clang_ext_btftypetag_spelling =
+  | GNU_btf_type_tag 
+  | CXX11_clang_btf_type_tag 
+  | C2x_clang_btf_type_tag 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_btftype_tag_get_spelling :
+  cxcursor -> clang_ext_btftypetag_spelling =
+    "clang_ext_BTFTypeTag_getSpelling_wrapper"
 type clang_ext_blocks_spelling =
   | GNU_blocks 
   | CXX11_clang_blocks 
@@ -3424,6 +3444,22 @@ type clang_ext_destructor_spelling =
 external ext_destructor_get_spelling :
   cxcursor -> clang_ext_destructor_spelling =
     "clang_ext_Destructor_getSpelling_wrapper"
+type clang_ext_diagnoseasbuiltin_spelling =
+  | GNU_diagnose_as_builtin 
+  | CXX11_clang_diagnose_as_builtin 
+  | C2x_clang_diagnose_as_builtin 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_diagnose_as_builtin_get_spelling :
+  cxcursor -> clang_ext_diagnoseasbuiltin_spelling =
+    "clang_ext_DiagnoseAsBuiltin_getSpelling_wrapper"
+type clang_ext_disablesanitizerinstrumentation_spelling =
+  | GNU_disable_sanitizer_instrumentation 
+  | CXX11_clang_disable_sanitizer_instrumentation 
+  | C2x_clang_disable_sanitizer_instrumentation 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_disable_sanitizer_instrumentation_get_spelling :
+  cxcursor -> clang_ext_disablesanitizerinstrumentation_spelling =
+    "clang_ext_DisableSanitizerInstrumentation_getSpelling_wrapper"
 type clang_ext_disabletailcalls_spelling =
   | GNU_disable_tail_calls 
   | CXX11_clang_disable_tail_calls 
@@ -3456,6 +3492,17 @@ type clang_ext_enumextensibility_spelling =
 external ext_enum_extensibility_get_spelling :
   cxcursor -> clang_ext_enumextensibility_spelling =
     "clang_ext_EnumExtensibility_getSpelling_wrapper"
+type clang_ext_error_spelling =
+  | GNU_error 
+  | CXX11_gnu_error 
+  | C2x_gnu_error 
+  | GNU_warning 
+  | CXX11_gnu_warning 
+  | C2x_gnu_warning 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_error_get_spelling :
+  cxcursor -> clang_ext_error_spelling =
+    "clang_ext_Error_getSpelling_wrapper"
 type clang_ext_excludefromexplicitinstantiation_spelling =
   | GNU_exclude_from_explicit_instantiation 
   | CXX11_clang_exclude_from_explicit_instantiation 
@@ -4560,6 +4607,14 @@ type clang_ext_syclkernel_spelling =
 external ext_syclkernel_get_spelling :
   cxcursor -> clang_ext_syclkernel_spelling =
     "clang_ext_SYCLKernel_getSpelling_wrapper"
+type clang_ext_syclspecialclass_spelling =
+  | GNU_sycl_special_class 
+  | CXX11_clang_sycl_special_class 
+  | C2x_clang_sycl_special_class 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_syclspecial_class_get_spelling :
+  cxcursor -> clang_ext_syclspecialclass_spelling =
+    "clang_ext_SYCLSpecialClass_getSpelling_wrapper"
 type clang_ext_scopedlockable_spelling =
   | GNU_scoped_lockable 
   | CXX11_clang_scoped_lockable 
@@ -4719,6 +4774,14 @@ type clang_ext_target_spelling =
 external ext_target_get_spelling :
   cxcursor -> clang_ext_target_spelling =
     "clang_ext_Target_getSpelling_wrapper"
+type clang_ext_targetclones_spelling =
+  | GNU_target_clones 
+  | CXX11_gnu_target_clones 
+  | C2x_gnu_target_clones 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_target_clones_get_spelling :
+  cxcursor -> clang_ext_targetclones_spelling =
+    "clang_ext_TargetClones_getSpelling_wrapper"
 type clang_ext_testtypestate_spelling =
   | GNU_test_typestate 
   | CXX11_clang_test_typestate 
@@ -4990,6 +5053,8 @@ external ext_patchable_function_entry_attr_get_offset :
   cxcursor -> int = "clang_ext_PatchableFunctionEntryAttr_getOffset_wrapper"
 external ext_assume_aligned_attr_get_offset :
   cxcursor -> cxcursor = "clang_ext_AssumeAlignedAttr_getOffset_wrapper"
+external ext_btftype_tag_attr_get_btftype_tag_length :
+  cxcursor -> int = "clang_ext_BTFTypeTagAttr_getBTFTypeTagLength_wrapper"
 external ext_web_assembly_import_name_attr_get_import_name_length :
   cxcursor -> int =
     "clang_ext_WebAssemblyImportNameAttr_getImportNameLength_wrapper"
@@ -5016,6 +5081,9 @@ external ext_suppress_attr_get_diagnostic_identifiers :
     "clang_ext_SuppressAttr_getDiagnosticIdentifiers_wrapper"
 external ext_attrs_get_deref_type :
   cxcursor -> clang_ext_typeloc = "clang_ext_Attrs_getDerefType_wrapper"
+external ext_ompdeclare_variant_attr_get_adjust_args_need_device_ptr_size :
+  cxcursor -> int =
+    "clang_ext_OMPDeclareVariantAttr_getAdjustArgsNeedDevicePtr_Size_wrapper"
 external ext_type_tag_for_datatype_attr_get_matching_ctype :
   cxcursor -> clang_ext_typeloc =
     "clang_ext_TypeTagForDatatypeAttr_getMatchingCType_wrapper"
@@ -5036,6 +5104,8 @@ external ext_attrs_get_args_size :
 external ext_cudalaunch_bounds_attr_get_min_blocks :
   cxcursor -> cxcursor =
     "clang_ext_CUDALaunchBoundsAttr_getMinBlocks_wrapper"
+external ext_btfdecl_tag_attr_get_btfdecl_tag_length :
+  cxcursor -> int = "clang_ext_BTFDeclTagAttr_getBTFDeclTagLength_wrapper"
 external ext_swift_bridge_attr_get_swift_type_length :
   cxcursor -> int = "clang_ext_SwiftBridgeAttr_getSwiftTypeLength_wrapper"
 external ext_external_source_symbol_attr_get_defined_in_length :
@@ -5099,6 +5169,8 @@ external ext_availability_attr_get_obsoleted :
     "clang_ext_AvailabilityAttr_getObsoleted_wrapper"
 external ext_init_seg_attr_get_section :
   cxcursor -> string = "clang_ext_InitSegAttr_getSection_wrapper"
+external ext_btfdecl_tag_attr_get_btfdecl_tag :
+  cxcursor -> string = "clang_ext_BTFDeclTagAttr_getBTFDeclTag_wrapper"
 external ext_external_source_symbol_attr_get_defined_in :
   cxcursor -> string =
     "clang_ext_ExternalSourceSymbolAttr_getDefinedIn_wrapper"
@@ -5148,6 +5220,13 @@ external ext_availability_attr_get_deprecated :
 external ext_preferred_name_attr_get_typedef_type :
   cxcursor -> clang_ext_typeloc =
     "clang_ext_PreferredNameAttr_getTypedefType_wrapper"
+external ext_diagnose_as_builtin_attr_get_arg_indices :
+  cxcursor -> (int -> unit) -> unit =
+    "clang_ext_DiagnoseAsBuiltinAttr_getArgIndices_wrapper"
+external ext_target_clones_attr_get_features_strs_size :
+  cxcursor -> int = "clang_ext_TargetClonesAttr_getFeaturesStrs_Size_wrapper"
+external ext_error_attr_get_user_diagnostic_length :
+  cxcursor -> int = "clang_ext_ErrorAttr_getUserDiagnosticLength_wrapper"
 external ext_web_assembly_export_name_attr_get_export_name :
   cxcursor -> string =
     "clang_ext_WebAssemblyExportNameAttr_getExportName_wrapper"
@@ -5185,6 +5264,9 @@ external ext_ompdeclare_variant_attr_get_variant_func_ref :
     "clang_ext_OMPDeclareVariantAttr_getVariantFuncRef_wrapper"
 external ext_no_builtin_attr_get_builtin_names_size :
   cxcursor -> int = "clang_ext_NoBuiltinAttr_getBuiltinNames_Size_wrapper"
+external ext_target_clones_attr_get_features_strs :
+  cxcursor -> (string -> unit) -> unit =
+    "clang_ext_TargetClonesAttr_getFeaturesStrs_wrapper"
 external ext_attrs_get_replacement :
   cxcursor -> string = "clang_ext_Attrs_getReplacement_wrapper"
 external ext_amdgpunum_sgprattr_get_num_sgpr :
@@ -5192,6 +5274,9 @@ external ext_amdgpunum_sgprattr_get_num_sgpr :
 external ext_obj_cbridge_related_attr_get_instance_method :
   cxcursor -> string =
     "clang_ext_ObjCBridgeRelatedAttr_getInstanceMethod_wrapper"
+external ext_ompdeclare_variant_attr_get_adjust_args_need_device_ptr :
+  cxcursor -> (cxcursor -> unit) -> unit =
+    "clang_ext_OMPDeclareVariantAttr_getAdjustArgsNeedDevicePtr_wrapper"
 external ext_ompdeclare_simd_decl_attr_get_simdlen :
   cxcursor -> cxcursor =
     "clang_ext_OMPDeclareSimdDeclAttr_getSimdlen_wrapper"
@@ -5251,6 +5336,9 @@ external ext_enum_extensibility_attr_get_extensibility :
     "clang_ext_EnumExtensibilityAttr_getExtensibility_wrapper"
 external ext_alloc_align_attr_get_param_index :
   cxcursor -> int = "clang_ext_AllocAlignAttr_getParamIndex_wrapper"
+external ext_diagnose_as_builtin_attr_get_arg_indices_size :
+  cxcursor -> int =
+    "clang_ext_DiagnoseAsBuiltinAttr_getArgIndices_Size_wrapper"
 external ext_availability_attr_get_introduced :
   cxcursor -> clang_ext_versiontuple =
     "clang_ext_AvailabilityAttr_getIntroduced_wrapper"
@@ -5266,6 +5354,8 @@ external ext_attrs_get_arg :
   cxcursor -> cxcursor = "clang_ext_Attrs_getArg_wrapper"
 external ext_attrs_get_cpus :
   cxcursor -> (string -> unit) -> unit = "clang_ext_Attrs_getCpus_wrapper"
+external ext_btftype_tag_attr_get_btftype_tag :
+  cxcursor -> string = "clang_ext_BTFTypeTagAttr_getBTFTypeTag_wrapper"
 external ext_open_clintel_reqd_sub_group_size_attr_get_sub_group_size :
   cxcursor -> int =
     "clang_ext_OpenCLIntelReqdSubGroupSizeAttr_getSubGroupSize_wrapper"
@@ -5286,6 +5376,9 @@ external ext_min_vector_width_attr_get_vector_width :
 external ext_type_tag_for_datatype_attr_get_layout_compatible :
   cxcursor -> bool =
     "clang_ext_TypeTagForDatatypeAttr_getLayoutCompatible_wrapper"
+external ext_ompdeclare_variant_attr_get_adjust_args_nothing :
+  cxcursor -> (cxcursor -> unit) -> unit =
+    "clang_ext_OMPDeclareVariantAttr_getAdjustArgsNothing_wrapper"
 external ext_init_seg_attr_get_section_length :
   cxcursor -> int = "clang_ext_InitSegAttr_getSectionLength_wrapper"
 external ext_vec_type_hint_attr_get_type_hint :
@@ -5293,6 +5386,9 @@ external ext_vec_type_hint_attr_get_type_hint :
     "clang_ext_VecTypeHintAttr_getTypeHint_wrapper"
 external ext_attrs_get_tcbname_length :
   cxcursor -> int = "clang_ext_Attrs_getTCBNameLength_wrapper"
+external ext_ompdeclare_variant_attr_get_adjust_args_nothing_size :
+  cxcursor -> int =
+    "clang_ext_OMPDeclareVariantAttr_getAdjustArgsNothing_Size_wrapper"
 external ext_external_source_symbol_attr_get_language_length :
   cxcursor -> int =
     "clang_ext_ExternalSourceSymbolAttr_getLanguageLength_wrapper"
@@ -5358,6 +5454,8 @@ external ext_ompdeclare_simd_decl_attr_get_linears_size :
     "clang_ext_OMPDeclareSimdDeclAttr_getLinears_Size_wrapper"
 external ext_nserror_domain_attr_get_error_domain :
   cxcursor -> cxcursor = "clang_ext_NSErrorDomainAttr_getErrorDomain_wrapper"
+external ext_error_attr_get_user_diagnostic :
+  cxcursor -> string = "clang_ext_ErrorAttr_getUserDiagnostic_wrapper"
 external ext_xray_log_args_attr_get_argument_count :
   cxcursor -> int = "clang_ext_XRayLogArgsAttr_getArgumentCount_wrapper"
 external ext_attrs_get_message :
@@ -5482,6 +5580,9 @@ external ext_attrs_get_kind :
   cxcursor -> string = "clang_ext_Attrs_getKind_wrapper"
 external ext_patchable_function_entry_attr_get_count :
   cxcursor -> int = "clang_ext_PatchableFunctionEntryAttr_getCount_wrapper"
+external ext_diagnose_as_builtin_attr_get_function :
+  cxcursor -> clang_ext_declarationname =
+    "clang_ext_DiagnoseAsBuiltinAttr_getFunction_wrapper"
 external ext_abi_tag_attr_get_tags :
   cxcursor -> (string -> unit) -> unit =
     "clang_ext_AbiTagAttr_getTags_wrapper"

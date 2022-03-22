@@ -111,5 +111,4 @@ let info =
   Cmdliner.Term.info "call_graph" ~doc ~exits:Cmdliner.Term.default_exits ~man
 
 let () =
-  Cmdliner.Term.eval (options, info) |>
-  Cmdliner.Term.exit
+  exit (Cmdliner.Cmd.eval (Cmdliner.Cmd.v info options))

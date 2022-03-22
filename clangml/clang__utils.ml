@@ -311,7 +311,7 @@ let format_diagnostics ?pp ?(options = Diagnostic_display_options.default)
       | None -> Format.fprintf fmt "@[<v>%a@]" format_all_diagnostics ()
       | Some pp -> pp format_all_diagnostics fmt ()
 
-let error = [Error; Fatal]
+let error : cxdiagnosticseverity list = [Error; Fatal]
 
 let warning_or_error = Warning :: error
 
