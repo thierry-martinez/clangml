@@ -2229,7 +2229,7 @@ void f(void) {
 #line %d "%s"
 %s;
 }
-      |} (Format.pp_print_list Printer.decl) context line filename s in
+      |} Printer.decls context line filename s in
     let ast = Ast.parse_string ?index ?clang_options ?options code in
     let expr =
       match (Node.force ast.desc).items with
