@@ -159,6 +159,7 @@ pipeline {
                         script: 'git rev-parse HEAD',
                         returnStdout: true
                     ).trim()
+                    sh 'git fetch origin'
                     sh 'git checkout origin/bootstrap'
                     sh 'tar -xf src/bootstrap.tar.xz'
                     sh 'git add bootstrap'
@@ -238,6 +239,7 @@ pipeline {
         stage('Commit to norms branch') {
             when { branch 'master' }
             steps {
+                sh 'git fetch origin'
                 sh 'git checkout origin/norms'
                 sh 'cp build/norm_c++14.ml norms/'
                 sh 'cp build/norm_c++17.ml norms/'
