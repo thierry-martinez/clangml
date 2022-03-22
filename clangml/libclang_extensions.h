@@ -95,9 +95,6 @@
 #ifdef LLVM_VERSION_BEFORE_13_0_0
 #define LLVM_VERSION_BEFORE_14_0_0
 #endif
-#ifdef LLVM_VERSION_13_0_0
-#define LLVM_VERSION_BEFORE_14_0_0
-#endif
 #ifdef LLVM_VERSION_13_0_1
 #define LLVM_VERSION_BEFORE_14_0_0
 #endif
