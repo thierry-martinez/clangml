@@ -1,4 +1,4 @@
-# Next version, 4.6.0
+# 2022-03-22, 4.6.0
 
 - Support for Clang/LLVM 14.0.0
 
