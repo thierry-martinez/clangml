@@ -103,7 +103,7 @@ AC_DEFUN([AC_CHECK_LLVM_VERSION],
                        [AC_SUBST([LLVM_CONFIG], [[$GENTOO_LLVM_CONFIG]])],
                        [AS_IF([test "x$BREW" != "x"],
                          AC_SUBST([BREW_CELLAR], [[`$BREW --cellar`]])
-                         AC_SUBST([BREW_LLVM_CONFIG], [$BREW_CELLAR/llvm*/$1*/bin/llvm-config])
+                         AC_SUBST([BREW_LLVM_CONFIG], [[`echo $BREW_CELLAR/llvm*/$1*/bin/llvm-config`]])
                          AS_IF([test "x$BREW_LLVM_CONFIG" != "x" -a -f "$BREW_LLVM_CONFIG"],
                            AC_SUBST([LLVM_CONFIG], [[$BREW_LLVM_CONFIG]])))])])])])])])])])
 
