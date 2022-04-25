@@ -156,7 +156,7 @@ AS_IF([test "x$LLVM_CONFIG" = "x"],
      AS_IF([test "x$LLVM_CONFIG" = "x"],
        [AC_CHECK_LLVM_VERSION([3.5])
      AS_IF([test "x$LLVM_CONFIG" = "x"],
-       [AC_CHECK_LLVM_VERSION([3.4])])])])])])])])])])])])])])])])])])
+       [AC_CHECK_LLVM_VERSION([3.4])])])])])])])])])])])])])])])])])])])])
 
 AS_IF([test "x$LLVM_CONFIG" = "x"],
   [AC_MSG_RESULT([[not found in PATH]])
