@@ -103,8 +103,8 @@ AC_DEFUN([AC_CHECK_LLVM_VERSION],
                        [AC_SUBST([LLVM_CONFIG], [[$GENTOO_LLVM_CONFIG]])],
                        [AS_IF([test "x$BREW" != "x"],
                          AC_SUBST([BREW_CELLAR], [[`$BREW --cellar`]])
-                         AC_SUBST([BREW_LLVM_CONFIG], [$BREW_CELLAR/llvm*/$1*/bin/llvm-config])
-                         AS_IF([test "x$BREW_LLVM_CONFIG" != "x"],
+                         AC_SUBST([BREW_LLVM_CONFIG], [[`echo $BREW_CELLAR/llvm*/$1*/bin/llvm-config`]])
+                         AS_IF([test "x$BREW_LLVM_CONFIG" != "x" -a -f "$BREW_LLVM_CONFIG"],
                            AC_SUBST([LLVM_CONFIG], [[$BREW_LLVM_CONFIG]])))])])])])])])])])
 
 AC_ARG_WITH([llvm],
@@ -123,6 +123,10 @@ AS_IF([test "x$LLVM_CONFIG" = "x"],
      AS_IF([test "x$LLVM_CONFIG" = "x"],
        [AC_SUBST([LLVM_CONFIG], [[`which llvm-config`]])])],
     [AC_SUBST([LLVM_CONFIG], [[`which llvm-config`]])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([14])
+     AS_IF([test "x$LLVM_CONFIG" = "x"],
+       [AC_CHECK_LLVM_VERSION([13])
      AS_IF([test "x$LLVM_CONFIG" = "x"],
        [AC_CHECK_LLVM_VERSION([12])
      AS_IF([test "x$LLVM_CONFIG" = "x"],
@@ -152,7 +156,7 @@ AS_IF([test "x$LLVM_CONFIG" = "x"],
      AS_IF([test "x$LLVM_CONFIG" = "x"],
        [AC_CHECK_LLVM_VERSION([3.5])
      AS_IF([test "x$LLVM_CONFIG" = "x"],
-       [AC_CHECK_LLVM_VERSION([3.4])])])])])])])])])])])])])])])])])])
+       [AC_CHECK_LLVM_VERSION([3.4])])])])])])])])])])])])])])])])])])])])
 
 AS_IF([test "x$LLVM_CONFIG" = "x"],
   [AC_MSG_RESULT([[not found in PATH]])
@@ -224,6 +228,12 @@ AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x12.0.0"],
 AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x13.0.0"],
   [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[13.0.1]])])
 AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x14.0.1"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[14.0.0]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x14.0.2"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[14.0.0]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x14.0.3"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[14.0.0]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x14.0.4"],
   [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[14.0.0]])])
 
 AC_SUBST([EQUIVALENT_LLVM_VERSION_MAJOR], [[`echo $EQUIVALENT_LLVM_VERSION | \
