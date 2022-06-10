@@ -229,6 +229,12 @@ AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x13.0.0"],
   [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[13.0.1]])])
 AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x14.0.1"],
   [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[14.0.0]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x14.0.2"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[14.0.0]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x14.0.3"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[14.0.0]])])
+AS_IF([test "x$EQUIVALENT_LLVM_VERSION" = "x14.0.4"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[14.0.0]])])
 
 AC_SUBST([EQUIVALENT_LLVM_VERSION_MAJOR], [[`echo $EQUIVALENT_LLVM_VERSION | \
   sed 's/^\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)/\1/'`]])

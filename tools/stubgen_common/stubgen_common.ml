@@ -54,6 +54,9 @@ let prepare_clang_options cflags llvm_config =
           | "12.0.0" -> "12.0.1"
           | "13.0.0" -> "13.0.1"
           | "14.0.1" -> "14.0.0"
+          | "14.0.2" -> "14.0.0"
+          | "14.0.3" -> "14.0.0"
+          | "14.0.4" -> "14.0.0"
           | _ -> llvm_version in
         let version_option =
           String.map (fun c -> if c = '.' then '_' else c)
