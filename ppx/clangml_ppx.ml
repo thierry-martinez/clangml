@@ -13,13 +13,14 @@ type antiquotation = {
 [%%meta
     let ocaml_minor_version =
       int_of_string (String.sub Sys.ocaml_version 2 2) in
+    let _, target_minor_version = Metapp.ast_version in
     let make_converter field_name e =
       let rec convert minor_version e =
-        if minor_version = 12 then
+        if minor_version = target_minor_version then
           e
         else
           let next_version =
-            if minor_version < 12 then
+            if minor_version < target_minor_version then
               minor_version + 1
             else
               minor_version - 1 in
