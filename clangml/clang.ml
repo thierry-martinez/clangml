@@ -1872,6 +1872,10 @@ ext_expr_requirement_return_type_get_type_constraint_template_parameter_list
                           ext_requires_expr_get_requirement cursor i |>
                           extract_requirement);
                   }
+              | ParenListExpr ->
+                  let exprs =
+                    List.map expr_of_cxcursor (list_of_children cursor) in
+                  ParenList exprs
               | kind -> UnexposedExpr kind
             end
         | _ ->

@@ -3152,6 +3152,53 @@ let () =
                kind = Add;
                rhs = { desc = DeclRef { name = IdentifierName "x" }}}}}] }}}}]]
     ]} *)
+  | ParenList of expr list
+(** Parenthesized list of expressions.
+
+    {[
+let example = {|
+template <class X>
+class C {
+    int x;
+    C(C* f) : x(f->x) { }
+};
+|}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = TemplateDecl {
+         parameters = { list = [{ desc = {
+           parameter_name = "X";
+           parameter_kind = Class { default = _ }}}] };
+         decl = { desc = RecordDecl {
+           keyword = Class;
+           name = "C";
+           fields = [
+             { desc = Field {
+                 name = "x";
+                 qual_type = { desc = BuiltinType Int }}};
+             { desc = Constructor {
+                 parameters = {
+                   non_variadic = [
+                     { desc = {
+                       qual_type = {
+                         desc = Pointer ({ desc = InjectedClassName {
+                           desc = TemplateSpecialization {
+                             name = NameTemplate "C";
+                             args = [Type {
+                               desc = TemplateTypeParm "X" }] }}})}}}] };
+                 initializer_list = [
+                   { kind = Member { indirect = false; field = { desc = "x" }};
+                     init = { desc = ParenList [
+                       { desc = Member {
+                           base = Some ({ desc =
+                             DeclRef { name = IdentifierName "f" }});
+                           arrow = true;
+                           field = DependentScopeMember {
+                             ident_ref = { name = IdentifierName "x" }}}}] }}];
+                 body = Some { desc = Compound [] }}}] }}}}]]
+]}*)
   | UnknownExpr of cxcursorkind * clang_ext_stmtkind
 
 and field =
