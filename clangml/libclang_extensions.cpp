@@ -2846,7 +2846,9 @@ extern "C" {
       default:
         if (auto e = llvm::dyn_cast_or_null<
             clang::CXXDependentScopeMemberExpr>(s)) {
-          return e->getNumTemplateArgs();
+          if (e->hasExplicitTemplateArgs()) {
+            return e->getNumTemplateArgs();
+          }
         }
       }
     }
