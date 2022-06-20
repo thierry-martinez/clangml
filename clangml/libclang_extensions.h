@@ -1314,5 +1314,10 @@ clang_ext_CXXCtorInitializer_getAnyMember(struct clang_ext_CXXCtorInitializer);
 CXCursor
 clang_ext_CXXCtorInitializer_getInit(struct clang_ext_CXXCtorInitializer);
 
+unsigned int
+clang_ext_FunctionDecl_getNumTemplateParameterLists(CXCursor);
+
+struct clang_ext_TemplateParameterList
+clang_ext_FunctionDecl_getTemplateParameterList(CXCursor, unsigned int);
 
 #include "libclang_extensions_attrs_headers.inc"
