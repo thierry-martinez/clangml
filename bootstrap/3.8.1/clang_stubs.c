@@ -10780,6 +10780,38 @@ clang_ext_CXXCtorInitializer_getInit_wrapper(value arg_ocaml)
   }
 }
 
+CAMLprim value
+clang_ext_FunctionDecl_getNumTemplateParameterLists_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int result = clang_ext_FunctionDecl_getNumTemplateParameterLists(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_int(result);
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_FunctionDecl_getTemplateParameterList_wrapper(value arg_ocaml, value arg2_ocaml)
+{
+  CAMLparam2(arg_ocaml, arg2_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  unsigned int arg2;
+  arg2 = Int_val(arg2_ocaml);
+  struct clang_ext_TemplateParameterList result = clang_ext_FunctionDecl_getTemplateParameterList(arg, arg2);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_templateparameterlist(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_AArch64VectorPcs_spelling
 Clang_ext_aarch64vectorpcs_spelling_val(value ocaml)
 {

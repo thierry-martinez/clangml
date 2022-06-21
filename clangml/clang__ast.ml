@@ -3152,6 +3152,53 @@ let () =
                kind = Add;
                rhs = { desc = DeclRef { name = IdentifierName "x" }}}}}] }}}}]]
     ]} *)
+  | ParenList of expr list
+(** Parenthesized list of expressions.
+
+    {[
+let example = {|
+template <class X>
+class C {
+    int x;
+    C(C* f) : x(f->x) { }
+};
+|}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = TemplateDecl {
+         parameters = { list = [{ desc = {
+           parameter_name = "X";
+           parameter_kind = Class { default = _ }}}] };
+         decl = { desc = RecordDecl {
+           keyword = Class;
+           name = "C";
+           fields = [
+             { desc = Field {
+                 name = "x";
+                 qual_type = { desc = BuiltinType Int }}};
+             { desc = Constructor {
+                 parameters = {
+                   non_variadic = [
+                     { desc = {
+                       qual_type = {
+                         desc = Pointer ({ desc = InjectedClassName {
+                           desc = TemplateSpecialization {
+                             name = NameTemplate "C";
+                             args = [Type {
+                               desc = TemplateTypeParm "X" }] }}})}}}] };
+                 initializer_list = [
+                   { kind = Member { indirect = false; field = { desc = "x" }};
+                     init = { desc = ParenList [
+                       { desc = Member {
+                           base = Some ({ desc =
+                             DeclRef { name = IdentifierName "f" }});
+                           arrow = true;
+                           field = DependentScopeMember {
+                             ident_ref = { name = IdentifierName "x" }}}}] }}];
+                 body = Some { desc = Compound [] }}}] }}}}]]
+]}*)
   | UnknownExpr of cxcursorkind * clang_ext_stmtkind
 
 and field =
@@ -3342,6 +3389,62 @@ let () =
              body = Some { desc = Compound [
                { desc =
                    Return (Some { desc = IntegerLiteral (Int 0)})}] }; }}}}}]]
+
+let example = {|
+  template<class T>
+  class C {
+    void f(T x);
+  };
+
+  template<class T>
+  void C<T>::f(T x) {}
+|}
+
+let () =
+  check_pattern quote_decl_list (parse_declaration_list ~language:CXX) example
+  [%pattern?
+    [{ desc = TemplateDecl {
+        parameters = { list = [
+          { desc = { parameter_name = "T";
+            parameter_kind = Class { default = None };
+            parameter_pack = false; }}] };
+        decl = { desc = RecordDecl {
+          keyword = Class;
+          name = "C";
+          fields = [
+            { desc = CXXMethod {
+                type_ref = { desc = InjectedClassName ({
+                  desc = TemplateSpecialization {
+                    name = NameTemplate "C";
+                    args = [Type { desc = TemplateTypeParm "T" }] }})};
+                function_decl = {
+                  function_type = {
+                    result = { desc = BuiltinType Void };
+                    parameters = Some { non_variadic = [
+                      { desc = {
+                          name = "x";
+                          qual_type = { desc = TemplateTypeParm "T" }}}] }};
+                  name = IdentifierName "f";
+                  body = None; }}}] }}}};
+     { desc = TemplateDecl {
+         parameters = { list = [{ desc = {
+           parameter_name = "T";
+           parameter_kind = Class { default = None };
+           parameter_pack = false; }}] };
+         decl = { desc = CXXMethod {
+           type_ref = { desc = InjectedClassName ({
+             desc = TemplateSpecialization {
+               name = NameTemplate "C";
+               args = [Type { desc = TemplateTypeParm "T" }] }}) };
+           function_decl = {
+             function_type = {
+               result = { desc = BuiltinType Void };
+               parameters = Some { non_variadic = [
+                 { desc = {
+                     name = "x";
+                     qual_type = { desc = TemplateTypeParm "T" }}}] }};
+             name = IdentifierName "f";
+             body = Some { desc = Compound [] }; }}}}}]]
 
 let example = {| template<class ... Types> struct Tuple {}; |}
 

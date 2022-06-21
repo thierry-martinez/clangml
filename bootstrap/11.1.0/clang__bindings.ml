@@ -3695,6 +3695,12 @@ external ext_cxxctor_initializer_get_any_member :
 external ext_cxxctor_initializer_get_init :
   clang_ext_cxxctorinitializer -> cxcursor =
     "clang_ext_CXXCtorInitializer_getInit_wrapper"
+external ext_function_decl_get_num_template_parameter_lists :
+  cxcursor -> int =
+    "clang_ext_FunctionDecl_getNumTemplateParameterLists_wrapper"
+external ext_function_decl_get_template_parameter_list :
+  cxcursor -> int -> clang_ext_templateparameterlist =
+    "clang_ext_FunctionDecl_getTemplateParameterList_wrapper"
 type clang_ext_aarch64vectorpcs_spelling =
   | GNU_aarch64_vector_pcs 
   | CXX11_clang_aarch64_vector_pcs 

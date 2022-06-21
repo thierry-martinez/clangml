@@ -2846,7 +2846,9 @@ extern "C" {
       default:
         if (auto e = llvm::dyn_cast_or_null<
             clang::CXXDependentScopeMemberExpr>(s)) {
-          return e->getNumTemplateArgs();
+          if (e->hasExplicitTemplateArgs()) {
+            return e->getNumTemplateArgs();
+          }
         }
       }
     }
@@ -4167,6 +4169,29 @@ extern "C" {
   {
     auto init = getCXXCtorInitializer(box);
     return MakeCXCursor(init->getInit(), getCXXCtorInitializerTU(box));
+  }
+
+  unsigned int
+  clang_ext_FunctionDecl_getNumTemplateParameterLists(CXCursor cursor)
+  {
+    if (auto d = GetCursorDecl(cursor)) {
+      if (auto fd = llvm::dyn_cast_or_null<clang::FunctionDecl>(d)) {
+        return fd->getNumTemplateParameterLists();
+      }
+    }
+    return 0;
+  }
+
+  struct clang_ext_TemplateParameterList
+  clang_ext_FunctionDecl_getTemplateParameterList(CXCursor cursor, unsigned int index)
+  {
+    if (auto d = GetCursorDecl(cursor)) {
+      if (auto fd = llvm::dyn_cast_or_null<clang::FunctionDecl>(d)) {
+        return MakeTemplateParameterList(
+          fd->getTemplateParameterList(index), getCursorTU(cursor));
+      }
+    }
+    return MakeTemplateParameterListInvalid(getCursorTU(cursor));
   }
 
   #include "libclang_extensions_attrs.inc"

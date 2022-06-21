@@ -1048,7 +1048,15 @@ module Ast = struct
         ext_cxxmethod_decl_get_parent cursor |>
         get_cursor_type |> of_cxtype in
       let function_decl = function_decl_of_cxcursor cursor in
-      CXXMethod {
+      let num_templates =
+        ext_function_decl_get_num_template_parameter_lists cursor in
+      let templates =
+        List.init num_templates (fun index ->
+          extract_template_parameter_list
+            (ext_function_decl_get_template_parameter_list cursor index)) in
+      let add_template (decl : decl_desc) parameters : decl_desc =
+        TemplateDecl { parameters; decl = node ~cursor (Node.from_val decl) } in
+      List.fold_left add_template (CXXMethod {
         type_ref; function_decl;
         defaulted = ext_cxxmethod_is_defaulted cursor;
         static = cxxmethod_is_static cursor;
@@ -1061,7 +1069,7 @@ module Ast = struct
             NonVirtual;
         const = ext_cxxmethod_is_const cursor;
         implicit = ext_decl_is_implicit cursor;
-      }
+      }) templates
 
     and parameter_of_cxtype cxtype =
       let qual_type = of_cxtype cxtype in
@@ -1872,6 +1880,10 @@ ext_expr_requirement_return_type_get_type_constraint_template_parameter_list
                           ext_requires_expr_get_requirement cursor i |>
                           extract_requirement);
                   }
+              | ParenListExpr ->
+                  let exprs =
+                    List.map expr_of_cxcursor (list_of_children cursor) in
+                  ParenList exprs
               | kind -> UnexposedExpr kind
             end
         | _ ->
