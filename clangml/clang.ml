@@ -608,6 +608,8 @@ module Ast = struct
                     Node.force sub.desc
                   else
                     Using sub
+              | Atomic ->
+                  Atomic (of_cxtype (ext_atomic_type_get_value_type cxtype))
               | kind -> UnexposedType kind
             end in
       make_paren (make_qual_type cxtype type_loc (Node.from_fun desc))

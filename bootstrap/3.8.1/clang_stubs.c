@@ -10812,6 +10812,22 @@ clang_ext_FunctionDecl_getTemplateParameterList_wrapper(value arg_ocaml, value a
   }
 }
 
+CAMLprim value
+clang_ext_AtomicType_getValueType_wrapper(value CT_ocaml)
+{
+  CAMLparam1(CT_ocaml);
+  CXType CT;
+  CT = Cxtype_val(Field(CT_ocaml, 0));
+  CXType result = clang_ext_AtomicType_getValueType(CT);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxtype(result));
+  Store_field(data, 1, safe_field(CT_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_AArch64VectorPcs_spelling
 Clang_ext_aarch64vectorpcs_spelling_val(value ocaml)
 {

@@ -2937,6 +2937,8 @@ external ext_function_decl_get_num_template_parameter_lists :
 external ext_function_decl_get_template_parameter_list :
   cxcursor -> int -> clang_ext_templateparameterlist =
     "clang_ext_FunctionDecl_getTemplateParameterList_wrapper"
+external ext_atomic_type_get_value_type :
+  cxtype -> cxtype = "clang_ext_AtomicType_getValueType_wrapper"
 type clang_ext_aarch64vectorpcs_spelling =
   | GNU_aarch64_vector_pcs 
   | CXX11_clang_aarch64_vector_pcs 

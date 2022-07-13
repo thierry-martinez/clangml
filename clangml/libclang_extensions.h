@@ -1320,4 +1320,7 @@ clang_ext_FunctionDecl_getNumTemplateParameterLists(CXCursor);
 struct clang_ext_TemplateParameterList
 clang_ext_FunctionDecl_getTemplateParameterList(CXCursor, unsigned int);
 
+CXType
+clang_ext_AtomicType_getValueType(CXType CT);
+
 #include "libclang_extensions_attrs_headers.inc"

@@ -804,6 +804,18 @@ let () =
   | InjectedClassName of qual_type
   | Using of qual_type
   (** Introduced in clang 14.0.0. *)
+  | Atomic of qual_type
+(** C11 [_Atomic] types.
+    {[
+let example = "_Atomic _Bool b;"
+
+let () =
+  check_pattern quote_decl_list parse_declaration_list example
+  [%pattern?
+    [{ desc = Var {
+      var_name = "b";
+      var_type = { desc = Atomic { desc = BuiltinType Bool}};}}]]
+    ]}*)
   | UnexposedType of clang_ext_typekind
   | InvalidType
 

@@ -4194,5 +4194,19 @@ extern "C" {
     return MakeTemplateParameterListInvalid(getCursorTU(cursor));
   }
 
+  CXType
+  clang_ext_AtomicType_getValueType(CXType CT) {
+    #ifdef LLVM_VERSION_BEFORE_11_0_0
+      clang::QualType T = GetQualType(CT);
+      if (T.isNull() || !T->isAtomicType()) {
+        return MakeCXTypeInvalid(GetTU(CT));
+      }
+      const auto *AT = T->castAs<clang::AtomicType>();
+      return MakeCXType(AT->getValueType(), GetTU(CT));
+    #else
+      return clang_Type_getValueType(CT);
+    #endif
+  }
+
   #include "libclang_extensions_attrs.inc"
 }
