@@ -18,6 +18,12 @@ let option_apply f s =
 let macos_sdk_include_path =
   "/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/usr/include/"
 
+let parse_llvm_version llvm_version : Clangml_config.version option =
+  match List.map int_of_string (String.split_on_char '.' llvm_version) with
+  | [major; minor] -> Some { major; minor; subminor = 0 }
+  | [major; minor; subminor] -> Some { major; minor; subminor }
+  | _ | exception Failure _ -> None
+
 let prepare_clang_options cflags llvm_config =
   let llvm_flags, llvm_version =
     match llvm_config with
@@ -31,32 +37,24 @@ let prepare_clang_options cflags llvm_config =
         let llvm_version =
           option_apply (String_utils.remove_suffix ~suffix:"git") llvm_version in
         let equivalent_llvm_version =
-          match llvm_version with
-          | "3.4"
-          | "3.4.1" -> "3.4.2"
-          | "3.5.0"
-          | "3.5.1" -> "3.5.2"
-          | "3.6.0"
-          | "3.6.1" -> "3.6.2"
-          | "3.7.0" -> "3.7.1"
-          | "3.8.0" -> "3.8.1"
-          | "3.9.0" -> "3.9.1"
-          | "4.0.0" -> "4.0.1"
-          | "5.0.0"
-          | "5.0.1" -> "5.0.2"
-          | "6.0.0" -> "6.0.1"
-          | "7.0.0" -> "7.1.0"
-          | "7.0.1" -> "7.1.0"
-          | "8.0.0" -> "8.0.1"
-          | "9.0.0" -> "9.0.1"
-          | "10.0.0" -> "10.0.1"
-          | "11.0.1" -> "11.1.0"
-          | "12.0.0" -> "12.0.1"
-          | "13.0.0" -> "13.0.1"
-          | "14.0.1" -> "14.0.0"
-          | "14.0.2" -> "14.0.0"
-          | "14.0.3" -> "14.0.0"
-          | "14.0.4" -> "14.0.0"
+          match parse_llvm_version llvm_version with
+          | Some { major = 3; minor = 4; subminor = _ } -> "3.4.2"
+          | Some { major = 3; minor = 5; subminor = _ } -> "3.5.2"
+          | Some { major = 3; minor = 6; subminor = _ } -> "3.6.2"
+          | Some { major = 3; minor = 7; subminor = _ } -> "3.7.1"
+          | Some { major = 8; minor = 8; subminor = _ } -> "3.8.1"
+          | Some { major = 9; minor = 9; subminor = _ } -> "3.9.1"
+          | Some { major = 4; minor = 0; subminor = _ } -> "4.0.1"
+          | Some { major = 5; minor = 0; subminor = _ } -> "5.0.2"
+          | Some { major = 6; minor = 0; subminor = _ } -> "6.0.1"
+          | Some { major = 7; minor = (0 | 1); subminor = _ } -> "7.1.0"
+          | Some { major = 8; minor = 0; subminor = _ } -> "8.0.1"
+          | Some { major = 9; minor = 0; subminor = _ } -> "9.0.1"
+          | Some { major = 10; minor = 0; subminor = _ } -> "10.0.1"
+          | Some { major = 11; minor = 0; subminor = 1 } -> "11.1.0"
+          | Some { major = 12; minor = 0; subminor = _ } -> "12.0.1"
+          | Some { major = 13; minor = 0; subminor = _ } -> "13.0.1"
+          | Some { major = 14; minor = 0; subminor = _ } -> "14.0.0"
           | _ -> llvm_version in
         let version_option =
           String.map (fun c -> if c = '.' then '_' else c)
