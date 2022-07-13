@@ -4196,7 +4196,7 @@ extern "C" {
 
   CXType
   clang_ext_AtomicType_getValueType(CXType CT) {
-    #ifdef LLVM_VERSION_BEFORE_10_0_0
+    #ifdef LLVM_VERSION_BEFORE_11_0_0
       clang::QualType T = GetQualType(CT);
       if (T.isNull() || !T->isAtomicType()) {
         return MakeCXCursorInvalid(CXCursor_InvalidCode, GetTU(CT));
