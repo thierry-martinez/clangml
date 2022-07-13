@@ -4199,7 +4199,7 @@ extern "C" {
     #ifdef LLVM_VERSION_BEFORE_11_0_0
       clang::QualType T = GetQualType(CT);
       if (T.isNull() || !T->isAtomicType()) {
-        return MakeCXCursorInvalid(CXCursor_InvalidCode, GetTU(CT));
+        return MakeCXTypeInvalid(GetTU(CT));
       }
       const auto *AT = T->castAs<clang::AtomicType>();
       return MakeCXType(AT->getValueType(), GetTU(CT));
