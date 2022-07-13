@@ -2,7 +2,7 @@ module Clang_helper = Clang_helper
 
 module String_utils = String_utils
 
-let run_llvm_config llvm_config arguments =
+let run_command llvm_config arguments =
   let command = String.concat " " (llvm_config :: arguments) in
   let output = Unix.open_process_in command in
   let result = input_line output in
@@ -23,9 +23,9 @@ let prepare_clang_options cflags llvm_config =
     match llvm_config with
     | None -> [], None
     | Some llvm_config ->
-        let llvm_version = run_llvm_config llvm_config ["--version"] in
-        let llvm_prefix = run_llvm_config llvm_config ["--prefix"] in
-        let llvm_cflags = run_llvm_config llvm_config ["--cflags"] in
+        let llvm_version = run_command llvm_config ["--version"] in
+        let llvm_prefix = run_command llvm_config ["--prefix"] in
+        let llvm_cflags = run_command llvm_config ["--cflags"] in
         let llvm_version =
           option_apply (String_utils.remove_suffix ~suffix:"svn") llvm_version in
         let llvm_version =
@@ -61,10 +61,12 @@ let prepare_clang_options cflags llvm_config =
         let version_option =
           String.map (fun c -> if c = '.' then '_' else c)
             equivalent_llvm_version in
+        let ocaml_lib = run_command "opam" ["var"; "ocaml:lib"] in
         String.split_on_char ' ' llvm_cflags @
         ["-I"; List.fold_left Filename.concat llvm_prefix
-           ["lib"; "clang"; llvm_version; "include"]; "-I";
-         macos_sdk_include_path;
+           ["lib"; "clang"; llvm_version; "include"];
+         "-I"; macos_sdk_include_path;
+         "-I"; ocaml_lib;
          "-DLLVM_VERSION_" ^ version_option],
         Some equivalent_llvm_version in
   let cflags = cflags |> List.map @@ String.split_on_char ',' |> List.flatten in
