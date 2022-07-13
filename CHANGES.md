@@ -2,9 +2,12 @@
 
 - Support for Clang/LLVM 14.0.{1,2,3,4}
 
-- Support for ParenList expressions (may apper in constructor initializers
+- Support for `ParenList` expressions (may appear in constructor initializers
   of templated classes).
   (reported by Arthur Charguéraud)
+
+- Support for `_Atomic` types
+  (reported by n47, https://discuss.ocaml.org/t/ann-clangml-4-2-0-ocaml-bindings-for-clang-api-for-c-and-c-parsing/6123/14)
 
 - Fix lossing template specification in method definitions.
   (reported by Arthur Charguéraud)
@@ -14,7 +17,7 @@
 - Support for Clang/LLVM 14.0.0
 
 - Fix bug with compound literals: when compound literals refer to a defined type,
-  the AST was UnknownExpr.
+  the AST was `UnknownExpr`.
   (reported by Arthur Charguéraud, https://gitlab.inria.fr/tmartine/clangml/-/issues/2)
 
 # 2021-11-11, 4.5.0
