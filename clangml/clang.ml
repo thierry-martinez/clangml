@@ -562,57 +562,81 @@ module Ast = struct
                       ext_elaborated_type_loc_get_named_type_loc type_loc |>
                       of_type_loc
                   }
-              | TemplateTypeParm ->
-                  TemplateTypeParm
-                    (cxtype |> ext_type_get_unqualified_type |>
-                      get_type_spelling)
-              | SubstTemplateTypeParm ->
-                  SubstTemplateTypeParm
-                    (cxtype |> ext_type_get_unqualified_type |>
-                      get_type_spelling)
-              | TemplateSpecialization ->
-                  let name =
-                    cxtype |>
-                    ext_template_specialization_type_get_template_name |>
-                    make_template_name in
-                  let args =
-                    List.init
-                      (ext_template_specialization_type_get_num_args cxtype)
-                    @@ fun i ->
-                      ext_template_specialization_type_get_argument cxtype i |>
-                      make_template_argument in
-                  TemplateSpecialization { name; args }
-              | Builtin -> BuiltinType (get_type_kind cxtype)
-              | Auto -> Auto
               | PackExpansion ->
                   let pattern =
                     ext_pack_expansion_type_loc_get_pattern_loc type_loc |>
                     of_type_loc in
                   PackExpansion pattern
-              | Decltype ->
-                  let sub =
-                    ext_decltype_type_get_underlying_expr cxtype |>
-                    expr_of_cxcursor in
-                  Decltype sub
-              | InjectedClassName ->
-                  let sub =
-              ext_injected_class_name_type_get_injected_specialization_type
-                      cxtype |>
-                    of_cxtype in
-                  InjectedClassName sub
-              | Using
-                  [@if [%meta Metapp.Exp.of_bool
-                    (Clangml_config.version.major >= 14)]] ->
-                  let sub = of_cxtype (ext_type_desugar cxtype) in
-                  if options.ignore_using_types then
-                    Node.force sub.desc
-                  else
-                    Using sub
-              | Atomic ->
-                  Atomic (of_cxtype (ext_atomic_type_get_value_type cxtype))
-              | kind -> UnexposedType kind
+              | _ -> of_ext_type_kind cxtype
             end in
       make_paren (make_qual_type cxtype type_loc (Node.from_fun desc))
+
+    and of_ext_type_kind cxtype =
+      match ext_type_get_kind cxtype with
+      | Paren -> ParenType (cxtype |> ext_get_inner_type |> of_cxtype)
+      | Elaborated -> (* Here for Clang <3.9.0 *)
+          let nested_name_specifier =
+            ext_type_get_qualifier cxtype |>
+            convert_nested_name_specifier in
+          Elaborated {
+            keyword = ext_elaborated_type_get_keyword cxtype;
+            nested_name_specifier;
+            named_type = ext_type_get_named_type cxtype |> of_cxtype;
+          }
+      | Attributed -> (* Here for Clang <8.0.0 *)
+          Attributed {
+            modified_type =
+              ext_attributed_type_get_modified_type cxtype |> of_cxtype;
+            attribute = attribute_of_cxtype cxtype;
+          }
+      | TemplateTypeParm ->
+          TemplateTypeParm
+            (cxtype |> ext_type_get_unqualified_type |>
+              get_type_spelling)
+      | SubstTemplateTypeParm ->
+          SubstTemplateTypeParm
+            (cxtype |> ext_type_get_unqualified_type |>
+              get_type_spelling)
+      | TemplateSpecialization ->
+          let name =
+            cxtype |>
+            ext_template_specialization_type_get_template_name |>
+            make_template_name in
+          let args =
+            List.init
+              (ext_template_specialization_type_get_num_args cxtype)
+            @@ fun i ->
+              ext_template_specialization_type_get_argument cxtype i |>
+              make_template_argument in
+          TemplateSpecialization { name; args }
+      | Builtin -> BuiltinType (get_type_kind cxtype)
+      | Auto -> Auto
+      | PackExpansion ->
+          let pattern =
+            ext_pack_expansion_get_pattern cxtype |> of_cxtype in
+          PackExpansion pattern
+      | Decltype ->
+          let sub =
+            ext_decltype_type_get_underlying_expr cxtype |>
+            expr_of_cxcursor in
+          Decltype sub
+      | InjectedClassName ->
+          let sub =
+      ext_injected_class_name_type_get_injected_specialization_type
+              cxtype |>
+            of_cxtype in
+          InjectedClassName sub
+      | Using
+          [@if [%meta Metapp.Exp.of_bool
+            (Clangml_config.version.major >= 14)]] ->
+          let sub = of_cxtype (ext_type_desugar cxtype) in
+          if options.ignore_using_types then
+            Node.force sub.desc
+          else
+            Using sub
+      | Atomic ->
+          Atomic (of_cxtype (ext_atomic_type_get_value_type cxtype))
+      | kind -> UnexposedType kind
 
     and of_cxtype cxtype =
       let desc () =
@@ -663,63 +687,7 @@ module Ast = struct
             let class_ = cxtype |> type_get_class_type |> of_cxtype in
             MemberPointer { pointee; class_ }
         | _ ->
-            begin
-              match ext_type_get_kind cxtype with
-              | Paren -> ParenType (cxtype |> ext_get_inner_type |> of_cxtype)
-              | Elaborated -> (* Here for Clang <3.9.0 *)
-                  let nested_name_specifier =
-                    ext_type_get_qualifier cxtype |>
-                    convert_nested_name_specifier in
-                  Elaborated {
-                    keyword = ext_elaborated_type_get_keyword cxtype;
-                    nested_name_specifier;
-                    named_type = ext_type_get_named_type cxtype |> of_cxtype;
-                  }
-              | Attributed -> (* Here for Clang <8.0.0 *)
-                  Attributed {
-                    modified_type =
-                      ext_attributed_type_get_modified_type cxtype |> of_cxtype;
-                    attribute = attribute_of_cxtype cxtype;
-                  }
-              | TemplateTypeParm ->
-                  TemplateTypeParm
-                    (cxtype |> ext_type_get_unqualified_type |>
-                      get_type_spelling)
-              | SubstTemplateTypeParm ->
-                  SubstTemplateTypeParm
-                    (cxtype |> ext_type_get_unqualified_type |>
-                      get_type_spelling)
-              | TemplateSpecialization ->
-                  let name =
-                    cxtype |>
-                    ext_template_specialization_type_get_template_name |>
-                    make_template_name in
-                  let args =
-                    List.init
-                      (ext_template_specialization_type_get_num_args cxtype)
-                    @@ fun i ->
-                      ext_template_specialization_type_get_argument cxtype i |>
-                      make_template_argument in
-                  TemplateSpecialization { name; args }
-              | Builtin -> BuiltinType (get_type_kind cxtype)
-              | Auto -> Auto
-              | PackExpansion ->
-                  let pattern =
-                    ext_pack_expansion_get_pattern cxtype |> of_cxtype in
-                  PackExpansion pattern
-              | Decltype ->
-                  let sub =
-                    ext_decltype_type_get_underlying_expr cxtype |>
-                    expr_of_cxcursor in
-                  Decltype sub
-              | InjectedClassName ->
-                  let sub =
-              ext_injected_class_name_type_get_injected_specialization_type
-                      cxtype |>
-                    of_cxtype in
-                  InjectedClassName sub
-              | kind -> UnexposedType kind
-            end in
+            of_ext_type_kind cxtype in
       if options.ignore_paren_in_types &&
         ext_type_get_kind cxtype = Paren then
         let inner = cxtype |> ext_get_inner_type |> of_cxtype in
