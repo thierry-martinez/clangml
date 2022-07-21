@@ -1310,7 +1310,14 @@ let translate_enum_decl context cur =
   let ocaml_constructors =
     List.map (fun (_, name, (_, cur)) ->
       let attrs = make_doc_attributes ~func:false cur in
-      Ppxlib.Ast_helper.Type.constructor (loc (String.capitalize_ascii name)) ~attrs)
+      let capitalized_name =
+        let rec first_letter i =
+          match name.[i] with
+          | 'a' .. 'z' | 'A' .. 'Z' -> i
+          | _ -> first_letter (succ i) in
+        let i = first_letter 0 in
+        String.capitalize_ascii (String.sub name i (String.length name - i)) in
+      Ppxlib.Ast_helper.Type.constructor (loc capitalized_name) ~attrs)
       constructors in
   let common_info = make_common_type_info ~type_interface ocaml_type_name in
   let enum_info = { result; constructors = List.map (fun (a, b, (c, _)) -> (a, b, c)) constructors } in
