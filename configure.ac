@@ -328,16 +328,15 @@ AC_SUBST([LIBS],
   [["$LLVM_LIBS -lpthread \
      -lstdc++ -ldl -lm -lz $LIBS"]])
 
-AC_LANG_CPLUSPLUS
+AC_LANG([C++])
 
-AC_TRY_LINK(
-  [
-    #include <llvm/ADT/Twine.h>
-  ],
-  [
-    llvm::Twine t;
-    t.str();
-  ],
+AC_LINK_IFELSE(
+  [AC_LANG_PROGRAM(
+    [[#include <llvm/ADT/Twine.h>]],
+    [[
+      llvm::Twine t;
+      t.str();
+    ]])],
   [
     AC_MSG_CHECKING([for disabling GLIBCXX_USE_CXX11_ABI])
     AC_MSG_RESULT([not required])
@@ -345,14 +344,13 @@ AC_TRY_LINK(
   [
     AC_MSG_CHECKING([for disabling GLIBCXX_USE_CXX11_ABI])
     AC_SUBST([CXXFLAGS], [["$CXXFLAGS -D_GLIBCXX_USE_CXX11_ABI=0"]])
-    AC_TRY_LINK(
-      [
-        #include <llvm/ADT/Twine.h>
-      ],
-      [
-        llvm::Twine t;
-        t.str();
-      ],
+    AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM(
+        [[#include <llvm/ADT/Twine.h>]],
+        [[
+          llvm::Twine t;
+          t.str();
+        ]])],
       [AC_MSG_RESULT([required])],
       [
         AC_MSG_RESULT([cannot compile test])
@@ -364,22 +362,24 @@ AC_SUBST([BASELIBS], [["$LIBS"]])
 
 AC_MSG_CHECKING([if -lclangAST -lclangLex -lclangBasic is available])
 AC_SUBST([LIBS], [["-lclangAST -lclangLex -lclangBasic $BASELIBS"]])
-AC_TRY_LINK(
-  [#include <clang/AST/Decl.h>],
-  [
-    clang::FunctionDecl *d;
-    d->getNumParams();
-  ],
+AC_LINK_IFELSE(
+  [AC_LANG_PROGRAM(
+    [[#include <clang/AST/Decl.h>]],
+    [[
+      clang::FunctionDecl *d;
+      d->getNumParams();
+    ]])],
   [AC_MSG_RESULT([yes])],
   [
     AC_MSG_CHECKING([if -lclang-cpp is available])
     AC_SUBST([LIBS], [["-lclang-cpp $BASELIBS"]])
-    AC_TRY_LINK(
-      [#include <clang/AST/Decl.h>],
-      [
-        clang::FunctionDecl *d;
-        d->getNumParams();
-      ],
+    AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM(
+        [[#include <clang/AST/Decl.h>]],
+        [[
+          clang::FunctionDecl *d;
+          d->getNumParams();
+        ]])],
       [AC_MSG_RESULT([yes])],
       [
         AC_MSG_RESULT([no])
