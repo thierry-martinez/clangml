@@ -7411,15 +7411,13 @@ fi
 
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
-    #include <llvm/ADT/Twine.h>
-
+#include <llvm/ADT/Twine.h>
 int
 main ()
 {
 
-    llvm::Twine t;
-    t.str();
+      llvm::Twine t;
+      t.str();
 
   ;
   return 0;
@@ -7440,15 +7438,13 @@ $as_echo_n "checking for disabling GLIBCXX_USE_CXX11_ABI... " >&6; }
 
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
-        #include <llvm/ADT/Twine.h>
-
+#include <llvm/ADT/Twine.h>
 int
 main ()
 {
 
-        llvm::Twine t;
-        t.str();
+          llvm::Twine t;
+          t.str();
 
   ;
   return 0;
@@ -7485,8 +7481,8 @@ int
 main ()
 {
 
-    clang::FunctionDecl *d;
-    d->getNumParams();
+      clang::FunctionDecl *d;
+      d->getNumParams();
 
   ;
   return 0;
@@ -7508,8 +7504,8 @@ int
 main ()
 {
 
-        clang::FunctionDecl *d;
-        d->getNumParams();
+          clang::FunctionDecl *d;
+          d->getNumParams();
 
   ;
   return 0;

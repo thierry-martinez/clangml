@@ -3091,6 +3091,10 @@ let () =
   | OverloadedDeclRef of ident_ref
   | StdInitializerList of expr list
   | DefaultArg
+  | Atomic of {
+      op: clang_expr_atomicop;
+      args : expr list;
+    }
   | UnexposedExpr of clang_ext_stmtkind
   | SubstNonTypeTemplateParm of expr
   | ArrayInitLoop of {

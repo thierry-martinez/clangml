@@ -2794,6 +2794,41 @@ external ext_function_decl_get_template_parameter_list :
     "clang_ext_FunctionDecl_getTemplateParameterList_wrapper"
 external ext_atomic_type_get_value_type :
   cxtype -> cxtype = "clang_ext_AtomicType_getValueType_wrapper"
+type clang_expr_atomicop =
+  | Invalid 
+  | C11_atomic_init 
+  | C11_atomic_load 
+  | C11_atomic_store 
+  | C11_atomic_exchange 
+  | C11_atomic_compare_exchange_strong 
+  | C11_atomic_compare_exchange_weak 
+  | C11_atomic_fetch_add 
+  | C11_atomic_fetch_sub 
+  | C11_atomic_fetch_and 
+  | C11_atomic_fetch_or 
+  | C11_atomic_fetch_xor 
+  | Atomic_load 
+  | Atomic_load_n 
+  | Atomic_store 
+  | Atomic_store_n 
+  | Atomic_exchange 
+  | Atomic_exchange_n 
+  | Atomic_compare_exchange 
+  | Atomic_compare_exchange_n 
+  | Atomic_fetch_add 
+  | Atomic_fetch_sub 
+  | Atomic_fetch_and 
+  | Atomic_fetch_or 
+  | Atomic_fetch_xor 
+  | Atomic_fetch_nand 
+  | Atomic_add_fetch 
+  | Atomic_sub_fetch 
+  | Atomic_and_fetch 
+  | Atomic_or_fetch 
+  | Atomic_xor_fetch 
+  | Atomic_nand_fetch [@@deriving refl]
+external ext_atomic_expr_get_op :
+  cxcursor -> clang_expr_atomicop = "clang_ext_AtomicExpr_getOp_wrapper"
 type clang_ext_aarch64vectorpcs_spelling =
   | GNU_aarch64_vector_pcs 
   | CXX11_clang_aarch64_vector_pcs 

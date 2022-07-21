@@ -12652,17 +12652,175 @@ clang_ext_FunctionDecl_getTemplateParameterList_wrapper(value arg_ocaml, value a
 }
 
 CAMLprim value
-clang_ext_AtomicType_getValueType_wrapper(value CT_ocaml)
+clang_ext_AtomicType_getValueType_wrapper(value arg_ocaml)
 {
-  CAMLparam1(CT_ocaml);
-  CXType CT;
-  CT = Cxtype_val(Field(CT_ocaml, 0));
-  CXType result = clang_ext_AtomicType_getValueType(CT);
+  CAMLparam1(arg_ocaml);
+  CXType arg;
+  arg = Cxtype_val(Field(arg_ocaml, 0));
+  CXType result = clang_ext_AtomicType_getValueType(arg);
   {
     CAMLlocal1(data);
     data = caml_alloc_tuple(2);
   Store_field(data, 0, Val_cxtype(result));
-  Store_field(data, 1, safe_field(CT_ocaml, 1));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+enum clang_expr_AtomicOp
+Clang_expr_atomicop_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CLANG_EXT_AO_Invalid;
+  case 1: return CLANG_EXT_AO__c11_atomic_init;
+  case 2: return CLANG_EXT_AO__c11_atomic_load;
+  case 3: return CLANG_EXT_AO__c11_atomic_store;
+  case 4: return CLANG_EXT_AO__c11_atomic_exchange;
+  case 5: return CLANG_EXT_AO__c11_atomic_compare_exchange_strong;
+  case 6: return CLANG_EXT_AO__c11_atomic_compare_exchange_weak;
+  case 7: return CLANG_EXT_AO__c11_atomic_fetch_add;
+  case 8: return CLANG_EXT_AO__c11_atomic_fetch_sub;
+  case 9: return CLANG_EXT_AO__c11_atomic_fetch_and;
+  case 10: return CLANG_EXT_AO__c11_atomic_fetch_or;
+  case 11: return CLANG_EXT_AO__c11_atomic_fetch_xor;
+  case 12: return CLANG_EXT_AO__c11_atomic_fetch_nand;
+  case 13: return CLANG_EXT_AO__c11_atomic_fetch_max;
+  case 14: return CLANG_EXT_AO__c11_atomic_fetch_min;
+  case 15: return CLANG_EXT_AO__atomic_load;
+  case 16: return CLANG_EXT_AO__atomic_load_n;
+  case 17: return CLANG_EXT_AO__atomic_store;
+  case 18: return CLANG_EXT_AO__atomic_store_n;
+  case 19: return CLANG_EXT_AO__atomic_exchange;
+  case 20: return CLANG_EXT_AO__atomic_exchange_n;
+  case 21: return CLANG_EXT_AO__atomic_compare_exchange;
+  case 22: return CLANG_EXT_AO__atomic_compare_exchange_n;
+  case 23: return CLANG_EXT_AO__atomic_fetch_add;
+  case 24: return CLANG_EXT_AO__atomic_fetch_sub;
+  case 25: return CLANG_EXT_AO__atomic_fetch_and;
+  case 26: return CLANG_EXT_AO__atomic_fetch_or;
+  case 27: return CLANG_EXT_AO__atomic_fetch_xor;
+  case 28: return CLANG_EXT_AO__atomic_fetch_nand;
+  case 29: return CLANG_EXT_AO__atomic_add_fetch;
+  case 30: return CLANG_EXT_AO__atomic_sub_fetch;
+  case 31: return CLANG_EXT_AO__atomic_and_fetch;
+  case 32: return CLANG_EXT_AO__atomic_or_fetch;
+  case 33: return CLANG_EXT_AO__atomic_xor_fetch;
+  case 34: return CLANG_EXT_AO__atomic_max_fetch;
+  case 35: return CLANG_EXT_AO__atomic_min_fetch;
+  case 36: return CLANG_EXT_AO__atomic_nand_fetch;
+  case 37: return CLANG_EXT_AO__opencl_atomic_init;
+  case 38: return CLANG_EXT_AO__opencl_atomic_load;
+  case 39: return CLANG_EXT_AO__opencl_atomic_store;
+  case 40: return CLANG_EXT_AO__opencl_atomic_exchange;
+  case 41: return CLANG_EXT_AO__opencl_atomic_compare_exchange_strong;
+  case 42: return CLANG_EXT_AO__opencl_atomic_compare_exchange_weak;
+  case 43: return CLANG_EXT_AO__opencl_atomic_fetch_add;
+  case 44: return CLANG_EXT_AO__opencl_atomic_fetch_sub;
+  case 45: return CLANG_EXT_AO__opencl_atomic_fetch_and;
+  case 46: return CLANG_EXT_AO__opencl_atomic_fetch_or;
+  case 47: return CLANG_EXT_AO__opencl_atomic_fetch_xor;
+  case 48: return CLANG_EXT_AO__opencl_atomic_fetch_min;
+  case 49: return CLANG_EXT_AO__opencl_atomic_fetch_max;
+  case 50: return CLANG_EXT_AO__atomic_fetch_min;
+  case 51: return CLANG_EXT_AO__atomic_fetch_max;
+  case 52: return CLANG_EXT_AO__hip_atomic_load;
+  case 53: return CLANG_EXT_AO__hip_atomic_store;
+  case 54: return CLANG_EXT_AO__hip_atomic_compare_exchange_weak;
+  case 55: return CLANG_EXT_AO__hip_atomic_compare_exchange_strong;
+  case 56: return CLANG_EXT_AO__hip_atomic_exchange;
+  case 57: return CLANG_EXT_AO__hip_atomic_fetch_add;
+  case 58: return CLANG_EXT_AO__hip_atomic_fetch_and;
+  case 59: return CLANG_EXT_AO__hip_atomic_fetch_or;
+  case 60: return CLANG_EXT_AO__hip_atomic_fetch_xor;
+  case 61: return CLANG_EXT_AO__hip_atomic_fetch_min;
+  case 62: return CLANG_EXT_AO__hip_atomic_fetch_max;
+  }
+  caml_failwith_fmt("invalid value for Clang_expr_atomicop_val: %d", Int_val(ocaml));
+  return CLANG_EXT_AO_Invalid;
+}
+
+value
+Val_clang_expr_atomicop(enum clang_expr_AtomicOp v)
+{
+  switch (v) {
+  case CLANG_EXT_AO_Invalid: return Val_int(0);
+  case CLANG_EXT_AO__c11_atomic_init: return Val_int(1);
+  case CLANG_EXT_AO__c11_atomic_load: return Val_int(2);
+  case CLANG_EXT_AO__c11_atomic_store: return Val_int(3);
+  case CLANG_EXT_AO__c11_atomic_exchange: return Val_int(4);
+  case CLANG_EXT_AO__c11_atomic_compare_exchange_strong: return Val_int(5);
+  case CLANG_EXT_AO__c11_atomic_compare_exchange_weak: return Val_int(6);
+  case CLANG_EXT_AO__c11_atomic_fetch_add: return Val_int(7);
+  case CLANG_EXT_AO__c11_atomic_fetch_sub: return Val_int(8);
+  case CLANG_EXT_AO__c11_atomic_fetch_and: return Val_int(9);
+  case CLANG_EXT_AO__c11_atomic_fetch_or: return Val_int(10);
+  case CLANG_EXT_AO__c11_atomic_fetch_xor: return Val_int(11);
+  case CLANG_EXT_AO__c11_atomic_fetch_nand: return Val_int(12);
+  case CLANG_EXT_AO__c11_atomic_fetch_max: return Val_int(13);
+  case CLANG_EXT_AO__c11_atomic_fetch_min: return Val_int(14);
+  case CLANG_EXT_AO__atomic_load: return Val_int(15);
+  case CLANG_EXT_AO__atomic_load_n: return Val_int(16);
+  case CLANG_EXT_AO__atomic_store: return Val_int(17);
+  case CLANG_EXT_AO__atomic_store_n: return Val_int(18);
+  case CLANG_EXT_AO__atomic_exchange: return Val_int(19);
+  case CLANG_EXT_AO__atomic_exchange_n: return Val_int(20);
+  case CLANG_EXT_AO__atomic_compare_exchange: return Val_int(21);
+  case CLANG_EXT_AO__atomic_compare_exchange_n: return Val_int(22);
+  case CLANG_EXT_AO__atomic_fetch_add: return Val_int(23);
+  case CLANG_EXT_AO__atomic_fetch_sub: return Val_int(24);
+  case CLANG_EXT_AO__atomic_fetch_and: return Val_int(25);
+  case CLANG_EXT_AO__atomic_fetch_or: return Val_int(26);
+  case CLANG_EXT_AO__atomic_fetch_xor: return Val_int(27);
+  case CLANG_EXT_AO__atomic_fetch_nand: return Val_int(28);
+  case CLANG_EXT_AO__atomic_add_fetch: return Val_int(29);
+  case CLANG_EXT_AO__atomic_sub_fetch: return Val_int(30);
+  case CLANG_EXT_AO__atomic_and_fetch: return Val_int(31);
+  case CLANG_EXT_AO__atomic_or_fetch: return Val_int(32);
+  case CLANG_EXT_AO__atomic_xor_fetch: return Val_int(33);
+  case CLANG_EXT_AO__atomic_max_fetch: return Val_int(34);
+  case CLANG_EXT_AO__atomic_min_fetch: return Val_int(35);
+  case CLANG_EXT_AO__atomic_nand_fetch: return Val_int(36);
+  case CLANG_EXT_AO__opencl_atomic_init: return Val_int(37);
+  case CLANG_EXT_AO__opencl_atomic_load: return Val_int(38);
+  case CLANG_EXT_AO__opencl_atomic_store: return Val_int(39);
+  case CLANG_EXT_AO__opencl_atomic_exchange: return Val_int(40);
+  case CLANG_EXT_AO__opencl_atomic_compare_exchange_strong: return Val_int(41);
+  case CLANG_EXT_AO__opencl_atomic_compare_exchange_weak: return Val_int(42);
+  case CLANG_EXT_AO__opencl_atomic_fetch_add: return Val_int(43);
+  case CLANG_EXT_AO__opencl_atomic_fetch_sub: return Val_int(44);
+  case CLANG_EXT_AO__opencl_atomic_fetch_and: return Val_int(45);
+  case CLANG_EXT_AO__opencl_atomic_fetch_or: return Val_int(46);
+  case CLANG_EXT_AO__opencl_atomic_fetch_xor: return Val_int(47);
+  case CLANG_EXT_AO__opencl_atomic_fetch_min: return Val_int(48);
+  case CLANG_EXT_AO__opencl_atomic_fetch_max: return Val_int(49);
+  case CLANG_EXT_AO__atomic_fetch_min: return Val_int(50);
+  case CLANG_EXT_AO__atomic_fetch_max: return Val_int(51);
+  case CLANG_EXT_AO__hip_atomic_load: return Val_int(52);
+  case CLANG_EXT_AO__hip_atomic_store: return Val_int(53);
+  case CLANG_EXT_AO__hip_atomic_compare_exchange_weak: return Val_int(54);
+  case CLANG_EXT_AO__hip_atomic_compare_exchange_strong: return Val_int(55);
+  case CLANG_EXT_AO__hip_atomic_exchange: return Val_int(56);
+  case CLANG_EXT_AO__hip_atomic_fetch_add: return Val_int(57);
+  case CLANG_EXT_AO__hip_atomic_fetch_and: return Val_int(58);
+  case CLANG_EXT_AO__hip_atomic_fetch_or: return Val_int(59);
+  case CLANG_EXT_AO__hip_atomic_fetch_xor: return Val_int(60);
+  case CLANG_EXT_AO__hip_atomic_fetch_min: return Val_int(61);
+  case CLANG_EXT_AO__hip_atomic_fetch_max: return Val_int(62);
+  }
+  caml_failwith_fmt("invalid value for Val_clang_expr_atomicop: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AtomicExpr_getOp_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  enum clang_expr_AtomicOp result = clang_ext_AtomicExpr_getOp(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_expr_atomicop(result);
     CAMLreturn(data);
   }
 }

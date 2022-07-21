@@ -1321,6 +1321,16 @@ struct clang_ext_TemplateParameterList
 clang_ext_FunctionDecl_getTemplateParameterList(CXCursor, unsigned int);
 
 CXType
-clang_ext_AtomicType_getValueType(CXType CT);
+clang_ext_AtomicType_getValueType(CXType);
+
+enum clang_expr_AtomicOp {
+  CLANG_EXT_AO_Invalid,
+  #define BUILTIN(ID, TYPE, ATTRS)
+  #define ATOMIC_BUILTIN(ID, TYPE, ATTRS) CLANG_EXT_AO ## ID,
+  #include <clang/Basic/Builtins.def>
+};
+
+enum clang_expr_AtomicOp
+clang_ext_AtomicExpr_getOp(CXCursor);
 
 #include "libclang_extensions_attrs_headers.inc"

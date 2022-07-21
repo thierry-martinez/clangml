@@ -4195,7 +4195,8 @@ extern "C" {
   }
 
   CXType
-  clang_ext_AtomicType_getValueType(CXType CT) {
+  clang_ext_AtomicType_getValueType(CXType CT)
+  {
     #ifdef LLVM_VERSION_BEFORE_11_0_0
       clang::QualType T = GetQualType(CT);
       if (T.isNull() || !T->isAtomicType()) {
@@ -4208,5 +4209,20 @@ extern "C" {
     #endif
   }
 
+  enum clang_expr_AtomicOp
+  clang_ext_AtomicExpr_getOp(CXCursor cursor)
+  {
+    if (auto e = llvm::dyn_cast_or_null<clang::AtomicExpr>(
+          GetCursorStmt(cursor))) {
+      switch (e->getOp()) {
+        #define BUILTIN(ID, TYPE, ATTRS)
+        #define ATOMIC_BUILTIN(ID, TYPE, ATTRS) \
+          case clang::AtomicExpr::AtomicOp::AO ## ID: \
+            return CLANG_EXT_AO ## ID;
+        #include <clang/Basic/Builtins.def>
+      }
+    }
+    return CLANG_EXT_AO_Invalid;
+  }
   #include "libclang_extensions_attrs.inc"
 }

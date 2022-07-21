@@ -6,7 +6,7 @@
   of templated classes).
   (reported by Arthur Charguéraud)
 
-- Support for `_Atomic` types
+- Support for `_Atomic` types and built-in expressions
   (reported by n47, https://discuss.ocaml.org/t/ann-clangml-4-2-0-ocaml-bindings-for-clang-api-for-c-and-c-parsing/6123/14)
 
 - Fix lossing template specification in method definitions.

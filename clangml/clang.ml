@@ -1854,6 +1854,11 @@ ext_expr_requirement_return_type_get_type_constraint_template_parameter_list
                   let exprs =
                     List.map expr_of_cxcursor (list_of_children cursor) in
                   ParenList exprs
+              | AtomicExpr ->
+                  let op = ext_atomic_expr_get_op cursor in
+                  let args =
+                    List.map expr_of_cxcursor (list_of_children cursor) in
+                  Atomic { op; args }
               | kind -> UnexposedExpr kind
             end
         | _ ->
