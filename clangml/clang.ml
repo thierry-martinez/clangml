@@ -567,6 +567,9 @@ module Ast = struct
                     ext_pack_expansion_type_loc_get_pattern_loc type_loc |>
                     of_type_loc in
                   PackExpansion pattern
+              | TypeOf ->
+                  TypeOf (ArgumentType (of_type_loc
+                    (ext_type_of_type_loc_get_underlying_type type_loc)))
               | _ -> of_ext_type_kind cxtype
             end in
       make_paren (make_qual_type cxtype type_loc (Node.from_fun desc))
@@ -636,6 +639,12 @@ module Ast = struct
             Using sub
       | Atomic ->
           Atomic (of_cxtype (ext_atomic_type_get_value_type cxtype))
+      | TypeOfExpr ->
+          TypeOf (ArgumentExpr (expr_of_cxcursor
+            (ext_type_of_expr_type_get_underlying_expr cxtype)))
+      | TypeOf ->
+          TypeOf (ArgumentType (of_cxtype
+            (ext_type_of_type_get_underlying_type cxtype)))
       | kind -> UnexposedType kind
 
     and of_cxtype cxtype =
@@ -1697,6 +1706,12 @@ module Ast = struct
             TemplateRef (ident_ref_of_cxcursor cursor)
         | OverloadedDeclRef ->
             OverloadedDeclRef (ident_ref_of_cxcursor cursor)
+        | StmtExpr ->
+            let sub =
+              match list_of_children cursor with
+              | [sub] -> sub
+              | _ -> raise Invalid_structure in
+            StmtExpr (stmt_of_cxcursor sub)
         | UnexposedExpr ->
             begin
               match ext_stmt_get_kind cursor with
