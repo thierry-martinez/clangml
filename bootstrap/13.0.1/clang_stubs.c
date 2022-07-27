@@ -12771,6 +12771,54 @@ clang_ext_AtomicExpr_getOp_wrapper(value arg_ocaml)
   }
 }
 
+CAMLprim value
+clang_ext_TypeOfExprType_getUnderlyingExpr_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXType arg;
+  arg = Cxtype_val(Field(arg_ocaml, 0));
+  CXCursor result = clang_ext_TypeOfExprType_getUnderlyingExpr(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxcursor(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TypeOfType_getUnderlyingType_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXType arg;
+  arg = Cxtype_val(Field(arg_ocaml, 0));
+  CXType result = clang_ext_TypeOfType_getUnderlyingType(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_cxtype(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
+CAMLprim value
+clang_ext_TypeOfTypeLoc_getUnderlyingType_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  struct clang_ext_TypeLoc arg;
+  arg = Clang_ext_typeloc_val(Field(arg_ocaml, 0));
+  struct clang_ext_TypeLoc result = clang_ext_TypeOfTypeLoc_getUnderlyingType(arg);
+  {
+    CAMLlocal1(data);
+    data = caml_alloc_tuple(2);
+  Store_field(data, 0, Val_clang_ext_typeloc(result));
+  Store_field(data, 1, safe_field(arg_ocaml, 1));
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_AArch64VectorPcs_spelling
 Clang_ext_aarch64vectorpcs_spelling_val(value ocaml)
 {

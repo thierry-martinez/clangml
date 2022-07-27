@@ -9,6 +9,11 @@
 - Support for `_Atomic` types and built-in expressions
   (reported by n47, https://discuss.ocaml.org/t/ann-clangml-4-2-0-ocaml-bindings-for-clang-api-for-c-and-c-parsing/6123/14)
 
+- Support for `typeof` type (GCC extension)
+  (reported by n47, https://discuss.ocaml.org/t/ann-clangml-4-2-0-ocaml-bindings-for-clang-api-for-c-and-c-parsing/6123/25?u=thierry-martinez)
+
+- Support for statement expression (GCC extension)
+
 - Fix lossing template specification in method definitions.
   (reported by Arthur Charguéraud)
 

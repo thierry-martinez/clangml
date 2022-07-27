@@ -1333,4 +1333,13 @@ enum clang_expr_AtomicOp {
 enum clang_expr_AtomicOp
 clang_ext_AtomicExpr_getOp(CXCursor);
 
+CXCursor
+clang_ext_TypeOfExprType_getUnderlyingExpr(CXType);
+
+CXType
+clang_ext_TypeOfType_getUnderlyingType(CXType);
+
+struct clang_ext_TypeLoc
+clang_ext_TypeOfTypeLoc_getUnderlyingType(struct clang_ext_TypeLoc);
+
 #include "libclang_extensions_attrs_headers.inc"

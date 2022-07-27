@@ -816,6 +816,7 @@ let () =
       var_name = "b";
       var_type = { desc = Atomic { desc = BuiltinType Bool}};}}]]
     ]}*)
+  | TypeOf of expr_or_type
   | UnexposedType of clang_ext_typekind
   | InvalidType
 
@@ -3095,6 +3096,7 @@ let () =
       op: clang_expr_atomicop;
       args : expr list;
     }
+  | StmtExpr of stmt
   | UnexposedExpr of clang_ext_stmtkind
   | SubstNonTypeTemplateParm of expr
   | ArrayInitLoop of {

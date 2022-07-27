@@ -101,7 +101,7 @@ static const clang::Decl *
 GetCursorDecl(CXCursor cursor)
 {
   if (!is_valid_decl(cursor.kind)) {
-    failwith("GetCursorDecl");
+    caml_failwith("GetCursorDecl");
   }
   return static_cast<const clang::Decl *>(cursor.data[0]);
 }
@@ -111,7 +111,7 @@ static const clang::Stmt *
 GetCursorStmt(CXCursor cursor)
 {
   if (!is_valid_stmt(cursor.kind)) {
-    failwith("GetCursorStmt");
+    caml_failwith("GetCursorStmt");
   }
   return static_cast<const clang::Stmt *>(cursor.data[1]);
 }
@@ -120,7 +120,7 @@ static const clang::Attr *
 GetCursorAttr(CXCursor cursor)
 {
   if (!is_valid_attr(cursor.kind)) {
-    failwith("GetCursorAttr");
+    caml_failwith("GetCursorAttr");
   }
   return static_cast<const clang::Attr *>(cursor.data[1]);
 }
@@ -4224,5 +4224,37 @@ extern "C" {
     }
     return CLANG_EXT_AO_Invalid;
   }
+
+  CXCursor
+  clang_ext_TypeOfExprType_getUnderlyingExpr(CXType c)
+  {
+    clang::QualType T = GetQualType(c);
+    if (const auto *TOE = T->getAs<clang::TypeOfExprType>()) {
+      return MakeCXCursor(TOE->getUnderlyingExpr(), GetTU(c));
+    }
+    return MakeCXCursorInvalid(CXCursor_InvalidCode, GetTU(c));
+  }
+
+  CXType
+  clang_ext_TypeOfType_getUnderlyingType(CXType c)
+  {
+    clang::QualType T = GetQualType(c);
+    if (const auto *TOT = T->getAs<clang::TypeOfType>()) {
+      return MakeCXType(TOT->getUnderlyingType(), GetTU(c));
+    }
+    return MakeCXTypeInvalid(GetTU(c));
+  }
+
+  struct clang_ext_TypeLoc
+  clang_ext_TypeOfTypeLoc_getUnderlyingType(struct clang_ext_TypeLoc tl)
+  {
+    if (auto *t = GetTypeLoc(tl)) {
+      if (auto at = t->getAs<clang::TypeOfTypeLoc>()) {
+        return MakeTypeLoc(at.getUnderlyingTInfo()->getTypeLoc(), tl.tu);
+      }
+    }
+    return MakeTypeLocInvalid(tl.tu);
+  }
+
   #include "libclang_extensions_attrs.inc"
 }

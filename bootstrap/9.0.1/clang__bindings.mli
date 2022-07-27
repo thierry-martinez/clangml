@@ -3675,6 +3675,13 @@ type clang_expr_atomicop =
   | Atomic_fetch_max [@@deriving refl]
 external ext_atomic_expr_get_op :
   cxcursor -> clang_expr_atomicop = "clang_ext_AtomicExpr_getOp_wrapper"
+external ext_type_of_expr_type_get_underlying_expr :
+  cxtype -> cxcursor = "clang_ext_TypeOfExprType_getUnderlyingExpr_wrapper"
+external ext_type_of_type_get_underlying_type :
+  cxtype -> cxtype = "clang_ext_TypeOfType_getUnderlyingType_wrapper"
+external ext_type_of_type_loc_get_underlying_type :
+  clang_ext_typeloc -> clang_ext_typeloc =
+    "clang_ext_TypeOfTypeLoc_getUnderlyingType_wrapper"
 type clang_ext_aarch64vectorpcs_spelling =
   | GNU_aarch64_vector_pcs 
   | CXX11_clang_aarch64_vector_pcs 
