@@ -10,33 +10,6 @@ type antiquotation = {
     pos_end : int;
   }
 
-[%%meta
-    let ocaml_minor_version =
-      int_of_string (String.sub Sys.ocaml_version 2 2) in
-    let _, target_minor_version = Metapp.ast_version in
-    let make_converter field_name e =
-      let rec convert minor_version e =
-        if minor_version = target_minor_version then
-          e
-        else
-          let next_version =
-            if minor_version < target_minor_version then
-              minor_version + 1
-            else
-              minor_version - 1 in
-          let converter_name =
-            Format.asprintf "Migrate_4%.2d_4%.2d"
-              minor_version next_version in
-          let converter =
-            Metapp.Exp.ident
-              (Ldot (Ldot (Lident "Astlib", converter_name),
-                field_name)) in
-          convert next_version [%e [%meta converter] [%meta e]] in
-      convert ocaml_minor_version e in
-    [%stri
-      let copy_structure s = [%meta make_converter "copy_structure" [%e s]]
-      and copy_pattern p = [%meta make_converter "copy_pattern" [%e p]]]]
-
 let extract_antiquotations s =
   let code_buffer = Buffer.create (String.length s) in
   let antiquotations_ref = ref [] in
@@ -85,11 +58,19 @@ let extract_antiquotations s =
         let loc_start = lexbuf.lex_curr_p in
         let payload : Ppxlib.payload =
           if pattern then
-            PPat (copy_pattern (
-              Ocaml_common.Parser.parse_pattern lexer lexbuf), None)
+            begin
+              let pattern =
+                Ppxlib.Selected_ast.Of_ocaml.copy_pattern
+                  (Parser.parse_pattern lexer lexbuf) in
+              PPat (pattern, None)
+            end
           else
-            PStr (copy_structure (
-              Ocaml_common.Parser.implementation lexer lexbuf)) in
+            begin
+              let structure =
+                Ppxlib.Selected_ast.Of_ocaml.copy_structure
+                  (Parser.implementation lexer lexbuf) in
+              PStr structure
+            end in
         let loc_end = lexbuf.lex_curr_p in
         let loc = { Location.loc_start; loc_end; loc_ghost = false } in
         let payload = { Location.loc; txt = payload } in
