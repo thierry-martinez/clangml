@@ -1,6 +1,6 @@
 # Development version
 
-- Support for Clang/LLVM 14.0.{1,2,3,4}
+- Support for Clang/LLVM 14.0.{1,2,3,4,5,6}
 
 - Support for `ParenList` expressions (may appear in constructor initializers
   of templated classes).
