@@ -36,9 +36,14 @@ end
 
 include Bindings
 
+external compare_cursors :
+  cxcursor -> cxcursor -> int = "clang_ext_compare_cursor_boxed"
+
 module Cursor = struct
   module Self = struct
     type t = cxcursor
+
+    let compare = compare_cursors
 
     let equal = equal_cursors
 
@@ -48,6 +53,10 @@ module Cursor = struct
   include Self
 
   module Hashtbl = Hashtbl.Make (Self)
+
+  module Set = Set.Make (Self)
+
+  module Map = Map.Make (Self)
 end
 
 module Types = Clang__types
@@ -59,8 +68,6 @@ include Clang__utils
 module Standard = Standard
 
 module Command_line = Clang__command_line
-
-module Printer = Printer
 
 let version () =
   ext_get_version ()
@@ -100,9 +107,6 @@ let string_chop_prefix_opt prefix s =
   else
     None
 *)
-
-external compare_cursors :
-  cxcursor -> cxcursor -> int = "clang_ext_compare_cursor_boxed"
 
 let rec get_typedef_underlying_type ?(recursive = false) (t : cxtype) =
   if get_type_kind t = Typedef then
@@ -147,6 +151,7 @@ module Init_list = struct
 end
 
 module Custom (Node : Clang__ast.NodeS) = struct
+module Printer = Printer.Make (Node)
 
 [%%meta Metapp.Stri.of_list ((new Metapp.filter)#structure [%str
 module Ast = struct

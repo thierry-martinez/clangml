@@ -21,37 +21,37 @@ clang_ext_compare_cursor(value v1, value v2)
   }
 
   if (c1.kind < c2.kind) {
-    CAMLreturn(-1);
+    CAMLreturnT(int, -1);
   }
   if (c1.kind > c2.kind) {
-    CAMLreturn(1);
+    CAMLreturnT(int, 1);
   }
 
   if (c1.xdata < c2.xdata) {
-    CAMLreturn(-1);
+    CAMLreturnT(int, -1);
   }
   if (c1.xdata > c2.xdata) {
-    CAMLreturn(1);
+    CAMLreturnT(int, 1);
   }
 
   int i;
   for (i = 0; i < 3; i++) {
     if (c1.data[i] < c2.data[i]) {
-      CAMLreturn(-1);
+      CAMLreturnT(int, -1);
     }
     if (c1.data[i] > c2.data[i]) {
-      CAMLreturn(1);
+      CAMLreturnT(int, 1);
     }
   }
 
-  CAMLreturn(0);
+  CAMLreturnT(int, 0);
 }
 
-value
+CAMLprim value
 clang_ext_compare_cursor_boxed(value v1, value v2)
 {
   CAMLparam2(v1, v2);
-  CAMLreturn(clang_ext_compare_cursor(v1, v2));
+  CAMLreturn(Val_int(clang_ext_compare_cursor(v1, v2)));
 }
 
 intnat

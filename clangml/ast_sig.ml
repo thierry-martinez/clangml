@@ -24,6 +24,28 @@ module type S = sig
   module Hashtbl : Hashtbl.S with type key = t
 end
 
+module type PrinterS = sig
+  module Node : Clang__ast.NodeS
+
+  val qual_type : Format.formatter -> Clang__ast.Custom (Node).qual_type -> unit
+
+  val typed_value :
+      (Format.formatter -> unit) -> Format.formatter ->
+      Clang__ast.Custom (Node).qual_type ->
+      unit
+
+  val expr : Format.formatter -> Clang__ast.Custom (Node).expr -> unit
+
+  val decl : Format.formatter -> Clang__ast.Custom (Node).decl -> unit
+
+  val decls : Format.formatter -> Clang__ast.Custom (Node).decl list -> unit
+
+  val stmt : Format.formatter -> Clang__ast.Custom (Node).stmt -> unit
+
+  val translation_unit :
+    Format.formatter -> Clang__ast.Custom (Node).translation_unit -> unit
+end
+
 module type CustomS = sig
 module Node : Clang__ast.NodeS
 
@@ -297,7 +319,7 @@ module Expr : sig
   val parse_string :
       ?index:cxindex -> ?clang_options:Cxtranslationunit_flags.t ->
         ?options:Ast.Options.t -> ?filename:string -> ?line:int ->
-          ?context:Clang__ast.decl list -> string ->
+          ?context:Ast.decl list -> string ->
             t option * Ast.translation_unit
   (** [parse_string ?index ?clang_options ?options ?filename ?line ?context
       contents] parses string [contents] as a C expression and returns
@@ -411,4 +433,6 @@ module Translation_unit : sig
 
   include S with type t := t
 end
+
+module Printer : PrinterS with module Node := Node
 end

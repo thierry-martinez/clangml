@@ -17,9 +17,17 @@ include module type of struct
 end
 
 module Cursor : sig
-  include Hashtbl.HashedType with type t = cxcursor
+  type t = cxcursor
+
+  include Hashtbl.HashedType with type t := cxcursor
+
+  include Set.OrderedType with type t := cxcursor
 
   module Hashtbl : Hashtbl.S with type key = cxcursor
+
+  module Set : Set.S with type elt = cxcursor
+
+  module Map : Map.S with type key = cxcursor
 end
 
 module Types = Clang__types
@@ -35,8 +43,6 @@ end
 module Standard = Standard
 
 module Command_line = Clang__command_line
-
-module Printer = Printer
 
 val version : unit -> cxversion
 (** [version ()] is the Clang version. *)

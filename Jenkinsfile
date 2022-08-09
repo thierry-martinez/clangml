@@ -45,7 +45,7 @@ pipeline {
                         eval $(opam env) && \
                         mkdir build && cd build && \
                         ../src/configure \
-                            --with-llvm-config=/media/llvms/14.0.0/bin/llvm-config
+                            --with-llvm-config=/media/llvms/14.0.6/bin/llvm-config
                        '''
                 }
             }
@@ -68,7 +68,7 @@ pipeline {
                        eval $(opam env) && \
                        cd build && \
                        dune exec -- tools/generate_attrs/generate_attrs.exe \
-                         --llvm-config /media/llvms/14.0.0/bin/llvm-config \
+                         --llvm-config /media/llvms/14.0.6/bin/llvm-config \
                          "../src/bootstrap/" && \
                        cp ../src/bootstrap/attributes.ml clangml && \
                        cp ../src/bootstrap/libclang_extensions_attrs.inc \
@@ -90,13 +90,20 @@ pipeline {
                         script: 'ls -1 /media/llvms',
                         returnStdout: true
                     ).split('\n').toList()
-                    llvm_versions.retainAll { it =~ /[0-9][.][0-9][.][0-9]/ }
+                    llvm_versions.retainAll { it =~ /^[0-9]+[.][0-9][.][0-9]$/ }
                     def branches = [:]
                     for (i in llvm_versions) {
                         def llvm_version = i
                         def llvm_dir = "/media/llvms/$llvm_version"
                         def llvm_config = "$llvm_dir/bin/llvm-config"
-                        def bootstrap_dir = "src/bootstrap/$llvm_version"
+                        def equivalent_llvm_version;
+                        if (llvm_version =~ /^14[.]0[.][0-9]$/) {
+                            equivalent_llvm_version = "14.0.0"
+                        }
+                        else {
+                            equivalent_llvm_version = llvm_version
+                        }
+                        def bootstrap_dir = "src/bootstrap/$equivalent_llvm_version"
                         def include_dir =
                             "$llvm_dir/lib/clang/$llvm_version/include"
                         def cc
