@@ -14,11 +14,11 @@ opam update
 
 opam depext --yes --verbose --install dune
 
-for package in stdcompat metapp metaquot traverse refl pattern; do
-    git clone https://github.com/thierry-martinez/"$package".git
-    ( cd "$package" && dune build "$package".opam )
-    opam pin add --yes --no-action -k path "$package"
-done
+# for package in stdcompat metapp metaquot traverse refl pattern; do
+#     git clone https://github.com/thierry-martinez/"$package".git
+#     ( cd "$package" && dune build "$package".opam )
+#     opam pin add --yes --no-action -k path "$package"
+# done
 
 opam pin add --yes --no-action "$URL"
 # --allow-releaseinfo-change-suite to circumvent error
