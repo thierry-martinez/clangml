@@ -1,15 +1,20 @@
 (library
   (name clang)
   (public_name clangml)
-  (c_names clang_stubs clang__custom clang_specials)
-  (c_flags (:include "../config/cflags.sexp") -I %{project_root}/../../clangml)
-  (cxx_flags --std=c++11 (:include "../config/cxxflags.sexp")
-    -I %{project_root}/../../clangml)
+  (foreign_stubs
+    (language c)
+    (names clang_stubs clang__custom clang_specials)
+    (flags (:include "../config/cflags.sexp") -I %{project_root}/../../clangml -fPIC))
+  (foreign_stubs
+    (language cxx)
+    (names libclang_extensions)
+    (flags --std=c++11 (:include "../config/cxxflags.sexp")
+      -I %{project_root}/../../clangml))
   (c_library_flags (:include "../config/ldflags.sexp")
     (:include "../config/libs.sexp"))
-  (cxx_names libclang_extensions)
   (library_flags -linkall)
-  (preprocess (pps clangml_config refl.ppx metapp.ppx))
+  (preprocess (pps refl.ppx metapp.ppx))
+  (preprocessor_deps "../config/clangml_config.cmxs")
 ; +warning 32: Unused value declaration.
 ; +warning 34: Unused type declaration.
 ; -warning 40: Constructor or label name used out of scope. (OCaml <=4.06.0)

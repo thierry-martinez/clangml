@@ -1121,7 +1121,8 @@ let main cflags llvm_config prefix =
       ([%str
           [@@@ocaml.warning "-27"] (* unused-var-strict *)
           [%%metapackage "metapp"]
-          [%%metadir "config/.clangml_config.objs/byte"]] @
+          [%%metadir "config/.clangml_config.objs/byte"]
+          [%%metaload "config/clangml_config.cmxs"]] @
         type_decl @ [convert]));
   let chan = open_out (prefix ^ "libclang_extensions_attrs.inc") in
   Fun.protect ~finally:(fun () -> close_out chan) (fun () ->

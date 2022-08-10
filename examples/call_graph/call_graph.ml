@@ -108,7 +108,7 @@ let info =
       `S Cmdliner.Manpage.s_bugs;
       `P "Email bug reports to <thierry.martinez@inria.fr>.";
     ] in
-  Cmdliner.Term.info "call_graph" ~doc ~exits:Cmdliner.Term.default_exits ~man
+  Cmdliner.Cmd.info "call_graph" ~doc ~man
 
 let () =
   exit (Cmdliner.Cmd.eval (Cmdliner.Cmd.v info options))

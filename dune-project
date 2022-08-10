@@ -1,14 +1,14 @@
-(lang dune 1.11)
+(lang dune 3.0)
 
 (generate_opam_files true)
 
 (license "BSD-2-Clause")
 (maintainers "Thierry Martinez <thierry.martinez@inria.fr>")
 (authors "Thierry Martinez <thierry.martinez@inria.fr>")
-(source (uri "git+https://gitlab.inria.fr/memcad/clangml"))
-(homepage "https://memcad.gitlabpages.inria.fr/clangml/")
-(bug_reports "https://gitlab.inria.fr/memcad/clangml/issues")
-(documentation "https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/index.html")
+(source (github "thierry-martinez/clangml"))
+(homepage "https://github.com/thierry-martinez/clangml/")
+(bug_reports "https://github.com/thierry-martinez/clangml/issues")
+(documentation "https://github.com/thierry-martinez/clangml/blob/v4.7.0/README.md")
 (version "4.7.0")
 
 (package

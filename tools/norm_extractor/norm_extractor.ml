@@ -128,21 +128,10 @@ type context = {
     command_line_args : string list;
   }
 
-let outside_decl (decl : Clang.Ast.decl) =
-  not (Filename.is_relative
-    (Clang.Ast.concrete_of_source_location Presumed
-       (Clang.Ast.location_of_node decl)).filename)
-
 let inside_decl (decl : Clang.Ast.decl) =
   Filename.is_relative
     (Clang.Ast.concrete_of_source_location Presumed
        (Clang.Ast.location_of_node decl)).filename
-
-let rec filter_outside list =
-  match list with
-  | hd :: tl when outside_decl hd ->
-      filter_outside tl
-  | _ -> list
 
 let format_check_pattern fmt (ast : Clang.Ast.translation_unit) =
   let hook : type a . a Refl.Lift.Pat.hook_fun =

@@ -1,3 +1,15 @@
+# Development version
+
+- Support for Clang/LLVM 15.0.0
+
+- `Ast.character_kind` and `Ast.string_kind` are now distinct
+  types (aliases for `Clang.clang_ext_characterkind` and
+  `Clang.clang_ext_stringkind` respectively.
+  The constructor `Ordinary` replaced the former  constructor `Ascii`
+  for `string_kind`, to match the new convention used by
+  `clang::StringLiteral::StringKind` from Clang 15.0.0.
+  The constructor `Ascii` for `character_kind` is left unchanged.
+
 # 2022-08-09, 4.7.0
 
 - Support for Clang/LLVM 14.0.{1,2,3,4,5,6}

@@ -98,6 +98,12 @@
 #ifdef LLVM_VERSION_13_0_1
 #define LLVM_VERSION_BEFORE_14_0_0
 #endif
+#ifdef LLVM_VERSION_BEFORE_14_0_0
+#define LLVM_VERSION_BEFORE_15_0_0
+#endif
+#ifdef LLVM_VERSION_14_0_0
+#define LLVM_VERSION_BEFORE_15_0_0
+#endif
 
 CXVersion
 clang_ext_getVersion();
@@ -210,7 +216,7 @@ clang_ext_StringLiteral_getCharByteWidth(CXCursor);
 
 /* Copied from Expr.h:StringLiteral:StringKind */
 enum clang_ext_StringKind {
-  clang_ext_StringKind_Ascii,
+  clang_ext_StringKind_Ordinary,
   clang_ext_StringKind_Wide,
   clang_ext_StringKind_UTF8,
   clang_ext_StringKind_UTF16,
@@ -421,7 +427,17 @@ clang_ext_DeclaratorDecl_GetSizeExpr(CXCursor);
 CXCursor
 clang_ext_VariableArrayType_GetSizeExpr(CXType c);
 
-enum clang_ext_StringKind
+/* Copied from Expr.h:CharacterLiteral:CharacterKind */
+enum clang_ext_CharacterKind {
+  clang_ext_CharacterKind_Ascii,
+  clang_ext_CharacterKind_Wide,
+  clang_ext_CharacterKind_UTF8,
+  clang_ext_CharacterKind_UTF16,
+  clang_ext_CharacterKind_UTF32,
+  clang_ext_CharacterKind_InvalidCharacterKind
+};
+
+enum clang_ext_CharacterKind
 clang_ext_CharacterLiteral_GetCharacterKind(CXCursor);
 
 unsigned

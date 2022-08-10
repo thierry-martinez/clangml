@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -e -x
-branch="$1"
-if [ -z "$branch" ]; then
-	branch=origin
+remote="$1"
+if [ -z "$remote" ]; then
+	remote=origin
 fi
 rm -rf bootstrap
-git checkout "$branch"/bootstrap bootstrap
+git checkout "$remote"/bootstrap bootstrap
 git reset HEAD bootstrap
 m4/download.sh
 ./autogen.sh

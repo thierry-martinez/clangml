@@ -6,14 +6,6 @@ let check_pattern_expr (e : Clang.Ast.expr)
       Format.fprintf Format.err_formatter "%a@." Pattern.pp_failure failure;
       failwith "check_pattern_expr"
 
-let run_llvm_config llvm_config arguments =
-  let command = String.concat " " (llvm_config :: arguments) in
-  let output = Unix.open_process_in command in
-  let result = input_line output in
-  if Unix.close_process_in output <> Unix.WEXITED 0 then
-    failwith (Printf.sprintf "%s: execution failed" command);
-  result
-
 let parse_string s =
   let command_line_args =
     List.map Clang.Command_line.include_directory

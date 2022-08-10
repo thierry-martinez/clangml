@@ -1,6 +1,6 @@
 (test
   (name ast)
-  (preprocess (pps pattern.ppx refl.ppx metapp clangml_config metapp.ppx))
+  (preprocess (pps pattern.ppx refl.ppx metapp.ppx))
   (link_flags -linkall)
 ; -warning 9: the following labels are not bound in this record pattern
 ; -warning 32: Unused value declaration.

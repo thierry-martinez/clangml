@@ -1,5 +1,6 @@
 [%%metapackage "metapp"]
 [%%metadir "config/.clangml_config.objs/byte"]
+[%%metaload "config/clangml_config.cmxs"]
 
 open Clang__bindings
 

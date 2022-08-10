@@ -952,8 +952,12 @@ extern "C" {
     const clang::Stmt *s = GetCursorStmt(cursor);
     if (auto m = llvm::dyn_cast_or_null<clang::StringLiteral>(s)) {
       switch (m->getKind()) {
+      #ifdef LLVM_VERSION_BEFORE_15_0_0
       case clang::StringLiteral::Ascii:
-        return clang_ext_StringKind_Ascii;
+      #else
+      case clang::StringLiteral::Ordinary:
+      #endif
+        return clang_ext_StringKind_Ordinary;
       case clang::StringLiteral::Wide:
         return clang_ext_StringKind_Wide;
       case clang::StringLiteral::UTF8:
@@ -1427,28 +1431,28 @@ extern "C" {
     return MakeCXCursorInvalid(CXCursor_InvalidCode, GetTU(c));
   }
 
-  enum clang_ext_StringKind
+  enum clang_ext_CharacterKind
   clang_ext_CharacterLiteral_GetCharacterKind(CXCursor c)
   {
     if (auto e =
       llvm::dyn_cast_or_null<clang::CharacterLiteral>(GetCursorStmt(c))) {
       switch (e->getKind()) {
       case clang::CharacterLiteral::Ascii:
-        return clang_ext_StringKind_Ascii;
+        return clang_ext_CharacterKind_Ascii;
       case clang::CharacterLiteral::Wide:
-        return clang_ext_StringKind_Wide;
+        return clang_ext_CharacterKind_Wide;
       #ifndef LLVM_VERSION_BEFORE_3_8_0
       case clang::CharacterLiteral::UTF8:
-        return clang_ext_StringKind_UTF8;
+        return clang_ext_CharacterKind_UTF8;
       #endif
       case clang::CharacterLiteral::UTF16:
-        return clang_ext_StringKind_UTF16;
+        return clang_ext_CharacterKind_UTF16;
       case clang::CharacterLiteral::UTF32:
-        return clang_ext_StringKind_UTF32;
+        return clang_ext_CharacterKind_UTF32;
       default:;
       }
     }
-    return clang_ext_StringKind_InvalidStringKind;
+    return clang_ext_CharacterKind_InvalidCharacterKind;
   }
 
   unsigned
