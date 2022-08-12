@@ -4,7 +4,6 @@
 [@@@ocaml.warning "-27"]
 [%%metapackage "metapp"]
 [%%metadir "config/.clangml_config.objs/byte"]
-[%%metaload "config/clangml_config.cmxs"]
 type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) amd =
   | GPUFlatWorkGroupSize of
   {

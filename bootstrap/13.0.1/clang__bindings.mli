@@ -2174,7 +2174,7 @@ external ext_string_literal_get_byte_length :
 external ext_string_literal_get_char_byte_width :
   cxcursor -> int = "clang_ext_StringLiteral_getCharByteWidth_wrapper"
 type clang_ext_stringkind =
-  | Ascii 
+  | Ordinary 
   | Wide 
   | UTF8 
   | UTF16 
@@ -2687,8 +2687,15 @@ external ext_declarator_decl_get_size_expr :
   cxcursor -> cxcursor = "clang_ext_DeclaratorDecl_GetSizeExpr_wrapper"
 external ext_variable_array_type_get_size_expr :
   cxtype -> cxcursor = "clang_ext_VariableArrayType_GetSizeExpr_wrapper"
+type clang_ext_characterkind =
+  | Ascii 
+  | Wide 
+  | UTF8 
+  | UTF16 
+  | UTF32 
+  | InvalidCharacterKind [@@deriving refl]
 external ext_character_literal_get_character_kind :
-  cxcursor -> clang_ext_stringkind =
+  cxcursor -> clang_ext_characterkind =
     "clang_ext_CharacterLiteral_GetCharacterKind_wrapper"
 external ext_character_literal_get_value :
   cxcursor -> int = "clang_ext_CharacterLiteral_GetValue_wrapper"

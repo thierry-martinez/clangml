@@ -594,8 +594,6 @@ type cxcursorkind =
   | CXXFunctionalCastExpr
   [@ocaml.doc
     "Represents an explicit C++ type conversion that uses \"functional\" notion (C++ \\[expr.type.conv\\])."]
-  | CXXAddrspaceCastExpr
-  [@ocaml.doc "OpenCL's addrspace_cast<> expression."]
   | CXXTypeidExpr
   [@ocaml.doc "A C++ typeid expression (C++ \\[expr.typeid\\])."]
   | CXXBoolLiteralExpr [@ocaml.doc "\\[C++ 2.13.5\\] C++ Boolean Literal."]
@@ -636,6 +634,11 @@ type cxcursorkind =
   | OMPArrayShapingExpr
   [@ocaml.doc "OpenMP 5.0 \\[2.1.4, Array Shaping\\]."]
   | OMPIteratorExpr [@ocaml.doc "OpenMP 5.0 \\[2.1.6 Iterators\\]"]
+  | CXXAddrspaceCastExpr
+  [@ocaml.doc "OpenCL's addrspace_cast<> expression."]
+  | ConceptSpecializationExpr
+  [@ocaml.doc "Expression that references a C++20 concept."]
+  | RequiresExpr [@ocaml.doc "Expression that references a C++20 concept."]
   | UnexposedStmt
   [@ocaml.doc
     "A statement whose specific kind is not exposed via this interface."]
@@ -760,6 +763,31 @@ type cxcursorkind =
   [@ocaml.doc "OpenMP parallel master directive."]
   | OMPDepobjDirective [@ocaml.doc "OpenMP depobj directive."]
   | OMPScanDirective [@ocaml.doc "OpenMP scan directive."]
+  | OMPTileDirective [@ocaml.doc "OpenMP tile directive."]
+  | OMPCanonicalLoop [@ocaml.doc "OpenMP canonical loop."]
+  | OMPInteropDirective [@ocaml.doc "OpenMP interop directive."]
+  | OMPDispatchDirective [@ocaml.doc "OpenMP dispatch directive."]
+  | OMPMaskedDirective [@ocaml.doc "OpenMP masked directive."]
+  | OMPUnrollDirective [@ocaml.doc "OpenMP unroll directive."]
+  | OMPMetaDirective [@ocaml.doc "OpenMP metadirective directive."]
+  | OMPGenericLoopDirective [@ocaml.doc "OpenMP loop directive."]
+  | OMPTeamsGenericLoopDirective [@ocaml.doc "OpenMP teams loop directive."]
+  | OMPTargetTeamsGenericLoopDirective
+  [@ocaml.doc "OpenMP target teams loop directive."]
+  | OMPParallelGenericLoopDirective
+  [@ocaml.doc "OpenMP parallel loop directive."]
+  | OMPTargetParallelGenericLoopDirective
+  [@ocaml.doc "OpenMP target parallel loop directive."]
+  | OMPParallelMaskedDirective
+  [@ocaml.doc "OpenMP parallel masked directive."]
+  | OMPMaskedTaskLoopDirective
+  [@ocaml.doc "OpenMP masked taskloop directive."]
+  | OMPMaskedTaskLoopSimdDirective
+  [@ocaml.doc "OpenMP masked taskloop simd directive."]
+  | OMPParallelMaskedTaskLoopDirective
+  [@ocaml.doc "OpenMP parallel masked taskloop directive."]
+  | OMPParallelMaskedTaskLoopSimdDirective
+  [@ocaml.doc "OpenMP parallel masked taskloop simd directive."]
   | TranslationUnit
   [@ocaml.doc "Cursor that represents the translation unit itself."]
   | UnexposedAttr
@@ -904,6 +932,7 @@ type cxcursorkind =
   | TypeAliasTemplateDecl [@ocaml.doc "A module import declaration."]
   | StaticAssert [@ocaml.doc "A static_assert or _Static_assert node"]
   | FriendDecl [@ocaml.doc "a friend declaration."]
+  | ConceptDecl [@ocaml.doc "a concept declaration."]
   | OverloadCandidate [@ocaml.doc "A code completion overload candidate."]
 [@@deriving refl][@@ocaml.doc
                    "Describes the kind of entity that a cursor refers to."]
@@ -1008,6 +1037,16 @@ external get_cursor_availability :
   cxcursor -> cxavailabilitykind = "clang_getCursorAvailability_wrapper"
 [@@ocaml.doc
   "Determine the availability of the entity that this cursor refers to, taking the current target platform into account."]
+external cursor_get_var_decl_initializer :
+  cxcursor -> cxcursor = "clang_Cursor_getVarDeclInitializer_wrapper"
+[@@ocaml.doc
+  "If cursor refers to a variable declaration and it has initializer returns cursor referring to the initializer otherwise return null cursor."]
+external cursor_has_var_decl_global_storage :
+  cxcursor -> int = "clang_Cursor_hasVarDeclGlobalStorage_wrapper"[@@ocaml.doc
+                                                                    "If cursor refers to a variable declaration that has global storage returns 1. If cursor refers to a variable declaration that doesn't have global storage returns 0. Otherwise returns -1."]
+external cursor_has_var_decl_external_storage :
+  cxcursor -> int = "clang_Cursor_hasVarDeclExternalStorage_wrapper"[@@ocaml.doc
+                                                                    "If cursor refers to a variable declaration that has external storage returns 1. If cursor refers to a variable declaration that doesn't have external storage returns 0. Otherwise returns -1."]
 type cxlanguagekind =
   | Invalid 
   | C 
@@ -1177,6 +1216,9 @@ type cxtypekind =
   [@ocaml.doc
     "A type whose specific kind is not exposed via this interface."]
   | BFloat16
+  [@ocaml.doc
+    "A type whose specific kind is not exposed via this interface."]
+  | Ibm128
   [@ocaml.doc
     "A type whose specific kind is not exposed via this interface."]
   | Complex
@@ -1413,6 +1455,9 @@ type cxtypekind =
   | Atomic
   [@ocaml.doc
     "Represents a type that was referred to using an elaborated type keyword."]
+  | BTFTagAttributed
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
 [@@deriving refl][@@ocaml.doc "Describes the kind of type"]
 type cxtype[@@ocaml.doc
              "The type of an element in the abstract syntax tree."]
@@ -1533,6 +1578,8 @@ type cxcallingconv =
   | PreserveMost 
   | PreserveAll 
   | AArch64VectorCall 
+  | SwiftAsync 
+  | AArch64SVEPCS 
   | Invalid 
   | Unexposed [@@deriving refl][@@ocaml.doc
                                  "Describes the calling convention of a function type"]
@@ -1600,6 +1647,9 @@ type cxtypenullabilitykind =
   [@ocaml.doc
     "Whether values of this type can be null is (explicitly) unspecified. This captures a (fairly rare) case where we can't conclude anything about the nullability of the type even though it has been considered."]
   | Invalid [@ocaml.doc "Nullability is not applicable to this type."]
+  | NullableResult
+  [@ocaml.doc
+    "Generally behaves like Nullable, except when used in a block parameter that was imported into a swift async method. There, swift will assume that the parameter can get null even if no error occurred. _Nullable parameters are assumed to only get null on error."]
 [@@deriving refl]
 external type_get_nullability :
   cxtype -> cxtypenullabilitykind = "clang_Type_getNullability_wrapper"
@@ -2294,6 +2344,8 @@ type clang_ext_declkind =
   | Import 
   | LifetimeExtendedTemporary 
   | LinkageSpec 
+  | Using 
+  | UsingEnum 
   | Label 
   | Namespace 
   | NamespaceAlias 
@@ -2322,7 +2374,7 @@ type clang_ext_declkind =
   | TypeAlias 
   | Typedef 
   | UnresolvedUsingTypename 
-  | Using 
+  | UnresolvedUsingIfExists 
   | UsingDirective 
   | UsingPack 
   | UsingShadow 
@@ -2351,6 +2403,8 @@ type clang_ext_declkind =
   | MSGuid 
   | OMPDeclareMapper 
   | OMPDeclareReduction 
+  | TemplateParamObject 
+  | UnnamedGlobalConstant 
   | UnresolvedUsingValue 
   | OMPAllocate 
   | OMPRequires 
@@ -2395,41 +2449,58 @@ type clang_ext_stmtkind =
   | IndirectGotoStmt 
   | MSDependentExistsStmt 
   | NullStmt 
+  | OMPCanonicalLoop 
   | OMPAtomicDirective 
   | OMPBarrierDirective 
   | OMPCancelDirective 
   | OMPCancellationPointDirective 
   | OMPCriticalDirective 
   | OMPDepobjDirective 
+  | OMPDispatchDirective 
   | OMPFlushDirective 
+  | OMPInteropDirective 
   | OMPDistributeDirective 
   | OMPDistributeParallelForDirective 
   | OMPDistributeParallelForSimdDirective 
   | OMPDistributeSimdDirective 
   | OMPForDirective 
   | OMPForSimdDirective 
+  | OMPGenericLoopDirective 
+  | OMPMaskedTaskLoopDirective 
+  | OMPMaskedTaskLoopSimdDirective 
   | OMPMasterTaskLoopDirective 
   | OMPMasterTaskLoopSimdDirective 
   | OMPParallelForDirective 
   | OMPParallelForSimdDirective 
+  | OMPParallelGenericLoopDirective 
+  | OMPParallelMaskedTaskLoopDirective 
+  | OMPParallelMaskedTaskLoopSimdDirective 
   | OMPParallelMasterTaskLoopDirective 
   | OMPParallelMasterTaskLoopSimdDirective 
   | OMPSimdDirective 
   | OMPTargetParallelForSimdDirective 
+  | OMPTargetParallelGenericLoopDirective 
   | OMPTargetSimdDirective 
   | OMPTargetTeamsDistributeDirective 
   | OMPTargetTeamsDistributeParallelForDirective 
   | OMPTargetTeamsDistributeParallelForSimdDirective 
   | OMPTargetTeamsDistributeSimdDirective 
+  | OMPTargetTeamsGenericLoopDirective 
   | OMPTaskLoopDirective 
   | OMPTaskLoopSimdDirective 
   | OMPTeamsDistributeDirective 
   | OMPTeamsDistributeParallelForDirective 
   | OMPTeamsDistributeParallelForSimdDirective 
   | OMPTeamsDistributeSimdDirective 
+  | OMPTeamsGenericLoopDirective 
+  | OMPTileDirective 
+  | OMPUnrollDirective 
+  | OMPMaskedDirective 
   | OMPMasterDirective 
+  | OMPMetaDirective 
   | OMPOrderedDirective 
   | OMPParallelDirective 
+  | OMPParallelMaskedDirective 
   | OMPParallelMasterDirective 
   | OMPParallelSectionsDirective 
   | OMPScanDirective 
@@ -2575,6 +2646,7 @@ type clang_ext_stmtkind =
   | PseudoObjectExpr 
   | RecoveryExpr 
   | RequiresExpr 
+  | SYCLUniqueStableNameExpr 
   | ShuffleVectorExpr 
   | SizeOfPackExpr 
   | SourceLocExpr 
@@ -2602,6 +2674,8 @@ type clang_ext_typekind =
   | VariableArray 
   | Atomic 
   | Attributed 
+  | BTFTagAttributed 
+  | BitInt 
   | BlockPointer 
   | Builtin 
   | Complex 
@@ -2609,13 +2683,12 @@ type clang_ext_typekind =
   | Auto 
   | DeducedTemplateSpecialization 
   | DependentAddressSpace 
-  | DependentExtInt 
+  | DependentBitInt 
   | DependentName 
   | DependentSizedExtVector 
   | DependentTemplateSpecialization 
   | DependentVector 
   | Elaborated 
-  | ExtInt 
   | FunctionNoProto 
   | FunctionProto 
   | InjectedClassName 
@@ -2644,6 +2717,7 @@ type clang_ext_typekind =
   | Typedef 
   | UnaryTransform 
   | UnresolvedUsing 
+  | Using 
   | Vector 
   | ExtVector 
   | UnknownType [@@deriving refl]
@@ -2688,7 +2762,9 @@ external ext_type_get_named_type :
 type clang_ext_attrkind =
   | NoAttr 
   | AddressSpace 
+  | AnnotateType 
   | ArmMveStrictPolymorphism 
+  | BTFTypeTag 
   | CmseNSCall 
   | NoDeref 
   | ObjCGC 
@@ -2697,6 +2773,8 @@ type clang_ext_attrkind =
   | OpenCLConstantAddressSpace 
   | OpenCLGenericAddressSpace 
   | OpenCLGlobalAddressSpace 
+  | OpenCLGlobalDeviceAddressSpace 
+  | OpenCLGlobalHostAddressSpace 
   | OpenCLLocalAddressSpace 
   | OpenCLPrivateAddressSpace 
   | Ptr32 
@@ -2705,11 +2783,20 @@ type clang_ext_attrkind =
   | TypeNonNull 
   | TypeNullUnspecified 
   | TypeNullable 
+  | TypeNullableResult 
   | UPtr 
   | FallThrough 
-  | NoMerge 
+  | Likely 
+  | MustTail 
+  | OpenCLUnrollHint 
   | Suppress 
+  | Unlikely 
+  | AlwaysInline 
+  | NoInline 
+  | NoMerge 
+  | AArch64SVEPcs 
   | AArch64VectorPcs 
+  | AMDGPUKernelCall 
   | AcquireHandle 
   | AnyX86NoCfCheck 
   | CDecl 
@@ -2725,10 +2812,12 @@ type clang_ext_attrkind =
   | PreserveMost 
   | RegCall 
   | StdCall 
+  | SwiftAsyncCall 
   | SwiftCall 
   | SysVABI 
   | ThisCall 
   | VectorCall 
+  | SwiftAsyncContext 
   | SwiftContext 
   | SwiftErrorResult 
   | SwiftIndirectResult 
@@ -2752,11 +2841,11 @@ type clang_ext_attrkind =
   | AcquiredAfter 
   | AcquiredBefore 
   | AlignMac68k 
+  | AlignNatural 
   | Aligned 
   | AllocAlign 
   | AllocSize 
   | AlwaysDestroy 
-  | AlwaysInline 
   | AnalyzerNoReturn 
   | AnyX86Interrupt 
   | AnyX86NoCallerSavedRegisters 
@@ -2769,9 +2858,12 @@ type clang_ext_attrkind =
   | AssertExclusiveLock 
   | AssertSharedLock 
   | AssumeAligned 
+  | Assumption 
   | Availability 
   | BPFPreserveAccessIndex 
+  | BTFDeclTag 
   | Blocks 
+  | Builtin 
   | C11NoReturn 
   | CFAuditedTransfer 
   | CFGuard 
@@ -2813,11 +2905,16 @@ type clang_ext_attrkind =
   | DLLImportStaticLocal 
   | Deprecated 
   | Destructor 
+  | DiagnoseAsBuiltin 
   | DiagnoseIf 
+  | DisableSanitizerInstrumentation 
   | DisableTailCalls 
   | EmptyBases 
   | EnableIf 
+  | EnforceTCB 
+  | EnforceTCBLeaf 
   | EnumExtensibility 
+  | Error 
   | ExcludeFromExplicitInstantiation 
   | ExclusiveTrylockFunction 
   | ExternalSourceSymbol 
@@ -2826,9 +2923,14 @@ type clang_ext_attrkind =
   | Flatten 
   | Format 
   | FormatArg 
+  | FunctionReturnThunks 
   | GNUInline 
   | GuardedBy 
   | GuardedVar 
+  | HIPManaged 
+  | HLSLNumThreads 
+  | HLSLSV_GroupIndex 
+  | HLSLShader 
   | Hot 
   | IBAction 
   | IBOutlet 
@@ -2837,8 +2939,10 @@ type clang_ext_attrkind =
   | InternalLinkage 
   | LTOVisibilityPublic 
   | LayoutVersion 
+  | Leaf 
   | LockReturned 
   | LocksExcluded 
+  | M68kInterrupt 
   | MIGServerRoutine 
   | MSAllocator 
   | MSInheritance 
@@ -2856,6 +2960,7 @@ type clang_ext_attrkind =
   | MipsLongCall 
   | MipsShortCall 
   | NSConsumesSelf 
+  | NSErrorDomain 
   | NSReturnsAutoreleased 
   | NSReturnsNotRetained 
   | Naked 
@@ -2864,10 +2969,11 @@ type clang_ext_attrkind =
   | NoDebug 
   | NoDestroy 
   | NoDuplicate 
-  | NoInline 
   | NoInstrumentFunction 
   | NoMicroMips 
   | NoMips16 
+  | NoProfileFunction 
+  | NoRandomizeLayout 
   | NoReturn 
   | NoSanitize 
   | NoSpeculativeLoadHardening 
@@ -2904,7 +3010,6 @@ type clang_ext_attrkind =
   | ObjCSubclassingRestricted 
   | OpenCLIntelReqdSubGroupSize 
   | OpenCLKernel 
-  | OpenCLUnrollHint 
   | OptimizeNone 
   | Override 
   | Owner 
@@ -2918,19 +3023,23 @@ type clang_ext_attrkind =
   | PragmaClangRelroSection 
   | PragmaClangRodataSection 
   | PragmaClangTextSection 
+  | PreferredName 
   | PtGuardedBy 
   | PtGuardedVar 
   | Pure 
   | RISCVInterrupt 
+  | RandomizeLayout 
   | Reinitializes 
   | ReleaseCapability 
   | ReqdWorkGroupSize 
   | RequiresCapability 
   | Restrict 
+  | Retain 
   | ReturnTypestate 
   | ReturnsNonNull 
   | ReturnsTwice 
   | SYCLKernel 
+  | SYCLSpecialClass 
   | ScopedLockable 
   | Section 
   | SelectAny 
@@ -2938,8 +3047,21 @@ type clang_ext_attrkind =
   | SetTypestate 
   | SharedTrylockFunction 
   | SpeculativeLoadHardening 
+  | StandaloneDebug 
+  | StrictFP 
+  | SwiftAsync 
+  | SwiftAsyncError 
+  | SwiftAsyncName 
+  | SwiftAttr 
+  | SwiftBridge 
+  | SwiftBridgedTypedef 
+  | SwiftError 
+  | SwiftName 
+  | SwiftNewType 
+  | SwiftPrivate 
   | TLSModel 
   | Target 
+  | TargetClones 
   | TestTypestate 
   | TransparentUnion 
   | TrivialABI 
@@ -2950,6 +3072,7 @@ type clang_ext_attrkind =
   | Uninitialized 
   | Unused 
   | Used 
+  | UsingIfExists 
   | Uuid 
   | VecReturn 
   | VecTypeHint 
@@ -2966,9 +3089,12 @@ type clang_ext_attrkind =
   | X86ForceAlignArgPointer 
   | XRayInstrument 
   | XRayLogArgs 
+  | ZeroCallUsedRegs 
   | AbiTag 
   | Alias 
   | AlignValue 
+  | BuiltinAlias 
+  | CalledOnce 
   | IFunc 
   | InitSeg 
   | LoaderUninitialized 
@@ -2985,11 +3111,13 @@ type clang_ext_attrkind =
   | ObjCDirect 
   | ObjCDirectMembers 
   | ObjCNonLazyClass 
+  | ObjCNonRuntimeProtocol 
   | ObjCRuntimeName 
   | ObjCRuntimeVisible 
   | OpenCLAccess 
   | Overloadable 
   | RenderScriptKernel 
+  | SwiftObjCMembers 
   | Thread [@@deriving refl]
 external ext_attr_kind_get_spelling :
   clang_ext_attrkind -> string = "clang_ext_AttrKind_GetSpelling_wrapper"
@@ -3205,13 +3333,24 @@ type clang_ext_langstandards =
   | Gnucxx17 
   | Cxx20 
   | Gnucxx20 
+  | Cxx2b 
+  | Gnucxx2b 
   | Opencl10 
   | Opencl11 
   | Opencl12 
   | Opencl20 
-  | Openclcpp 
+  | Opencl30 
+  | Openclcpp10 
+  | Openclcpp2021 
   | Cuda 
   | Hip 
+  | Hlsl 
+  | Hlsl2015 
+  | Hlsl2016 
+  | Hlsl2017 
+  | Hlsl2018 
+  | Hlsl2021 
+  | Hlsl202x 
   | InvalidLang [@@deriving refl]
 external ext_lang_standard_get_name :
   clang_ext_langstandards -> string =
@@ -3465,6 +3604,8 @@ type clang_ext_typeloc_class =
   | VariableArray 
   | Atomic 
   | Attributed 
+  | BTFTagAttributed 
+  | BitInt 
   | BlockPointer 
   | Builtin 
   | Complex 
@@ -3472,13 +3613,12 @@ type clang_ext_typeloc_class =
   | Auto 
   | DeducedTemplateSpecialization 
   | DependentAddressSpace 
-  | DependentExtInt 
+  | DependentBitInt 
   | DependentName 
   | DependentSizedExtVector 
   | DependentTemplateSpecialization 
   | DependentVector 
   | Elaborated 
-  | ExtInt 
   | FunctionNoProto 
   | FunctionProto 
   | InjectedClassName 
@@ -3507,6 +3647,7 @@ type clang_ext_typeloc_class =
   | Typedef 
   | UnaryTransform 
   | UnresolvedUsing 
+  | Using 
   | Vector 
   | ExtVector 
   | InvalidTypeLoc [@@deriving refl]
@@ -3722,6 +3863,7 @@ type clang_expr_atomicop =
   | C11_atomic_fetch_and 
   | C11_atomic_fetch_or 
   | C11_atomic_fetch_xor 
+  | C11_atomic_fetch_nand 
   | C11_atomic_fetch_max 
   | C11_atomic_fetch_min 
   | Atomic_load 
@@ -3760,7 +3902,18 @@ type clang_expr_atomicop =
   | Opencl_atomic_fetch_min 
   | Opencl_atomic_fetch_max 
   | Atomic_fetch_min 
-  | Atomic_fetch_max [@@deriving refl]
+  | Atomic_fetch_max 
+  | Hip_atomic_load 
+  | Hip_atomic_store 
+  | Hip_atomic_compare_exchange_weak 
+  | Hip_atomic_compare_exchange_strong 
+  | Hip_atomic_exchange 
+  | Hip_atomic_fetch_add 
+  | Hip_atomic_fetch_and 
+  | Hip_atomic_fetch_or 
+  | Hip_atomic_fetch_xor 
+  | Hip_atomic_fetch_min 
+  | Hip_atomic_fetch_max [@@deriving refl]
 external ext_atomic_expr_get_op :
   cxcursor -> clang_expr_atomicop = "clang_ext_AtomicExpr_getOp_wrapper"
 external ext_type_of_expr_type_get_underlying_expr :

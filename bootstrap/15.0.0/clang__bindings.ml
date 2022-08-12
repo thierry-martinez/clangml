@@ -54,19 +54,19 @@ external create_index :
   exclude_declarations_from_pch:bool -> display_diagnostics:bool -> cxindex =
     "clang_createIndex_wrapper"[@@ocaml.doc
                                  "Provides a shared context for creating translation units."]
-module Cxglobaloptflags :
-sig
-  type t
-  external (+) : t -> t -> t = "%orint"
-  val (-) : t -> t -> t
-  external (&) : t -> t -> t = "%andint"
-  external ( * ) : t -> t -> t = "%xorint"
-  val subset : t -> t -> bool
-  val none : t
-  val thread_background_priority_for_indexing : t
-  val thread_background_priority_for_editing : t
-  val thread_background_priority_for_all : t
-end
+module Cxglobaloptflags =
+  struct
+    type t = int
+    external (+) : t -> t -> t = "%orint"
+    let (-) x y = x land (lnot y)
+    external (&) : t -> t -> t = "%andint"
+    external ( * ) : t -> t -> t = "%xorint"
+    let subset x y = (y - x) = 0
+    let none = 0
+    let thread_background_priority_for_indexing = 1
+    let thread_background_priority_for_editing = 2
+    let thread_background_priority_for_all = 3
+  end
 external cxindex_set_global_options :
   cxindex -> Cxglobaloptflags.t -> unit =
     "clang_CXIndex_setGlobalOptions_wrapper"[@@ocaml.doc
@@ -217,22 +217,22 @@ external get_diagnostic_set_from_tu :
   cxtranslationunit -> cxdiagnosticset =
     "clang_getDiagnosticSetFromTU_wrapper"[@@ocaml.doc
                                             "Retrieve the complete set of diagnostics associated with a translation unit."]
-module Cxdiagnosticdisplayoptions :
-sig
-  type t
-  external (+) : t -> t -> t = "%orint"
-  val (-) : t -> t -> t
-  external (&) : t -> t -> t = "%andint"
-  external ( * ) : t -> t -> t = "%xorint"
-  val subset : t -> t -> bool
-  val zero : t
-  val display_source_location : t
-  val display_column : t
-  val display_source_ranges : t
-  val display_option : t
-  val display_category_id : t
-  val display_category_name : t
-end
+module Cxdiagnosticdisplayoptions =
+  struct
+    type t = int
+    external (+) : t -> t -> t = "%orint"
+    let (-) x y = x land (lnot y)
+    external (&) : t -> t -> t = "%andint"
+    external ( * ) : t -> t -> t = "%xorint"
+    let subset x y = (y - x) = 0
+    let zero = 0
+    let display_source_location = 1
+    let display_column = 2
+    let display_source_ranges = 4
+    let display_option = 8
+    let display_category_id = 16
+    let display_category_name = 32
+  end
 external format_diagnostic :
   cxdiagnostic -> Cxdiagnosticdisplayoptions.t -> string =
     "clang_formatDiagnostic_wrapper"[@@ocaml.doc
@@ -315,32 +315,32 @@ external create_translation_unit2 :
   cxindex -> string -> (cxtranslationunit, cxerrorcode) result =
     "clang_createTranslationUnit2_wrapper"[@@ocaml.doc
                                             "Create a translation unit from an AST file ( -emit-ast)."]
-module Cxtranslationunit_flags :
-sig
-  type t
-  external (+) : t -> t -> t = "%orint"
-  val (-) : t -> t -> t
-  external (&) : t -> t -> t = "%andint"
-  external ( * ) : t -> t -> t = "%xorint"
-  val subset : t -> t -> bool
-  val none : t
-  val detailed_preprocessing_record : t
-  val incomplete : t
-  val precompiled_preamble : t
-  val cache_completion_results : t
-  val for_serialization : t
-  val cxxchained_pch : t
-  val skip_function_bodies : t
-  val include_brief_comments_in_code_completion : t
-  val create_preamble_on_first_parse : t
-  val keep_going : t
-  val single_file_parse : t
-  val limit_skip_function_bodies_to_preamble : t
-  val include_attributed_types : t
-  val visit_implicit_attributes : t
-  val ignore_non_errors_from_included_files : t
-  val retain_excluded_conditional_blocks : t
-end
+module Cxtranslationunit_flags =
+  struct
+    type t = int
+    external (+) : t -> t -> t = "%orint"
+    let (-) x y = x land (lnot y)
+    external (&) : t -> t -> t = "%andint"
+    external ( * ) : t -> t -> t = "%xorint"
+    let subset x y = (y - x) = 0
+    let none = 0
+    let detailed_preprocessing_record = 1
+    let incomplete = 2
+    let precompiled_preamble = 4
+    let cache_completion_results = 8
+    let for_serialization = 16
+    let cxxchained_pch = 32
+    let skip_function_bodies = 64
+    let include_brief_comments_in_code_completion = 128
+    let create_preamble_on_first_parse = 256
+    let keep_going = 512
+    let single_file_parse = 1024
+    let limit_skip_function_bodies_to_preamble = 2048
+    let include_attributed_types = 4096
+    let visit_implicit_attributes = 8192
+    let ignore_non_errors_from_included_files = 16384
+    let retain_excluded_conditional_blocks = 32768
+  end
 external default_editing_translation_unit_options :
   unit -> Cxtranslationunit_flags.t =
     "clang_defaultEditingTranslationUnitOptions_wrapper"[@@ocaml.doc
@@ -386,16 +386,16 @@ type cxsaveerror =
     "Indicates that the translation unit to be saved was somehow invalid (e.g., NULL)."]
 [@@deriving refl][@@ocaml.doc
                    "Describes the kind of error that occurred (if any) in a call to clang_saveTranslationUnit()."]
-module Cxsavetranslationunit_flags :
-sig
-  type t
-  external (+) : t -> t -> t = "%orint"
-  val (-) : t -> t -> t
-  external (&) : t -> t -> t = "%andint"
-  external ( * ) : t -> t -> t = "%xorint"
-  val subset : t -> t -> bool
-  val none : t
-end
+module Cxsavetranslationunit_flags =
+  struct
+    type t = int
+    external (+) : t -> t -> t = "%orint"
+    let (-) x y = x land (lnot y)
+    external (&) : t -> t -> t = "%andint"
+    external ( * ) : t -> t -> t = "%xorint"
+    let subset x y = (y - x) = 0
+    let none = 0
+  end
 external save_translation_unit :
   cxtranslationunit ->
     string -> Cxsavetranslationunit_flags.t -> (unit, cxsaveerror) result =
@@ -404,16 +404,16 @@ external save_translation_unit :
 external suspend_translation_unit :
   cxtranslationunit -> int = "clang_suspendTranslationUnit_wrapper"[@@ocaml.doc
                                                                     "Suspend a translation unit in order to free memory associated with it."]
-module Cxreparse_flags :
-sig
-  type t
-  external (+) : t -> t -> t = "%orint"
-  val (-) : t -> t -> t
-  external (&) : t -> t -> t = "%andint"
-  external ( * ) : t -> t -> t = "%xorint"
-  val subset : t -> t -> bool
-  val none : t
-end
+module Cxreparse_flags =
+  struct
+    type t = int
+    external (+) : t -> t -> t = "%orint"
+    let (-) x y = x land (lnot y)
+    external (&) : t -> t -> t = "%andint"
+    external ( * ) : t -> t -> t = "%xorint"
+    let subset x y = (y - x) = 0
+    let none = 0
+  end
 external default_reparse_options :
   cxtranslationunit -> Cxreparse_flags.t =
     "clang_defaultReparseOptions_wrapper"[@@ocaml.doc
@@ -594,8 +594,6 @@ type cxcursorkind =
   | CXXFunctionalCastExpr
   [@ocaml.doc
     "Represents an explicit C++ type conversion that uses \"functional\" notion (C++ \\[expr.type.conv\\])."]
-  | CXXAddrspaceCastExpr
-  [@ocaml.doc "OpenCL's addrspace_cast<> expression."]
   | CXXTypeidExpr
   [@ocaml.doc "A C++ typeid expression (C++ \\[expr.typeid\\])."]
   | CXXBoolLiteralExpr [@ocaml.doc "\\[C++ 2.13.5\\] C++ Boolean Literal."]
@@ -636,6 +634,11 @@ type cxcursorkind =
   | OMPArrayShapingExpr
   [@ocaml.doc "OpenMP 5.0 \\[2.1.4, Array Shaping\\]."]
   | OMPIteratorExpr [@ocaml.doc "OpenMP 5.0 \\[2.1.6 Iterators\\]"]
+  | CXXAddrspaceCastExpr
+  [@ocaml.doc "OpenCL's addrspace_cast<> expression."]
+  | ConceptSpecializationExpr
+  [@ocaml.doc "Expression that references a C++20 concept."]
+  | RequiresExpr [@ocaml.doc "Expression that references a C++20 concept."]
   | UnexposedStmt
   [@ocaml.doc
     "A statement whose specific kind is not exposed via this interface."]
@@ -760,6 +763,31 @@ type cxcursorkind =
   [@ocaml.doc "OpenMP parallel master directive."]
   | OMPDepobjDirective [@ocaml.doc "OpenMP depobj directive."]
   | OMPScanDirective [@ocaml.doc "OpenMP scan directive."]
+  | OMPTileDirective [@ocaml.doc "OpenMP tile directive."]
+  | OMPCanonicalLoop [@ocaml.doc "OpenMP canonical loop."]
+  | OMPInteropDirective [@ocaml.doc "OpenMP interop directive."]
+  | OMPDispatchDirective [@ocaml.doc "OpenMP dispatch directive."]
+  | OMPMaskedDirective [@ocaml.doc "OpenMP masked directive."]
+  | OMPUnrollDirective [@ocaml.doc "OpenMP unroll directive."]
+  | OMPMetaDirective [@ocaml.doc "OpenMP metadirective directive."]
+  | OMPGenericLoopDirective [@ocaml.doc "OpenMP loop directive."]
+  | OMPTeamsGenericLoopDirective [@ocaml.doc "OpenMP teams loop directive."]
+  | OMPTargetTeamsGenericLoopDirective
+  [@ocaml.doc "OpenMP target teams loop directive."]
+  | OMPParallelGenericLoopDirective
+  [@ocaml.doc "OpenMP parallel loop directive."]
+  | OMPTargetParallelGenericLoopDirective
+  [@ocaml.doc "OpenMP target parallel loop directive."]
+  | OMPParallelMaskedDirective
+  [@ocaml.doc "OpenMP parallel masked directive."]
+  | OMPMaskedTaskLoopDirective
+  [@ocaml.doc "OpenMP masked taskloop directive."]
+  | OMPMaskedTaskLoopSimdDirective
+  [@ocaml.doc "OpenMP masked taskloop simd directive."]
+  | OMPParallelMaskedTaskLoopDirective
+  [@ocaml.doc "OpenMP parallel masked taskloop directive."]
+  | OMPParallelMaskedTaskLoopSimdDirective
+  [@ocaml.doc "OpenMP parallel masked taskloop simd directive."]
   | TranslationUnit
   [@ocaml.doc "Cursor that represents the translation unit itself."]
   | UnexposedAttr
@@ -904,6 +932,7 @@ type cxcursorkind =
   | TypeAliasTemplateDecl [@ocaml.doc "A module import declaration."]
   | StaticAssert [@ocaml.doc "A static_assert or _Static_assert node"]
   | FriendDecl [@ocaml.doc "a friend declaration."]
+  | ConceptDecl [@ocaml.doc "a concept declaration."]
   | OverloadCandidate [@ocaml.doc "A code completion overload candidate."]
 [@@deriving refl][@@ocaml.doc
                    "Describes the kind of entity that a cursor refers to."]
@@ -1008,6 +1037,16 @@ external get_cursor_availability :
   cxcursor -> cxavailabilitykind = "clang_getCursorAvailability_wrapper"
 [@@ocaml.doc
   "Determine the availability of the entity that this cursor refers to, taking the current target platform into account."]
+external cursor_get_var_decl_initializer :
+  cxcursor -> cxcursor = "clang_Cursor_getVarDeclInitializer_wrapper"
+[@@ocaml.doc
+  "If cursor refers to a variable declaration and it has initializer returns cursor referring to the initializer otherwise return null cursor."]
+external cursor_has_var_decl_global_storage :
+  cxcursor -> int = "clang_Cursor_hasVarDeclGlobalStorage_wrapper"[@@ocaml.doc
+                                                                    "If cursor refers to a variable declaration that has global storage returns 1. If cursor refers to a variable declaration that doesn't have global storage returns 0. Otherwise returns -1."]
+external cursor_has_var_decl_external_storage :
+  cxcursor -> int = "clang_Cursor_hasVarDeclExternalStorage_wrapper"[@@ocaml.doc
+                                                                    "If cursor refers to a variable declaration that has external storage returns 1. If cursor refers to a variable declaration that doesn't have external storage returns 0. Otherwise returns -1."]
 type cxlanguagekind =
   | Invalid 
   | C 
@@ -1177,6 +1216,9 @@ type cxtypekind =
   [@ocaml.doc
     "A type whose specific kind is not exposed via this interface."]
   | BFloat16
+  [@ocaml.doc
+    "A type whose specific kind is not exposed via this interface."]
+  | Ibm128
   [@ocaml.doc
     "A type whose specific kind is not exposed via this interface."]
   | Complex
@@ -1413,6 +1455,9 @@ type cxtypekind =
   | Atomic
   [@ocaml.doc
     "Represents a type that was referred to using an elaborated type keyword."]
+  | BTFTagAttributed
+  [@ocaml.doc
+    "Represents a type that was referred to using an elaborated type keyword."]
 [@@deriving refl][@@ocaml.doc "Describes the kind of type"]
 type cxtype[@@ocaml.doc
              "The type of an element in the abstract syntax tree."]
@@ -1533,6 +1578,8 @@ type cxcallingconv =
   | PreserveMost 
   | PreserveAll 
   | AArch64VectorCall 
+  | SwiftAsync 
+  | AArch64SVEPCS 
   | Invalid 
   | Unexposed [@@deriving refl][@@ocaml.doc
                                  "Describes the calling convention of a function type"]
@@ -1600,6 +1647,9 @@ type cxtypenullabilitykind =
   [@ocaml.doc
     "Whether values of this type can be null is (explicitly) unspecified. This captures a (fairly rare) case where we can't conclude anything about the nullability of the type even though it has been considered."]
   | Invalid [@ocaml.doc "Nullability is not applicable to this type."]
+  | NullableResult
+  [@ocaml.doc
+    "Generally behaves like Nullable, except when used in a block parameter that was imported into a swift async method. There, swift will assume that the parameter can get null even if no error occurred. _Nullable parameters are assumed to only get null on error."]
 [@@deriving refl]
 external type_get_nullability :
   cxtype -> cxtypenullabilitykind = "clang_Type_getNullability_wrapper"
@@ -2294,6 +2344,8 @@ type clang_ext_declkind =
   | Import 
   | LifetimeExtendedTemporary 
   | LinkageSpec 
+  | Using 
+  | UsingEnum 
   | Label 
   | Namespace 
   | NamespaceAlias 
@@ -2322,7 +2374,7 @@ type clang_ext_declkind =
   | TypeAlias 
   | Typedef 
   | UnresolvedUsingTypename 
-  | Using 
+  | UnresolvedUsingIfExists 
   | UsingDirective 
   | UsingPack 
   | UsingShadow 
@@ -2351,6 +2403,8 @@ type clang_ext_declkind =
   | MSGuid 
   | OMPDeclareMapper 
   | OMPDeclareReduction 
+  | TemplateParamObject 
+  | UnnamedGlobalConstant 
   | UnresolvedUsingValue 
   | OMPAllocate 
   | OMPRequires 
@@ -2395,41 +2449,58 @@ type clang_ext_stmtkind =
   | IndirectGotoStmt 
   | MSDependentExistsStmt 
   | NullStmt 
+  | OMPCanonicalLoop 
   | OMPAtomicDirective 
   | OMPBarrierDirective 
   | OMPCancelDirective 
   | OMPCancellationPointDirective 
   | OMPCriticalDirective 
   | OMPDepobjDirective 
+  | OMPDispatchDirective 
   | OMPFlushDirective 
+  | OMPInteropDirective 
   | OMPDistributeDirective 
   | OMPDistributeParallelForDirective 
   | OMPDistributeParallelForSimdDirective 
   | OMPDistributeSimdDirective 
   | OMPForDirective 
   | OMPForSimdDirective 
+  | OMPGenericLoopDirective 
+  | OMPMaskedTaskLoopDirective 
+  | OMPMaskedTaskLoopSimdDirective 
   | OMPMasterTaskLoopDirective 
   | OMPMasterTaskLoopSimdDirective 
   | OMPParallelForDirective 
   | OMPParallelForSimdDirective 
+  | OMPParallelGenericLoopDirective 
+  | OMPParallelMaskedTaskLoopDirective 
+  | OMPParallelMaskedTaskLoopSimdDirective 
   | OMPParallelMasterTaskLoopDirective 
   | OMPParallelMasterTaskLoopSimdDirective 
   | OMPSimdDirective 
   | OMPTargetParallelForSimdDirective 
+  | OMPTargetParallelGenericLoopDirective 
   | OMPTargetSimdDirective 
   | OMPTargetTeamsDistributeDirective 
   | OMPTargetTeamsDistributeParallelForDirective 
   | OMPTargetTeamsDistributeParallelForSimdDirective 
   | OMPTargetTeamsDistributeSimdDirective 
+  | OMPTargetTeamsGenericLoopDirective 
   | OMPTaskLoopDirective 
   | OMPTaskLoopSimdDirective 
   | OMPTeamsDistributeDirective 
   | OMPTeamsDistributeParallelForDirective 
   | OMPTeamsDistributeParallelForSimdDirective 
   | OMPTeamsDistributeSimdDirective 
+  | OMPTeamsGenericLoopDirective 
+  | OMPTileDirective 
+  | OMPUnrollDirective 
+  | OMPMaskedDirective 
   | OMPMasterDirective 
+  | OMPMetaDirective 
   | OMPOrderedDirective 
   | OMPParallelDirective 
+  | OMPParallelMaskedDirective 
   | OMPParallelMasterDirective 
   | OMPParallelSectionsDirective 
   | OMPScanDirective 
@@ -2575,6 +2646,7 @@ type clang_ext_stmtkind =
   | PseudoObjectExpr 
   | RecoveryExpr 
   | RequiresExpr 
+  | SYCLUniqueStableNameExpr 
   | ShuffleVectorExpr 
   | SizeOfPackExpr 
   | SourceLocExpr 
@@ -2602,6 +2674,8 @@ type clang_ext_typekind =
   | VariableArray 
   | Atomic 
   | Attributed 
+  | BTFTagAttributed 
+  | BitInt 
   | BlockPointer 
   | Builtin 
   | Complex 
@@ -2609,13 +2683,12 @@ type clang_ext_typekind =
   | Auto 
   | DeducedTemplateSpecialization 
   | DependentAddressSpace 
-  | DependentExtInt 
+  | DependentBitInt 
   | DependentName 
   | DependentSizedExtVector 
   | DependentTemplateSpecialization 
   | DependentVector 
   | Elaborated 
-  | ExtInt 
   | FunctionNoProto 
   | FunctionProto 
   | InjectedClassName 
@@ -2644,6 +2717,7 @@ type clang_ext_typekind =
   | Typedef 
   | UnaryTransform 
   | UnresolvedUsing 
+  | Using 
   | Vector 
   | ExtVector 
   | UnknownType [@@deriving refl]
@@ -2688,7 +2762,9 @@ external ext_type_get_named_type :
 type clang_ext_attrkind =
   | NoAttr 
   | AddressSpace 
+  | AnnotateType 
   | ArmMveStrictPolymorphism 
+  | BTFTypeTag 
   | CmseNSCall 
   | NoDeref 
   | ObjCGC 
@@ -2697,6 +2773,8 @@ type clang_ext_attrkind =
   | OpenCLConstantAddressSpace 
   | OpenCLGenericAddressSpace 
   | OpenCLGlobalAddressSpace 
+  | OpenCLGlobalDeviceAddressSpace 
+  | OpenCLGlobalHostAddressSpace 
   | OpenCLLocalAddressSpace 
   | OpenCLPrivateAddressSpace 
   | Ptr32 
@@ -2705,11 +2783,20 @@ type clang_ext_attrkind =
   | TypeNonNull 
   | TypeNullUnspecified 
   | TypeNullable 
+  | TypeNullableResult 
   | UPtr 
   | FallThrough 
-  | NoMerge 
+  | Likely 
+  | MustTail 
+  | OpenCLUnrollHint 
   | Suppress 
+  | Unlikely 
+  | AlwaysInline 
+  | NoInline 
+  | NoMerge 
+  | AArch64SVEPcs 
   | AArch64VectorPcs 
+  | AMDGPUKernelCall 
   | AcquireHandle 
   | AnyX86NoCfCheck 
   | CDecl 
@@ -2725,10 +2812,12 @@ type clang_ext_attrkind =
   | PreserveMost 
   | RegCall 
   | StdCall 
+  | SwiftAsyncCall 
   | SwiftCall 
   | SysVABI 
   | ThisCall 
   | VectorCall 
+  | SwiftAsyncContext 
   | SwiftContext 
   | SwiftErrorResult 
   | SwiftIndirectResult 
@@ -2752,11 +2841,11 @@ type clang_ext_attrkind =
   | AcquiredAfter 
   | AcquiredBefore 
   | AlignMac68k 
+  | AlignNatural 
   | Aligned 
   | AllocAlign 
   | AllocSize 
   | AlwaysDestroy 
-  | AlwaysInline 
   | AnalyzerNoReturn 
   | AnyX86Interrupt 
   | AnyX86NoCallerSavedRegisters 
@@ -2769,9 +2858,12 @@ type clang_ext_attrkind =
   | AssertExclusiveLock 
   | AssertSharedLock 
   | AssumeAligned 
+  | Assumption 
   | Availability 
   | BPFPreserveAccessIndex 
+  | BTFDeclTag 
   | Blocks 
+  | Builtin 
   | C11NoReturn 
   | CFAuditedTransfer 
   | CFGuard 
@@ -2813,11 +2905,16 @@ type clang_ext_attrkind =
   | DLLImportStaticLocal 
   | Deprecated 
   | Destructor 
+  | DiagnoseAsBuiltin 
   | DiagnoseIf 
+  | DisableSanitizerInstrumentation 
   | DisableTailCalls 
   | EmptyBases 
   | EnableIf 
+  | EnforceTCB 
+  | EnforceTCBLeaf 
   | EnumExtensibility 
+  | Error 
   | ExcludeFromExplicitInstantiation 
   | ExclusiveTrylockFunction 
   | ExternalSourceSymbol 
@@ -2826,9 +2923,14 @@ type clang_ext_attrkind =
   | Flatten 
   | Format 
   | FormatArg 
+  | FunctionReturnThunks 
   | GNUInline 
   | GuardedBy 
   | GuardedVar 
+  | HIPManaged 
+  | HLSLNumThreads 
+  | HLSLSV_GroupIndex 
+  | HLSLShader 
   | Hot 
   | IBAction 
   | IBOutlet 
@@ -2837,8 +2939,10 @@ type clang_ext_attrkind =
   | InternalLinkage 
   | LTOVisibilityPublic 
   | LayoutVersion 
+  | Leaf 
   | LockReturned 
   | LocksExcluded 
+  | M68kInterrupt 
   | MIGServerRoutine 
   | MSAllocator 
   | MSInheritance 
@@ -2856,6 +2960,7 @@ type clang_ext_attrkind =
   | MipsLongCall 
   | MipsShortCall 
   | NSConsumesSelf 
+  | NSErrorDomain 
   | NSReturnsAutoreleased 
   | NSReturnsNotRetained 
   | Naked 
@@ -2864,10 +2969,11 @@ type clang_ext_attrkind =
   | NoDebug 
   | NoDestroy 
   | NoDuplicate 
-  | NoInline 
   | NoInstrumentFunction 
   | NoMicroMips 
   | NoMips16 
+  | NoProfileFunction 
+  | NoRandomizeLayout 
   | NoReturn 
   | NoSanitize 
   | NoSpeculativeLoadHardening 
@@ -2904,7 +3010,6 @@ type clang_ext_attrkind =
   | ObjCSubclassingRestricted 
   | OpenCLIntelReqdSubGroupSize 
   | OpenCLKernel 
-  | OpenCLUnrollHint 
   | OptimizeNone 
   | Override 
   | Owner 
@@ -2918,19 +3023,23 @@ type clang_ext_attrkind =
   | PragmaClangRelroSection 
   | PragmaClangRodataSection 
   | PragmaClangTextSection 
+  | PreferredName 
   | PtGuardedBy 
   | PtGuardedVar 
   | Pure 
   | RISCVInterrupt 
+  | RandomizeLayout 
   | Reinitializes 
   | ReleaseCapability 
   | ReqdWorkGroupSize 
   | RequiresCapability 
   | Restrict 
+  | Retain 
   | ReturnTypestate 
   | ReturnsNonNull 
   | ReturnsTwice 
   | SYCLKernel 
+  | SYCLSpecialClass 
   | ScopedLockable 
   | Section 
   | SelectAny 
@@ -2938,8 +3047,21 @@ type clang_ext_attrkind =
   | SetTypestate 
   | SharedTrylockFunction 
   | SpeculativeLoadHardening 
+  | StandaloneDebug 
+  | StrictFP 
+  | SwiftAsync 
+  | SwiftAsyncError 
+  | SwiftAsyncName 
+  | SwiftAttr 
+  | SwiftBridge 
+  | SwiftBridgedTypedef 
+  | SwiftError 
+  | SwiftName 
+  | SwiftNewType 
+  | SwiftPrivate 
   | TLSModel 
   | Target 
+  | TargetClones 
   | TestTypestate 
   | TransparentUnion 
   | TrivialABI 
@@ -2950,6 +3072,7 @@ type clang_ext_attrkind =
   | Uninitialized 
   | Unused 
   | Used 
+  | UsingIfExists 
   | Uuid 
   | VecReturn 
   | VecTypeHint 
@@ -2966,9 +3089,12 @@ type clang_ext_attrkind =
   | X86ForceAlignArgPointer 
   | XRayInstrument 
   | XRayLogArgs 
+  | ZeroCallUsedRegs 
   | AbiTag 
   | Alias 
   | AlignValue 
+  | BuiltinAlias 
+  | CalledOnce 
   | IFunc 
   | InitSeg 
   | LoaderUninitialized 
@@ -2985,11 +3111,13 @@ type clang_ext_attrkind =
   | ObjCDirect 
   | ObjCDirectMembers 
   | ObjCNonLazyClass 
+  | ObjCNonRuntimeProtocol 
   | ObjCRuntimeName 
   | ObjCRuntimeVisible 
   | OpenCLAccess 
   | Overloadable 
   | RenderScriptKernel 
+  | SwiftObjCMembers 
   | Thread [@@deriving refl]
 external ext_attr_kind_get_spelling :
   clang_ext_attrkind -> string = "clang_ext_AttrKind_GetSpelling_wrapper"
@@ -3014,18 +3142,18 @@ external ext_function_decl_does_this_declaration_have_abody :
     "clang_ext_FunctionDecl_doesThisDeclarationHaveABody_wrapper"
 external ext_function_decl_get_body :
   cxcursor -> cxcursor = "clang_ext_FunctionDecl_getBody_wrapper"
-module Clang_ext_languageids :
-sig
-  type t
-  external (+) : t -> t -> t = "%orint"
-  val (-) : t -> t -> t
-  external (&) : t -> t -> t = "%andint"
-  external ( * ) : t -> t -> t = "%xorint"
-  val subset : t -> t -> bool
-  val zero : t
-  val c : t
-  val cxx : t
-end
+module Clang_ext_languageids =
+  struct
+    type t = int
+    external (+) : t -> t -> t = "%orint"
+    let (-) x y = x land (lnot y)
+    external (&) : t -> t -> t = "%andint"
+    external ( * ) : t -> t -> t = "%xorint"
+    let subset x y = (y - x) = 0
+    let zero = 0
+    let c = 1
+    let cxx = 2
+  end
 external ext_linkage_spec_decl_get_language_ids :
   cxcursor -> Clang_ext_languageids.t =
     "clang_ext_LinkageSpecDecl_getLanguageIDs_wrapper"
@@ -3205,13 +3333,24 @@ type clang_ext_langstandards =
   | Gnucxx17 
   | Cxx20 
   | Gnucxx20 
+  | Cxx2b 
+  | Gnucxx2b 
   | Opencl10 
   | Opencl11 
   | Opencl12 
   | Opencl20 
-  | Openclcpp 
+  | Opencl30 
+  | Openclcpp10 
+  | Openclcpp2021 
   | Cuda 
   | Hip 
+  | Hlsl 
+  | Hlsl2015 
+  | Hlsl2016 
+  | Hlsl2017 
+  | Hlsl2018 
+  | Hlsl2021 
+  | Hlsl202x 
   | InvalidLang [@@deriving refl]
 external ext_lang_standard_get_name :
   clang_ext_langstandards -> string =
@@ -3465,6 +3604,8 @@ type clang_ext_typeloc_class =
   | VariableArray 
   | Atomic 
   | Attributed 
+  | BTFTagAttributed 
+  | BitInt 
   | BlockPointer 
   | Builtin 
   | Complex 
@@ -3472,13 +3613,12 @@ type clang_ext_typeloc_class =
   | Auto 
   | DeducedTemplateSpecialization 
   | DependentAddressSpace 
-  | DependentExtInt 
+  | DependentBitInt 
   | DependentName 
   | DependentSizedExtVector 
   | DependentTemplateSpecialization 
   | DependentVector 
   | Elaborated 
-  | ExtInt 
   | FunctionNoProto 
   | FunctionProto 
   | InjectedClassName 
@@ -3507,6 +3647,7 @@ type clang_ext_typeloc_class =
   | Typedef 
   | UnaryTransform 
   | UnresolvedUsing 
+  | Using 
   | Vector 
   | ExtVector 
   | InvalidTypeLoc [@@deriving refl]
@@ -3722,6 +3863,7 @@ type clang_expr_atomicop =
   | C11_atomic_fetch_and 
   | C11_atomic_fetch_or 
   | C11_atomic_fetch_xor 
+  | C11_atomic_fetch_nand 
   | C11_atomic_fetch_max 
   | C11_atomic_fetch_min 
   | Atomic_load 
@@ -3760,7 +3902,18 @@ type clang_expr_atomicop =
   | Opencl_atomic_fetch_min 
   | Opencl_atomic_fetch_max 
   | Atomic_fetch_min 
-  | Atomic_fetch_max [@@deriving refl]
+  | Atomic_fetch_max 
+  | Hip_atomic_load 
+  | Hip_atomic_store 
+  | Hip_atomic_compare_exchange_weak 
+  | Hip_atomic_compare_exchange_strong 
+  | Hip_atomic_exchange 
+  | Hip_atomic_fetch_add 
+  | Hip_atomic_fetch_and 
+  | Hip_atomic_fetch_or 
+  | Hip_atomic_fetch_xor 
+  | Hip_atomic_fetch_min 
+  | Hip_atomic_fetch_max [@@deriving refl]
 external ext_atomic_expr_get_op :
   cxcursor -> clang_expr_atomicop = "clang_ext_AtomicExpr_getOp_wrapper"
 external ext_type_of_expr_type_get_underlying_expr :
