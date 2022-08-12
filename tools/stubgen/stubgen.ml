@@ -2314,7 +2314,6 @@ let main cflags llvm_config prefix =
   Buffer.add_string contents {|
 #include <clang-c/Index.h>
 #include "clangml/clang__custom.h"
-typedef __UINT64_TYPE__ uint64_t;
 #include "clangml/libclang_extensions.h" |};
   let contents = Buffer.contents contents in
   prerr_endline contents;
