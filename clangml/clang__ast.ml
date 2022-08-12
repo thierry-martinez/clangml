@@ -1078,7 +1078,12 @@ let () =
 let example = "f(void);"
 
 let () =
-  check pp_decl parse_declaration_list example @@
+  let standard : Clang.Standard.t option =
+    if (Clang.version ()).major >= 15 then
+      Some C89 (* ISO C99 rejects implicit int with Clang >=15 *)
+    else
+      None in
+  check pp_decl (parse_declaration_list ?standard) example @@
   fun ast -> match ast with
   | [{ desc = Function {
       name = IdentifierName "f";

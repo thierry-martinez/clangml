@@ -1718,7 +1718,7 @@ module Ast = struct
               | [sub] -> sub
               | _ -> raise Invalid_structure in
             StmtExpr (stmt_of_cxcursor sub)
-        | UnexposedExpr ->
+        | _ ->
             begin
               match ext_stmt_get_kind cursor with
               | ImplicitCastExpr ->
@@ -1882,8 +1882,6 @@ ext_expr_requirement_return_type_get_type_constraint_template_parameter_list
                   Atomic { op; args }
               | kind -> UnexposedExpr kind
             end
-        | _ ->
-            UnknownExpr (kind, ext_stmt_get_kind cursor)
       with Invalid_structure ->
         UnknownExpr (kind, ext_stmt_get_kind cursor)
 
