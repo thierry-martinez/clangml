@@ -395,6 +395,7 @@ module Ast = struct
           NameTemplate (
             ext_template_name_get_as_template_decl name |> get_cursor_spelling)
       | OverloadedTemplate -> OverloadedTemplate
+      | AssumedTemplate -> AssumedTemplate
       | QualifiedTemplate -> QualifiedTemplate
       | DependentTemplate -> DependentTemplate
       | SubstTemplateTemplateParm -> SubstTemplateTemplateParm

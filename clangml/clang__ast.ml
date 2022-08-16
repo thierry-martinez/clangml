@@ -824,6 +824,7 @@ let () =
 and template_name =
   | NameTemplate of string
   | OverloadedTemplate
+  | AssumedTemplate
   | QualifiedTemplate
   | DependentTemplate
   | SubstTemplateTemplateParm

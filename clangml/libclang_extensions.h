@@ -541,6 +541,7 @@ clang_ext_TemplateName_dispose(struct clang_ext_TemplateName);
 enum clang_ext_TemplateName_NameKind {
   CLANG_EXT_Template,
   CLANG_EXT_OverloadedTemplate,
+  CLANG_EXT_AssumedTemplate,
   CLANG_EXT_QualifiedTemplate,
   CLANG_EXT_DependentTemplate,
   CLANG_EXT_SubstTemplateTemplateParm,

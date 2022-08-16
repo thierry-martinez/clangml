@@ -1657,7 +1657,24 @@ extern "C" {
   clang_ext_TemplateName_getKind(struct clang_ext_TemplateName CTN)
   {
     if (auto *TN = GetTemplateName(CTN)) {
-      return static_cast<enum clang_ext_TemplateName_NameKind>(TN->getKind());
+      switch (TN->getKind()) {
+      case clang::TemplateName::NameKind::Template:
+        return CLANG_EXT_Template;
+      case clang::TemplateName::NameKind::OverloadedTemplate:
+        return CLANG_EXT_OverloadedTemplate;
+      #ifndef LLVM_VERSION_BEFORE_9_0_0
+      case clang::TemplateName::NameKind::AssumedTemplate:
+        return CLANG_EXT_AssumedTemplate;
+      #endif
+      case clang::TemplateName::NameKind::QualifiedTemplate:
+        return CLANG_EXT_QualifiedTemplate;
+      case clang::TemplateName::NameKind::DependentTemplate:
+        return CLANG_EXT_DependentTemplate;
+      case clang::TemplateName::NameKind::SubstTemplateTemplateParm:
+        return CLANG_EXT_SubstTemplateTemplateParm;
+      case clang::TemplateName::NameKind::SubstTemplateTemplateParmPack:
+        return CLANG_EXT_SubstTemplateTemplateParmPack;
+      }
     }
     return CLANG_EXT_InvalidNameKind;
   }
