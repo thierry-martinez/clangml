@@ -93,8 +93,7 @@ let info =
       `S Cmdliner.Manpage.s_bugs;
       `P "Email bug reports to <thierry.martinez@inria.fr>.";
     ] in
-  Cmdliner.Term.info "functions_with_loop" ~doc
-    ~exits:Cmdliner.Term.default_exits ~man
+  Cmdliner.Cmd.info "functions_with_loop" ~doc ~man
 
 let () =
   exit (Cmdliner.Cmd.eval (Cmdliner.Cmd.v info options))

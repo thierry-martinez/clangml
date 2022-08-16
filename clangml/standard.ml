@@ -1,5 +1,6 @@
 [%%metapackage "metapp"]
 [%%metadir "config/.clangml_config.objs/byte"]
+[%%metaload "config/clangml_config.cmxs"]
 
 type t =
   | C89
@@ -23,14 +24,24 @@ type t =
   | Gnucxx17
   | Cxx20
   | Gnucxx20
+  | Cxx2b
+  | Gnucxx2b
   | Opencl10
   | Opencl11
   | Opencl12
   | Opencl20
+  | Opencl30
   | Openclcpp10
   | Openclcpp2021
   | Cuda
   | Hip
+  | Hlsl
+  | Hlsl2015
+  | Hlsl2016
+  | Hlsl2017
+  | Hlsl2018
+  | Hlsl2021
+  | Hlsl202x
       [@@deriving refl]
 
 exception Unavailable of t
@@ -113,6 +124,16 @@ let to_clang : t -> Clang__bindings.clang_ext_langstandards = function
         Gnucxx2a]
       else [%expr
         raise (Unavailable Gnucxx20)]]
+  | Cxx2b ->
+      [%meta if Clangml_config.version.major >= 12 then [%expr
+        Cxx2b]
+      else [%expr
+        raise (Unavailable Cxx2b)]]
+  | Gnucxx2b ->
+      [%meta if Clangml_config.version.major >= 12 then [%expr
+        Gnucxx2b]
+      else [%expr
+        raise (Unavailable Gnucxx2b)]]
   | Opencl10 ->
       [%meta if Clangml_config.version.major >= 5 then [%expr
         Opencl10]
@@ -127,6 +148,11 @@ let to_clang : t -> Clang__bindings.clang_ext_langstandards = function
         Opencl20]
       else [%expr
         raise (Unavailable Opencl20)]]
+  | Opencl30 ->
+      [%meta if Clangml_config.version.major >= 12 then [%expr
+        Opencl30]
+      else [%expr
+        raise (Unavailable Opencl30)]]
   | Openclcpp10 ->
       [%meta if Clangml_config.version.major >= 14 then [%expr
         Openclcpp10]
@@ -145,3 +171,38 @@ let to_clang : t -> Clang__bindings.clang_ext_langstandards = function
         Hip]
       else [%expr
         raise (Unavailable Hip)]]
+  | Hlsl ->
+      [%meta if Clangml_config.version.major >= 15 then [%expr
+        Hlsl]
+      else [%expr
+        raise (Unavailable Hlsl)]]
+  | Hlsl2015 ->
+      [%meta if Clangml_config.version.major >= 15 then [%expr
+        Hlsl2015]
+      else [%expr
+        raise (Unavailable Hlsl2015)]]
+  | Hlsl2016 ->
+      [%meta if Clangml_config.version.major >= 15 then [%expr
+        Hlsl2016]
+      else [%expr
+        raise (Unavailable Hlsl2016)]]
+  | Hlsl2017 ->
+      [%meta if Clangml_config.version.major >= 15 then [%expr
+        Hlsl2017]
+      else [%expr
+        raise (Unavailable Hlsl2017)]]
+  | Hlsl2018 ->
+      [%meta if Clangml_config.version.major >= 15 then [%expr
+        Hlsl2018]
+      else [%expr
+        raise (Unavailable Hlsl2018)]]
+  | Hlsl2021 ->
+      [%meta if Clangml_config.version.major >= 15 then [%expr
+        Hlsl2021]
+      else [%expr
+        raise (Unavailable Hlsl2021)]]
+  | Hlsl202x ->
+      [%meta if Clangml_config.version.major >= 15 then [%expr
+        Hlsl202x]
+      else [%expr
+        raise (Unavailable Hlsl202x)]]

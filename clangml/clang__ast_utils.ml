@@ -103,7 +103,7 @@ let ids_of_language (l : Clang__types.language) =
   | CXX -> Clang_ext_languageids.cxx
   | _ -> invalid_arg "ids_of_language"
 
-let literal_of_string ?(byte_width = 8) ?(string_kind = Ascii)
+let literal_of_string ?(byte_width = 8) ?(string_kind = Ordinary)
     (bytes : string) : string_literal = {
   byte_width;
   bytes;

@@ -8,14 +8,14 @@ clangml provides bindings to call the Clang API from OCaml.
 maintainer: ["Thierry Martinez <thierry.martinez@inria.fr>"]
 authors: ["Thierry Martinez <thierry.martinez@inria.fr>"]
 license: "BSD-2-Clause"
-homepage: "https://memcad.gitlabpages.inria.fr/clangml/"
-doc: "https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/index.html"
-bug-reports: "https://gitlab.inria.fr/memcad/clangml/issues"
+homepage: "https://github.com/thierry-martinez/clangml/"
+doc: "https://github.com/thierry-martinez/clangml/blob/v4.7.0/README.md"
+bug-reports: "https://github.com/thierry-martinez/clangml/issues"
 depends: [
   "conf-libclang"
   "conf-ncurses"
   "conf-zlib"
-  "dune" {>= "1.11.0"}
+  "dune" {>= "3.0" & >= "1.11.0"}
   "stdcompat" {>= "13"}
   "ocaml" {>= "4.08.0"}
   "ocamlfind" {build & >= "1.8.0"}
@@ -29,7 +29,7 @@ depends: [
   "odoc" {with-doc & >= "1.5.1"}
   "ocaml-migrate-parsetree" {>= "2.2.0"}
 ]
-dev-repo: "git+https://gitlab.inria.fr/memcad/clangml"
+dev-repo: "git+https://github.com/thierry-martinez/clangml.git"
 build: [
   ["./configure" "--prefix=%{prefix}%" "--with-llvm-config=%{conf-libclang:config}%"]
   ["./build_with_bigger_stack_size.sh" "dune" "build" "-p" name "-j" jobs "@install"

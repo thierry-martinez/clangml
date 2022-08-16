@@ -222,8 +222,10 @@ let add_constant constant_name constant_interface enum_interface =
   { enum_interface with constants =
     (constant_name, constant_interface) :: enum_interface.constants }
 
+(*
 let add_attributes attributes enum_interface =
   { enum_interface with attributes = enum_interface.attributes @ attributes }
+*)
 
 type field_interface =
   | Sized_string of { length : string; contents : string }
@@ -1947,7 +1949,14 @@ let string_option =
         clang_disposeString(%s);" tgt src src) }, Regular)
 
 let tool_name = "stubgen"
-
+(*
+let with_open_process command f =
+  let pair = Unix.open_process command in
+  let result = f pair in
+  match Unix.close_process pair with
+  | WEXITED 0 -> result
+  | _status -> failwith "External command failed"
+*)
 let main cflags llvm_config prefix =
   let clang_options, llvm_version =
     Stubgen_common.prepare_clang_options cflags llvm_config in
@@ -2295,15 +2304,25 @@ let main cflags llvm_config prefix =
     ~pp_sep:(fun fmt () -> Format.pp_print_string fmt " ")
       Format.pp_print_string)
     clang_options;
+  let contents = Buffer.create 17 in
+  (*
+  with_open_process "clang -dM -E -"
+    (fun (in_channel, out_channel) ->
+      close_out out_channel;
+      Redirect.add_channel_to_the_end contents in_channel);
+   *)
+  Buffer.add_string contents {|
+#include <clang-c/Index.h>
+#include "clangml/clang__custom.h"
+#include "clangml/libclang_extensions.h" |};
+  let contents = Buffer.contents contents in
+  prerr_endline contents;
   let tu =
     match
       Clang.parse_translation_unit2 idx
         "source.c"
         (Array.of_list clang_options)
-        [| { filename = "source.c"; contents = "\
-#include <clang-c/Index.h>
-#include \"clangml/clang__custom.h\"
-#include \"clangml/libclang_extensions.h\"" } |]
+        [| { filename = "source.c"; contents } |]
         Clang.Cxtranslationunit_flags.none with
     | Error _ -> failwith "Error!"
     | Ok tu -> tu in
@@ -2313,12 +2332,12 @@ let main cflags llvm_config prefix =
   let chan_stubs = open_out (prefix ^ "clang_stubs.c") in
   Fun.protect ~finally:(fun () -> close_out chan_stubs) (fun () ->
     Stubgen_common.output_warning_c chan_stubs tool_name;
-    output_string chan_stubs "\
-#include \"stubgen.h\"
+    output_string chan_stubs {|
+#include "stubgen.h"
 #include <clang-c/Index.h>
-#include \"clang__custom.h\"
-#include \"libclang_extensions.h\"
-";
+#include "clang__custom.h"
+#include "libclang_extensions.h"
+|};
     let context =
       create_translation_context module_interface chan_stubs in
     ignore (Clang.visit_children cur (fun cur _par ->

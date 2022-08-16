@@ -1,5 +1,6 @@
 [%%metapackage "metapp"]
 [%%metadir "config/.clangml_config.objs/byte"]
+[%%metaload "config/clangml_config.cmxs"]
 
 module type S = Ast_sig.S
 
@@ -394,6 +395,7 @@ module Ast = struct
           NameTemplate (
             ext_template_name_get_as_template_decl name |> get_cursor_spelling)
       | OverloadedTemplate -> OverloadedTemplate
+      | AssumedTemplate -> AssumedTemplate
       | QualifiedTemplate -> QualifiedTemplate
       | DependentTemplate -> DependentTemplate
       | SubstTemplateTemplateParm -> SubstTemplateTemplateParm
@@ -1717,7 +1719,7 @@ module Ast = struct
               | [sub] -> sub
               | _ -> raise Invalid_structure in
             StmtExpr (stmt_of_cxcursor sub)
-        | UnexposedExpr ->
+        | _ ->
             begin
               match ext_stmt_get_kind cursor with
               | ImplicitCastExpr ->
@@ -1881,8 +1883,6 @@ ext_expr_requirement_return_type_get_type_constraint_template_parameter_list
                   Atomic { op; args }
               | kind -> UnexposedExpr kind
             end
-        | _ ->
-            UnknownExpr (kind, ext_stmt_get_kind cursor)
       with Invalid_structure ->
         UnknownExpr (kind, ext_stmt_get_kind cursor)
 

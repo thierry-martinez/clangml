@@ -206,7 +206,8 @@ module Make (Node : Clang__ast.NodeS) = struct
     | CharacterLiteral { kind; value } ->
         begin
           match kind with
-          | Ascii -> Format.fprintf fmt "'%a'" c_escape_char (char_of_int value)
+          | Ascii ->
+              Format.fprintf fmt "'%a'" c_escape_char (char_of_int value)
           | _ -> failwith "Not implemented character kind"
         end
     | StringLiteral { bytes; _ } ->

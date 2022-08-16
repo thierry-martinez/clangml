@@ -4527,6 +4527,10 @@ if test "x$LLVM_VERSION_MAJOR" = "x14"; then :
   EQUIVALENT_LLVM_VERSION=14.0.0
 
 fi
+if test "x$LLVM_VERSION_MAJOR" = "x15"; then :
+  EQUIVALENT_LLVM_VERSION=15.0.0
+
+fi
 
 EQUIVALENT_LLVM_VERSION_MAJOR=`echo $EQUIVALENT_LLVM_VERSION | \
   sed 's/^\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)/\1/'`

@@ -2167,7 +2167,7 @@ external ext_string_literal_get_byte_length :
 external ext_string_literal_get_char_byte_width :
   cxcursor -> int = "clang_ext_StringLiteral_getCharByteWidth_wrapper"
 type clang_ext_stringkind =
-  | Ascii 
+  | Ordinary 
   | Wide 
   | UTF8 
   | UTF16 
@@ -2671,8 +2671,15 @@ external ext_declarator_decl_get_size_expr :
   cxcursor -> cxcursor = "clang_ext_DeclaratorDecl_GetSizeExpr_wrapper"
 external ext_variable_array_type_get_size_expr :
   cxtype -> cxcursor = "clang_ext_VariableArrayType_GetSizeExpr_wrapper"
+type clang_ext_characterkind =
+  | Ascii 
+  | Wide 
+  | UTF8 
+  | UTF16 
+  | UTF32 
+  | InvalidCharacterKind [@@deriving refl]
 external ext_character_literal_get_character_kind :
-  cxcursor -> clang_ext_stringkind =
+  cxcursor -> clang_ext_characterkind =
     "clang_ext_CharacterLiteral_GetCharacterKind_wrapper"
 external ext_character_literal_get_value :
   cxcursor -> int = "clang_ext_CharacterLiteral_GetValue_wrapper"
@@ -3072,6 +3079,7 @@ external ext_non_type_template_parm_decl_get_default_argument :
 type clang_ext_templatename_namekind =
   | Template 
   | OverloadedTemplate 
+  | AssumedTemplate 
   | QualifiedTemplate 
   | DependentTemplate 
   | SubstTemplateTemplateParm 
@@ -3807,6 +3815,14 @@ external ext_type_of_type_get_underlying_type :
 external ext_type_of_type_loc_get_underlying_type :
   clang_ext_typeloc -> clang_ext_typeloc =
     "clang_ext_TypeOfTypeLoc_getUnderlyingType_wrapper"
+type clang_ext_aarch64svepcs_spelling =
+  | GNU_aarch64_sve_pcs 
+  | CXX11_clang_aarch64_sve_pcs 
+  | C2x_clang_aarch64_sve_pcs 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_aarch64_svepcs_get_spelling :
+  cxcursor -> clang_ext_aarch64svepcs_spelling =
+    "clang_ext_AArch64SVEPcs_getSpelling_wrapper"
 type clang_ext_aarch64vectorpcs_spelling =
   | GNU_aarch64_vector_pcs 
   | CXX11_clang_aarch64_vector_pcs 
@@ -3822,6 +3838,14 @@ type clang_ext_amdgpuflatworkgroupsize_spelling =
 external ext_amdgpuflat_work_group_size_get_spelling :
   cxcursor -> clang_ext_amdgpuflatworkgroupsize_spelling =
     "clang_ext_AMDGPUFlatWorkGroupSize_getSpelling_wrapper"
+type clang_ext_amdgpukernelcall_spelling =
+  | GNU_amdgpu_kernel 
+  | CXX11_clang_amdgpu_kernel 
+  | C2x_clang_amdgpu_kernel 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_amdgpukernel_call_get_spelling :
+  cxcursor -> clang_ext_amdgpukernelcall_spelling =
+    "clang_ext_AMDGPUKernelCall_getSpelling_wrapper"
 type clang_ext_amdgpunumsgpr_spelling =
   | GNU_amdgpu_num_sgpr 
   | CXX11_clang_amdgpu_num_sgpr 
@@ -3943,15 +3967,6 @@ type clang_ext_alwaysdestroy_spelling =
 external ext_always_destroy_get_spelling :
   cxcursor -> clang_ext_alwaysdestroy_spelling =
     "clang_ext_AlwaysDestroy_getSpelling_wrapper"
-type clang_ext_alwaysinline_spelling =
-  | GNU_always_inline 
-  | CXX11_gnu_always_inline 
-  | C2x_gnu_always_inline 
-  | Keyword_forceinline 
-  | SpellingNotCalculated [@@deriving refl]
-external ext_always_inline_get_spelling :
-  cxcursor -> clang_ext_alwaysinline_spelling =
-    "clang_ext_AlwaysInline_getSpelling_wrapper"
 type clang_ext_annotate_spelling =
   | GNU_annotate 
   | CXX11_clang_annotate 
@@ -3960,6 +3975,13 @@ type clang_ext_annotate_spelling =
 external ext_annotate_get_spelling :
   cxcursor -> clang_ext_annotate_spelling =
     "clang_ext_Annotate_getSpelling_wrapper"
+type clang_ext_annotatetype_spelling =
+  | CXX11_clang_annotate_type 
+  | C2x_clang_annotate_type 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_annotate_type_get_spelling :
+  cxcursor -> clang_ext_annotatetype_spelling =
+    "clang_ext_AnnotateType_getSpelling_wrapper"
 type clang_ext_anyx86interrupt_spelling =
   | GNU_interrupt 
   | CXX11_gnu_interrupt 
@@ -4237,6 +4259,14 @@ type clang_ext_cudashared_spelling =
 external ext_cudashared_get_spelling :
   cxcursor -> clang_ext_cudashared_spelling =
     "clang_ext_CUDAShared_getSpelling_wrapper"
+type clang_ext_cxx11noreturn_spelling =
+  | CXX11_noreturn 
+  | C2x_noreturn 
+  | C2x_Noreturn 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_cxx11_no_return_get_spelling :
+  cxcursor -> clang_ext_cxx11noreturn_spelling =
+    "clang_ext_CXX11NoReturn_getSpelling_wrapper"
 type clang_ext_callablewhen_spelling =
   | GNU_callable_when 
   | CXX11_clang_callable_when 
@@ -4523,6 +4553,14 @@ type clang_ext_formatarg_spelling =
 external ext_format_arg_get_spelling :
   cxcursor -> clang_ext_formatarg_spelling =
     "clang_ext_FormatArg_getSpelling_wrapper"
+type clang_ext_functionreturnthunks_spelling =
+  | GNU_function_return 
+  | CXX11_gnu_function_return 
+  | C2x_gnu_function_return 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_function_return_thunks_get_spelling :
+  cxcursor -> clang_ext_functionreturnthunks_spelling =
+    "clang_ext_FunctionReturnThunks_getSpelling_wrapper"
 type clang_ext_gnuinline_spelling =
   | GNU_gnu_inline 
   | CXX11_gnu_gnu_inline 
@@ -4883,15 +4921,6 @@ type clang_ext_noescape_spelling =
 external ext_no_escape_get_spelling :
   cxcursor -> clang_ext_noescape_spelling =
     "clang_ext_NoEscape_getSpelling_wrapper"
-type clang_ext_noinline_spelling =
-  | GNU_noinline 
-  | CXX11_gnu_noinline 
-  | C2x_gnu_noinline 
-  | Declspec_noinline 
-  | SpellingNotCalculated [@@deriving refl]
-external ext_no_inline_get_spelling :
-  cxcursor -> clang_ext_noinline_spelling =
-    "clang_ext_NoInline_getSpelling_wrapper"
 type clang_ext_noinstrumentfunction_spelling =
   | GNU_no_instrument_function 
   | CXX11_gnu_no_instrument_function 
@@ -4924,6 +4953,14 @@ type clang_ext_noprofilefunction_spelling =
 external ext_no_profile_function_get_spelling :
   cxcursor -> clang_ext_noprofilefunction_spelling =
     "clang_ext_NoProfileFunction_getSpelling_wrapper"
+type clang_ext_norandomizelayout_spelling =
+  | GNU_no_randomize_layout 
+  | CXX11_gnu_no_randomize_layout 
+  | C2x_gnu_no_randomize_layout 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_randomize_layout_get_spelling :
+  cxcursor -> clang_ext_norandomizelayout_spelling =
+    "clang_ext_NoRandomizeLayout_getSpelling_wrapper"
 type clang_ext_noreturn_spelling =
   | GNU_noreturn 
   | CXX11_gnu_noreturn 
@@ -5454,6 +5491,14 @@ type clang_ext_riscvinterrupt_spelling =
 external ext_riscvinterrupt_get_spelling :
   cxcursor -> clang_ext_riscvinterrupt_spelling =
     "clang_ext_RISCVInterrupt_getSpelling_wrapper"
+type clang_ext_randomizelayout_spelling =
+  | GNU_randomize_layout 
+  | CXX11_gnu_randomize_layout 
+  | C2x_gnu_randomize_layout 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_randomize_layout_get_spelling :
+  cxcursor -> clang_ext_randomizelayout_spelling =
+    "clang_ext_RandomizeLayout_getSpelling_wrapper"
 type clang_ext_regcall_spelling =
   | GNU_regcall 
   | CXX11_gnu_regcall 
@@ -5960,6 +6005,14 @@ type clang_ext_xraylogargs_spelling =
 external ext_xray_log_args_get_spelling :
   cxcursor -> clang_ext_xraylogargs_spelling =
     "clang_ext_XRayLogArgs_getSpelling_wrapper"
+type clang_ext_zerocallusedregs_spelling =
+  | GNU_zero_call_used_regs 
+  | CXX11_gnu_zero_call_used_regs 
+  | C2x_gnu_zero_call_used_regs 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_zero_call_used_regs_get_spelling :
+  cxcursor -> clang_ext_zerocallusedregs_spelling =
+    "clang_ext_ZeroCallUsedRegs_getSpelling_wrapper"
 external ext_ompdeclare_simd_decl_attr_get_uniforms_size :
   cxcursor -> int =
     "clang_ext_OMPDeclareSimdDeclAttr_getUniforms_Size_wrapper"
@@ -5992,6 +6045,9 @@ type clang_ext_swiftasyncerrorattr_conventionkind =
 external ext_swift_async_error_attr_get_convention :
   cxcursor -> clang_ext_swiftasyncerrorattr_conventionkind =
     "clang_ext_SwiftAsyncErrorAttr_getConvention_wrapper"
+external ext_attrs_get_delayed_args :
+  cxcursor -> (cxcursor -> unit) -> unit =
+    "clang_ext_Attrs_getDelayedArgs_wrapper"
 external ext_ifunc_attr_get_resolver :
   cxcursor -> string = "clang_ext_IFuncAttr_getResolver_wrapper"
 external ext_patchable_function_entry_attr_get_offset :
@@ -6026,14 +6082,20 @@ external ext_suppress_attr_get_diagnostic_identifiers :
     "clang_ext_SuppressAttr_getDiagnosticIdentifiers_wrapper"
 external ext_attrs_get_deref_type :
   cxcursor -> clang_ext_typeloc = "clang_ext_Attrs_getDerefType_wrapper"
+type clang_ext_functionreturnthunksattr_kind =
+  | Keep 
+  | Extern [@@deriving refl]
+external ext_function_return_thunks_attr_get_thunk_type :
+  cxcursor -> clang_ext_functionreturnthunksattr_kind =
+    "clang_ext_FunctionReturnThunksAttr_getThunkType_wrapper"
 external ext_ompdeclare_variant_attr_get_adjust_args_need_device_ptr_size :
   cxcursor -> int =
     "clang_ext_OMPDeclareVariantAttr_getAdjustArgsNeedDevicePtr_Size_wrapper"
 external ext_type_tag_for_datatype_attr_get_matching_ctype :
   cxcursor -> clang_ext_typeloc =
     "clang_ext_TypeTagForDatatypeAttr_getMatchingCType_wrapper"
-external ext_annotate_attr_get_annotation_length :
-  cxcursor -> int = "clang_ext_AnnotateAttr_getAnnotationLength_wrapper"
+external ext_attrs_get_annotation_length :
+  cxcursor -> int = "clang_ext_Attrs_getAnnotationLength_wrapper"
 external ext_layout_version_attr_get_version :
   cxcursor -> int = "clang_ext_LayoutVersionAttr_getVersion_wrapper"
 external ext_sentinel_attr_get_null_pos :
@@ -6056,6 +6118,24 @@ external ext_swift_bridge_attr_get_swift_type_length :
 external ext_external_source_symbol_attr_get_defined_in_length :
   cxcursor -> int =
     "clang_ext_ExternalSourceSymbolAttr_getDefinedInLength_wrapper"
+type clang_ext_hlslshaderattr_shadertype =
+  | Pixel 
+  | Vertex 
+  | Geometry 
+  | Hull 
+  | Domain 
+  | Compute 
+  | RayGeneration 
+  | Intersection 
+  | AnyHit 
+  | ClosestHit 
+  | Miss 
+  | Callable 
+  | Mesh 
+  | Amplification [@@deriving refl]
+external ext_hlslshader_attr_get_type :
+  cxcursor -> clang_ext_hlslshaderattr_shadertype =
+    "clang_ext_HLSLShaderAttr_getType_wrapper"
 external ext_format_attr_get_type :
   cxcursor -> string = "clang_ext_FormatAttr_getType_wrapper"
 external ext_pass_object_size_attr_get_type :
@@ -6141,6 +6221,8 @@ type clang_ext_swiftnewtypeattr_newtypekind =
 external ext_swift_new_type_attr_get_newtype_kind :
   cxcursor -> clang_ext_swiftnewtypeattr_newtypekind =
     "clang_ext_SwiftNewTypeAttr_getNewtypeKind_wrapper"
+external ext_hlslnum_threads_attr_get_z :
+  cxcursor -> int = "clang_ext_HLSLNumThreadsAttr_getZ_wrapper"
 external ext_no_sanitize_attr_get_sanitizers_size :
   cxcursor -> int = "clang_ext_NoSanitizeAttr_getSanitizers_Size_wrapper"
 external ext_callback_attr_get_encoding_size :
@@ -6202,8 +6284,10 @@ external ext_ompdeclare_variant_attr_get_trait_infos :
     "clang_ext_OMPDeclareVariantAttr_getTraitInfos_wrapper"
 external ext_ompallocate_decl_attr_get_allocator :
   cxcursor -> cxcursor = "clang_ext_OMPAllocateDeclAttr_getAllocator_wrapper"
-external ext_annotate_attr_get_annotation :
-  cxcursor -> string = "clang_ext_AnnotateAttr_getAnnotation_wrapper"
+external ext_hlslnum_threads_attr_get_y :
+  cxcursor -> int = "clang_ext_HLSLNumThreadsAttr_getY_wrapper"
+external ext_attrs_get_annotation :
+  cxcursor -> string = "clang_ext_Attrs_getAnnotation_wrapper"
 external ext_ompdeclare_variant_attr_get_variant_func_ref :
   cxcursor -> cxcursor =
     "clang_ext_OMPDeclareVariantAttr_getVariantFuncRef_wrapper"
@@ -6229,6 +6313,19 @@ external ext_target_attr_get_features_str_length :
   cxcursor -> int = "clang_ext_TargetAttr_getFeaturesStrLength_wrapper"
 external ext_aligned_attr_get_alignment_expr :
   cxcursor -> cxcursor = "clang_ext_AlignedAttr_getAlignmentExpr_wrapper"
+type clang_ext_zerocallusedregsattr_zerocallusedregskind =
+  | Skip 
+  | UsedGPRArg 
+  | UsedGPR 
+  | UsedArg 
+  | Used 
+  | AllGPRArg 
+  | AllGPR 
+  | AllArg 
+  | All [@@deriving refl]
+external ext_zero_call_used_regs_attr_get_zero_call_used_regs :
+  cxcursor -> clang_ext_zerocallusedregsattr_zerocallusedregskind =
+    "clang_ext_ZeroCallUsedRegsAttr_getZeroCallUsedRegs_wrapper"
 external ext_ompdeclare_simd_decl_attr_get_steps :
   cxcursor -> (cxcursor -> unit) -> unit =
     "clang_ext_OMPDeclareSimdDeclAttr_getSteps_wrapper"
@@ -6523,11 +6620,15 @@ external ext_swift_async_attr_get_kind :
     "clang_ext_SwiftAsyncAttr_getKind_wrapper"
 external ext_attrs_get_kind :
   cxcursor -> string = "clang_ext_Attrs_getKind_wrapper"
+external ext_hlslnum_threads_attr_get_x :
+  cxcursor -> int = "clang_ext_HLSLNumThreadsAttr_getX_wrapper"
 external ext_patchable_function_entry_attr_get_count :
   cxcursor -> int = "clang_ext_PatchableFunctionEntryAttr_getCount_wrapper"
 external ext_diagnose_as_builtin_attr_get_function :
   cxcursor -> clang_ext_declarationname =
     "clang_ext_DiagnoseAsBuiltinAttr_getFunction_wrapper"
+external ext_attrs_get_delayed_args_size :
+  cxcursor -> int = "clang_ext_Attrs_getDelayedArgs_Size_wrapper"
 external ext_abi_tag_attr_get_tags :
   cxcursor -> (string -> unit) -> unit =
     "clang_ext_AbiTagAttr_getTags_wrapper"

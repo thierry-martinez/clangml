@@ -4,12 +4,14 @@
 [@@@ocaml.warning "-27"]
 [%%metapackage "metapp"]
 [%%metadir "config/.clangml_config.objs/byte"]
+[%%metaload "config/clangml_config.cmxs"]
 type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) amd =
   | GPUFlatWorkGroupSize of
   {
   spelling: Clang__bindings.clang_ext_amdgpuflatworkgroupsize_spelling ;
   min: 'expr ;
   max: 'expr } 
+  | GPUKernelCall of Clang__bindings.clang_ext_amdgpukernelcall_spelling 
   | GPUNumSGPR of
   {
   spelling: Clang__bindings.clang_ext_amdgpunumsgpr_spelling ;
@@ -268,6 +270,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   swift 
   | WebAssembly of ('expr, 'decl, 'qual_type, 'declaration_name,
   'omp_trait_info) web_assembly 
+  | AArch64SVEPcs of Clang__bindings.clang_ext_aarch64svepcs_spelling 
   | AArch64VectorPcs of Clang__bindings.clang_ext_aarch64vectorpcs_spelling 
   | ARMInterrupt of
   {
@@ -310,12 +313,18 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   elem_size: int ;
   num_elems: int } 
   | AlwaysDestroy of Clang__bindings.clang_ext_alwaysdestroy_spelling 
-  | AlwaysInline of Clang__bindings.clang_ext_alwaysinline_spelling 
   | Annotate of
   {
   spelling: Clang__bindings.clang_ext_annotate_spelling ;
   annotation: string ;
-  args: 'expr list } 
+  args: 'expr list ;
+  delayed_args: 'expr list } 
+  | AnnotateType of
+  {
+  spelling: Clang__bindings.clang_ext_annotatetype_spelling ;
+  annotation: string ;
+  args: 'expr list ;
+  delayed_args: 'expr list } 
   | ArcWeakrefUnavailable of
   Clang__bindings.clang_ext_arcweakrefunavailable_spelling 
   | ArgumentWithTypeTag of
@@ -396,6 +405,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   
   | CFUnknownTransfer of Clang__bindings.clang_ext_cfunknowntransfer_spelling
   
+  | CXX11NoReturn of Clang__bindings.clang_ext_cxx11noreturn_spelling 
   | CallableWhen of
   {
   spelling: Clang__bindings.clang_ext_callablewhen_spelling ;
@@ -502,10 +512,19 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   {
   spelling: Clang__bindings.clang_ext_formatarg_spelling ;
   format_idx: int } 
+  | FunctionReturnThunks of
+  {
+  spelling: Clang__bindings.clang_ext_functionreturnthunks_spelling ;
+  thunk_type: Clang__bindings.clang_ext_functionreturnthunksattr_kind } 
   | GNUInline of Clang__bindings.clang_ext_gnuinline_spelling 
   | GuardedBy of 'expr 
   | GuardedVar of Clang__bindings.clang_ext_guardedvar_spelling 
   | HIPManaged of Clang__bindings.clang_ext_hipmanaged_spelling 
+  | HLSLNumThreads of {
+  x: int ;
+  y: int ;
+  z: int } 
+  | HLSLShader of Clang__bindings.clang_ext_hlslshaderattr_shadertype 
   | Hot of Clang__bindings.clang_ext_hot_spelling 
   | IFunc of
   {
@@ -576,12 +595,13 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   | NoDestroy of Clang__bindings.clang_ext_nodestroy_spelling 
   | NoDuplicate of Clang__bindings.clang_ext_noduplicate_spelling 
   | NoEscape of Clang__bindings.clang_ext_noescape_spelling 
-  | NoInline of Clang__bindings.clang_ext_noinline_spelling 
   | NoInstrumentFunction of
   Clang__bindings.clang_ext_noinstrumentfunction_spelling 
   | NoMicroMips of Clang__bindings.clang_ext_nomicromips_spelling 
   | NoMips16 of Clang__bindings.clang_ext_nomips16_spelling 
   | NoProfileFunction of Clang__bindings.clang_ext_noprofilefunction_spelling
+  
+  | NoRandomizeLayout of Clang__bindings.clang_ext_norandomizelayout_spelling
   
   | NoReturn of Clang__bindings.clang_ext_noreturn_spelling 
   | NoSanitize of
@@ -641,6 +661,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   {
   spelling: Clang__bindings.clang_ext_riscvinterrupt_spelling ;
   interrupt: Clang__bindings.clang_ext_riscvinterruptattr_interrupttype } 
+  | RandomizeLayout of Clang__bindings.clang_ext_randomizelayout_spelling 
   | RegCall of Clang__bindings.clang_ext_regcall_spelling 
   | Reinitializes of Clang__bindings.clang_ext_reinitializes_spelling 
   | ReleaseCapability of
@@ -775,6 +796,12 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   {
   spelling: Clang__bindings.clang_ext_xraylogargs_spelling ;
   argument_count: int } 
+  | ZeroCallUsedRegs of
+  {
+  spelling: Clang__bindings.clang_ext_zerocallusedregs_spelling ;
+  zero_call_used_regs:
+    Clang__bindings.clang_ext_zerocallusedregsattr_zerocallusedregskind }
+  
   | Other of Clang__bindings.clang_ext_attrkind [@@deriving refl]
 [%%meta
   (new Metapp.filter)#structure_item
@@ -782,6 +809,14 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
        let convert cursor expr_of_cxcursor decl_of_cxcursor of_type_loc
          convert_declaration_name omp_trait_info_of_cxcursor =
          match Clang__bindings.ext_attr_get_kind cursor with
+         | ((AArch64SVEPcs)[@if
+                             [%meta
+                               Metapp.Exp.of_bool
+                                 (Clangml_config.equivalent_version.major >=
+                                    15)]])
+             ->
+             AArch64SVEPcs
+               (Clang__bindings.ext_aarch64_svepcs_get_spelling cursor)
          | ((AArch64VectorPcs)[@if
                                 [%meta
                                   Metapp.Exp.of_bool
@@ -809,6 +844,15 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                       (expr_of_cxcursor
                          (Clang__bindings.ext_attrs_get_max cursor))
                   })
+         | ((AMDGPUKernelCall)[@if
+                                [%meta
+                                  Metapp.Exp.of_bool
+                                    (Clangml_config.equivalent_version.major
+                                       >= 15)]])
+             ->
+             AMD
+               (GPUKernelCall
+                  (Clang__bindings.ext_amdgpukernel_call_get_spelling cursor))
          | ((AMDGPUNumSGPR)[@if
                              [%meta
                                Metapp.Exp.of_bool
@@ -1015,20 +1059,43 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
              ->
              AlwaysDestroy
                (Clang__bindings.ext_always_destroy_get_spelling cursor)
-         | AlwaysInline ->
-             AlwaysInline
-               (Clang__bindings.ext_always_inline_get_spelling cursor)
          | Annotate ->
              Annotate
                {
                  spelling =
                    (Clang__bindings.ext_annotate_get_spelling cursor);
                  annotation =
-                   (Clang__bindings.ext_annotate_attr_get_annotation cursor);
+                   (Clang__bindings.ext_attrs_get_annotation cursor);
                  args =
                    ((Clang__utils.list_of_iter
                        (Clang__bindings.ext_acquire_capability_attr_get_args
                           cursor))
+                      |> (List.map expr_of_cxcursor));
+                 delayed_args =
+                   ((Clang__utils.list_of_iter
+                       (Clang__bindings.ext_attrs_get_delayed_args cursor))
+                      |> (List.map expr_of_cxcursor))
+               }
+         | ((AnnotateType)[@if
+                            [%meta
+                              Metapp.Exp.of_bool
+                                (Clangml_config.equivalent_version.major >=
+                                   15)]])
+             ->
+             AnnotateType
+               {
+                 spelling =
+                   (Clang__bindings.ext_annotate_type_get_spelling cursor);
+                 annotation =
+                   (Clang__bindings.ext_attrs_get_annotation cursor);
+                 args =
+                   ((Clang__utils.list_of_iter
+                       (Clang__bindings.ext_acquire_capability_attr_get_args
+                          cursor))
+                      |> (List.map expr_of_cxcursor));
+                 delayed_args =
+                   ((Clang__utils.list_of_iter
+                       (Clang__bindings.ext_attrs_get_delayed_args cursor))
                       |> (List.map expr_of_cxcursor))
                }
          | ((AnyX86Interrupt)[@if
@@ -1395,6 +1462,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
          | CUDAShared ->
              CUDA
                (Shared (Clang__bindings.ext_cudashared_get_spelling cursor))
+         | CXX11NoReturn ->
+             CXX11NoReturn
+               (Clang__bindings.ext_cxx11_no_return_get_spelling cursor)
          | ((CallableWhen)[@if
                             [%meta
                               Metapp.Exp.of_bool
@@ -1729,6 +1799,21 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                  format_idx =
                    (Clang__bindings.ext_format_arg_attr_get_format_idx cursor)
                }
+         | ((FunctionReturnThunks)[@if
+                                    [%meta
+                                      Metapp.Exp.of_bool
+                                        (Clangml_config.equivalent_version.major
+                                           >= 15)]])
+             ->
+             FunctionReturnThunks
+               {
+                 spelling =
+                   (Clang__bindings.ext_function_return_thunks_get_spelling
+                      cursor);
+                 thunk_type =
+                   (Clang__bindings.ext_function_return_thunks_attr_get_thunk_type
+                      cursor)
+               }
          | GNUInline ->
              GNUInline (Clang__bindings.ext_gnuinline_get_spelling cursor)
          | GuardedBy ->
@@ -1742,6 +1827,24 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                               (Clangml_config.equivalent_version.major >= 12)]])
              ->
              HIPManaged (Clang__bindings.ext_hipmanaged_get_spelling cursor)
+         | ((HLSLNumThreads)[@if
+                              [%meta
+                                Metapp.Exp.of_bool
+                                  (Clangml_config.equivalent_version.major >=
+                                     15)]])
+             ->
+             HLSLNumThreads
+               {
+                 x = (Clang__bindings.ext_hlslnum_threads_attr_get_x cursor);
+                 y = (Clang__bindings.ext_hlslnum_threads_attr_get_y cursor);
+                 z = (Clang__bindings.ext_hlslnum_threads_attr_get_z cursor)
+               }
+         | ((HLSLShader)[@if
+                          [%meta
+                            Metapp.Exp.of_bool
+                              (Clangml_config.equivalent_version.major >= 15)]])
+             ->
+             HLSLShader (Clang__bindings.ext_hlslshader_attr_get_type cursor)
          | Hot -> Hot (Clang__bindings.ext_hot_get_spelling cursor)
          | IBAction ->
              IB (Action (Clang__bindings.ext_ibaction_get_spelling cursor))
@@ -2065,8 +2168,6 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                           Metapp.Exp.of_bool
                             (Clangml_config.equivalent_version.major >= 6)]])
              -> NoEscape (Clang__bindings.ext_no_escape_get_spelling cursor)
-         | NoInline ->
-             NoInline (Clang__bindings.ext_no_inline_get_spelling cursor)
          | NoInstrumentFunction ->
              NoInstrumentFunction
                (Clang__bindings.ext_no_instrument_function_get_spelling
@@ -2088,6 +2189,14 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
              ->
              NoProfileFunction
                (Clang__bindings.ext_no_profile_function_get_spelling cursor)
+         | ((NoRandomizeLayout)[@if
+                                 [%meta
+                                   Metapp.Exp.of_bool
+                                     (Clangml_config.equivalent_version.major
+                                        >= 15)]])
+             ->
+             NoRandomizeLayout
+               (Clang__bindings.ext_no_randomize_layout_get_spelling cursor)
          | NoReturn ->
              NoReturn (Clang__bindings.ext_no_return_get_spelling cursor)
          | ((NoSanitize)[@if
@@ -2884,6 +2993,14 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                    (Clang__bindings.ext_riscvinterrupt_attr_get_interrupt
                       cursor)
                }
+         | ((RandomizeLayout)[@if
+                               [%meta
+                                 Metapp.Exp.of_bool
+                                   (Clangml_config.equivalent_version.major
+                                      >= 15)]])
+             ->
+             RandomizeLayout
+               (Clang__bindings.ext_randomize_layout_get_spelling cursor)
          | ((RegCall)[@if
                        [%meta
                          Metapp.Exp.of_bool
@@ -3505,6 +3622,21 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                    (Clang__bindings.ext_xray_log_args_get_spelling cursor);
                  argument_count =
                    (Clang__bindings.ext_xray_log_args_attr_get_argument_count
+                      cursor)
+               }
+         | ((ZeroCallUsedRegs)[@if
+                                [%meta
+                                  Metapp.Exp.of_bool
+                                    (Clangml_config.equivalent_version.major
+                                       >= 15)]])
+             ->
+             ZeroCallUsedRegs
+               {
+                 spelling =
+                   (Clang__bindings.ext_zero_call_used_regs_get_spelling
+                      cursor);
+                 zero_call_used_regs =
+                   (Clang__bindings.ext_zero_call_used_regs_attr_get_zero_call_used_regs
                       cursor)
                }
          | other -> Other other])]

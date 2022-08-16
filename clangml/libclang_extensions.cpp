@@ -952,8 +952,12 @@ extern "C" {
     const clang::Stmt *s = GetCursorStmt(cursor);
     if (auto m = llvm::dyn_cast_or_null<clang::StringLiteral>(s)) {
       switch (m->getKind()) {
+      #ifdef LLVM_VERSION_BEFORE_15_0_0
       case clang::StringLiteral::Ascii:
-        return clang_ext_StringKind_Ascii;
+      #else
+      case clang::StringLiteral::Ordinary:
+      #endif
+        return clang_ext_StringKind_Ordinary;
       case clang::StringLiteral::Wide:
         return clang_ext_StringKind_Wide;
       case clang::StringLiteral::UTF8:
@@ -1427,28 +1431,28 @@ extern "C" {
     return MakeCXCursorInvalid(CXCursor_InvalidCode, GetTU(c));
   }
 
-  enum clang_ext_StringKind
+  enum clang_ext_CharacterKind
   clang_ext_CharacterLiteral_GetCharacterKind(CXCursor c)
   {
     if (auto e =
       llvm::dyn_cast_or_null<clang::CharacterLiteral>(GetCursorStmt(c))) {
       switch (e->getKind()) {
       case clang::CharacterLiteral::Ascii:
-        return clang_ext_StringKind_Ascii;
+        return clang_ext_CharacterKind_Ascii;
       case clang::CharacterLiteral::Wide:
-        return clang_ext_StringKind_Wide;
+        return clang_ext_CharacterKind_Wide;
       #ifndef LLVM_VERSION_BEFORE_3_8_0
       case clang::CharacterLiteral::UTF8:
-        return clang_ext_StringKind_UTF8;
+        return clang_ext_CharacterKind_UTF8;
       #endif
       case clang::CharacterLiteral::UTF16:
-        return clang_ext_StringKind_UTF16;
+        return clang_ext_CharacterKind_UTF16;
       case clang::CharacterLiteral::UTF32:
-        return clang_ext_StringKind_UTF32;
+        return clang_ext_CharacterKind_UTF32;
       default:;
       }
     }
-    return clang_ext_StringKind_InvalidStringKind;
+    return clang_ext_CharacterKind_InvalidCharacterKind;
   }
 
   unsigned
@@ -1653,7 +1657,24 @@ extern "C" {
   clang_ext_TemplateName_getKind(struct clang_ext_TemplateName CTN)
   {
     if (auto *TN = GetTemplateName(CTN)) {
-      return static_cast<enum clang_ext_TemplateName_NameKind>(TN->getKind());
+      switch (TN->getKind()) {
+      case clang::TemplateName::NameKind::Template:
+        return CLANG_EXT_Template;
+      case clang::TemplateName::NameKind::OverloadedTemplate:
+        return CLANG_EXT_OverloadedTemplate;
+      #ifndef LLVM_VERSION_BEFORE_9_0_0
+      case clang::TemplateName::NameKind::AssumedTemplate:
+        return CLANG_EXT_AssumedTemplate;
+      #endif
+      case clang::TemplateName::NameKind::QualifiedTemplate:
+        return CLANG_EXT_QualifiedTemplate;
+      case clang::TemplateName::NameKind::DependentTemplate:
+        return CLANG_EXT_DependentTemplate;
+      case clang::TemplateName::NameKind::SubstTemplateTemplateParm:
+        return CLANG_EXT_SubstTemplateTemplateParm;
+      case clang::TemplateName::NameKind::SubstTemplateTemplateParmPack:
+        return CLANG_EXT_SubstTemplateTemplateParmPack;
+      }
     }
     return CLANG_EXT_InvalidNameKind;
   }

@@ -68,7 +68,7 @@ pipeline {
                        eval $(opam env) && \
                        cd build && \
                        dune exec -- tools/generate_attrs/generate_attrs.exe \
-                         --llvm-config /media/llvms/14.0.6/bin/llvm-config \
+                         --llvm-config /media/llvms/15.0.0rc2/bin/llvm-config \
                          "../src/bootstrap/" && \
                        cp ../src/bootstrap/attributes.ml clangml && \
                        cp ../src/bootstrap/libclang_extensions_attrs.inc \
@@ -90,15 +90,18 @@ pipeline {
                         script: 'ls -1 /media/llvms',
                         returnStdout: true
                     ).split('\n').toList()
-                    llvm_versions.retainAll { it =~ /^[0-9]+[.][0-9][.][0-9]$/ }
+                    llvm_versions.retainAll { it =~ /^[0-9]+[.][0-9][.][0-9]/ }
                     def branches = [:]
                     for (i in llvm_versions) {
                         def llvm_version = i
                         def llvm_dir = "/media/llvms/$llvm_version"
                         def llvm_config = "$llvm_dir/bin/llvm-config"
                         def equivalent_llvm_version;
-                        if (llvm_version =~ /^14[.]0[.][0-9]$/) {
+                        if (llvm_version =~ /^14[.]0[.][0-9]/) {
                             equivalent_llvm_version = "14.0.0"
+                        }
+                        else if (llvm_version =~ /^15[.]0[.][0-9]/) {
+                            equivalent_llvm_version = "15.0.0"
                         }
                         else {
                             equivalent_llvm_version = llvm_version
@@ -159,7 +162,7 @@ pipeline {
             }
         }
         stage('Commit to bootstrap branch') {
-            when { branch 'master' }
+            when { branch 'main' }
             steps {
                 script {
                     def commit = sh (
@@ -180,7 +183,7 @@ pipeline {
         }
 
         stage('opam installation') {
-            when { branch 'master' }
+            when { branch 'main' }
             steps {
                 script {
                     opam_installations(
@@ -191,7 +194,7 @@ pipeline {
         }
 
         stage('Commit to snapshot branch') {
-            when { branch 'master' }
+            when { branch 'main' }
             steps {
                 sh 'src/ci-scripts/commit-snapshot-branch.sh'
             }
@@ -200,7 +203,7 @@ pipeline {
         stage('opam installation from snapshot') {
             steps {
                 script {
-                    def repo = env.JOB_NAME == "perso/master" ? "tmartine" : "memcad"
+                    def repo = env.JOB_NAME == "perso/main" ? "tmartine" : "memcad"
                     opam_installations(
                         ["4.13"],
 "https://gitlab.inria.fr/$repo/clangml/-/archive/snapshot/clangml-snapshot.tar.gz")
@@ -244,7 +247,7 @@ pipeline {
         }
 
         stage('Commit to norms branch') {
-            when { branch 'master' }
+            when { branch 'main' }
             steps {
                 sh 'git fetch origin'
                 sh 'git checkout origin/norms'
@@ -254,7 +257,7 @@ pipeline {
                 sh 'git add norms/*'
                 sh '''
                     git commit -m \
-                      "generated files for commit `git rev-parse master`" || \
+                      "generated files for commit `git rev-parse main`" || \
                     true
                 '''
                 sh 'git push origin HEAD:norms'
