@@ -950,9 +950,12 @@ let main cflags llvm_config prefix =
     StringMap.add "clang_ext_OpenCLPrivateAddressSpace_spelling" (10, 0) |>
     StringMap.add "clang_ext_PassObjectSize_spelling" (9, 0) |>
     StringMap.add "clang_ext_Unused_spelling" (3, 9) |>
+    StringMap.add "clang_ext_CXX11NoReturn_spelling" (15, 0) |>
     (* args is missing *)
     StringMap.add "Annotate:args" (12, 0) |>
     StringMap.add "Annotate:args_Size" (12, 0) |>
+    StringMap.add "Annotate:delayedArgs" (15, 0) |>
+    StringMap.add "Annotate:delayedArgs_Size" (15, 0) |>
     (* OMPAllocateDeclAttr::alignment* introduced in 14.0.0 *)
     StringMap.add "OMPAllocateDecl:alignment" (14, 0) |>
     (* OMPDeclareVariantAttr::adjustArgs* introduced in 14.0.0 *)
