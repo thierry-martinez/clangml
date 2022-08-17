@@ -1,7 +1,7 @@
 # clangml: OCaml bindings for Clang.
 
 clangml provides bindings for all versions of Clang, from 3.4 to
-14.0.6.
+15.0.0.
 
 ## Introduction
 
@@ -13,7 +13,7 @@ Contrary to old clangml versions, the versions of clangml from 4.0.0 are
 independent from the version of the Clang library:
 any version of clangml from 4.0.0 can be built with any version of the
 Clang library in the supported interval.
-Currently, all versions of Clang, from 3.4 to 14.0.6, are supported.
+Currently, all versions of Clang, from 3.4 to 15.0.0, are supported.
 
 However, clangml is statically linked to libclang, and clangml needs
 to be rebuilt for every version of libclang to run with.
@@ -45,10 +45,10 @@ opam depext -i clangml
 Manual installation requires a bootstrapped source directory.
 Commits from branch `snapshot` are bootstrapped: a new snapshot
 is committed by continuous integration after every successful build from
-`master`.
+`main`.
 
 Snapshot tarball:
-https://gitlab.inria.fr/memcad/clangml/-/archive/snapshot/clangml-snapshot.tar.gz
+https://github.com/thierry-martinez/clangml/archive/refs/heads/snapshot.tar.gz
 
 To build clangml from snapshot or from a bootstrapped source directory,
 you may either:
@@ -56,9 +56,9 @@ you may either:
 * execute `./configure && make && make install`
 (this method is recommended if you have to pass some options to configure);
 * execute
-`opam pin add git+https://gitlab.inria.fr/memcad/clangml.git#snapshot`.
+`opam pin add git+https://github.com/thierry-martinez/clangml.git#snapshot`.
 
-To bootstrap the repository from a development branch (e.g., `master`),
+To bootstrap the repository from a development branch (e.g., `main`),
 execute `./bootstrap.sh` first, then `./configure && make && make install` as
 usual.
 
@@ -73,7 +73,7 @@ Additionnally, to run `make tests`: `opam install ocamlcodoc pattern`.
 `libclang` and other external dependencies can be installed with opam depext
 plugin:
 ```
-opam pin add -n git+https://gitlab.inria.fr/memcad/clangml.git#snapshot
+opam pin add -n git+https://github.com/thierry-martinez/clangml.git#snapshot
 opam depext -i clangml
 ```
 (`-n` option asks `opam pin` not to install clangml directly, and `-i` option
@@ -90,7 +90,7 @@ not been covered by libclang.
 
 [1]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang/index.html
 [2]: https://clang.llvm.org/doxygen/group__CINDEX.html
-[3]: https://gitlab.inria.fr/memcad/clangml/blob/master/clangml/libclang_extensions.h
+[3]: https://gitlab.inria.fr/memcad/clangml/blob/main/clangml/libclang_extensions.h
 
 The module [`Clang.Ast`] provides a higher-level interface to clang's AST.
 The function [`Clang.Ast.parse_file`] returns the AST from a file
@@ -110,8 +110,8 @@ Moreover, the git branch [`norms`] contains the AST corresponding to the example
 automatically extracted from C++14, C++17, and C++20 norms.
 
 [`Clang__ast`]: https://memcad.gitlabpages.inria.fr/clangml/doc/clangml/Clang__/Clang__ast/index.html
-[`ocamlcodoc`]: https://gitlab.inria.fr/memcad/ocamlcodoc
-[`norms`]: https://gitlab.inria.fr/memcad/clangml/tree/norms/norms
+[`ocamlcodoc`]: https://github.com/thierry-martinez/ocamlcodoc
+[`norms`]: https://github.com/thierry-martinez/clangml/tree/norms
 
 Modules [`Clang.Type`], [`Clang.Expr`], [`Clang.Stmt`],
 [`Clang.Decl`], and [`Clang.Enum_constant`] provides sub-modules

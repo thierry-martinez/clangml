@@ -65,11 +65,12 @@ module Ast : sig
   (** The following functions provides convenient ways to build some AST
       nodes. *)
 
-  val var : ?linkage:linkage_kind -> ?var_init:expr ->
+  val var : ?linkage:linkage_kind -> ?storage:storage_class -> ?var_init:expr ->
     ?constexpr:bool -> ?attributes:attribute list -> string -> qual_type ->
     var_decl_desc
 
-  val function_decl : ?linkage:linkage_kind -> ?body:stmt -> ?deleted:bool ->
+  val function_decl : ?linkage:linkage_kind -> ?storage:storage_class ->
+    ?body:stmt -> ?deleted:bool ->
     ?constexpr:bool -> ?inline_specified:bool -> ?inlined:bool ->
     ?nested_name_specifier:nested_name_specifier ->
     ?attributes:attribute list -> ?has_written_prototype:bool ->
