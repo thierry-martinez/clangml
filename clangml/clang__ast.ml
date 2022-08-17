@@ -142,7 +142,7 @@ and calling_conv = cxcallingconv
 
 and linkage_kind = cxlinkagekind
 
-and storage_class = cx_storageclass
+and storage_class = clang_ext_storageclass
 
 and predefined_identifier_kind = clang_ext_predefinedexpr_identkind
 

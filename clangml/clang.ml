@@ -1014,7 +1014,7 @@ module Ast = struct
       let function_type = function_type_of_decl cursor in
       {
         linkage = get_cursor_linkage cursor;
-        storage = cursor_get_storage_class cursor;
+        storage = ext_decl_get_storage_class cursor;
         function_type;
         nested_name_specifier; name; body;
         deleted = ext_function_decl_is_deleted cursor;
@@ -1140,7 +1140,7 @@ module Ast = struct
 
     and var_decl_desc_of_cxcursor cursor =
       let linkage = get_cursor_linkage cursor in
-      let storage = cursor_get_storage_class cursor in
+      let storage = ext_decl_get_storage_class cursor in
       let var_name = get_cursor_spelling cursor in
       let var_type = of_type_loc (ext_declarator_decl_get_type_loc cursor) in
       let var_init : 'a option =

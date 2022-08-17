@@ -4277,5 +4277,35 @@ extern "C" {
     return MakeTypeLocInvalid(tl.tu);
   }
 
+  enum clang_ext_StorageClass
+  clang_ext_Decl_getStorageClass(CXCursor cursor)
+  {
+    clang::StorageClass result = clang::StorageClass::SC_None;
+    if (auto d = GetCursorDecl(cursor)) {
+      if (auto vd = llvm::dyn_cast_or_null<clang::VarDecl>(d)) {
+        result = vd->getStorageClass();
+      }
+      else if (auto fd = llvm::dyn_cast_or_null<clang::FunctionDecl>(d)) {
+        result = fd->getStorageClass();
+      }
+    }
+    switch (result) {
+    case clang::StorageClass::SC_Extern:
+      return CLANG_EXT_SC_Extern;
+    case clang::StorageClass::SC_Static:
+      return CLANG_EXT_SC_Static;
+    case clang::StorageClass::SC_PrivateExtern:
+      return CLANG_EXT_SC_PrivateExtern;
+    #ifdef LLVM_VERSION_BEFORE_3_8_0
+    case clang::StorageClass::SC_OpenCLWorkGroupLocal:
+      return CLANG_EXT_SC_OpenCLWorkGroupLocal;
+    #endif
+    case clang::StorageClass::SC_Auto:
+      return CLANG_EXT_SC_Auto;
+    case clang::StorageClass::SC_Register:
+      return CLANG_EXT_SC_Register;
+    }
+    return CLANG_EXT_SC_None;
+  }
   #include "libclang_extensions_attrs.inc"
 }

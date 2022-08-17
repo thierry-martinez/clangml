@@ -378,14 +378,14 @@ module Make (Node : Clang__ast.NodeS) = struct
     | Some else_branch ->
         Format.fprintf fmt "@[else@ %a@]" stmt else_branch
 
-  and pp_storage fmt (storage : Clang__bindings.cx_storageclass) =
+  and pp_storage fmt (storage : Clang__ast.storage_class) =
     match storage with
     | None -> ()
     | Extern -> Format.fprintf fmt "extern@ "
     | Static -> Format.fprintf fmt "static@ "
     | _ ->
         failwith (Format.asprintf "Not implemented storage: %a"
-          (Refl.pp [%refl: Clang__bindings.cx_storageclass] []) storage)
+          (Refl.pp [%refl: Clang__ast.storage_class] []) storage)
 
   and pp_parameters fmt parameters =
     let all_parameters = List.map Option.some parameters.non_variadic in
