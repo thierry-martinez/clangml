@@ -170,16 +170,18 @@ module Ast = struct
     { decoration; desc }
 
   let var
-      ?(linkage = NoLinkage) ?var_init ?(constexpr = false)
+      ?(linkage = NoLinkage) ?(storage : storage_class = None) ?var_init
+      ?(constexpr = false)
       ?(attributes = []) var_name var_type =
-    { linkage; var_name; var_type; var_init; constexpr; attributes }
+    { linkage; storage; var_name; var_type; var_init; constexpr; attributes }
 
   let function_decl
-      ?(linkage = NoLinkage) ?body ?(deleted = false) ?(constexpr = false)
+      ?(linkage = NoLinkage) ?(storage : storage_class = None) ?body
+      ?(deleted = false) ?(constexpr = false)
       ?(inline_specified = false) ?(inlined = false) ?nested_name_specifier
       ?(attributes = []) ?(has_written_prototype = false)
       function_type name =
-    { linkage; body; deleted; constexpr; inline_specified; inlined;
+    { linkage; storage; body; deleted; constexpr; inline_specified; inlined;
       function_type; nested_name_specifier; name; attributes;
       has_written_prototype }
 
@@ -1012,6 +1014,7 @@ module Ast = struct
       let function_type = function_type_of_decl cursor in
       {
         linkage = get_cursor_linkage cursor;
+        storage = ext_decl_get_storage_class cursor;
         function_type;
         nested_name_specifier; name; body;
         deleted = ext_function_decl_is_deleted cursor;
@@ -1136,7 +1139,8 @@ module Ast = struct
       node ~cursor (Node.from_fun (fun () -> var_decl_desc_of_cxcursor cursor))
 
     and var_decl_desc_of_cxcursor cursor =
-      let linkage = cursor |> get_cursor_linkage in
+      let linkage = get_cursor_linkage cursor in
+      let storage = ext_decl_get_storage_class cursor in
       let var_name = get_cursor_spelling cursor in
       let var_type = of_type_loc (ext_declarator_decl_get_type_loc cursor) in
       let var_init : 'a option =
@@ -1147,7 +1151,7 @@ module Ast = struct
           end
         else
           None in
-      { linkage; var_name; var_type; var_init;
+      { linkage; storage; var_name; var_type; var_init;
         constexpr = ext_var_decl_is_constexpr cursor;
         attributes = attributes_of_decl cursor; }
 

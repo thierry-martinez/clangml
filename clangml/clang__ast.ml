@@ -142,6 +142,8 @@ and calling_conv = cxcallingconv
 
 and linkage_kind = cxlinkagekind
 
+and storage_class = clang_ext_storageclass
+
 and predefined_identifier_kind = clang_ext_predefinedexpr_identkind
 
 and lambda_capture_default = clang_ext_lambdacapturedefault
@@ -929,6 +931,7 @@ let () =
 
 and function_decl = {
     linkage : linkage_kind;
+    storage : storage_class;
     function_type : function_type;
     nested_name_specifier : nested_name_specifier option; (** C++ *)
     name : declaration_name;
@@ -2929,6 +2932,7 @@ let () =
   [%pattern?
     [{ desc = Function {
       linkage = External;
+      storage = None;
       function_type = {
         calling_conv = C;
         result = { desc = BuiltinType Void};
@@ -2989,6 +2993,7 @@ let () =
     [{ desc = RecordDecl { keyword = Struct; name = "T"; fields = [] }};
      { desc = Function {
       linkage = External;
+      storage = None;
       function_type = {
         calling_conv = C;
         result = { desc = BuiltinType Void};
@@ -3023,6 +3028,7 @@ let () =
   [%pattern?
     [{ desc = Function {
       linkage = External;
+      storage = None;
       function_type = {
         calling_conv = C;
         result = { desc = BuiltinType Void};
@@ -3058,6 +3064,7 @@ let () =
     [{ desc = RecordDecl { keyword = Struct; name = "T"; fields = [] }};
      { desc = Function {
       linkage = External;
+      storage = None;
       function_type = {
         calling_conv = C;
         result = { desc = BuiltinType Void};
@@ -3530,6 +3537,7 @@ let () =
   @@ fun ast -> match ast with
   | [{ desc = Function {
       linkage = External;
+      storage = None;
       function_type = {
         calling_conv = C;
         result = { desc = BuiltinType Int};
@@ -3546,6 +3554,7 @@ let () =
   fun ast -> match ast with
   | [{ desc = Function {
       linkage = Internal;
+      storage = Static;
       function_type = {
         calling_conv = C;
         result = { desc = BuiltinType Int};
@@ -3860,6 +3869,7 @@ let () =
     fun ast -> match ast with
   | [{ desc = Var {
       linkage = External;
+      storage = None;
       var_type = { const = false; desc = BuiltinType Int };
       var_name = "x";
       var_init = Some { desc = IntegerLiteral (Int 1)}}}] -> ()
@@ -3872,6 +3882,7 @@ let () =
     fun ast -> match ast with
   | [{ desc = Var {
       linkage = External;
+      storage = None;
       var_type = { const = true; desc = BuiltinType Int };
       var_name = "x";
       var_init = Some { desc = IntegerLiteral (Int 1)}}}] -> ()
@@ -3884,6 +3895,7 @@ let () =
     fun ast -> match ast with
   | [{ desc = Var {
       linkage = Internal;
+      storage = Static;
       var_type = { const = false; desc = BuiltinType Int };
       var_name = "x";
       var_init = Some ({ desc = IntegerLiteral (Int 1)})}}] -> ()
@@ -5225,6 +5237,7 @@ and var_decl = var_decl_desc node
 
 and var_decl_desc = {
     linkage : linkage_kind;
+    storage : storage_class;
     var_name : string;
     var_type : qual_type;
     var_init : expr option;

@@ -1359,4 +1359,18 @@ clang_ext_TypeOfType_getUnderlyingType(CXType);
 struct clang_ext_TypeLoc
 clang_ext_TypeOfTypeLoc_getUnderlyingType(struct clang_ext_TypeLoc);
 
+enum clang_ext_StorageClass {
+  CLANG_EXT_SC_None,
+  CLANG_EXT_SC_Extern,
+  CLANG_EXT_SC_Static,
+  CLANG_EXT_SC_PrivateExtern,
+  CLANG_EXT_SC_OpenCLWorkGroupLocal, /* only with Clang 3.{4,5,6,7} */
+  CLANG_EXT_SC_Auto,
+  CLANG_EXT_SC_Register
+};
+
+/* clang_Cursor_getStorageClass is not available with Clang 3.{4,5} */
+enum clang_ext_StorageClass
+clang_ext_Decl_getStorageClass(CXCursor);
+
 #include "libclang_extensions_attrs_headers.inc"

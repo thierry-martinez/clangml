@@ -5,10 +5,16 @@
 - `Ast.character_kind` and `Ast.string_kind` are now distinct
   types (aliases for `Clang.clang_ext_characterkind` and
   `Clang.clang_ext_stringkind` respectively.
-  The constructor `Ordinary` replaced the former  constructor `Ascii`
+  The constructor `Ordinary` replaced the former constructor `Ascii`
   for `string_kind`, to match the new convention used by
   `clang::StringLiteral::StringKind` from Clang 15.0.0.
   The constructor `Ascii` for `character_kind` is left unchanged.
+
+- `Ast.Var` and `Ast.Function` constructors now have a `storage`
+  field in addition to the computed `linkage`, exposing the value
+  previously accessible via `cursor_get_storage_class`. The
+  storage classes are now correctly printed by the printer.
+  (reported by Ronan, rsaill/n47, https://github.com/thierry-martinez/clangml/issues/1)
 
 # 2022-08-09, 4.7.0
 
