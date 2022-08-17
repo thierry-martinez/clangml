@@ -97,9 +97,9 @@ module Make (Node : Clang__ast.NodeS) = struct
 
   let rec decl fmt (d : Ast.decl) =
     match Node.force d.desc with
-    | Function { linkage; function_type; name; body; _ } ->
+    | Function { storage; function_type; name; body; _ } ->
         Format.fprintf fmt "@[<v>%a%a%a@]"
-          pp_linkage linkage
+          pp_storage storage
           pp_function_type (function_type, name)
           pp_function_body body
     | Var var_decl ->
@@ -182,9 +182,9 @@ module Make (Node : Clang__ast.NodeS) = struct
           (Refl.pp [%refl: Ast.decl] []) d
 
   and pp_var_decl fmt (var_decl : Ast.var_decl_desc) =
-    match var_decl with { linkage; var_type = ty; var_name; var_init; _ } ->
+    match var_decl with { storage; var_type = ty; var_name; var_init; _ } ->
     Format.fprintf fmt "@[%a%a%a@]"
-      pp_linkage linkage
+      pp_storage storage
       (typed_value (fun fmt -> Format.pp_print_string fmt var_name)) ty
       pp_variable_init var_init
 
@@ -250,8 +250,8 @@ module Make (Node : Clang__ast.NodeS) = struct
         let op_prec, associativity = prec_of_binary_operator kind in
         let left_prec, right_prec =
           match associativity with
-          | Left_to_right -> op_prec - 1, op_prec
-          | Right_to_left -> op_prec, op_prec - 1 in
+          | Left_to_right -> op_prec + 1, op_prec
+          | Right_to_left -> op_prec, op_prec + 1 in
         maybe_parentheses op_prec prec fmt (fun fmt ->
           Format.fprintf fmt "@[%a@ %s@ %a@]" (expr_prec left_prec) lhs
             (Clang__bindings.ext_binary_operator_get_opcode_spelling kind)
@@ -378,14 +378,14 @@ module Make (Node : Clang__ast.NodeS) = struct
     | Some else_branch ->
         Format.fprintf fmt "@[else@ %a@]" stmt else_branch
 
-  and pp_linkage fmt linkage =
-    match linkage with
-    | Internal -> Format.fprintf fmt "static@ "
-    | External
-    | NoLinkage -> ()
+  and pp_storage fmt (storage : Clang__bindings.cx_storageclass) =
+    match storage with
+    | None -> ()
+    | Extern -> Format.fprintf fmt "extern@ "
+    | Static -> Format.fprintf fmt "static@ "
     | _ ->
-        failwith (Format.asprintf "Not implemented linkage: %a"
-          (Refl.pp [%refl: Clang__bindings.cxlinkagekind] []) linkage)
+        failwith (Format.asprintf "Not implemented storage: %a"
+          (Refl.pp [%refl: Clang__bindings.cx_storageclass] []) storage)
 
   and pp_parameters fmt parameters =
     let all_parameters = List.map Option.some parameters.non_variadic in
@@ -504,7 +504,12 @@ module Make (Node : Clang__ast.NodeS) = struct
       | [] -> ()
       | hd :: tl ->
           let default_case () =
-            Format.fprintf fmt "@[%a;@]@ " decl hd;
+            begin match Node.force hd.desc with
+            | Function _ ->
+                Format.fprintf fmt "@[%a@]@ " decl hd;
+            | _ ->
+                Format.fprintf fmt "@[%a;@]@ " decl hd
+            end;
             aux fmt tl in
           match Node.force hd.desc, tl with
           | (EnumDecl _ | RecordDecl { keyword = Struct; _ }) as desc,
