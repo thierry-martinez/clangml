@@ -23,7 +23,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AArch64SVEPcs_SpellingNotCalculated;};
+ return clang_ext_AArch64SVEPcs_SpellingNotCalculated;}
 enum
 clang_ext_AArch64VectorPcs_spelling clang_ext_AArch64VectorPcs_getSpelling(
 CXCursor cursor)
@@ -46,7 +46,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AArch64VectorPcs_SpellingNotCalculated;};
+ return clang_ext_AArch64VectorPcs_SpellingNotCalculated;}
 enum
 clang_ext_AMDGPUFlatWorkGroupSize_spelling
 clang_ext_AMDGPUFlatWorkGroupSize_getSpelling(CXCursor cursor)
@@ -69,7 +69,7 @@ clang_ext_AMDGPUFlatWorkGroupSize_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AMDGPUFlatWorkGroupSize_SpellingNotCalculated;};
+ return clang_ext_AMDGPUFlatWorkGroupSize_SpellingNotCalculated;}
 enum
 clang_ext_AMDGPUKernelCall_spelling clang_ext_AMDGPUKernelCall_getSpelling(
 CXCursor cursor)
@@ -92,7 +92,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AMDGPUKernelCall_SpellingNotCalculated;};
+ return clang_ext_AMDGPUKernelCall_SpellingNotCalculated;}
 enum
 clang_ext_AMDGPUNumSGPR_spelling clang_ext_AMDGPUNumSGPR_getSpelling(
 CXCursor cursor)
@@ -113,7 +113,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AMDGPUNumSGPR_SpellingNotCalculated;};
+ return clang_ext_AMDGPUNumSGPR_SpellingNotCalculated;}
 enum
 clang_ext_AMDGPUNumVGPR_spelling clang_ext_AMDGPUNumVGPR_getSpelling(
 CXCursor cursor)
@@ -134,7 +134,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AMDGPUNumVGPR_SpellingNotCalculated;};
+ return clang_ext_AMDGPUNumVGPR_SpellingNotCalculated;}
 enum
 clang_ext_AMDGPUWavesPerEU_spelling clang_ext_AMDGPUWavesPerEU_getSpelling(
 CXCursor cursor)
@@ -155,7 +155,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AMDGPUWavesPerEU_SpellingNotCalculated;};
+ return clang_ext_AMDGPUWavesPerEU_SpellingNotCalculated;}
 enum
 clang_ext_ARMInterruptAttr_InterruptType
 convert_ARMInterruptAttr_InterruptType(
@@ -173,7 +173,7 @@ clang::ARMInterruptAttr ::InterruptType value)
   return clang_ext_ARMInterruptAttr_InterruptType_UNDEF;
   case clang::ARMInterruptAttr ::InterruptType ::Generic:
   return clang_ext_ARMInterruptAttr_InterruptType_Generic;}
- return clang_ext_ARMInterruptAttr_InterruptType_IRQ;};
+ return clang_ext_ARMInterruptAttr_InterruptType_IRQ;}
 enum
 clang_ext_ARMInterrupt_spelling clang_ext_ARMInterrupt_getSpelling(
 CXCursor cursor)
@@ -195,7 +195,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ARMInterrupt_SpellingNotCalculated;};
+ return clang_ext_ARMInterrupt_SpellingNotCalculated;}
 enum
 clang_ext_AVRInterrupt_spelling clang_ext_AVRInterrupt_getSpelling(
 CXCursor cursor)
@@ -217,7 +217,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AVRInterrupt_SpellingNotCalculated;};
+ return clang_ext_AVRInterrupt_SpellingNotCalculated;}
 enum
 clang_ext_AVRSignal_spelling clang_ext_AVRSignal_getSpelling(CXCursor cursor)
 {
@@ -238,7 +238,7 @@ clang_ext_AVRSignal_spelling clang_ext_AVRSignal_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AVRSignal_SpellingNotCalculated;};
+ return clang_ext_AVRSignal_SpellingNotCalculated;}
 enum clang_ext_AbiTag_spelling clang_ext_AbiTag_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_9_0
@@ -256,7 +256,7 @@ enum clang_ext_AbiTag_spelling clang_ext_AbiTag_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AbiTag_SpellingNotCalculated;};
+ return clang_ext_AbiTag_SpellingNotCalculated;}
 enum
 clang_ext_AcquireCapability_spelling clang_ext_AcquireCapability_getSpelling(
 CXCursor cursor)
@@ -289,7 +289,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AcquireCapability_SpellingNotCalculated;};
+ return clang_ext_AcquireCapability_SpellingNotCalculated;}
 enum
 clang_ext_AcquireHandle_spelling clang_ext_AcquireHandle_getSpelling(
 CXCursor cursor)
@@ -312,7 +312,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AcquireHandle_SpellingNotCalculated;};
+ return clang_ext_AcquireHandle_SpellingNotCalculated;}
 enum
 clang_ext_AddressSpace_spelling clang_ext_AddressSpace_getSpelling(
 CXCursor cursor)
@@ -334,7 +334,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AddressSpace_SpellingNotCalculated;};
+ return clang_ext_AddressSpace_SpellingNotCalculated;}
 enum clang_ext_Alias_spelling clang_ext_Alias_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -354,7 +354,7 @@ enum clang_ext_Alias_spelling clang_ext_Alias_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Alias_SpellingNotCalculated;};
+ return clang_ext_Alias_SpellingNotCalculated;}
 enum
 clang_ext_Aligned_spelling clang_ext_Aligned_getSpelling(CXCursor cursor)
 {
@@ -389,7 +389,7 @@ clang_ext_Aligned_spelling clang_ext_Aligned_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Aligned_SpellingNotCalculated;};
+ return clang_ext_Aligned_SpellingNotCalculated;}
 enum
 clang_ext_AllocAlign_spelling clang_ext_AllocAlign_getSpelling(
 CXCursor cursor)
@@ -411,7 +411,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AllocAlign_SpellingNotCalculated;};
+ return clang_ext_AllocAlign_SpellingNotCalculated;}
 enum
 clang_ext_AllocSize_spelling clang_ext_AllocSize_getSpelling(CXCursor cursor)
 {
@@ -432,7 +432,7 @@ clang_ext_AllocSize_spelling clang_ext_AllocSize_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AllocSize_SpellingNotCalculated;};
+ return clang_ext_AllocSize_SpellingNotCalculated;}
 enum
 clang_ext_AlwaysDestroy_spelling clang_ext_AlwaysDestroy_getSpelling(
 CXCursor cursor)
@@ -453,7 +453,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AlwaysDestroy_SpellingNotCalculated;};
+ return clang_ext_AlwaysDestroy_SpellingNotCalculated;}
 enum
 clang_ext_Annotate_spelling clang_ext_Annotate_getSpelling(CXCursor cursor)
 {
@@ -474,7 +474,7 @@ clang_ext_Annotate_spelling clang_ext_Annotate_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Annotate_SpellingNotCalculated;};
+ return clang_ext_Annotate_SpellingNotCalculated;}
 enum
 clang_ext_AnnotateType_spelling clang_ext_AnnotateType_getSpelling(
 CXCursor cursor)
@@ -494,7 +494,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AnnotateType_SpellingNotCalculated;};
+ return clang_ext_AnnotateType_SpellingNotCalculated;}
 enum
 clang_ext_AnyX86Interrupt_spelling clang_ext_AnyX86Interrupt_getSpelling(
 CXCursor cursor)
@@ -517,7 +517,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AnyX86Interrupt_SpellingNotCalculated;};
+ return clang_ext_AnyX86Interrupt_SpellingNotCalculated;}
 enum
 clang_ext_AnyX86NoCallerSavedRegisters_spelling
 clang_ext_AnyX86NoCallerSavedRegisters_getSpelling(CXCursor cursor)
@@ -544,7 +544,7 @@ clang_ext_AnyX86NoCallerSavedRegisters_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AnyX86NoCallerSavedRegisters_SpellingNotCalculated;};
+ return clang_ext_AnyX86NoCallerSavedRegisters_SpellingNotCalculated;}
 enum
 clang_ext_AnyX86NoCfCheck_spelling clang_ext_AnyX86NoCfCheck_getSpelling(
 CXCursor cursor)
@@ -567,7 +567,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AnyX86NoCfCheck_SpellingNotCalculated;};
+ return clang_ext_AnyX86NoCfCheck_SpellingNotCalculated;}
 enum
 clang_ext_ArcWeakrefUnavailable_spelling
 clang_ext_ArcWeakrefUnavailable_getSpelling(CXCursor cursor)
@@ -594,7 +594,7 @@ clang_ext_ArcWeakrefUnavailable_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ArcWeakrefUnavailable_SpellingNotCalculated;};
+ return clang_ext_ArcWeakrefUnavailable_SpellingNotCalculated;}
 enum
 clang_ext_ArgumentWithTypeTag_spelling
 clang_ext_ArgumentWithTypeTag_getSpelling(CXCursor cursor)
@@ -661,7 +661,7 @@ clang_ext_ArgumentWithTypeTag_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ArgumentWithTypeTag_SpellingNotCalculated;};
+ return clang_ext_ArgumentWithTypeTag_SpellingNotCalculated;}
 enum
 clang_ext_ArmBuiltinAlias_spelling clang_ext_ArmBuiltinAlias_getSpelling(
 CXCursor cursor)
@@ -684,7 +684,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ArmBuiltinAlias_SpellingNotCalculated;};
+ return clang_ext_ArmBuiltinAlias_SpellingNotCalculated;}
 enum
 clang_ext_ArmMveStrictPolymorphism_spelling
 clang_ext_ArmMveStrictPolymorphism_getSpelling(CXCursor cursor)
@@ -711,7 +711,7 @@ clang_ext_ArmMveStrictPolymorphism_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ArmMveStrictPolymorphism_SpellingNotCalculated;};
+ return clang_ext_ArmMveStrictPolymorphism_SpellingNotCalculated;}
 enum
 clang_ext_Artificial_spelling clang_ext_Artificial_getSpelling(
 CXCursor cursor)
@@ -733,7 +733,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Artificial_SpellingNotCalculated;};
+ return clang_ext_Artificial_SpellingNotCalculated;}
 enum
 clang_ext_AsmLabel_spelling clang_ext_AsmLabel_getSpelling(CXCursor cursor)
 {
@@ -750,7 +750,7 @@ clang_ext_AsmLabel_spelling clang_ext_AsmLabel_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AsmLabel_SpellingNotCalculated;};
+ return clang_ext_AsmLabel_SpellingNotCalculated;}
 enum
 clang_ext_AssertCapability_spelling clang_ext_AssertCapability_getSpelling(
 CXCursor cursor)
@@ -777,7 +777,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AssertCapability_SpellingNotCalculated;};
+ return clang_ext_AssertCapability_SpellingNotCalculated;}
 enum
 clang_ext_AssumeAligned_spelling clang_ext_AssumeAligned_getSpelling(
 CXCursor cursor)
@@ -800,7 +800,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_AssumeAligned_SpellingNotCalculated;};
+ return clang_ext_AssumeAligned_SpellingNotCalculated;}
 enum
 clang_ext_Assumption_spelling clang_ext_Assumption_getSpelling(
 CXCursor cursor)
@@ -822,7 +822,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Assumption_SpellingNotCalculated;};
+ return clang_ext_Assumption_SpellingNotCalculated;}
 enum
 clang_ext_Availability_spelling clang_ext_Availability_getSpelling(
 CXCursor cursor)
@@ -844,7 +844,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Availability_SpellingNotCalculated;};
+ return clang_ext_Availability_SpellingNotCalculated;}
 enum
 clang_ext_BPFPreserveAccessIndex_spelling
 clang_ext_BPFPreserveAccessIndex_getSpelling(CXCursor cursor)
@@ -868,7 +868,7 @@ clang_ext_BPFPreserveAccessIndex_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_BPFPreserveAccessIndex_SpellingNotCalculated;};
+ return clang_ext_BPFPreserveAccessIndex_SpellingNotCalculated;}
 enum
 clang_ext_BTFDeclTag_spelling clang_ext_BTFDeclTag_getSpelling(
 CXCursor cursor)
@@ -890,7 +890,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_BTFDeclTag_SpellingNotCalculated;};
+ return clang_ext_BTFDeclTag_SpellingNotCalculated;}
 enum
 clang_ext_BTFTypeTag_spelling clang_ext_BTFTypeTag_getSpelling(
 CXCursor cursor)
@@ -912,14 +912,14 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_BTFTypeTag_SpellingNotCalculated;};
+ return clang_ext_BTFTypeTag_SpellingNotCalculated;}
 enum
 clang_ext_BlocksAttr_BlockType convert_BlocksAttr_BlockType(
 clang::BlocksAttr ::BlockType value)
 {switch (value)
  {case clang::BlocksAttr ::BlockType ::ByRef:
   return clang_ext_BlocksAttr_BlockType_ByRef;}
- return clang_ext_BlocksAttr_BlockType_ByRef;};
+ return clang_ext_BlocksAttr_BlockType_ByRef;}
 enum clang_ext_Blocks_spelling clang_ext_Blocks_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -939,7 +939,7 @@ enum clang_ext_Blocks_spelling clang_ext_Blocks_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Blocks_SpellingNotCalculated;};
+ return clang_ext_Blocks_SpellingNotCalculated;}
 enum
 clang_ext_BuiltinAlias_spelling clang_ext_BuiltinAlias_getSpelling(
 CXCursor cursor)
@@ -961,7 +961,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_BuiltinAlias_SpellingNotCalculated;};
+ return clang_ext_BuiltinAlias_SpellingNotCalculated;}
 enum clang_ext_CDecl_spelling clang_ext_CDecl_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -983,7 +983,7 @@ enum clang_ext_CDecl_spelling clang_ext_CDecl_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CDecl_SpellingNotCalculated;};
+ return clang_ext_CDecl_SpellingNotCalculated;}
 enum
 clang_ext_CFAuditedTransfer_spelling clang_ext_CFAuditedTransfer_getSpelling(
 CXCursor cursor)
@@ -1007,7 +1007,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CFAuditedTransfer_SpellingNotCalculated;};
+ return clang_ext_CFAuditedTransfer_SpellingNotCalculated;}
 enum
 clang_ext_CFConsumed_spelling clang_ext_CFConsumed_getSpelling(
 CXCursor cursor)
@@ -1029,7 +1029,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CFConsumed_SpellingNotCalculated;};
+ return clang_ext_CFConsumed_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_10_0_0
 ;
@@ -1039,7 +1039,7 @@ clang::CFGuardAttr ::GuardArg value)
 {switch (value)
  {case clang::CFGuardAttr ::GuardArg ::nocf:
   return clang_ext_CFGuardAttr_GuardArg_nocf;}
- return clang_ext_CFGuardAttr_GuardArg_nocf;};
+ return clang_ext_CFGuardAttr_GuardArg_nocf;}
 
 #endif
 ;
@@ -1067,7 +1067,7 @@ clang_ext_CFICanonicalJumpTable_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CFICanonicalJumpTable_SpellingNotCalculated;};
+ return clang_ext_CFICanonicalJumpTable_SpellingNotCalculated;}
 enum
 clang_ext_CFReturnsNotRetained_spelling
 clang_ext_CFReturnsNotRetained_getSpelling(CXCursor cursor)
@@ -1091,7 +1091,7 @@ clang_ext_CFReturnsNotRetained_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CFReturnsNotRetained_SpellingNotCalculated;};
+ return clang_ext_CFReturnsNotRetained_SpellingNotCalculated;}
 enum
 clang_ext_CFReturnsRetained_spelling clang_ext_CFReturnsRetained_getSpelling(
 CXCursor cursor)
@@ -1115,7 +1115,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CFReturnsRetained_SpellingNotCalculated;};
+ return clang_ext_CFReturnsRetained_SpellingNotCalculated;}
 enum
 clang_ext_CFUnknownTransfer_spelling clang_ext_CFUnknownTransfer_getSpelling(
 CXCursor cursor)
@@ -1139,7 +1139,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CFUnknownTransfer_SpellingNotCalculated;};
+ return clang_ext_CFUnknownTransfer_SpellingNotCalculated;}
 enum
 clang_ext_CPUDispatch_spelling clang_ext_CPUDispatch_getSpelling(
 CXCursor cursor)
@@ -1163,7 +1163,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CPUDispatch_SpellingNotCalculated;};
+ return clang_ext_CPUDispatch_SpellingNotCalculated;}
 enum
 clang_ext_CPUSpecific_spelling clang_ext_CPUSpecific_getSpelling(
 CXCursor cursor)
@@ -1187,7 +1187,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CPUSpecific_SpellingNotCalculated;};
+ return clang_ext_CPUSpecific_SpellingNotCalculated;}
 enum
 clang_ext_CUDAConstant_spelling clang_ext_CUDAConstant_getSpelling(
 CXCursor cursor)
@@ -1207,7 +1207,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CUDAConstant_SpellingNotCalculated;};
+ return clang_ext_CUDAConstant_SpellingNotCalculated;}
 enum
 clang_ext_CUDADevice_spelling clang_ext_CUDADevice_getSpelling(
 CXCursor cursor)
@@ -1227,7 +1227,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CUDADevice_SpellingNotCalculated;};
+ return clang_ext_CUDADevice_SpellingNotCalculated;}
 enum
 clang_ext_CUDADeviceBuiltinSurfaceType_spelling
 clang_ext_CUDADeviceBuiltinSurfaceType_getSpelling(CXCursor cursor)
@@ -1251,7 +1251,7 @@ clang_ext_CUDADeviceBuiltinSurfaceType_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CUDADeviceBuiltinSurfaceType_SpellingNotCalculated;};
+ return clang_ext_CUDADeviceBuiltinSurfaceType_SpellingNotCalculated;}
 enum
 clang_ext_CUDADeviceBuiltinTextureType_spelling
 clang_ext_CUDADeviceBuiltinTextureType_getSpelling(CXCursor cursor)
@@ -1275,7 +1275,7 @@ clang_ext_CUDADeviceBuiltinTextureType_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CUDADeviceBuiltinTextureType_SpellingNotCalculated;};
+ return clang_ext_CUDADeviceBuiltinTextureType_SpellingNotCalculated;}
 enum
 clang_ext_CUDAGlobal_spelling clang_ext_CUDAGlobal_getSpelling(
 CXCursor cursor)
@@ -1295,7 +1295,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CUDAGlobal_SpellingNotCalculated;};
+ return clang_ext_CUDAGlobal_SpellingNotCalculated;}
 enum
 clang_ext_CUDAHost_spelling clang_ext_CUDAHost_getSpelling(CXCursor cursor)
 {
@@ -1314,7 +1314,7 @@ clang_ext_CUDAHost_spelling clang_ext_CUDAHost_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CUDAHost_SpellingNotCalculated;};
+ return clang_ext_CUDAHost_SpellingNotCalculated;}
 enum
 clang_ext_CUDALaunchBounds_spelling clang_ext_CUDALaunchBounds_getSpelling(
 CXCursor cursor)
@@ -1335,7 +1335,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CUDALaunchBounds_SpellingNotCalculated;};
+ return clang_ext_CUDALaunchBounds_SpellingNotCalculated;}
 enum
 clang_ext_CUDAShared_spelling clang_ext_CUDAShared_getSpelling(
 CXCursor cursor)
@@ -1355,7 +1355,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CUDAShared_SpellingNotCalculated;};
+ return clang_ext_CUDAShared_SpellingNotCalculated;}
 enum
 clang_ext_CXX11NoReturn_spelling clang_ext_CXX11NoReturn_getSpelling(
 CXCursor cursor)
@@ -1378,7 +1378,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CXX11NoReturn_SpellingNotCalculated;};
+ return clang_ext_CXX11NoReturn_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_3_5_0
 ;
@@ -1393,7 +1393,7 @@ clang::CallableWhenAttr ::ConsumedState value)
   return clang_ext_CallableWhenAttr_ConsumedState_Consumed;
   case clang::CallableWhenAttr ::ConsumedState ::Unconsumed:
   return clang_ext_CallableWhenAttr_ConsumedState_Unconsumed;}
- return clang_ext_CallableWhenAttr_ConsumedState_Unknown;};
+ return clang_ext_CallableWhenAttr_ConsumedState_Unknown;}
 
 #endif
 ;
@@ -1416,7 +1416,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CallableWhen_SpellingNotCalculated;};
+ return clang_ext_CallableWhen_SpellingNotCalculated;}
 enum
 clang_ext_Callback_spelling clang_ext_Callback_getSpelling(CXCursor cursor)
 {
@@ -1437,7 +1437,7 @@ clang_ext_Callback_spelling clang_ext_Callback_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Callback_SpellingNotCalculated;};
+ return clang_ext_Callback_SpellingNotCalculated;}
 enum
 clang_ext_CalledOnce_spelling clang_ext_CalledOnce_getSpelling(
 CXCursor cursor)
@@ -1459,7 +1459,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CalledOnce_SpellingNotCalculated;};
+ return clang_ext_CalledOnce_SpellingNotCalculated;}
 enum
 clang_ext_Capability_spelling clang_ext_Capability_getSpelling(
 CXCursor cursor)
@@ -1483,7 +1483,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Capability_SpellingNotCalculated;};
+ return clang_ext_Capability_SpellingNotCalculated;}
 enum
 clang_ext_CarriesDependency_spelling clang_ext_CarriesDependency_getSpelling(
 CXCursor cursor)
@@ -1505,7 +1505,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CarriesDependency_SpellingNotCalculated;};
+ return clang_ext_CarriesDependency_SpellingNotCalculated;}
 enum
 clang_ext_Cleanup_spelling clang_ext_Cleanup_getSpelling(CXCursor cursor)
 {
@@ -1526,7 +1526,7 @@ clang_ext_Cleanup_spelling clang_ext_Cleanup_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Cleanup_SpellingNotCalculated;};
+ return clang_ext_Cleanup_SpellingNotCalculated;}
 enum clang_ext_Cold_spelling clang_ext_Cold_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -1546,7 +1546,7 @@ enum clang_ext_Cold_spelling clang_ext_Cold_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Cold_SpellingNotCalculated;};
+ return clang_ext_Cold_SpellingNotCalculated;}
 enum clang_ext_Common_spelling clang_ext_Common_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -1566,7 +1566,7 @@ enum clang_ext_Common_spelling clang_ext_Common_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Common_SpellingNotCalculated;};
+ return clang_ext_Common_SpellingNotCalculated;}
 enum clang_ext_Const_spelling clang_ext_Const_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -1586,7 +1586,7 @@ enum clang_ext_Const_spelling clang_ext_Const_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Const_SpellingNotCalculated;};
+ return clang_ext_Const_SpellingNotCalculated;}
 enum
 clang_ext_ConstInit_spelling clang_ext_ConstInit_getSpelling(CXCursor cursor)
 {
@@ -1608,7 +1608,7 @@ clang_ext_ConstInit_spelling clang_ext_ConstInit_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ConstInit_SpellingNotCalculated;};
+ return clang_ext_ConstInit_SpellingNotCalculated;}
 enum
 clang_ext_Constructor_spelling clang_ext_Constructor_getSpelling(
 CXCursor cursor)
@@ -1630,7 +1630,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Constructor_SpellingNotCalculated;};
+ return clang_ext_Constructor_SpellingNotCalculated;}
 enum
 clang_ext_ConsumableAttr_ConsumedState convert_ConsumableAttr_ConsumedState(
 clang::ConsumableAttr ::ConsumedState value)
@@ -1641,7 +1641,7 @@ clang::ConsumableAttr ::ConsumedState value)
   return clang_ext_ConsumableAttr_ConsumedState_Consumed;
   case clang::ConsumableAttr ::ConsumedState ::Unconsumed:
   return clang_ext_ConsumableAttr_ConsumedState_Unconsumed;}
- return clang_ext_ConsumableAttr_ConsumedState_Unknown;};
+ return clang_ext_ConsumableAttr_ConsumedState_Unknown;}
 enum
 clang_ext_Consumable_spelling clang_ext_Consumable_getSpelling(
 CXCursor cursor)
@@ -1661,7 +1661,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Consumable_SpellingNotCalculated;};
+ return clang_ext_Consumable_SpellingNotCalculated;}
 enum
 clang_ext_ConsumableAutoCast_spelling
 clang_ext_ConsumableAutoCast_getSpelling(CXCursor cursor)
@@ -1683,7 +1683,7 @@ clang_ext_ConsumableAutoCast_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ConsumableAutoCast_SpellingNotCalculated;};
+ return clang_ext_ConsumableAutoCast_SpellingNotCalculated;}
 enum
 clang_ext_ConsumableSetOnRead_spelling
 clang_ext_ConsumableSetOnRead_getSpelling(CXCursor cursor)
@@ -1706,7 +1706,7 @@ clang_ext_ConsumableSetOnRead_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ConsumableSetOnRead_SpellingNotCalculated;};
+ return clang_ext_ConsumableSetOnRead_SpellingNotCalculated;}
 enum
 clang_ext_Convergent_spelling clang_ext_Convergent_getSpelling(
 CXCursor cursor)
@@ -1728,7 +1728,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Convergent_SpellingNotCalculated;};
+ return clang_ext_Convergent_SpellingNotCalculated;}
 enum
 clang_ext_DLLExport_spelling clang_ext_DLLExport_getSpelling(CXCursor cursor)
 {
@@ -1751,7 +1751,7 @@ clang_ext_DLLExport_spelling clang_ext_DLLExport_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_DLLExport_SpellingNotCalculated;};
+ return clang_ext_DLLExport_SpellingNotCalculated;}
 enum
 clang_ext_DLLImport_spelling clang_ext_DLLImport_getSpelling(CXCursor cursor)
 {
@@ -1774,7 +1774,7 @@ clang_ext_DLLImport_spelling clang_ext_DLLImport_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_DLLImport_SpellingNotCalculated;};
+ return clang_ext_DLLImport_SpellingNotCalculated;}
 enum
 clang_ext_Deprecated_spelling clang_ext_Deprecated_getSpelling(
 CXCursor cursor)
@@ -1802,7 +1802,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Deprecated_SpellingNotCalculated;};
+ return clang_ext_Deprecated_SpellingNotCalculated;}
 enum
 clang_ext_Destructor_spelling clang_ext_Destructor_getSpelling(
 CXCursor cursor)
@@ -1824,7 +1824,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Destructor_SpellingNotCalculated;};
+ return clang_ext_Destructor_SpellingNotCalculated;}
 enum
 clang_ext_DiagnoseAsBuiltin_spelling clang_ext_DiagnoseAsBuiltin_getSpelling(
 CXCursor cursor)
@@ -1848,7 +1848,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_DiagnoseAsBuiltin_SpellingNotCalculated;};
+ return clang_ext_DiagnoseAsBuiltin_SpellingNotCalculated;}
 enum
 clang_ext_DisableSanitizerInstrumentation_spelling
 clang_ext_DisableSanitizerInstrumentation_getSpelling(CXCursor cursor)
@@ -1875,7 +1875,7 @@ clang_ext_DisableSanitizerInstrumentation_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_DisableSanitizerInstrumentation_SpellingNotCalculated;};
+ return clang_ext_DisableSanitizerInstrumentation_SpellingNotCalculated;}
 enum
 clang_ext_DisableTailCalls_spelling clang_ext_DisableTailCalls_getSpelling(
 CXCursor cursor)
@@ -1898,7 +1898,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_DisableTailCalls_SpellingNotCalculated;};
+ return clang_ext_DisableTailCalls_SpellingNotCalculated;}
 enum
 clang_ext_EnforceTCB_spelling clang_ext_EnforceTCB_getSpelling(
 CXCursor cursor)
@@ -1920,7 +1920,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_EnforceTCB_SpellingNotCalculated;};
+ return clang_ext_EnforceTCB_SpellingNotCalculated;}
 enum
 clang_ext_EnforceTCBLeaf_spelling clang_ext_EnforceTCBLeaf_getSpelling(
 CXCursor cursor)
@@ -1943,7 +1943,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_EnforceTCBLeaf_SpellingNotCalculated;};
+ return clang_ext_EnforceTCBLeaf_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_5_0_0
 ;
@@ -1955,7 +1955,7 @@ clang::EnumExtensibilityAttr ::Kind value)
   return clang_ext_EnumExtensibilityAttr_Kind_Closed;
   case clang::EnumExtensibilityAttr ::Kind ::Open:
   return clang_ext_EnumExtensibilityAttr_Kind_Open;}
- return clang_ext_EnumExtensibilityAttr_Kind_Closed;};
+ return clang_ext_EnumExtensibilityAttr_Kind_Closed;}
 
 #endif
 ;
@@ -1982,7 +1982,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_EnumExtensibility_SpellingNotCalculated;};
+ return clang_ext_EnumExtensibility_SpellingNotCalculated;}
 enum clang_ext_Error_spelling clang_ext_Error_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_14_0_0
@@ -2008,7 +2008,7 @@ enum clang_ext_Error_spelling clang_ext_Error_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Error_SpellingNotCalculated;};
+ return clang_ext_Error_SpellingNotCalculated;}
 enum
 clang_ext_ExcludeFromExplicitInstantiation_spelling
 clang_ext_ExcludeFromExplicitInstantiation_getSpelling(CXCursor cursor)
@@ -2035,7 +2035,7 @@ clang_ext_ExcludeFromExplicitInstantiation_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ExcludeFromExplicitInstantiation_SpellingNotCalculated;};
+ return clang_ext_ExcludeFromExplicitInstantiation_SpellingNotCalculated;}
 enum
 clang_ext_ExternalSourceSymbol_spelling
 clang_ext_ExternalSourceSymbol_getSpelling(CXCursor cursor)
@@ -2059,7 +2059,7 @@ clang_ext_ExternalSourceSymbol_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ExternalSourceSymbol_SpellingNotCalculated;};
+ return clang_ext_ExternalSourceSymbol_SpellingNotCalculated;}
 enum
 clang_ext_FallThrough_spelling clang_ext_FallThrough_getSpelling(
 CXCursor cursor)
@@ -2087,7 +2087,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_FallThrough_SpellingNotCalculated;};
+ return clang_ext_FallThrough_SpellingNotCalculated;}
 enum
 clang_ext_FastCall_spelling clang_ext_FastCall_getSpelling(CXCursor cursor)
 {
@@ -2110,7 +2110,7 @@ clang_ext_FastCall_spelling clang_ext_FastCall_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_FastCall_SpellingNotCalculated;};
+ return clang_ext_FastCall_SpellingNotCalculated;}
 enum clang_ext_Final_spelling clang_ext_Final_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -2128,7 +2128,7 @@ enum clang_ext_Final_spelling clang_ext_Final_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Final_SpellingNotCalculated;};
+ return clang_ext_Final_SpellingNotCalculated;}
 enum
 clang_ext_FlagEnum_spelling clang_ext_FlagEnum_getSpelling(CXCursor cursor)
 {
@@ -2149,7 +2149,7 @@ clang_ext_FlagEnum_spelling clang_ext_FlagEnum_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_FlagEnum_SpellingNotCalculated;};
+ return clang_ext_FlagEnum_SpellingNotCalculated;}
 enum
 clang_ext_Flatten_spelling clang_ext_Flatten_getSpelling(CXCursor cursor)
 {
@@ -2170,7 +2170,7 @@ clang_ext_Flatten_spelling clang_ext_Flatten_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Flatten_SpellingNotCalculated;};
+ return clang_ext_Flatten_SpellingNotCalculated;}
 enum clang_ext_Format_spelling clang_ext_Format_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -2190,7 +2190,7 @@ enum clang_ext_Format_spelling clang_ext_Format_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Format_SpellingNotCalculated;};
+ return clang_ext_Format_SpellingNotCalculated;}
 enum
 clang_ext_FormatArg_spelling clang_ext_FormatArg_getSpelling(CXCursor cursor)
 {
@@ -2211,7 +2211,7 @@ clang_ext_FormatArg_spelling clang_ext_FormatArg_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_FormatArg_SpellingNotCalculated;};
+ return clang_ext_FormatArg_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_15_0_0
 ;
@@ -2224,7 +2224,7 @@ clang::FunctionReturnThunksAttr ::Kind value)
   return clang_ext_FunctionReturnThunksAttr_Kind_Keep;
   case clang::FunctionReturnThunksAttr ::Kind ::Extern:
   return clang_ext_FunctionReturnThunksAttr_Kind_Extern;}
- return clang_ext_FunctionReturnThunksAttr_Kind_Keep;};
+ return clang_ext_FunctionReturnThunksAttr_Kind_Keep;}
 
 #endif
 ;
@@ -2251,7 +2251,7 @@ clang_ext_FunctionReturnThunks_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_FunctionReturnThunks_SpellingNotCalculated;};
+ return clang_ext_FunctionReturnThunks_SpellingNotCalculated;}
 enum
 clang_ext_GNUInline_spelling clang_ext_GNUInline_getSpelling(CXCursor cursor)
 {
@@ -2272,7 +2272,7 @@ clang_ext_GNUInline_spelling clang_ext_GNUInline_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_GNUInline_SpellingNotCalculated;};
+ return clang_ext_GNUInline_SpellingNotCalculated;}
 enum
 clang_ext_GuardedVar_spelling clang_ext_GuardedVar_getSpelling(
 CXCursor cursor)
@@ -2292,7 +2292,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_GuardedVar_SpellingNotCalculated;};
+ return clang_ext_GuardedVar_SpellingNotCalculated;}
 enum
 clang_ext_HIPManaged_spelling clang_ext_HIPManaged_getSpelling(
 CXCursor cursor)
@@ -2312,7 +2312,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_HIPManaged_SpellingNotCalculated;};
+ return clang_ext_HIPManaged_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_15_0_0
 ;
@@ -2348,7 +2348,7 @@ clang::HLSLShaderAttr ::ShaderType value)
   return clang_ext_HLSLShaderAttr_ShaderType_Mesh;
   case clang::HLSLShaderAttr ::ShaderType ::Amplification:
   return clang_ext_HLSLShaderAttr_ShaderType_Amplification;}
- return clang_ext_HLSLShaderAttr_ShaderType_Pixel;};
+ return clang_ext_HLSLShaderAttr_ShaderType_Pixel;}
 
 #endif
 ;
@@ -2371,7 +2371,7 @@ enum clang_ext_Hot_spelling clang_ext_Hot_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Hot_SpellingNotCalculated;};
+ return clang_ext_Hot_SpellingNotCalculated;}
 enum
 clang_ext_IBAction_spelling clang_ext_IBAction_getSpelling(CXCursor cursor)
 {
@@ -2392,7 +2392,7 @@ clang_ext_IBAction_spelling clang_ext_IBAction_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_IBAction_SpellingNotCalculated;};
+ return clang_ext_IBAction_SpellingNotCalculated;}
 enum
 clang_ext_IBOutlet_spelling clang_ext_IBOutlet_getSpelling(CXCursor cursor)
 {
@@ -2413,7 +2413,7 @@ clang_ext_IBOutlet_spelling clang_ext_IBOutlet_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_IBOutlet_SpellingNotCalculated;};
+ return clang_ext_IBOutlet_SpellingNotCalculated;}
 enum
 clang_ext_IBOutletCollection_spelling
 clang_ext_IBOutletCollection_getSpelling(CXCursor cursor)
@@ -2437,7 +2437,7 @@ clang_ext_IBOutletCollection_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_IBOutletCollection_SpellingNotCalculated;};
+ return clang_ext_IBOutletCollection_SpellingNotCalculated;}
 enum clang_ext_IFunc_spelling clang_ext_IFunc_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_9_0
@@ -2457,7 +2457,7 @@ enum clang_ext_IFunc_spelling clang_ext_IFunc_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_IFunc_SpellingNotCalculated;};
+ return clang_ext_IFunc_SpellingNotCalculated;}
 enum
 clang_ext_InitPriority_spelling clang_ext_InitPriority_getSpelling(
 CXCursor cursor)
@@ -2477,7 +2477,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_InitPriority_SpellingNotCalculated;};
+ return clang_ext_InitPriority_SpellingNotCalculated;}
 enum
 clang_ext_IntelOclBicc_spelling clang_ext_IntelOclBicc_getSpelling(
 CXCursor cursor)
@@ -2497,7 +2497,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_IntelOclBicc_SpellingNotCalculated;};
+ return clang_ext_IntelOclBicc_SpellingNotCalculated;}
 enum
 clang_ext_InternalLinkage_spelling clang_ext_InternalLinkage_getSpelling(
 CXCursor cursor)
@@ -2520,7 +2520,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_InternalLinkage_SpellingNotCalculated;};
+ return clang_ext_InternalLinkage_SpellingNotCalculated;}
 enum
 clang_ext_LTOVisibilityPublic_spelling
 clang_ext_LTOVisibilityPublic_getSpelling(CXCursor cursor)
@@ -2544,7 +2544,7 @@ clang_ext_LTOVisibilityPublic_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_LTOVisibilityPublic_SpellingNotCalculated;};
+ return clang_ext_LTOVisibilityPublic_SpellingNotCalculated;}
 enum clang_ext_Leaf_spelling clang_ext_Leaf_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_12_0_0
@@ -2564,7 +2564,7 @@ enum clang_ext_Leaf_spelling clang_ext_Leaf_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Leaf_SpellingNotCalculated;};
+ return clang_ext_Leaf_SpellingNotCalculated;}
 enum
 clang_ext_LifetimeBound_spelling clang_ext_LifetimeBound_getSpelling(
 CXCursor cursor)
@@ -2585,7 +2585,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_LifetimeBound_SpellingNotCalculated;};
+ return clang_ext_LifetimeBound_SpellingNotCalculated;}
 enum clang_ext_Likely_spelling clang_ext_Likely_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_12_0_0
@@ -2603,7 +2603,7 @@ enum clang_ext_Likely_spelling clang_ext_Likely_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Likely_SpellingNotCalculated;};
+ return clang_ext_Likely_SpellingNotCalculated;}
 enum
 clang_ext_LoaderUninitialized_spelling
 clang_ext_LoaderUninitialized_getSpelling(CXCursor cursor)
@@ -2627,7 +2627,7 @@ clang_ext_LoaderUninitialized_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_LoaderUninitialized_SpellingNotCalculated;};
+ return clang_ext_LoaderUninitialized_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_10_0_0
 ;
@@ -2659,7 +2659,7 @@ clang::LoopHintAttr ::OptionType value)
   return clang_ext_LoopHintAttr_OptionType_Distribute;
   case clang::LoopHintAttr ::OptionType ::VectorizePredicate:
   return clang_ext_LoopHintAttr_OptionType_VectorizePredicate;}
- return clang_ext_LoopHintAttr_OptionType_Vectorize;};
+ return clang_ext_LoopHintAttr_OptionType_Vectorize;}
 
 #endif
 ;
@@ -2687,7 +2687,7 @@ clang_ext_LoopHint_spelling clang_ext_LoopHint_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_LoopHint_SpellingNotCalculated;};
+ return clang_ext_LoopHint_SpellingNotCalculated;}
 enum
 clang_ext_MIGServerRoutine_spelling clang_ext_MIGServerRoutine_getSpelling(
 CXCursor cursor)
@@ -2710,7 +2710,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_MIGServerRoutine_SpellingNotCalculated;};
+ return clang_ext_MIGServerRoutine_SpellingNotCalculated;}
 enum clang_ext_MSABI_spelling clang_ext_MSABI_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -2730,7 +2730,7 @@ enum clang_ext_MSABI_spelling clang_ext_MSABI_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_MSABI_SpellingNotCalculated;};
+ return clang_ext_MSABI_SpellingNotCalculated;}
 enum
 clang_ext_MSInheritance_spelling clang_ext_MSInheritance_getSpelling(
 CXCursor cursor)
@@ -2755,7 +2755,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_MSInheritance_SpellingNotCalculated;};
+ return clang_ext_MSInheritance_SpellingNotCalculated;}
 enum
 clang_ext_MSP430Interrupt_spelling clang_ext_MSP430Interrupt_getSpelling(
 CXCursor cursor)
@@ -2778,7 +2778,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_MSP430Interrupt_SpellingNotCalculated;};
+ return clang_ext_MSP430Interrupt_SpellingNotCalculated;}
 enum
 clang_ext_MSStruct_spelling clang_ext_MSStruct_getSpelling(CXCursor cursor)
 {
@@ -2799,7 +2799,7 @@ clang_ext_MSStruct_spelling clang_ext_MSStruct_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_MSStruct_SpellingNotCalculated;};
+ return clang_ext_MSStruct_SpellingNotCalculated;}
 enum
 clang_ext_MayAlias_spelling clang_ext_MayAlias_getSpelling(CXCursor cursor)
 {
@@ -2820,7 +2820,7 @@ clang_ext_MayAlias_spelling clang_ext_MayAlias_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_MayAlias_SpellingNotCalculated;};
+ return clang_ext_MayAlias_SpellingNotCalculated;}
 enum
 clang_ext_MicroMips_spelling clang_ext_MicroMips_getSpelling(CXCursor cursor)
 {
@@ -2841,7 +2841,7 @@ clang_ext_MicroMips_spelling clang_ext_MicroMips_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_MicroMips_SpellingNotCalculated;};
+ return clang_ext_MicroMips_SpellingNotCalculated;}
 enum
 clang_ext_MinSize_spelling clang_ext_MinSize_getSpelling(CXCursor cursor)
 {
@@ -2862,7 +2862,7 @@ clang_ext_MinSize_spelling clang_ext_MinSize_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_MinSize_SpellingNotCalculated;};
+ return clang_ext_MinSize_SpellingNotCalculated;}
 enum
 clang_ext_MinVectorWidth_spelling clang_ext_MinVectorWidth_getSpelling(
 CXCursor cursor)
@@ -2885,7 +2885,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_MinVectorWidth_SpellingNotCalculated;};
+ return clang_ext_MinVectorWidth_SpellingNotCalculated;}
 enum clang_ext_Mips16_spelling clang_ext_Mips16_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -2905,7 +2905,7 @@ enum clang_ext_Mips16_spelling clang_ext_Mips16_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Mips16_SpellingNotCalculated;};
+ return clang_ext_Mips16_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_3_8_0
 ;
@@ -2932,7 +2932,7 @@ clang::MipsInterruptAttr ::InterruptType value)
   return clang_ext_MipsInterruptAttr_InterruptType_hw5;
   case clang::MipsInterruptAttr ::InterruptType ::eic:
   return clang_ext_MipsInterruptAttr_InterruptType_eic;}
- return clang_ext_MipsInterruptAttr_InterruptType_sw0;};
+ return clang_ext_MipsInterruptAttr_InterruptType_sw0;}
 
 #endif
 ;
@@ -2958,7 +2958,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_MipsInterrupt_SpellingNotCalculated;};
+ return clang_ext_MipsInterrupt_SpellingNotCalculated;}
 enum
 clang_ext_MipsLongCall_spelling clang_ext_MipsLongCall_getSpelling(
 CXCursor cursor)
@@ -3002,7 +3002,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_MipsLongCall_SpellingNotCalculated;};
+ return clang_ext_MipsLongCall_SpellingNotCalculated;}
 enum
 clang_ext_MipsShortCall_spelling clang_ext_MipsShortCall_getSpelling(
 CXCursor cursor)
@@ -3047,7 +3047,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_MipsShortCall_SpellingNotCalculated;};
+ return clang_ext_MipsShortCall_SpellingNotCalculated;}
 enum clang_ext_Mode_spelling clang_ext_Mode_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -3067,7 +3067,7 @@ enum clang_ext_Mode_spelling clang_ext_Mode_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Mode_SpellingNotCalculated;};
+ return clang_ext_Mode_SpellingNotCalculated;}
 enum
 clang_ext_MustTail_spelling clang_ext_MustTail_getSpelling(CXCursor cursor)
 {
@@ -3088,7 +3088,7 @@ clang_ext_MustTail_spelling clang_ext_MustTail_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_MustTail_SpellingNotCalculated;};
+ return clang_ext_MustTail_SpellingNotCalculated;}
 enum
 clang_ext_NSConsumed_spelling clang_ext_NSConsumed_getSpelling(
 CXCursor cursor)
@@ -3110,7 +3110,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NSConsumed_SpellingNotCalculated;};
+ return clang_ext_NSConsumed_SpellingNotCalculated;}
 enum
 clang_ext_NSConsumesSelf_spelling clang_ext_NSConsumesSelf_getSpelling(
 CXCursor cursor)
@@ -3133,7 +3133,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NSConsumesSelf_SpellingNotCalculated;};
+ return clang_ext_NSConsumesSelf_SpellingNotCalculated;}
 enum
 clang_ext_NSReturnsAutoreleased_spelling
 clang_ext_NSReturnsAutoreleased_getSpelling(CXCursor cursor)
@@ -3157,7 +3157,7 @@ clang_ext_NSReturnsAutoreleased_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NSReturnsAutoreleased_SpellingNotCalculated;};
+ return clang_ext_NSReturnsAutoreleased_SpellingNotCalculated;}
 enum
 clang_ext_NSReturnsNotRetained_spelling
 clang_ext_NSReturnsNotRetained_getSpelling(CXCursor cursor)
@@ -3181,7 +3181,7 @@ clang_ext_NSReturnsNotRetained_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NSReturnsNotRetained_SpellingNotCalculated;};
+ return clang_ext_NSReturnsNotRetained_SpellingNotCalculated;}
 enum
 clang_ext_NSReturnsRetained_spelling clang_ext_NSReturnsRetained_getSpelling(
 CXCursor cursor)
@@ -3205,7 +3205,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NSReturnsRetained_SpellingNotCalculated;};
+ return clang_ext_NSReturnsRetained_SpellingNotCalculated;}
 enum clang_ext_Naked_spelling clang_ext_Naked_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -3227,7 +3227,7 @@ enum clang_ext_Naked_spelling clang_ext_Naked_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Naked_SpellingNotCalculated;};
+ return clang_ext_Naked_SpellingNotCalculated;}
 enum
 clang_ext_NoBuiltin_spelling clang_ext_NoBuiltin_getSpelling(CXCursor cursor)
 {
@@ -3248,7 +3248,7 @@ clang_ext_NoBuiltin_spelling clang_ext_NoBuiltin_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoBuiltin_SpellingNotCalculated;};
+ return clang_ext_NoBuiltin_SpellingNotCalculated;}
 enum
 clang_ext_NoCommon_spelling clang_ext_NoCommon_getSpelling(CXCursor cursor)
 {
@@ -3269,7 +3269,7 @@ clang_ext_NoCommon_spelling clang_ext_NoCommon_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoCommon_SpellingNotCalculated;};
+ return clang_ext_NoCommon_SpellingNotCalculated;}
 enum
 clang_ext_NoDebug_spelling clang_ext_NoDebug_getSpelling(CXCursor cursor)
 {
@@ -3290,7 +3290,7 @@ clang_ext_NoDebug_spelling clang_ext_NoDebug_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoDebug_SpellingNotCalculated;};
+ return clang_ext_NoDebug_SpellingNotCalculated;}
 enum
 clang_ext_NoDeref_spelling clang_ext_NoDeref_getSpelling(CXCursor cursor)
 {
@@ -3311,7 +3311,7 @@ clang_ext_NoDeref_spelling clang_ext_NoDeref_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoDeref_SpellingNotCalculated;};
+ return clang_ext_NoDeref_SpellingNotCalculated;}
 enum
 clang_ext_NoDestroy_spelling clang_ext_NoDestroy_getSpelling(CXCursor cursor)
 {
@@ -3330,7 +3330,7 @@ clang_ext_NoDestroy_spelling clang_ext_NoDestroy_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoDestroy_SpellingNotCalculated;};
+ return clang_ext_NoDestroy_SpellingNotCalculated;}
 enum
 clang_ext_NoDuplicate_spelling clang_ext_NoDuplicate_getSpelling(
 CXCursor cursor)
@@ -3352,7 +3352,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoDuplicate_SpellingNotCalculated;};
+ return clang_ext_NoDuplicate_SpellingNotCalculated;}
 enum
 clang_ext_NoEscape_spelling clang_ext_NoEscape_getSpelling(CXCursor cursor)
 {
@@ -3373,7 +3373,7 @@ clang_ext_NoEscape_spelling clang_ext_NoEscape_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoEscape_SpellingNotCalculated;};
+ return clang_ext_NoEscape_SpellingNotCalculated;}
 enum
 clang_ext_NoInstrumentFunction_spelling
 clang_ext_NoInstrumentFunction_getSpelling(CXCursor cursor)
@@ -3397,7 +3397,7 @@ clang_ext_NoInstrumentFunction_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoInstrumentFunction_SpellingNotCalculated;};
+ return clang_ext_NoInstrumentFunction_SpellingNotCalculated;}
 enum
 clang_ext_NoMicroMips_spelling clang_ext_NoMicroMips_getSpelling(
 CXCursor cursor)
@@ -3419,7 +3419,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoMicroMips_SpellingNotCalculated;};
+ return clang_ext_NoMicroMips_SpellingNotCalculated;}
 enum
 clang_ext_NoMips16_spelling clang_ext_NoMips16_getSpelling(CXCursor cursor)
 {
@@ -3440,7 +3440,7 @@ clang_ext_NoMips16_spelling clang_ext_NoMips16_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoMips16_SpellingNotCalculated;};
+ return clang_ext_NoMips16_SpellingNotCalculated;}
 enum
 clang_ext_NoProfileFunction_spelling clang_ext_NoProfileFunction_getSpelling(
 CXCursor cursor)
@@ -3465,7 +3465,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoProfileFunction_SpellingNotCalculated;};
+ return clang_ext_NoProfileFunction_SpellingNotCalculated;}
 enum
 clang_ext_NoRandomizeLayout_spelling clang_ext_NoRandomizeLayout_getSpelling(
 CXCursor cursor)
@@ -3489,7 +3489,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoRandomizeLayout_SpellingNotCalculated;};
+ return clang_ext_NoRandomizeLayout_SpellingNotCalculated;}
 enum
 clang_ext_NoReturn_spelling clang_ext_NoReturn_getSpelling(CXCursor cursor)
 {
@@ -3512,7 +3512,7 @@ clang_ext_NoReturn_spelling clang_ext_NoReturn_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoReturn_SpellingNotCalculated;};
+ return clang_ext_NoReturn_SpellingNotCalculated;}
 enum
 clang_ext_NoSanitize_spelling clang_ext_NoSanitize_getSpelling(
 CXCursor cursor)
@@ -3534,7 +3534,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoSanitize_SpellingNotCalculated;};
+ return clang_ext_NoSanitize_SpellingNotCalculated;}
 enum
 clang_ext_NoSpeculativeLoadHardening_spelling
 clang_ext_NoSpeculativeLoadHardening_getSpelling(CXCursor cursor)
@@ -3561,7 +3561,7 @@ clang_ext_NoSpeculativeLoadHardening_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoSpeculativeLoadHardening_SpellingNotCalculated;};
+ return clang_ext_NoSpeculativeLoadHardening_SpellingNotCalculated;}
 enum
 clang_ext_NoSplitStack_spelling clang_ext_NoSplitStack_getSpelling(
 CXCursor cursor)
@@ -3583,7 +3583,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoSplitStack_SpellingNotCalculated;};
+ return clang_ext_NoSplitStack_SpellingNotCalculated;}
 enum
 clang_ext_NoStackProtector_spelling clang_ext_NoStackProtector_getSpelling(
 CXCursor cursor)
@@ -3606,7 +3606,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoStackProtector_SpellingNotCalculated;};
+ return clang_ext_NoStackProtector_SpellingNotCalculated;}
 enum
 clang_ext_NoThreadSafetyAnalysis_spelling
 clang_ext_NoThreadSafetyAnalysis_getSpelling(CXCursor cursor)
@@ -3632,7 +3632,7 @@ clang_ext_NoThreadSafetyAnalysis_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoThreadSafetyAnalysis_SpellingNotCalculated;};
+ return clang_ext_NoThreadSafetyAnalysis_SpellingNotCalculated;}
 enum
 clang_ext_NoThrow_spelling clang_ext_NoThrow_getSpelling(CXCursor cursor)
 {
@@ -3655,7 +3655,7 @@ clang_ext_NoThrow_spelling clang_ext_NoThrow_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NoThrow_SpellingNotCalculated;};
+ return clang_ext_NoThrow_SpellingNotCalculated;}
 enum
 clang_ext_NonNull_spelling clang_ext_NonNull_getSpelling(CXCursor cursor)
 {
@@ -3676,7 +3676,7 @@ clang_ext_NonNull_spelling clang_ext_NonNull_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NonNull_SpellingNotCalculated;};
+ return clang_ext_NonNull_SpellingNotCalculated;}
 enum
 clang_ext_NotTailCalled_spelling clang_ext_NotTailCalled_getSpelling(
 CXCursor cursor)
@@ -3699,7 +3699,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_NotTailCalled_SpellingNotCalculated;};
+ return clang_ext_NotTailCalled_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_9_0_0
 ;
@@ -3737,7 +3737,7 @@ clang::OMPAllocateDeclAttr ::AllocatorTypeTy value)
   case clang::OMPAllocateDeclAttr ::AllocatorTypeTy ::OMPUserDefinedMemAlloc:
   return
   clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPUserDefinedMemAlloc;}
- return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPNullMemAlloc;};
+ return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPNullMemAlloc;}
 
 #endif
 ;
@@ -3755,7 +3755,7 @@ clang::OMPDeclareSimdDeclAttr ::BranchStateTy value)
   return clang_ext_OMPDeclareSimdDeclAttr_BranchStateTy_BS_Inbranch;
   case clang::OMPDeclareSimdDeclAttr ::BranchStateTy ::BS_Notinbranch:
   return clang_ext_OMPDeclareSimdDeclAttr_BranchStateTy_BS_Notinbranch;}
- return clang_ext_OMPDeclareSimdDeclAttr_BranchStateTy_BS_Undefined;};
+ return clang_ext_OMPDeclareSimdDeclAttr_BranchStateTy_BS_Undefined;}
 
 #endif
 ;
@@ -3771,7 +3771,7 @@ clang::OMPDeclareTargetDeclAttr ::MapTypeTy value)
   return clang_ext_OMPDeclareTargetDeclAttr_MapTypeTy_MT_To;
   case clang::OMPDeclareTargetDeclAttr ::MapTypeTy ::MT_Link:
   return clang_ext_OMPDeclareTargetDeclAttr_MapTypeTy_MT_Link;}
- return clang_ext_OMPDeclareTargetDeclAttr_MapTypeTy_MT_To;};
+ return clang_ext_OMPDeclareTargetDeclAttr_MapTypeTy_MT_To;}
 
 #endif
 ;
@@ -3796,7 +3796,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OSConsumed_SpellingNotCalculated;};
+ return clang_ext_OSConsumed_SpellingNotCalculated;}
 enum
 clang_ext_OSConsumesThis_spelling clang_ext_OSConsumesThis_getSpelling(
 CXCursor cursor)
@@ -3819,7 +3819,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OSConsumesThis_SpellingNotCalculated;};
+ return clang_ext_OSConsumesThis_SpellingNotCalculated;}
 enum
 clang_ext_OSReturnsNotRetained_spelling
 clang_ext_OSReturnsNotRetained_getSpelling(CXCursor cursor)
@@ -3843,7 +3843,7 @@ clang_ext_OSReturnsNotRetained_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OSReturnsNotRetained_SpellingNotCalculated;};
+ return clang_ext_OSReturnsNotRetained_SpellingNotCalculated;}
 enum
 clang_ext_OSReturnsRetained_spelling clang_ext_OSReturnsRetained_getSpelling(
 CXCursor cursor)
@@ -3867,7 +3867,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OSReturnsRetained_SpellingNotCalculated;};
+ return clang_ext_OSReturnsRetained_SpellingNotCalculated;}
 enum
 clang_ext_OSReturnsRetainedOnNonZero_spelling
 clang_ext_OSReturnsRetainedOnNonZero_getSpelling(CXCursor cursor)
@@ -3894,7 +3894,7 @@ clang_ext_OSReturnsRetainedOnNonZero_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OSReturnsRetainedOnNonZero_SpellingNotCalculated;};
+ return clang_ext_OSReturnsRetainedOnNonZero_SpellingNotCalculated;}
 enum
 clang_ext_OSReturnsRetainedOnZero_spelling
 clang_ext_OSReturnsRetainedOnZero_getSpelling(CXCursor cursor)
@@ -3920,7 +3920,7 @@ clang_ext_OSReturnsRetainedOnZero_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OSReturnsRetainedOnZero_SpellingNotCalculated;};
+ return clang_ext_OSReturnsRetainedOnZero_SpellingNotCalculated;}
 enum
 clang_ext_ObjCBoxable_spelling clang_ext_ObjCBoxable_getSpelling(
 CXCursor cursor)
@@ -3942,7 +3942,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCBoxable_SpellingNotCalculated;};
+ return clang_ext_ObjCBoxable_SpellingNotCalculated;}
 enum
 clang_ext_ObjCBridge_spelling clang_ext_ObjCBridge_getSpelling(
 CXCursor cursor)
@@ -3964,7 +3964,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCBridge_SpellingNotCalculated;};
+ return clang_ext_ObjCBridge_SpellingNotCalculated;}
 enum
 clang_ext_ObjCBridgeMutable_spelling clang_ext_ObjCBridgeMutable_getSpelling(
 CXCursor cursor)
@@ -3988,7 +3988,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCBridgeMutable_SpellingNotCalculated;};
+ return clang_ext_ObjCBridgeMutable_SpellingNotCalculated;}
 enum
 clang_ext_ObjCBridgeRelated_spelling clang_ext_ObjCBridgeRelated_getSpelling(
 CXCursor cursor)
@@ -4012,7 +4012,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCBridgeRelated_SpellingNotCalculated;};
+ return clang_ext_ObjCBridgeRelated_SpellingNotCalculated;}
 enum
 clang_ext_ObjCClassStub_spelling clang_ext_ObjCClassStub_getSpelling(
 CXCursor cursor)
@@ -4035,7 +4035,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCClassStub_SpellingNotCalculated;};
+ return clang_ext_ObjCClassStub_SpellingNotCalculated;}
 enum
 clang_ext_ObjCDesignatedInitializer_spelling
 clang_ext_ObjCDesignatedInitializer_getSpelling(CXCursor cursor)
@@ -4061,7 +4061,7 @@ clang_ext_ObjCDesignatedInitializer_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCDesignatedInitializer_SpellingNotCalculated;};
+ return clang_ext_ObjCDesignatedInitializer_SpellingNotCalculated;}
 enum
 clang_ext_ObjCDirect_spelling clang_ext_ObjCDirect_getSpelling(
 CXCursor cursor)
@@ -4083,7 +4083,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCDirect_SpellingNotCalculated;};
+ return clang_ext_ObjCDirect_SpellingNotCalculated;}
 enum
 clang_ext_ObjCDirectMembers_spelling clang_ext_ObjCDirectMembers_getSpelling(
 CXCursor cursor)
@@ -4107,7 +4107,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCDirectMembers_SpellingNotCalculated;};
+ return clang_ext_ObjCDirectMembers_SpellingNotCalculated;}
 enum
 clang_ext_ObjCException_spelling clang_ext_ObjCException_getSpelling(
 CXCursor cursor)
@@ -4130,7 +4130,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCException_SpellingNotCalculated;};
+ return clang_ext_ObjCException_SpellingNotCalculated;}
 enum
 clang_ext_ObjCExplicitProtocolImpl_spelling
 clang_ext_ObjCExplicitProtocolImpl_getSpelling(CXCursor cursor)
@@ -4157,7 +4157,7 @@ clang_ext_ObjCExplicitProtocolImpl_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCExplicitProtocolImpl_SpellingNotCalculated;};
+ return clang_ext_ObjCExplicitProtocolImpl_SpellingNotCalculated;}
 enum
 clang_ext_ObjCExternallyRetained_spelling
 clang_ext_ObjCExternallyRetained_getSpelling(CXCursor cursor)
@@ -4182,7 +4182,7 @@ clang_ext_ObjCExternallyRetained_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCExternallyRetained_SpellingNotCalculated;};
+ return clang_ext_ObjCExternallyRetained_SpellingNotCalculated;}
 enum clang_ext_ObjCGC_spelling clang_ext_ObjCGC_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_8_0_0
@@ -4202,7 +4202,7 @@ enum clang_ext_ObjCGC_spelling clang_ext_ObjCGC_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCGC_SpellingNotCalculated;};
+ return clang_ext_ObjCGC_SpellingNotCalculated;}
 enum
 clang_ext_ObjCIndependentClass_spelling
 clang_ext_ObjCIndependentClass_getSpelling(CXCursor cursor)
@@ -4226,7 +4226,7 @@ clang_ext_ObjCIndependentClass_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCIndependentClass_SpellingNotCalculated;};
+ return clang_ext_ObjCIndependentClass_SpellingNotCalculated;}
 enum
 clang_ext_ObjCMethodFamilyAttr_FamilyKind
 convert_ObjCMethodFamilyAttr_FamilyKind(
@@ -4244,7 +4244,7 @@ clang::ObjCMethodFamilyAttr ::FamilyKind value)
   return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_mutableCopy;
   case clang::ObjCMethodFamilyAttr ::FamilyKind ::OMF_new:
   return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_new;}
- return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_None;};
+ return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_None;}
 enum
 clang_ext_ObjCMethodFamily_spelling clang_ext_ObjCMethodFamily_getSpelling(
 CXCursor cursor)
@@ -4267,7 +4267,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCMethodFamily_SpellingNotCalculated;};
+ return clang_ext_ObjCMethodFamily_SpellingNotCalculated;}
 enum
 clang_ext_ObjCNSObject_spelling clang_ext_ObjCNSObject_getSpelling(
 CXCursor cursor)
@@ -4289,7 +4289,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCNSObject_SpellingNotCalculated;};
+ return clang_ext_ObjCNSObject_SpellingNotCalculated;}
 enum
 clang_ext_ObjCNonLazyClass_spelling clang_ext_ObjCNonLazyClass_getSpelling(
 CXCursor cursor)
@@ -4312,7 +4312,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCNonLazyClass_SpellingNotCalculated;};
+ return clang_ext_ObjCNonLazyClass_SpellingNotCalculated;}
 enum
 clang_ext_ObjCNonRuntimeProtocol_spelling
 clang_ext_ObjCNonRuntimeProtocol_getSpelling(CXCursor cursor)
@@ -4338,7 +4338,7 @@ clang_ext_ObjCNonRuntimeProtocol_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCNonRuntimeProtocol_SpellingNotCalculated;};
+ return clang_ext_ObjCNonRuntimeProtocol_SpellingNotCalculated;}
 enum
 clang_ext_ObjCOwnership_spelling clang_ext_ObjCOwnership_getSpelling(
 CXCursor cursor)
@@ -4361,7 +4361,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCOwnership_SpellingNotCalculated;};
+ return clang_ext_ObjCOwnership_SpellingNotCalculated;}
 enum
 clang_ext_ObjCPreciseLifetime_spelling
 clang_ext_ObjCPreciseLifetime_getSpelling(CXCursor cursor)
@@ -4385,7 +4385,7 @@ clang_ext_ObjCPreciseLifetime_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCPreciseLifetime_SpellingNotCalculated;};
+ return clang_ext_ObjCPreciseLifetime_SpellingNotCalculated;}
 enum
 clang_ext_ObjCRequiresPropertyDefs_spelling
 clang_ext_ObjCRequiresPropertyDefs_getSpelling(CXCursor cursor)
@@ -4412,7 +4412,7 @@ clang_ext_ObjCRequiresPropertyDefs_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCRequiresPropertyDefs_SpellingNotCalculated;};
+ return clang_ext_ObjCRequiresPropertyDefs_SpellingNotCalculated;}
 enum
 clang_ext_ObjCRequiresSuper_spelling clang_ext_ObjCRequiresSuper_getSpelling(
 CXCursor cursor)
@@ -4436,7 +4436,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCRequiresSuper_SpellingNotCalculated;};
+ return clang_ext_ObjCRequiresSuper_SpellingNotCalculated;}
 enum
 clang_ext_ObjCReturnsInnerPointer_spelling
 clang_ext_ObjCReturnsInnerPointer_getSpelling(CXCursor cursor)
@@ -4462,7 +4462,7 @@ clang_ext_ObjCReturnsInnerPointer_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCReturnsInnerPointer_SpellingNotCalculated;};
+ return clang_ext_ObjCReturnsInnerPointer_SpellingNotCalculated;}
 enum
 clang_ext_ObjCRootClass_spelling clang_ext_ObjCRootClass_getSpelling(
 CXCursor cursor)
@@ -4485,7 +4485,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCRootClass_SpellingNotCalculated;};
+ return clang_ext_ObjCRootClass_SpellingNotCalculated;}
 enum
 clang_ext_ObjCRuntimeName_spelling clang_ext_ObjCRuntimeName_getSpelling(
 CXCursor cursor)
@@ -4508,7 +4508,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCRuntimeName_SpellingNotCalculated;};
+ return clang_ext_ObjCRuntimeName_SpellingNotCalculated;}
 enum
 clang_ext_ObjCRuntimeVisible_spelling
 clang_ext_ObjCRuntimeVisible_getSpelling(CXCursor cursor)
@@ -4532,7 +4532,7 @@ clang_ext_ObjCRuntimeVisible_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCRuntimeVisible_SpellingNotCalculated;};
+ return clang_ext_ObjCRuntimeVisible_SpellingNotCalculated;}
 enum
 clang_ext_ObjCSubclassingRestricted_spelling
 clang_ext_ObjCSubclassingRestricted_getSpelling(CXCursor cursor)
@@ -4558,7 +4558,7 @@ clang_ext_ObjCSubclassingRestricted_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ObjCSubclassingRestricted_SpellingNotCalculated;};
+ return clang_ext_ObjCSubclassingRestricted_SpellingNotCalculated;}
 enum
 clang_ext_OpenCLAccess_spelling clang_ext_OpenCLAccess_getSpelling(
 CXCursor cursor)
@@ -4580,7 +4580,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OpenCLAccess_SpellingNotCalculated;};
+ return clang_ext_OpenCLAccess_SpellingNotCalculated;}
 enum
 clang_ext_OpenCLConstantAddressSpace_spelling
 clang_ext_OpenCLConstantAddressSpace_getSpelling(CXCursor cursor)
@@ -4609,7 +4609,7 @@ clang_ext_OpenCLConstantAddressSpace_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OpenCLConstantAddressSpace_SpellingNotCalculated;};
+ return clang_ext_OpenCLConstantAddressSpace_SpellingNotCalculated;}
 enum
 clang_ext_OpenCLGenericAddressSpace_spelling
 clang_ext_OpenCLGenericAddressSpace_getSpelling(CXCursor cursor)
@@ -4637,7 +4637,7 @@ clang_ext_OpenCLGenericAddressSpace_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OpenCLGenericAddressSpace_SpellingNotCalculated;};
+ return clang_ext_OpenCLGenericAddressSpace_SpellingNotCalculated;}
 enum
 clang_ext_OpenCLGlobalAddressSpace_spelling
 clang_ext_OpenCLGlobalAddressSpace_getSpelling(CXCursor cursor)
@@ -4665,7 +4665,7 @@ clang_ext_OpenCLGlobalAddressSpace_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OpenCLGlobalAddressSpace_SpellingNotCalculated;};
+ return clang_ext_OpenCLGlobalAddressSpace_SpellingNotCalculated;}
 enum
 clang_ext_OpenCLGlobalDeviceAddressSpace_spelling
 clang_ext_OpenCLGlobalDeviceAddressSpace_getSpelling(CXCursor cursor)
@@ -4691,7 +4691,7 @@ clang_ext_OpenCLGlobalDeviceAddressSpace_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OpenCLGlobalDeviceAddressSpace_SpellingNotCalculated;};
+ return clang_ext_OpenCLGlobalDeviceAddressSpace_SpellingNotCalculated;}
 enum
 clang_ext_OpenCLGlobalHostAddressSpace_spelling
 clang_ext_OpenCLGlobalHostAddressSpace_getSpelling(CXCursor cursor)
@@ -4716,7 +4716,7 @@ clang_ext_OpenCLGlobalHostAddressSpace_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OpenCLGlobalHostAddressSpace_SpellingNotCalculated;};
+ return clang_ext_OpenCLGlobalHostAddressSpace_SpellingNotCalculated;}
 enum
 clang_ext_OpenCLKernel_spelling clang_ext_OpenCLKernel_getSpelling(
 CXCursor cursor)
@@ -4734,7 +4734,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OpenCLKernel_SpellingNotCalculated;};
+ return clang_ext_OpenCLKernel_SpellingNotCalculated;}
 enum
 clang_ext_OpenCLLocalAddressSpace_spelling
 clang_ext_OpenCLLocalAddressSpace_getSpelling(CXCursor cursor)
@@ -4762,7 +4762,7 @@ clang_ext_OpenCLLocalAddressSpace_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OpenCLLocalAddressSpace_SpellingNotCalculated;};
+ return clang_ext_OpenCLLocalAddressSpace_SpellingNotCalculated;}
 enum
 clang_ext_OpenCLPrivateAddressSpace_spelling
 clang_ext_OpenCLPrivateAddressSpace_getSpelling(CXCursor cursor)
@@ -4790,7 +4790,7 @@ clang_ext_OpenCLPrivateAddressSpace_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OpenCLPrivateAddressSpace_SpellingNotCalculated;};
+ return clang_ext_OpenCLPrivateAddressSpace_SpellingNotCalculated;}
 enum
 clang_ext_OptimizeNone_spelling clang_ext_OptimizeNone_getSpelling(
 CXCursor cursor)
@@ -4812,7 +4812,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OptimizeNone_SpellingNotCalculated;};
+ return clang_ext_OptimizeNone_SpellingNotCalculated;}
 enum
 clang_ext_Overloadable_spelling clang_ext_Overloadable_getSpelling(
 CXCursor cursor)
@@ -4834,7 +4834,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Overloadable_SpellingNotCalculated;};
+ return clang_ext_Overloadable_SpellingNotCalculated;}
 enum
 clang_ext_Ownership_spelling clang_ext_Ownership_getSpelling(CXCursor cursor)
 {
@@ -4915,7 +4915,7 @@ clang_ext_Ownership_spelling clang_ext_Ownership_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Ownership_SpellingNotCalculated;};
+ return clang_ext_Ownership_SpellingNotCalculated;}
 enum clang_ext_Packed_spelling clang_ext_Packed_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -4935,7 +4935,7 @@ enum clang_ext_Packed_spelling clang_ext_Packed_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Packed_SpellingNotCalculated;};
+ return clang_ext_Packed_SpellingNotCalculated;}
 enum
 clang_ext_ParamTypestateAttr_ConsumedState
 convert_ParamTypestateAttr_ConsumedState(
@@ -4947,7 +4947,7 @@ clang::ParamTypestateAttr ::ConsumedState value)
   return clang_ext_ParamTypestateAttr_ConsumedState_Consumed;
   case clang::ParamTypestateAttr ::ConsumedState ::Unconsumed:
   return clang_ext_ParamTypestateAttr_ConsumedState_Unconsumed;}
- return clang_ext_ParamTypestateAttr_ConsumedState_Unknown;};
+ return clang_ext_ParamTypestateAttr_ConsumedState_Unknown;}
 enum
 clang_ext_ParamTypestate_spelling clang_ext_ParamTypestate_getSpelling(
 CXCursor cursor)
@@ -4968,7 +4968,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ParamTypestate_SpellingNotCalculated;};
+ return clang_ext_ParamTypestate_SpellingNotCalculated;}
 enum clang_ext_Pascal_spelling clang_ext_Pascal_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -4990,7 +4990,7 @@ enum clang_ext_Pascal_spelling clang_ext_Pascal_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Pascal_SpellingNotCalculated;};
+ return clang_ext_Pascal_SpellingNotCalculated;}
 enum
 clang_ext_PassObjectSize_spelling clang_ext_PassObjectSize_getSpelling(
 CXCursor cursor)
@@ -5021,7 +5021,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_PassObjectSize_SpellingNotCalculated;};
+ return clang_ext_PassObjectSize_SpellingNotCalculated;}
 enum
 clang_ext_PatchableFunctionEntry_spelling
 clang_ext_PatchableFunctionEntry_getSpelling(CXCursor cursor)
@@ -5045,7 +5045,7 @@ clang_ext_PatchableFunctionEntry_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_PatchableFunctionEntry_SpellingNotCalculated;};
+ return clang_ext_PatchableFunctionEntry_SpellingNotCalculated;}
 enum
 clang_ext_PcsAttr_PCSType convert_PcsAttr_PCSType(
 clang::PcsAttr ::PCSType value)
@@ -5054,7 +5054,7 @@ clang::PcsAttr ::PCSType value)
   return clang_ext_PcsAttr_PCSType_AAPCS;
   case clang::PcsAttr ::PCSType ::AAPCS_VFP:
   return clang_ext_PcsAttr_PCSType_AAPCS_VFP;}
- return clang_ext_PcsAttr_PCSType_AAPCS;};
+ return clang_ext_PcsAttr_PCSType_AAPCS;}
 enum clang_ext_Pcs_spelling clang_ext_Pcs_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -5074,7 +5074,7 @@ enum clang_ext_Pcs_spelling clang_ext_Pcs_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Pcs_SpellingNotCalculated;};
+ return clang_ext_Pcs_SpellingNotCalculated;}
 enum
 clang_ext_PreferredName_spelling clang_ext_PreferredName_getSpelling(
 CXCursor cursor)
@@ -5095,7 +5095,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_PreferredName_SpellingNotCalculated;};
+ return clang_ext_PreferredName_SpellingNotCalculated;}
 enum
 clang_ext_PreserveAll_spelling clang_ext_PreserveAll_getSpelling(
 CXCursor cursor)
@@ -5117,7 +5117,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_PreserveAll_SpellingNotCalculated;};
+ return clang_ext_PreserveAll_SpellingNotCalculated;}
 enum
 clang_ext_PreserveMost_spelling clang_ext_PreserveMost_getSpelling(
 CXCursor cursor)
@@ -5139,7 +5139,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_PreserveMost_SpellingNotCalculated;};
+ return clang_ext_PreserveMost_SpellingNotCalculated;}
 enum
 clang_ext_PtGuardedVar_spelling clang_ext_PtGuardedVar_getSpelling(
 CXCursor cursor)
@@ -5159,7 +5159,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_PtGuardedVar_SpellingNotCalculated;};
+ return clang_ext_PtGuardedVar_SpellingNotCalculated;}
 enum clang_ext_Pure_spelling clang_ext_Pure_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -5179,7 +5179,7 @@ enum clang_ext_Pure_spelling clang_ext_Pure_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Pure_SpellingNotCalculated;};
+ return clang_ext_Pure_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_7_0_0
 ;
@@ -5194,7 +5194,7 @@ clang::RISCVInterruptAttr ::InterruptType value)
   return clang_ext_RISCVInterruptAttr_InterruptType_supervisor;
   case clang::RISCVInterruptAttr ::InterruptType ::machine:
   return clang_ext_RISCVInterruptAttr_InterruptType_machine;}
- return clang_ext_RISCVInterruptAttr_InterruptType_user;};
+ return clang_ext_RISCVInterruptAttr_InterruptType_user;}
 
 #endif
 ;
@@ -5220,7 +5220,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_RISCVInterrupt_SpellingNotCalculated;};
+ return clang_ext_RISCVInterrupt_SpellingNotCalculated;}
 enum
 clang_ext_RandomizeLayout_spelling clang_ext_RandomizeLayout_getSpelling(
 CXCursor cursor)
@@ -5243,7 +5243,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_RandomizeLayout_SpellingNotCalculated;};
+ return clang_ext_RandomizeLayout_SpellingNotCalculated;}
 enum
 clang_ext_RegCall_spelling clang_ext_RegCall_getSpelling(CXCursor cursor)
 {
@@ -5266,7 +5266,7 @@ clang_ext_RegCall_spelling clang_ext_RegCall_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_RegCall_SpellingNotCalculated;};
+ return clang_ext_RegCall_SpellingNotCalculated;}
 enum
 clang_ext_Reinitializes_spelling clang_ext_Reinitializes_getSpelling(
 CXCursor cursor)
@@ -5287,7 +5287,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Reinitializes_SpellingNotCalculated;};
+ return clang_ext_Reinitializes_SpellingNotCalculated;}
 enum
 clang_ext_ReleaseCapability_spelling clang_ext_ReleaseCapability_getSpelling(
 CXCursor cursor)
@@ -5334,7 +5334,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ReleaseCapability_SpellingNotCalculated;};
+ return clang_ext_ReleaseCapability_SpellingNotCalculated;}
 enum
 clang_ext_ReleaseHandle_spelling clang_ext_ReleaseHandle_getSpelling(
 CXCursor cursor)
@@ -5357,7 +5357,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ReleaseHandle_SpellingNotCalculated;};
+ return clang_ext_ReleaseHandle_SpellingNotCalculated;}
 enum
 clang_ext_RequiresCapability_spelling
 clang_ext_RequiresCapability_getSpelling(CXCursor cursor)
@@ -5413,7 +5413,7 @@ clang_ext_RequiresCapability_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_RequiresCapability_SpellingNotCalculated;};
+ return clang_ext_RequiresCapability_SpellingNotCalculated;}
 enum
 clang_ext_Restrict_spelling clang_ext_Restrict_getSpelling(CXCursor cursor)
 {
@@ -5444,7 +5444,7 @@ clang_ext_Restrict_spelling clang_ext_Restrict_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Restrict_SpellingNotCalculated;};
+ return clang_ext_Restrict_SpellingNotCalculated;}
 enum clang_ext_Retain_spelling clang_ext_Retain_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_13_0_0
@@ -5464,7 +5464,7 @@ enum clang_ext_Retain_spelling clang_ext_Retain_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Retain_SpellingNotCalculated;};
+ return clang_ext_Retain_SpellingNotCalculated;}
 enum
 clang_ext_ReturnTypestateAttr_ConsumedState
 convert_ReturnTypestateAttr_ConsumedState(
@@ -5476,7 +5476,7 @@ clang::ReturnTypestateAttr ::ConsumedState value)
   return clang_ext_ReturnTypestateAttr_ConsumedState_Consumed;
   case clang::ReturnTypestateAttr ::ConsumedState ::Unconsumed:
   return clang_ext_ReturnTypestateAttr_ConsumedState_Unconsumed;}
- return clang_ext_ReturnTypestateAttr_ConsumedState_Unknown;};
+ return clang_ext_ReturnTypestateAttr_ConsumedState_Unknown;}
 enum
 clang_ext_ReturnTypestate_spelling clang_ext_ReturnTypestate_getSpelling(
 CXCursor cursor)
@@ -5497,7 +5497,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ReturnTypestate_SpellingNotCalculated;};
+ return clang_ext_ReturnTypestate_SpellingNotCalculated;}
 enum
 clang_ext_ReturnsNonNull_spelling clang_ext_ReturnsNonNull_getSpelling(
 CXCursor cursor)
@@ -5520,7 +5520,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ReturnsNonNull_SpellingNotCalculated;};
+ return clang_ext_ReturnsNonNull_SpellingNotCalculated;}
 enum
 clang_ext_ReturnsTwice_spelling clang_ext_ReturnsTwice_getSpelling(
 CXCursor cursor)
@@ -5542,7 +5542,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ReturnsTwice_SpellingNotCalculated;};
+ return clang_ext_ReturnsTwice_SpellingNotCalculated;}
 enum
 clang_ext_SYCLKernel_spelling clang_ext_SYCLKernel_getSpelling(
 CXCursor cursor)
@@ -5564,7 +5564,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SYCLKernel_SpellingNotCalculated;};
+ return clang_ext_SYCLKernel_SpellingNotCalculated;}
 enum
 clang_ext_SYCLSpecialClass_spelling clang_ext_SYCLSpecialClass_getSpelling(
 CXCursor cursor)
@@ -5587,7 +5587,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SYCLSpecialClass_SpellingNotCalculated;};
+ return clang_ext_SYCLSpecialClass_SpellingNotCalculated;}
 enum
 clang_ext_ScopedLockable_spelling clang_ext_ScopedLockable_getSpelling(
 CXCursor cursor)
@@ -5608,7 +5608,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ScopedLockable_SpellingNotCalculated;};
+ return clang_ext_ScopedLockable_SpellingNotCalculated;}
 enum
 clang_ext_Section_spelling clang_ext_Section_getSpelling(CXCursor cursor)
 {
@@ -5639,7 +5639,7 @@ clang_ext_Section_spelling clang_ext_Section_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Section_SpellingNotCalculated;};
+ return clang_ext_Section_SpellingNotCalculated;}
 enum
 clang_ext_SelectAny_spelling clang_ext_SelectAny_getSpelling(CXCursor cursor)
 {
@@ -5662,7 +5662,7 @@ clang_ext_SelectAny_spelling clang_ext_SelectAny_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SelectAny_SpellingNotCalculated;};
+ return clang_ext_SelectAny_SpellingNotCalculated;}
 enum
 clang_ext_Sentinel_spelling clang_ext_Sentinel_getSpelling(CXCursor cursor)
 {
@@ -5683,7 +5683,7 @@ clang_ext_Sentinel_spelling clang_ext_Sentinel_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Sentinel_SpellingNotCalculated;};
+ return clang_ext_Sentinel_SpellingNotCalculated;}
 enum
 clang_ext_SetTypestateAttr_ConsumedState
 convert_SetTypestateAttr_ConsumedState(
@@ -5695,7 +5695,7 @@ clang::SetTypestateAttr ::ConsumedState value)
   return clang_ext_SetTypestateAttr_ConsumedState_Consumed;
   case clang::SetTypestateAttr ::ConsumedState ::Unconsumed:
   return clang_ext_SetTypestateAttr_ConsumedState_Unconsumed;}
- return clang_ext_SetTypestateAttr_ConsumedState_Unknown;};
+ return clang_ext_SetTypestateAttr_ConsumedState_Unknown;}
 enum
 clang_ext_SetTypestate_spelling clang_ext_SetTypestate_getSpelling(
 CXCursor cursor)
@@ -5715,7 +5715,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SetTypestate_SpellingNotCalculated;};
+ return clang_ext_SetTypestate_SpellingNotCalculated;}
 enum
 clang_ext_SpeculativeLoadHardening_spelling
 clang_ext_SpeculativeLoadHardening_getSpelling(CXCursor cursor)
@@ -5741,7 +5741,7 @@ clang_ext_SpeculativeLoadHardening_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SpeculativeLoadHardening_SpellingNotCalculated;};
+ return clang_ext_SpeculativeLoadHardening_SpellingNotCalculated;}
 enum
 clang_ext_StandaloneDebug_spelling clang_ext_StandaloneDebug_getSpelling(
 CXCursor cursor)
@@ -5762,7 +5762,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_StandaloneDebug_SpellingNotCalculated;};
+ return clang_ext_StandaloneDebug_SpellingNotCalculated;}
 enum
 clang_ext_StdCall_spelling clang_ext_StdCall_getSpelling(CXCursor cursor)
 {
@@ -5785,7 +5785,7 @@ clang_ext_StdCall_spelling clang_ext_StdCall_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_StdCall_SpellingNotCalculated;};
+ return clang_ext_StdCall_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_12_0_0
 ;
@@ -5799,7 +5799,7 @@ clang::SwiftAsyncAttr ::Kind value)
   return clang_ext_SwiftAsyncAttr_Kind_SwiftPrivate;
   case clang::SwiftAsyncAttr ::Kind ::NotSwiftPrivate:
   return clang_ext_SwiftAsyncAttr_Kind_NotSwiftPrivate;}
- return clang_ext_SwiftAsyncAttr_Kind_None;};
+ return clang_ext_SwiftAsyncAttr_Kind_None;}
 
 #endif
 ;
@@ -5824,7 +5824,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SwiftAsync_SpellingNotCalculated;};
+ return clang_ext_SwiftAsync_SpellingNotCalculated;}
 enum
 clang_ext_SwiftAsyncCall_spelling clang_ext_SwiftAsyncCall_getSpelling(
 CXCursor cursor)
@@ -5847,7 +5847,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SwiftAsyncCall_SpellingNotCalculated;};
+ return clang_ext_SwiftAsyncCall_SpellingNotCalculated;}
 enum
 clang_ext_SwiftAsyncContext_spelling clang_ext_SwiftAsyncContext_getSpelling(
 CXCursor cursor)
@@ -5871,7 +5871,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SwiftAsyncContext_SpellingNotCalculated;};
+ return clang_ext_SwiftAsyncContext_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_13_0_0
 ;
@@ -5888,7 +5888,7 @@ clang::SwiftAsyncErrorAttr ::ConventionKind value)
   return clang_ext_SwiftAsyncErrorAttr_ConventionKind_ZeroArgument;
   case clang::SwiftAsyncErrorAttr ::ConventionKind ::NonZeroArgument:
   return clang_ext_SwiftAsyncErrorAttr_ConventionKind_NonZeroArgument;}
- return clang_ext_SwiftAsyncErrorAttr_ConventionKind_None;};
+ return clang_ext_SwiftAsyncErrorAttr_ConventionKind_None;}
 
 #endif
 ;
@@ -5914,7 +5914,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SwiftAsyncError_SpellingNotCalculated;};
+ return clang_ext_SwiftAsyncError_SpellingNotCalculated;}
 enum
 clang_ext_SwiftCall_spelling clang_ext_SwiftCall_getSpelling(CXCursor cursor)
 {
@@ -5935,7 +5935,7 @@ clang_ext_SwiftCall_spelling clang_ext_SwiftCall_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SwiftCall_SpellingNotCalculated;};
+ return clang_ext_SwiftCall_SpellingNotCalculated;}
 enum
 clang_ext_SwiftContext_spelling clang_ext_SwiftContext_getSpelling(
 CXCursor cursor)
@@ -5957,7 +5957,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SwiftContext_SpellingNotCalculated;};
+ return clang_ext_SwiftContext_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_12_0_0
 ;
@@ -5976,7 +5976,7 @@ clang::SwiftErrorAttr ::ConventionKind value)
   return clang_ext_SwiftErrorAttr_ConventionKind_ZeroResult;
   case clang::SwiftErrorAttr ::ConventionKind ::NonZeroResult:
   return clang_ext_SwiftErrorAttr_ConventionKind_NonZeroResult;}
- return clang_ext_SwiftErrorAttr_ConventionKind_None;};
+ return clang_ext_SwiftErrorAttr_ConventionKind_None;}
 
 #endif
 ;
@@ -6002,7 +6002,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SwiftErrorResult_SpellingNotCalculated;};
+ return clang_ext_SwiftErrorResult_SpellingNotCalculated;}
 enum
 clang_ext_SwiftIndirectResult_spelling
 clang_ext_SwiftIndirectResult_getSpelling(CXCursor cursor)
@@ -6026,7 +6026,7 @@ clang_ext_SwiftIndirectResult_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SwiftIndirectResult_SpellingNotCalculated;};
+ return clang_ext_SwiftIndirectResult_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_12_0_0
 ;
@@ -6038,7 +6038,7 @@ clang::SwiftNewTypeAttr ::NewtypeKind value)
   return clang_ext_SwiftNewTypeAttr_NewtypeKind_NK_Struct;
   case clang::SwiftNewTypeAttr ::NewtypeKind ::NK_Enum:
   return clang_ext_SwiftNewTypeAttr_NewtypeKind_NK_Enum;}
- return clang_ext_SwiftNewTypeAttr_NewtypeKind_NK_Struct;};
+ return clang_ext_SwiftNewTypeAttr_NewtypeKind_NK_Struct;}
 
 #endif
 ;
@@ -6061,7 +6061,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SwiftNewType_SpellingNotCalculated;};
+ return clang_ext_SwiftNewType_SpellingNotCalculated;}
 enum
 clang_ext_SysVABI_spelling clang_ext_SysVABI_getSpelling(CXCursor cursor)
 {
@@ -6082,7 +6082,7 @@ clang_ext_SysVABI_spelling clang_ext_SysVABI_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SysVABI_SpellingNotCalculated;};
+ return clang_ext_SysVABI_SpellingNotCalculated;}
 enum
 clang_ext_TLSModel_spelling clang_ext_TLSModel_getSpelling(CXCursor cursor)
 {
@@ -6103,7 +6103,7 @@ clang_ext_TLSModel_spelling clang_ext_TLSModel_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_TLSModel_SpellingNotCalculated;};
+ return clang_ext_TLSModel_SpellingNotCalculated;}
 enum clang_ext_Target_spelling clang_ext_Target_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_8_0
@@ -6123,7 +6123,7 @@ enum clang_ext_Target_spelling clang_ext_Target_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Target_SpellingNotCalculated;};
+ return clang_ext_Target_SpellingNotCalculated;}
 enum
 clang_ext_TargetClones_spelling clang_ext_TargetClones_getSpelling(
 CXCursor cursor)
@@ -6145,7 +6145,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_TargetClones_SpellingNotCalculated;};
+ return clang_ext_TargetClones_SpellingNotCalculated;}
 enum
 clang_ext_TestTypestateAttr_ConsumedState
 convert_TestTypestateAttr_ConsumedState(
@@ -6155,7 +6155,7 @@ clang::TestTypestateAttr ::ConsumedState value)
   return clang_ext_TestTypestateAttr_ConsumedState_Consumed;
   case clang::TestTypestateAttr ::ConsumedState ::Unconsumed:
   return clang_ext_TestTypestateAttr_ConsumedState_Unconsumed;}
- return clang_ext_TestTypestateAttr_ConsumedState_Consumed;};
+ return clang_ext_TestTypestateAttr_ConsumedState_Consumed;}
 enum
 clang_ext_TestTypestate_spelling clang_ext_TestTypestate_getSpelling(
 CXCursor cursor)
@@ -6176,7 +6176,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_TestTypestate_SpellingNotCalculated;};
+ return clang_ext_TestTypestate_SpellingNotCalculated;}
 enum
 clang_ext_ThisCall_spelling clang_ext_ThisCall_getSpelling(CXCursor cursor)
 {
@@ -6199,7 +6199,7 @@ clang_ext_ThisCall_spelling clang_ext_ThisCall_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ThisCall_SpellingNotCalculated;};
+ return clang_ext_ThisCall_SpellingNotCalculated;}
 enum
 clang_ext_TransparentUnion_spelling clang_ext_TransparentUnion_getSpelling(
 CXCursor cursor)
@@ -6222,7 +6222,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_TransparentUnion_SpellingNotCalculated;};
+ return clang_ext_TransparentUnion_SpellingNotCalculated;}
 enum
 clang_ext_TrivialABI_spelling clang_ext_TrivialABI_getSpelling(
 CXCursor cursor)
@@ -6242,7 +6242,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_TrivialABI_SpellingNotCalculated;};
+ return clang_ext_TrivialABI_SpellingNotCalculated;}
 enum
 clang_ext_TryAcquireCapability_spelling
 clang_ext_TryAcquireCapability_getSpelling(CXCursor cursor)
@@ -6273,7 +6273,7 @@ clang_ext_TryAcquireCapability_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_TryAcquireCapability_SpellingNotCalculated;};
+ return clang_ext_TryAcquireCapability_SpellingNotCalculated;}
 enum
 clang_ext_TypeTagForDatatype_spelling
 clang_ext_TypeTagForDatatype_getSpelling(CXCursor cursor)
@@ -6297,7 +6297,7 @@ clang_ext_TypeTagForDatatype_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_TypeTagForDatatype_SpellingNotCalculated;};
+ return clang_ext_TypeTagForDatatype_SpellingNotCalculated;}
 enum
 clang_ext_TypeVisibilityAttr_VisibilityType
 convert_TypeVisibilityAttr_VisibilityType(
@@ -6309,7 +6309,7 @@ clang::TypeVisibilityAttr ::VisibilityType value)
   return clang_ext_TypeVisibilityAttr_VisibilityType_Hidden;
   case clang::TypeVisibilityAttr ::VisibilityType ::Protected:
   return clang_ext_TypeVisibilityAttr_VisibilityType_Protected;}
- return clang_ext_TypeVisibilityAttr_VisibilityType_Default;};
+ return clang_ext_TypeVisibilityAttr_VisibilityType_Default;}
 enum
 clang_ext_TypeVisibility_spelling clang_ext_TypeVisibility_getSpelling(
 CXCursor cursor)
@@ -6332,7 +6332,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_TypeVisibility_SpellingNotCalculated;};
+ return clang_ext_TypeVisibility_SpellingNotCalculated;}
 enum
 clang_ext_Unavailable_spelling clang_ext_Unavailable_getSpelling(
 CXCursor cursor)
@@ -6354,7 +6354,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Unavailable_SpellingNotCalculated;};
+ return clang_ext_Unavailable_SpellingNotCalculated;}
 enum
 clang_ext_Uninitialized_spelling clang_ext_Uninitialized_getSpelling(
 CXCursor cursor)
@@ -6375,7 +6375,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Uninitialized_SpellingNotCalculated;};
+ return clang_ext_Uninitialized_SpellingNotCalculated;}
 enum
 clang_ext_Unlikely_spelling clang_ext_Unlikely_getSpelling(CXCursor cursor)
 {
@@ -6394,7 +6394,7 @@ clang_ext_Unlikely_spelling clang_ext_Unlikely_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Unlikely_SpellingNotCalculated;};
+ return clang_ext_Unlikely_SpellingNotCalculated;}
 enum clang_ext_Unused_spelling clang_ext_Unused_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_9_0
@@ -6434,7 +6434,7 @@ enum clang_ext_Unused_spelling clang_ext_Unused_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Unused_SpellingNotCalculated;};
+ return clang_ext_Unused_SpellingNotCalculated;}
 enum
 clang_ext_UseHandle_spelling clang_ext_UseHandle_getSpelling(CXCursor cursor)
 {
@@ -6455,7 +6455,7 @@ clang_ext_UseHandle_spelling clang_ext_UseHandle_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_UseHandle_SpellingNotCalculated;};
+ return clang_ext_UseHandle_SpellingNotCalculated;}
 enum clang_ext_Used_spelling clang_ext_Used_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -6475,7 +6475,7 @@ enum clang_ext_Used_spelling clang_ext_Used_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Used_SpellingNotCalculated;};
+ return clang_ext_Used_SpellingNotCalculated;}
 enum
 clang_ext_UsingIfExists_spelling clang_ext_UsingIfExists_getSpelling(
 CXCursor cursor)
@@ -6496,7 +6496,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_UsingIfExists_SpellingNotCalculated;};
+ return clang_ext_UsingIfExists_SpellingNotCalculated;}
 enum clang_ext_Uuid_spelling clang_ext_Uuid_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_11_0_0
@@ -6514,7 +6514,7 @@ enum clang_ext_Uuid_spelling clang_ext_Uuid_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Uuid_SpellingNotCalculated;};
+ return clang_ext_Uuid_SpellingNotCalculated;}
 enum
 clang_ext_VecReturn_spelling clang_ext_VecReturn_getSpelling(CXCursor cursor)
 {
@@ -6533,7 +6533,7 @@ clang_ext_VecReturn_spelling clang_ext_VecReturn_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_VecReturn_SpellingNotCalculated;};
+ return clang_ext_VecReturn_SpellingNotCalculated;}
 enum
 clang_ext_VectorCall_spelling clang_ext_VectorCall_getSpelling(
 CXCursor cursor)
@@ -6557,7 +6557,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_VectorCall_SpellingNotCalculated;};
+ return clang_ext_VectorCall_SpellingNotCalculated;}
 enum
 clang_ext_VisibilityAttr_VisibilityType
 convert_VisibilityAttr_VisibilityType(
@@ -6569,7 +6569,7 @@ clang::VisibilityAttr ::VisibilityType value)
   return clang_ext_VisibilityAttr_VisibilityType_Hidden;
   case clang::VisibilityAttr ::VisibilityType ::Protected:
   return clang_ext_VisibilityAttr_VisibilityType_Protected;}
- return clang_ext_VisibilityAttr_VisibilityType_Default;};
+ return clang_ext_VisibilityAttr_VisibilityType_Default;}
 enum
 clang_ext_Visibility_spelling clang_ext_Visibility_getSpelling(
 CXCursor cursor)
@@ -6591,7 +6591,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Visibility_SpellingNotCalculated;};
+ return clang_ext_Visibility_SpellingNotCalculated;}
 enum
 clang_ext_WarnUnused_spelling clang_ext_WarnUnused_getSpelling(
 CXCursor cursor)
@@ -6613,7 +6613,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_WarnUnused_SpellingNotCalculated;};
+ return clang_ext_WarnUnused_SpellingNotCalculated;}
 enum
 clang_ext_WarnUnusedResult_spelling clang_ext_WarnUnusedResult_getSpelling(
 CXCursor cursor)
@@ -6651,7 +6651,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_WarnUnusedResult_SpellingNotCalculated;};
+ return clang_ext_WarnUnusedResult_SpellingNotCalculated;}
 enum clang_ext_Weak_spelling clang_ext_Weak_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -6671,7 +6671,7 @@ enum clang_ext_Weak_spelling clang_ext_Weak_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_Weak_SpellingNotCalculated;};
+ return clang_ext_Weak_SpellingNotCalculated;}
 enum
 clang_ext_WeakImport_spelling clang_ext_WeakImport_getSpelling(
 CXCursor cursor)
@@ -6693,7 +6693,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_WeakImport_SpellingNotCalculated;};
+ return clang_ext_WeakImport_SpellingNotCalculated;}
 enum
 clang_ext_WeakRef_spelling clang_ext_WeakRef_getSpelling(CXCursor cursor)
 {
@@ -6714,7 +6714,7 @@ clang_ext_WeakRef_spelling clang_ext_WeakRef_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_WeakRef_SpellingNotCalculated;};
+ return clang_ext_WeakRef_SpellingNotCalculated;}
 enum
 clang_ext_WebAssemblyExportName_spelling
 clang_ext_WebAssemblyExportName_getSpelling(CXCursor cursor)
@@ -6738,7 +6738,7 @@ clang_ext_WebAssemblyExportName_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_WebAssemblyExportName_SpellingNotCalculated;};
+ return clang_ext_WebAssemblyExportName_SpellingNotCalculated;}
 enum
 clang_ext_WebAssemblyImportModule_spelling
 clang_ext_WebAssemblyImportModule_getSpelling(CXCursor cursor)
@@ -6762,7 +6762,7 @@ clang_ext_WebAssemblyImportModule_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_WebAssemblyImportModule_SpellingNotCalculated;};
+ return clang_ext_WebAssemblyImportModule_SpellingNotCalculated;}
 enum
 clang_ext_WebAssemblyImportName_spelling
 clang_ext_WebAssemblyImportName_getSpelling(CXCursor cursor)
@@ -6786,7 +6786,7 @@ clang_ext_WebAssemblyImportName_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_WebAssemblyImportName_SpellingNotCalculated;};
+ return clang_ext_WebAssemblyImportName_SpellingNotCalculated;}
 enum
 clang_ext_X86ForceAlignArgPointer_spelling
 clang_ext_X86ForceAlignArgPointer_getSpelling(CXCursor cursor)
@@ -6810,7 +6810,7 @@ clang_ext_X86ForceAlignArgPointer_getSpelling(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_X86ForceAlignArgPointer_SpellingNotCalculated;};
+ return clang_ext_X86ForceAlignArgPointer_SpellingNotCalculated;}
 enum
 clang_ext_XRayInstrument_spelling clang_ext_XRayInstrument_getSpelling(
 CXCursor cursor)
@@ -6859,7 +6859,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_XRayInstrument_SpellingNotCalculated;};
+ return clang_ext_XRayInstrument_SpellingNotCalculated;}
 enum
 clang_ext_XRayLogArgs_spelling clang_ext_XRayLogArgs_getSpelling(
 CXCursor cursor)
@@ -6881,7 +6881,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_XRayLogArgs_SpellingNotCalculated;};
+ return clang_ext_XRayLogArgs_SpellingNotCalculated;}
 
 #ifndef LLVM_VERSION_BEFORE_15_0_0
 ;
@@ -6908,7 +6908,7 @@ clang::ZeroCallUsedRegsAttr ::ZeroCallUsedRegsKind value)
   return clang_ext_ZeroCallUsedRegsAttr_ZeroCallUsedRegsKind_AllArg;
   case clang::ZeroCallUsedRegsAttr ::ZeroCallUsedRegsKind ::All:
   return clang_ext_ZeroCallUsedRegsAttr_ZeroCallUsedRegsKind_All;}
- return clang_ext_ZeroCallUsedRegsAttr_ZeroCallUsedRegsKind_Skip;};
+ return clang_ext_ZeroCallUsedRegsAttr_ZeroCallUsedRegsKind_Skip;}
 
 #endif
 ;
@@ -6934,7 +6934,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ZeroCallUsedRegs_SpellingNotCalculated;};
+ return clang_ext_ZeroCallUsedRegs_SpellingNotCalculated;}
 unsigned int clang_ext_OMPDeclareSimdDeclAttr_getUniforms_Size(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -6951,7 +6951,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 enum
 clang_ext_ReturnTypestateAttr_ConsumedState
 clang_ext_ReturnTypestateAttr_getState(CXCursor cursor)
@@ -6960,7 +6960,7 @@ clang_ext_ReturnTypestateAttr_getState(CXCursor cursor)
  if
  (auto qual_attr = llvm::dyn_cast_or_null<clang::ReturnTypestateAttr >(attr))
  return convert_ReturnTypestateAttr_ConsumedState(qual_attr->getState());
- return clang_ext_ReturnTypestateAttr_ConsumedState_Unknown;};
+ return clang_ext_ReturnTypestateAttr_ConsumedState_Unknown;}
 unsigned int clang_ext_Attrs_getAliaseeLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -6975,7 +6975,7 @@ unsigned int clang_ext_Attrs_getAliaseeLength(CXCursor cursor)
   break;
   default:
   ;}
- return 0;};
+ return 0;}
 CXString clang_ext_ObjCRuntimeNameAttr_getMetadataName(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -6990,7 +6990,7 @@ CXString clang_ext_ObjCRuntimeNameAttr_getMetadataName(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 enum
 clang_ext_SwiftErrorAttr_ConventionKind
 clang_ext_SwiftErrorAttr_getConvention(CXCursor cursor)
@@ -7006,7 +7006,7 @@ clang_ext_SwiftErrorAttr_getConvention(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SwiftErrorAttr_ConventionKind_None;};
+ return clang_ext_SwiftErrorAttr_ConventionKind_None;}
 enum
 clang_ext_SwiftAsyncErrorAttr_ConventionKind
 clang_ext_SwiftAsyncErrorAttr_getConvention(CXCursor cursor)
@@ -7024,7 +7024,7 @@ clang_ext_SwiftAsyncErrorAttr_getConvention(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SwiftAsyncErrorAttr_ConventionKind_None;};
+ return clang_ext_SwiftAsyncErrorAttr_ConventionKind_None;}
 void clang_ext_Attrs_getDelayedArgs(
 CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -7064,7 +7064,7 @@ CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
   ;
   
   default:
-  ;}};
+  ;}}
 CXString clang_ext_IFuncAttr_getResolver(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7078,7 +7078,7 @@ CXString clang_ext_IFuncAttr_getResolver(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 int clang_ext_PatchableFunctionEntryAttr_getOffset(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7094,7 +7094,7 @@ int clang_ext_PatchableFunctionEntryAttr_getOffset(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 CXCursor clang_ext_AssumeAlignedAttr_getOffset(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7109,7 +7109,7 @@ CXCursor clang_ext_AssumeAlignedAttr_getOffset(CXCursor cursor)
  #endif
  ;
  
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));};
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 unsigned int clang_ext_BTFTypeTagAttr_getBTFTypeTagLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7123,7 +7123,7 @@ unsigned int clang_ext_BTFTypeTagAttr_getBTFTypeTagLength(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_WebAssemblyImportNameAttr_getImportNameLength(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -7140,13 +7140,13 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 int clang_ext_SentinelAttr_getSentinel(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::SentinelAttr >(attr))
  return qual_attr->getSentinel();
- return 0;};
+ return 0;}
 CXCursor clang_ext_Attrs_getSuccessValue(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7179,7 +7179,7 @@ CXCursor clang_ext_Attrs_getSuccessValue(CXCursor cursor)
   break;
   default:
   ;}
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));};
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 unsigned int clang_ext_Attrs_getCpus_Size(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7210,13 +7210,13 @@ unsigned int clang_ext_Attrs_getCpus_Size(CXCursor cursor)
   
   default:
   ;}
- return 0;};
+ return 0;}
 unsigned int clang_ext_TLSModelAttr_getModelLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::TLSModelAttr >(attr))
  return qual_attr->getModelLength();
- return 0;};
+ return 0;}
 enum
 clang_ext_ParamTypestateAttr_ConsumedState
 clang_ext_ParamTypestateAttr_getParamState(CXCursor cursor)
@@ -7225,7 +7225,7 @@ clang_ext_ParamTypestateAttr_getParamState(CXCursor cursor)
  if
  (auto qual_attr = llvm::dyn_cast_or_null<clang::ParamTypestateAttr >(attr))
  return convert_ParamTypestateAttr_ConsumedState(qual_attr->getParamState());
- return clang_ext_ParamTypestateAttr_ConsumedState_Unknown;};
+ return clang_ext_ParamTypestateAttr_ConsumedState_Unknown;}
 bool clang_ext_ExternalSourceSymbolAttr_getGeneratedDeclaration(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -7242,7 +7242,7 @@ CXCursor cursor)
  #endif
  ;
  
- return false;};
+ return false;}
 void clang_ext_SuppressAttr_getDiagnosticIdentifiers(
 CXCursor cursor, void (*callback_value)(CXString , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -7260,7 +7260,7 @@ CXCursor cursor, void (*callback_value)(CXString , void *), void *data)
  
  #endif
  ;
- };
+ }
 struct clang_ext_TypeLoc clang_ext_Attrs_getDerefType(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7297,7 +7297,7 @@ struct clang_ext_TypeLoc clang_ext_Attrs_getDerefType(CXCursor cursor)
   
   default:
   ;}
- return MakeTypeLocInvalid(getCursorTU(cursor));};
+ return MakeTypeLocInvalid(getCursorTU(cursor));}
 enum
 clang_ext_FunctionReturnThunksAttr_Kind
 clang_ext_FunctionReturnThunksAttr_getThunkType(CXCursor cursor)
@@ -7315,7 +7315,7 @@ clang_ext_FunctionReturnThunksAttr_getThunkType(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_FunctionReturnThunksAttr_Kind_Keep;};
+ return clang_ext_FunctionReturnThunksAttr_Kind_Keep;}
 unsigned int clang_ext_OMPDeclareVariantAttr_getAdjustArgsNeedDevicePtr_Size(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -7332,7 +7332,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 struct
 clang_ext_TypeLoc clang_ext_TypeTagForDatatypeAttr_getMatchingCType(
 CXCursor cursor)
@@ -7346,7 +7346,7 @@ CXCursor cursor)
                                                 )->getTypeLoc(),
                                                 getCursorTU(cursor)) : 
  MakeTypeLocInvalid(getCursorTU(cursor));
- return MakeTypeLocInvalid(getCursorTU(cursor));};
+ return MakeTypeLocInvalid(getCursorTU(cursor));}
 unsigned int clang_ext_Attrs_getAnnotationLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7370,7 +7370,7 @@ unsigned int clang_ext_Attrs_getAnnotationLength(CXCursor cursor)
   break;
   default:
   ;}
- return 0;};
+ return 0;}
 unsigned int clang_ext_LayoutVersionAttr_getVersion(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7385,13 +7385,13 @@ unsigned int clang_ext_LayoutVersionAttr_getVersion(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 int clang_ext_SentinelAttr_getNullPos(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::SentinelAttr >(attr))
  return qual_attr->getNullPos();
- return 0;};
+ return 0;}
 void clang_ext_OMPDeclareSimdDeclAttr_getAligneds(
 CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -7411,7 +7411,7 @@ CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
  
  #endif
  ;
- };
+ }
 unsigned int clang_ext_SwiftAsyncAttr_getCompletionHandlerIndex(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -7426,7 +7426,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_Attrs_getArgs_Size(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7583,7 +7583,7 @@ unsigned int clang_ext_Attrs_getArgs_Size(CXCursor cursor)
   
   default:
   ;}
- return 0;};
+ return 0;}
 CXCursor clang_ext_CUDALaunchBoundsAttr_getMinBlocks(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7598,7 +7598,7 @@ CXCursor clang_ext_CUDALaunchBoundsAttr_getMinBlocks(CXCursor cursor)
  #endif
  ;
  
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));};
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 unsigned int clang_ext_BTFDeclTagAttr_getBTFDeclTagLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7612,7 +7612,7 @@ unsigned int clang_ext_BTFDeclTagAttr_getBTFDeclTagLength(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_SwiftBridgeAttr_getSwiftTypeLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7626,7 +7626,7 @@ unsigned int clang_ext_SwiftBridgeAttr_getSwiftTypeLength(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_ExternalSourceSymbolAttr_getDefinedInLength(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -7643,7 +7643,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 enum
 clang_ext_HLSLShaderAttr_ShaderType clang_ext_HLSLShaderAttr_getType(
 CXCursor cursor)
@@ -7659,13 +7659,13 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_HLSLShaderAttr_ShaderType_Pixel;};
+ return clang_ext_HLSLShaderAttr_ShaderType_Pixel;}
 CXString clang_ext_FormatAttr_getType(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::FormatAttr >(attr))
  return cxstring_createDup(qual_attr->getType()->getName());
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 int clang_ext_PassObjectSizeAttr_getType(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7680,14 +7680,14 @@ int clang_ext_PassObjectSizeAttr_getType(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 enum
 clang_ext_BlocksAttr_BlockType clang_ext_BlocksAttr_getType(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::BlocksAttr >(attr))
  return convert_BlocksAttr_BlockType(qual_attr->getType());
- return clang_ext_BlocksAttr_BlockType_ByRef;};
+ return clang_ext_BlocksAttr_BlockType_ByRef;}
 unsigned int clang_ext_AssumptionAttr_getAssumptionLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7701,7 +7701,7 @@ unsigned int clang_ext_AssumptionAttr_getAssumptionLength(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 CXString clang_ext_AsmLabelAttr_getLabel(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7715,7 +7715,7 @@ CXString clang_ext_AsmLabelAttr_getLabel(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 CXString clang_ext_SwiftAttrAttr_getAttribute(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7729,7 +7729,7 @@ CXString clang_ext_SwiftAttrAttr_getAttribute(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 CXString clang_ext_AvailabilityAttr_getPlatform(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7743,7 +7743,7 @@ CXString clang_ext_AvailabilityAttr_getPlatform(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 CXCursor clang_ext_Attrs_getMax(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7778,7 +7778,7 @@ CXCursor clang_ext_Attrs_getMax(CXCursor cursor)
   
   default:
   ;}
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));};
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 CXString clang_ext_TargetAttr_getFeaturesStr(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7792,7 +7792,7 @@ CXString clang_ext_TargetAttr_getFeaturesStr(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 unsigned int clang_ext_CallableWhenAttr_getCallableStates_Size(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -7807,7 +7807,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 enum
 clang_ext_TestTypestateAttr_ConsumedState
 clang_ext_TestTypestateAttr_getTestState(CXCursor cursor)
@@ -7816,7 +7816,7 @@ clang_ext_TestTypestateAttr_getTestState(CXCursor cursor)
  if
  (auto qual_attr = llvm::dyn_cast_or_null<clang::TestTypestateAttr >(attr))
  return convert_TestTypestateAttr_ConsumedState(qual_attr->getTestState());
- return clang_ext_TestTypestateAttr_ConsumedState_Consumed;};
+ return clang_ext_TestTypestateAttr_ConsumedState_Consumed;}
 unsigned int clang_ext_OMPCaptureKindAttr_getCaptureKindVal(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7831,13 +7831,13 @@ unsigned int clang_ext_OMPCaptureKindAttr_getCaptureKindVal(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_InitPriorityAttr_getPriority(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::InitPriorityAttr >(attr))
  return qual_attr->getPriority();
- return 0;};
+ return 0;}
 int clang_ext_Attrs_getPriority(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7865,7 +7865,7 @@ int clang_ext_Attrs_getPriority(CXCursor cursor)
   
   default:
   ;}
- return 0;};
+ return 0;}
 enum
 clang_ext_OMPDeclareTargetDeclAttr_MapTypeTy
 clang_ext_OMPDeclareTargetDeclAttr_getMapType(CXCursor cursor)
@@ -7883,7 +7883,7 @@ clang_ext_OMPDeclareTargetDeclAttr_getMapType(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OMPDeclareTargetDeclAttr_MapTypeTy_MT_To;};
+ return clang_ext_OMPDeclareTargetDeclAttr_MapTypeTy_MT_To;}
 unsigned int clang_ext_Attrs_getYDim(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7902,7 +7902,7 @@ unsigned int clang_ext_Attrs_getYDim(CXCursor cursor)
   break;
   default:
   ;}
- return 0;};
+ return 0;}
 struct
 clang_ext_DeclarationName clang_ext_CleanupAttr_getFunctionDecl(
 CXCursor cursor)
@@ -7912,7 +7912,7 @@ CXCursor cursor)
  return
  MakeDeclarationName(qual_attr->getFunctionDecl()->getDeclName(),
                      getCursorTU(cursor));
- return MakeDeclarationNameInvalid(getCursorTU(cursor));};
+ return MakeDeclarationNameInvalid(getCursorTU(cursor));}
 struct
 clang_ext_VersionTuple clang_ext_AvailabilityAttr_getObsoleted(
 CXCursor cursor)
@@ -7928,7 +7928,7 @@ CXCursor cursor)
  #endif
  ;
  
- return zeroVersionTuple;};
+ return zeroVersionTuple;}
 CXString clang_ext_InitSegAttr_getSection(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7942,7 +7942,7 @@ CXString clang_ext_InitSegAttr_getSection(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 CXString clang_ext_BTFDeclTagAttr_getBTFDeclTag(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7956,7 +7956,7 @@ CXString clang_ext_BTFDeclTagAttr_getBTFDeclTag(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 CXString clang_ext_ExternalSourceSymbolAttr_getDefinedIn(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7972,7 +7972,7 @@ CXString clang_ext_ExternalSourceSymbolAttr_getDefinedIn(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 unsigned int clang_ext_AllocSizeAttr_getNumElemsParam(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -7986,7 +7986,7 @@ unsigned int clang_ext_AllocSizeAttr_getNumElemsParam(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_IFuncAttr_getResolverLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8000,7 +8000,7 @@ unsigned int clang_ext_IFuncAttr_getResolverLength(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_AsmLabelAttr_getLabelLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8014,7 +8014,7 @@ unsigned int clang_ext_AsmLabelAttr_getLabelLength(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_AbiTagAttr_getTags_Size(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8028,7 +8028,7 @@ unsigned int clang_ext_AbiTagAttr_getTags_Size(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 CXCursor clang_ext_CUDALaunchBoundsAttr_getMaxThreads(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8043,7 +8043,7 @@ CXCursor clang_ext_CUDALaunchBoundsAttr_getMaxThreads(CXCursor cursor)
  #endif
  ;
  
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));};
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 CXString clang_ext_Attrs_getBuiltinName(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8076,7 +8076,7 @@ CXString clang_ext_Attrs_getBuiltinName(CXCursor cursor)
   
   default:
   ;}
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 CXString clang_ext_WebAssemblyImportModuleAttr_getImportModule(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -8093,7 +8093,7 @@ CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 enum
 clang_ext_SwiftNewTypeAttr_NewtypeKind
 clang_ext_SwiftNewTypeAttr_getNewtypeKind(CXCursor cursor)
@@ -8109,7 +8109,7 @@ clang_ext_SwiftNewTypeAttr_getNewtypeKind(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SwiftNewTypeAttr_NewtypeKind_NK_Struct;};
+ return clang_ext_SwiftNewTypeAttr_NewtypeKind_NK_Struct;}
 int clang_ext_HLSLNumThreadsAttr_getZ(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8124,7 +8124,7 @@ int clang_ext_HLSLNumThreadsAttr_getZ(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_NoSanitizeAttr_getSanitizers_Size(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8138,7 +8138,7 @@ unsigned int clang_ext_NoSanitizeAttr_getSanitizers_Size(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_CallbackAttr_getEncoding_Size(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8152,7 +8152,7 @@ unsigned int clang_ext_CallbackAttr_getEncoding_Size(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_Attrs_getXDim(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8171,7 +8171,7 @@ unsigned int clang_ext_Attrs_getXDim(CXCursor cursor)
   break;
   default:
   ;}
- return 0;};
+ return 0;}
 CXCursor clang_ext_UuidAttr_getGuidDecl(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8185,7 +8185,7 @@ CXCursor clang_ext_UuidAttr_getGuidDecl(CXCursor cursor)
  #endif
  ;
  
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));};
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 CXString clang_ext_Attrs_getAliasee(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8200,7 +8200,7 @@ CXString clang_ext_Attrs_getAliasee(CXCursor cursor)
   break;
   default:
   ;}
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 CXString clang_ext_Attrs_getHandleType(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8245,7 +8245,7 @@ CXString clang_ext_Attrs_getHandleType(CXCursor cursor)
   
   default:
   ;}
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 unsigned int clang_ext_WebAssemblyImportModuleAttr_getImportModuleLength(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -8262,7 +8262,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 void clang_ext_OMPDeclareSimdDeclAttr_getLinears(
 CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -8282,7 +8282,7 @@ CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
  
  #endif
  ;
- };
+ }
 struct
 clang_ext_VersionTuple clang_ext_AvailabilityAttr_getDeprecated(
 CXCursor cursor)
@@ -8298,7 +8298,7 @@ CXCursor cursor)
  #endif
  ;
  
- return zeroVersionTuple;};
+ return zeroVersionTuple;}
 struct
 clang_ext_TypeLoc clang_ext_PreferredNameAttr_getTypedefType(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -8317,7 +8317,7 @@ clang_ext_TypeLoc clang_ext_PreferredNameAttr_getTypedefType(CXCursor cursor)
  #endif
  ;
  
- return MakeTypeLocInvalid(getCursorTU(cursor));};
+ return MakeTypeLocInvalid(getCursorTU(cursor));}
 void clang_ext_DiagnoseAsBuiltinAttr_getArgIndices(
 CXCursor cursor, void (*callback_value)(unsigned int , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -8337,7 +8337,7 @@ CXCursor cursor, void (*callback_value)(unsigned int , void *), void *data)
  
  #endif
  ;
- };
+ }
 unsigned int clang_ext_TargetClonesAttr_getFeaturesStrs_Size(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8351,7 +8351,7 @@ unsigned int clang_ext_TargetClonesAttr_getFeaturesStrs_Size(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_ErrorAttr_getUserDiagnosticLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8365,7 +8365,7 @@ unsigned int clang_ext_ErrorAttr_getUserDiagnosticLength(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 CXString clang_ext_WebAssemblyExportNameAttr_getExportName(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8381,7 +8381,7 @@ CXString clang_ext_WebAssemblyExportNameAttr_getExportName(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 bool clang_ext_ArgumentWithTypeTagAttr_getIsPointer(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8389,7 +8389,7 @@ bool clang_ext_ArgumentWithTypeTagAttr_getIsPointer(CXCursor cursor)
  (auto qual_attr =
   llvm::dyn_cast_or_null<clang::ArgumentWithTypeTagAttr >(attr))
  return qual_attr->getIsPointer();
- return false;};
+ return false;}
 unsigned int clang_ext_UuidAttr_getGuidLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8403,7 +8403,7 @@ unsigned int clang_ext_UuidAttr_getGuidLength(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_OMPDeclareSimdDeclAttr_getAligneds_Size(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -8420,7 +8420,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_Attrs_getMessageLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8494,13 +8494,13 @@ unsigned int clang_ext_Attrs_getMessageLength(CXCursor cursor)
   
   default:
   ;}
- return 0;};
+ return 0;}
 enum clang_ext_PcsAttr_PCSType clang_ext_PcsAttr_getPCS(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::PcsAttr >(attr))
  return convert_PcsAttr_PCSType(qual_attr->getPCS());
- return clang_ext_PcsAttr_PCSType_AAPCS;};
+ return clang_ext_PcsAttr_PCSType_AAPCS;}
 void clang_ext_CallbackAttr_getEncoding(
 CXCursor cursor, void (*callback_value)(int , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -8518,7 +8518,7 @@ CXCursor cursor, void (*callback_value)(int , void *), void *data)
  
  #endif
  ;
- };
+ }
 CXString clang_ext_Attrs_getArgumentKind(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8537,7 +8537,7 @@ CXString clang_ext_Attrs_getArgumentKind(CXCursor cursor)
   break;
   default:
   ;}
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 bool clang_ext_AvailabilityAttr_getUnavailable(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8551,7 +8551,7 @@ bool clang_ext_AvailabilityAttr_getUnavailable(CXCursor cursor)
  #endif
  ;
  
- return false;};
+ return false;}
 struct
 clang_ext_OMPTraitInfo clang_ext_OMPDeclareVariantAttr_getTraitInfos(
 CXCursor cursor)
@@ -8569,7 +8569,7 @@ CXCursor cursor)
  #endif
  ;
  
- return MakeOMPTraitInfoInvalid(getCursorTU(cursor));};
+ return MakeOMPTraitInfoInvalid(getCursorTU(cursor));}
 CXCursor clang_ext_OMPAllocateDeclAttr_getAllocator(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8584,7 +8584,7 @@ CXCursor clang_ext_OMPAllocateDeclAttr_getAllocator(CXCursor cursor)
  #endif
  ;
  
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));};
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 int clang_ext_HLSLNumThreadsAttr_getY(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8599,7 +8599,7 @@ int clang_ext_HLSLNumThreadsAttr_getY(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 CXString clang_ext_Attrs_getAnnotation(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8623,7 +8623,7 @@ CXString clang_ext_Attrs_getAnnotation(CXCursor cursor)
   break;
   default:
   ;}
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 CXCursor clang_ext_OMPDeclareVariantAttr_getVariantFuncRef(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8639,7 +8639,7 @@ CXCursor clang_ext_OMPDeclareVariantAttr_getVariantFuncRef(CXCursor cursor)
  #endif
  ;
  
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));};
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 unsigned int clang_ext_NoBuiltinAttr_getBuiltinNames_Size(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8653,7 +8653,7 @@ unsigned int clang_ext_NoBuiltinAttr_getBuiltinNames_Size(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 void clang_ext_TargetClonesAttr_getFeaturesStrs(
 CXCursor cursor, void (*callback_value)(CXString , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -8671,7 +8671,7 @@ CXCursor cursor, void (*callback_value)(CXString , void *), void *data)
  
  #endif
  ;
- };
+ }
 CXString clang_ext_Attrs_getReplacement(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8703,7 +8703,7 @@ CXString clang_ext_Attrs_getReplacement(CXCursor cursor)
   
   default:
   ;}
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 unsigned int clang_ext_AMDGPUNumSGPRAttr_getNumSGPR(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8718,7 +8718,7 @@ unsigned int clang_ext_AMDGPUNumSGPRAttr_getNumSGPR(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 CXString clang_ext_ObjCBridgeRelatedAttr_getInstanceMethod(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8734,7 +8734,7 @@ CXString clang_ext_ObjCBridgeRelatedAttr_getInstanceMethod(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 void clang_ext_OMPDeclareVariantAttr_getAdjustArgsNeedDevicePtr(
 CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -8754,7 +8754,7 @@ CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
  
  #endif
  ;
- };
+ }
 CXCursor clang_ext_OMPDeclareSimdDeclAttr_getSimdlen(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8770,7 +8770,7 @@ CXCursor clang_ext_OMPDeclareSimdDeclAttr_getSimdlen(CXCursor cursor)
  #endif
  ;
  
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));};
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 unsigned int clang_ext_TargetAttr_getFeaturesStrLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8784,13 +8784,13 @@ unsigned int clang_ext_TargetAttr_getFeaturesStrLength(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 CXCursor clang_ext_AlignedAttr_getAlignmentExpr(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::AlignedAttr >(attr))
  return MakeCXCursor(qual_attr->getAlignmentExpr(), getCursorTU(cursor));
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));};
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 enum
 clang_ext_ZeroCallUsedRegsAttr_ZeroCallUsedRegsKind
 clang_ext_ZeroCallUsedRegsAttr_getZeroCallUsedRegs(CXCursor cursor)
@@ -8809,7 +8809,7 @@ clang_ext_ZeroCallUsedRegsAttr_getZeroCallUsedRegs(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_ZeroCallUsedRegsAttr_ZeroCallUsedRegsKind_Skip;};
+ return clang_ext_ZeroCallUsedRegsAttr_ZeroCallUsedRegsKind_Skip;}
 void clang_ext_OMPDeclareSimdDeclAttr_getSteps(
 CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -8829,13 +8829,13 @@ CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
  
  #endif
  ;
- };
+ }
 CXString clang_ext_TLSModelAttr_getModel(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::TLSModelAttr >(attr))
  return cxstring_createDup(qual_attr->getModel());
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 void clang_ext_OMPDeclareSimdDeclAttr_getModifiers(
 CXCursor cursor, void (*callback_value)(unsigned int , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -8855,13 +8855,13 @@ CXCursor cursor, void (*callback_value)(unsigned int , void *), void *data)
  
  #endif
  ;
- };
+ }
 int clang_ext_FormatAttr_getFirstArg(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::FormatAttr >(attr))
  return qual_attr->getFirstArg();
- return 0;};
+ return 0;}
 unsigned int clang_ext_AMDGPUNumVGPRAttr_getNumVGPR(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8876,7 +8876,7 @@ unsigned int clang_ext_AMDGPUNumVGPRAttr_getNumVGPR(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 enum
 clang_ext_MipsInterruptAttr_InterruptType
 clang_ext_MipsInterruptAttr_getInterrupt(CXCursor cursor)
@@ -8893,7 +8893,7 @@ clang_ext_MipsInterruptAttr_getInterrupt(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_MipsInterruptAttr_InterruptType_sw0;};
+ return clang_ext_MipsInterruptAttr_InterruptType_sw0;}
 enum
 clang_ext_ARMInterruptAttr_InterruptType
 clang_ext_ARMInterruptAttr_getInterrupt(CXCursor cursor)
@@ -8901,7 +8901,7 @@ clang_ext_ARMInterruptAttr_getInterrupt(CXCursor cursor)
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::ARMInterruptAttr >(attr))
  return convert_ARMInterruptAttr_InterruptType(qual_attr->getInterrupt());
- return clang_ext_ARMInterruptAttr_InterruptType_IRQ;};
+ return clang_ext_ARMInterruptAttr_InterruptType_IRQ;}
 enum
 clang_ext_RISCVInterruptAttr_InterruptType
 clang_ext_RISCVInterruptAttr_getInterrupt(CXCursor cursor)
@@ -8918,7 +8918,7 @@ clang_ext_RISCVInterruptAttr_getInterrupt(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_RISCVInterruptAttr_InterruptType_user;};
+ return clang_ext_RISCVInterruptAttr_InterruptType_user;}
 CXCursor clang_ext_Attrs_getMin(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8953,7 +8953,7 @@ CXCursor clang_ext_Attrs_getMin(CXCursor cursor)
   
   default:
   ;}
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));};
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 enum
 clang_ext_EnumExtensibilityAttr_Kind
 clang_ext_EnumExtensibilityAttr_getExtensibility(CXCursor cursor)
@@ -8971,7 +8971,7 @@ clang_ext_EnumExtensibilityAttr_getExtensibility(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_EnumExtensibilityAttr_Kind_Closed;};
+ return clang_ext_EnumExtensibilityAttr_Kind_Closed;}
 unsigned int clang_ext_AllocAlignAttr_getParamIndex(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -8985,7 +8985,7 @@ unsigned int clang_ext_AllocAlignAttr_getParamIndex(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_DiagnoseAsBuiltinAttr_getArgIndices_Size(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -9002,7 +9002,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 struct
 clang_ext_VersionTuple clang_ext_AvailabilityAttr_getIntroduced(
 CXCursor cursor)
@@ -9018,7 +9018,7 @@ CXCursor cursor)
  #endif
  ;
  
- return zeroVersionTuple;};
+ return zeroVersionTuple;}
 unsigned int clang_ext_MaxFieldAlignmentAttr_getAlignment(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9026,7 +9026,7 @@ unsigned int clang_ext_MaxFieldAlignmentAttr_getAlignment(CXCursor cursor)
  (auto qual_attr =
   llvm::dyn_cast_or_null<clang::MaxFieldAlignmentAttr >(attr))
  return qual_attr->getAlignment();
- return 0;};
+ return 0;}
 CXCursor clang_ext_Attrs_getAlignment(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9071,7 +9071,7 @@ CXCursor clang_ext_Attrs_getAlignment(CXCursor cursor)
   
   default:
   ;}
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));};
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 int clang_ext_AddressSpaceAttr_getAddressSpace(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9085,13 +9085,13 @@ int clang_ext_AddressSpaceAttr_getAddressSpace(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 CXString clang_ext_ModeAttr_getMode(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::ModeAttr >(attr))
  return cxstring_createDup(qual_attr->getMode()->getName());
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 CXCursor clang_ext_Attrs_getArg(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9111,7 +9111,7 @@ CXCursor clang_ext_Attrs_getArg(CXCursor cursor)
   break;
   default:
   ;}
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));};
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 void clang_ext_Attrs_getCpus(
 CXCursor cursor, void (*callback_value)(CXString , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -9150,7 +9150,7 @@ CXCursor cursor, void (*callback_value)(CXString , void *), void *data)
   ;
   
   default:
-  ;}};
+  ;}}
 CXString clang_ext_BTFTypeTagAttr_getBTFTypeTag(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9164,7 +9164,7 @@ CXString clang_ext_BTFTypeTagAttr_getBTFTypeTag(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 unsigned int clang_ext_OpenCLIntelReqdSubGroupSizeAttr_getSubGroupSize(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -9181,7 +9181,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_ArgumentWithTypeTagAttr_getArgumentIdx(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -9190,7 +9190,7 @@ CXCursor cursor)
  (auto qual_attr =
   llvm::dyn_cast_or_null<clang::ArgumentWithTypeTagAttr >(attr))
  return unsigned_int_of_ParamIdx(qual_attr->getArgumentIdx());
- return 0;};
+ return 0;}
 bool clang_ext_AvailabilityAttr_getStrict(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9204,7 +9204,7 @@ bool clang_ext_AvailabilityAttr_getStrict(CXCursor cursor)
  #endif
  ;
  
- return false;};
+ return false;}
 enum
 clang_ext_CFGuardAttr_GuardArg clang_ext_CFGuardAttr_getGuard(
 CXCursor cursor)
@@ -9220,7 +9220,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_CFGuardAttr_GuardArg_nocf;};
+ return clang_ext_CFGuardAttr_GuardArg_nocf;}
 CXString clang_ext_OwnershipAttr_getModule(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9234,7 +9234,7 @@ CXString clang_ext_OwnershipAttr_getModule(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 unsigned int clang_ext_MinVectorWidthAttr_getVectorWidth(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9249,7 +9249,7 @@ unsigned int clang_ext_MinVectorWidthAttr_getVectorWidth(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 bool clang_ext_TypeTagForDatatypeAttr_getLayoutCompatible(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9257,7 +9257,7 @@ bool clang_ext_TypeTagForDatatypeAttr_getLayoutCompatible(CXCursor cursor)
  (auto qual_attr =
   llvm::dyn_cast_or_null<clang::TypeTagForDatatypeAttr >(attr))
  return qual_attr->getLayoutCompatible();
- return false;};
+ return false;}
 void clang_ext_OMPDeclareVariantAttr_getAdjustArgsNothing(
 CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -9277,7 +9277,7 @@ CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
  
  #endif
  ;
- };
+ }
 unsigned int clang_ext_InitSegAttr_getSectionLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9291,7 +9291,7 @@ unsigned int clang_ext_InitSegAttr_getSectionLength(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 struct
 clang_ext_TypeLoc clang_ext_VecTypeHintAttr_getTypeHint(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -9301,7 +9301,7 @@ clang_ext_TypeLoc clang_ext_VecTypeHintAttr_getTypeHint(CXCursor cursor)
  qual_attr->getTypeHintLoc() ? MakeTypeLoc(qual_attr->getTypeHintLoc()->getTypeLoc(
                                            ), getCursorTU(cursor)) : 
  MakeTypeLocInvalid(getCursorTU(cursor));
- return MakeTypeLocInvalid(getCursorTU(cursor));};
+ return MakeTypeLocInvalid(getCursorTU(cursor));}
 unsigned int clang_ext_Attrs_getTCBNameLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9333,7 +9333,7 @@ unsigned int clang_ext_Attrs_getTCBNameLength(CXCursor cursor)
   
   default:
   ;}
- return 0;};
+ return 0;}
 unsigned int clang_ext_OMPDeclareVariantAttr_getAdjustArgsNothing_Size(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -9350,7 +9350,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_ExternalSourceSymbolAttr_getLanguageLength(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -9367,7 +9367,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_ObjCRuntimeNameAttr_getMetadataNameLength(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -9383,7 +9383,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 enum
 clang_ext_ConsumableAttr_ConsumedState
 clang_ext_ConsumableAttr_getDefaultState(CXCursor cursor)
@@ -9391,7 +9391,7 @@ clang_ext_ConsumableAttr_getDefaultState(CXCursor cursor)
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::ConsumableAttr >(attr))
  return convert_ConsumableAttr_ConsumedState(qual_attr->getDefaultState());
- return clang_ext_ConsumableAttr_ConsumedState_Unknown;};
+ return clang_ext_ConsumableAttr_ConsumedState_Unknown;}
 unsigned int clang_ext_BuiltinAttr_getID(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9405,7 +9405,7 @@ unsigned int clang_ext_BuiltinAttr_getID(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 CXString clang_ext_AssumptionAttr_getAssumption(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9419,7 +9419,7 @@ CXString clang_ext_AssumptionAttr_getAssumption(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 CXString clang_ext_Attrs_getBridgedType(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9444,7 +9444,7 @@ CXString clang_ext_Attrs_getBridgedType(CXCursor cursor)
   break;
   default:
   ;}
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 unsigned int clang_ext_OMPDeclareSimdDeclAttr_getModifiers_Size(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -9461,7 +9461,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_SwiftAttrAttr_getAttributeLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9475,7 +9475,7 @@ unsigned int clang_ext_SwiftAttrAttr_getAttributeLength(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 enum
 clang_ext_SetTypestateAttr_ConsumedState
 clang_ext_SetTypestateAttr_getNewState(CXCursor cursor)
@@ -9483,7 +9483,7 @@ clang_ext_SetTypestateAttr_getNewState(CXCursor cursor)
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::SetTypestateAttr >(attr))
  return convert_SetTypestateAttr_ConsumedState(qual_attr->getNewState());
- return clang_ext_SetTypestateAttr_ConsumedState_Unknown;};
+ return clang_ext_SetTypestateAttr_ConsumedState_Unknown;}
 CXString clang_ext_ObjCBridgeRelatedAttr_getClassMethod(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9499,7 +9499,7 @@ CXString clang_ext_ObjCBridgeRelatedAttr_getClassMethod(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 CXCursor clang_ext_OMPReferencedVarAttr_getRef(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9514,7 +9514,7 @@ CXCursor clang_ext_OMPReferencedVarAttr_getRef(CXCursor cursor)
  #endif
  ;
  
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));};
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 unsigned int clang_ext_AllocSizeAttr_getElemSizeParam(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9528,7 +9528,7 @@ unsigned int clang_ext_AllocSizeAttr_getElemSizeParam(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 enum
 clang_ext_VisibilityAttr_VisibilityType
 clang_ext_VisibilityAttr_getVisibility(CXCursor cursor)
@@ -9536,7 +9536,7 @@ clang_ext_VisibilityAttr_getVisibility(CXCursor cursor)
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::VisibilityAttr >(attr))
  return convert_VisibilityAttr_VisibilityType(qual_attr->getVisibility());
- return clang_ext_VisibilityAttr_VisibilityType_Default;};
+ return clang_ext_VisibilityAttr_VisibilityType_Default;}
 enum
 clang_ext_TypeVisibilityAttr_VisibilityType
 clang_ext_TypeVisibilityAttr_getVisibility(CXCursor cursor)
@@ -9546,7 +9546,7 @@ clang_ext_TypeVisibilityAttr_getVisibility(CXCursor cursor)
  (auto qual_attr = llvm::dyn_cast_or_null<clang::TypeVisibilityAttr >(attr))
  return
  convert_TypeVisibilityAttr_VisibilityType(qual_attr->getVisibility());
- return clang_ext_TypeVisibilityAttr_VisibilityType_Default;};
+ return clang_ext_TypeVisibilityAttr_VisibilityType_Default;}
 CXString clang_ext_ExternalSourceSymbolAttr_getLanguage(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9562,7 +9562,7 @@ CXString clang_ext_ExternalSourceSymbolAttr_getLanguage(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 unsigned int clang_ext_Attrs_getReplacementLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9594,7 +9594,7 @@ unsigned int clang_ext_Attrs_getReplacementLength(CXCursor cursor)
   
   default:
   ;}
- return 0;};
+ return 0;}
 unsigned int clang_ext_OMPDeclareSimdDeclAttr_getAlignments_Size(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -9611,7 +9611,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_OMPDeclareSimdDeclAttr_getLinears_Size(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -9628,7 +9628,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 CXCursor clang_ext_NSErrorDomainAttr_getErrorDomain(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9643,7 +9643,7 @@ CXCursor clang_ext_NSErrorDomainAttr_getErrorDomain(CXCursor cursor)
  #endif
  ;
  
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));};
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 CXString clang_ext_ErrorAttr_getUserDiagnostic(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9657,7 +9657,7 @@ CXString clang_ext_ErrorAttr_getUserDiagnostic(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 unsigned int clang_ext_XRayLogArgsAttr_getArgumentCount(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9671,7 +9671,7 @@ unsigned int clang_ext_XRayLogArgsAttr_getArgumentCount(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 CXString clang_ext_Attrs_getMessage(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9745,7 +9745,7 @@ CXString clang_ext_Attrs_getMessage(CXCursor cursor)
   
   default:
   ;}
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 unsigned int clang_ext_ArgumentWithTypeTagAttr_getTypeTagIdx(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9753,7 +9753,7 @@ unsigned int clang_ext_ArgumentWithTypeTagAttr_getTypeTagIdx(CXCursor cursor)
  (auto qual_attr =
   llvm::dyn_cast_or_null<clang::ArgumentWithTypeTagAttr >(attr))
  return unsigned_int_of_ParamIdx(qual_attr->getTypeTagIdx());
- return 0;};
+ return 0;}
 CXString clang_ext_UuidAttr_getGuid(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9767,7 +9767,7 @@ CXString clang_ext_UuidAttr_getGuid(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 unsigned int clang_ext_Attrs_getZDim(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9786,7 +9786,7 @@ unsigned int clang_ext_Attrs_getZDim(CXCursor cursor)
   break;
   default:
   ;}
- return 0;};
+ return 0;}
 unsigned int clang_ext_Attrs_getHandleTypeLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9831,7 +9831,7 @@ unsigned int clang_ext_Attrs_getHandleTypeLength(CXCursor cursor)
   
   default:
   ;}
- return 0;};
+ return 0;}
 void clang_ext_OMPDeclareSimdDeclAttr_getUniforms(
 CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -9851,7 +9851,7 @@ CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
  
  #endif
  ;
- };
+ }
 enum
 clang_ext_LoopHintAttr_OptionType clang_ext_LoopHintAttr_getOption(
 CXCursor cursor)
@@ -9867,7 +9867,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_LoopHintAttr_OptionType_Vectorize;};
+ return clang_ext_LoopHintAttr_OptionType_Vectorize;}
 CXString clang_ext_ObjCBridgeRelatedAttr_getRelatedClass(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9883,7 +9883,7 @@ CXString clang_ext_ObjCBridgeRelatedAttr_getRelatedClass(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 CXString clang_ext_WebAssemblyImportNameAttr_getImportName(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9899,7 +9899,7 @@ CXString clang_ext_WebAssemblyImportNameAttr_getImportName(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 void clang_ext_NoSanitizeAttr_getSanitizers(
 CXCursor cursor, void (*callback_value)(CXString , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -9917,7 +9917,7 @@ CXCursor cursor, void (*callback_value)(CXString , void *), void *data)
  
  #endif
  ;
- };
+ }
 void clang_ext_CallableWhenAttr_getCallableStates(
 CXCursor cursor,
 void
@@ -9938,7 +9938,7 @@ void *data)
  
  #endif
  ;
- };
+ }
 enum
 clang_ext_OMPDeclareSimdDeclAttr_BranchStateTy
 clang_ext_OMPDeclareSimdDeclAttr_getBranchState(CXCursor cursor)
@@ -9957,7 +9957,7 @@ clang_ext_OMPDeclareSimdDeclAttr_getBranchState(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OMPDeclareSimdDeclAttr_BranchStateTy_BS_Undefined;};
+ return clang_ext_OMPDeclareSimdDeclAttr_BranchStateTy_BS_Undefined;}
 bool clang_ext_AsmLabelAttr_getIsLiteralLabel(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9971,7 +9971,7 @@ bool clang_ext_AsmLabelAttr_getIsLiteralLabel(CXCursor cursor)
  #endif
  ;
  
- return false;};
+ return false;}
 CXString clang_ext_SwiftBridgeAttr_getSwiftType(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -9985,19 +9985,19 @@ CXString clang_ext_SwiftBridgeAttr_getSwiftType(CXCursor cursor)
  #endif
  ;
  
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 unsigned int clang_ext_FormatArgAttr_getFormatIdx(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::FormatArgAttr >(attr))
  return unsigned_int_of_ParamIdx(qual_attr->getFormatIdx());
- return 0;};
+ return 0;}
 int clang_ext_FormatAttr_getFormatIdx(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
  if (auto qual_attr = llvm::dyn_cast_or_null<clang::FormatAttr >(attr))
  return qual_attr->getFormatIdx();
- return 0;};
+ return 0;}
 bool clang_ext_TypeTagForDatatypeAttr_getMustBeNull(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -10005,7 +10005,7 @@ bool clang_ext_TypeTagForDatatypeAttr_getMustBeNull(CXCursor cursor)
  (auto qual_attr =
   llvm::dyn_cast_or_null<clang::TypeTagForDatatypeAttr >(attr))
  return qual_attr->getMustBeNull();
- return false;};
+ return false;}
 enum
 clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy
 clang_ext_OMPAllocateDeclAttr_getAllocatorType(CXCursor cursor)
@@ -10023,7 +10023,7 @@ clang_ext_OMPAllocateDeclAttr_getAllocatorType(CXCursor cursor)
  #endif
  ;
  
- return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPNullMemAlloc;};
+ return clang_ext_OMPAllocateDeclAttr_AllocatorTypeTy_OMPNullMemAlloc;}
 unsigned int clang_ext_Attrs_getNameLength(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -10153,7 +10153,7 @@ unsigned int clang_ext_Attrs_getNameLength(CXCursor cursor)
   
   default:
   ;}
- return 0;};
+ return 0;}
 CXString clang_ext_Attrs_getName(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -10283,7 +10283,7 @@ CXString clang_ext_Attrs_getName(CXCursor cursor)
   
   default:
   ;}
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 unsigned int clang_ext_SuppressAttr_getDiagnosticIdentifiers_Size(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -10298,7 +10298,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_OMPDeclareSimdDeclAttr_getSteps_Size(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -10314,7 +10314,7 @@ unsigned int clang_ext_OMPDeclareSimdDeclAttr_getSteps_Size(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_WebAssemblyExportNameAttr_getExportNameLength(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -10331,7 +10331,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 void clang_ext_OMPDeclareSimdDeclAttr_getAlignments(
 CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -10351,7 +10351,7 @@ CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
  
  #endif
  ;
- };
+ }
 unsigned int clang_ext_MSVtorDispAttr_getVdm(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -10365,7 +10365,7 @@ unsigned int clang_ext_MSVtorDispAttr_getVdm(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 CXCursor clang_ext_Attrs_getCond(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -10396,7 +10396,7 @@ CXCursor clang_ext_Attrs_getCond(CXCursor cursor)
   
   default:
   ;}
- return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));};
+ return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));}
 struct
 clang_ext_TypeLoc clang_ext_IBOutletCollectionAttr_getInterface(
 CXCursor cursor)
@@ -10409,7 +10409,7 @@ CXCursor cursor)
  qual_attr->getInterfaceLoc() ? MakeTypeLoc(qual_attr->getInterfaceLoc()->getTypeLoc(
                                             ), getCursorTU(cursor)) : 
  MakeTypeLocInvalid(getCursorTU(cursor));
- return MakeTypeLocInvalid(getCursorTU(cursor));};
+ return MakeTypeLocInvalid(getCursorTU(cursor));}
 enum
 clang_ext_ObjCMethodFamilyAttr_FamilyKind
 clang_ext_ObjCMethodFamilyAttr_getFamily(CXCursor cursor)
@@ -10418,7 +10418,7 @@ clang_ext_ObjCMethodFamilyAttr_getFamily(CXCursor cursor)
  if
  (auto qual_attr = llvm::dyn_cast_or_null<clang::ObjCMethodFamilyAttr >(attr))
  return convert_ObjCMethodFamilyAttr_FamilyKind(qual_attr->getFamily());
- return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_None;};
+ return clang_ext_ObjCMethodFamilyAttr_FamilyKind_OMF_None;}
 unsigned int clang_ext_SwiftAsyncErrorAttr_getHandlerParamIdx(
 CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
@@ -10434,7 +10434,7 @@ CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 enum
 clang_ext_SwiftAsyncAttr_Kind clang_ext_SwiftAsyncAttr_getKind(
 CXCursor cursor)
@@ -10450,7 +10450,7 @@ CXCursor cursor)
  #endif
  ;
  
- return clang_ext_SwiftAsyncAttr_Kind_None;};
+ return clang_ext_SwiftAsyncAttr_Kind_None;}
 CXString clang_ext_Attrs_getKind(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -10482,7 +10482,7 @@ CXString clang_ext_Attrs_getKind(CXCursor cursor)
   
   default:
   ;}
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 int clang_ext_HLSLNumThreadsAttr_getX(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -10497,7 +10497,7 @@ int clang_ext_HLSLNumThreadsAttr_getX(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 unsigned int clang_ext_PatchableFunctionEntryAttr_getCount(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -10513,7 +10513,7 @@ unsigned int clang_ext_PatchableFunctionEntryAttr_getCount(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 struct
 clang_ext_DeclarationName clang_ext_DiagnoseAsBuiltinAttr_getFunction(
 CXCursor cursor)
@@ -10533,7 +10533,7 @@ CXCursor cursor)
  #endif
  ;
  
- return MakeDeclarationNameInvalid(getCursorTU(cursor));};
+ return MakeDeclarationNameInvalid(getCursorTU(cursor));}
 unsigned int clang_ext_Attrs_getDelayedArgs_Size(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -10565,7 +10565,7 @@ unsigned int clang_ext_Attrs_getDelayedArgs_Size(CXCursor cursor)
   
   default:
   ;}
- return 0;};
+ return 0;}
 void clang_ext_AbiTagAttr_getTags(
 CXCursor cursor, void (*callback_value)(CXString , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -10583,7 +10583,7 @@ CXCursor cursor, void (*callback_value)(CXString , void *), void *data)
  
  #endif
  ;
- };
+ }
 unsigned int clang_ext_Attrs_getNumber(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -10608,7 +10608,7 @@ unsigned int clang_ext_Attrs_getNumber(CXCursor cursor)
   
   default:
   ;}
- return 0;};
+ return 0;}
 CXString clang_ext_Attrs_getTCBName(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -10640,7 +10640,7 @@ CXString clang_ext_Attrs_getTCBName(CXCursor cursor)
   
   default:
   ;}
- return cxstring_createRef("");};
+ return cxstring_createRef("");}
 unsigned int clang_ext_OpenCLUnrollHintAttr_getUnrollHint(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -10655,7 +10655,7 @@ unsigned int clang_ext_OpenCLUnrollHintAttr_getUnrollHint(CXCursor cursor)
  #endif
  ;
  
- return 0;};
+ return 0;}
 void clang_ext_NoBuiltinAttr_getBuiltinNames(
 CXCursor cursor, void (*callback_value)(CXString , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -10673,7 +10673,7 @@ CXCursor cursor, void (*callback_value)(CXString , void *), void *data)
  
  #endif
  ;
- };
+ }
 bool clang_ext_MSInheritanceAttr_getBestCase(CXCursor cursor)
 {auto attr = GetCursorAttr(cursor);
  
@@ -10688,7 +10688,7 @@ bool clang_ext_MSInheritanceAttr_getBestCase(CXCursor cursor)
  #endif
  ;
  
- return false;};
+ return false;}
 void clang_ext_NonNullAttr_getArgs(
 CXCursor cursor, void (*callback_value)(unsigned int , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -10719,7 +10719,7 @@ CXCursor cursor, void (*callback_value)(unsigned int , void *), void *data)
    callback_value(unsigned_int_of_ParamIdx(item), data);}
   break;
   default:
-  ;}};
+  ;}}
 void clang_ext_AcquireCapabilityAttr_getArgs(
 CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
 {auto attr = GetCursorAttr(cursor);
@@ -10916,5 +10916,5 @@ CXCursor cursor, void (*callback_value)(CXCursor , void *), void *data)
   ;
   
   default:
-  ;}};
+  ;}}
 

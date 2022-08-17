@@ -3649,6 +3649,17 @@ external ext_type_of_type_get_underlying_type :
 external ext_type_of_type_loc_get_underlying_type :
   clang_ext_typeloc -> clang_ext_typeloc =
     "clang_ext_TypeOfTypeLoc_getUnderlyingType_wrapper"
+type clang_ext_storageclass =
+  | None 
+  | Extern 
+  | Static 
+  | PrivateExtern 
+  | OpenCLWorkGroupLocal 
+  | Auto 
+  | Register [@@deriving refl]
+external ext_decl_get_storage_class :
+  cxcursor -> clang_ext_storageclass =
+    "clang_ext_Decl_getStorageClass_wrapper"
 type clang_ext_aarch64svepcs_spelling =
   | GNU_aarch64_sve_pcs 
   | CXX11_clang_aarch64_sve_pcs 

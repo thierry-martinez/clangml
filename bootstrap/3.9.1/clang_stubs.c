@@ -11368,6 +11368,52 @@ clang_ext_TypeOfTypeLoc_getUnderlyingType_wrapper(value arg_ocaml)
   }
 }
 
+enum clang_ext_StorageClass
+Clang_ext_storageclass_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return CLANG_EXT_SC_None;
+  case 1: return CLANG_EXT_SC_Extern;
+  case 2: return CLANG_EXT_SC_Static;
+  case 3: return CLANG_EXT_SC_PrivateExtern;
+  case 4: return CLANG_EXT_SC_OpenCLWorkGroupLocal;
+  case 5: return CLANG_EXT_SC_Auto;
+  case 6: return CLANG_EXT_SC_Register;
+  }
+  caml_failwith_fmt("invalid value for Clang_ext_storageclass_val: %d", Int_val(ocaml));
+  return CLANG_EXT_SC_None;
+}
+
+value
+Val_clang_ext_storageclass(enum clang_ext_StorageClass v)
+{
+  switch (v) {
+  case CLANG_EXT_SC_None: return Val_int(0);
+  case CLANG_EXT_SC_Extern: return Val_int(1);
+  case CLANG_EXT_SC_Static: return Val_int(2);
+  case CLANG_EXT_SC_PrivateExtern: return Val_int(3);
+  case CLANG_EXT_SC_OpenCLWorkGroupLocal: return Val_int(4);
+  case CLANG_EXT_SC_Auto: return Val_int(5);
+  case CLANG_EXT_SC_Register: return Val_int(6);
+  }
+  caml_failwith_fmt("invalid value for Val_clang_ext_storageclass: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_Decl_getStorageClass_wrapper(value arg_ocaml)
+{
+  CAMLparam1(arg_ocaml);
+  CXCursor arg;
+  arg = Cxcursor_val(Field(arg_ocaml, 0));
+  enum clang_ext_StorageClass result = clang_ext_Decl_getStorageClass(arg);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_storageclass(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_AArch64SVEPcs_spelling
 Clang_ext_aarch64svepcs_spelling_val(value ocaml)
 {
