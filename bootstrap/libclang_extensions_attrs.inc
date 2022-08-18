@@ -455,6 +455,58 @@ CXCursor cursor)
  
  return clang_ext_AlwaysDestroy_SpellingNotCalculated;}
 enum
+clang_ext_AlwaysInline_spelling clang_ext_AlwaysInline_getSpelling(
+CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ ;
+ 
+ auto attr = GetCursorAttr(cursor);
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::AlwaysInlineAttr >(attr))
+ switch (qual_attr->getSemanticSpelling())
+ {case clang::AlwaysInlineAttr ::Spelling ::GNU_always_inline:
+  return clang_ext_AlwaysInline_GNU_always_inline;
+  case clang::AlwaysInlineAttr ::Spelling ::CXX11_gnu_always_inline:
+  return clang_ext_AlwaysInline_CXX11_gnu_always_inline;
+  
+  #ifndef LLVM_VERSION_BEFORE_11_0_0
+  ;
+  
+  case clang::AlwaysInlineAttr ::Spelling ::C2x_gnu_always_inline:
+  return clang_ext_AlwaysInline_C2x_gnu_always_inline;
+  
+  #endif
+  ;
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_15_0_0
+  ;
+  
+  case clang::AlwaysInlineAttr ::Spelling ::CXX11_clang_always_inline:
+  return clang_ext_AlwaysInline_CXX11_clang_always_inline;
+  
+  #endif
+  ;
+  
+  
+  #ifndef LLVM_VERSION_BEFORE_15_0_0
+  ;
+  
+  case clang::AlwaysInlineAttr ::Spelling ::C2x_clang_always_inline:
+  return clang_ext_AlwaysInline_C2x_clang_always_inline;
+  
+  #endif
+  ;
+  
+  case clang::AlwaysInlineAttr ::Spelling ::Keyword_forceinline:
+  return clang_ext_AlwaysInline_Keyword_forceinline;}
+ 
+ #endif
+ ;
+ 
+ return clang_ext_AlwaysInline_SpellingNotCalculated;}
+enum
 clang_ext_Annotate_spelling clang_ext_Annotate_getSpelling(CXCursor cursor)
 {
  #ifndef LLVM_VERSION_BEFORE_3_5_0
@@ -3375,6 +3427,35 @@ clang_ext_NoEscape_spelling clang_ext_NoEscape_getSpelling(CXCursor cursor)
  
  return clang_ext_NoEscape_SpellingNotCalculated;}
 enum
+clang_ext_NoInline_spelling clang_ext_NoInline_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_3_5_0
+ ;
+ 
+ auto attr = GetCursorAttr(cursor);
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoInlineAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoInline_Keyword_noinline;
+  case 1:
+  return clang_ext_NoInline_GNU_noinline;
+  case 2:
+  return clang_ext_NoInline_CXX11_gnu_noinline;
+  case 3:
+  return clang_ext_NoInline_C2x_gnu_noinline;
+  case 4:
+  return clang_ext_NoInline_CXX11_clang_noinline;
+  case 5:
+  return clang_ext_NoInline_C2x_clang_noinline;
+  case 6:
+  return clang_ext_NoInline_Declspec_noinline;}
+ 
+ #endif
+ ;
+ 
+ return clang_ext_NoInline_SpellingNotCalculated;}
+enum
 clang_ext_NoInstrumentFunction_spelling
 clang_ext_NoInstrumentFunction_getSpelling(CXCursor cursor)
 {
@@ -3398,6 +3479,27 @@ clang_ext_NoInstrumentFunction_getSpelling(CXCursor cursor)
  ;
  
  return clang_ext_NoInstrumentFunction_SpellingNotCalculated;}
+enum
+clang_ext_NoMerge_spelling clang_ext_NoMerge_getSpelling(CXCursor cursor)
+{
+ #ifndef LLVM_VERSION_BEFORE_11_0_0
+ ;
+ 
+ auto attr = GetCursorAttr(cursor);
+ 
+ if (auto qual_attr = llvm::dyn_cast_or_null<clang::NoMergeAttr >(attr))
+ switch (qual_attr->getSpellingListIndex())
+ {case 0:
+  return clang_ext_NoMerge_GNU_nomerge;
+  case 1:
+  return clang_ext_NoMerge_CXX11_clang_nomerge;
+  case 2:
+  return clang_ext_NoMerge_C2x_clang_nomerge;}
+ 
+ #endif
+ ;
+ 
+ return clang_ext_NoMerge_SpellingNotCalculated;}
 enum
 clang_ext_NoMicroMips_spelling clang_ext_NoMicroMips_getSpelling(
 CXCursor cursor)
