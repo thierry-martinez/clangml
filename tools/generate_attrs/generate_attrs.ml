@@ -572,6 +572,7 @@ let generate_attribute context versions name reduced_name public_methods
 let is_parameter_base_class name =
   match name with
   | "Attr" | "TypeAttr" | "StmtAttr" | "InheritableAttr"
+  | "DeclOrStmtAttr"
   | "InheritableParamAttr" | "ParameterABIAttr" -> true
   | _ -> false
 
