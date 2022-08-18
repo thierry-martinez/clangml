@@ -876,6 +876,8 @@ let main cflags llvm_config prefix =
     (* some constants are missing *)
     StringMap.add "LoopHint" (10, 0) |>
     (* some spelling are missing *)
+    StringMap.add "clang_ext_AlwaysInline_CXX11_clang_always_inline" (15, 0) |>
+    StringMap.add "clang_ext_AlwaysInline_C2x_clang_always_inline" (15, 0) |>
     StringMap.add "clang_ext_Aligned_C2x_gnu_aligned" (11, 0) |>
     StringMap.add "clang_ext_AlwaysInline_C2x_gnu_always_inline" (11, 0) |>
     StringMap.add "clang_ext_MipsLongCall_C2x_gnu_long_call" (11, 0) |>
