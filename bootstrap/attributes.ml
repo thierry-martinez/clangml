@@ -313,6 +313,7 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   elem_size: int ;
   num_elems: int } 
   | AlwaysDestroy of Clang__bindings.clang_ext_alwaysdestroy_spelling 
+  | AlwaysInline of Clang__bindings.clang_ext_alwaysinline_spelling 
   | Annotate of
   {
   spelling: Clang__bindings.clang_ext_annotate_spelling ;
@@ -595,8 +596,10 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
   | NoDestroy of Clang__bindings.clang_ext_nodestroy_spelling 
   | NoDuplicate of Clang__bindings.clang_ext_noduplicate_spelling 
   | NoEscape of Clang__bindings.clang_ext_noescape_spelling 
+  | NoInline of Clang__bindings.clang_ext_noinline_spelling 
   | NoInstrumentFunction of
   Clang__bindings.clang_ext_noinstrumentfunction_spelling 
+  | NoMerge of Clang__bindings.clang_ext_nomerge_spelling 
   | NoMicroMips of Clang__bindings.clang_ext_nomicromips_spelling 
   | NoMips16 of Clang__bindings.clang_ext_nomips16_spelling 
   | NoProfileFunction of Clang__bindings.clang_ext_noprofilefunction_spelling
@@ -1059,6 +1062,9 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
              ->
              AlwaysDestroy
                (Clang__bindings.ext_always_destroy_get_spelling cursor)
+         | AlwaysInline ->
+             AlwaysInline
+               (Clang__bindings.ext_always_inline_get_spelling cursor)
          | Annotate ->
              Annotate
                {
@@ -2168,10 +2174,19 @@ type ('expr, 'decl, 'qual_type, 'declaration_name, 'omp_trait_info) t =
                           Metapp.Exp.of_bool
                             (Clangml_config.equivalent_version.major >= 6)]])
              -> NoEscape (Clang__bindings.ext_no_escape_get_spelling cursor)
+         | NoInline ->
+             NoInline (Clang__bindings.ext_no_inline_get_spelling cursor)
          | NoInstrumentFunction ->
              NoInstrumentFunction
                (Clang__bindings.ext_no_instrument_function_get_spelling
                   cursor)
+         | ((NoMerge)[@if
+                       [%meta
+                         Metapp.Exp.of_bool
+                           (((Clangml_config.equivalent_version.major),
+                              (Clangml_config.equivalent_version.minor)) >=
+                              (11, 0))]])
+             -> NoMerge (Clang__bindings.ext_no_merge_get_spelling cursor)
          | ((NoMicroMips)[@if
                            [%meta
                              Metapp.Exp.of_bool

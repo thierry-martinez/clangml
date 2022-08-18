@@ -153,6 +153,17 @@ clang_ext_AlwaysDestroy_SpellingNotCalculated};
 enum
 clang_ext_AlwaysDestroy_spelling clang_ext_AlwaysDestroy_getSpelling(
 CXCursor cursor);
+enum clang_ext_AlwaysInline_spelling {
+clang_ext_AlwaysInline_GNU_always_inline,
+clang_ext_AlwaysInline_CXX11_gnu_always_inline,
+clang_ext_AlwaysInline_C2x_gnu_always_inline,
+clang_ext_AlwaysInline_CXX11_clang_always_inline,
+clang_ext_AlwaysInline_C2x_clang_always_inline,
+clang_ext_AlwaysInline_Keyword_forceinline,
+clang_ext_AlwaysInline_SpellingNotCalculated};
+enum
+clang_ext_AlwaysInline_spelling clang_ext_AlwaysInline_getSpelling(
+CXCursor cursor);
 enum clang_ext_Annotate_spelling {
 clang_ext_Annotate_GNU_annotate,
 clang_ext_Annotate_CXX11_clang_annotate,
@@ -1108,6 +1119,17 @@ clang_ext_NoEscape_C2x_clang_noescape,
 clang_ext_NoEscape_SpellingNotCalculated};
 enum
 clang_ext_NoEscape_spelling clang_ext_NoEscape_getSpelling(CXCursor cursor);
+enum clang_ext_NoInline_spelling {
+clang_ext_NoInline_Keyword_noinline,
+clang_ext_NoInline_GNU_noinline,
+clang_ext_NoInline_CXX11_gnu_noinline,
+clang_ext_NoInline_C2x_gnu_noinline,
+clang_ext_NoInline_CXX11_clang_noinline,
+clang_ext_NoInline_C2x_clang_noinline,
+clang_ext_NoInline_Declspec_noinline,
+clang_ext_NoInline_SpellingNotCalculated};
+enum
+clang_ext_NoInline_spelling clang_ext_NoInline_getSpelling(CXCursor cursor);
 enum clang_ext_NoInstrumentFunction_spelling {
 clang_ext_NoInstrumentFunction_GNU_no_instrument_function,
 clang_ext_NoInstrumentFunction_CXX11_gnu_no_instrument_function,
@@ -1116,6 +1138,13 @@ clang_ext_NoInstrumentFunction_SpellingNotCalculated};
 enum
 clang_ext_NoInstrumentFunction_spelling
 clang_ext_NoInstrumentFunction_getSpelling(CXCursor cursor);
+enum clang_ext_NoMerge_spelling {
+clang_ext_NoMerge_GNU_nomerge,
+clang_ext_NoMerge_CXX11_clang_nomerge,
+clang_ext_NoMerge_C2x_clang_nomerge,
+clang_ext_NoMerge_SpellingNotCalculated};
+enum
+clang_ext_NoMerge_spelling clang_ext_NoMerge_getSpelling(CXCursor cursor);
 enum clang_ext_NoMicroMips_spelling {
 clang_ext_NoMicroMips_GNU_nomicromips,
 clang_ext_NoMicroMips_CXX11_gnu_nomicromips,

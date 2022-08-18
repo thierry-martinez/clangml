@@ -3331,6 +3331,17 @@ type clang_ext_alwaysdestroy_spelling =
 external ext_always_destroy_get_spelling :
   cxcursor -> clang_ext_alwaysdestroy_spelling =
     "clang_ext_AlwaysDestroy_getSpelling_wrapper"
+type clang_ext_alwaysinline_spelling =
+  | GNU_always_inline 
+  | CXX11_gnu_always_inline 
+  | C2x_gnu_always_inline 
+  | CXX11_clang_always_inline 
+  | C2x_clang_always_inline 
+  | Keyword_forceinline 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_always_inline_get_spelling :
+  cxcursor -> clang_ext_alwaysinline_spelling =
+    "clang_ext_AlwaysInline_getSpelling_wrapper"
 type clang_ext_annotate_spelling =
   | GNU_annotate 
   | CXX11_clang_annotate 
@@ -4285,6 +4296,18 @@ type clang_ext_noescape_spelling =
 external ext_no_escape_get_spelling :
   cxcursor -> clang_ext_noescape_spelling =
     "clang_ext_NoEscape_getSpelling_wrapper"
+type clang_ext_noinline_spelling =
+  | Keyword_noinline 
+  | GNU_noinline 
+  | CXX11_gnu_noinline 
+  | C2x_gnu_noinline 
+  | CXX11_clang_noinline 
+  | C2x_clang_noinline 
+  | Declspec_noinline 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_inline_get_spelling :
+  cxcursor -> clang_ext_noinline_spelling =
+    "clang_ext_NoInline_getSpelling_wrapper"
 type clang_ext_noinstrumentfunction_spelling =
   | GNU_no_instrument_function 
   | CXX11_gnu_no_instrument_function 
@@ -4293,6 +4316,14 @@ type clang_ext_noinstrumentfunction_spelling =
 external ext_no_instrument_function_get_spelling :
   cxcursor -> clang_ext_noinstrumentfunction_spelling =
     "clang_ext_NoInstrumentFunction_getSpelling_wrapper"
+type clang_ext_nomerge_spelling =
+  | GNU_nomerge 
+  | CXX11_clang_nomerge 
+  | C2x_clang_nomerge 
+  | SpellingNotCalculated [@@deriving refl]
+external ext_no_merge_get_spelling :
+  cxcursor -> clang_ext_nomerge_spelling =
+    "clang_ext_NoMerge_getSpelling_wrapper"
 type clang_ext_nomicromips_spelling =
   | GNU_nomicromips 
   | CXX11_gnu_nomicromips 

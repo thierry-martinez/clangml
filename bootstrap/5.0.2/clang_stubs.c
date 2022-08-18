@@ -12592,6 +12592,52 @@ clang_ext_AlwaysDestroy_getSpelling_wrapper(value cursor_ocaml)
   }
 }
 
+enum clang_ext_AlwaysInline_spelling
+Clang_ext_alwaysinline_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_AlwaysInline_GNU_always_inline;
+  case 1: return clang_ext_AlwaysInline_CXX11_gnu_always_inline;
+  case 2: return clang_ext_AlwaysInline_C2x_gnu_always_inline;
+  case 3: return clang_ext_AlwaysInline_CXX11_clang_always_inline;
+  case 4: return clang_ext_AlwaysInline_C2x_clang_always_inline;
+  case 5: return clang_ext_AlwaysInline_Keyword_forceinline;
+  case 6: return clang_ext_AlwaysInline_SpellingNotCalculated;
+  }
+  caml_failwith_fmt("invalid value for Clang_ext_alwaysinline_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_AlwaysInline_GNU_always_inline;
+}
+
+value
+Val_clang_ext_alwaysinline_spelling(enum clang_ext_AlwaysInline_spelling v)
+{
+  switch (v) {
+  case clang_ext_AlwaysInline_GNU_always_inline: return Val_int(0);
+  case clang_ext_AlwaysInline_CXX11_gnu_always_inline: return Val_int(1);
+  case clang_ext_AlwaysInline_C2x_gnu_always_inline: return Val_int(2);
+  case clang_ext_AlwaysInline_CXX11_clang_always_inline: return Val_int(3);
+  case clang_ext_AlwaysInline_C2x_clang_always_inline: return Val_int(4);
+  case clang_ext_AlwaysInline_Keyword_forceinline: return Val_int(5);
+  case clang_ext_AlwaysInline_SpellingNotCalculated: return Val_int(6);
+  }
+  caml_failwith_fmt("invalid value for Val_clang_ext_alwaysinline_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_AlwaysInline_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_AlwaysInline_spelling result = clang_ext_AlwaysInline_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_alwaysinline_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_Annotate_spelling
 Clang_ext_annotate_spelling_val(value ocaml)
 {
@@ -17364,6 +17410,54 @@ clang_ext_NoEscape_getSpelling_wrapper(value cursor_ocaml)
   }
 }
 
+enum clang_ext_NoInline_spelling
+Clang_ext_noinline_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoInline_Keyword_noinline;
+  case 1: return clang_ext_NoInline_GNU_noinline;
+  case 2: return clang_ext_NoInline_CXX11_gnu_noinline;
+  case 3: return clang_ext_NoInline_C2x_gnu_noinline;
+  case 4: return clang_ext_NoInline_CXX11_clang_noinline;
+  case 5: return clang_ext_NoInline_C2x_clang_noinline;
+  case 6: return clang_ext_NoInline_Declspec_noinline;
+  case 7: return clang_ext_NoInline_SpellingNotCalculated;
+  }
+  caml_failwith_fmt("invalid value for Clang_ext_noinline_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoInline_Keyword_noinline;
+}
+
+value
+Val_clang_ext_noinline_spelling(enum clang_ext_NoInline_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoInline_Keyword_noinline: return Val_int(0);
+  case clang_ext_NoInline_GNU_noinline: return Val_int(1);
+  case clang_ext_NoInline_CXX11_gnu_noinline: return Val_int(2);
+  case clang_ext_NoInline_C2x_gnu_noinline: return Val_int(3);
+  case clang_ext_NoInline_CXX11_clang_noinline: return Val_int(4);
+  case clang_ext_NoInline_C2x_clang_noinline: return Val_int(5);
+  case clang_ext_NoInline_Declspec_noinline: return Val_int(6);
+  case clang_ext_NoInline_SpellingNotCalculated: return Val_int(7);
+  }
+  caml_failwith_fmt("invalid value for Val_clang_ext_noinline_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoInline_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoInline_spelling result = clang_ext_NoInline_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_noinline_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
 enum clang_ext_NoInstrumentFunction_spelling
 Clang_ext_noinstrumentfunction_spelling_val(value ocaml)
 {
@@ -17400,6 +17494,46 @@ clang_ext_NoInstrumentFunction_getSpelling_wrapper(value cursor_ocaml)
   {
     CAMLlocal1(data);
     data = Val_clang_ext_noinstrumentfunction_spelling(result);
+    CAMLreturn(data);
+  }
+}
+
+enum clang_ext_NoMerge_spelling
+Clang_ext_nomerge_spelling_val(value ocaml)
+{
+  switch (Int_val(ocaml)) {
+  case 0: return clang_ext_NoMerge_GNU_nomerge;
+  case 1: return clang_ext_NoMerge_CXX11_clang_nomerge;
+  case 2: return clang_ext_NoMerge_C2x_clang_nomerge;
+  case 3: return clang_ext_NoMerge_SpellingNotCalculated;
+  }
+  caml_failwith_fmt("invalid value for Clang_ext_nomerge_spelling_val: %d", Int_val(ocaml));
+  return clang_ext_NoMerge_GNU_nomerge;
+}
+
+value
+Val_clang_ext_nomerge_spelling(enum clang_ext_NoMerge_spelling v)
+{
+  switch (v) {
+  case clang_ext_NoMerge_GNU_nomerge: return Val_int(0);
+  case clang_ext_NoMerge_CXX11_clang_nomerge: return Val_int(1);
+  case clang_ext_NoMerge_C2x_clang_nomerge: return Val_int(2);
+  case clang_ext_NoMerge_SpellingNotCalculated: return Val_int(3);
+  }
+  caml_failwith_fmt("invalid value for Val_clang_ext_nomerge_spelling: %d", v);
+  return Val_int(0);
+}
+
+CAMLprim value
+clang_ext_NoMerge_getSpelling_wrapper(value cursor_ocaml)
+{
+  CAMLparam1(cursor_ocaml);
+  CXCursor cursor;
+  cursor = Cxcursor_val(Field(cursor_ocaml, 0));
+  enum clang_ext_NoMerge_spelling result = clang_ext_NoMerge_getSpelling(cursor);
+  {
+    CAMLlocal1(data);
+    data = Val_clang_ext_nomerge_spelling(result);
     CAMLreturn(data);
   }
 }
