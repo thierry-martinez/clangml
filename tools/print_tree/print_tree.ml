@@ -77,15 +77,24 @@ and print_tree indent cursor history =
     print_tree sub_indent cur history;
     Continue)
 
-let print options ast tu =
-  Clang.format_diagnostics Clang.warning_or_error Format.err_formatter tu;
-  if ast then
-    Format.printf "@[%a@]@." Clang.Translation_unit.pp
-      (Clang.Ast.of_cxtranslationunit ~options tu)
-  else
-    print_tree "" (Clang.get_translation_unit_cursor tu) []
+type printer =
+  | Cursor
+  | AST
+  | Reprint
 
-let main ast exprs files =
+let print options printer tu =
+  Clang.format_diagnostics Clang.warning_or_error Format.err_formatter tu;
+  match printer with
+  | Cursor ->
+      print_tree "" (Clang.get_translation_unit_cursor tu) []
+  | AST ->
+      Format.printf "@[%a@]@." Clang.Translation_unit.pp
+        (Clang.Ast.of_cxtranslationunit ~options tu)
+  | Reprint ->
+      Format.printf "@[%a@]@." Clang.Printer.translation_unit
+        (Clang.Ast.of_cxtranslationunit ~options tu)
+
+let main printer exprs files =
   Clangml_tools_common.command_line begin fun language command_line_args ->
     let options = Clang.default_editing_translation_unit_options () in
     let ast_options =
@@ -101,11 +110,11 @@ let main ast exprs files =
       let filename = "string" ^ suffix in
       prerr_endline filename;
       let tu = Clang.parse_string ~command_line_args ~filename expr ~options in
-      print ast_options ast tu
+      print ast_options printer tu
     end;
     files |> List.iter begin fun file ->
       let tu = Clang.parse_file ~command_line_args file ~options in
-      print ast_options ast tu
+      print ast_options printer tu
     end
   end
 
@@ -114,10 +123,17 @@ let option_expr =
   Cmdliner.Arg.(
     value & opt_all string [] & info ["c"] ~docv:"EXPR" ~doc)
 
-let option_ast =
-  let doc = "Print ClangML AST." in
-  Cmdliner.Arg.(
-    value & flag & info ["ast"] ~doc)
+let option_printer =
+  let cursor =
+    let doc = "Print Clang cursor tree." in
+    Cursor, Cmdliner.Arg.info ["cursor"] ~doc in
+  let ast =
+    let doc = "Print ClangML AST." in
+    AST, Cmdliner.Arg.info ["ast"] ~doc in
+  let reprint =
+    let doc = "Reprint using pretty-printer." in
+    Reprint, Cmdliner.Arg.info ["reprint"] ~doc in
+  Cmdliner.Arg.(value & vflag Cursor [cursor; ast; reprint])
 
 let files =
   let doc = "File to check" in
@@ -127,7 +143,7 @@ let files =
 
 let options =
   Clangml_tools_common.options
-    Cmdliner.Term.(const main $ option_ast $ option_expr $ files)
+    Cmdliner.Term.(const main $ option_printer $ option_expr $ files)
 
 let info =
   let doc = "print Clang internal AST" in

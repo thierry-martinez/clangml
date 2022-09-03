@@ -14,6 +14,7 @@ module Make (Node : Clang__ast.NodeS) = struct
     | Long -> "long"
     | ULong -> "unsigned long"
     | LongLong -> "long long"
+    | ULongLong -> "unsigned long long"
     | Short -> "short"
     | UShort -> "unsigned short"
     | Double -> "double"
@@ -200,7 +201,26 @@ module Make (Node : Clang__ast.NodeS) = struct
   and expr_prec prec fmt (e : Ast.expr) =
     match Node.force e.desc with
     | IntegerLiteral i ->
-        Clang__ast_utils.pp_print_integer_literal fmt i
+        let signed, suffix =
+          match e.decoration with
+          | Custom _ -> None, ""
+          | Cursor cursor ->
+              let type_kind =
+                Clang__bindings.get_type_kind
+                  (Clang__bindings.get_cursor_type cursor) in
+              let signed = Clang__utils.is_signed_integer type_kind in
+              let sign_suffix =
+                if signed then ""
+                else "U" in
+              let length_suffix =
+                match type_kind with
+                | ULong | Long -> "L"
+                | ULongLong | LongLong -> "LL"
+                | _ -> "" in
+              Some signed, sign_suffix ^ length_suffix in
+        Format.fprintf fmt "%a%s"
+          (Clang__ast_utils.pp_print_integer_literal ?signed) i
+          suffix
     | FloatingLiteral f ->
         Clang__ast_utils.pp_print_floating_literal fmt f
     | CharacterLiteral { kind; value } ->

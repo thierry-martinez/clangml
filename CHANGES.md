@@ -10,11 +10,16 @@
   `clang::StringLiteral::StringKind` from Clang 15.0.0.
   The constructor `Ascii` for `character_kind` is left unchanged.
 
-- `Ast.Var` and `Ast.Function` constructors now have a `storage`
+- #1, #2: `Ast.Var` and `Ast.Function` constructors now have a `storage`
   field in addition to the computed `linkage`, exposing the value
   previously accessible via `cursor_get_storage_class`. The
   storage classes are now correctly printed by the printer.
   (reported by Ronan, rsaill/n47, https://github.com/thierry-martinez/clangml/issues/1)
+
+- #3, #4: fix `Clang.Expr.radix_of_integer_literal` when the literal
+  comes from a macro expansion, and fix printing of unsigned/long
+  integer literals with `Clang.Printer`.
+  (reported by Ronan, rsaill/n47, https://github.com/thierry-martinez/clangml/issues/3)
 
 # 2022-08-09, 4.7.0
 
