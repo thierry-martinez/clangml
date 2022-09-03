@@ -2222,11 +2222,14 @@ module Expr = [%meta node_module [%str
       Decimal
 
   let radix_of_integer_literal (expr : t) : radix option =
-    let tokens = Ast.tokens_of_node expr in
+    let cursor = Ast.cursor_of_node expr in
+    let start = get_range_start (get_cursor_extent cursor) in
+    let tu = cursor_get_translation_unit cursor in
+    let tokens = tokenize tu (get_range start start) in
     (* [tokens] should be an array of length 1: however, with Clang <7,
        [tokens] include the token next to the range. *)
     if Array.length tokens >= 1 then
-      Some (radix_of_string tokens.(0))
+      Some (radix_of_string (get_token_spelling tu tokens.(0)))
     else
       None
 
