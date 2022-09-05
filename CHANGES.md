@@ -1,4 +1,4 @@
-# Development version
+# 2022-09-05, 4.8.0
 
 - Support for Clang/LLVM 15.0.0
 
