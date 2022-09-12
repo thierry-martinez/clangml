@@ -1,3 +1,9 @@
+# Development version
+
+- #5, #6: fix printing of elaborated declarations in function
+  parameters
+  (reported by rsaill, https://github.com/thierry-martinez/clangml/issues/5)
+
 # 2022-09-05, 4.8.0
 
 - Support for Clang/LLVM 15.0.0

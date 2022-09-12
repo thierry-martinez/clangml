@@ -1,5 +1,9 @@
 module Make (Node : Clang__ast.NodeS) = struct
-  module Ast = Clang__ast.Custom (Node)
+  module Ast = Ast_converter.Make (Node)
+
+  module Converter = Ast.Converter (struct
+    let options = Clang__ast_options.default
+  end)
 
   let string_of_builtin_type (ty : Clang__ast.builtin_type) =
     match ty with
@@ -106,19 +110,9 @@ module Make (Node : Clang__ast.NodeS) = struct
     | Var var_decl ->
         Format.fprintf fmt "@[%a@]" pp_var_decl var_decl
     | EnumDecl { name; constants; _ } ->
-        let pp_constant fmt (constant : Ast.enum_constant) =
-          let desc = Node.force constant.desc in
-          Format.pp_print_string fmt desc.constant_name;
-          desc.constant_init |> Option.iter (fun init ->
-            Format.fprintf fmt "@ =@ %a" expr init) in
-        Format.fprintf fmt "@[<v>@[enum@ %s@ {@]@,%a}@]" name
-          (Format.pp_print_list ~pp_sep:pp_comma pp_constant) constants
+        pp_enum_decl fmt name constants
     | RecordDecl { keyword; name; fields; _ } ->
-        Format.fprintf fmt "@[<v>@[%s@ %s@ {@]@,%a}@]"
-          (Clang__bindings.ext_elaborated_type_get_keyword_spelling keyword)
-          name
-          decls
-          fields
+        pp_record_decl fmt keyword name fields
     | Field { name; qual_type = ty; bitwidth; _ } ->
         Format.fprintf fmt "@[%a%t@]"
           (typed_value (fun fmt -> Format.pp_print_string fmt name)) ty
@@ -194,6 +188,22 @@ module Make (Node : Clang__ast.NodeS) = struct
     | None -> ()
     | Some value ->
         Format.fprintf fmt "@ =@ %a" expr value
+
+  and pp_enum_decl fmt name constants =
+    let pp_constant fmt (constant : Ast.enum_constant) =
+      let desc = Node.force constant.desc in
+      Format.pp_print_string fmt desc.constant_name;
+      desc.constant_init |> Option.iter (fun init ->
+        Format.fprintf fmt "@ =@ %a" expr init) in
+    Format.fprintf fmt "@[<v>@[enum@ %s@ {@]@,%a}@]" name
+      (Format.pp_print_list ~pp_sep:pp_comma pp_constant) constants
+
+  and pp_record_decl fmt keyword name fields =
+    Format.fprintf fmt "@[<v>@[%s@ %s@ {@]@,%a}@]"
+      (Clang__bindings.ext_elaborated_type_get_keyword_spelling keyword)
+      name
+      decls
+      fields
 
   and expr fmt e =
     expr_prec 15 fmt e
@@ -414,10 +424,24 @@ module Make (Node : Clang__ast.NodeS) = struct
     let pp_parameter fmt (parameter : Ast.parameter option) =
       match parameter with
       | None -> Format.pp_print_string fmt "..."
-      | Some { desc; _ } ->
+      | Some ({ desc; _ } as parameter) ->
           let { name; qual_type = ty; _ } : Ast.parameter_desc =
             Node.force desc in
-          typed_value (fun fmt -> Format.pp_print_string fmt name) fmt ty in
+          let print_elaborated =
+            match parameter.decoration with
+            | Custom _ -> false
+            | Cursor cursor ->
+                List.exists
+                  (fun cursor ->
+                    match Clang__bindings.get_cursor_kind cursor with
+                    | StructDecl
+                    | ClassDecl
+                    | UnionDecl
+                    | EnumDecl -> true
+                    | _ -> false)
+                  (Clang__utils.list_of_children cursor) in
+          typed_value ~print_elaborated
+            (fun fmt -> Format.pp_print_string fmt name) fmt ty in
     Format.pp_print_list
       ~pp_sep:pp_comma
       pp_parameter fmt all_parameters
@@ -473,7 +497,7 @@ module Make (Node : Clang__ast.NodeS) = struct
           (Clang__bindings.ext_overloaded_operator_get_spelling op)
     | _ -> failwith "Not implemented pp_ident_ref.declaration_name"
 
-  and typed_value fmt_value fmt t =
+  and typed_value ?(print_elaborated = false) fmt_value fmt t =
     let fmt_value =
       if t.const then
         (fun fmt -> Format.fprintf fmt "@[const %t@]" fmt_value)
@@ -481,26 +505,35 @@ module Make (Node : Clang__ast.NodeS) = struct
         fmt_value in
     match Node.force t.desc with
     | Pointer t ->
-        typed_value (fun fmt -> Format.fprintf fmt "@[*%t@]" fmt_value) fmt t
+        typed_value ~print_elaborated
+          (fun fmt -> Format.fprintf fmt "@[*%t@]" fmt_value) fmt t
     | LValueReference t ->
-        typed_value (fun fmt -> Format.fprintf fmt "@[&%t@]" fmt_value) fmt t
+        typed_value ~print_elaborated (fun fmt -> Format.fprintf fmt "@[&%t@]" fmt_value) fmt t
     | RValueReference t ->
-        typed_value (fun fmt -> Format.fprintf fmt "@[&&%t@]" fmt_value) fmt t
+        typed_value ~print_elaborated (fun fmt -> Format.fprintf fmt "@[&&%t@]" fmt_value) fmt t
     | BuiltinType ty ->
         Format.fprintf fmt "@[%s@ %t@]" (string_of_builtin_type ty) fmt_value
     | ConstantArray { element; size_as_expr = Some size_as_expr; _ } ->
-        typed_value
+        typed_value ~print_elaborated
           (fun fmt ->
             Format.fprintf fmt "@[%t[%a]@]" fmt_value expr size_as_expr)
           fmt element
     | ConstantArray { element; size_as_expr = None; size } ->
-        typed_value
+        typed_value ~print_elaborated
           (fun fmt -> Format.fprintf fmt "@[%t[%d]@]" fmt_value size) fmt
           element
     | Elaborated { keyword; named_type; _ } ->
-        Format.fprintf fmt "@[%s@ %a@]"
-          (Clang__bindings.ext_elaborated_type_get_keyword_spelling keyword)
-          (typed_value fmt_value) named_type
+        if print_elaborated then
+          begin
+            let d =
+              Converter.decl_of_cxcursor
+                (Clang__bindings.get_type_declaration t.cxtype) in
+            Format.fprintf fmt "@[%a@ %t@]" decl d fmt_value
+          end
+        else
+          Format.fprintf fmt "@[%s@ %a@]"
+            (Clang__bindings.ext_elaborated_type_get_keyword_spelling keyword)
+            (typed_value ~print_elaborated fmt_value) named_type
     | Record ident
     | Enum ident
     | Typedef ident ->
@@ -508,7 +541,7 @@ module Make (Node : Clang__ast.NodeS) = struct
     | Auto ->
         Format.fprintf fmt "@[auto@ %t@]" fmt_value
     | FunctionType { result; parameters; _ } ->
-        typed_value (fun fmt -> Format.fprintf fmt "@[(%t)(%t)@]"
+        typed_value ~print_elaborated (fun fmt -> Format.fprintf fmt "@[(%t)(%t)@]"
             fmt_value (fun fmt -> parameters |> Option.iter @@ pp_parameters fmt))
           fmt result
     | _ ->
