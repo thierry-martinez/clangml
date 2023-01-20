@@ -12,6 +12,9 @@
   front-end to get the list of basic include directories. They can be passed to
   compiler command-line with `Clang.Command_line.include_directory`.
 
+- New function `Clang.ext_type_get_field_decl` returns the cursor pointing
+  to the field declaration given a type and a field name.
+
 # 2022-09-05, 4.8.0
 
 - Support for Clang/LLVM 15.0.0
