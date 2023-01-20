@@ -423,7 +423,8 @@ AS_IF([test -d clangml],
      AC_CP([$srcdir/clangml/libclang_extensions.cpp], [clangml/])
      AC_CP([$srcdir/clangml/libclang_extensions.h], [clangml/])
      AC_CP([$srcdir/clangml/clangml_OperationKinds.def], [clangml/])
-     AC_CP([$srcdir/clangml/ast_sig.ml], [clangml/])],
+     AC_CP([$srcdir/clangml/ast_sig.ml], [clangml/])
+     AC_CP([$srcdir/clangml/ast_converter.ml], [clangml/])],
     [AC_MSG_ERROR([[cannot create directory clangml/]])])])
 
 AS_IF([test -d ppx],
