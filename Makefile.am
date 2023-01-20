@@ -97,7 +97,7 @@ $(foreach tool, $(tools), $(eval $(foreach_tool)))
 define foreach_dune_file
 .PHONY : $(DUNE_PREFIX)/$(dune_file)
 $(DUNE_PREFIX)/$(dune_file) :
-	$(DUNE) build $(dune_file) $(FLAGS)
+	$(DUNE) build --sandbox=none $(dune_file) $(FLAGS)
 endef
 $(foreach dune_file, $(dune_files) $(tools_exe), $(eval $(foreach_dune_file)))
 
