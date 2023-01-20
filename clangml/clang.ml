@@ -91,6 +91,71 @@ let default_include_directories () =
     "/usr/lib64/clang/" ^ Clangml_config.version_string ^ "/include/" in
   [macos_sdk; (*cpp_lib;*) includedir; gentoo_dir; centos_dir]
 
+exception External_command_failed of {
+    command: string;
+    status: Unix.process_status;
+}
+
+let with_open_process command f =
+  let pair = Unix.open_process command in
+  let result = f pair in
+  match Unix.close_process pair with
+  | WEXITED 0 -> result
+  | status -> raise (External_command_failed { command; status })
+
+let with_open_process_full command f =
+  let triplet =
+    Unix.open_process_full command (Unix.environment ()) in
+  let result = f triplet in
+  match Unix.close_process_full triplet with
+  | WEXITED 0 -> result
+  | status -> raise (External_command_failed { command; status })
+
+let rec extract_predefined_macros_rec accu in_channel
+        : Command_line.macro list =
+  match input_line in_channel with
+  | exception End_of_file -> List.rev accu
+  | line ->
+      let accu =
+        if String.starts_with ~prefix:"#define " line then
+          begin
+            let tail = String.sub line 8 (String.length line - 8) in
+            match String.index tail ' ' with
+            | exception Not_found -> accu
+            | index ->
+                let name = String.sub tail 0 index in
+                let value =
+                  String.sub tail (index + 1)
+                    (String.length tail - index - 1) in
+                { name; value } :: accu
+          end
+        else
+          accu in
+      extract_predefined_macros_rec accu in_channel
+
+let get_compiler_predefined_macros ?(compiler = "clang") () =
+  with_open_process (Printf.sprintf "%s -dM -E -" compiler)
+    (fun (in_channel, out_channel) ->
+      close_out out_channel;
+      extract_predefined_macros_rec [] in_channel)
+
+let rec extract_include_directories_rec accu in_channel =
+  match input_line in_channel with
+  | exception End_of_file -> List.rev accu
+  | line ->
+      let accu =
+        if String.starts_with ~prefix:" " line then
+          String.sub line 1 (String.length line - 1) :: accu
+        else
+          accu in
+      extract_include_directories_rec accu in_channel
+
+let get_compiler_include_directories ?(compiler = "clang") () =
+  with_open_process_full (Printf.sprintf "%s -E -Wp,-v -" compiler)
+    (fun (_in_channel, out_channel, err_channel) ->
+      close_out out_channel;
+      extract_include_directories_rec [] err_channel)
+
 (*
 let string_chop_prefix_opt prefix s =
   let prefix_length = String.length prefix in

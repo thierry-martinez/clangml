@@ -19,3 +19,11 @@ let standard std =
   standard_of_clang (Standard.to_clang std)
 
 let trigraphs = "-trigraphs"
+
+type macro = {
+    name : string;
+    value : string;
+  }
+
+let define { name; value } =
+  Printf.sprintf "-D%s=%s" name value

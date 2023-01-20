@@ -62,6 +62,29 @@ val default_include_directories : unit -> string list
     common to pass to Clang command-line. The list contains {!val:includedir}.
  *)
 
+exception External_command_failed of {
+    command: string;
+    status: Unix.process_status;
+}
+
+val get_compiler_predefined_macros :
+  ?compiler:string -> unit -> Command_line.macro list
+(** [get_compiler_predefined_macros ?compiler ()] is a list of macro
+    definitions that are automatically defined by [compiler] front-end:
+    [compiler] should be a command name, by default [clang] is used,
+    but [gcc] can be used.
+    The elements of the resulting list can be passed to
+    [Clang.Command_line.define].
+
+    Raise [External_command_failed] if [compiler] cannot be executed. *)
+
+val get_compiler_include_directories : ?compiler:string -> unit -> string list
+(** [get_compiler_include_directories ?compiler ()] is a list of include
+    directories that are automatically included by [compiler] front-end:
+    [compiler] should be a command name, by default [clang] is used,
+    but [gcc] can be used. Raise [External_command_failed] if [compiler]
+    cannot be executed. *)
+
 val compare_cursors : cxcursor -> cxcursor -> int
 (** [compare_cursors c1 c2] provides a total order over cursors. *)
 

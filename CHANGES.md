@@ -4,6 +4,14 @@
   parameters
   (reported by rsaill, https://github.com/thierry-martinez/clangml/issues/5)
 
+- New function `Clang.get_compiler_predefined_macros` runs compiler
+  front-end to get the list of predefined macros. They can be passed to
+  compiler command-line with `Clang.Command_line.define`.
+  
+- New function `Clang.get_compiler_include_directories` runs compiler
+  front-end to get the list of basic include directories. They can be passed to
+  compiler command-line with `Clang.Command_line.include_directory`.
+
 # 2022-09-05, 4.8.0
 
 - Support for Clang/LLVM 15.0.0
