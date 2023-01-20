@@ -30,6 +30,7 @@ module type PrinterS = sig
   val qual_type : Format.formatter -> Clang__ast.Custom (Node).qual_type -> unit
 
   val typed_value :
+      ?print_elaborated:bool ->
       (Format.formatter -> unit) -> Format.formatter ->
       Clang__ast.Custom (Node).qual_type ->
       unit
