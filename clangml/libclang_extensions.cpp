@@ -4307,5 +4307,31 @@ extern "C" {
     }
     return CLANG_EXT_SC_None;
   }
+
+
+  CXCursor
+  clang_ext_Type_getFieldDecl(CXType ty, const char *s)
+  {
+    // copied from clang_Type_getOffsetOf
+    // check that PT is not incomplete/dependent
+    CXCursor PC = clang_getTypeDeclaration(ty);
+    // lookup field
+    clang::ASTContext &Ctx = GetTU(ty)->TheASTUnit->getASTContext();
+    clang::IdentifierInfo *II = &Ctx.Idents.get(s);
+    clang::DeclarationName FieldName(II);
+    const clang::RecordDecl *RD =
+          llvm::dyn_cast_or_null<clang::RecordDecl>(GetCursorDecl(PC));
+    // verified in validateFieldParentType
+    RD = RD->getDefinition();
+    clang::RecordDecl::lookup_result Res = RD->lookup(FieldName);
+    // If a field of the parent record is incomplete, lookup will fail.
+    // and we would return InvalidFieldName instead of Incomplete.
+    // But this erroneous results does protects again a hidden assertion failure
+    // in the RecordLayoutBuilder
+    if (!Res.isSingleResult())
+      return MakeCXCursorInvalid(CXCursor_InvalidCode, GetTU(ty));
+    return MakeCXCursor(Res.front(), GetTU(ty));
+  }
+
   #include "libclang_extensions_attrs.inc"
 }

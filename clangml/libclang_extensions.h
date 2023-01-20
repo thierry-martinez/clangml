@@ -1373,4 +1373,7 @@ enum clang_ext_StorageClass {
 enum clang_ext_StorageClass
 clang_ext_Decl_getStorageClass(CXCursor);
 
+CXCursor
+clang_ext_Type_getFieldDecl(CXType, const char *);
+
 #include "libclang_extensions_attrs_headers.inc"
