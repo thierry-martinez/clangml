@@ -4312,7 +4312,7 @@ extern "C" {
   CXCursor
   clang_ext_Type_getFieldDecl(CXType ty, const char *s)
   {
-    // copied from clang_Type_getOffsetOf
+    // adapted from clang_Type_getOffsetOf
     CXCursor PC = clang_getTypeDeclaration(ty);
     // lookup field
     clang::ASTContext &Ctx = GetTU(ty)->TheASTUnit->getASTContext();
@@ -4326,7 +4326,11 @@ extern "C" {
       // and we would return InvalidFieldName instead of Incomplete.
       // But this erroneous results does protects again a hidden assertion failure
       // in the RecordLayoutBuilder
+#ifdef LLVM_VERSION_BEFORE_13_0_0
+      if (Res.size() == 1) {
+#else
       if (Res.isSingleResult()) {
+#endif
         return MakeCXCursor(Res.front(), GetTU(ty));
       }
     }
