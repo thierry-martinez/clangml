@@ -1940,6 +1940,7 @@ extern "C" {
           return MakeCXCursor(tad->getTemplatedDecl(), getCursorTU(cursor));
         }
         break;
+      default:;
       }
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
@@ -4321,7 +4322,11 @@ extern "C" {
     if (const clang::RecordDecl *RD =
           llvm::dyn_cast_or_null<clang::RecordDecl>(GetCursorDecl(PC))) {
       RD = RD->getDefinition();
+#ifdef LLVM_VERSION_BEFORE_3_7_0
+      clang::RecordDecl::lookup_const_result Res = RD->lookup(FieldName);
+#else
       clang::RecordDecl::lookup_result Res = RD->lookup(FieldName);
+#endif
       // If a field of the parent record is incomplete, lookup will fail.
       // and we would return InvalidFieldName instead of Incomplete.
       // But this erroneous results does protects again a hidden assertion failure
