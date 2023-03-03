@@ -7,3 +7,5 @@ WORKDIR /home/ci
 RUN git clone https://github.com/llvm/llvm-project.git
 COPY compile-clang.sh .
 RUN sh compile-clang.sh
+COPY install-clang.sh .
+RUN sh install-clang.sh
