@@ -231,6 +231,8 @@ AS_IF([test "x$LLVM_VERSION_MAJOR" = "x14"],
   [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[14.0.0]])])
 AS_IF([test "x$LLVM_VERSION_MAJOR" = "x15"],
   [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[15.0.0]])])
+AS_IF([test "x$LLVM_VERSION_MAJOR" = "x16"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[16.0.0]])])
 
 AC_SUBST([EQUIVALENT_LLVM_VERSION_MAJOR], [[`echo $EQUIVALENT_LLVM_VERSION | \
   sed 's/^\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)/\1/'`]])
@@ -277,6 +279,8 @@ AC_VERSION_BLOCK(11, 1)
 AC_VERSION_BLOCK(12, 0)
 AC_VERSION_BLOCK(13, 0)
 AC_VERSION_BLOCK(14, 0)
+AC_VERSION_BLOCK(15, 0)
+AC_VERSION_BLOCK(16, 0)
 
 AC_SUBST([LLVM_CFLAGS], [[`$LLVM_CONFIG --cflags`]])
 
@@ -307,7 +311,7 @@ AC_SUBST([CFLAGS], [["$LLVM_CFLAGS -D$LLVM_VERSION_MACRO -I$srcdir/clangml"]])
 # AS_IF([test `printf "$OCAMLVERSION\n4.14" | sort | head -n1` != 4.14],
 #   [AC_SUBST([CFLAGS], [["$CFLAGS -DOCAML_BEFORE_4_14"]])])
 
-AC_SUBST([CXXFLAGS], [["$CFLAGS --std=c++14"]])
+AC_SUBST([CXXFLAGS], [["$CFLAGS --std=c++17"]])
 
 AC_CHECK_HEADERS([clang-c/Index.h], [],
   [AC_MSG_ERROR([[Header clang-c/Index.h not found]])])

@@ -104,6 +104,12 @@
 #ifdef LLVM_VERSION_14_0_0
 #define LLVM_VERSION_BEFORE_15_0_0
 #endif
+#ifdef LLVM_VERSION_BEFORE_15_0_0
+#define LLVM_VERSION_BEFORE_16_0_0
+#endif
+#ifdef LLVM_VERSION_15_0_0
+#define LLVM_VERSION_BEFORE_16_0_0
+#endif
 
 CXVersion
 clang_ext_getVersion();

@@ -545,9 +545,15 @@ getDesignator(const clang::DesignatedInitExpr *e, unsigned int i) {
 template<typename T> static const T &
 getDefault(llvm::Optional<T> const &option, T const &default_value)
 {
-  if (option.hasValue()) {
-    return option.getValue();
-  }
+  #ifdef LLVM_VERSION_BEFORE_16_0_0
+    if (option.hasValue()) {
+      return option.getValue();
+    }
+  #else
+    if (option.has_value()) {
+      return option.value();
+    }
+  #endif
   return default_value;
 }
 
@@ -1818,7 +1824,11 @@ extern "C" {
   {
     clang::QualType T = GetQualType(CT);
     if (auto *TST = T->getAs<clang::TemplateSpecializationType>()) {
-      return TST->getNumArgs();
+      #ifdef LLVM_VERSION_BEFORE_16_0_0
+        return TST->getNumArgs();
+      #else
+        return TST->template_arguments().size();
+      #endif
     }
     return 0;
   }
@@ -1828,7 +1838,12 @@ extern "C" {
   {
     clang::QualType T = GetQualType(CT);
     if (auto *TST = T->getAs<clang::TemplateSpecializationType>()) {
-      return MakeTemplateArgument(TST->getArg(i), GetTU(CT));
+      #ifdef LLVM_VERSION_BEFORE_16_0_0
+        auto arg = TST->getArg(i);
+      #else
+	auto arg = TST->template_arguments()[i];
+      #endif
+      return MakeTemplateArgument(arg, GetTU(CT));
     }
     return MakeTemplateArgumentInvalid(GetTU(CT));
   }
@@ -4262,7 +4277,11 @@ extern "C" {
   {
     clang::QualType T = GetQualType(c);
     if (const auto *TOT = T->getAs<clang::TypeOfType>()) {
-      return MakeCXType(TOT->getUnderlyingType(), GetTU(c));
+      #ifdef LLVM_VERSION_BEFORE_16_0_0
+        return MakeCXType(TOT->getUnderlyingType(), GetTU(c));
+      #else
+        return MakeCXType(TOT->getUnmodifiedType(), GetTU(c));
+      #endif
     }
     return MakeCXTypeInvalid(GetTU(c));
   }
@@ -4272,7 +4291,12 @@ extern "C" {
   {
     if (auto *t = GetTypeLoc(tl)) {
       if (auto at = t->getAs<clang::TypeOfTypeLoc>()) {
-        return MakeTypeLoc(at.getUnderlyingTInfo()->getTypeLoc(), tl.tu);
+	#ifdef LLVM_VERSION_BEFORE_16_0_0
+	  auto ati = at.getUnderlyingTInfo();
+        #else
+          auto ati = at.getUnmodifiedTInfo();
+        #endif
+        return MakeTypeLoc(ati->getTypeLoc(), tl.tu);
       }
     }
     return MakeTypeLocInvalid(tl.tu);

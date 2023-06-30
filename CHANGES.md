@@ -1,5 +1,7 @@
 # Development version
 
+- Support for Clang/LLVM 16.0.0
+
 - #5, #6: fix printing of elaborated declarations in function
   parameters
   (reported by rsaill, https://github.com/thierry-martinez/clangml/issues/5)
