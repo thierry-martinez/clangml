@@ -581,7 +581,9 @@ let do_decl context versions (decl : Clang.Lazy.Decl.t) =
   | RecordDecl {
         keyword = Class; name; fields = (_ :: _) as fields; bases = [
           { qual_type = { desc = lazy (Record {
-              name = IdentifierName base_class; _ }); _}; _}]; _} when
+              name = IdentifierName base_class; _ } |
+          Elaborated { named_type = { desc = lazy (Record {
+              name = IdentifierName base_class; _ }); _}; _}); _}; _}]; _} when
     is_parameter_base_class base_class && not (is_parameter_base_class name) ->
       let extract_enum
           (field : Clang.Lazy.Decl.t) : (string * enum_decl) option =

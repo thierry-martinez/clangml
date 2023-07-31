@@ -63,6 +63,8 @@ let prepare_clang_options cflags llvm_config =
         String.split_on_char ' ' llvm_cflags @
         ["-I"; List.fold_left Filename.concat llvm_prefix
            ["lib"; "clang"; llvm_version; "include"];
+         "-I"; List.fold_left Filename.concat llvm_prefix
+           ["lib"; "clang"; String.sub llvm_version 0 2; "include"];
          "-I"; macos_sdk_include_path;
          "-I"; ocaml_lib;
          "-DLLVM_VERSION_" ^ version_option],
