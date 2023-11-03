@@ -4,7 +4,7 @@ if which curl >/dev/null; then
     function download {
         target="$1"
         url="$2"
-        curl "$url" > "$target"
+        curl "$url" > "$target" || ( rm -f "$target"; exit 1 )
     }
 elif which wget >/dev/null; then
     function download {
