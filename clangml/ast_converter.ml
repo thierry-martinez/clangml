@@ -340,8 +340,9 @@ module Make (Node : Clang__ast.NodeS) = struct
           const = is_const_qualified_type cxtype;
           volatile = is_volatile_qualified_type cxtype;
           restrict = is_restrict_qualified_type cxtype; } in
+      let type_class = ext_type_loc_get_class type_loc in
       let make_paren, type_loc, cxtype =
-        match ext_type_loc_get_class type_loc with
+        match type_class with
         | Paren ->
             let type_loc' = ext_paren_type_loc_get_inner_loc type_loc in
             let cxtype' = ext_type_loc_get_type type_loc' in
@@ -355,7 +356,7 @@ module Make (Node : Clang__ast.NodeS) = struct
             make_paren, type_loc', cxtype'
         | _ -> Fun.id, type_loc, cxtype in
       let desc () =
-        match ext_type_loc_get_class type_loc with
+        match type_class with
         | Attributed ->
             let attribute =
               if Clangml_config.version.major >= 8 then
@@ -440,13 +441,11 @@ module Make (Node : Clang__ast.NodeS) = struct
                   let nested_name_specifier =
                     ext_type_loc_get_qualifier_loc type_loc |>
                     convert_nested_name_specifier_loc in
-                  Elaborated {
-                    keyword = ext_elaborated_type_get_keyword cxtype;
-                    nested_name_specifier;
-                    named_type =
-                      ext_elaborated_type_loc_get_named_type_loc type_loc |>
-                      of_type_loc
-                  }
+                  let keyword = ext_elaborated_type_get_keyword cxtype in
+                  let named_type =
+                    ext_elaborated_type_loc_get_named_type_loc type_loc |>
+                    of_type_loc in
+                  Elaborated { keyword; nested_name_specifier; named_type }
               | PackExpansion ->
                   let pattern =
                     ext_pack_expansion_type_loc_get_pattern_loc type_loc |>
@@ -457,7 +456,14 @@ module Make (Node : Clang__ast.NodeS) = struct
                     (ext_type_of_type_loc_get_underlying_type type_loc)))
               | _ -> of_ext_type_kind cxtype
             end in
-      make_paren (make_qual_type cxtype type_loc (Node.from_fun desc))
+      match type_class with
+      | Elaborated when
+          options.ignore_no_keyword &&
+          ext_elaborated_type_get_keyword cxtype = NoKeyword ->
+        ext_elaborated_type_loc_get_named_type_loc type_loc |>
+        of_type_loc
+      | _ ->
+        make_paren (make_qual_type cxtype type_loc (Node.from_fun desc))
 
     and of_ext_type_kind cxtype =
       match ext_type_get_kind cxtype with
@@ -466,11 +472,9 @@ module Make (Node : Clang__ast.NodeS) = struct
           let nested_name_specifier =
             ext_type_get_qualifier cxtype |>
             convert_nested_name_specifier in
-          Elaborated {
-            keyword = ext_elaborated_type_get_keyword cxtype;
-            nested_name_specifier;
-            named_type = ext_type_get_named_type cxtype |> of_cxtype;
-          }
+          let keyword = ext_elaborated_type_get_keyword cxtype in
+          let named_type = ext_type_get_named_type cxtype |> of_cxtype in
+          Elaborated { keyword; nested_name_specifier; named_type }
       | Attributed -> (* Here for Clang <8.0.0 *)
           Attributed {
             modified_type =
@@ -582,11 +586,15 @@ module Make (Node : Clang__ast.NodeS) = struct
             MemberPointer { pointee; class_ }
         | _ ->
             of_ext_type_kind cxtype in
-      if options.ignore_paren_in_types &&
-        ext_type_get_kind cxtype = Paren then
+      match ext_type_get_kind cxtype with
+      | Paren when options.ignore_paren_in_types ->
         let inner = cxtype |> ext_get_inner_type |> of_cxtype in
         { inner with cxtype }
-      else
+      | Elaborated when
+          options.ignore_no_keyword &&
+          ext_elaborated_type_get_keyword cxtype = NoKeyword ->
+        ext_type_get_named_type cxtype |> of_cxtype
+      | _ ->
         { cxtype; type_loc = None; desc = Node.from_fun desc;
           const = is_const_qualified_type cxtype;
           volatile = is_volatile_qualified_type cxtype;

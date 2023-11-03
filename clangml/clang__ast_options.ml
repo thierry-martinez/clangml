@@ -52,6 +52,9 @@ type t = {
     ignore_using_types : bool;
     (** Ignore using types (introduced in 14.0.0). *)
 
+    ignore_no_keyword : bool;
+    (** Ignore ElaboratedType with NoKeyword. *)
+
     convert_integer_literals : bool;
     (** Convert integer literals into {!constructor:Clang__ast.Int}.
         See {!constructor:Clang__ast.IntegerLiteral} for examples. *)
@@ -80,6 +83,7 @@ let default = {
   ignore_anonymous_fields = true;
   ignore_indirect_fields = true;
   ignore_using_types = true;
+  ignore_no_keyword = true;
   convert_integer_literals = true;
   convert_floating_literals = true;
   init_list_form = Syntactic;

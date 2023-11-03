@@ -17,6 +17,9 @@
 - New function `Clang.ext_type_get_field_decl` returns the cursor pointing
   to the field declaration given a type and a field name.
 
+- New option `ignore_no_keyword` to suppress `NoKeyword` elaborated nodes
+  introduced in LLVM 16.
+
 # 2022-09-05, 4.8.0
 
 - Support for Clang/LLVM 15.0.0
