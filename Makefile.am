@@ -13,7 +13,7 @@ NORM_PREFIX = $(error NORM_PREFIX should be set)
 
 norm_files = $(shell sed -n -e 's/^\\include{\([^}]*\)}/\1/p' $(NORM_PREFIX)/std.tex)
 
-libraries = ppx printer
+libraries = printer # ppx
 
 tools = stubgen norm_extractor print_tree generate_attrs
 

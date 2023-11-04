@@ -175,7 +175,7 @@ AS_IF([test "x$with_llvm" != "x"],
     [true],
     [AC_MSG_ERROR([[LLVM version $LLVM_VERSION found but $with_llvm expected]])]))
 
-AC_SUBST([LLVM_VERSION], [[`echo $LLVM_VERSION | sed 's/\(svn\|git\)$//'`]])
+AC_SUBST([LLVM_VERSION], [[`echo $LLVM_VERSION | sed 's/\(svn\|git\|rc\)$//'`]])
 
 AC_SUBST([LLVM_VERSION_MAJOR], [[`echo $LLVM_VERSION | \
   sed 's/^\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)/\1/'`]])
@@ -233,6 +233,8 @@ AS_IF([test "x$LLVM_VERSION_MAJOR" = "x15"],
   [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[15.0.0]])])
 AS_IF([test "x$LLVM_VERSION_MAJOR" = "x16"],
   [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[16.0.0]])])
+AS_IF([test "x$LLVM_VERSION_MAJOR" = "x17"],
+  [AC_SUBST([EQUIVALENT_LLVM_VERSION], [[17.0.0]])])
 
 AC_SUBST([EQUIVALENT_LLVM_VERSION_MAJOR], [[`echo $EQUIVALENT_LLVM_VERSION | \
   sed 's/^\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)[.]\([[:digit:]][[:digit:]]*\)/\1/'`]])
@@ -281,6 +283,7 @@ AC_VERSION_BLOCK(13, 0)
 AC_VERSION_BLOCK(14, 0)
 AC_VERSION_BLOCK(15, 0)
 AC_VERSION_BLOCK(16, 0)
+AC_VERSION_BLOCK(17, 0)
 
 AC_SUBST([LLVM_CFLAGS], [[`$LLVM_CONFIG --cflags`]])
 
@@ -431,12 +434,12 @@ AS_IF([test -d clangml],
      AC_CP([$srcdir/clangml/ast_converter.ml], [clangml/])],
     [AC_MSG_ERROR([[cannot create directory clangml/]])])])
 
-AS_IF([test -d ppx],
-  [true],
-  [AS_IF([mkdir ppx],
-     AC_CP([$srcdir/ppx/clangml_ppx.ml], [ppx/])
-     AC_CP([$srcdir/ppx/ppx_lexer.mll], [ppx/])
-     AC_CP([$srcdir/ppx/dune], [ppx/]))])
+dnl AS_IF([test -d ppx],
+dnl   [true],
+dnl   [AS_IF([mkdir ppx],
+dnl      AC_CP([$srcdir/ppx/clangml_ppx.ml], [ppx/])
+dnl      AC_CP([$srcdir/ppx/ppx_lexer.mll], [ppx/])
+dnl      AC_CP([$srcdir/ppx/dune], [ppx/]))])
 
 AS_IF([test -d printer],
   [true],
@@ -498,16 +501,16 @@ AS_IF([test -d tests],
   [true],
   [AS_IF([mkdir tests],
     [AS_IF([mkdir tests/ast],
-      [AC_CP([$srcdir/tests/ast/dune], [tests/ast/])])]
-    [AS_IF([mkdir tests/c17],
-      [AC_CP([$srcdir/tests/c17/dune], [tests/c17/])
-       AC_CP([$srcdir/tests/c17/c17.ml], [tests/c17/])])]
-    [AS_IF([mkdir tests/cpp],
-      [AC_CP([$srcdir/tests/cpp/dune], [tests/cpp/])
-       AC_CP([$srcdir/tests/cpp/cpp.ml], [tests/cpp/])])]
-    [AS_IF([mkdir tests/ppx],
-      [AC_CP([$srcdir/tests/ppx/dune], [tests/ppx/])
-       AC_CP([$srcdir/tests/ppx/ppx.ml], [tests/ppx/])])])])
+      [AC_CP([$srcdir/tests/ast/dune], [tests/ast/])])])])
+dnl    [AS_IF([mkdir tests/c17],
+dnl      [AC_CP([$srcdir/tests/c17/dune], [tests/c17/])
+dnl       AC_CP([$srcdir/tests/c17/c17.ml], [tests/c17/])])]
+dnl    [AS_IF([mkdir tests/cpp],
+dnl      [AC_CP([$srcdir/tests/cpp/dune], [tests/cpp/])
+dnl       AC_CP([$srcdir/tests/cpp/cpp.ml], [tests/cpp/])])]
+dnl    [AS_IF([mkdir tests/ppx],
+dnl      [AC_CP([$srcdir/tests/ppx/dune], [tests/ppx/])
+dnl       AC_CP([$srcdir/tests/ppx/ppx.ml], [tests/ppx/])])])])
 
 AS_IF([test -d config],
   [true],

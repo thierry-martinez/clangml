@@ -1,6 +1,6 @@
 # Development version
 
-- Support for Clang/LLVM 16.0.0
+- Support for Clang/LLVM 16.0.x and 17.0.x
 
 - #5, #6: fix printing of elaborated declarations in function
   parameters
@@ -19,6 +19,9 @@
 
 - New option `ignore_no_keyword` to suppress `NoKeyword` elaborated nodes
   introduced in LLVM 16.
+
+- Disable clangml.ppx support for now (may be restored if there is
+  use of it).
 
 # 2022-09-05, 4.8.0
 

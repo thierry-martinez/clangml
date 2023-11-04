@@ -1069,7 +1069,7 @@ module Make (Node : Clang__ast.NodeS) = struct
     and attribute_of_cxcursor (cursor : cxcursor) : attribute =
       let desc () =
         Attributes.convert cursor expr_of_cxcursor decl_of_cxcursor of_type_loc
-          convert_declaration_name Fun.id in
+          convert_declaration_name Fun.id Fun.id in
       node ~cursor (Node.from_fun desc)
 
     and record_decl_of_cxcursor (keyword : clang_ext_elaboratedtypekeyword)

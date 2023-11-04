@@ -543,7 +543,13 @@ getDesignator(const clang::DesignatedInitExpr *e, unsigned int i) {
 }
 
 template<typename T> static const T &
-getDefault(llvm::Optional<T> const &option, T const &default_value)
+getDefault(
+#ifdef LLVM_VERSION_BEFORE_17_0_0
+  llvm::Optional<T>
+#else
+  std::optional<T>
+#endif
+const &option, T const &default_value)
 {
   #ifdef LLVM_VERSION_BEFORE_16_0_0
     if (option.hasValue()) {
@@ -575,6 +581,24 @@ makeVersionTuple(
     #endif
   };
   return result;
+}
+
+#ifndef LLVM_VERSION_BEFORE_17_0_0
+static struct clang_ext_OMPInteropInfo
+MakeOMPInteropInfo(
+  const clang::OMPInteropInfo interopInfo, CXTranslationUnit tu)
+{
+  struct clang_ext_OMPInteropInfo info = { &interopInfo, tu };
+  return info;
+}
+#endif
+
+static struct clang_ext_OMPInteropInfo
+MakeOMPInteropInfoInvalid(
+  CXTranslationUnit tu)
+{
+  struct clang_ext_OMPInteropInfo info = { nullptr, tu };
+  return info;
 }
 
 #ifndef LLVM_VERSION_BEFORE_11_0_0
@@ -745,12 +769,22 @@ extern "C" {
   }
 
   unsigned
-  clang_ext_Int_getMinSignedBits(CXInt c)
+  clang_ext_Int_getSignificantBits(CXInt c)
   {
     if (auto i = static_cast<llvm::APInt *>(c.data)) {
-      return i->getMinSignedBits();
+      #ifdef LLVM_VERSION_BEFORE_17_0_0
+        return i->getMinSignedBits();
+      #else
+        return i->getSignificantBits();
+      #endif
     }
     return 0;
+  }
+
+  unsigned
+  clang_ext_Int_getMinSignedBits(CXInt c)
+  {
+    return clang_ext_Int_getSignificantBits(c);
   }
 
   bool
@@ -3483,15 +3517,27 @@ extern "C" {
   }
 
   CXCursor
-  clang_ext_DesignatedInitExpr_getField(CXCursor cursor, unsigned int index)
+  clang_ext_DesignatedInitExpr_getFieldDecl(CXCursor cursor, unsigned int index)
   {
     auto s = GetCursorStmt(cursor);
     if (auto e = llvm::dyn_cast_or_null<clang::DesignatedInitExpr>(s)) {
       if (auto d = getDesignator(e, index)) {
-        return MakeCXCursor(d->getField(), getCursorTU(cursor));
+        return MakeCXCursor(
+          #ifdef LLVM_VERSION_BEFORE_17_0_0
+            d->getField()
+          #else
+            d->getFieldDecl()
+          #endif
+          , getCursorTU(cursor));
       }
     }
     return MakeCXCursorInvalid(CXCursor_InvalidCode, getCursorTU(cursor));
+  }
+
+  CXCursor
+  clang_ext_DesignatedInitExpr_getField(CXCursor cursor, unsigned int index)
+  {
+    return clang_ext_DesignatedInitExpr_getFieldDecl(cursor, index);
   }
 
   CXCursor
@@ -4104,6 +4150,11 @@ extern "C" {
       return MakeCXTypeInvalid(GetTU(CT));
     }
     return MakeCXType(result, GetTU(CT));
+  }
+
+  void
+  clang_ext_OMPInteropInfo_dispose(struct clang_ext_OMPInteropInfo)
+  {
   }
 
   void

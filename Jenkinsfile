@@ -45,7 +45,7 @@ pipeline {
                         eval $(opam env) && \
                         mkdir build && cd build && \
                         ../src/configure \
-                            --with-llvm-config=/media/llvms/14.0.6/bin/llvm-config
+                            --with-llvm-config=/media/llvms/17.0.0/bin/llvm-config
                        '''
                 }
             }
@@ -68,7 +68,7 @@ pipeline {
                        eval $(opam env) && \
                        cd build && \
                        dune exec -- tools/generate_attrs/generate_attrs.exe \
-                         --llvm-config /media/llvms/16.0.0/bin/llvm-config \
+                         --llvm-config /media/llvms/17.0.0/bin/llvm-config \
                          "../src/bootstrap/" && \
                        cp ../src/bootstrap/attributes.ml clangml && \
                        cp ../src/bootstrap/libclang_extensions_attrs.inc \

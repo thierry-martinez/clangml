@@ -110,6 +110,12 @@
 #ifdef LLVM_VERSION_15_0_0
 #define LLVM_VERSION_BEFORE_16_0_0
 #endif
+#ifdef LLVM_VERSION_BEFORE_16_0_0
+#define LLVM_VERSION_BEFORE_17_0_0
+#endif
+#ifdef LLVM_VERSION_16_0_0
+#define LLVM_VERSION_BEFORE_17_0_0
+#endif
 
 CXVersion
 clang_ext_getVersion();
@@ -150,6 +156,9 @@ clang_ext_Int_getActiveBits(CXInt);
 
 unsigned
 clang_ext_Int_getMinSignedBits(CXInt);
+
+unsigned
+clang_ext_Int_getSignificantBits(CXInt);
 
 bool
 clang_ext_Int_getBoolValue(CXInt);
@@ -1137,6 +1146,9 @@ enum clang_ext_DesignatedInitExpr_DesignatorKind
 clang_ext_DesignatedInitExpr_getKind(CXCursor, unsigned int);
 
 CXCursor
+clang_ext_DesignatedInitExpr_getFieldDecl(CXCursor, unsigned int);
+
+CXCursor
 clang_ext_DesignatedInitExpr_getField(CXCursor, unsigned int);
 
 CXCursor
@@ -1286,6 +1298,14 @@ clang_ext_Type_isSugared(CXType);
 
 CXType
 clang_ext_Type_desugar(CXType);
+
+struct clang_ext_OMPInteropInfo {
+  const void *data;
+  CXTranslationUnit tu;
+};
+
+void
+clang_ext_OMPInteropInfo_dispose(struct clang_ext_OMPInteropInfo);
 
 struct clang_ext_OMPTraitInfo {
   const void *data;

@@ -1,7 +1,7 @@
 # clangml: OCaml bindings for Clang.
 
 clangml provides bindings for all versions of Clang, from 3.4 to
-16.0.0.
+17.0.x.
 
 ## Introduction
 
@@ -13,7 +13,7 @@ Contrary to old clangml versions, the versions of clangml from 4.0.0 are
 independent from the version of the Clang library:
 any version of clangml from 4.0.0 can be built with any version of the
 Clang library in the supported interval.
-Currently, all versions of Clang, from 3.4 to 16.0.0, are supported.
+Currently, all versions of Clang, from 3.4 to 17.0.x, are supported.
 
 However, clangml is statically linked to libclang, and clangml needs
 to be rebuilt for every version of libclang to run with.

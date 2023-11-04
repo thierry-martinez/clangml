@@ -36,8 +36,11 @@ let prepare_clang_options cflags llvm_config =
           option_apply (String_utils.remove_suffix ~suffix:"svn") llvm_version in
         let llvm_version =
           option_apply (String_utils.remove_suffix ~suffix:"git") llvm_version in
+        let llvm_version =
+          option_apply (String_utils.remove_suffix ~suffix:"rc") llvm_version in
+        let parsed_llvm_version = parse_llvm_version llvm_version in
         let equivalent_llvm_version =
-          match parse_llvm_version llvm_version with
+          match parsed_llvm_version with
           | Some { major = 3; minor = 4; subminor = _ } -> "3.4.2"
           | Some { major = 3; minor = 5; subminor = _ } -> "3.5.2"
           | Some { major = 3; minor = 6; subminor = _ } -> "3.6.2"
@@ -55,6 +58,13 @@ let prepare_clang_options cflags llvm_config =
           | Some { major = 12; minor = 0; subminor = _ } -> "12.0.1"
           | Some { major = 13; minor = 0; subminor = _ } -> "13.0.1"
           | Some { major = 14; minor = 0; subminor = _ } -> "14.0.0"
+          | Some { major = 15; minor = 0; subminor = _ } -> "15.0.0"
+          | Some { major = 16; minor = 0; subminor = _ } -> "16.0.0"
+          | Some { major = 17; minor = 0; subminor = _ } -> "17.0.0"
+          | _ -> llvm_version in
+        let llvm_version_dir =
+          match parsed_llvm_version with
+          | Some { major; _ } when major >= 16 -> string_of_int major
           | _ -> llvm_version in
         let version_option =
           String.map (fun c -> if c = '.' then '_' else c)
@@ -62,9 +72,7 @@ let prepare_clang_options cflags llvm_config =
         let ocaml_lib = run_command "opam" ["var"; "ocaml:lib"] in
         String.split_on_char ' ' llvm_cflags @
         ["-I"; List.fold_left Filename.concat llvm_prefix
-           ["lib"; "clang"; llvm_version; "include"];
-         "-I"; List.fold_left Filename.concat llvm_prefix
-           ["lib"; "clang"; String.sub llvm_version 0 2; "include"];
+           ["lib"; "clang"; llvm_version_dir; "include"];
          "-I"; macos_sdk_include_path;
          "-I"; ocaml_lib;
          "-DLLVM_VERSION_" ^ version_option],

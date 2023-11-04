@@ -39,6 +39,7 @@ type ocaml_type_conversion =
   | NoConversion
   | Expr
   | Decl
+  | OMPInteropInfo
   | OMPTraitInfo
   | TypeLoc
   | DeclarationName
@@ -148,6 +149,20 @@ let rec get_type_info name (qual_type : Clang.Lazy.Type.t)
               [Lazy.force get_cursor_tu]));
         default =
           H.call (H.decl_of_string "MakeTypeLocInvalid")
+            [Lazy.force get_cursor_tu] }
+  | Pointer { desc = lazy (
+        Record { name = IdentifierName "OMPInteropInfo"; _ }); _ } ->
+      { ocaml_type = [%type: 'omp_interop_info];
+        type_conversion = OMPInteropInfo;
+        interface_type =
+          H.elaborated Struct
+            (H.record (Clang.Ast.identifier_name "clang_ext_OMPInteropInfo"));
+        multiple = true;
+        access = (fun e ->
+          H.call (H.decl_of_string "MakeOMPInteropInfo")
+            [e; Lazy.force get_cursor_tu]);
+        default =
+          H.call (H.decl_of_string "MakeOMPInteropInfoInvalid")
             [Lazy.force get_cursor_tu] }
   | Pointer { desc = lazy (
         Record { name = IdentifierName "OMPTraitInfo"; _ }); _ } ->
@@ -850,6 +865,9 @@ let find_attributes_among_clang_versions dir : (int * int) StringMap.t =
       StringMap.add attribute version versions) StringMap.empty attributes)
     StringMap.empty bindings
 
+let is_valid_constructor name =
+  name <> "" && Char.uppercase_ascii name.[0] = name.[0]
+
 let main cflags llvm_config prefix =
   let versions = find_attributes_among_clang_versions prefix in
   let versions =
@@ -956,6 +974,7 @@ let main cflags llvm_config prefix =
     StringMap.add "clang_ext_PassObjectSize_spelling" (9, 0) |>
     StringMap.add "clang_ext_Unused_spelling" (3, 9) |>
     StringMap.add "clang_ext_CXX11NoReturn_spelling" (15, 0) |>
+    StringMap.add "clang_ext_NoStackProtector_spelling" (16, 0) |>
     (* args is missing *)
     StringMap.add "Annotate:args" (12, 0) |>
     StringMap.add "Annotate:args_Size" (12, 0) |>
@@ -968,9 +987,21 @@ let main cflags llvm_config prefix =
     StringMap.add "OMPDeclareVariant:adjustArgsNothing" (14, 0) |>
     StringMap.add "OMPDeclareVariant:adjustArgsNeedDevicePtr_Size" (14, 0) |>
     StringMap.add "OMPDeclareVariant:adjustArgsNeedDevicePtr" (14, 0) |>
+    (* OMPDeclareVariantAttr::appendArgs* introduced in 17.0.0 *)
+    StringMap.add "OMPDeclareVariant:appendArgs_Size" (17, 0) |>
+    StringMap.add "OMPDeclareVariant:appendArgs" (17, 0) |>
+    (* ExternalSourceSymbolAttr::getUSR* introduced in 17.0.0 *)
+    StringMap.add "ExternalSourceSymbol:uSRLength" (17, 0) |>
+    StringMap.add "ExternalSourceSymbol:uSR" (17, 0) |>
+    (* HLSLShaderAttr::ShaderType::Library introduced in 16.0.0 *)
+    StringMap.add "clang_ext_HLSLShaderAttr_ShaderType_Library" (16, 0) |>
+    (* OMPDeclareTargetDeclAttr::MapTypeTy::MT_Enter introduced in 16.0.0 *)
+    StringMap.add "clang_ext_OMPDeclareTargetDeclAttr_MapTypeTy_MT_Enter" (16, 0) |>
     Fun.id in
   let command_line_args, _llvm_version =
     Stubgen_common.prepare_clang_options cflags llvm_config in
+  prerr_endline (String.concat " " command_line_args);
+  let command_line_args = "--std=c++20" :: command_line_args in
   let tu =
     Clang.Lazy.Ast.parse_string ~filename:"string.cpp" ~command_line_args {|
       #include <clang/AST/Attr.h>
@@ -1006,17 +1037,17 @@ let main cflags llvm_config prefix =
     Ppxlib.Ast_helper.Type.constructor (Metapp.mkloc "Other")
       ~args:(Pcstr_tuple [[%type: Clang__bindings.clang_ext_attrkind]]) in
   let groups = [
-    "AMD"; "AVR"; "AnyX86"; "CPU"; "CUDA"; "IB"; "NS"; "OMP"; "OS"; "ObjC";
+    "Acquire"; "Alloc"; "Align"; "AMD"; "AVR"; "AnyX86"; "CPU"; "CUDA"; "IB"; "No"; "NS"; "OMP"; "OS"; "ObjC";
     "OpenCL"; "PragmaClang"; "Swift"; "WebAssembly"] in
   let groups = List.map (fun group -> group, ref []) groups in
   let constructors = List.rev (other :: context.constructors) in
   let constructors = constructors |> List.filter
     (fun (constructor : Ppxlib.constructor_declaration) ->
       match List.find_map (fun (prefix, list) -> Option.map (fun suffix -> suffix, list) (Stubgen_common.String_utils.remove_prefix ~prefix constructor.pcd_name.txt)) groups with
-      | None -> true
-      | Some (suffix, list) ->
+      | Some (suffix, list) when is_valid_constructor suffix -> 
           list := { constructor with pcd_name = { constructor.pcd_name with txt = suffix }} :: !list;
-          false) in
+          false
+      | _ -> true) in
   let groups =
     groups |> List.filter_map (fun (prefix, list) ->
       let list = !list in
@@ -1025,7 +1056,7 @@ let main cflags llvm_config prefix =
       | _ -> Some (prefix, List.rev list)) in
   let parameters =
     [[%type: 'expr]; [%type: 'decl]; [%type: 'qual_type];
-      [%type: 'declaration_name]; [%type: 'omp_trait_info]] in
+      [%type: 'declaration_name]; [%type: 'omp_interop_info]; [%type: 'omp_trait_info]] in
   let constructors =
     (groups |> List.map (fun (prefix, _) ->
       Ppxlib.Ast_helper.Type.constructor (Metapp.mkloc prefix)
@@ -1081,6 +1112,7 @@ let main cflags llvm_config prefix =
               | Expr -> Some [%expr expr_of_cxcursor]
               | Decl -> Some [%expr decl_of_cxcursor]
               | TypeLoc -> Some [%expr of_type_loc]
+              | OMPInteropInfo -> Some [%expr omp_interop_info_of_cxcursor]
               | OMPTraitInfo -> Some [%expr omp_trait_info_of_cxcursor]
               | DeclarationName ->
                  Some [%expr convert_declaration_name] in
@@ -1106,9 +1138,9 @@ let main cflags llvm_config prefix =
           | _ -> Ppxlib.Ast_helper.Exp.record args None in
         let construct =
           match List.find_map (fun (prefix, _) -> Option.map (fun suffix -> prefix, suffix) (Stubgen_common.String_utils.remove_prefix ~prefix attribute.name)) groups with
-          | Some (prefix, suffix) ->
+          | Some (prefix, suffix) when is_valid_constructor suffix ->
               (fun args -> Ppxlib.Ast_helper.Exp.construct (Metapp.mklid prefix) (Some (Ppxlib.Ast_helper.Exp.construct (Metapp.mklid suffix) args)))
-          | None -> Ppxlib.Ast_helper.Exp.construct lid in
+          | _ -> Ppxlib.Ast_helper.Exp.construct lid in
         construct (Some args) in
       Ppxlib.Ast_helper.Exp.case pattern expr) in
   let cases = Ppxlib.Ast_helper.Exp.case [%pat? other] [%expr Other other] :: cases in
@@ -1119,7 +1151,8 @@ let main cflags llvm_config prefix =
     [%stri
        [%%meta (new Metapp.filter)#structure_item [%stri
        let convert cursor expr_of_cxcursor decl_of_cxcursor of_type_loc
-             convert_declaration_name omp_trait_info_of_cxcursor =
+             convert_declaration_name omp_interop_info_of_cxcursor
+             omp_trait_info_of_cxcursor =
          [%e pattern_matching]]]] in
   let chan = open_out (prefix ^ "attributes.ml") in
   Fun.protect ~finally:(fun () -> close_out chan) (fun () ->

@@ -24,8 +24,10 @@ type t =
   | Gnucxx17
   | Cxx20
   | Gnucxx20
-  | Cxx2b
-  | Gnucxx2b
+  | Cxx23
+  | Gnucxx23
+  | Cxx26
+  | Gnucxx26
   | Opencl10
   | Opencl11
   | Opencl12
@@ -124,16 +126,30 @@ let to_clang : t -> Clang__bindings.clang_ext_langstandards = function
         Gnucxx2a]
       else [%expr
         raise (Unavailable Gnucxx20)]]
-  | Cxx2b ->
-      [%meta if Clangml_config.version.major >= 12 then [%expr
+  | Cxx23 ->
+      [%meta if Clangml_config.version.major >= 17 then [%expr
+        Cxx23]
+      else if Clangml_config.version.major >= 12 then [%expr
         Cxx2b]
       else [%expr
-        raise (Unavailable Cxx2b)]]
-  | Gnucxx2b ->
-      [%meta if Clangml_config.version.major >= 12 then [%expr
+        raise (Unavailable Cxx23)]]
+  | Gnucxx23 ->
+      [%meta if Clangml_config.version.major >= 17 then [%expr
+        Gnucxx23]
+      else if Clangml_config.version.major >= 12 then [%expr
         Gnucxx2b]
       else [%expr
-        raise (Unavailable Gnucxx2b)]]
+        raise (Unavailable Gnucxx23)]]
+  | Cxx26 ->
+      [%meta if Clangml_config.version.major >= 17 then [%expr
+        Cxx26]
+      else [%expr
+        raise (Unavailable Cxx26)]]
+  | Gnucxx26 ->
+      [%meta if Clangml_config.version.major >= 17 then [%expr
+        Gnucxx26]
+      else [%expr
+        raise (Unavailable Gnucxx26)]]
   | Opencl10 ->
       [%meta if Clangml_config.version.major >= 5 then [%expr
         Opencl10]
@@ -165,9 +181,15 @@ let to_clang : t -> Clang__bindings.clang_ext_langstandards = function
         Openclcpp2021]
       else [%expr
         raise (Unavailable Openclcpp2021)]]
-  | Cuda -> Cuda
+  | Cuda -> 
+      [%meta if Clangml_config.version.major >= 17 then [%expr
+        raise (Unavailable Cuda)]
+      else [%expr
+        Cuda]]
   | Hip ->
-      [%meta if Clangml_config.version.major >= 7 then [%expr
+      [%meta if Clangml_config.version.major >= 17 then [%expr
+        raise (Unavailable Hip)]
+      else if Clangml_config.version.major >= 7 then [%expr
         Hip]
       else [%expr
         raise (Unavailable Hip)]]

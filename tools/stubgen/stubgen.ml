@@ -705,7 +705,7 @@ for (size_t i = 0; i < %d; i++) {
       end
   | _ ->
       match Clang.ext_get_type_kind ty with (* for Ocaml 3.8 *)
-      | Elaborated ->
+      | Elaborated when Clang.ext_elaborated_type_get_keyword ty <> NoKeyword ->
           let full_type_name = Clang.get_type_spelling ty in
           begin
             match get_elaborated_type full_type_name with
@@ -1231,10 +1231,19 @@ CAMLparam1(arg_ocaml);
 
 let translate_struct_decl context cur =
   let name = Clang.get_cursor_spelling cur in
+  let type_spelling = Clang.get_type_spelling (Clang.get_cursor_type cur) in
+  let typedef = not (String.starts_with ~prefix:"struct " type_spelling) in
+  (* No longer work with Clang >= 16
   let typedef, name =
     if name = "" then
       true, Clang.get_type_spelling (Clang.get_cursor_type cur)
     else false, name in
+    *)
+  let name =
+    if typedef then
+      type_spelling (* for Clang < 16 *)
+    else
+      name in
   translate_struct_decl' context cur typedef name
 
 let longuest_common_prefix s0 s1 =
@@ -1263,10 +1272,12 @@ let translate_enum_decl context cur =
   let name = Clang.get_cursor_spelling cur in
   let interface = get_enum name context.module_interface in
   let type_interface = get_type name context.module_interface in
-  let typedef, name =
-    if name = "" then
-      true, Clang.get_type_spelling (Clang.get_cursor_type cur)
-    else false, name in
+  let type_spelling = Clang.get_type_spelling (Clang.get_cursor_type cur) in
+  let typedef = name = "" || not (String.starts_with ~prefix:"enum " type_spelling) in
+  let name =
+    if typedef then
+      type_spelling
+    else name in
   let ocaml_type_name = make_ocaml_type_name name in
   let result = ref None in
   let constructors_ref = ref [] in
@@ -1659,6 +1670,11 @@ let translate_function_decl context cur =
         begin
           match args.(pointer), args.(data_caller) with
           | CXType pointer_ty, CXType data_caller_type ->
+              let pointer_ty =
+                match Clang.ext_get_type_kind pointer_ty with
+                | Elaborated when Clang.ext_elaborated_type_get_keyword pointer_ty = NoKeyword ->
+                   Clang.ext_type_get_named_type pointer_ty
+                | _ -> pointer_ty in
               let pointer_ty =
                 match Clang.get_type_kind pointer_ty with
                 | Pointer -> pointer_ty
@@ -2324,7 +2340,7 @@ let main cflags llvm_config prefix =
         (Array.of_list clang_options)
         [| { filename = "source.c"; contents } |]
         Clang.Cxtranslationunit_flags.none with
-    | Error _ -> failwith "Error!"
+    | Error _err -> failwith "Error!"
     | Ok tu -> tu in
   if Clang.has_severity Clang.error tu then
     failwith "Clang compilation error";
